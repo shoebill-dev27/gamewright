@@ -15,6 +15,7 @@ files to do the work. Canonical intent: `docs/spec/initial-spec.md`.
 | Role | A responsibility with authority and boundaries. Not a model, not an agent. | `roles/` |
 | Skill | A method for doing a kind of work. Usable by any Role whose responsibility covers that work. | `skills/` |
 | Workflow | The catalogue of development stages plus routing rules. A menu, not a pipeline. | `workflows/development-loop.md` |
+| Isolated execution | How a runtime runs each operation in a fresh executor that sees only its packet, and enforces Role policies. | `execution.md` |
 | Project Context | Everything specific to one game: vision, state, constraints, design, decisions, goals. | outside `studio/` |
 | Handoff | Persisted work packet between Steps. Self-contained: a new executor can start from it alone. | `<project>/goals/<goal>/NN-*.md` |
 | Decision | Persisted significant judgment: what, why, alternatives, when to revisit. | `<project>/decisions/` |
@@ -91,4 +92,5 @@ with the game) or anywhere else; the Studio is given its path.
 ```
 
 Path convention inside Project artifacts: paths starting with `studio/` are relative to the Studio
-root; all other paths are relative to the Project Context directory.
+root; all other paths are relative to the Project Context directory. `file#section` names one `## `
+section by its slug: the heading in lowercase with spaces as hyphens (`project.md#current-state`).

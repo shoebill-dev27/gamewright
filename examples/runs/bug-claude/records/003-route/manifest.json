@@ -1,0 +1,107 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "studio/README.md",
+  "sha256": "760ada6bd8b789e1ad8d69e6958661b3274f1a3ce8396295e5c628c90f14a480",
+  "bytes": 6188
+ },
+ {
+  "path": "studio/orchestration.md",
+  "sha256": "16e241d1040db0392c83420ebe22d7ddb9e9dc63243e35301fc12c442de379a8",
+  "bytes": 10125
+ },
+ {
+  "path": "studio/workflows/development-loop.md",
+  "sha256": "a7128fc40c3130fa05a137ca54e3cbf0322de2cb4806ed0dbf872f7cedb35c9c",
+  "bytes": 5047
+ },
+ {
+  "path": "studio/roles/art-director.md#works-from",
+  "sha256": "1a9b4ea463ac85d107625d79994080052da5b1d784f3692ad9a104f2424ad56d",
+  "bytes": 172
+ },
+ {
+  "path": "studio/roles/game-designer.md#works-from",
+  "sha256": "fe60f9d4900dea1514aa0fb524d2c69dad547e7cc71ff3139183e3d2d86aca3b",
+  "bytes": 171
+ },
+ {
+  "path": "studio/roles/game-director.md#works-from",
+  "sha256": "fde4d1b3c02d9abaf3a00f5287e4c8d23694df2027a9f960fedbc1f27c63ff31",
+  "bytes": 203
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md#works-from",
+  "sha256": "a0ebe4d4866fa859cecd40ffd4c98b6aaf79f44403a965e3376d00b52f50293a",
+  "bytes": 175
+ },
+ {
+  "path": "studio/roles/playtester.md#works-from",
+  "sha256": "6025c9d1ca754ba86f61996472c6d3a5e308f23d81479849e1e3a01b60eb4f2d",
+  "bytes": 371
+ },
+ {
+  "path": "studio/roles/playtester.md#independence",
+  "sha256": "29e2c5b25cb9b8b16d1b40109c2ecca745024349a2b4062a24545d4643ff3d25",
+  "bytes": 232
+ },
+ {
+  "path": "studio/roles/qa.md#works-from",
+  "sha256": "e4e9de4a0c4f5b40f4c41edc771780fe53f19c1573cee671f22dcdff410f2fa8",
+  "bytes": 355
+ },
+ {
+  "path": "studio/roles/qa.md#independence",
+  "sha256": "c8090d5136ea02384fb4e96585cf1be7935428e4dac0331a52709f305dcff2f3",
+  "bytes": 208
+ },
+ {
+  "path": "studio/roles/technical-director.md#works-from",
+  "sha256": "5571f0fcf5ac14950e226c1f713d5c058a27e2649fd7ac18df4e783978323621",
+  "bytes": 160
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "00e93d3ba6b07e002008b83fe12ca37f6d6ed529640a08ac48b1e7c3cb3ec0de",
+  "bytes": 2053
+ },
+ {
+  "path": "studio/templates/escalation.md",
+  "sha256": "6e505880bdef28223c7275a4bb19c8f245577964d14c28d48e04561e7a5c7b90",
+  "bytes": 975
+ },
+ {
+  "path": "studio/templates/goal.md",
+  "sha256": "1dc9e58baa2f7cd91b7d6ed3450fd64754b0c43bf1adc554c21a9361b39d6e55",
+  "bytes": 1133
+ },
+ {
+  "path": "project.md",
+  "sha256": "eb3a1f3e9d131417f9e3c6fd836599f3ae249eea497ce2f8eca2061773ad76d2",
+  "bytes": 1510
+ },
+ {
+  "path": "@project-files",
+  "sha256": "431b18ae55bc429460daa5a139b0ca8af17ad7299f2cc6f8a33126e9bc7bd58d",
+  "bytes": 250
+ },
+ {
+  "path": "@decision-titles",
+  "sha256": "f5c1d8547bc5b7d22192dc1755561e06d7176bc5201d5fe2ae7c58057f452aa0",
+  "bytes": 88
+ },
+ {
+  "path": "goals/G-001-damage-during-dash/goal.md",
+  "sha256": "c251d32e1386a7743ceac55253751a2625d5b4b3275b8a225bd1cb81f2bf08ed",
+  "bytes": 4421
+ },
+ {
+  "path": "goals/G-001-damage-during-dash/02-qa-to-gameplay-engineer.md",
+  "sha256": "8a6e8694add3760772ea78939358de45ff483d3166c0ec3a85141b106e092a0e",
+  "bytes": 5330
+ }
+]

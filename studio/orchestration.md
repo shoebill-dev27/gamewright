@@ -12,6 +12,8 @@ core job; adding stages is not.
 
 Every executor performs these operations the same way. In Phase 1 a human starts each operation;
 the Studio stops after Intake and after every Route, and states the next action (spec §18).
+`execution.md` defines how a runtime runs each operation in a fresh, isolated executor that sees
+only its packet; the procedures below are the same either way.
 
 ### Intake — a new Goal
 
@@ -35,7 +37,8 @@ touches it.
 6. **Order and parallelize.** Default is sequential. Parallel only for independent steps (see
    Parallel work).
 7. **Write** `goals/G-NNN-<slug>/goal.md` (templates/goal.md; next free number in the project,
-   short kebab-case slug, ISO dates) and the first Handoff `01-studio-to-<role>.md`. Apply Route
+   short kebab-case slug, ISO dates) and the first Handoff `01-studio-to-<role>.md`; mark that
+   first step `open` in the route table. Apply Route
    steps 4–5 to that Handoff: read the recipient's Role contract ("Works from", "Independence")
    before writing it.
 8. **Return to the Owner** and stop: the route, why each stage is there, which stages were skipped
@@ -70,14 +73,16 @@ Load: `goal.md`, the latest Handoff, this file, `studio/workflows/development-lo
 3. **Check escalation triggers** (below). If one fires, write an Escalation instead of a Handoff.
 4. **Check the recipient's inputs.** Compare the outgoing Handoff with the recipient Role's
    "Works from" section; remove what the recipient must not receive and add what is missing,
-   editing the Handoff in place (it keeps `from`: the sender).
+   editing the Handoff in place (it keeps `from`: the sender). Leave `## Sender assessment`
+   untouched: it stays on record, and Roles whose policy strips it never receive it.
    When the recipient has an Independence section that forbids what the sender knows (e.g., a
    Playtester after Build or Verify), the Studio composes a fresh Handoff for the recipient from
    permitted information only. To make that possible, the Handoff that routes work to the sender
    says in its Expected output: address the result to `studio`.
 5. **Select context.** Fill the Handoff's Load list: the recipient's Role contract, its Skills, the
    Project Context sections and Decisions this step needs, and the previous Handoff.
-6. **Update Next action** in `goal.md`. If the Goal is met, Close.
+6. **Mark the next step `open`** in the route table, with the Handoff that starts it, and update
+   Next action in `goal.md`. If the Goal is met, Close.
 
 ### Resume — after an Owner decision
 

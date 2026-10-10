@@ -21,6 +21,22 @@ Follow `studio/orchestration.md`. It defines four operations; load only what eac
 - Run `qa` and `playtester` steps in a fresh context without implementation history when your
   environment allows it.
 
+## Isolated execution (preferred when available)
+
+`scripts/studio_run.py` runs every operation in a fresh executor that receives only its packet —
+for a Step, the Handoff and exactly the files in its Load list — and writes only validated
+artifacts, per `studio/execution.md`. It works on a workspace (`<ws>/project`, `<ws>/records`):
+
+```text
+python3 scripts/studio_run.py init <ws> --from <project-or-fixture-dir>
+python3 scripts/studio_run.py intake <ws> "<goal>"
+python3 scripts/studio_run.py next <ws>              # Step, then Route, as separate executors
+python3 scripts/studio_run.py decide <ws> "<owner's answer>"
+```
+
+`--runtime claude|codex` picks the executor runtime. Never paste your own conversation into a
+Step; the packet is the only input. The manual operations above remain valid.
+
 ## When changing the Studio itself
 
 - `docs/spec/initial-spec.md` is the canonical spec (what and why). Do not edit it as part of
@@ -29,4 +45,4 @@ Follow `studio/orchestration.md`. It defines four operations; load only what eac
   game-specific facts). The tests enforce both.
 - Tool-specific material belongs only in entry points: this file, `CLAUDE.md`, `.claude/`.
 - Repository language is English. Owner-facing artifacts use the project's `owner_language`.
-- Check: `python3 -m pytest tests/` (or `python3 tests/test_studio.py`).
+- Check: `python3 -m pytest tests/` (Phase 1 structure: `tests/test_studio.py`; isolation: `tests/test_phase2.py`).

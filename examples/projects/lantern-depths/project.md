@@ -4,6 +4,7 @@ id: lantern-depths
 name: Lantern Depths (sample)
 repository: none (sample project for dry-runs; builds are simulated under sim/)
 owner_language: ja
+player_visible: sim/build-*.md
 ---
 # Project: Lantern Depths (sample)
 

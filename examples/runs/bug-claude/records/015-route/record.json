@@ -1,0 +1,111 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "5f08c03e-780c-4dee-8d7c-e10641470b6d",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 18169,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 4247,
+    "output_tokens_details": {
+     "thinking_tokens": 330
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 18169,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 4247,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 18169,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 18169
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.11515,
+   "attempt": 1,
+   "started": "2026-10-10T13:15:24",
+   "seconds": 27.0,
+   "errors": [
+    "goal.md: route row 9 has unknown role playtester / game-director"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "fd63435c-e904-4b41-bf2f-541284773594",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 18234,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 4331,
+    "output_tokens_details": {
+     "thinking_tokens": 422
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 18234,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 4331,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 18234,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 18234
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.11624999999999999,
+   "attempt": 2,
+   "started": "2026-10-10T13:15:51",
+   "seconds": 29.4,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-damage-during-dash/goal.md": "cd7ec31cf9a87e4c8d885477700cc2a25a19402c80c227edb428d575048b6751"
+ },
+ "decision": {
+  "status": "done",
+  "open": []
+ }
+}

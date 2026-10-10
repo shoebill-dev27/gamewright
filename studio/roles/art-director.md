@@ -1,6 +1,7 @@
 ---
 kind: role
 id: art-director
+writes: design/*, decisions/*
 ---
 # Role: Art Director
 

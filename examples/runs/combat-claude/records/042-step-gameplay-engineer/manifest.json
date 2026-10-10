@@ -1,0 +1,62 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/35-studio-to-gameplay-engineer.md",
+  "sha256": "ba0f9cd756e86af972e5cf2a666d770677aee646ccf566190f1d143bf750afbd",
+  "bytes": 5161
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md",
+  "sha256": "ec063b0c2f3a86b58d7fc1774ef705d02b02e87267f735b8f4c058bb1a3ab5e8",
+  "bytes": 1569
+ },
+ {
+  "path": "studio/skills/implement-change.md",
+  "sha256": "a9befd7f1d9e09eb94c51a066f030db88c5061ad1b522d9795e62bc2c242964a",
+  "bytes": 1823
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "ad9e58397be036df274ee1b23d6733d56f22ed3412a28923c38d370a51adc019",
+  "bytes": 28210
+ },
+ {
+  "path": "sim/repo-notes.md",
+  "sha256": "672fc5b4700b64041fcaf25e7c1211d48aa36860158bdfa36cbb8c95ec9963b4",
+  "bytes": 6440
+ },
+ {
+  "path": "sim/build-0.5.md",
+  "sha256": "02ec2be427bad12eee70035f505a945d5df024241d02d345d3b65356d496ae81",
+  "bytes": 12272
+ },
+ {
+  "path": "decisions/D-005-flinch-contact-and-far-slot-rules.md",
+  "sha256": "b4f9da5d5557328df1d08e0a652c6f7e9df46a3fe0604b0c36d325794f2edf06",
+  "bytes": 5682
+ },
+ {
+  "path": "decisions/D-009-wave-condition-start-and-waiting-enemies.md",
+  "sha256": "47bd9a645a63642930602903e699f8b49b761da1f5b239e59c4b20b9c506d5ac",
+  "bytes": 3865
+ },
+ {
+  "path": "goals/G-001-combat-monotony/34-qa-to-studio.md",
+  "sha256": "ef9368e585ac523488b31ee426ad388a973096fe0aade0c87d39d713fa763c7d",
+  "bytes": 11656
+ },
+ {
+  "path": "goals/G-001-combat-monotony/32-gameplay-engineer-to-studio.md",
+  "sha256": "550b664ffd0d3e91495142e05cbda93675f7ad2217865778f855397826f59177",
+  "bytes": 27847
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ }
+]

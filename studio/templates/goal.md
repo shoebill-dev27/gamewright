@@ -26,8 +26,8 @@ answer, and the stage it creates. Also: stages skipped and why.>
 |---|---|---|---|---|---|
 | 1 | <stage> | <role-id> | <skill-id> | planned | — |
 
-Status: planned | tentative | open | done | skipped. Handoff: the incoming Handoff that starts the
-step. Parallel steps: 2a, 2b. Step numbers need not
+Status: planned | tentative | open | done | skipped. Handoff: the file name (in this goal's directory)
+of the incoming Handoff that starts the step. Parallel steps: 2a, 2b. Step numbers need not
 match Handoff seq numbers. The route is a plan; the Route operation revises it.
 
 ## Route changes

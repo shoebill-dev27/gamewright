@@ -1,0 +1,81 @@
+---
+kind: handoff
+goal: G-001
+seq: 6
+from: qa
+to: studio
+stage: Verify
+outcome: question
+---
+# 06: qa → studio — Verify build 0.4: criteria 1–5 pass, criterion 6 needs a ruling from game-designer
+
+## Task
+
+Route the criterion 6 question below to `game-designer`. Once it is answered, QA can close the overall verdict. Criteria 1–5 pass, and no failure is recorded, so nothing goes to `gameplay-engineer`.
+
+## Context
+
+Goal G-001: the player took damage partway through a dash started shortly after a hit. I verified build 0.4 against acceptance criteria 1–6 from `02-qa-to-gameplay-engineer.md`, which are unchanged. Per the Studio ruling in 05, `sim/build-0.4.md` is the build under test, and I treated its player-observable statements as the observed behavior. I judged from the criteria, `design/combat.md` and the build text, not from any explanation of why the fix works.
+
+Caveat: the build's last bullet says "The fix has not been run or tested in this simulation; the description follows the change as specified." The Studio accepted this description as the project's way of running the build, so the passes below are limited to what the build text states.
+
+## Findings
+
+### Verification report
+
+| # | Criterion | 30 FPS | 60 FPS | Evidence (build 0.4 text) |
+|---|---|---|---|---|
+| 1 | No damage during a dash started right after hit-stun (~0.3 s), Grub and Spitter | pass | pass | "You cannot be hurt at any moment from the start of a dash to its end… any time after a hit, once input returns (about 0.3 s after the hit). A Grub touching you or a Spitter projectile reaching you during the dash does nothing, for both enemy types." The build states identical behavior at both frame rates, apart from edge timing. |
+| 2 | No damage for dashes at several delays in the 0.8 s window, including 0.55–0.8 s | pass | pass | It states ~0.3 s and ~0.5 s dashes (protected through the dash, then through the rest of the 0.8 s window). It also states 0.6–0.75 s dashes ("you stay unhurtable through the whole dash, even though the 0.8 s post-hit period runs out partway through"). The general rule "any time after a hit" covers the rest of the range. |
+| 3 | Regression: dash with no recent hit takes no damage | pass | pass | "This holds whether the dash begins with no recent hit or any time after a hit." Both enemy types are named. |
+| 4 | Regression: undashed hit = 1 heart, 0.3 s hit-stun, invulnerable until 0.8 s | pass | pass | Stated twice: "Taking a hit still costs 1 heart, locks out input for 0.3 s, and then leaves you unhurtable until 0.8 s" and "A hit taken without dashing behaves as before". |
+| 5 | Regression: dash 4 tiles / 0.25 s, cooldown 0.6 s, attack queued in a dash fires at its end | pass | pass | "A dash still covers 4 tiles in 0.25 s, has a 0.6 s cooldown, and an attack pressed during the dash still fires when the dash ends." |
+| 6 | Same results at 30 and 60 FPS | not decided | not decided | See the question below. |
+
+- **Original reproduction** (hit, then dash as soon as input returns, about 0.3 s): no damage in the build text, for both enemy types. The defect no longer appears. No mid-dash damage is described at any delay.
+- **Regressions checked:** the undashed hit, dash with no recent hit, dash distance, duration and cooldown, and the queued attack. None regressed.
+- **D-001:** the build text implies no new inputs. No issue.
+- **Missing information:** nothing needed for criteria 1–5 is missing. The "at least 20 repetitions per frame rate" in criterion 1 does not apply to a text build. The build states deterministic behavior rather than intermittent behavior.
+
+### Criterion 6: what the build shows
+
+The build states that behavior is the same at 30 and 60 FPS "apart from the frame-sized timing differences noted below". The only difference is this edge-timing bullet (exact wording):
+
+> "Edge timing: protection ends on the first frame at or after its end time. At 30 FPS that can be up to about 33 ms late, and at 60 FPS up to about 17 ms late. So a contact landing within one frame of an end time can go either way depending on frame rate. This is not visible in normal play."
+
+My reading:
+- The difference appears only in the single frame at an expiry boundary (the end of the dash or of the 0.8 s post-hit window).
+- Protection ends late, never early. So it cannot cause damage inside the dash (0.25 s), and criteria 1 and 2 are unaffected.
+- The only affected case is a contact in the one frame just after a protection end time. Whether that counts as a difference under "same results" is the open point.
+
+`design/combat.md` gives no frame-rate or tolerance rule. The criterion says "same results", and I may not redefine it. So I cannot decide criterion 6 from the criteria and the design. I have recorded this as an observation and am not marking it pass or fail.
+
+### Overall verdict
+
+Criteria 1–5: pass. Criterion 6: undecided, pending the ruling below. I am not issuing an overall `pass` while a criterion is unresolved, and no `fail` exists. If the ruling accepts a one-frame difference at an expiry boundary, the overall verdict is `pass`. If it does not, criterion 6 fails at the edge and goes to `gameplay-engineer` with this evidence: the 30 FPS vs 60 FPS difference is at the protection end time, which applies to the dash end and the 0.8 s post-hit expiry, for both Grub and Spitter, and the cause is quantization to the first frame at or after the end time.
+
+## Decisions already made
+
+- D-001 (one attack button plus dash): no new inputs. Nothing in the build text implies any.
+
+## Constraints
+
+- Must play correctly at 30 and 60 FPS.
+- No new input buttons beyond attack, dash and pause (D-001).
+- QA does not modify production code or redefine acceptance criteria.
+
+## Open questions
+
+1. For `game-designer`: is a one-frame difference at a protection-expiry boundary acceptable under "same results at 30 and 60 FPS"? Concretely, protection (dash end or the 0.8 s post-hit mark) ends on the first frame at or after its end time. That is up to about 33 ms late at 30 FPS and about 17 ms late at 60 FPS, and it is never early. Is that within tolerance? If so, state the tolerance, for example "within one frame of the frame rate, late only", so QA can close the verdict. If not, state the intended behavior, for example whether expiry must be time-exact and independent of frame rate.
+
+## Expected output
+
+The Studio routes the question to `game-designer`. With the answer, it re-routes Verify to `qa` for the final overall verdict: `pass` if the difference is accepted, otherwise `fail` to `gameplay-engineer` on criterion 6 with the evidence above. This is not a second failure of any criterion, so the technical-director escalation does not apply.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: project.md#constraints, design/combat.md, sim/build-0.4.md, goals/G-001-damage-during-dash/02-qa-to-gameplay-engineer.md
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-001-damage-during-dash/05-studio-to-qa.md

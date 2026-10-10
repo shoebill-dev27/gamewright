@@ -1,0 +1,72 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/11-studio-to-art-director.md",
+  "sha256": "bb1ce9261c00f6989d75167113f5af2b25a47467accb64234b61b4052973596f",
+  "bytes": 6369
+ },
+ {
+  "path": "studio/roles/art-director.md",
+  "sha256": "0a782e71d7d5344b9f3701549fa91d3ea4243ec75a6816a68dbcbf56ac5c71df",
+  "bytes": 1139
+ },
+ {
+  "path": "studio/skills/write-design-spec.md",
+  "sha256": "f60b4ce8c6e89c2dc27ff87184c54b91452c45db8422fc378ca9253b45a0efd2",
+  "bytes": 1367
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "883fcf4805d72138797f043030a901fce6e5a5bf0b6e0d3f7d592fe462d6eb57",
+  "bytes": 24328
+ },
+ {
+  "path": "project.md#art-direction",
+  "sha256": "8ef4190e8e145d993682898fbb7fe0ca8bd81e86b7a123e263644b95ce51119b",
+  "bytes": 158
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "05a33c6f8e50caa20ddf4f3844885137c4261ad4a3e5f3db3eb1b5312b129a9f",
+  "bytes": 237
+ },
+ {
+  "path": "project.md#player-profile",
+  "sha256": "8ab7a2aeebd9deea8e5f25fb124acb3213563cbd9b926a869af8ed6dd2881a8f",
+  "bytes": 172
+ },
+ {
+  "path": "decisions/D-002-combat-direction-rooms-and-grub-charge.md",
+  "sha256": "5b57fe5f9c1c8abb81f10f593c5926997255382e9bba9e0f1fc764289a50bab2",
+  "bytes": 4969
+ },
+ {
+  "path": "decisions/D-003-grub-charge-and-room-rules.md",
+  "sha256": "ec13f8620784000f21125c3b999a018e405da2c2f3a59749e4559687a0818ec2",
+  "bytes": 2323
+ },
+ {
+  "path": "decisions/D-004-technical-approach-grub-charge-and-waves.md",
+  "sha256": "f7b898214a665b72c8cf26b68de022dd9fe6ae2ebf8e802d4dea3f2922f469ff",
+  "bytes": 4563
+ },
+ {
+  "path": "decisions/D-005-flinch-contact-and-far-slot-rules.md",
+  "sha256": "b4f9da5d5557328df1d08e0a652c6f7e9df46a3fe0604b0c36d325794f2edf06",
+  "bytes": 5682
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "00e93d3ba6b07e002008b83fe12ca37f6d6ed529640a08ac48b1e7c3cb3ec0de",
+  "bytes": 2053
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

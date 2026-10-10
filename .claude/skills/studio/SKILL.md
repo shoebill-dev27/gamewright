@@ -20,9 +20,12 @@ Arguments: $ARGUMENTS
 
 Claude Code execution notes (how to execute, not Studio rules):
 
-- For a `qa` or `playtester` step, run the Step in a fresh subagent via the Agent tool. Give it only
-  the repository path, the handoff path, and "act as the `to` role; follow the handoff's Load
-  list; write the outgoing handoff". Then do Route yourself.
+- Prefer the isolated runner for `next` / `decide` / goals in a workspace:
+  `python3 scripts/studio_run.py next <ws>` (see AGENTS.md). It starts each operation as a separate
+  `claude -p` process with no tools, no user settings, memory or MCP, and only the packet as input.
+  Do not write the Step's prompt yourself: your conversation must not reach the executor.
+- Without the runner, run `qa` and `playtester` Steps in a fresh subagent via the Agent tool, giving
+  it only the handoff path. A subagent can still read the repository, so this is weaker isolation.
 - Subagents may research or review for a Role. The Role's decision is written by that step, never
   by combining several subagents' votes.
 - Use a git worktree only when a Technical Director plan calls for parallel, independent code

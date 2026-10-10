@@ -1,6 +1,7 @@
 ---
 kind: role
 id: gameplay-engineer
+load_forbid: goals/*/*-playtester-to-*.md
 ---
 # Role: Gameplay Engineer
 
@@ -30,7 +31,8 @@ Implements approved designs and plans as working changes to the game, and fixes 
 
 - The change, with tests where the project supports them.
 - A Handoff to `qa`: what changed and where, how to exercise it, which acceptance criteria it
-  addresses, own test results, known risks.
+  addresses, known risks. Root cause reasoning, own test results and confidence go under
+  `## Sender assessment`, which QA never receives.
 - Or a hand-back: the open question, what is blocked, what could proceed.
 
 ## Hands back / escalates when

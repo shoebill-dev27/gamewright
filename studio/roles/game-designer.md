@@ -1,6 +1,7 @@
 ---
 kind: role
 id: game-designer
+writes: design/*, decisions/*
 ---
 # Role: Game Designer
 

@@ -1,0 +1,62 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "e8f2de16-430f-4e58-873f-6379a1fea9cd",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 47526,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 31788,
+    "output_tokens_details": {
+     "thinking_tokens": 548
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 47526,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 31788,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 47526,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 47526
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.5079879999999999,
+   "attempt": 1,
+   "started": "2026-10-10T15:34:52",
+   "seconds": 159.6,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-combat-monotony/goal.md": "efb8e811bfcbe2bbbbdbe12aa65c4086c1aaebaab2a6d445630a1cf7c8bc8253"
+ },
+ "decision": {
+  "status": "done",
+  "open": []
+ }
+}

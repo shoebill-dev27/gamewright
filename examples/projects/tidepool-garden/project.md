@@ -4,6 +4,7 @@ id: tidepool-garden
 name: Tidepool Garden (sample)
 repository: none (sample project for dry-runs; builds are simulated under sim/)
 owner_language: ja
+player_visible: sim/build-*.md
 ---
 # Project: Tidepool Garden (sample)
 

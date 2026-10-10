@@ -15,6 +15,7 @@ checks it against the recipient's "Works from", settles Expected output and fill
 outcome: routed = written by the Studio; done = work finished, no verdict; pass/fail = verification
 verdict; question = handed back with an open question; goal-met/goal-not-met = Review verdict.
 Paths: studio/... is relative to the Studio root; everything else to the Project Context directory.
+file#section: the section heading's slug, lowercase with hyphens (project.md#current-state).
 Previous handoff = the Handoff the sender worked from (one step of history). -->
 
 ## Task
@@ -44,6 +45,12 @@ Previous handoff = the Handoff the sender worked from (one step of history). -->
 ## Expected output
 
 <What the recipient produces and where it goes next.>
+
+## Sender assessment
+
+<Optional. The sender's own evaluation and reasoning: self-test verdicts, root cause analysis,
+confidence. Kept for the record and for Roles that may use it; removed before the Handoff reaches
+a Role whose policy strips it (qa, playtester).>
 
 ## Load
 

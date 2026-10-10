@@ -1,0 +1,67 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/23-studio-to-game-designer.md",
+  "sha256": "d5d713febc69a2383bccab59ffe2193ec61878c634ad1e4b1028f77b95af67f9",
+  "bytes": 5929
+ },
+ {
+  "path": "studio/roles/game-designer.md",
+  "sha256": "7e48b1058cca3a1dc59a4240cf232256acb047fb5b659c317fa11197f4017ca4",
+  "bytes": 1578
+ },
+ {
+  "path": "studio/skills/write-design-spec.md",
+  "sha256": "f60b4ce8c6e89c2dc27ff87184c54b91452c45db8422fc378ca9253b45a0efd2",
+  "bytes": 1367
+ },
+ {
+  "path": "studio/skills/make-decision.md",
+  "sha256": "68436360ad82bd660f2153934ae7305118489c26ad3255d10e5018773d9eb4b6",
+  "bytes": 1129
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "883fcf4805d72138797f043030a901fce6e5a5bf0b6e0d3f7d592fe462d6eb57",
+  "bytes": 24328
+ },
+ {
+  "path": "design/grub-charge-telegraph.md",
+  "sha256": "0a7288d2658c9063e5f41742e0ae2fef1f9a0acb9f8279debd82c65267a780b9",
+  "bytes": 16055
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "05a33c6f8e50caa20ddf4f3844885137c4261ad4a3e5f3db3eb1b5312b129a9f",
+  "bytes": 237
+ },
+ {
+  "path": "decisions/D-002-combat-direction-rooms-and-grub-charge.md",
+  "sha256": "5b57fe5f9c1c8abb81f10f593c5926997255382e9bba9e0f1fc764289a50bab2",
+  "bytes": 4969
+ },
+ {
+  "path": "decisions/D-003-grub-charge-and-room-rules.md",
+  "sha256": "ec13f8620784000f21125c3b999a018e405da2c2f3a59749e4559687a0818ec2",
+  "bytes": 2323
+ },
+ {
+  "path": "decisions/D-005-flinch-contact-and-far-slot-rules.md",
+  "sha256": "b4f9da5d5557328df1d08e0a652c6f7e9df46a3fe0604b0c36d325794f2edf06",
+  "bytes": 5682
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "00e93d3ba6b07e002008b83fe12ca37f6d6ed529640a08ac48b1e7c3cb3ec0de",
+  "bytes": 2053
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

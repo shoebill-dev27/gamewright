@@ -1,0 +1,32 @@
+{
+ "of": "050-route",
+ "runtime": "claude",
+ "session_id": "91cd39b8-7308-4132-a0dc-7f9a834753ec",
+ "decision": {
+  "new": [
+   "game-director",
+   "Review"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "game-director",
+    "Review(模擬ビルドに基づく判定)"
+   ]
+  ]
+ },
+ "original": {
+  "new": [
+   "game-director",
+   "Review"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "game-director",
+    "Review(模擬ビルドに基づく判定)"
+   ]
+  ]
+ },
+ "same_decision": true
+}

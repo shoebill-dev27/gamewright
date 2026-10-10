@@ -1,0 +1,351 @@
+<<<FILE decisions/D-008-owner-simulated-build-judgment.md
+---
+kind: decision
+id: D-008
+status: accepted
+decided_by: owner
+goal: G-001
+date: 2026-10-10
+supersedes: none
+---
+# D-008: Build は変更内容を Handoff に正確に書いた時点で完了とし、Goal は模擬ビルドに基づいて判定する(Escalation 20 の Option C)
+
+## Decision
+
+Owner は Escalation 20 の Option C を選んだ。Owner の言葉:
+
+> Cで進めてください。このプロジェクトは模擬専用のサンプルなので、sim/repo-notes.md をコードとして扱い、Build は変更内容を Handoff に正確に書いた時点で完了とします。模擬ビルドは私ではなくランタイムのシミュレーターが、その変更内容から作ります。結果には模擬であることを明記したうえで、Goal の判定は模擬ビルドに基づいて行ってください。
+
+内容と条件:
+
+1. `sim/repo-notes.md` を、このプロジェクトのコードとして扱う。D-007 の台帳 7 項目は、その記述に照らして確認する。記述が答えない項目は「模擬上の前提」と明記する。
+2. Build(`gameplay-engineer`)は、変更内容を Handoff に正確に書いた時点で完了とする。実際のコードの変更、ビルド、テスト実行は行わず、行ったとも書かない。
+3. 模擬ビルドは、Owner ではなくランタイムのシミュレーターが Build の変更内容から作る。Studio は模擬ビルドを自分で書かない。変更内容は、シミュレーターが観察可能な挙動(数値、時間、部屋の構成、状態遷移、視覚要素)を導けるだけの精度で書く。
+4. Verify・Play・Review は模擬ビルドに対して行い、Goal の判定も模擬ビルドに基づいて行う。すべての成果物(報告、Review、Outcome)に「模擬ビルドに基づく」ことを明記する。
+5. 限界(Studio の追記。Owner の条件の実施方法): この判定は模擬の証拠に基づく。ゲームパッドの操作感、0.7 秒の予告で足りるか、暗い床での読み取りやすさ(H1〜H4)は、実機では確認されない。Outcome にその旨を書く。
+
+D-001〜D-007 は変わらない。新しい入力ボタンもビジョンの柱の変更もない。D-007 の 7(コードが読めない場合は返す)は、`sim/repo-notes.md` を読める入力として渡すことで入力の欠落が解消したため、今回は適用しない。
+
+## Rationale
+
+プロジェクトは `repository: none` の模擬専用サンプルで、Owner がその前提で工程を最後まで進めることを選んだ。Goal の判定を模擬ビルドに基づかせるのは、Owner の価値判断(Escalation 20 が Goal の再解釈に当たるとした点)であり、Studio は覆さない。
+
+## Alternatives considered
+
+- Option A(実リポジトリの提供): リポジトリがないため選ばれなかった。
+- Option B(計画と基準の確定までに縮小): Owner が工程を最後まで進めることを選んだ。
+
+## Revisit when
+
+実際のゲームのコードベースが用意された場合。そのときは模擬の結果を実機の証拠として扱わず、Build と Verify を実コードでやり直すかを Owner に確認する。
+
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/20-technical-director-to-owner.md
+---
+kind: escalation
+goal: G-001
+seq: 20
+from: technical-director
+to: owner
+status: resolved
+decision: D-008
+---
+# 20: Owner decision needed — コードのない環境で Build をどう進めるか
+
+## Question
+
+G-001 の Build に実際のゲームのコードとビルド・テスト手段を用意しますか。それとも、コードなしで進められる範囲(実装計画と受け入れ基準の確定まで、または模擬による工程の予行)に Build の範囲を縮めますか。
+
+## Why this needs the Owner
+
+Goal の範囲とリスクが大きく変わるため、Studio は単独で決められません。
+
+- Build(Handoff 18)は、ゲームのソースコード、ビルド、テストの実行手段、リポジトリのいずれも使えないと報告しました。`project.md` は `repository: none` で、ビルドは `sim/build-*.md` による模擬です。
+- 台帳 7 項目(部屋データ、部屋と敵コントローラの分離、判定形状、Spitter の弾、視覚の仕組み、接触結果の通知、経過時間での進行)は、すべて未確認です。`sim/repo-notes.md` と `sim/build-0.3.md` は模擬の記述であり、確認済みの扱いにはできません。
+- D-007 の 7 は、この状況を「前提のリスクではなく入力の欠落」とし、再試行せず Owner の判断を求めると定めています。
+- どちらの道も Goal の成功条件(実際に遊んで単調でなくなったかを確かめる)に影響します。リポジトリの提供は費用と責任範囲の判断です。範囲の縮小は成功条件そのものを変えます。どちらも Technical Director や Game Director の権限を超えます。
+
+D-001〜D-006 の内容、ビジョンの柱、ランの長さ、入力ボタンは、どの選択肢でも変えません。
+
+## Options
+
+### Option A — 実際のリポジトリとビルド・テスト手段を Build に提供する
+
+- ゲームにとって: D-002 の方向(部屋の構成と進行が主軸、予告つき Grub 突進を併用)を、そのまま実装して検証できます。Goal の成功条件を満たせる唯一の道です。
+- 費用: 実際のコードベースの用意が必要です(`repository: none` のため、新規に用意するか、既存のものを指定することになります)。また、Build が読み書きでき、ビルドとテストを実行できる環境が要ります。
+- リスク: 台帳の未確認項目が実際に崩れる可能性があります。その場合は D-007 の分類(i〜iv)で戻します。コードは読んでみないと分かりません。
+- 戻しやすさ: 高いです。環境を用意するだけで、既存の Decision は変わりません。
+- 成立する工程: Build、QA の Verify、`art-director` の Verify、Play、Review がすべて成立します。
+
+If chosen: Studio は Goal を再開し、Build を Handoff 17 の台帳の順序で再開します(部屋のタスク冒頭で 1・2、状態追加の冒頭で 7、突進の冒頭で 3・6、弾の処理を読んだ時点で 4、見た目の冒頭で 5)。最初の報告は「コードを読み書きでき、ビルドとテストを実行できるか」です。Owner からは、リポジトリの場所とビルド・テストの手順をお知らせください。
+
+### Option B — Build の範囲を縮め、実装計画と受け入れ基準の確定までを成果にする
+
+- ゲームにとって: 実装はしません。D-004 と D-007 に沿って、実装計画、受け入れ基準、台帳の確認手順を、コードがあれば誰でもすぐ着手できる形に整えるところまでを成果とします。ゲームの遊び心地は変わりません。
+- 費用: 小さいです。文書の作業だけで済みます。
+- リスク: 台帳の 7 項目は未確認のまま残り、計画が現実のコードに合うかは分かりません。単調さが解消したかどうかも分かりません。
+- 戻しやすさ: 高いです。後で Option A に切り替えれば、成果物をそのまま使えます。
+- 成立しなくなる工程:
+  - Verify(QA、`art-director`): 検証する実装物がないため成立しません。計画と仕様の整合を文書で見ることはできますが、これは Verify ではなく文書レビューです。
+  - Play: 遊べるビルドがないため成立しません。
+  - Review: Goal の成功条件を判定できません。Review の結論は「判定不能、計画のみ完了」となり、Goal は達成扱いにできません。計画文書のレビューは可能です。
+
+If chosen: Studio は Goal の範囲を「実装計画と受け入れ基準の確定」に改め、その旨を Decision に記録します。Technical Director が計画を整理し、`game-designer` が基準を確認します。Build、Verify、Play は行いません。Review では、成功条件が未確認であることを明記します。
+
+### Option C — 模擬のビルドで工程を予行する(Owner または指定者が `sim/build-*.md` を用意する)
+
+- ゲームにとって: このプロジェクトは `repository: none` で、ビルドは模擬の文書です。Owner(または指定者)が、実装後の挙動を描いた模擬のビルド記述を用意すれば、Verify、Play、Review の流れを予行できます。
+- 費用: 模擬の記述の用意が必要です。コードの費用はかかりません。
+- リスク: 結果は、記述した内容に左右されます。実際のゲームの証拠にはなりません。台帳の 7 項目は未確認のまま残ります。工程の予行としては有用ですが、「単調さが解消した」という結論を事実として扱ってはいけません。
+- 戻しやすさ: 高いです。ただし、結果をゲームの証拠として誤用しないよう、記録に予行である旨を明記する必要があります。
+- 成立しなくなる工程: Build は、実装ではなく模擬の記述の受け取りになります。Verify は記述との照合にとどまります。Play は、模擬の記述を読んで反応する形になり、実機での確認になりません。Review は工程の確認としては成立しますが、成功条件の判定には使えません。
+
+If chosen: Owner が模擬のビルドの記述を提供した時点で、Studio は Verify から再開します。結果には「模擬による予行」と明記し、Goal を達成扱いにはしません。
+
+## Studio recommendation
+
+Option B。ただし、Owner が実際のゲームのコードを持っていて、実際に遊んで確かめることが目的なら Option A を選んでください。
+
+## Reasoning
+
+- 判断の材料にできる事実は、このプロジェクトが `repository: none` で、ビルドが `sim/` の模擬であること、そして Build がコードを一切使えなかったことです。この状態で実装を求め続けると、未確認の前提を確認済みとして扱う誘惑が生じます。D-007 の 4 は、それを禁じています。
+- Option B は、現状の入力で嘘なく完了できる範囲で、後で Option A に移るときに無駄になりません。
+- Option C は、工程の予行としては意味がありますが、結果が記述者の想定に依存するため、Goal の成功条件には結びつきません。目的が工程の確認だと分かっている場合にだけ選んでください。
+- Option A は成功条件を満たせる唯一の道です。実際のコードが存在するなら、これが最良です。推奨を変える証拠は、「実際のコードベースがあり、Build がそれを使える」ことです。
+- いずれの選択肢でも、台帳の 7 項目は、実際のコードを読むまで確認済みにはなりません。
+
+## Meanwhile
+
+コードを要する作業(実装、Verify、Play)は止まります。Build の範囲に関わる文書作業(計画・基準の整理)も、選択肢で内容が変わるため、決まるまで始めません。
+
+答えに依存しない次の 2 件は、止めずに続けられます(Studio が後続の操作で Handoff を作ります):
+- 欠陥 D(被弾直後のダッシュ中のダメージ)の `qa` による再現。
+- `design/combat.md` §10 に視覚仕様 `design/grub-charge-telegraph.md` への参照を追記する `game-designer` の小作業。
+
+## Owner decision required
+
+A / B / C のいずれかを、条件があればあわせてお知らせください。A の場合は、リポジトリの場所とビルド・テストの手順もお願いします。
+
+---
+
+**Owner response (2026-10-10):** Cで進めてください。このプロジェクトは模擬専用のサンプルなので、sim/repo-notes.md をコードとして扱い、Build は変更内容を Handoff に正確に書いた時点で完了とします。模擬ビルドは私ではなくランタイムのシミュレーターが、その変更内容から作ります。結果には模擬であることを明記したうえで、Goal の判定は模擬ビルドに基づいて行ってください。
+
+(Studio 記録: Decision D-008 として記録し、この Escalation を resolved にした。)
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/21-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-001
+seq: 21
+from: studio
+to: gameplay-engineer
+stage: Build
+outcome: routed
+---
+# 21: studio → gameplay-engineer — 変更内容を正確に書く(模擬ビルドの元になる Build)
+
+## Task
+
+承認済みの仕様と計画に従い、`sim/repo-notes.md` をこのプロジェクトのコードとして扱って、ゲームに加える変更内容を Handoff に正確に書く。変更内容を正確に書いた時点で、この Build は完了する(D-008)。
+
+## Context
+
+G-001「戦闘が単調なので改善したい」。方向は D-002(部屋の構成と進行が主軸、予告つき Grub 突進を併用)で、仕様は `design/combat.md`(D-003、D-005)と `design/grub-charge-telegraph.md`(D-006)、技術方針は D-004 と D-007 で決まっている。以前の Build は実コードがなく 2 回 `question` で返った(Handoff 14、18)。Owner は Escalation 20 に Option C で回答した(D-008): `sim/repo-notes.md` をコードとして扱い、模擬ビルドは変更内容から、ランタイムのシミュレーターが作る。以後の Verify・Play・Review は模擬ビルドに基づく。
+
+## Findings
+
+- 入力の欠落は解消した。`sim/repo-notes.md` は読める入力として Load にある。D-007 の 7(コードが読めない場合に返す)は今回は適用しない。
+- 台帳 7 項目(Handoff 17、D-007)は `sim/repo-notes.md` と `sim/build-0.3.md` に照らして確認する。記述が答える項目は、答えの引用つきで「確認(模擬のコード)」と書く。記述が答えない項目は「模擬上の前提」と書き、その前提を変更内容に明記する。実際のコードで確認済みとは書かない。
+- 範囲: D-002/D-003 の部屋の構成と進行(波、突進スイッチ)、予告つき Grub 突進、D-006 の視覚要素、D-004 の接触結果の通知(視覚仕様の要素 9)、D-005 の規則(怯まない 3 状態、接触は突進ごとに最初の重なりで 1 回だけ、遠い方は出現を決める時点で選ぶ)。
+- 範囲外: 欠陥 D(被弾直後のダッシュ中のダメージ)の修正、新しい入力ボタン、Spitter の変化、新しい敵、プレイヤー側の数値調整、キット変更。
+
+## Decisions already made
+
+- D-001: 攻撃とダッシュのワンボタン戦闘。新ボタンなし。
+- D-002: 主軸は部屋の構成と進行。併用は予告つき Grub 突進の 1 つだけ。
+- D-003: 突進は同時に 1 体、方向固定、予告中は無害。部屋は突進スイッチで外せる。
+- D-004: 共通コントローラへの状態追加、スイープ判定、導出による同時 1 体、スポナーでのスイッチ。
+- D-005: 突進型は 3 状態で怯まない。接触は突進ごとに最初の重なりで 1 回だけ。「遠い方」は出現を決める時点で選ぶ。
+- D-006: 突進の予告は地面のレーン + 熾火の点灯 + 沈み込み。赤橙は害になる状態だけに使う。
+- D-007: 台帳 7 項目と、前提が崩れたときの戻し先。
+- D-008: Owner が Option C を選んだ。変更内容の記述で Build 完了。結果に模擬であることを明記する。
+
+## Constraints
+
+- 変更内容は、シミュレーターが観察可能な挙動を導ける精度で書く。部屋ごとの構成(敵の種類と数、波、出現位置、突進スイッチ)、時間の値(予告 0.7 秒などの仕様の数値)、状態と遷移、視覚要素、接触結果の通知、30/60 FPS で同じ挙動になる扱いを含める。
+- 仕様の数値を勝手に変えない。仕様が曖昧、矛盾、または欠落している場合は決めず、`outcome: question` で返す(Studio が `game-designer` に回す)。
+- 実行していないことを実行したと書かない。ビルド、テスト、動作確認は行っていない。受け入れ基準については「どの変更で満たす想定か」の対応表を書き、満たしたとは書かない。
+- 模擬ビルドを自分で書かない。それはシミュレーターの仕事で、この Build の成果物ではない。
+- 開発用補助(部屋の選択、突進スイッチ、30/60 FPS 切り替え、状態の遷移ログ)は D-004 のとおり開発ビルド限定で、プレイヤー向けの入力は足さない。
+- 欠陥 D の原因に結び付く推測は書かない。
+
+## Open questions
+
+- 台帳 7 項目のうち、`sim/repo-notes.md` が答えない項目はどれか。その場合の模擬上の前提は何か。
+- 視覚仕様の必須要素 1〜6 と要素 9 は、`sim/repo-notes.md` の記述にある仕組みで足りるか。
+
+## Expected output
+
+次の Handoff を `goals/G-001-combat-monotony/22-gameplay-engineer-to-studio.md` として書く。`to: studio`(Verify で `qa` と `art-director` を並列にするため、Studio が受け手ごとに新しい Handoff を組む)。`outcome: done`(曖昧さがあれば `question`)。
+
+Findings に次を書く:
+
+1. 台帳 7 項目の結果(確認(模擬のコード)/ 模擬上の前提)。
+2. 変更内容(部屋ごと、敵コントローラ、スポナー、視覚要素、接触結果の通知、開発用補助)。シミュレーターがそのまま読める形で。
+3. 受け入れ基準と変更の対応表。
+4. 実装していない・確認していないことの一覧(実行、ビルド、テスト、実機の感触)。
+
+自己評価(確信度、疑い)は `## Sender assessment` に分けて書く。`qa` と `playtester` には渡されない。
+
+## Sender assessment
+
+(Studio が書いた routed Handoff のため、なし。)
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: design/combat.md、design/grub-charge-telegraph.md、sim/repo-notes.md、sim/build-0.3.md、project.md#constraints
+- Decisions: decisions/D-001-one-button-combat.md、decisions/D-002-combat-direction-rooms-and-grub-charge.md、decisions/D-003-grub-charge-and-room-rules.md、decisions/D-004-technical-approach-grub-charge-and-waves.md、decisions/D-005-flinch-contact-and-far-slot-rules.md、decisions/D-006-grub-charge-telegraph-visual.md、decisions/D-007-build-without-code-access-assumption-register.md、decisions/D-008-owner-simulated-build-judgment.md
+- Previous handoff: goals/G-001-combat-monotony/17-studio-to-gameplay-engineer.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-10
+---
+# G-001: 戦闘の単調さの改善
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+体験上の Goal。ビルド 0.3 の戦闘が、想定プレイヤー(短時間で濃いランを求め、回避と間合いに慣れたアクション好き)にとって単調に感じられない状態にする。
+成功条件は質的なもので、プレイヤーが戦闘中に、ほぼ同じ行動の繰り返しではなく、状況に応じた位置取り・タイミング・敵の挙動への対応といった判断を実感できること。数値基準は Design の受け入れ基準で、最終判定は Review で決める。
+
+Owner の判断(D-008): このプロジェクトは模擬専用のサンプルとして扱い、`sim/repo-notes.md` をコードとする。Build は変更内容を Handoff に正確に書いた時点で完了で、模擬ビルドはランタイムのシミュレーターがその変更内容から作る。Goal の判定は模擬ビルドに基づいて行い、結果には模擬であることを明記する。
+
+範囲外:
+- 新しい入力ボタンの追加(D-001 により Owner 承認なしでは不可)。
+- 戦闘以外のシステムの変更。
+- ラン長(15–20分)やビジョンの柱の変更。
+- 原因の特定前に解決策を決めること。
+
+## Unknowns
+
+Project Context の確認結果:
+- ビジョンの柱 1「ワンボタン戦闘」(D-001)は、攻撃とダッシュだけのキットで、深みは位置取り・タイミング・敵の挙動から生むと定めている。「単調」の解決策はこの枠内に収める必要がある。
+- 現状はビルド 0.3(5部屋、敵2種、攻撃とダッシュ)。
+- 即時エスカレーションは不要。Goal は再解釈を要さず、ビジョンや既存の Decision と衝突しない。ただし方向の決定で D-001 の変更や新ボタンが必要と分かれば、その時点でエスカレーションする。
+
+各ステージの入口の問い:
+- Observe: 単調さを実際にプレイして観察したか → 観察済み(Handoff 02)。ただし被弾直後のダッシュ中ダメージの疑い(問題 D)は未再現で、`qa` による再現が必要。
+- Diagnose: 原因は分かっているか → 診断済み(Handoff 04。主因は敵挙動が各1種類で単純なこと(P1)と、部屋構成に進行がないこと(P2))。感触・実時間・演出・数値に関わる仮説 H1〜H4 は未確認。
+- Decide: 方向・優先度・スコープの本当の選択があるか → あった。診断が D-001 の枠内の3案(敵の挙動 / 部屋の構成 / プレイヤー数値)を示し、`game-director` が D-002 で決めた(主軸は部屋の構成と進行、併用は予告つき Grub 突進の1つのみ)。コードのない環境での Build の進め方は Owner が D-008 で決めた。
+- Design: 意図する挙動は仕様化済みか → 戦闘仕様は `design/combat.md` に仕様化済みで、技術確認で出た食い違い 3 点も D-005 で解消済み(Handoff 10)。突進の予告の見た目も `design/grub-charge-telegraph.md` と D-006 で仕様化済み(Handoff 12)。
+- Plan: 技術的アプローチは非自明か → 実現性確認は完了(Handoff 08、D-004)。T0 は D-007 で「前提の台帳」に置き換え済み。コードにアクセスできない問題は Owner の回答(D-008)で解消し、`sim/repo-notes.md` をコードとして扱う。
+- Build: ゲームを変更する必要があるか → ある(D-002)。D-008 により、変更内容を Handoff に正確に書くことで完了とする。
+- Verify: Build の後は常に必要。対象は模擬ビルド。
+- Play: Goal は遊び心地に関する → 変更後に必要。対象は模擬ビルド。H1〜H4 は実機では確認できないため、Outcome に限界として書く。
+- Review: 体験の Goal かつ方向 Decision がある → 必要。模擬ビルドに基づく判定であることを明記する。
+
+スキップしたステージ: なし。
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | [02-playtester-to-studio.md](02-playtester-to-studio.md)(開始 Handoff: [01-studio-to-playtester.md](01-studio-to-playtester.md)) |
+| 2a | Diagnose | game-designer | diagnose-experience | done | [04-game-designer-to-game-director.md](04-game-designer-to-game-director.md)(開始 Handoff: [03-studio-to-game-designer.md](03-studio-to-game-designer.md)) |
+| 2b | Observe(欠陥 D) | qa | reproduce-defect | planned(Escalation の答えに依存しない。Owner の報告の原文が入力にないため Handoff は未作成。後続の Studio 操作で作成。他のステップと独立) | —(次の空き seq で `NN-studio-to-qa.md`) |
+| 3 | Decide | game-director | make-decision, prepare-owner-escalation | done(D-002) | [04-game-designer-to-game-director.md](04-game-designer-to-game-director.md)(出力: [05-game-director-to-game-designer.md](05-game-director-to-game-designer.md)、`decisions/D-002-combat-direction-rooms-and-grub-charge.md`) |
+| 4 | Design(戦闘仕様) | game-designer | write-design-spec | done(`design/combat.md`、D-003) | [05-game-director-to-game-designer.md](05-game-director-to-game-designer.md)(出力: [06-game-designer-to-studio.md](06-game-designer-to-studio.md)) |
+| 5a | Plan(実現性確認) | technical-director | technical-plan | done(D-004。仕様は実現可能。確認依頼 3 点あり) | [07-studio-to-technical-director.md](07-studio-to-technical-director.md)(出力: [08-technical-director-to-studio.md](08-technical-director-to-studio.md)) |
+| 5b | Design(突進の予告の見た目) | art-director | write-design-spec, make-decision | done(`design/grub-charge-telegraph.md`、D-006。戦闘の規則の変更なし) | [11-studio-to-art-director.md](11-studio-to-art-director.md)(出力: [12-art-director-to-studio.md](12-art-director-to-studio.md)) |
+| 5c | Design(仕様の確認: 怯み・接触の定義・部屋 5 の FL/FR) | game-designer | write-design-spec, make-decision | done(D-005。方向・スコープの変更なし) | [09-studio-to-game-designer.md](09-studio-to-game-designer.md)(出力: [10-game-designer-to-studio.md](10-game-designer-to-studio.md)) |
+| 6 | Build(1 回目) | gameplay-engineer | implement-change | done(`outcome: question`。T0 を完了できず、実装なし) | [13-studio-to-gameplay-engineer.md](13-studio-to-gameplay-engineer.md)(出力: [14-gameplay-engineer-to-studio.md](14-gameplay-engineer-to-studio.md)) |
+| 6a | Plan(T0 を実施できない場合の進め方の再確認) | technical-director | technical-plan, make-decision | done(D-007。T0 を前提の台帳に置き換え、方針 D-004 は維持) | [15-studio-to-technical-director.md](15-studio-to-technical-director.md)(出力: [16-technical-director-to-studio.md](16-technical-director-to-studio.md)) |
+| 6b | Build(再開) | gameplay-engineer | implement-change | done(`outcome: question`。コードを読み書きできず、台帳のプローブも実装もできなかった。D-007 の 7 に該当し、再試行せず返した) | [17-studio-to-gameplay-engineer.md](17-studio-to-gameplay-engineer.md)(出力: [18-gameplay-engineer-to-studio.md](18-gameplay-engineer-to-studio.md)) |
+| 6c | Plan(コードにアクセスできない Build の進め方、Owner 確認の要否) | technical-director | technical-plan, prepare-owner-escalation, make-decision | done(Owner の判断が必要と判断し Escalation を作成) | [19-studio-to-technical-director.md](19-studio-to-technical-director.md)(出力: [20-technical-director-to-owner.md](20-technical-director-to-owner.md)) |
+| 6d | Decide(Owner) | owner | — | done(D-008。Owner は Option C を選択。`sim/repo-notes.md` をコードとして扱い、Build は変更内容の記述で完了、判定は模擬ビルドに基づく) | [20-technical-director-to-owner.md](20-technical-director-to-owner.md)(Decision: `decisions/D-008-owner-simulated-build-judgment.md`) |
+| 6e | Build(変更内容の記述。D-008 により、記述の完了で Build 完了) | gameplay-engineer | implement-change | open | [21-studio-to-gameplay-engineer.md](21-studio-to-gameplay-engineer.md) |
+| 7 | Verify(模擬ビルド。視覚要素があるため `art-director` を並列に加える: visual-review) | qa | verify-change | planned(6e の後、ランタイムのシミュレーターが変更内容から模擬ビルドを作ってから開始。Handoff は Studio が受け手ごとに新しく組み、Build の Sender assessment は `qa` に渡さない) | — |
+| 8 | Play(模擬ビルド) | playtester | playtest-session | planned(7 の後。新しい実行コンテキストで、模擬ビルドとプレイヤー像のみを渡す。H1〜H4 は実機では確認できない) | — |
+| 9 | Review(模擬ビルドに基づく判定) | game-director | review-outcome | planned(8 の後。判定は模擬ビルドに基づく旨と、実機で確認できていない点を明記する) | — |
+
+Status: planned | tentative | open | done | skipped. Handoff: the incoming Handoff that starts the
+step. Parallel steps: 2a, 2b. Step numbers need not
+match Handoff seq numbers. The route is a plan; the Route operation revises it.
+
+## Route changes
+
+- Step 1(Observe)の後: プレイテスターの観察報告(Handoff 02)は、体験の問題 A〜C(毎部屋同じ型、緊張感の欠如、ダッシュが戦闘で使われない)と、不具合の疑い D(被弾直後のダッシュ中にダメージを受けることがある)を報告した。計画どおり Diagnose(2a)に進む。
+- 追加: 2b として `qa` による D の再現(`reproduce-defect`)を加えた。理由: D は仕様と食い違うか明らかな不具合の疑いであり、戻りルール(Play の結果が欠陥なら Observe は `qa`)に従う。2a の診断と互いの出力を使わない。
+- 2a(Diagnose)の後: 診断(Handoff 04)は D-001 の枠内の3案を示し、方向・優先度・スコープの本当の選択があるため Decide(3)を確定し `open` にした。エスカレーションは不要と判断した。
+- 3(Decide)の後: `game-director` が D-002 を記録した(主軸は案2の部屋の構成と進行、併用は予告つき Grub 突進の1つのみ。Spitter の変化、新しい敵、プレイヤー側の数値調整、キット変更は扱わない)。D-001 とビジョンの柱の範囲内で、新ボタンも不要なため、エスカレーションは発動しない。計画どおり Design(4)に進む。
+- 3 の後の route 改訂: (a) Decide が実装前の実現性確認を求めたため、Plan(5a)を `planned` に確定した。(b) 突進の予告の見た目は `art-director` の範囲であり、Director も仕様後に回すと指示したため、Design(5b)を新設した。仕様が書き上がってから、5a と 5b を互いに独立なステップとして Handoff する(並列可。どちらも相手の出力を使わない)。(c) ゲーム変更が決まったため、Build(6)は `planned`、Verify(7)、Play(8)、Review(9)も `planned` に確定した。視覚要素(予告)が入るため、Verify は `art-director` の `visual-review` を並列に加える。
+- 欠陥 D は、Director の指示どおり今回の戦闘仕様に含めない。2b の再現結果が出てから、ダッシュと被弾後の無敵の規則を設計書に書き足す。2b の Handoff は、Owner の報告と設計文書のみを `qa` に渡す必要がある。報告文の原文は後続の Studio 操作で用意し、推測で書かない。
+- Handoff 05 の編集(Route 手順 4–5): `stage` を `Specify` から開発ループの用語である `Design` に直した。Load に、受け手の Works from に合う `project.md#player-profile`(ゲームパッド主体のプレイヤー)と、元の観察である Handoff 02 を追加した。`Sender assessment` は触っていない。
+- 観察と診断は `sim/build-0.3.md` と `design/combat.md` に基づくドライランであり、ゲームパッドの操作感・実時間・演出・数値(H1〜H4)は未確認。仕様の数値は暫定値として扱い、Play の確認後に調整する。
+- 4(Design)の後: 仕様(Handoff 06)は計画どおりで、方向・優先度・スコープの選択は出ておらず、エスカレーションも発動しない(D-001、D-002 の範囲内。新ボタンなし)。Design(4)を `done` にし、Plan(5a)を `open` にした。
+- 5a と 5b の Handoff について: 5a と 5b は独立で並列にできる(連続する seq で、route 番号に文字の接尾辞)。この Route 操作で書けるのは seq 7 の Handoff 1 つだけだったため、5a の Handoff(07)を先に作り、5b の Handoff は後続の Studio 操作が作る。5b の入力は `design/combat.md` §10 と `project.md#art-direction` で、`game-designer` の Sender assessment は渡さない。Handoff 06 が指示するとおり、Playtester に渡す Handoff には仕様の数値や §6.2 の体験の観点を書かない。
+- 5a の Handoff(07)は Handoff 06 の Findings(客観的な仕様の内容)から Studio が組み立てた。`game-designer` の Sender assessment(確信度、暫定値の根拠)は技術計画に不要なので含めていない。
+- 5a(Plan)の後: 技術計画(Handoff 08、D-004)は、仕様が D-001〜D-003 と制約の範囲で実現できると結論した。コードは読まず `sim/` の記述に基づく見積もりで、部屋データ、スポナー、弾の衝突、接触の判定形状は Build の最初の作業 T0 で確認する。`outcome: question` ではないため、Plan の戻りルール(仕様が実現不能)は適用しない。エスカレーションの条件(コンセプト・柱・Decision の変更、スコープ・費用・リスクの大幅な変化、不可逆な変更)にも当たらないと判断した。
+- 5a の後の route 改訂: 技術側が仕様の文面と既存実装の食い違いを 3 点(怯みの扱い、接触の定義、部屋 5 の FL/FR)見つけ、仕様側の決定が要るため、Design(5c、`game-designer`)を新設して `open` にした(Handoff 09)。これは仕様の解釈であり、技術側は決められない。Build は 5b と 5c の両方の後に進める。5c は 5b と互いの出力を使わないので並列にできる。5c の答えが D-002 や D-003 の変更、スコープの変更を要する場合は、`game-designer` が `question` で返し、Decide(`game-director`)に回す。
+- Handoff 09 の作り方(Route 手順 4–5): 受け手 `game-designer` の Works from(仕様の質問、Decision、設計文書)に合わせ、Handoff 08 の Findings から確認依頼 1〜3 と既定 4、判断材料の技術的事実だけを抜き出した。Handoff 08 の Sender assessment(欠陥 D の仮説を含む)は渡していない。欠陥 D の仮説は `qa` の再現に先入観を与えるため、2b の Handoff にも含めない。
+- Handoff 08 は編集していない(受け手は Studio で、Load は Studio の routing のため)。
+- Build が T2 と T3 を並列にする条件は、T0 で部屋のコードと敵のコントローラが別モジュールだと確認できること。Build の Handoff を作るときに、この条件と T0 で前提が崩れたときの Studio への戻しを Expected output に書く。Handoff 08 のとおり、開発用補助(部屋の選択、突進スイッチ、30/60 FPS 切り替え、状態の遷移ログ)は開発ビルド限定で、プレイヤー向けの新しい入力は足さない。
+- 5c(Design)の後: 仕様の確認(Handoff 10、D-005)は D-001〜D-003 の範囲内で決まり、`outcome: done`。方向・優先度・スコープの変更も新ボタンもなく、エスカレーションの条件に当たらない。`game-director` に回す必要もない。5c を `done` にした。Handoff 10 の質問「欠陥 D の規則の追記」は 2b の結果待ちで、Build の前提ではない。
+- 5c の後の次の操作: Build は 5b の後という計画を変えない。残る前提は 5b だけなので、Handoff 11 で `art-director` に 5b を始める。Handoff 11 は、受け手 `art-director` の Works from(設計仕様の視覚的含意、美術方針と制約)に合わせて Studio が組み立てた。Handoff 10 の Findings のうち視覚に関わる客観的な事実(怯まない 3 状態、接触の解決の仕方)だけを抜き出し、`game-designer` の Sender assessment と実装側への影響(Playtester・art に不要)は渡していない。`design/combat.md` §10 の本文はこの操作の入力になかったため、Handoff 11 では要約せず Load で指定した。Previous handoff を none にしたのは、Handoff 10 に Sender assessment が含まれ、5b の方針(渡さない)に反するため。
+- 2b(欠陥 D の `qa`)の Handoff は今回も作っていない。理由: この操作で書けるのは seq 11 の 1 つで、5b の方が Build を止めている前提になる。2b は Build を止めず、独立している(Build の前に結果があれば、欠陥修正を Build に加える)。Owner の報告の原文が入力にないため、推測で書かない。
+- Build の Handoff を作るときの条件(Route 手順 4–5 のため記録): 5b の結果(視覚要素の一覧、既存の仕組みで足りるかの見立て)と `design/combat.md`、D-004、D-005 を渡す。Handoff 10 の「実装側への影響」(解決済みフラグ、除外状態、遠い方の選択はデータの規則)は技術情報として `gameplay-engineer` に渡してよいが、Sender assessment は渡さない。
+- 5b(Design)の後: 視覚仕様(Handoff 12、D-006)は `outcome: done`。`art-director` は戦闘の規則・数値の変更は不要と判断しており、`question` ではない。D-001〜D-005 の範囲内で、新ボタンも方向・スコープの変更もなく、エスカレーションの条件に当たらない。5b を `done` にし、計画どおり Build(6)を `open` にした(Handoff 13)。
+- Handoff 13 の作り方(Route 手順 4–5): 受け手 `gameplay-engineer` の Works from(承認済みの仕様、計画、制約、リポジトリ)に合わせ、Handoff 12 の Findings から視覚要素と見立て・未確認の点を客観的な事実として抜き出した。Handoff 12 と同様、Sender assessment(確信度、費用の見立ての根拠)は渡していない。Handoff 08 も Previous handoff にせず(Sender assessment に欠陥 D の仮説があるため)、計画の内容は D-004 を Load で渡す。Handoff 12 は編集していない(`to: studio` で、Load は Studio の routing のため)。Expected output に、Verify で `qa` と `art-director` を並列にするための `to: studio` と、T0 の結果で前提が崩れたときの戻し先(仕様の欠落は Design、計画の不成立は Plan、視覚要素の実現不能は `art-director` への仕様調整を Studio 経由で)を書いた。
+- 未処理(Build を止めない): Handoff 12 の Open question により、`design/combat.md` §10 に `design/grub-charge-telegraph.md` への参照を追記する必要がある。書き込めるのは `game-designer` のため、後続の Studio 操作で小さな Handoff(次の空き seq)として回す。Build は視覚仕様を Load で直接読むので、これを待たない。ただし Verify の前に済ませる。
+- Playtester に渡す Handoff には、視覚仕様 §10.2 の体験の観点を書かない(Handoff 12 の指示、および Playtester の Independence)。
+- 6(Build 1 回目)の後: Handoff 14 は `outcome: question`。実装に入らず、T0 を完了できなかった理由は、その実行にゲームのコード・ビルド・テスト実行の手段がなかったこと。`project.md` は `repository: none`(サンプルで、ビルドは `sim/` で模擬)と明記しており、Handoff 14 の選択肢 (a)「リポジトリを使える形で Build をやり直す」は Studio が用意できない。選択肢 (b)「別の担当に T0 だけをさせる」も、同じ入力では同じ結果になる。したがって Studio 単独で選べる process の問題ではなく、Build をどう進めるかという技術方針・順序(`technical-director` の権限)の問題になる。戻りルール「Build: 計画が成り立たない場合 → Plan(`technical-director`)」に従い、Plan(6a)を新設して `open` にした。Build(6b)は 6a の結果を待つ。Verify(7)は成果物がないため始めない(Handoff 14 の要請どおり、Verify の Handoff は組まない)。
+- 6 の後のエスカレーション確認: 仕様の曖昧さや矛盾は報告されておらず(`game-designer` へ戻す理由はない)、D-001〜D-006 のどれも変更を要しない。コンセプト・柱・Decision の変更はなく、新ボタンもない。現時点では Owner のエスカレーションの条件に当たらない。ただし 6a で `technical-director` が「模擬環境では D-004 の前提を確かめる手段がなく、Build を成立させるには Owner の判断(リポジトリの提供、またはスコープ・リスクの受け入れ)が要る」と結論した場合は、スコープ・リスクの大幅な変化に当たりうるため、`technical-director` が `prepare-owner-escalation` で Escalation を作る。Handoff 15 の Expected output にそう書いた。
+- Handoff 14 の Open questions 2(要素 9)と 3(必須視覚要素 1〜6 が既存の仕組みで実現できるか)は技術方針に関わるため、6a の Handoff 15 に含めた。Handoff 14 は編集していない(受け手は Studio で、Load は Studio の routing のため)。Sender assessment は Handoff 15 に転記せず、客観的な事実(報告された `sim/repo-notes.md` の内容、確認できなかった項目)だけを Findings に抜き出した。無敵フラグの共有構造は欠陥 D の原因候補だが、確定していない仮説なので「`sim/repo-notes.md` に書かれた事実」としてのみ渡し、欠陥 D の原因とは結び付けていない。`technical-director` は `qa` ではないため、事実の伝達は問題ない。
+- 2b の `qa` Handoff と `game-designer` の §10 追記 Handoff は、今回も作っていない(この操作で書けるのは seq 15 の 1 つで、Build の再開の前提である 6a を優先した)。どちらも 6a と独立で、残っている。
+- 6a(Plan)の後: Handoff 16(D-007)は `outcome: done`。`technical-director` は D-004 の方針を保ち、T0 を「前提の台帳」(7 項目。各項目に置く前提・確認する場所・崩れたときの戻し先)に置き換え、接触結果の通知(視覚仕様の要素 9)を D-004 の口に足し、読めるコードが全くない場合は再試行せず返す条件(D-007 の 7)を定めた。仕様・方向の変更は不要で、`game-designer`・`game-director` に回す事項はない。D-001〜D-006 は変わらず、新ボタンもない。Owner の Escalation は `technical-director` が「今回は作らない」と判断した(作業が戻しやすい、D-004 の骨格は `sim/repo-notes.md` で確認済み、方針が変わりうる未確認項目は 2 点で実装の入口で見える)。Studio も、Escalation の条件に今は当たらないと確認した。6a を `done`、6b を `open` にした。
+- 6a の後に残るリスク: Build が書き換えられるコード自体がない場合、計画は空になる。Handoff 17 の Expected output で、最初にコードを読み書きできるかを報告させ、できない場合は再試行せず `outcome: question` で返す(D-007 の 7)。その結果を受けた次の Route で、Escalation が要るかを `technical-director` に判断させる。Studio は先回りして Escalation を書かない。
+- Handoff 17 の作り方(Route 手順 4–5): 受け手 `gameplay-engineer` の Works from に合わせ、Handoff 16 の Findings から台帳、共通手順、接触結果の通知、視覚要素の段階、並列化、無敵の問い合わせ関数、テスト戦略、打ち切りの条件を客観的な内容として抜き出した。Handoff 16 の Sender assessment は渡していない。Previous handoff は none。無敵のタイマーについては、触れない・フラグを共有しているという事実と V3、V4 の測定条件のみを渡し、欠陥 D の原因とは結び付けていない。
+- Handoff 17 の Expected output に、Verify で `qa` と `art-director` を並列にするため `to: studio` を指定した(Build の Sender assessment は `qa` に渡さない)。縮小案を使った場合は、Studio が `art-director` に受け入れ基準(A6、A7 など)の読み替えを確認する必要がある。
+- 6b(Build 再開)の後: Handoff 18 は `outcome: question`。最初の確認の結果、実行環境にゲームのコード・ビルド・テスト手段・リポジトリがなく、変更を加える経路もなかった。台帳 7 項目はすべて未確認で、実装・テスト・ビルドノートはなく、`qa` / `art-director` に渡せる成果物もない。D-007 の 7 に該当するため、Build は再試行しない。Studio は、Build を同じ入力で再び開始しない(結果が変わらないため)。仕様の曖昧さや矛盾は報告されておらず、`game-designer` に回すものはない。D-001〜D-007 の変更も要しない。
+- 6b の後の route 改訂: 6a で `technical-director` は「今回は Escalation を作らない」と判断したが、その前提(コードにアクセスできる可能性)は崩れた。リポジトリの提供、または Build の範囲を模擬に合わせて縮めることは、スコープ・費用・リスクが Goal の想定から大きく変わりうる(Escalation の条件)。ただし、要否と選択肢の設計は技術リスクの判断であり、`technical-director` の権限(Escalation の準備は `prepare-owner-escalation`)にあるため、Studio は先回りして Escalation を書かず、Plan(6c)を新設して `open` にした(Handoff 19)。Verify(7)は成果物がないため始めない。Play(8)と Review(9)は 6c の結果に依存するため `planned` のまま、範囲が変わりうると注記した。
+- Handoff 19 の作り方(Route 手順 4–5): 受け手 `technical-director` の Works from(技術的な問題、制約、リポジトリの所在、関連 Decision)に合わせ、Handoff 18 の Findings(確認できたこと・できなかったこと、選択肢 (a)(b)、再開順序)を客観的な事実として抜き出した。Handoff 18 の Sender assessment は転記していない。Previous handoff として Handoff 18 を Load に入れた(`technical-director` に Sender assessment を除外する方針はない)。Handoff 18 は編集していない(受け手は Studio で、Load は Studio の routing のため)。Handoff 19 の Expected output は、Owner の判断が要る場合は Escalation(seq 20、`to: owner`)、不要な場合は `to: studio` の Handoff とした。
+- 6c(Plan)の後: Escalation 20 で、`technical-director` は Owner の判断が要ると結論し、選択肢 A(実際のリポジトリとビルド・テスト手段の提供)、B(Build の範囲を実装計画と受け入れ基準の確定までに縮小)、C(模擬ビルドで工程を予行)と推奨(B。ただし実コードがあり実機で確かめたいなら A)を示した。Studio も、スコープ・費用・リスクが Goal の想定から大きく変わることを確認し、エスカレーションの条件に当たると判断した。6c を `done` にし、6d(Owner)を `open`、Goal を `blocked-on-owner` にした。
+- Resume(Owner の回答、2026-10-10): Owner は Escalation 20 に Option C で回答し、条件を付けた(`sim/repo-notes.md` をコードとして扱う、Build は変更内容を Handoff に正確に書いた時点で完了、模擬ビルドはランタイムのシミュレーターが変更内容から作る、結果に模擬であることを明記し Goal の判定は模擬ビルドに基づく)。Studio は D-008(`decided_by: owner`)に Owner の言葉を含めて記録し、Escalation 20 を `resolved`(`decision: D-008`)にして、Goal を `active` に戻した。6d を `done` にした。
+- Resume の route 再計画: Escalation の Option C の "If chosen" は「Owner が模擬ビルドの記述を提供した時点で Verify から再開、Goal は達成扱いにしない」だった。Owner の回答は、それとは異なる点が 3 つある。(1) 模擬ビルドを作るのは Owner ではなくランタイムのシミュレーターで、その元は Build の変更内容である。(2) `sim/repo-notes.md` をコードとして扱うため、Build(`gameplay-engineer`)は変更内容を書く工程として残る。(3) Goal の判定は模擬ビルドに基づいて行う。そのため、選択肢の記述どおりには進めず、Owner の言葉を優先して残りの route を再計画した(Resume 手順 3、選択肢に記述のない回答)。変更点は次のとおり。Build(6e)を新設して `open` にし、Handoff 21 を作った。Verify(7)、Play(8)、Review(9)は模擬ビルドを対象にし、Review は模擬ビルドに基づく判定にする。Goal を達成扱いにしない、という Escalation の記述は Owner の条件で置き換わった。ただし、結果には模擬であることを明記し、実機で確認できない点(H1〜H4)を Outcome に書く。
+- 再計画での Escalation 確認: Owner の回答は D-001〜D-007、ビジョンの柱、入力ボタンに触れない。新しい Escalation の条件には当たらない。シミュレーターは Role ではないため、route の行には置かない。模擬ビルドの作成は 6e と 7 の間のランタイムの動作で、Next action に記す。
+- D-007 の 7 の扱い: コードを読めない入力の欠落は、`sim/repo-notes.md` を Load に入れたことで解消した。Handoff 21 で、台帳 7 項目は `sim/repo-notes.md` に照らして確認し、答えがない項目は「模擬上の前提」と明記するよう指示した。実コードで確認済みと書かせない。
+- Handoff 21 の作り方(Route 手順 4–5): 受け手 `gameplay-engineer` の Works from(承認済みの仕様、計画、制約、リポジトリ)に合わせ、仕様と計画は Load で渡した。Previous handoff は Studio が書いた Handoff 17(Sender assessment がない)にした。Handoff 18 は Sender assessment を含むため Load に入れず、必要な事実は Handoff 21 に転記した。Expected output は `to: studio` として、Verify の `qa` と `art-director` への Handoff を Studio が組み直せるようにした。欠陥 D の原因の推測は書かせない。
+- 2b の `qa` Handoff と `game-designer` の §10 追記 Handoff は、今回も作っていない(この操作で書けるのは seq 21 の 1 つ。どちらも Owner の回答に依存せず、Build とも独立で、残っている)。2b は Owner の報告の原文が入力にない限り作れない。§10 の追記は Verify の前までに済ませる。
+
+## Next action
+
+Goal は `active`。6e(Build、`gameplay-engineer`)が `open`。Handoff: `goals/G-001-combat-monotony/21-studio-to-gameplay-engineer.md`。
+
+1. `gameplay-engineer` が Handoff 21 に従い、`sim/repo-notes.md` をコードとして扱って変更内容を正確に書き、Handoff 22(`to: studio`)として返す。曖昧さがあれば `outcome: question`。
+2. Studio が Route を行う。変更内容が揃えば、ランタイムのシミュレーターが変更内容から模擬ビルドを作る(Studio は模擬ビルドを書かない)。その後、Verify(7)の Handoff を `qa` と `art-director` 向けに、Sender assessment を除いて新しく組む。
+3. 独立: 2b(`qa`、`reproduce-defect`)の Handoff。Owner の報告の原文と設計文書のみを渡す。原文が入力にない場合は作れない。
+4. 独立: `game-designer` 宛ての小さな Handoff で、`design/combat.md` §10 に視覚仕様への参照を追記させる。Verify の前までに済ませる。
+
+Owner への報告(日本語):
+- 選択肢 C の回答を D-008 として記録し、Escalation 20 を解決済みにして、Goal を再開しました。
+- 次は `gameplay-engineer` が `sim/repo-notes.md` をコードとして扱い、変更内容を Handoff に正確に書きます(それで Build は完了です)。模擬ビルドはランタイムのシミュレーターが、その変更内容から作ります。
+- その後、Verify、Play、Review を模擬ビルドに対して行い、判定には「模擬ビルドに基づく」と明記します。ゲームパッドの操作感、0.7 秒の予告で足りるか、暗い床での読み取りやすさ(H1〜H4)は、実機では確認できないままです。
+- 欠陥 D の再現と、設計書への参照追記は、引き続き独立して進められます。欠陥 D の再現には、Owner の元の報告文が必要です。
+
+## Outcome
+
+(未完了)
+>>>END

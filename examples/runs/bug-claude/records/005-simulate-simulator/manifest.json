@@ -1,0 +1,27 @@
+[
+ {
+  "path": "simulator-instructions",
+  "sha256": "cee9f7b2036ebe0df2967ebdc66bf0acabe22af01ed95158f472a19e1b9bebb6",
+  "bytes": 1003
+ },
+ {
+  "path": "goals/G-001-damage-during-dash/03-gameplay-engineer-to-qa.md",
+  "sha256": "ce651a1b135f31b54c9e77bb25f27c0bc3f1886a91763703e998411cbfc00a21",
+  "bytes": 7111
+ },
+ {
+  "path": "sim/build-0.3.md",
+  "sha256": "3159bf3f32d15e24e59b3276d1b8618ee3b0d65f884c8681aa7b2b85f4eb6d64",
+  "bytes": 851
+ },
+ {
+  "path": "sim/repo-notes.md",
+  "sha256": "9d2a0c8d3c25a33a3a305e1fe5f3a6d4ed024bb20db9e161c4cde5d2237c7f0e",
+  "bytes": 1203
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "05a33c6f8e50caa20ddf4f3844885137c4261ad4a3e5f3db3eb1b5312b129a9f",
+  "bytes": 237
+ }
+]

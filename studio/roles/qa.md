@@ -1,6 +1,7 @@
 ---
 kind: role
 id: qa
+strip_sections: Sender assessment
 ---
 # Role: QA
 
@@ -30,6 +31,8 @@ of why it should work. Prefer a fresh executor context without the implementatio
 - For defects: the Owner's report and the relevant design documents.
 - For verification: acceptance criteria, how to exercise the change, project constraints (e.g.,
   supported platforms and frame rates).
+- Never the implementer's self-assessment or reasoning: a Handoff's `## Sender assessment` section
+  is removed before QA receives it.
 
 ## Produces
 

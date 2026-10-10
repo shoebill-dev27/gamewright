@@ -1,0 +1,106 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "1306258a-9adc-4699-9ce7-9237474ce714",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 16363,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 5644,
+    "output_tokens_details": {
+     "thinking_tokens": 1822
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 16363,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 5644,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 16363,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 16363
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.12189599999999999,
+   "attempt": 1,
+   "started": "2026-10-10T13:08:46",
+   "seconds": 35.9,
+   "errors": [
+    "open step 5: handoff [03-gameplay-engineer-to-qa.md](03-gameplay-engineer-to-qa.md) does not exist"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "1cb2f878-c25c-4550-b2d5-ab236e154172",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 16455,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 4872,
+    "output_tokens_details": {
+     "thinking_tokens": 1109
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 16455,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 4872,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 16455,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 16455
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.114544,
+   "attempt": 2,
+   "started": "2026-10-10T13:09:22",
+   "seconds": 30.7,
+   "errors": [
+    "open step 5: handoff [03-gameplay-engineer-to-qa.md](03-gameplay-engineer-to-qa.md) does not exist"
+   ]
+  }
+ ],
+ "status": "rejected"
+}

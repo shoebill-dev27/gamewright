@@ -1,0 +1,62 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/39-studio-to-art-director.md",
+  "sha256": "3937454cbd44330bd37c18ad0a83cc269a687df5299787b816bcdf4f995d142c",
+  "bytes": 4382
+ },
+ {
+  "path": "studio/roles/art-director.md",
+  "sha256": "0a782e71d7d5344b9f3701549fa91d3ea4243ec75a6816a68dbcbf56ac5c71df",
+  "bytes": 1139
+ },
+ {
+  "path": "studio/skills/visual-review.md",
+  "sha256": "a4c0a2bc09a91a5af5765901e80bae9296517858e7d87341f54a53f006c1a263",
+  "bytes": 1066
+ },
+ {
+  "path": "project.md#art-direction",
+  "sha256": "8ef4190e8e145d993682898fbb7fe0ca8bd81e86b7a123e263644b95ce51119b",
+  "bytes": 158
+ },
+ {
+  "path": "design/grub-charge-telegraph.md",
+  "sha256": "0a7288d2658c9063e5f41742e0ae2fef1f9a0acb9f8279debd82c65267a780b9",
+  "bytes": 16055
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "ad9e58397be036df274ee1b23d6733d56f22ed3412a28923c38d370a51adc019",
+  "bytes": 28210
+ },
+ {
+  "path": "sim/build-0.6.md",
+  "sha256": "95fb9b0a94bd8be057b11d3b742870a4b46bee4c1c637ae5da5536a5b370c02c",
+  "bytes": 13239
+ },
+ {
+  "path": "decisions/D-006-grub-charge-telegraph-visual.md",
+  "sha256": "5bd58d6c836400290565961679a87658878eada9dfbffd7314d8e1504fc054b4",
+  "bytes": 5370
+ },
+ {
+  "path": "decisions/D-001-one-button-combat.md",
+  "sha256": "c7fe9ca23a369707a5ab439e44789a25a0a8544efce4703a676f8fd180f82ec1",
+  "bytes": 798
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

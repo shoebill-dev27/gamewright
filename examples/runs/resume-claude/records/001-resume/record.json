@@ -1,0 +1,74 @@
+{
+ "op": "Resume",
+ "role": null,
+ "goal": "G-002",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "534c1536-1d0e-4c00-ab2b-8261b0760eff",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 14500,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 5934,
+    "output_tokens_details": {
+     "thinking_tokens": 827
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 14500,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 5934,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 14500,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 14500
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.117344,
+   "attempt": 1,
+   "started": "2026-10-10T13:32:44",
+   "seconds": 40.8,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "decisions/D-002-enemy-side-depth-one-button.md": "ac67c103759e437d9225f1a26e0a7b88646d1899ce5af988f08edee7dd1ebd6b",
+  "goals/G-002-combat-monotony/04-game-director-to-owner.md": "0bcb12608a0190a7f290ae7bc065c690a383046dbea5a7d4b411932e46360eb5",
+  "goals/G-002-combat-monotony/goal.md": "fcc6549c2f39325a74d761188ab8098bab3e7694f8c77918108a3978f99e24f9",
+  "goals/G-002-combat-monotony/05-studio-to-game-designer.md": "51102d93954c2469937f28ea473b043555ba3f01e8b1e83e8e98103f6d001d36"
+ },
+ "decision": {
+  "status": "active",
+  "open": [
+   [
+    "game-designer",
+    "Design"
+   ]
+  ],
+  "new": [
+   "game-designer",
+   "Design"
+  ]
+ }
+}

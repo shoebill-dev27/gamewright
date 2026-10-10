@@ -28,7 +28,8 @@ Spec or defect report, acceptance criteria, plan (if any), constraints, reposito
    reported path only.
 4. Implement, add or update tests, run them under the project's supported conditions.
 5. Describe the change for QA: what changed and where, how to exercise it, which criteria it
-   addresses, test results, known risks.
+   addresses, known risks. Put your root cause reasoning, own test results and confidence under
+   `## Sender assessment` — QA verifies independently and never receives that section.
 
 ## Output
 

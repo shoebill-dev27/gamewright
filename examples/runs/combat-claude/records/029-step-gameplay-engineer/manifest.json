@@ -1,0 +1,62 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/25-studio-to-gameplay-engineer.md",
+  "sha256": "4ba46463ea1dc3cc47334d9fd53bf48b4c65f685c9fd1c39b28f14ae9fe82f0d",
+  "bytes": 5182
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md",
+  "sha256": "ec063b0c2f3a86b58d7fc1774ef705d02b02e87267f735b8f4c058bb1a3ab5e8",
+  "bytes": 1569
+ },
+ {
+  "path": "studio/skills/implement-change.md",
+  "sha256": "a9befd7f1d9e09eb94c51a066f030db88c5061ad1b522d9795e62bc2c242964a",
+  "bytes": 1823
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "ad9e58397be036df274ee1b23d6733d56f22ed3412a28923c38d370a51adc019",
+  "bytes": 28210
+ },
+ {
+  "path": "sim/repo-notes.md",
+  "sha256": "9d2a0c8d3c25a33a3a305e1fe5f3a6d4ed024bb20db9e161c4cde5d2237c7f0e",
+  "bytes": 1203
+ },
+ {
+  "path": "decisions/D-009-wave-condition-start-and-waiting-enemies.md",
+  "sha256": "47bd9a645a63642930602903e699f8b49b761da1f5b239e59c4b20b9c506d5ac",
+  "bytes": 3865
+ },
+ {
+  "path": "decisions/D-005-flinch-contact-and-far-slot-rules.md",
+  "sha256": "b4f9da5d5557328df1d08e0a652c6f7e9df46a3fe0604b0c36d325794f2edf06",
+  "bytes": 5682
+ },
+ {
+  "path": "decisions/D-008-owner-simulated-build-judgment.md",
+  "sha256": "a4271bb4325eae6ca29ef615e8c89eed66ea6f6bfe8f00d70074fb15444f23dc",
+  "bytes": 3263
+ },
+ {
+  "path": "decisions/D-007-build-without-code-access-assumption-register.md",
+  "sha256": "4399f0987f06b84722edee98993c8cc026f9708db92ba1ea291afb2d1aceccc8",
+  "bytes": 5092
+ },
+ {
+  "path": "goals/G-001-combat-monotony/24-game-designer-to-studio.md",
+  "sha256": "ff22ec8781b4c92d3e909be3929e88e1e62e093b4c55735ea477432464ae1ea5",
+  "bytes": 4377
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "00e93d3ba6b07e002008b83fe12ca37f6d6ed529640a08ac48b1e7c3cb3ec0de",
+  "bytes": 2053
+ }
+]

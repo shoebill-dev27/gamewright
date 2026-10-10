@@ -1,0 +1,57 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-damage-during-dash/05-studio-to-qa.md",
+  "sha256": "ec56754d188a0462f3548724fb951b7d75e0d869af1e795d005e293289f7217d",
+  "bytes": 4450
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "e65b1378195da3373e0b30e3a5fc9a454a2aedebe1ce953fd80da8237e4e641c",
+  "bytes": 1734
+ },
+ {
+  "path": "studio/skills/verify-change.md",
+  "sha256": "da40d2c0030e078ac6d085ea06b17bb9b452495f4e2f412a9e1bd723ac72ddf5",
+  "bytes": 1281
+ },
+ {
+  "path": "project.md",
+  "sha256": "eb3a1f3e9d131417f9e3c6fd836599f3ae249eea497ce2f8eca2061773ad76d2",
+  "bytes": 1510
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "b67a8b97eaf78370e06b07dd9143f1c92991e97db5d0326ebbdf7d4784a43cec",
+  "bytes": 854
+ },
+ {
+  "path": "sim/build-0.4.md",
+  "sha256": "6fa44b49a912b8e9c75f33ac6374c82131e6014a11ab318cda16ed1f593726b3",
+  "bytes": 2532
+ },
+ {
+  "path": "goals/G-001-damage-during-dash/02-qa-to-gameplay-engineer.md",
+  "sha256": "03e5a48019cf76dc10daefa05fda04052dd70a581a9ae82b61274818e1a8c3ac",
+  "bytes": 5791
+ },
+ {
+  "path": "decisions/D-001-one-button-combat.md",
+  "sha256": "c7fe9ca23a369707a5ab439e44789a25a0a8544efce4703a676f8fd180f82ec1",
+  "bytes": 798
+ },
+ {
+  "path": "goals/G-001-damage-during-dash/04-qa-to-studio.md",
+  "sha256": "2bf8a061fee3ef28275c4a4b38bab1d2a6da37724790c39cf49c2259dc9789ee",
+  "bytes": 5839
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "00e93d3ba6b07e002008b83fe12ca37f6d6ed529640a08ac48b1e7c3cb3ec0de",
+  "bytes": 2053
+ }
+]

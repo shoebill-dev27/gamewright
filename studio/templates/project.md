@@ -4,6 +4,7 @@ id: <project-id>
 name: <display name>
 repository: <path or URL of the game repository>
 owner_language: <language for Owner-facing text, e.g. en, ja>
+player_visible: <optional: files a Playtester may load, e.g. builds or captures>
 ---
 # Project: <display name>
 

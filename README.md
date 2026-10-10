@@ -68,6 +68,30 @@ Studio goal for examples/projects/lantern-depths: 戦闘が単調なので改善
 Studio next examples/projects/lantern-depths/goals/G-003-...
 ```
 
+### Isolated execution (Phase 2)
+
+`scripts/studio_run.py` runs each operation in a **fresh executor that sees only its packet**: for
+a Step, the Handoff plus exactly the files its Load list names. The executor has no tools, no
+memory, no conversation history; only validated artifacts carry over, and a separate executor
+decides the next step. Role policies (e.g., a Playtester never receives design documents, the
+Owner's words or the implementer's self-assessment) are enforced mechanically
+(`studio/execution.md`).
+
+```bash
+python3 scripts/studio_run.py init examples/runs/my-run --from examples/fixtures/lantern-depths
+```
+
+```bash
+python3 scripts/studio_run.py intake examples/runs/my-run "戦闘が単調なので改善したい"
+```
+
+```bash
+python3 scripts/studio_run.py next examples/runs/my-run
+```
+
+`decide <ws> "<answer>"` resumes after an Owner escalation; `--runtime codex` runs the same packets
+on Codex. Every operation leaves a record (packet, manifest, session id) under `<ws>/records/`.
+
 ### By hand
 
 Follow `studio/orchestration.md` yourself: Intake writes `goal.md` and the first Handoff; for each
@@ -87,11 +111,13 @@ The same Roles, Skills and Workflow serve every project; nothing about your game
 | Path | What it is |
 |---|---|
 | `docs/spec/initial-spec.md` | Canonical spec: what the Studio is for and which principles it keeps. Not edited by implementation work. |
-| `docs/phase1.md` | Phase 1 design notes, dry-run results, known gaps, what to automate next. |
+| `docs/phase1.md`, `docs/phase2.md` | Phase notes: design, dry-run results, known gaps. |
 | `studio/` | The tool-neutral Studio: concepts and catalogue (`README.md`), `orchestration.md`, `workflows/`, `roles/`, `skills/`, `templates/`. |
 | `examples/projects/` | Two sample Project Contexts with dry-run Goals. Builds are simulated (`sim/`). |
+| `examples/fixtures/`, `examples/runs/` | Pristine Project Contexts, and Goals re-run from them by the isolated runner (with records). |
+| `scripts/studio_run.py` | The isolated runner (stdlib only): packets, policies, fresh executors, records. |
 | `AGENTS.md`, `CLAUDE.md`, `.claude/skills/studio/` | Thin tool-specific entry points. Removing them leaves the Studio intact. |
-| `tests/test_studio.py` | Structural checks and dry-run assertions. |
+| `tests/` | `test_studio.py`: structure and Phase 1 dry-run assertions. `test_phase2.py`: execution-level isolation. |
 
 ## Checks
 

@@ -13,29 +13,69 @@ PROJECTS = ROOT / "examples" / "projects"
 ROLE_IDS = {p.stem for p in (STUDIO / "roles").glob("*.md")}
 SKILL_IDS = {p.stem for p in (STUDIO / "skills").glob("*.md")}
 PARTICIPANTS = ROLE_IDS | {"studio", "owner"}
-STAGES = {"Observe", "Diagnose", "Decide", "Design", "Plan", "Build", "Verify", "Play", "Review", "Next"}
+STAGES = {
+    "Observe",
+    "Diagnose",
+    "Decide",
+    "Design",
+    "Plan",
+    "Build",
+    "Verify",
+    "Play",
+    "Review",
+    "Next",
+}
 OUTCOMES = {"routed", "done", "pass", "fail", "question", "goal-met", "goal-not-met"}
 
 REQUIRED_SECTIONS = {
-    "role": ["Responsibility", "Decides", "Must not", "Works from", "Produces",
-             "Hands back / escalates when", "Typical skills"],
+    "role": [
+        "Responsibility",
+        "Decides",
+        "Must not",
+        "Works from",
+        "Produces",
+        "Hands back / escalates when",
+        "Typical skills",
+    ],
     "skill": ["When to use", "Inputs", "Method", "Output", "Do not"],
     # spec §10
-    "handoff": ["Task", "Context", "Findings", "Decisions already made", "Constraints",
-                "Open questions", "Expected output", "Load"],
+    "handoff": [
+        "Task",
+        "Context",
+        "Findings",
+        "Decisions already made",
+        "Constraints",
+        "Open questions",
+        "Expected output",
+        "Load",
+    ],
     # spec §11
     "decision": ["Decision", "Rationale", "Alternatives considered", "Revisit when"],
     # spec §5
-    "escalation": ["Question", "Why this needs the Owner", "Options", "Studio recommendation",
-                   "Reasoning", "Owner decision required"],
-    "goal": ["Owner request", "Interpretation", "Unknowns", "Route", "Route changes",
-             "Next action", "Outcome"],
+    "escalation": [
+        "Question",
+        "Why this needs the Owner",
+        "Options",
+        "Studio recommendation",
+        "Reasoning",
+        "Owner decision required",
+    ],
+    "goal": [
+        "Owner request",
+        "Interpretation",
+        "Unknowns",
+        "Route",
+        "Route changes",
+        "Next action",
+        "Outcome",
+    ],
     # spec §6
     "project": ["Vision", "Current state", "Constraints", "Design index"],
 }
 
 TOOL_TERMS = re.compile(
-    r"\b(claude|codex|anthropic|openai|chatgpt|gemini|gpt|opus|sonnet|haiku|mcp|agents\.md)\b", re.I
+    r"\b(claude|codex|anthropic|openai|chatgpt|gemini|gpt|opus|sonnet|haiku|mcp|agents\.md)\b",
+    re.I,
 )
 
 
@@ -79,13 +119,19 @@ def project_dir(path):
 
 def goal_artifacts(project, goal_id):
     """Handoffs and escalations of one goal, in seq order."""
-    items = [(p, m, b) for kind in ("handoff", "escalation")
-             for p, m, b in artifacts(kind, project) if m["goal"] == goal_id]
+    items = [
+        (p, m, b)
+        for kind in ("handoff", "escalation")
+        for p, m, b in artifacts(kind, project)
+        if m["goal"] == goal_id
+    ]
     return sorted(items, key=lambda item: int(item[1]["seq"]))
 
 
 def goal_record(project, goal_id):
-    return next((p, m, b) for p, m, b in artifacts("goal", project) if m["id"] == goal_id)
+    return next(
+        (p, m, b) for p, m, b in artifacts("goal", project) if m["id"] == goal_id
+    )
 
 
 def route_rows(body):
@@ -93,7 +139,9 @@ def route_rows(body):
     for line in section(body, "Route").splitlines():
         cells = [c.strip() for c in line.strip().strip("|").split("|")]
         if len(cells) == 6 and re.fullmatch(r"\d+[a-z]?", cells[0]):
-            rows.append(dict(zip(["n", "stage", "role", "skills", "status", "handoff"], cells)))
+            rows.append(
+                dict(zip(["n", "stage", "role", "skills", "status", "handoff"], cells))
+            )
     return rows
 
 
@@ -114,14 +162,23 @@ def participants(items):
 
 
 def test_role_contracts_are_complete():
-    assert ROLE_IDS == {"game-director", "game-designer", "technical-director", "gameplay-engineer",
-                        "art-director", "qa", "playtester"}
+    assert ROLE_IDS == {
+        "game-director",
+        "game-designer",
+        "technical-director",
+        "gameplay-engineer",
+        "art-director",
+        "qa",
+        "playtester",
+    }
     for role in ROLE_IDS:
         meta, body = parse(STUDIO / "roles" / f"{role}.md")
         assert meta.get("id") == role
         missing = set(REQUIRED_SECTIONS["role"]) - headings(body)
         assert not missing, f"{role}: missing {missing}"
-        typical = {s.strip() for s in section(body, "Typical skills").split(",") if s.strip()}
+        typical = {
+            s.strip() for s in section(body, "Typical skills").split(",") if s.strip()
+        }
         assert typical <= SKILL_IDS, f"{role}: unknown skills {typical - SKILL_IDS}"
 
 
@@ -184,12 +241,17 @@ def test_handoff_fields_and_filenames():
     for kind in ("handoff", "escalation"):
         for path, meta, _ in artifacts(kind):
             assert meta["from"] in PARTICIPANTS and meta["to"] in PARTICIPANTS, path
-            assert path.name == f"{int(meta['seq']):02d}-{meta['from']}-to-{meta['to']}.md", path
+            assert (
+                path.name == f"{int(meta['seq']):02d}-{meta['from']}-to-{meta['to']}.md"
+            ), path
             if kind == "handoff":
                 assert meta["stage"] in STAGES | {"Route"}, path
                 assert meta["outcome"] in OUTCOMES, path
             else:
-                assert meta["to"] == "owner" and meta["status"] in {"open", "resolved"}, path
+                assert meta["to"] == "owner" and meta["status"] in {
+                    "open",
+                    "resolved",
+                }, path
 
 
 def test_load_lists_resolve_and_include_the_recipient_role():
@@ -199,7 +261,9 @@ def test_load_lists_resolve_and_include_the_recipient_role():
             target, anchor = resolve(ref, project)
             assert target.is_file(), f"{path.relative_to(ROOT)}: missing {ref}"
             if anchor:
-                assert anchor in {slug(h) for h in headings(parse(target)[1])}, f"{path}: {ref}"
+                assert anchor in {
+                    slug(h) for h in headings(parse(target)[1])
+                }, f"{path}: {ref}"
         if meta["to"] in ROLE_IDS:
             assert f"studio/roles/{meta['to']}.md" in load_paths(body), path
 
@@ -230,7 +294,9 @@ def test_every_role_starts_from_a_previous_handoff():
         received = set()
         for p, m, _ in items:
             if m["from"] in ROLE_IDS:
-                assert m["from"] in received, f"{p.relative_to(ROOT)}: sender never received work"
+                assert (
+                    m["from"] in received
+                ), f"{p.relative_to(ROOT)}: sender never received work"
             received.add(m["to"])
 
 
@@ -241,7 +307,11 @@ def test_bug_goal_takes_the_short_route_and_qa_failure_returns_to_build():
     _, goal, body = goal_record("lantern-depths", "G-001")
     items = goal_artifacts("lantern-depths", "G-001")
     assert participants(items) == {"studio", "qa", "gameplay-engineer"}
-    assert {r["role"] for r in route_rows(body)} == {"studio", "qa", "gameplay-engineer"}
+    assert {r["role"] for r in route_rows(body)} == {
+        "studio",
+        "qa",
+        "gameplay-engineer",
+    }
     flow = [(m["from"], m["to"], m.get("outcome")) for _, m, _ in items]
     fail = flow.index(("qa", "gameplay-engineer", "fail"))
     assert flow[fail + 1][:2] == ("gameplay-engineer", "qa")
@@ -250,8 +320,14 @@ def test_bug_goal_takes_the_short_route_and_qa_failure_returns_to_build():
 
 def test_experience_goal_expands_only_to_needed_roles():
     used = participants(goal_artifacts("lantern-depths", "G-002"))
-    assert {"playtester", "game-designer", "game-director", "technical-director",
-            "gameplay-engineer", "qa"} <= used
+    assert {
+        "playtester",
+        "game-designer",
+        "game-director",
+        "technical-director",
+        "gameplay-engineer",
+        "qa",
+    } <= used
     assert "art-director" not in used  # no visual cause was diagnosed
     assert "art-director" in participants(goal_artifacts("tidepool-garden", "G-001"))
 
@@ -263,7 +339,9 @@ def test_engineer_hands_spec_gaps_back_to_the_designer():
     _, answer, body = items[gap + 1]
     assert (answer["from"], answer["to"]) == ("game-designer", "gameplay-engineer")
     cited = re.findall(r"D-\d{3}", section(body, "Decisions already made"))
-    deciders = {m["id"]: m["decided_by"] for _, m, _ in artifacts("decision", "lantern-depths")}
+    deciders = {
+        m["id"]: m["decided_by"] for _, m, _ in artifacts("decision", "lantern-depths")
+    }
     assert "game-designer" in {deciders[d] for d in cited}
 
 
@@ -272,7 +350,11 @@ def test_playtest_findings_return_to_design_roles():
         for path, meta, _ in artifacts("handoff", project):
             if meta["from"] == "playtester":
                 assert meta["to"] in {"game-designer", "game-director", "studio"}, path
-    senders = {m["to"] for _, m, _ in goal_artifacts("lantern-depths", "G-002") if m["from"] == "playtester"}
+    senders = {
+        m["to"]
+        for _, m, _ in goal_artifacts("lantern-depths", "G-002")
+        if m["from"] == "playtester"
+    }
     assert senders == {"game-designer", "game-director"}
 
 
@@ -282,10 +364,16 @@ def test_owner_escalation_stops_with_options_and_resumes():
     _, esc, body = items[index]
     assert len(re.findall(r"^### Option", section(body, "Options"), re.M)) >= 2
     assert section(body, "Studio recommendation").strip()
-    decision = next(m for _, m, _ in artifacts("decision", "lantern-depths") if m["id"] == esc["decision"])
+    decision = next(
+        m
+        for _, m, _ in artifacts("decision", "lantern-depths")
+        if m["id"] == esc["decision"]
+    )
     assert esc["status"] == "resolved" and decision["decided_by"] == "owner"
     _, after, after_body = items[index + 1]
-    assert after["from"] == "studio" and esc["decision"] in section(after_body, "Decisions already made")
+    assert after["from"] == "studio" and esc["decision"] in section(
+        after_body, "Decisions already made"
+    )
 
 
 def test_playtester_handoffs_are_blind():
@@ -296,7 +384,9 @@ def test_playtester_handoffs_are_blind():
         request = section(goal_body, "Owner request").strip().lstrip("> ").strip()
         assert request not in body, f"{path.relative_to(ROOT)} leaks the Owner request"
         for ref in load_paths(body):
-            assert not ref.startswith(("design/", "goals/", "decisions/", "sim/repo")), (path, ref)
+            assert not ref.startswith(
+                ("design/", "goals/", "decisions/", "sim/repo")
+            ), (path, ref)
 
 
 def test_same_role_contracts_serve_multiple_projects():
@@ -306,7 +396,10 @@ def test_same_role_contracts_serve_multiple_projects():
             if ref.startswith("studio/roles/"):
                 loaded.setdefault(ref, set()).add(project_dir(path).name)
     for role in ("playtester", "game-designer"):
-        assert loaded[f"studio/roles/{role}.md"] == {"lantern-depths", "tidepool-garden"}
+        assert loaded[f"studio/roles/{role}.md"] == {
+            "lantern-depths",
+            "tidepool-garden",
+        }
 
 
 if __name__ == "__main__":

@@ -1,0 +1,87 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/27-studio-to-gameplay-engineer.md",
+  "sha256": "1389e9bfa93d402b991215a99549b97abc9ea8d9e6cc178852decf0cca2d8397",
+  "bytes": 4535
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md",
+  "sha256": "ec063b0c2f3a86b58d7fc1774ef705d02b02e87267f735b8f4c058bb1a3ab5e8",
+  "bytes": 1569
+ },
+ {
+  "path": "studio/skills/implement-change.md",
+  "sha256": "a9befd7f1d9e09eb94c51a066f030db88c5061ad1b522d9795e62bc2c242964a",
+  "bytes": 1823
+ },
+ {
+  "path": "goals/G-001-combat-monotony/22-gameplay-engineer-to-studio.md",
+  "sha256": "c88fe3faf92767971a48b8e79980e6ef915c3ecb587383eb44dc604c8d42cade",
+  "bytes": 30275
+ },
+ {
+  "path": "goals/G-001-combat-monotony/17-studio-to-gameplay-engineer.md",
+  "sha256": "2104297259a0009492f2579d792ae26dad8d353581d21c737b9933b28057619b",
+  "bytes": 12423
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "ad9e58397be036df274ee1b23d6733d56f22ed3412a28923c38d370a51adc019",
+  "bytes": 28210
+ },
+ {
+  "path": "design/grub-charge-telegraph.md",
+  "sha256": "0a7288d2658c9063e5f41742e0ae2fef1f9a0acb9f8279debd82c65267a780b9",
+  "bytes": 16055
+ },
+ {
+  "path": "sim/repo-notes.md",
+  "sha256": "9d2a0c8d3c25a33a3a305e1fe5f3a6d4ed024bb20db9e161c4cde5d2237c7f0e",
+  "bytes": 1203
+ },
+ {
+  "path": "decisions/D-004-technical-approach-grub-charge-and-waves.md",
+  "sha256": "f7b898214a665b72c8cf26b68de022dd9fe6ae2ebf8e802d4dea3f2922f469ff",
+  "bytes": 4563
+ },
+ {
+  "path": "decisions/D-005-flinch-contact-and-far-slot-rules.md",
+  "sha256": "b4f9da5d5557328df1d08e0a652c6f7e9df46a3fe0604b0c36d325794f2edf06",
+  "bytes": 5682
+ },
+ {
+  "path": "decisions/D-006-grub-charge-telegraph-visual.md",
+  "sha256": "5bd58d6c836400290565961679a87658878eada9dfbffd7314d8e1504fc054b4",
+  "bytes": 5370
+ },
+ {
+  "path": "decisions/D-007-build-without-code-access-assumption-register.md",
+  "sha256": "4399f0987f06b84722edee98993c8cc026f9708db92ba1ea291afb2d1aceccc8",
+  "bytes": 5092
+ },
+ {
+  "path": "decisions/D-008-owner-simulated-build-judgment.md",
+  "sha256": "a4271bb4325eae6ca29ef615e8c89eed66ea6f6bfe8f00d70074fb15444f23dc",
+  "bytes": 3263
+ },
+ {
+  "path": "decisions/D-009-wave-condition-start-and-waiting-enemies.md",
+  "sha256": "47bd9a645a63642930602903e699f8b49b761da1f5b239e59c4b20b9c506d5ac",
+  "bytes": 3865
+ },
+ {
+  "path": "goals/G-001-combat-monotony/26-gameplay-engineer-to-studio.md",
+  "sha256": "ad5e34849270d9241835853fc69711514cd716b30598a3a61f81d4b567ed3203",
+  "bytes": 9404
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "00e93d3ba6b07e002008b83fe12ca37f6d6ed529640a08ac48b1e7c3cb3ec0de",
+  "bytes": 2053
+ }
+]

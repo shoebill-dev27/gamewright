@@ -1,6 +1,7 @@
 ---
 kind: role
 id: game-director
+writes: decisions/*
 ---
 # Role: Game Director
 

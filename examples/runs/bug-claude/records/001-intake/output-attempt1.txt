@@ -1,0 +1,154 @@
+<<<FILE goals/G-001-damage-during-dash/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-10
+---
+# G-001: Player takes damage while dashing
+
+## Owner request
+
+> ダッシュ中なのにダメージを受けることがある。再現できるので直してほしい。
+
+## Interpretation
+
+The Owner reports a defect: the player sometimes takes damage while in the middle of a dash. The Owner says it is reproducible and wants it fixed.
+
+Success condition (qualitative): when the player is dashing, damage is applied exactly as the combat design says it should be during a dash. The situations the Owner saw, where damage landed mid-dash, no longer happen, and nothing else about dash or damage regresses. It must hold at both 30 and 60 FPS, a project constraint.
+
+Numeric thresholds, such as invulnerability frame counts, belong to the design's acceptance criteria. They are not set here.
+
+Out of scope:
+- Changing the dash or damage rules as a design improvement.
+- Adding buttons or inputs (D-001).
+- Rebalancing enemies.
+- Any experience or feel tuning.
+
+Note for the route: the Owner assumes dash should prevent damage. Intake did not have the content of `design/combat.md` in its packet, so it has not confirmed that the design states this. QA checks it first (see Unknowns, Design).
+
+## Unknowns
+
+Entry questions from `development-loop.md`:
+
+- **Observe: has the problem been reproduced first-hand?** No. The Owner says it is reproducible, but there is no defect report yet and the exact conditions are unknown (which enemy or attack, which dash phase, which frame rate). This creates an Observe step with `qa`. It is a defect, not an experience problem: the Owner describes behavior that contradicts the expected dash protection.
+- **Diagnose: is the cause understood?** Unknown. For defects, root cause belongs to `gameplay-engineer` as part of Build (Decision authority), so there is no separate Diagnose stage. If QA finds the cause is technical and cross-system, Plan covers it.
+- **Decide: is there a real choice of direction, priority or scope?** No. Nothing conflicts with the vision or with D-001, so the stage is skipped. It becomes relevant only if the fix would change scope or direction (return rules).
+- **Design: is the intended behavior specified well enough to build and verify?** Not confirmed. `design/combat.md` is listed as holding the damage and invulnerability rules, but Intake did not read it. Tentative: needed only if QA reports that the design does not define behavior for the reproduced case, or that the design itself allows damage during a dash. If the design clearly says the player is protected, Design is dropped.
+- **Plan: is the technical approach non-obvious, risky, cross-system or parallelizable?** Unknown until the cause is seen. Tentative: needed only if the cause turns out to be non-local, such as frame-rate-dependent timing or interaction between several systems. A local, obvious fix needs no Plan. A fix for a frame-rate-dependent cause also falls under the 30/60 FPS constraint.
+- **Build:** the game must change, so this is planned.
+- **Verify:** always after Build, so this is planned.
+- **Play / Review: skipped.** The Goal is a defect, not about feel, and involves no direction Decision. Both stages are skipped, following the development-loop note that a defect needs no Play or Review.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | qa | reproduce-defect | open | 01-studio-to-qa.md |
+| 2 | Design | game-designer | write-design-spec | tentative (only if QA finds the intended dash/damage behavior undefined or the design permits the damage) | — |
+| 3 | Plan | technical-director | technical-plan | tentative (only if the cause is cross-system or frame-rate dependent, or the fix is non-obvious) | — |
+| 4 | Build | gameplay-engineer | implement-change | planned | — |
+| 5 | Verify | qa | verify-change | planned | — |
+
+Status: planned | tentative | open | done | skipped. Handoff: the incoming Handoff that starts the
+step. Parallel steps: 2a, 2b. Step numbers need not
+match Handoff seq numbers. The route is a plan; the Route operation revises it.
+
+## Route changes
+
+None yet.
+
+## Next action
+
+Run Step on `goals/G-001-damage-during-dash/01-studio-to-qa.md` as `qa` (reproduce the defect and write a defect report with acceptance criteria). Then run Route.
+
+## Outcome
+
+(Filled at Close, in Japanese.)
+>>>END
+
+<<<FILE goals/G-001-damage-during-dash/01-studio-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 1
+from: studio
+to: qa
+stage: Observe
+outcome: routed
+---
+# 01: studio → qa — Reproduce "damage taken while dashing" and write a defect report
+
+## Task
+
+Reproduce the Owner's report that the player sometimes takes damage while dashing. Write a precise defect report with player-observable acceptance criteria, using the `reproduce-defect` skill.
+
+## Context
+
+The Owner's report, verbatim:
+
+> ダッシュ中なのにダメージを受けることがある。再現できるので直してほしい。
+
+(In English: "I sometimes take damage even while dashing. It's reproducible, so please fix it.")
+
+This is Goal G-001. Nobody has reproduced the problem first-hand yet. The project is a dry-run: "running the build" means reading the simulated build file listed under Load. The planned route is Observe (this step) → Build → Verify. Design and Plan are tentative and depend on your report.
+
+## Findings
+
+None yet. This is the first step. Intake did not read the combat design, so it has not confirmed what the design says about dash and damage.
+
+## Decisions already made
+
+None that touch this Goal. D-001 (one attack button plus dash) only limits inputs: no new buttons are to be added.
+
+## Constraints
+
+- The game must play correctly at both 30 and 60 FPS. Check whether the defect depends on frame rate and say so in the report.
+- No new input buttons beyond attack, dash and pause (D-001).
+- Report observed behavior. Do not propose design changes. Root cause is the gameplay engineer's call.
+
+## Open questions
+
+1. Under what exact conditions does damage land during a dash? Cover which enemy or attack, which phase of the dash (start, middle, end), the positions or timing involved, and whether frame rate matters.
+2. What does `design/combat.md` say the intended behavior is for damage during a dash?
+   - If it clearly says the player takes no damage during the relevant dash phase, state that and cite it.
+   - If it is silent or ambiguous for the reproduced case, or allows the damage, say so plainly. That outcome sends the work to Design (`game-designer`) instead of Build.
+
+## Expected output
+
+A defect report (per the `reproduce-defect` skill) containing:
+- Reproduction steps and conditions.
+- Observed vs. expected behavior, citing the design document.
+- Reproducibility (always, sometimes, or frame-rate dependent) and your severity call.
+- Player-observable acceptance criteria that Verify can later check, at both 30 and 60 FPS.
+
+Write it in the Findings of your outgoing Handoff. Set `to` per the route:
+- `gameplay-engineer` if the intended behavior is specified and the defect is reproduced.
+- `game-designer` if the expected behavior is undefined or contradicts the Owner's expectation.
+- `studio` with `outcome: question` if you cannot reproduce it, listing exactly what you tried and what information you need.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/reproduce-defect.md
+- Project: project.md#constraints, design/combat.md, sim/build-0.3.md (the build to run)
+- Decisions: none
+- Previous handoff: none
+>>>END
+
+Intake 完了です。次のアクションは、`goals/G-001-damage-during-dash/01-studio-to-qa.md` を `qa` として実行することです。
+
+**ルート**
+1. Observe (`qa`, `reproduce-defect`): 計画済み。まだ誰も再現しておらず、発生条件(敵・ダッシュの局面・FPS)が不明なため。
+2. Design (`game-designer`): tentative。QA が、設計書にダッシュ中の被ダメージの仕様がない、または設計上ダメージを受けうると報告した場合のみ必要。
+3. Plan (`technical-director`): tentative。原因が複数システムにまたがる、またはフレームレート依存の場合のみ必要。
+4. Build (`gameplay-engineer`): 計画済み。
+5. Verify (`qa`): 計画済み。30FPS と 60FPS の両方で確認する。
+
+**スキップした段階**
+- Decide: ビジョンや D-001 と衝突せず、方向性の選択もないため。
+- Play / Review: 体験ではなく不具合の修正のため。
+
+**注意点**
+- `design/combat.md` の中身はこのパケットになく、Intake では確認していません。「ダッシュ中は被ダメージなし」が設計で明記されているかは、QA が最初に確認します。

@@ -1,0 +1,59 @@
+{
+ "op": "Step",
+ "role": "qa",
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "88f299fd-f9fa-4fa4-b8af-c506f3f31b7f",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 8783,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 2792,
+    "output_tokens_details": {
+     "thinking_tokens": 581
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 8783,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 2792,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 8783,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 8783
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.063056,
+   "attempt": 1,
+   "started": "2026-10-10T13:11:13",
+   "seconds": 24.7,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-damage-during-dash/04-qa-to-studio.md": "2bf8a061fee3ef28275c4a4b38bab1d2a6da37724790c39cf49c2259dc9789ee"
+ },
+ "decision": {}
+}

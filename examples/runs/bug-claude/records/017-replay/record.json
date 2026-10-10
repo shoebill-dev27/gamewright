@@ -1,0 +1,32 @@
+{
+ "of": "011-route",
+ "runtime": "claude",
+ "session_id": "19e67122-42f9-4922-a52a-6befb4b673a0",
+ "decision": {
+  "new": [
+   "game-designer",
+   "Design"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "game-designer",
+    "Design (criterion 6 tolerance)"
+   ]
+  ]
+ },
+ "original": {
+  "status": "active",
+  "open": [
+   [
+    "game-designer",
+    "Design (criterion 6 tolerance)"
+   ]
+  ],
+  "new": [
+   "game-designer",
+   "Design"
+  ]
+ },
+ "same_decision": true
+}

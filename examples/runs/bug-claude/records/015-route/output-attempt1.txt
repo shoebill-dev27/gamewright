@@ -1,0 +1,99 @@
+Step 7 (the final Verify) came back as an overall pass, so no step is left. Review was never planned for this defect Goal, so I closed the Goal directly. Only `goal.md` changed; no Handoff was needed.
+
+<<<FILE goals/G-001-damage-during-dash/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: done
+created: 2026-10-10
+---
+# G-001: Player takes damage while dashing
+
+## Owner request
+
+> ダッシュ中なのにダメージを受けることがある。再現できるので直してほしい。
+
+## Interpretation
+
+The Owner reports a defect: the player sometimes takes damage while in the middle of a dash. The Owner says it is reproducible and wants it fixed.
+
+Success condition (qualitative): when the player is dashing, damage is applied exactly as the combat design says it should be during a dash. The situations the Owner saw, where damage landed mid-dash, no longer happen, and nothing else about dash or damage regresses. It must hold at both 30 and 60 FPS, a project constraint.
+
+Numeric thresholds, such as invulnerability frame counts, belong to the design's acceptance criteria. They are not set here.
+
+Out of scope:
+- Changing the dash or damage rules as a design improvement.
+- Adding buttons or inputs (D-001).
+- Rebalancing enemies.
+- Any experience or feel tuning.
+
+Note for the route: the Owner assumes dash should prevent damage. QA has since confirmed that `design/combat.md` states this (the player is invulnerable for the full dash duration).
+
+## Unknowns
+
+Entry questions from `development-loop.md`:
+
+- **Observe: has the problem been reproduced first-hand?** Done. QA reproduced it on the dry-run build description: damage partway through a dash started shortly after taking a hit (intermittent). Defect report in `02-qa-to-gameplay-engineer.md`.
+- **Diagnose: is the cause understood?** For defects, root cause belongs to `gameplay-engineer` as part of Build (Decision authority), so there is no separate Diagnose stage. The engineer identified a cause (see 03).
+- **Decide: is there a real choice of direction, priority or scope?** No. Nothing conflicts with the vision or with D-001, so the stage is skipped.
+- **Design: is the intended behavior specified well enough to build and verify?** Yes. `design/combat.md` specifies full-duration dash invulnerability with no exception. The one gap surfaced in Verify (criterion 6, tolerance for a one-frame difference at a protection-expiry boundary) was ruled by the Game Designer in step 6 (D-002).
+- **Plan: is the technical approach non-obvious, risky, cross-system or parallelizable?** No. The engineer reports a local fix in the player's shared invulnerability logic. Skipped.
+- **Build:** done. It did not need to reopen, because the final Verify passed.
+- **Verify:** always after Build. Criteria 1–6 all pass (step 7).
+- **Play / Review: skipped.** The Goal is a defect, not about feel, and involves no direction Decision.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | qa | reproduce-defect | done | [01-studio-to-qa.md](01-studio-to-qa.md); result: [02-qa-to-gameplay-engineer.md](02-qa-to-gameplay-engineer.md) |
+| 2 | Design | game-designer | write-design-spec | skipped (intended behavior is defined in `design/combat.md`; the criterion 6 gap is handled in step 6) | — |
+| 3 | Plan | technical-director | technical-plan | skipped (the engineer reports a local fix; see Route changes) | — |
+| 4 | Build | gameplay-engineer | implement-change | done | [02-qa-to-gameplay-engineer.md](02-qa-to-gameplay-engineer.md); result: [03-gameplay-engineer-to-qa.md](03-gameplay-engineer-to-qa.md) |
+| 5 | Verify | qa | verify-change | done (no overall verdict: criteria 1–5 pass, criterion 6 undecided; returned as `question`) | [05-studio-to-qa.md](05-studio-to-qa.md); result: [06-qa-to-studio.md](06-qa-to-studio.md) |
+| 6 | Design (criterion 6 tolerance) | game-designer | write-design-spec | done (ruling: expiry may be late by under one frame, never early; D-002) | [07-studio-to-game-designer.md](07-studio-to-game-designer.md); result: [08-game-designer-to-studio.md](08-game-designer-to-studio.md) |
+| 7 | Verify (final verdict) | qa | verify-change | done (pass, criteria 1–6) | [09-studio-to-qa.md](09-studio-to-qa.md); result: [10-qa-to-studio.md](10-qa-to-studio.md) |
+| 8 | Build | gameplay-engineer | implement-change | skipped (the ruling accepts the edge-timing difference; step 7 passed, so no rework) | — |
+| 9 | Play / Review | playtester / game-director | playtest-session / review-outcome | skipped (defect Goal, no experience target, no direction Decision) | — |
+
+Status: planned | tentative | open | done | skipped. Handoff: the incoming Handoff that starts the
+step. Parallel steps: 2a, 2b. Step numbers need not
+match Handoff seq numbers. The route is a plan; the Route operation revises it.
+
+## Route changes
+
+- After step 1 (Observe): Design dropped (skipped). QA confirmed the expected behavior is specified in `design/combat.md`, and the build contradicts it in one reproduced case. Plan stays tentative, since the cause is not yet known.
+- After step 4 (Build): Plan dropped (skipped). The engineer's condition for Plan (a non-local cause) did not occur: the cause is in the player's shared invulnerability logic and frame rate only shifts the boundary by up to one frame. Verify follows as planned. The Handoff to QA was edited in place: the Sender assessment and the root-cause reasoning were removed (QA policy), the Load list now points at `sim/build-0.4.md`, and the verdict is to be addressed to `studio`.
+- Caveat for the record: the engineer reported that it had no way to run or edit source in its operation and has no test results. The fix is untested. QA should report a blocker if the build under test does not show the changed behavior. A blocker or a failure goes back to `gameplay-engineer`.
+- After the first Verify attempt (04, outcome `question`): no verdict was issued. QA blocked because `sim/build-0.4.md` is a description, not a runnable build. The Studio resolved this from the Project Context: `project.md` defines this as a dry-run sample project with no repository, where builds are simulated under `sim/` and "running the build" means reading the `sim/build-*.md` file, which is the project's `player_visible` artifact. The description is therefore the build under test. This is a process ruling, not a design or verdict ruling. Verify was re-routed to QA (05). No failure was recorded, so the second-failure loop limit is not triggered.
+- After the second Verify attempt (06, outcome `question`): criteria 1–5 pass at 30 and 60 FPS, and the original reproduction no longer shows damage. Criterion 6 is undecided. Return rule "Verify: the expected behavior is undefined" applies, so the route went to Design (`game-designer`, step 6) with that question only. Step 7 (Verify, final verdict) was added after it. Step 8 (Build) was tentative.
+- Escalation check for 06: no trigger fires. A frame-rate tolerance for protection expiry is a rule/tuning question inside `game-designer` authority.
+- After step 6 (Design, 08, outcome `done`): the Game Designer ruled that protection expiry may be late by under one frame at the running frame rate and must never be early, for both boundaries and both enemy types, and recorded D-002. This accepts the edge-timing difference, so the tentative step 8 (Build) is dropped (skipped). Escalation check: no trigger fires. No dash or damage rule changed, the vision and D-001 are untouched, and no direction or scope change is implied.
+- Handoff 09 to QA was composed by the Studio from the criteria and the ruling only. It leaves out the designer's statement of the expected verdict, so that QA verifies from the spec and the build (QA Independence), and it asks for the result to be addressed to `studio`.
+- After step 7 (Verify, 10, outcome `pass`): criteria 1–6 pass at 30 and 60 FPS with no regression. The outcome fits the plan; step 8 stays skipped and no loop limit is involved (criterion 6 was verified once). Escalation check: no trigger fires. Review and Play were never planned (defect Goal, no direction Decision), so the Goal is met and goes to Close. QA's optional wording note (contact at the exact end-time instant) is a minor design clarification and becomes a proposed follow-up, not scope growth.
+
+## Next action
+
+None. The Goal is closed (status `done`). The Owner can read the Outcome below.
+
+## Outcome
+
+（オーナー向け・日本語）
+
+**結果**
+- 「ダッシュ中にダメージを受けることがある」という不具合は修正され、ビルド 0.4 で解消されました。
+- 原因は、被弾直後（入力が戻る約0.3秒後）にダッシュを始めると、被弾後の無敵（0.8秒）とダッシュ中の無敵がうまく噛み合わず、ダッシュの途中で無敵が切れてダメージを受けてしまうことでした。修正後は、ダッシュ開始から終了まで、グラブの接触でもスピッターの弾でもダメージを受けません。
+- QAが基準1〜6のすべてを 30FPS・60FPS の両方で確認し、合格（pass）としました。ダッシュなしの被弾（1ハート、0.3秒の硬直、0.8秒まで無敵）、ダッシュの距離・時間・クールダウン、ダッシュ中に押した攻撃の発動など、他の挙動に退行はありません。
+- ダッシュ・ダメージのルール自体は変えていません。新しいボタンも追加していません（D-001 に抵触なし）。
+
+**行った判断（Decision）**
+- D-002（ゲームデザイナー）：無敵の終了タイミングはフレーム単位でずれることがあります。終了は最大でも1フレーム未満の遅れまで許容し、早く切れることは決して許さない、というルールです。30FPS と 60FPS の差は、この境界の1フレームだけです。
+- オーナー判断が必要な事項はありませんでした。
+
+**オーナーへの注意事項**
+- このプロジェクトはドライラン用のサンプルで、ビルドは `sim/build-0.4.md` の記述として扱われています。そのため確認はこの記述に基づくものです。ビルド記述には「この模擬環境では実行・テストしていない」とあります。実際のリポジトリで実装する際は、実機での再確認をおすすめします。
+
+**次の課題（新規Goalの提案）**
+- 任意：無敵終了時刻ちょうどの接触が保護されるか、という設計文書の文言を明確にする（`design/combat.md` の小さな追記。挙動の変更ではありません）。
+>>>END

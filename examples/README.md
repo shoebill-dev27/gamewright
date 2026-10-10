@@ -11,3 +11,18 @@ of the Project Context layout.
 | `tidepool-garden` | Calm touch puzzle for children 7–10 | G-001 children stall at the first puzzle (in progress: Intake and the first Step/Route were run by fresh executors with no prior context; the Studio added the Art Director in parallel). |
 
 How the dry-runs were produced and what they revealed: `docs/phase1.md`.
+
+## Phase 2: isolated re-runs
+
+`fixtures/` holds frozen Project Context states; `runs/` holds Goals re-run from them by
+`scripts/studio_run.py`, one fresh executor per operation. Each run directory has the produced
+`project/` and a `records/` entry per operation (packet, manifest, raw output, session id).
+
+| Run | What it shows |
+|---|---|
+| `runs/bug-claude` | The bug Goal end to end: QA → Engineer → QA, a Designer ruling on frame tolerance, no Director/Art Director/Playtester. |
+| `runs/combat-claude` | The combat Goal end to end, including an Owner escalation and resume, an engineer spec hand-back, the Art Director joining only when needed, and a blind re-playtest. |
+| `runs/resume-claude` | Owner decision on a frozen escalation → fresh Resume → a fresh Designer consuming the Owner Decision. |
+| `runs/bug-codex` | The same fixture on Codex: Intake output produced, retry stopped by a usage limit. |
+
+Results and findings: `docs/phase2.md`.

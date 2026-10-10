@@ -1,6 +1,7 @@
 ---
 kind: role
 id: technical-director
+writes: decisions/*
 ---
 # Role: Technical Director
 

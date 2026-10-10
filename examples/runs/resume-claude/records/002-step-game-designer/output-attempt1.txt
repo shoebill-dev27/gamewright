@@ -1,0 +1,359 @@
+I've written the Option A spec as a new file, `design/enemy-depth.md`, and the outgoing handoff to `technical-director`. I left `design/combat.md` untouched. The spec says it extends that file and is authoritative for enemies and rooms from the next build.
+
+<<<FILE design/enemy-depth.md
+# Enemy-side combat depth (G-002, Option A) — design spec
+
+Extends `design/combat.md` (build 0.3). From the build that implements this spec, the **Enemies** and
+**Rooms** sections of `combat.md` are replaced by the Grub/Spitter/Charger/Shieldbearer definitions
+and the room table below. Player kit (attack, dash, getting hit) is unchanged.
+
+Authority: D-001 (one attack button plus dash), D-002 (fix monotony through enemy behavior and room
+composition; no new input).
+
+> Terminology: the Charger's attack is called a **rush** in this document, on purpose. Nothing here
+> involves holding, charging or any new player action. Hold-to-charge is out of scope (D-002).
+
+## 1. Experience intent
+
+Across the 5 rooms the player must keep making different decisions: where to stand, when to dash,
+and which enemy to deal with first. Corner-and-swipe must stop being a universal answer. Every
+threat is shown before it can hurt (pillar 3), and the answer to every threat uses only attack and
+dash (pillar 1).
+
+## 2. Global rules
+
+### 2.1 Time and frame rate
+
+- All durations, speeds and cooldowns are in **seconds** and **tiles per second**, advanced by
+  elapsed time, never by frame count.
+- At 30 and 60 FPS the same inputs at the same times must give the same outcome, within a tolerance
+  of one 30 FPS frame (about 0.033 s).
+- Any fast movement (the rush, projectiles) must not skip over the player between frames. Contact is
+  checked along the path travelled in the frame, not only at the end position.
+
+### 2.2 Telegraph rules (apply to every damaging enemy action except Grub contact)
+
+- **T1** Every enemy action that can damage the player has a **telegraph phase** (visible wind-up),
+  then an **active phase** (can damage), then a **recovery phase**. Damage only occurs in the active
+  phase.
+- **T2** At the start of the telegraph a **danger marker** appears on the floor, covering the area
+  the active phase will harm (to within a quarter tile), and the enemy visibly changes to a
+  wind-up pose or tint. Both use the saturated orange/red threat language (art direction).
+- **T3** Telegraph durations are never shorter than 0.5 s. Values are in the enemy tables.
+- **T4** Direction and area are **locked** when the telegraph starts. They do not track the player
+  afterwards. This is what makes the threat dodgeable and readable.
+- **T5** The marker disappears when the active phase ends. If the enemy dies, the whole action is
+  cancelled at once, marker included.
+- **T6** Player attacks do not interrupt or stagger a telegraphing enemy (only death cancels).
+  No new stagger system is introduced.
+- **T7** No enemy begins a telegraph within **1.0 s** of the room starting, so the player can
+  orient first.
+- **T8** Damage reuses the existing getting-hit rule (`combat.md`): 1 heart, 0.3 s hit-stun, then
+  invulnerability until 0.8 s after the hit. No new damage values or rules exist. If several active
+  phases reach the player together, only one heart is lost, because of that invulnerability.
+
+### 2.3 Dash interaction (reuses the existing dash rule)
+
+- The player is invulnerable for the full 0.25 s dash. An active phase that overlaps the player
+  during the dash does nothing to the player and is **not** used up: it keeps going. If it still
+  overlaps the player on the first moment they are vulnerable again, the normal hit rule applies.
+- Dash cooldown is 0.6 s. Every telegraph that is meant to be answered by dash lasts at least 0.6 s
+  (Spitter 0.6, Charger 0.7, Shieldbearer bash 0.7), so a player who dashed just before a telegraph
+  started has the dash ready by the time the active phase begins.
+- The dash-related defect in `sim/build-0.3.md` (damage partway through a dash right after being
+  hit) belongs to G-001. This spec assumes the dash rule in `combat.md` holds as written.
+
+## 3. Enemies
+
+### 3.1 Grub (unchanged)
+
+HP 2. Walks straight at the player; bites on contact for 1 damage. No telegraph: its approach is
+the visible threat. Reuses the existing contact rule. Its role is pressure that forces decisions
+about the other enemies.
+
+### 3.2 Spitter (telegraph added)
+
+HP 2. Stationary. One shot cycle every **2.0 s**, measured from one telegraph start to the next.
+
+| Phase | Duration | What the player sees |
+|---|---|---|
+| Telegraph | 0.6 s | Muzzle glows orange/red; a thin aim line from the Spitter to the first wall or the player, locked at telegraph start |
+| Active | on release | Existing slow projectile along the locked line, 1 damage on hit |
+| Idle | rest of the 2.0 s cycle | Normal look |
+
+- Projectile speed, size and damage are as in build 0.3.
+- Projectiles pass over other enemies and do not hurt them (assumed to match build 0.3; see the
+  handoff's open points for the Technical Director).
+
+### 3.3 Charger (new)
+
+HP 3. Its job is to make the player leave the corner, or dash.
+
+| Parameter | Value |
+|---|---|
+| Approach speed | 1.5 tiles/s (walks toward the player; no damage while walking) |
+| Starts telegraph when | player is within 6 tiles and the Charger has not rushed in the last 1.5 s |
+| Telegraph | 0.7 s, rush lane locked at the start |
+| Rush lane | 1.5 tiles wide, up to 8 tiles long, straight from the Charger in the locked direction |
+| Rush speed | 8 tiles/s |
+| Rush damage | 1 (existing hit rule), only while rushing |
+| Recovery after hitting a wall or another enemy | 1.2 s |
+| Recovery after hitting the player, or after the full 8 tiles | 0.6 s |
+
+Rules:
+
+- **Telegraph:** the Charger stops, lowers its head and glows; the whole rush lane is drawn as an
+  orange/red marker on the floor (T2, T4).
+- **Rush:** moves along the lane at constant speed. It ends at the first of: a wall, another enemy
+  (treated like a wall), the player (after dealing damage), or 8 tiles travelled.
+- **Recovery:** the Charger stands still, visibly dazed, and cannot damage. This is the player's
+  opening: with HP 3 and the 0.35 s attack recovery, a 1.2 s recovery is enough for a three-swipe
+  kill if the player starts at once.
+- A rush that misses the player into open floor leaves a shorter 0.6 s opening, so punishing it is
+  possible but tighter.
+- After recovery the Charger returns to approaching.
+- **Answers using only walk, attack and dash:** (a) leave the lane before the rush starts; (b)
+  dash so that the dash covers the moment the Charger reaches the player (the invulnerable window
+  is 0.25 s); (c) punish the recovery. Standing in a corner with the lane pointing at you leaves
+  (b) as the main answer.
+
+### 3.4 Shieldbearer (new)
+
+HP 3. Its job is to make "face it and swipe" fail, and to reward getting around it or baiting it.
+
+| Parameter | Value |
+|---|---|
+| Walk speed | 1.0 tile/s toward the player |
+| Turn rate (when not telegraphing or recovering) | 90°/s toward the player |
+| Guard arc | 120° total (±60° from its facing), measured from the Shieldbearer to the attacking player |
+| Bash starts telegraph when | player is within 1.5 tiles and inside the guard arc, and 1.0 s have passed since the last bash recovery |
+| Bash telegraph | 0.7 s, facing and zone locked |
+| Bash zone | front arc of 120°, 1.5 tiles long |
+| Bash active | 0.15 s, 1 damage (existing hit rule) |
+| Bash recovery | 1.0 s with the **guard down** |
+
+Rules:
+
+- **Guarded:** a player attack that lands from inside the guard arc deals **0** damage and gives
+  distinct feedback (a visible spark on the shield). It does not push anyone back and does not
+  stagger.
+- **Unguarded:** a player attack that lands from outside the arc (sides or back) deals normal damage.
+  During bash telegraph, active and recovery phases the Shieldbearer does not turn, and during
+  bash recovery the **guard is down**, so front attacks also deal damage. The guard-down state must
+  be visibly different (shield lowered, orange/red tint on the body).
+- **Getting past the guard, using only attack and dash:**
+  1. **Flank:** dash to its side or behind it, then swipe before it turns. At 90°/s, a player
+     directly behind needs 120° of turning (about 1.3 s) before it can guard again, which allows a
+     full three-swipe kill if the swipes begin at once. A player at its side has a shorter window.
+  2. **Bait:** stand inside the arc until the bash telegraph starts, dash out of the zone (or
+     through the active moment), then swipe the front during guard-down recovery.
+- Grubs, Spitter projectiles and the Charger's rush are not affected by the shield.
+- Shield and bash use only the existing hit and invulnerability rules.
+
+## 4. Rooms
+
+All enemies are present at room start. T7 applies. A room ends when all enemies are defeated
+(unchanged). Room sizes and layouts are as in build 0.3. Compositions only; no layout work is
+requested here.
+
+| Room | Enemies | The question the room asks | Why it differs |
+|---|---|---|---|
+| 1 | 1 Charger, 2 Grubs | When do I dash or leave the lane? | Introduces telegraph and rush. A single Charger, with Grubs forcing the player out of a corner |
+| 2 | 1 Shieldbearer, 2 Grubs | How do I get around the guard while Grubs press me? | Introduces guard. Which to handle first (Grubs or the shield) |
+| 3 | 2 Spitters, 1 Charger | Where do I stand so two aim lines and one rush lane do not overlap me? | Positioning among several locked lanes; first room where lanes cross |
+| 4 | 2 Shieldbearers, 1 Spitter, 1 Grub | Which target first, and how do I use the bash recovery? | Two guards, so flank and bait must be chosen per target. The Spitter keeps fire coming while you work |
+| 5 | 1 Charger, 1 Shieldbearer, 1 Spitter, 2 Grubs (5 total) | Everything together: priority, position, dash timing | Final exam: uses every enemy; no single answer covers it |
+
+Room size stays within the existing 3–6 enemies. Total enemy HP is higher than in build 0.3, so
+run length needs checking (see acceptance criteria).
+
+## 5. Edge cases
+
+| Case | Rule |
+|---|---|
+| Player kills an enemy mid-telegraph | Action and marker cancelled immediately (T5) |
+| Player is hit-stunned (0.3 s) or hit-invulnerable when an active phase arrives | Normal hit rules apply; telegraph and active phase are unchanged and the marker is still shown |
+| Charger rush overlaps the player during a dash | No damage, rush continues; if still overlapping when the dash ends, normal hit applies (2.3) |
+| Charger rushes into a Grub or Shieldbearer | Treated like a wall: rush ends, 1.2 s recovery. No damage to the other enemy |
+| Two attack active phases hit together | One heart lost (T8) |
+| Player attack queued during a dash lands on a Shieldbearer's guard | Same rules as any attack; arc decided at the moment of impact |
+| Player attacks a Shieldbearer exactly at an arc edge | The 120° arc is inclusive of its boundary on the guarded side; ties resolve in favour of guarded |
+| Charger spawns with the player already within 6 tiles | T7 still applies: no telegraph for 1.0 s |
+| Shieldbearer cannot turn because it is in telegraph or recovery | Facing locked, as specified |
+| Frame rate 30 vs 60 | Section 2.1 |
+| Player holds the attack button | Nothing new happens (D-001, D-002) |
+
+## 6. Acceptance criteria
+
+### 6.1 Verification checks (QA, observable)
+
+- **V1** In every room, before any enemy attack other than Grub contact can hurt the player, an
+  orange/red marker was visible for at least 0.5 s. Checked at both 30 and 60 FPS.
+- **V2** The marker's shape matches the area that actually hurts: standing outside it when the
+  action resolves causes no damage; standing inside it, without being invulnerable, causes exactly 1
+  heart.
+- **V3** A dash that covers the moment the action reaches the player avoids all damage; a dash that
+  ends before, or starts after, does not. The same timing gives the same result at 30 and 60 FPS
+  (within one 30 FPS frame).
+- **V4** The Charger's lane stays where it was when the telegraph began, even if the player moves;
+  the Charger stops at a wall and is then visibly dazed and harmless; the player can attack it
+  freely during that time.
+- **V5** Swiping a Shieldbearer from the front deals no damage and shows distinct feedback; swiping
+  from the side or back damages it; swiping the front during bash recovery damages it.
+- **V6** A tester using only walk, attack and dash can defeat a Shieldbearer by flanking, and
+  separately by baiting its bash.
+- **V7** Killing an enemy during its telegraph removes its marker and no damage follows.
+- **V8** Each room contains exactly the enemies in the room table, and no enemy telegraphs in the
+  first second of a room.
+- **V9** No new button does anything; holding attack changes nothing.
+- **V10** Two simultaneous hits cost one heart, not two.
+
+### 6.2 Experience signals (playtest and Review; keep away from the Playtester's handoff)
+
+- A player who just holds a corner and swipes can no longer clear rooms 1–5 without clearly
+  losing hearts. The old tactic stops working as a general answer.
+- The dash is used in combat in every room, on purpose, to avoid or get past something, not just to
+  cross the room.
+- Without being told, a player can say how each enemy type must be fought differently (Grub:
+  kill before contact; Spitter: avoid lanes; Charger: leave the lane or dash; Shieldbearer: get
+  around or bait).
+- Players describe the five rooms as asking different things (for example "room 2 was about the
+  shield, room 3 was about where to stand"), and attention does not drop in rooms 4–5.
+- When a player is hit, they can say what they should have seen or done; no hit feels unseen
+  (pillar 3).
+- A full run still lands within the 15–20 minute target (pillar 2).
+- The "want a heavy hit" remark is not addressed here; if it recurs after this build, that is
+  evidence for the D-002 revisit conditions.
+
+## 7. Open questions and follow-ups
+
+For `art-director` (visual spec requested; this spec does not decide them):
+
+1. Danger marker look: shape language, fill versus outline, pulse or fill-up to show time left,
+   exact orange/red values, and readability on the lantern-lit cave floor. Needs one language for
+   Spitter aim line, Charger lane and Shieldbearer bash arc.
+2. Enemy wind-up poses and tints for Spitter, Charger and Shieldbearer bash.
+3. Shieldbearer's guard presentation: how the front reads at a glance, the blocked-hit spark, and
+   the guard-down state.
+4. Charger's dazed recovery pose.
+5. Whether marker readability needs a non-colour cue (for example shape or pulse) in addition to
+   orange/red.
+
+For `technical-director` (checks or assumptions, not decided here): see the outgoing handoff.
+
+No conflict with D-001 or pillar 3 was found.
+
+## 8. Changed documents
+
+- Added: `design/enemy-depth.md` (this file).
+- `design/combat.md` left as is; this file supersedes its Enemies and Rooms sections from the build
+  that implements it.
+>>>END
+
+<<<FILE goals/G-002-combat-monotony/06-game-designer-to-technical-director.md
+---
+kind: handoff
+goal: G-002
+seq: 6
+from: game-designer
+to: technical-director
+stage: Plan
+outcome: done
+---
+# 06: game-designer → technical-director — plan the build of Option A enemy-side combat depth
+
+## Task
+
+Make a technical plan for building the spec in `design/enemy-depth.md`: telegraphed attacks, the
+Charger, the Shieldbearer, and new compositions for the 5 existing rooms. Split the work into
+buildable, verifiable parts and call out risks.
+
+## Context
+
+Goal G-002: the Owner said 「戦闘が単調なので改善したい」. The playtest (01–02) found monotony. The
+diagnosis (03) offered options. The Owner chose Option A on 2026-10-10 (D-002): fix it through enemy
+behavior and room composition, keep one-button combat. This handoff delivers the design spec.
+
+## Findings
+
+- The spec is in **`design/enemy-depth.md`** (new file). `design/combat.md` is unchanged; the spec
+  says it supersedes combat.md's Enemies and Rooms sections from the implementing build.
+- Summary of the spec:
+  - **Telegraph rules (section 2.2):** every damaging enemy action except Grub contact has telegraph
+    → active → recovery phases. A floor danger marker in orange/red appears for at least 0.5 s,
+    direction/area locked at telegraph start, no damage before the active phase, no stagger, death
+    cancels everything.
+  - **Dash (section 2.3):** reuses the existing full-duration dash invulnerability; an active phase
+    that overlaps a dashing player is not used up, so it can still hurt if it overlaps when the dash
+    ends. Telegraphs that expect a dash are at least as long as the 0.6 s dash cooldown.
+  - **Spitter:** telegraph 0.6 s, cycle 2.0 s, locked aim line. **Grub:** unchanged.
+  - **Charger:** HP 3; telegraph 0.7 s with a 1.5-tile-wide, up-to-8-tile lane; rush 8 tiles/s;
+    recovery 1.2 s after a wall or enemy, 0.6 s after a player hit or a full-length miss.
+  - **Shieldbearer:** HP 3; 120° guard arc, front hits deal 0 with feedback; 90°/s turn rate; bash
+    with 0.7 s telegraph, then 1.0 s guard-down recovery. Player gets past it by flanking after a
+    dash, or by baiting the bash.
+  - **Rooms:** R1 Charger + 2 Grubs; R2 Shieldbearer + 2 Grubs; R3 2 Spitters + Charger; R4 2
+    Shieldbearers + Spitter + Grub; R5 Charger + Shieldbearer + Spitter + 2 Grubs.
+  - **Acceptance criteria** are in section 6 (V1–V10 for QA, experience signals separately).
+- All timings are in seconds and tiles per second. At 30 and 60 FPS outcomes must match within one
+  30 FPS frame; fast movement needs path-based contact checks, not end-position checks.
+- Art follow-ups for `art-director` are listed in spec section 7 (marker look, wind-up poses, guard
+  presentation, dazed pose, non-colour cue). They are not decided in this spec.
+
+## Decisions already made
+
+- D-001: one attack button plus dash, unchanged.
+- D-002: enemy behavior and room composition only; no heavy attack, no new input, **no
+  hold-to-charge** in this Goal. (The spec calls the Charger's attack a "rush" to avoid confusion.)
+
+## Constraints
+
+- No new input buttons. Holding attack must do nothing new.
+- Must play correctly at 30 and 60 FPS.
+- Small team: reuse existing systems (hit, invulnerability, dash, contact rules, enemy controller).
+- Stay inside the 5-room cave slice. No layout, biome, meta-progression or run-length changes.
+- Pillar 3: every threat is visible before it can hurt.
+
+## Open questions
+
+For the Technical Director to confirm or answer in the plan. None of them changes the design
+direction; if one does, hand back with a question.
+
+1. Does the current dash pass through enemies, or stop against them? The spec's flank and bait
+   routes should work with sideways dashes, but a dash through the Shieldbearer's space would be
+   an additional route. Please report the actual behavior.
+2. Player walk speed is not in `combat.md`. The spec assumes the player is clearly faster than the
+   Shieldbearer (1.0 tile/s) and the Charger's approach (1.5 tiles/s). Please confirm or report the
+   value.
+3. Enemy-versus-enemy collision: the spec assumes a Charger's rush stops at any enemy as at a
+   wall, and that Spitter projectiles pass over enemies without hurting them. Please confirm
+   whether this matches existing behavior; if not, say what is cheapest.
+4. Cost and approach for generalising telegraph → active → recovery across enemies, and for the
+   "hit check along the path" requirement at 30 FPS.
+5. Whether total enemy HP in rooms 4–5 risks the 15–20 minute run target; flag if a measurement is
+   needed in the verification plan.
+6. The dash defect in G-001 should be fixed or confirmed fixed before V3 can be verified reliably;
+   please order the work accordingly.
+
+## Expected output
+
+A technical plan (Skill `technical-plan`): approach, work breakdown, order, risks, and how each
+spec check V1–V10 will be verified, including at 30 and 60 FPS. It goes next to implementation. It
+also lists art-director's visual spec (spec section 7) as a dependency or parallel task.
+
+## Sender assessment
+
+Confidence is good on intent and parameters, medium on tuning: numbers such as the 1.2 s Charger
+recovery, the 90°/s turn rate and total enemy HP in room 5 are first estimates and should be
+expected to need a tuning pass after the first playable build. The spec keeps all numbers in its
+parameter tables so tuning does not require changing criteria. No D-001 or pillar 3 conflict found.
+Not written: a new Decision (no significant choice beyond D-002 was needed).
+
+## Load
+
+- Role: studio/roles/technical-director.md
+- Skills: studio/skills/technical-plan.md
+- Project: project.md#constraints, design/combat.md, design/enemy-depth.md, sim/build-0.3.md
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-002-enemy-side-depth-one-button.md
+- Previous handoff: goals/G-002-combat-monotony/05-studio-to-game-designer.md
+>>>END

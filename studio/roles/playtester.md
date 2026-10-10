@@ -1,6 +1,9 @@
 ---
 kind: role
 id: playtester
+receives_from: studio
+load_only: studio/roles/playtester.md, studio/skills/playtest-session.md, project.md#player-profile, @player_visible
+strip_sections: Sender assessment
 ---
 # Role: Playtester
 
