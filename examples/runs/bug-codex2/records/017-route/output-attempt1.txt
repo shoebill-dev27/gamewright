@@ -1,0 +1,196 @@
+<<<FILE goals/G-001-dash-damage/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-10
+---
+# G-001: ダッシュ中の被ダメージ不具合を修正する
+
+## Owner request
+
+> ダッシュ中なのにダメージを受けることがある。再現できるので直してほしい。
+
+## Interpretation
+
+報告された被ダメージを再現し、仕様に反する挙動を修正して、ダッシュ時のダメージ判定が既存の仕様どおりに動くことを独立した検証で確認する。
+
+戦闘の方向性変更、新しい入力の追加、無関係なバランス調整は対象外。
+
+## Unknowns
+
+- Observe: QA は仕様不一致を資料上で確認し、AC-1〜AC-6 を作成した。Owner の詳細条件を独立試行で再現したわけではない。追加 Observe は現時点では不要。
+- Diagnose / Plan: technical-director が原因を診断し、D-003 に基づく修正計画を作成済み。
+- Decide: 既存仕様への修正であり、ゲームの方向選択は不要。
+- Design: 期待挙動は既存仕様と QA の受け入れ条件を用いる。入力不能中の予約、完全同時イベントの優先順位、クールダウン起点の新仕様は定めない。
+- Build: `15-gameplay-engineer-to-studio.md` に模擬実装変更を定義済み。project.md の dry-run 規約ではこの記述が実装となる。simulator によるビルド・観察資料の生成は未確認。
+- Verify: 必須。対応する更新ビルドと観察資料が揃ってから、QA が AC-1〜AC-6 と回帰を PC・30 / 60 FPS・キーボード / ゲームパッドの全4組合せで独立検証する。
+- Play: 体験や感触の改善依頼ではないため省略。
+- Review: 体験 Goal やゲームの方向 Decision を伴わないため省略。
+- Next: 独立検証後に Studio が結果と残件をまとめる。
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | qa | reproduce-defect | done | 01-studio-to-qa.md |
+| 1b | Observe | qa | reproduce-defect | done | 03-studio-to-qa.md |
+| 1c | Observe | qa | reproduce-defect | done | 05-studio-to-qa.md |
+| 1d | Observe | qa | reproduce-defect | done | 07-studio-to-qa.md |
+| 1e | Observe | qa | reproduce-defect | done | 10-studio-to-qa.md |
+| 2 | Diagnose / Plan | technical-director | technical-plan | done | 12-studio-to-technical-director.md |
+| 3 | Decide | game-director | make-decision, prepare-owner-escalation | skipped | — |
+| 4 | Design | game-designer | write-design-spec | skipped | — |
+| 5 | Plan | technical-director | technical-plan | skipped | — |
+| 6 | Build | gameplay-engineer | implement-change | done | 14-studio-to-gameplay-engineer.md |
+| 7 | Verify | qa | verify-change | open | 16-studio-to-qa.md |
+| 8 | Play | playtester | playtest-session | skipped | — |
+| 9 | Review | game-director | review-outcome | skipped | — |
+| 10 | Next | studio | — | planned | — |
+
+Observe の done は各入力確認作業の終了を表し、独立再現の成功を意味しない。1d の結果は `08-qa-to-studio.md`、1e は `11-qa-to-studio.md`。行 2 の結果は `13-technical-director-to-studio.md`。行 5 は行 2 に統合した。行 6 の結果は `15-gameplay-engineer-to-studio.md`（done）。Build の done は模擬変更記述の完了であり、更新資料の生成確認や QA 合格ではない。行 7 は資料準備条件付きで open とする。
+
+## Route changes
+
+2026-10-10 — `02-qa-to-studio.md`（question）を受領し、1 を done とした。再現条件不足により追加 Observe を設けた。期待挙動の仕様不足ではないという QA の報告を受け、Design を skipped とした。
+
+2026-10-10 — `04-qa-to-studio.md`（question）を受領し、1b を done とした。補足資料が未提供のため、資料受領を開始条件とする 1c を設けた。
+
+2026-10-10 — `06-qa-to-studio.md`（question）を受領し、1c を done とした。資料受領を開始条件とする 1d を設け、実行環境側の補完を待つ方針とした。当時は Owner escalation を行わなかった。
+
+2026-10-10 — `08-qa-to-studio.md`（question）を受領し、1d を done とした。同じ不足入力について新資料なしで question が二回以上返ったため loop limits を適用し、`09-studio-to-owner.md` で Owner に必要入力を求め、blocked-on-owner とした。
+
+2026-10-10 — Owner が Option A を選び、新しい観察を提供した。D-002 に記録し、09 を resolved、Goal を active とした。Observe 1e を追加した。体感による時刻や頻度を計測値とは扱わない。
+
+2026-10-10 — `11-qa-to-studio.md`（done）を受領し、1e を done とした。QA は不具合報告と AC-1〜AC-6 を作成し、追加の Owner 計測を必須とせず技術調査へ進めると報告した。Diagnose / Plan を行 2 に統合した。
+
+2026-10-10 — `13-technical-director-to-studio.md`（done）を受領し、行 2 を done、行 6 を open とした。D-003 の方式と実装順序を担当の判断として引き継いだ。視覚変更は計画にないため art-director は追加しなかった。
+
+2026-10-10 — `15-gameplay-engineer-to-studio.md`（done）を受領し、行 6 を done とした。予定どおり独立 Verify に進めるが、simulator が生成する更新ビルドと観察資料は本 packet に存在せず、生成済みとは扱わない。`sim/build-0.4.md` は一覧にあるだけで、今回の変更との対応を確認できないため代替にしない。
+
+QA の Works from / Independence に従い、Studio が `16-studio-to-qa.md` を新規作成した。15 の Sender assessment は原本にそのまま保持し、15 全文、実装資料、原因説明、技術計画を QA の Load から除外する。受け入れ条件と観察可能な試行要件のみを引き継ぐ。
+
+契約全文、Skill、設計、QA 報告、Decision、更新ビルドと観察資料の本文は本 Route packet にない。確認済みとは扱わず、次の packet の準備要件とする。runtime による資料生成は既存の dry-run 手順内であり、現時点で Owner にしか提供できない入力と判明したものはない。新しい escalation は行わない。
+
+## Next action
+
+実行環境は `15-gameplay-engineer-to-studio.md` の模擬変更を simulator に反映し、`sim/build-0.3-G001-15.md` と `sim/qa-G001-15.md` を生成する。生成不能な項目は不足として記録し、期待結果を観察結果へ転記しない。
+
+その後、`16-studio-to-qa.md` の Load を揃え、新しい executor で QA を開始する。QA に15全文や実装者の自己評価を渡さない。資料不足なら検証合格や挙動不合格とせず、具体的な不足を Studio に返す。本 Route は資料生成も検証も実施していない。
+
+## Outcome
+
+未完了。仕様不一致の資料上の確認、受け入れ条件、技術計画、模擬修正の記述が完了した。D-002 に基づき継続し、D-003 の方式を採用した。更新ビルド・観察資料の生成確認と独立 QA は未完了。現時点で Owner に新たな判断を求める事項はない。
+>>>END
+
+<<<FILE goals/G-001-dash-damage/16-studio-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 16
+from: studio
+to: qa
+stage: Verify
+outcome: routed
+---
+# 16: studio → qa — ダッシュ時の被害判定を独立検証する
+
+## Task
+
+仕様、既存の AC-1〜AC-6、対象ビルドと模擬観察資料から独立 Verify を行い、結果を Studio に返す。最初に資料の存在とビルド対応を確認し、不足を期待結果で補わない。
+
+## Context
+
+Owner の依頼は「ダッシュ中なのにダメージを受けることがある。再現できるので直してほしい。」である。既存仕様への修正を扱い、戦闘の方向変更やバランス調整は対象外。
+
+本プロジェクトは dry-run で、実行とは模擬ビルドと試行資料を読むことを意味する。実機計測や実コードのテストとして報告しない。
+
+## Findings
+
+### 入力準備状況
+
+対象識別子は `0.3-G001-15`。次の二資料は生成予定先であり、Studio は本 Route で存在・内容・対応を確認していない。
+
+- `sim/build-0.3-G001-15.md`: 読み方と観察可能な挙動を記した模擬ビルド。
+- `sim/qa-G001-15.md`: 設定、実際に生成された模擬イベントとハート変化、無効試行、未確認項目を分けた観察資料。
+
+runtime が両資料を用意してから検証を開始する。旧ビルドや識別子の異なる資料を、対応の根拠なしに修正後の証拠へ置き換えない。実装の説明や「直った」という宣言は検証証拠にしない。
+
+### 検証範囲
+
+正式な受け入れ条件は `11-qa-to-studio.md` と `design/combat.md` を参照する。以下は引き継がれた試行要件の要約であり、原文を変更しない。矛盾や未定義の期待挙動は Studio に返す。
+
+全項目を PC の30 FPS・キーボード、30 FPS・ゲームパッド、60 FPS・キーボード、60 FPS・ゲームパッドで確認する。
+
+| 条件 | 確認対象 |
+|---|---|
+| AC-1 | 先行被弾なしのダッシュ前半・後半で、成立した接触／弾命中によるハート減少がない |
+| AC-2 | 通常被弾後、0.3秒の入力不能終了を観察してから開始したダッシュ中に追加被害がない |
+| AC-3 | 先行被弾から0.8秒が経過した後も、継続中のダッシュで追加被害がない |
+| AC-4 | ダッシュ終了後も、先行被弾から0.8秒まで追加被害がない |
+| AC-5 | 保護のない通常被弾で1ハート減少、0.3秒入力不能と回復、0.8秒の被弾後保護が維持される |
+| AC-6 | ダッシュ4タイル・0.25秒、既存起点から0.6秒のクールダウン、ダッシュ中の攻撃予約と終了時の一度の発動が維持される |
+
+AC-1〜AC-4 は Grub 接触と Spitter 弾命中を独立に確認する。AC-1 の前半・後半も別試行とする。
+
+追加回帰は全4環境・両命中源で確認する。
+
+- 被弾後の保護がダッシュより先に終了する場合と、ダッシュが先に終了する場合の双方で、両方の保護終了後に通常被害が成立する。
+- 保護中の異なるフレームで少なくとも2回の成立した命中を受けても、保護が延長されない。
+- 先行被弾なしのダッシュ中に複数命中を防いだ後、ダッシュ終了後に通常被害が成立する。
+- 防いだ命中により新しい入力不能が発生しない。
+
+### 観察資料の必要条件
+
+各試行には、ビルド識別子、環境、初期ハート、配置、敵と弾の条件、入力・命中・ハート変化・ダッシュ開始終了の実際の時刻が必要。予定時刻と実際の模擬イベントは分離する。
+
+接触／弾命中の成立が記録されていない通過を保護成功に数えない。AC-3 は「被弾後0.8秒の終了 < 命中 < ダッシュ終了」、AC-4 は「ダッシュ終了 < 命中 < 被弾後0.8秒の終了」の実際の前後関係を確認する。
+
+フレーム番号、delta time、同一フレーム内のイベント順序、論理時間と観察フレームを照合する。30 FPS の0.25秒について独自の許容誤差を設けない。同時境界、命中不成立、予定外の先行被弾、必要な前後関係を満たさない試行は該当条件の証拠に数えない。
+
+AC-6 は既存クールダウン起点の根拠を必要とする。起点をダッシュ開始または終了と仮定しない。起点を確認できない場合は当該項目を未確認とする。
+
+有効・無効・未実施を分離し、条件別の試行数と被害発生数を記録する。生成不能な配置や観察があれば、その不足を具体的に示す。
+
+## Decisions already made
+
+- D-001: 攻撃・ダッシュ・ポーズ以外の入力を追加しない。
+- D-002: Owner の補足観察を受けて修正を継続する。追加の Owner 計測を開始条件にしない。
+- 保護中に防いだ命中は保護期間を延長しない。検証にはこの挙動上の条件を用い、技術方式の説明は不要。
+
+## Constraints
+
+仕様、受け入れ条件、ビルドと観察資料から判断する。実装者の自己評価、原因説明、実装理由を受け取らない。
+
+新しい executor を用いる。実装資料、技術計画、Build Handoff 全文は Load に含めない。既存 QA 報告についても Sender assessment を packet から除外する。
+
+入力不能中の予約入力、完全同時イベントの優先順位、クールダウン起点を新たに定義しない。資料不足を挙動の fail と混同しない。
+
+## Open questions
+
+- 対象ビルドと観察資料が生成され、同一変更に対応しているか。
+- 全 AC・環境・必要命中源について有効な模擬観察があるか。
+- 既存クールダウン起点を確認できるか。
+- 仕様と観察が一致するか。未定義の期待挙動が検証を阻んでいないか。
+
+## Expected output
+
+Studio 宛ての Handoff に、対象識別子、使用資料、条件別 pass / fail / 未確認、試行数、有効性、証拠の位置、回帰結果と制約を記載する。
+
+挙動不一致には再現条件、期待と観察、該当 AC を付す。必須資料が不足して検証できなければ outcome: question とし、必要資料と阻まれた条件を明示する。未確認を残したまま総合 pass としない。最終的なルーティングは Studio が行う。
+
+## Load
+
+以下は次の実行 packet の準備要件。本文未提供の資料を読んだとは扱わない。
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: project.md#constraints
+- Project: design/combat.md
+- Project: goals/G-001-dash-damage/11-qa-to-studio.md — 不具合報告・受け入れ条件のみ。Sender assessment は除外
+- Project: sim/build-0.3-G001-15.md — runtime による生成と識別子確認が必要
+- Project: sim/qa-G001-15.md — 期待・観察を分離し、実装理由・自己評価を除外
+- Decisions: none — 本 Step に必要な挙動上の制約は上記に記載
+- Previous handoff: none — 独立性のため Build Handoff を渡さず、本 Studio Handoff に必要入力を再構成した
+>>>END

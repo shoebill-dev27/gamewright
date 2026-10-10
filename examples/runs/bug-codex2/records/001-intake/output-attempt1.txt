@@ -1,0 +1,86 @@
+<<<FILE goals/G-001-dash-damage/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-10
+---
+# G-001: ダッシュ中の被ダメージ不具合の修正
+
+## Owner request
+
+> ダッシュ中なのにダメージを受けることがある。再現できるので直してほしい。
+
+## Interpretation
+
+報告された状況を再現し、ダッシュ中の被ダメージが承認済みのダメージ・無敵ルールに従う状態に修正する。修正後は QA が再現条件と受け入れ基準に基づいて独立に検証する。
+
+ダッシュの全時間が無敵であるとは、現時点では断定しない。戦闘方針の変更、新しい入力の追加、無関係な戦闘調整は対象外。
+
+## Unknowns
+
+- **Observe:** Owner は再現可能と報告しているが、再現手順と独立した観測結果は未提供。QA による再現確認が必要。
+- **Diagnose:** 原因は不明。独立した技術診断が必要か、通常の修正作業内で解決できるかは再現結果から判断する。
+- **Decide:** 現時点で方向性の選択は求められていない。ただし、仕様・Decision 本文との整合性確認は未完了。
+- **Design:** `design/combat.md` にダメージ・無敵ルールがあることは分かるが、本文が未提供のため、期待動作が十分に定義済みか判断できない。
+- **Plan:** 技術的な難易度と影響範囲は不明。再現・仕様確認後に必要性を判断する。
+- **Build:** Owner は修正を求めている。仕様に反する挙動を確認できた場合に実施する。
+- **Verify:** Build を実施した場合は必須。30 FPS・60 FPS、キーボード・ゲームパッドの制約を踏まえる。
+- **Play:** skipped。現在の依頼は具体的な不具合修正であり、体験評価を求めていない。
+- **Review:** skipped。現在は体験 Goal でも方向性 Decision を伴う Goal でもない。方向性の判断が発生した場合は再検討する。
+- **Next:** 最後に結果と残課題を Owner に報告する。
+
+### Intake の不足入力
+
+このパケットには、Goal が直接関係する `design/combat.md` と `decisions/D-001-one-button-combat.md` の本文がない。Project Context の要約とファイル名だけでは、ダッシュの期待動作や既存 Decision との整合性を確認できない。
+
+また、初回 QA Handoff の Load に含める再現用ビルド `sim/build-0.3.md` の本文も未提供。Studio が受信者の入力を確認するため、これらを含むパケットで Intake を再開する必要がある。パケット外の内容は推測しない。
+
+これは入力不足による停止であり、Owner に新しいゲーム内容の判断を求めるエスカレーションではない。
+
+## Route
+
+以下は入力補完前の暫定ルート。初回 Handoff は未発行であり、open の Step はない。
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | qa | reproduce-defect | planned | — |
+| 2 | Diagnose | technical-director | technical-plan | tentative | — |
+| 3 | Decide | game-director | make-decision, prepare-owner-escalation | tentative | — |
+| 4 | Design | game-designer | write-design-spec | tentative | — |
+| 5 | Plan | technical-director | technical-plan | tentative | — |
+| 6 | Build | gameplay-engineer | implement-change | tentative | — |
+| 7 | Verify | qa | verify-change | tentative | — |
+| 8 | Play | playtester | playtest-session | skipped | — |
+| 9 | Review | game-director | review-outcome | skipped | — |
+| 10 | Next | studio | — | planned | — |
+
+条件と順序：
+
+- Diagnose は、再現結果から独立した技術調査が必要と分かった場合のみ。
+- Decide は、仕様確認や診断で方向性・優先順位・範囲の選択が必要になった場合のみ。Owner 判断事項ならエスカレーションする。
+- Design は、既存仕様だけでは期待動作や受け入れ基準を確定できない場合のみ。
+- Plan は、修正が非自明、危険、または複数システムに及ぶ場合のみ。
+- Build は、修正すべき不具合と受け入れ基準が確定した場合に planned とする。
+- Verify は、Build を確定した時点で必ず planned とする。
+- 並列作業は予定しない。各条件を確認する Route 操作で不要な段階を skipped にする。
+
+## Route changes
+
+初回 Intake：関連仕様・Decision・再現用ビルドの本文がパケットにないため、入力確認の段階で停止。Role の作業は開始していない。
+
+## Next action
+
+Studio の Intake を、以下の本文を追加したパケットで再開する。
+
+- `design/combat.md`
+- `decisions/D-001-one-button-combat.md`
+- `sim/build-0.3.md`
+
+Studio は期待動作と既存方針との整合性、QA の入力を確認し、問題がなければ `01-studio-to-qa.md` を作成して Observe を open にする。QA は Owner の報告と関連仕様から再現条件・受け入れ基準を整理する。
+
+## Outcome
+
+未完了。受付内容と暫定ルートを記録した。必要な入力が不足しているため、再現確認・修正・検証は未実施。Owner による追加の判断事項は、現時点では特定されていない。
+>>>END

@@ -333,7 +333,15 @@ def check_artifact(project, name, text, request=None, full=True, pending=None):
         if content is None and path.is_file():
             content = path.read_text(encoding="utf-8")
         if content is None:
-            errors.append(f"{name}: Load entry missing: {entry}")
+            folder = path.parent
+            nearby = (
+                sorted(f.name for f in folder.glob("*") if f.is_file())
+                if folder.is_dir()
+                else []
+            )
+            errors.append(
+                f"{name}: Load entry missing: {entry} (existing files there: {', '.join(nearby) or 'none'})"
+            )
         elif anchor and anchor not in {slug(h) for h in headings(content)}:
             errors.append(f"{name}: Load section missing: {entry}")
     if f"studio/roles/{to}.md" not in loads:
@@ -900,6 +908,8 @@ def run_codex(packet_text, model=None):
         "project_doc_max_bytes=0",
         "-c",
         'web_search="disabled"',
+        "-c",
+        'model_reasoning_effort="low"',  # --ignore-user-config drops the user's effort setting; keep runs light
     ]
     for feature in CODEX_TOOL_FEATURES:
         cmd += ["--disable", feature]

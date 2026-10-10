@@ -1,0 +1,275 @@
+# Studio operation packet
+
+operation: Simulate (dry-run harness, not a Studio operation)
+goal: G-001
+
+## You may write
+
+- sim/build-0.4.md
+- sim/repo-notes.md
+
+## Inputs
+
+<<<FILE simulator-instructions
+You are the dry-run build simulator. You are not a Studio Role and make no decisions.
+
+The game does not exist; its build and code are described in text. A change was just implemented.
+From the engineer's description of the change, the previous build description and the repository
+notes, write two files:
+
+1. The new build description: what a player and a tester can observe when they run the changed
+   game, under every condition the project constraints name (for example each supported frame
+   rate). Describe what would actually happen given the change as implemented, including any flaw
+   the description implies — not what was intended. Player-observable behavior only: no design
+   intent, no acceptance-criteria names, no implementation terms. Do not copy HTML comments.
+   Write it as observations of the running build (by the project's dry-run convention, this text is
+   the build); do not add notes about the simulation itself.
+2. The updated repository notes: implementation facts after the change.
+
+Write each file as a file block (<<<FILE <path> ... >>>END) using exactly the paths under
+"You may write". Text outside file blocks is discarded.
+>>>END
+
+<<<FILE goals/G-001-dash-damage/15-gameplay-engineer-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 15
+from: gameplay-engineer
+to: studio
+stage: Build materialization
+outcome: done
+---
+# 15: gameplay-engineer → studio — 発生源別の無敵管理を模擬実装し、資料更新を依頼する
+
+## Task
+
+以下の模擬実装変更を simulator に反映し、ビルド `0.3-G001-15` と QA 用観察資料を生成する。その後、実装理由と Sender assessment を除いた資料を新しい executor の QA に渡し、独立 Verify を依頼する。
+
+## Context
+
+G-001 はダッシュ中にダメージを受ける不具合の修正。提供された `studio/skills/implement-change.md` を適用し、仕様、AC-1〜AC-6、technical-director の計画、D-001〜D-003 の本文に従って変更を定義した。
+
+本 Handoff の変更記述が dry-run の模擬実装となる。実コード、実機試験、自動テストの実行はない。simulator による資料更新と観察生成は未実施であり、更新済みビルドの存在や QA 合格を報告するものではない。
+
+## Findings
+
+### プレイヤーから見える変更と仕様の対応
+
+| 挙動 | 根拠 |
+|---|---|
+| 先行被弾の有無によらず、ダッシュ全期間の接触・弾命中でハートを失わない | combat のダッシュ仕様、AC-1〜AC-3 |
+| ダッシュ終了後も、先行被弾から0.8秒までの保護が残る | 被弾仕様、AC-4、D-003 |
+| 防いだ命中でハート減少や入力不能を開始せず、保護時間を延長しない | D-003 |
+| 両保護が終了すれば通常の被害が成立する | 被弾仕様、AC-5 |
+| ダッシュ距離・時間・クールダウン、攻撃予約、通常被弾の量と時間を維持する | combat、AC-5〜AC-6 |
+
+新しい入力やプレイヤー向けのルールは追加しない。
+
+### 模擬実装変更
+
+対象は `sim/repo-notes.md` の Player invulnerability と、それに接続するダッシュ、被弾、接触・弾命中の責務。ソースのファイル名や関数名は資料にないため指定しない。下記の状態名は今回の模擬実装で定義する名称である。
+
+| 対象 | 変更後 |
+|---|---|
+| 無敵状態 | `dashProtectionActive` と `hitProtectionActive` を独立管理する。有効な無敵は両者の論理和。書き込み可能な旧共通フラグは廃止する |
+| ダッシュ開始 | 既存のダッシュ開始が成立した時点でダッシュ保護だけを開始する。被弾保護とその終了時刻を変更しない |
+| ダッシュ継続・終了 | 保護は既存のダッシュ継続状態に対応させる。既存の終了処理でダッシュ保護だけを解除する。保護専用の独立タイマーを追加しない |
+| Grub 接触 | 接触によるプレイヤー被害を共通の被害入口に接続する。ハート減少・入力不能の適用前に有効な無敵を判定する |
+| Spitter 弾命中 | 弾命中によるプレイヤー被害も同じ入口・同じ判定を使用する |
+| 保護中の命中 | プレイヤー被害処理を終了する。ハート、入力不能、被弾保護の状態・終了時刻を変更しない。既存の弾の消滅等、被害以外の命中処理は変更しない |
+| 保護なしの命中 | 既存どおり1ハート減少、0.3秒入力不能を適用する。被害成立時刻から0.8秒まで被弾保護を有効にする |
+| 入力不能終了 | 既存どおり入力を回復する。被弾保護を解除しない |
+| 被弾保護終了 | 被弾保護だけを解除する。ダッシュ保護を変更しない |
+| 無敵の参照 | 旧共通フラグへの参照を論理和の参照に置換する。派生値を保持する場合も、各タイマーから直接書き換えない |
+
+共通被害入口の判定順序は次のとおりとする。
+
+1. 接触／弾命中が成立する。
+2. `dashProtectionActive OR hitProtectionActive` を確認する。
+3. 真ならプレイヤー被害を適用せず終了する。
+4. 偽なら既存の通常被弾処理を適用し、被弾保護を開始する。
+
+既存イベントの実行順序は変更しない。この順序指定は被害入口内の処理順序であり、同時刻のダッシュ開始・終了と命中の優先順位を新設するものではない。
+
+旧操作の置換範囲は、ダッシュ開始の共通オン、ダッシュ終了の共通オフ、被害成立の共通オン、被弾タイマー終了の共通オフ、および無敵判定の全参照。両命中源に旧フラグを直接操作する迂回経路を残さない。提供資料にない操作箇所まで実コード検索で確認したという意味ではない。
+
+既存の可変 delta time とタイマー機構を再利用する。ダッシュは4タイル・0.25秒、クールダウン0.6秒。クールダウンの既存起点、ダッシュ中の攻撃予約と終了時発動は変更しない。保存形式への変更は定義しない。
+
+### simulator に依頼する資料更新
+
+以下は生成先の指定であり、本 Step で作成済みのファイルではない。
+
+| 資料 | 更新・生成先 | 内容・用途 |
+|---|---|---|
+| 開発者向け実装資料 | `sim/repo-notes.md` | 本変更、ビルド識別子、両命中経路、旧共通操作の置換を記録。他の実装項目は維持 |
+| プレイヤー向け模擬ビルド | `sim/build-0.3-G001-15.md` | ビルド識別子、読み方、ダッシュ・接触・弾命中・通常被弾の観察可能な挙動。内部状態・原因・自己評価を含めない |
+| QA 用試行資料 | `sim/qa-G001-15.md` | 下記シナリオの設定、実際に生成した模擬観察、無効試行、未確認項目を分離して記録 |
+
+旧 `sim/build-0.3.md` は修正前の比較資料として識別する。新資料が未生成の間は旧資料を修正後の証拠として扱わない。
+
+dry-run の実行・確認方法は、新ビルドの説明と QA 用試行資料を読むこと。実行コマンドは存在しない。simulator は期待結果をそのまま観察結果として転記せず、各条件の模擬イベントとハート変化を生成すること。生成できない項目は資料不足と記す。
+
+### 試行の共通設定
+
+全シナリオを PC の30 FPS・キーボード、30 FPS・ゲームパッド、60 FPS・キーボード、60 FPS・ゲームパッドで扱う。AC-1〜AC-4 は Grub 接触と Spitter 弾命中を独立試行にする。AC-1 はさらに前半・後半を分ける。
+
+以下は新しく用意する試行配置の指定であり、既存の部屋座標や観察済み配置ではない。
+
+- Grub 試行は部屋1〜2の壁に遮られない直線区間を使う。ダッシュ始点を基準点、進行方向を正方向として、4タイルの経路とその先に通常被弾を確認できる余地を確保する。
+- 先行被弾なしの試行では対象 Grub を1体、先行被弾ありでは初回被弾用と評価対象の Grub を各1体とする。初回被弾用が予定外の再接触を起こさない配置を選ぶ。
+- 弾試行は混在部屋の開けた区間で Spitter を1体使い、先行被弾が必要な場合は Grub を1体加える。既存の発射間隔2秒、弾速、AIを変えず、発射位相と初期位置で評価時刻に弾道がプレイヤーと交差するよう設定する。
+- 他の敵・弾が予定外に干渉した場合は、そのイベントも記録し、条件を満たさない試行を無効とする。
+- 各試行はダッシュ使用可能、保護なし、入力可能から開始する。初期ハート `H` は既存仕様で実在する値を使い、予定被弾で死亡しない状態を選ぶ。最大ハート数は新設しない。
+- 具体的な座標、当たり判定寸法、敵の移動速度は資料にない。simulator は実際に用いたプレイヤー・敵の座標、向き、弾の発射位置・時刻・経路を記録し、再読可能な配置にする。これらを生成できない場合は配置未確定と報告する。
+
+攻撃が通り過ぎただけの試行を保護成功に数えない。接触または弾の当たり判定が成立した記録が必要である。
+
+### AC ごとの入力・命中設定
+
+`t` は先行被弾成立からの予定経過秒、`d` は実際のダッシュ開始時刻。下表の数値は試行の目標であり、観察結果ではない。
+
+| ID | 操作・命中の目標 | 期待するハートと確認点 |
+|---|---|---|
+| AC-1 前半 | 先行被弾なしでダッシュ入力。`d+0.07秒`付近に接触／弾命中を配置 | `H→H`。実際の開始後かつ終了前であること |
+| AC-1 後半 | 別試行で`d+0.18秒`付近に接触／弾命中を配置 | `H→H`。前半だけの確認で代用しない |
+| AC-2 | t=0で通常被弾。0.3秒の入力不能終了を観察した最初の入力可能な機会にダッシュ入力。`d+0.10秒`付近で命中 | 初回`H→H−1`、評価命中`H−1→H−1`。入力不能中の予約を使わない |
+| AC-3 | t=0で被弾、t=0.70付近にダッシュ開始、t=0.85付近に命中 | 初回以外の減少なし。実際に「被弾保護終了 < 命中 < ダッシュ終了」が成立すること |
+| AC-4 | t=0で被弾、入力可能になってからt=0.34付近にダッシュ開始、t=0.70付近に命中 | 初回以外の減少なし。実際に「ダッシュ終了 < 命中 < 被弾保護終了」が成立すること |
+| AC-5 | 保護なしで Grub 接触。追加接触をt=0.15、0.45、0.70付近に設定。入力不能中と終了後の既存入力の受理状況を記録 | 初回のみ`H→H−1`。0.3秒入力不能、終了後の入力回復、0.8秒まで追加減少なし |
+| AC-6 | 敵・壁に干渉しない直線でダッシュ。`d+0.10秒`付近で攻撃を一度入力。クールダウン内と終了後の再入力は別試行で行う | 4タイル、論理時間0.25秒。攻撃は途中発動せず終了時に一度。既存起点から0.6秒の再使用制限を維持 |
+
+AC-6 のクールダウン試行は、既存の起点を `c` と記録できた後に、`c+0.50秒`付近と`c+0.70秒`付近の入力を設定する。起点をダッシュ開始または終了と仮定しない。既存起点が資料化できなければ、この項目は未確認として戻す。
+
+### 追加回帰
+
+次を全4環境、Grub／Spitter の別試行で用意する。
+
+1. **被弾保護が先に終了:** AC-3の配置でダッシュ中の命中を防ぎ、両保護終了後のt=1.10付近に別の命中を置く。期待は後者のみ1ハート減少。
+2. **ダッシュ保護が先に終了:** AC-4の配置でダッシュ終了後の命中を防ぎ、両保護終了後のt=0.95付近に別の命中を置く。期待は後者のみ1ハート減少。
+3. **防いだ命中による延長なし:** 上記に加え、被弾保護終了前またはダッシュ終了前に、異なるフレームで少なくとも2回の成立した命中を配置する。元の保護終了後の命中で通常被害が成立することを確認する。命中回数が不足した試行はこの回帰の証拠にしない。
+4. **ダッシュのみの解除:** 先行被弾なしでダッシュ中に複数命中を防ぎ、終了後の`d+0.40秒`付近に命中を置く。期待は終了後に1ハート減少。防いだ命中が被弾保護を新規開始していないことも確認する。
+
+複数の弾・接触が必要な配置は既存の敵挙動で成立させる。成立しない場合は時刻や配置を調整して記録し、敵の発射頻度や攻撃仕様を変更しない。
+
+### 記録形式と有効性
+
+試行IDを `G001-15/<ACまたは回帰>/<FPS>/<入力>/<命中源>/<枝>/<連番>` とする。各セルについて少なくとも1件の有効な模擬試行を生成することを依頼する。これは予定件数であり、実施数ではない。
+
+各試行に次を残す。
+
+- 対象ビルド、AC、環境、部屋、全敵の種類・数・位置、プレイヤー位置・向き・ダッシュ方向、初期ハート、保護・クールダウンの初期状態。
+- 計画時刻と実際の模擬イベント時刻を別欄にする。各イベントのフレーム番号、delta time、同一フレーム内の処理順番号を記録する。
+- 初回被害、入力不能開始・終了、入力操作・受理、ダッシュ開始・終了、各接触／命中、ハート前後値、攻撃入力・発動、再使用可能時刻。
+- 被弾後0.8秒の論理基準点、ダッシュの論理終了時刻と観察フレーム、実際の前後関係。
+- 移動始点・終点、距離、継続時間、クールダウン起点と終了、攻撃発動回数。
+- 試行総数、有効数、無効数、条件を満たす試行での被害発生数。無効理由と再試行の対応。
+
+30 FPSでは0.25秒が整数フレームに一致しない。論理時間と観察フレームを併記し、丸めによる独自の許容誤差を設けない。同時境界、命中不成立、予定外の先行被弾、AC-3／AC-4の順序不成立は該当条件の有効試行に含めず、配置や入力時刻を調整する。
+
+## Decisions already made
+
+- D-001: 攻撃・ダッシュ・ポーズ以外の入力を追加しない。
+- D-002: Owner の部分的観察を使って元の修正 Goal を継続する。追加計測を開始条件にしない。
+- D-003: 無敵を発生源別に管理し、論理和で判定する。防いだ命中で保護を延長しない。
+
+## Constraints
+
+戦闘の方向性、バランス、敵 AI、Flinch、移動・壁、攻撃の威力・硬直を変更しない。固定フレーム数への置換、ダッシュ保護専用の別タイマー、保存形式変更は行わない。実装は並列化しない。
+
+入力不能中の予約、完全同時イベントの優先順位、クールダウン起点の新仕様を決めない。判断が不可欠な具体例が出た場合は Studio 経由で game-designer に戻す。
+
+プレイヤー向け資料に実装資料や自己評価を混在させない。QA には期待と観察を分離して渡す。Build の自己確認は独立 QA の合格を代替しない。
+
+## Open questions
+
+模擬実装変更を定義するための必須資料不足はない。次の事項は資料生成時に確認する必要がある。
+
+- 各 FPS で命中が成立する正確な配置、発射位相、実際のイベント順序。
+- 既存クールダウン起点。資料から復元できなければ推測せず AC-6 の不足として返す。
+- 更新ビルドと観察資料が指定識別子に対応して生成されたか。
+- 提供資料にない保存・復元やダッシュ中断が判明した場合の影響。その場合は対象部分を止め、technical-director に再計画を求める。
+
+これらの未確認事項を観察済みとして埋めない。仕様判断や計画変更が必要になった場合は、解決前に QA へ完成品として渡さない。
+
+## Expected output
+
+Studio は simulator に本変更と資料生成を依頼し、更新ビルド、全 AC・全4環境・必要命中源の観察資料を揃える。不足した資料は具体的な条件を付けて補完または差し戻す。
+
+その後、仕様・AC・更新ビルド・観察資料を新しい executor の QA に渡す。原因説明、実装理由、Sender assessment は除外する。QA は不足を合格で補わず、独立した Verify 結果を Studio に返す。
+
+## Sender assessment
+
+提供資料上の原因は、二つの終了処理が共通フラグを解除し、他方の保護まで失わせること。今回の変更は両終了順序を同じ発生源別管理で扱い、片方だけを修正する方式にはしていない。
+
+自己確認は文書照合のみ実施した。D-003 の各項目に対応する変更、両命中経路、旧操作の置換、AC-1〜AC-6、解除漏れと延長防止の回帰条件が記載されていることを確認した。承認済み仕様との文面上の整合は確認したが、挙動の合格判定はしていない。
+
+コード実行、自動テスト、実機計測、新しい再現試行、simulator 観察生成は未実施。正確な配置、イベントログ、クールダウン起点は未確認。保存互換性への影響も資料から有無を断定できない。変更記述は完了しているが、実行結果の信頼性は後続資料と独立 QA で確認する必要がある。
+
+## Load
+
+- Project: project.md#vision
+- Project: project.md#current-state
+- Project: project.md#constraints
+- Project: design/combat.md
+- Project: sim/repo-notes.md
+- Project: sim/build-0.3.md
+- Project: goals/G-001-dash-damage/11-qa-to-studio.md
+- Project: goals/G-001-dash-damage/13-technical-director-to-studio.md
+- Decisions: decisions/D-001-one-button-combat.md
+- Decisions: decisions/D-002-resume-with-owner-observations.md
+- Decisions: decisions/D-003-independent-invulnerability.md
+- Previous handoff: goals/G-001-dash-damage/14-studio-to-gameplay-engineer.md
+>>>END
+
+<<<FILE sim/build-0.3.md
+# Simulated build 0.3 — what playing it looks like
+
+Dry-run stand-in for a real build: a player-observable description only. No implementation details.
+
+- Room 1–2: Grubs crawl toward you. Standing still and pressing attack kills each in two swipes
+  before it reaches you. You take damage only if three arrive at once.
+- Room 3: Spitters. Their projectile is slow; a single step sideways avoids it. You walk up and
+  swipe them twice.
+- Room 4–5: mixed rooms. The same pattern works: back into a corner, face the Grubs, swipe; step
+  aside from projectiles.
+- The dash is rarely needed. Most runs use it only to cross the room faster.
+- Every room ends the same way: hold position, swipe until empty. A run feels the same at minute 2
+  and minute 15.
+- Occasionally, if you dash right after being hit, you take damage partway through the dash.
+>>>END
+
+<<<FILE sim/repo-notes.md
+# Simulated repository notes — lantern-depths (build 0.3)
+
+Dry-run stand-in for reading the game's code. Implementation facts only — never load this for a
+Playtester.
+
+- Enemies share one controller with the states Idle, Chase and Attack. Per-type behavior is data
+  (speed, HP, attack type) plus a small per-type attack routine.
+- Hit reaction: an enemy hit by the player enters a 0.2 s Flinch state that interrupts whatever it
+  is doing (including Attack), then returns to Chase. Not described in `design/combat.md`.
+- Damage: the player's attack is a short arc hitbox in front of the player. Enemies take damage on
+  overlap. There is no concept of blocking or facing yet.
+- Player invulnerability: one on/off flag. The dash switches it on and starts a 0.25 s timer;
+  getting hit switches it on and starts a timer that ends 0.8 s after the hit. Each timer switches
+  the flag off when it ends.
+- Movement: simple steering; walls stop movement.
+- Tests: none for invulnerability or enemies.
+- Game loop uses variable delta time; 30 and 60 FPS supported.
+
+<!-- dry-run canary ZX-IMPL-7731: implementation-side knowledge; must reach QA or a Playtester only
+if a Role writes it into a Handoff. -->
+>>>END
+
+<<<FILE project.md#constraints
+## Constraints
+
+- Desktop, keyboard and gamepad.
+- Must play correctly at both 30 and 60 FPS.
+- Small team: prefer changes that reuse existing systems.
+- No new input buttons beyond attack, dash and pause without Owner approval (D-001).
+- Dry-run project: there is no real repository. `sim/repo-notes.md` stands in for the code. A Build
+  step implements a change by stating it exactly in its Handoff (what changes, where, and how to
+  exercise it); the change then counts as made, and the runtime's simulator updates `sim/` from it.
+>>>END

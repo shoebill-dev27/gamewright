@@ -1,0 +1,37 @@
+{
+ "op": "Step",
+ "role": "technical-director",
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "codex",
+   "session_id": "01a1257f-e469-7471-9b68-2f767704dbd3",
+   "model": "gpt-6-astra",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 18182,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 4895,
+    "reasoning_output_tokens": 61
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 1,
+   "started": "2026-10-10T20:08:20",
+   "seconds": 116.5,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "decisions/D-003-independent-invulnerability.md": "e45ad995e4e78323d29aa605e1d7f2f52d06c21f8d040cf6ee3fc63f9694c35a",
+  "goals/G-001-dash-damage/13-technical-director-to-studio.md": "251971222e45d5008c6bff9462bfe73ad12628484dbcc9c70169ef0cd89a4149"
+ },
+ "decision": {}
+}

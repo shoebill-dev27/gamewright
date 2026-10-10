@@ -1,0 +1,76 @@
+<<<FILE goals/G-001-dash-damage/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-10
+---
+# G-001: ダッシュ中の被ダメージ不具合を修正する
+
+## Owner request
+
+> ダッシュ中なのにダメージを受けることがある。再現できるので直してほしい。
+
+## Interpretation
+
+報告された被ダメージを再現し、仕様に反する挙動を修正して、ダッシュ時のダメージ判定が既存の仕様どおりに動くことを独立した検証で確認する。
+
+戦闘の方向性変更、新しい入力の追加、無関係なバランス調整は対象外。Studio は仕様、技術方式、再現結果、検証判定を決定しない。
+
+## Unknowns
+
+- Observe: QA は模擬資料の記述と仕様との不一致を報告したが、再現条件・時系列・試行結果は未確定。補足観察資料を得て QA の追加観察が必要。
+- Diagnose: 原因は未確定。局所的な原因調査は Build の責任範囲とし、独立した技術調査が必要と判明した場合に Technical Director を追加する。
+- Decide: 方向・優先順位・範囲の選択は発生していないため省略。
+- Design: QA によれば、ダッシュ全期間の無敵という期待挙動と受け入れ条件は既存仕様から確定できるため省略。入力不能中のダッシュ予約や終了と命中が完全に同時の場合を、新たに定義する作業は含めない。
+- Plan: 技術的な難度・影響範囲は未確認。非自明・高リスク・複数システムへの影響が判明した場合に追加する。
+- Build: 修正を予定するが、再現報告の補完後に開始する。
+- Verify: Build 後は必須。仕様と受け入れ条件に対し、キーボード／ゲームパッド、30／60 FPS の組み合わせを独立検証する。
+- Play: 体験や感触の改善依頼ではないため省略。
+- Review: 体験 Goal や方向 Decision を伴わないため省略。
+- Next: 検証後に Studio が Owner 向けに結果と残件をまとめる。
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | qa | reproduce-defect | done | 01-studio-to-qa.md |
+| 1b | Observe（補足資料による追加確認） | qa | reproduce-defect | planned | — |
+| 2 | Diagnose | technical-director | technical-plan | tentative | — |
+| 3 | Decide | game-director | make-decision, prepare-owner-escalation | skipped | — |
+| 4 | Design | game-designer | write-design-spec | skipped | — |
+| 5 | Plan | technical-director | technical-plan | tentative | — |
+| 6 | Build | gameplay-engineer | implement-change | planned | — |
+| 7 | Verify | qa | verify-change | planned | — |
+| 8 | Play | playtester | playtest-session | skipped | — |
+| 9 | Review | game-director | review-outcome | skipped | — |
+| 10 | Next | studio | — | planned | — |
+
+順次実行する。追加 Observe は資料待ちであり、まだ open にしない。Diagnose と Plan の要否は追加観察または工程上の差し戻しで判断する。
+
+## Route changes
+
+2026-10-10 — 最初の Observe を完了として記録。結果は [02-qa-to-studio.md](02-qa-to-studio.md)（`outcome: question`）。工程の完了は、再現報告の完成や修正の完了を意味しない。
+
+QA は期待挙動の仕様不足ではなく、観察資料の不足を報告した。このため Design を tentative から skipped に変更し、Build の前に追加 Observe を予定した。原因と修正の影響範囲は未確定のため、Diagnose と Plan は tentative を維持する。検証失敗ではないため、同一受け入れ条件の検証失敗回数には数えない。
+
+この packet には補足観察資料がなく、参照先である戦闘仕様・模擬ビルドの本文も含まれない。QA の完全な Role 契約、reproduce-defect Skill、前回の入力 Handoff 本文もない。Studio は不足資料や未観察の結果を作成して補うことはできず、次の受領者の Load を確認する Route 手順を完了できない。
+
+方向変更、範囲拡大、不可逆な操作、Goal の再解釈などの Owner 判断事項は現在発生していない。情報不足を Owner の選択問題には置き換えず、Goal は active のまま資料待ちとする。02 の内容と宛先は変更しない。新しい Handoff は未作成。
+
+## Next action
+
+この Route は入力不足として実行元へ差し戻す。実行元は、次の Route packet に以下を含める。
+
+- 02 の Open questions に対応する補足観察資料。敵・攻撃種別、配置、被弾からダッシュと再被弾までの時系列、入力方式・FPS、試行数と発生数、比較条件を含め、未確認事項は未確認と明記する。
+- `design/combat.md` と `sim/build-0.3.md` の本文、および補足資料の参照可能なパス。
+- `studio/roles/qa.md`、`studio/skills/reproduce-defect.md`、`goals/G-001-dash-damage/01-studio-to-qa.md` の本文。
+- 更新済みの本 Goal、02 の Handoff、および今回の routing 用資料。
+
+資料が揃ったら Studio が QA の入力を確認し、`03-studio-to-qa.md` を作成して追加 Observe を open にする。QA は新しい executor で補足資料から再現報告を完成させ、結果を Studio に返す。補足資料を用意できない場合は、その制約を明示して再度 Route に戻す。同じ資料だけで QA を繰り返さない。
+
+## Outcome
+
+未完了。QA は模擬資料上の挙動が既存仕様に反することを報告し、受け入れ条件を提示した。具体的な再現条件は未確定で、修正と修正後の検証は未実施。現在は追加観察資料と次工程の入力資料を待っている。新たな Decision および Owner 判断依頼はない。
+>>>END

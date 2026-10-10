@@ -1,0 +1,141 @@
+<<<FILE goals/G-001-dash-damage/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-10
+---
+# G-001: ダッシュ中の被ダメージ不具合を修正する
+
+## Owner request
+
+> ダッシュ中なのにダメージを受けることがある。再現できるので直してほしい。
+
+## Interpretation
+
+報告された被ダメージを再現し、仕様に反する挙動を修正して、ダッシュ時のダメージ判定が既存の仕様どおりに動くことを独立した検証で確認する。
+
+「ダッシュ中は常に無敵」とは仮定しない。正しい挙動と受け入れ条件は、QA が関連仕様と再現結果から明確にする。戦闘の方向性変更、新しい入力の追加、無関係なバランス調整は対象外。
+
+## Unknowns
+
+- Observe: Owner は再現可能と報告しているが、手順・発生条件・独立した観察結果は未提示。QA による再現が必要。
+- Diagnose: 原因は不明。独立した技術調査が必要かは再現結果次第。局所的な原因調査は Build の責任範囲とし、別段階が必要なら Technical Director に回す。
+- Decide: 現時点で方向・優先順位・範囲の選択は不要。既存仕様への修正として扱うため省略。報告と仕様が一致し、仕様変更が必要になった場合は Goal を再解釈せず差し戻す。
+- Design: `design/combat.md` は存在するが本文はこの packet にない。期待挙動が十分に定義されているかは QA が確認し、未定義なら追加する。
+- Plan: 技術的な難度・影響範囲は未確認。局所的で明白な修正なら省略し、非自明・高リスク・複数システムへの影響が判明した場合に追加する。
+- Build: 不具合修正の依頼なので予定する。ただし再現と受け入れ条件の確立後に開始する。
+- Verify: Build 後は必須。仕様・受け入れ条件と、30 / 60 FPS、キーボード・ゲームパッドの制約に照らして独立検証する。
+- Play: 体験や感触の改善依頼ではないため省略。
+- Review: 体験 Goal や方向 Decision を伴わないため省略。
+- Next: 検証結果を受け、Studio が Owner 向けに結果と残件をまとめる。
+
+現時点で vision や既知の Decision の題名との衝突は見当たらない。D-001 の本文は未読であり、入力体系の変更を必要とする場合は関連内容の確認と Owner 判断が必要。
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | qa | reproduce-defect | open | 01-studio-to-qa.md |
+| 2 | Diagnose | technical-director | technical-plan | tentative | — |
+| 3 | Decide | game-director | make-decision, prepare-owner-escalation | skipped | — |
+| 4 | Design | game-designer | write-design-spec | tentative | — |
+| 5 | Plan | technical-director | technical-plan | tentative | — |
+| 6 | Build | gameplay-engineer | implement-change | planned | — |
+| 7 | Verify | qa | verify-change | planned | — |
+| 8 | Play | playtester | playtest-session | skipped | — |
+| 9 | Review | game-director | review-outcome | skipped | — |
+| 10 | Next | studio | — | planned | — |
+
+基本経路は Observe → Build → Verify → Next。tentative の段階は上記の条件が成立した場合だけ追加する。順次実行とし、Observe 後の Route で不要な段階を skipped にする。視覚表現への変更が必要と判明した場合は、Art Director の検証要否も再評価する。
+
+## Route changes
+
+Intake 時点。変更なし。
+
+## Next action
+
+新しい executor で `01-studio-to-qa.md` とその Load のみを読み、QA の Observe を開始する。まず模擬ビルドと戦闘仕様から報告を再現し、受け入れ条件を備えた不具合報告、または不足情報を明示した差し戻しを Studio に返す。Intake はここで停止する。
+
+## Outcome
+
+未完了。修正・検証はまだ実施していない。
+>>>END
+
+<<<FILE goals/G-001-dash-damage/01-studio-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 1
+from: studio
+to: qa
+stage: Observe
+outcome: routed
+---
+# 01: studio → qa — ダッシュ中の被ダメージを再現する
+
+## Task
+
+Owner の報告を模擬ビルドで再現し、戦闘仕様と照合して、再現手順・期待挙動・実際の挙動・受け入れ条件を備えた不具合報告を作成する。再現できない場合や仕様が不足する場合は、その不足を明示して Studio に返す。
+
+## Context
+
+Owner の依頼：
+
+> ダッシュ中なのにダメージを受けることがある。再現できるので直してほしい。
+
+対象は Lantern Depths の build 0.3。短時間のトップダウン型アクション roguelite で、現在は 5 部屋、敵 2 種、攻撃とダッシュの構成。dry-run のため、ビルドを実行する代わりに `sim/build-0.3.md` を読む。
+
+## Findings
+
+- Owner は再現可能と述べているが、具体的な手順・タイミング・敵の種類は未提示。
+- 独立した再現確認はまだない。
+- `design/combat.md` にダメージと無敵の規則がある。Studio は本文を受け取っておらず、期待挙動を確定していない。
+- 原因や修正方法は未判断。
+
+## Decisions already made
+
+この Goal での Decision はなし。
+
+Project Context では、既存の D-001 により攻撃とダッシュを基本とし、攻撃・ダッシュ・ポーズ以外の入力追加には Owner 承認が必要とされている。本段階は既存挙動の観察のみを行う。
+
+## Constraints
+
+- 実在のゲーム repository はない。模擬ビルドから確認できたことと、確認できないことを区別する。
+- Desktop、キーボード・ゲームパッド、30 / 60 FPS が対象。模擬資料に情報がない条件を検証済みとしない。
+- ダッシュ全体が無敵であるとは仮定せず、既存仕様を根拠に期待挙動を定める。
+- 実装、ルール変更、技術方式の決定は行わない。
+- QA は独立した新しい executor で実行し、実装者の説明・自己評価は受け取らない。
+
+## Open questions
+
+- どの手順・条件で被ダメージが発生するか。
+- 発生時点は仕様上の無敵区間に含まれるか。
+- 期待挙動と実際の挙動に差があるか。
+- 入力方式や FPS による差が資料から確認できるか。
+- 既存仕様から、修正の受け入れ条件を十分に定義できるか。
+
+## Expected output
+
+次の Handoff を `to: studio` として作成し、Findings に以下を記載する。
+
+- 参照した仕様と観察の根拠。
+- 再現手順、条件、期待挙動、実際の挙動、再現性、重大度。
+- 不具合が確認できた場合、既存仕様に基づくプレイヤーから観察可能な受け入れ条件。
+- 未確認の環境・条件と、追加で必要な情報。
+
+再現報告が完成した場合は `outcome: done`、情報不足・期待挙動の未定義・報告と仕様の一致などで修正へ進めない場合は `outcome: question` とする。Studio が結果を受けて次の段階を確定する。
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/reproduce-defect.md
+- Project: project.md#vision
+- Project: project.md#current-state
+- Project: project.md#constraints
+- Project: design/combat.md
+- Project: sim/build-0.3.md
+- Decisions: none
+- Previous handoff: none
+>>>END

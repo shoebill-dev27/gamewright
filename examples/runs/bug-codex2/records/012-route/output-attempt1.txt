@@ -1,0 +1,180 @@
+<<<FILE goals/G-001-dash-damage/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-10
+---
+# G-001: ダッシュ中の被ダメージ不具合を修正する
+
+## Owner request
+
+> ダッシュ中なのにダメージを受けることがある。再現できるので直してほしい。
+
+## Interpretation
+
+報告された被ダメージを再現し、仕様に反する挙動を修正して、ダッシュ時のダメージ判定が既存の仕様どおりに動くことを独立した検証で確認する。
+
+戦闘の方向性変更、新しい入力の追加、無関係なバランス調整は対象外。
+
+## Unknowns
+
+- Observe: QA は既存仕様と模擬ビルドの記述から仕様不一致を確認し、不具合報告と AC-1〜AC-6 を作成した。Owner の詳細条件を独立した試行で再現したわけではなく、安定再現の配置・時刻・発生境界は未確定。追加 Observe は現時点では不要。
+- Diagnose / Plan: 実装原因と修正箇所は未確認。technical-director が実装資料を調べ、既存仕様を維持する修正計画と、後続の模擬検証に必要な資料を定める。同じ担当・入力で扱えるため一つの Step にまとめる。
+- Decide: 既存仕様への修正に方向選択は不要。D-002 は不足入力を補完して修正を継続する Owner の決定であり、ゲームの方向変更ではない。
+- Design: QA によれば期待挙動と受け入れ条件は明確。入力不能中の予約入力や完全同時の境界処理は今回新たに定義しない。判断が必要になれば game-designer に戻す。
+- Build: 技術調査・計画の結果を受け、修正を実施する。
+- Verify: Build 後は必須。AC-1〜AC-6 を PC・30 / 60 FPS・キーボード / ゲームパッドの全4組合せで独立検証する。
+- Play: 体験や感触の改善依頼ではないため省略。
+- Review: 体験 Goal やゲームの方向 Decision を伴わないため省略。
+- Next: 検証後に Studio が Owner 向けの結果と残件をまとめる。
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | qa | reproduce-defect | done | 01-studio-to-qa.md |
+| 1b | Observe | qa | reproduce-defect | done | 03-studio-to-qa.md |
+| 1c | Observe | qa | reproduce-defect | done | 05-studio-to-qa.md |
+| 1d | Observe | qa | reproduce-defect | done | 07-studio-to-qa.md |
+| 1e | Observe | qa | reproduce-defect | done | 10-studio-to-qa.md |
+| 2 | Diagnose / Plan | technical-director | technical-plan | open | 12-studio-to-technical-director.md |
+| 3 | Decide | game-director | make-decision, prepare-owner-escalation | skipped | — |
+| 4 | Design | game-designer | write-design-spec | skipped | — |
+| 5 | Plan | technical-director | technical-plan | skipped | — |
+| 6 | Build | gameplay-engineer | implement-change | planned | — |
+| 7 | Verify | qa | verify-change | planned | — |
+| 8 | Play | playtester | playtest-session | skipped | — |
+| 9 | Review | game-director | review-outcome | skipped | — |
+| 10 | Next | studio | — | planned | — |
+
+過去の Observe の done は入力確認作業の終了を表し、再現確認の成功を表さない。1d の結果は `08-qa-to-studio.md`。1e の結果は `11-qa-to-studio.md`（outcome: done）であり、仕様不一致の照合と受け入れ条件の作成が完了した。修正完了や Verify 合格ではない。独立した Plan 行 5 は行 2 に統合したため skipped とし、計画作成自体は省略しない。
+
+## Route changes
+
+2026-10-10 — 初回 Observe の結果 `02-qa-to-studio.md`（outcome: question）を受領し、1 を done とした。再現条件が不足しているため追加 Observe を設けた。期待挙動の仕様不足ではないという QA の報告を受け、Design を skipped とした。
+
+2026-10-10 — `04-qa-to-studio.md`（outcome: question）を受領し、1b を done とした。補足資料が未提供のため、資料受領を開始条件とする 1c を設けた。
+
+2026-10-10 — `06-qa-to-studio.md`（outcome: question）を受領し、1c を done とした。資料受領を開始条件とする 1d を設け、実行環境側の補完を待つ方針とした。当時は Owner escalation を行わなかった。
+
+2026-10-10 — `08-qa-to-studio.md`（outcome: question）を受領し、1d を done とした。QA Role・Skill 等の基本資料は補完されたが、繰り返し求めている補足観察資料と実行環境側の回答は依然未提供で、追加再現確認は未開始。
+
+同じ不足入力について、新しい該当資料がないまま question が二回以上返った場合は Role に再投入せず Owner にエスカレーションするという `studio/orchestration.md#loop-limits` を適用した。基本資料の補完は、当該観察資料の不足解消には当たらない。過去の待機・再ルーティング方針を修正し、`09-studio-to-owner.md` に必要入力と選択肢をまとめ、Goal を blocked-on-owner とした。提供不能とは断定せず、Build や検証合格へ進めなかった。
+
+2026-10-10 — Owner が Option A を選び、新しい観察を提供した。選択と回答原文を `decisions/D-002-resume-with-owner-observations.md` に記録し、09 を resolved、Goal を active とした。Option A の帰結に従い Observe 1e を追加し、`10-studio-to-qa.md` を open とした。体感による時刻や頻度を計測値とせず、部分資料から判断可能な範囲を QA に委ねる。
+
+2026-10-10 — `11-qa-to-studio.md`（outcome: done）を受領し、1e を done とした。QA は修正へ渡せる不具合報告と AC-1〜AC-6 を作成し、追加の Owner 計測を必須とせず技術調査へ進めると報告した。原因・変更箇所は未確認のため Diagnose と Plan の必要性を確定し、technical-director の一つの Step に統合した。行 2 を `12-studio-to-technical-director.md` で open とし、独立した行 5 は統合により skipped とした。Build と Verify は維持する。
+
+現時点では Owner escalation の新しい根拠はない。技術担当が調査できる未解決事項を Owner に戻さず、同じ資料で QA Observe を繰り返さない。本 Route packet に実装資料・設計・Decision の本文、technical-director の契約全文と Skill 本文は含まれないため、それらを読んだとは扱わない。次の Step packet に Load 資料を含め、欠落があれば具体的な不足を報告する。
+
+## Next action
+
+新しい executor で technical-director が `12-studio-to-technical-director.md` とその Load 資料から技術調査・計画を開始する。実装原因、変更箇所、修正手順、AC-1〜AC-6 の模擬検証に必要な資料を整理し、結果を Studio に返す。
+
+次の packet には特に `sim/repo-notes.md`、`design/combat.md`、`sim/build-0.3.md` と関連 Decision の本文を含める。資料が欠ける場合は内容を推測せず、欠落と進められる範囲を報告する。
+
+## Outcome
+
+未完了。QA は既存仕様と模擬ビルドの記述の不一致を確認し、修正の受け入れ条件を作成した。D-002 に基づく継続方針のもと、次は技術調査・計画を行う。独立した詳細再現、修正、修正後の検証はまだ完了していない。現時点で Owner に新たな判断を求める事項はない。
+>>>END
+
+<<<FILE goals/G-001-dash-damage/12-studio-to-technical-director.md
+---
+kind: handoff
+goal: G-001
+seq: 12
+from: studio
+to: technical-director
+stage: Diagnose / Plan
+outcome: routed
+---
+# 12: studio → technical-director — ダッシュ中被ダメージの技術調査と修正計画
+
+## Task
+
+QA の不具合報告と実装資料を照合し、ダッシュ中の被ダメージの原因と変更箇所を調査する。既存仕様を維持する修正計画と、Build 後に独立した QA が受け入れ条件を評価できる模擬資料の要件を作成し、Studio に返す。
+
+## Context
+
+Owner の依頼は「ダッシュ中なのにダメージを受けることがある。再現できるので直してほしい。」である。D-002 により Owner の部分的な観察を使って元の修正 Goal を継続している。
+
+QA は `11-qa-to-studio.md` で、模擬ビルドの「ダッシュ途中の被ダメージ」と既存仕様の「全ダッシュ時間無敵」の不一致を確認し、不具合報告と AC-1〜AC-6 を作成した。詳細条件の独立した再現や実装原因の特定は未完了だが、追加の Owner 計測を必須とせず技術調査へ進めると報告している。
+
+このプロジェクトには実リポジトリがなく、`sim/repo-notes.md` が実装資料に相当する。Build は gameplay-engineer が変更内容を Handoff に正確に記述し、実行環境の simulator が `sim/` に反映する方式で行う。
+
+## Findings
+
+以下は QA 報告の要約であり、Studio が独自に検証した結果ではない。詳細な不具合報告・比較手順・受け入れ条件は前の Handoff を参照する。
+
+- ダッシュは 0.25 秒間すべて無敵。移動距離は 4 タイル、クールダウンは 0.6 秒。ダッシュ中の攻撃は終了時に発動する。
+- 通常被弾は 1 ハート減少と 0.3 秒の入力不能を伴い、被弾後 0.8 秒まで無敵となる。
+- Owner は PC・60 FPS・ゲームパッド、部屋1〜2で、Grub による被弾と硬直終了後に少し待ってダッシュすると、ダッシュ後半の別の Grub 接触で 1 ハート失うと報告した。
+- 被弾から約 0.5〜0.8 秒、約 10 回中 6 回という値は体感・概数であり、計測結果ではない。Spitter 弾でも 1 回の観察があるが詳細は不明。
+- 実装原因、安定再現に必要な配置・時刻、発生境界は未確認。時間条件の重なりだけから実装方式や原因を断定しない。
+
+修正計画が満たすべき QA の受け入れ条件は次のとおり。
+
+| ID | 検証対象 |
+|---|---|
+| AC-1 | 未被弾時のダッシュ中は Grub 接触・Spitter 弾命中でハートが減らない |
+| AC-2 | 被弾後の入力不能終了直後に開始したダッシュ中もハートが減らない |
+| AC-3 | ダッシュ途中で被弾後 0.8 秒が経過しても、ダッシュ終了前の接触・弾命中ではハートが減らない |
+| AC-4 | ダッシュ終了後に被弾由来の無敵時間が残る場合、その時間内はハートが減らない |
+| AC-5 | 通常時の Grub 接触で 1 ハート減少、0.3 秒入力不能、被弾後 0.8 秒まで追加被害なしを維持する |
+| AC-6 | ダッシュの距離・時間・クールダウンと、ダッシュ中の攻撃入力の終了時発動を維持する |
+
+全条件を PC・30 / 60 FPS・キーボード / ゲームパッドの全4組合せで評価する。現在はすべて未検証である。
+
+本 Route packet には `sim/repo-notes.md`、設計・Decision 本文、technical-director の契約全文と Skill 本文がない。Studio は提供された Works from と QA 報告から必要な入力を選定したが、未提供本文との整合性は確認していない。次の Step では Load の実資料を用い、要約を資料の代用にして原因や結果を創作しない。
+
+## Decisions already made
+
+- `decisions/D-001-one-button-combat.md`: 攻撃・ダッシュ・ポーズ以外の入力追加には Owner 承認が必要という既存制約を守る。
+- `decisions/D-002-resume-with-owner-observations.md`: Owner の部分的な観察を使って元の修正 Goal を継続する。仕様変更や修正完了の承認ではない。
+
+Decision 本文の詳細は Load 資料で確認する。
+
+## Constraints
+
+- 既存仕様への修正に限定し、方向変更、新しい入力、無関係なバランス調整を行わない。
+- 小規模チームのため既存システムの再利用を優先し、PC・30 / 60 FPS・キーボード・ゲームパッドを対象とする。
+- この Step は技術調査・計画であり、Build や QA の合否判定を代行しない。
+- 模擬資料の記述、Owner の体感、仕様から算出した検証条件、実施済みの結果を区別する。
+- 入力不能中の予約入力や、ダッシュ開始・終了と命中が完全同時の場合の優先順位を新たに決めない。必要なら game-designer の判断へ戻す。
+- 必須資料が欠ける場合は欠落と影響を具体的に報告する。実リポジトリがないこと自体は、この dry-run の障害ではない。
+
+## Open questions
+
+- 実装資料から仕様不一致を説明する原因と変更箇所を特定できるか。証拠と仮説をどこまで分離できるか。
+- 既存仕様を維持して修正するための手順、影響範囲、回帰リスクは何か。
+- 安定再現の条件と、AC-1〜AC-6 の各環境での評価に必要なイベント順序・観察情報を、後続の模擬資料でどう示すか。
+- 設計判断や追加情報を必要とする具体的な阻害事項はあるか。
+
+## Expected output
+
+技術調査・修正計画を記載した outgoing Handoff を `to: studio` で返す。少なくとも以下を含める。
+
+- 実装資料に根拠を置いた診断、未確認事項、必要なら切り分け手順。
+- gameplay-engineer が実施できる変更箇所・変更内容・順序と、維持すべき既存挙動。
+- AC-1〜AC-6 への対応、全4環境組合せの確認手順、回帰リスク。
+- 更新後の模擬ビルドと観察資料に必要な内容。実際の接触・命中、イベント時刻・順序、ハート変化など、QA が期待結果だけから合格を推測せず評価できる情報を示す。
+- Build に進めるか、未解決の仕様判断や不足資料があるか。
+
+Studio は結果を受けて Build へルーティングし、その後は独立した Verify を必ず行う。技術的な重要判断が後続作業を制約する場合は Role の権限内で Decision として記録する。
+
+## Load
+
+- Role: studio/roles/technical-director.md
+- Skills: studio/skills/technical-plan.md
+- Project: project.md#vision
+- Project: project.md#current-state
+- Project: project.md#constraints
+- Project: design/combat.md
+- Project: sim/repo-notes.md
+- Project: sim/build-0.3.md
+- Decisions: decisions/D-001-one-button-combat.md
+- Decisions: decisions/D-002-resume-with-owner-observations.md
+- Previous handoff: goals/G-001-dash-damage/11-qa-to-studio.md
+>>>END

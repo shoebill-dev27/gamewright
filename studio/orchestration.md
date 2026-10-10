@@ -113,7 +113,11 @@ The Studio does not finalize every judgment on its own (spec §5, §19).
 - scope, cost or risk would change significantly beyond what the Goal implies;
 - the Owner's taste or values are the main criterion for the choice;
 - the change is irreversible (destructive data or asset changes, releases, public commitments);
-- the Goal itself has to be reinterpreted to make progress.
+- the Goal itself has to be reinterpreted to make progress;
+- the work is blocked on information or material that no Role can produce (e.g., reproduction
+  details only the Owner has, a build or repository that does not exist). The brief says exactly
+  what is needed and why no Role can produce it; options include providing it, narrowing the Goal,
+  or stopping.
 
 ### Do not escalate
 
@@ -171,3 +175,5 @@ No unbounded loops (Phase 1 has no autonomous loop at all, but routes can cycle)
   re-plan, not to a third fix attempt.
 - A Goal re-enters Diagnose twice without measurable progress → `game-director` reviews; this may
   become an escalation about scope or the Goal itself.
+- A step hands back `question` twice for the same missing input, with nothing new supplied in
+  between → do not route it to a Role again; escalate to the Owner for that input.

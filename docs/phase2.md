@@ -159,9 +159,15 @@ Agent tool の subagent は採用しなかった。会話は新しく始まる�
   - 個人の指示（`~/.codex/AGENTS.md`）は届いた。
   - 残ったツールは使われなかった（§5 の未解決 1、2）。
 
-### 4.4 コストと時間（Sonnet、記録値）
+### 4.4 利用量と時間（Sonnet、記録値）
 
-| 実行 | コスト | executor の実行時間 |
+下表の金額は `claude -p` が報告する `total_cost_usd`（API 価格に換算した推定値）であり、実際の請求額ではない。
+
+- 実行はサブスクリプションの OAuth 認証で行った（起動時イベントの `apiKeySource: none`、`ANTHROPIC_API_KEY` は未設定）。
+- そのため実際には、サブスクリプションの利用枠を消費した。14:10 にセッション上限に達して停止している。
+- Codex 側も同様に、ChatGPT サブスクリプションの利用枠を消費した。
+
+| 実行 | API 換算の推定値 | executor の実行時間 |
 |---|---|---|
 | バグ Goal | 約 1.6 ドル | 約 9 分 |
 | 戦闘改善 Goal | 約 14 ドル | 約 80 分 |
@@ -199,6 +205,7 @@ Agent tool の subagent は採用しなかった。会話は新しく始まる�
 | 5 | QA が模擬ビルドでの合格を拒否した。ビルド記述に「未実行・未テスト。変更内容どおり」とあり、実装者の説明に依存することになるため | Simulator がメタな注記を書いた | Simulator の指示を「観測としてのビルド記述。模擬への言及はしない」に直した。QA の独立性は意図どおり機能していた |
 | 6 | 戦闘改善 Goal で、Engineer が「リポジトリがないので実装できない」と差し戻しを続け、最後は TD が Owner に escalation した | fixture の Project Context に、dry-run での Build の扱いが書かれていなかった（Phase 1 の probe ではプロンプトで補っていた） | Owner（模擬）が判断し、D-008 として再開した。fixture の Constraints に dry-run の Build の扱いを追記した（Project 固有の規約なので Role 側ではなく Project Context に置いた） |
 | 7 | 利用上限で Simulator が途中で失敗し、record.json のない記録が残った | 実行時エラーの経路で記録を書いていなかった | エラー時にも `status: error` の記録を残すようにした。Simulator だけを再実行する `simulate` コマンドを追加した |
+| 8 | Codex のバグ Goal で、QA が「模擬ビルドの記述だけでは再現条件を確定できない」と差し戻し、Route が同じ QA へ 3 回戻した（ループ） | orchestration に「どの Role も作れない入力（Owner だけが持つ再現情報など）」の扱いがなかった。既存のループ上限は Verify の失敗と Diagnose の再入しか対象にしていなかった（仕様の穴） | escalation の条件に「どの Role も作れない情報・素材で止まった」を追加した。ループ上限に「同じ不足入力で `question` が 2 回返ったら、Role に戻さず Owner へ escalation」を追加した。修正後、Codex の Route は Owner へ escalation した（必要な観察項目を列挙）。Owner（模擬）の観察を受けて再開した |
 
 executor の規則違反による拒否は 3 回あり、3 回とも新しい executor での再試行（検証エラーのみを渡す）で通った。内訳:
 
@@ -212,7 +219,10 @@ executor の規則違反による拒否は 3 回あり、3 回とも新しい ex
 
 1. **Codex のユーザー全体の指示が executor に届く。** Codex は、フラグや設定の上書きをしても `~/.codex/AGENTS.md`（あなたの個人の作業ルール）を必ず読み込む。
    - カナリアで確認した範囲では、プロジェクトの情報（gamewright、lantern）は届いていない。
-   - 防ぐ唯一の方法は使い捨ての `CODEX_HOME` だが、認証ファイルの扱いが伴う。セキュリティ上の判断になるため、実施していない（要判断）。
+   - 防ぐ唯一の方法は使い捨ての `CODEX_HOME` だが、認証ファイルの扱いが伴う。
+   - **Owner の判断（2026-10-10）: 混入を受け入れて記録する。**
+     - 各 Codex 記録に `ambient_instructions` として残す。
+     - Codex での実行は「プロジェクト情報の隔離は成立、個人の指示は混入」と区別して扱う。
 2. **Codex のツールは一部を無効化できない。** `exec`（code mode。ホストを無効化したので実行時は失敗する）、collaboration 系、`apply_patch` が残る。ツールが 1 回でも使われたら、ランタイムがそのオペレーションを拒否する（監査）。Claude はツール 0 個で起動できる。
 3. **Route は最新の成果物 1 件しか見ない。** 後回しにした並列ステップ（戦闘改善 Goal の 2b：Playtester が報告した欠陥の QA 再現）のように、古い成果物に依存する Handoff を Route が組めなかった。
 4. **dry-run の検証は循環する。** Simulator は Engineer の変更記述からビルド記述を作るので、QA と Playtester が観察する「ビルド」は、実装者の記述から導かれたものにすぎない。情報の流れは隔離できても、模擬世界の真実性は保証できない。#5 の QA の拒否は、これを正しく指摘していた。実ゲームの自動操作（対象外）が入るまで残る。
@@ -241,7 +251,7 @@ executor の規則違反による拒否は 3 回あり、3 回とも新しい ex
 
    続けて `intake … --runtime codex` と `next … --runtime codex` を実行する。
 
-   あわせて、`~/.codex/AGENTS.md` を読ませないための使い捨て `CODEX_HOME` を採用するかを判断する（認証ファイルの扱いが伴う）。
+   `~/.codex/AGENTS.md` の混入は受け入れて記録する（Owner の判断）。
 2. **Route の packet に「保留中の並列ステップが依存する成果物」を含める**（未解決 3）。または、1 回の Route で複数の Handoff を書けるようにする。
 3. **「Owner escalation まで連続で進める」モード。** `next` の繰り返しを runner に入れる。上限、停止条件、記録は今のまま流用できる。
 4. **実ビルドの Playtest / QA の harness**（未解決 4）。これがないと、dry-run の検証の循環は解けない。
