@@ -1,0 +1,36 @@
+{
+ "op": "Step",
+ "role": "technical-director",
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "codex",
+   "session_id": "01a1268e-a1a6-7e13-ae00-702d566d0418",
+   "model": "gpt-6-astra",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 17750,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 4590,
+    "reasoning_output_tokens": 56
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 1,
+   "started": "2026-10-11T01:04:03",
+   "seconds": 117.0,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-dash-damage/19-technical-director-to-studio.md": "21e6ffa3e5fb03c233afe87c5c426e8d06484418b6aace56d770501a419bf699"
+ },
+ "decision": {}
+}

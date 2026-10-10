@@ -1,0 +1,111 @@
+<<<FILE goals/G-001-dash-damage/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-10
+---
+# G-001: ダッシュ中の被ダメージ不具合を修正する
+
+## Owner request
+
+> ダッシュ中なのにダメージを受けることがある。再現できるので直してほしい。
+
+## Interpretation
+
+報告された被ダメージを再現し、仕様に反する挙動を修正して、ダッシュ時のダメージ判定が既存の仕様どおりに動くことを独立した検証で確認する。
+
+戦闘の方向性変更、新しい入力の追加、無関係なバランス調整は対象外。
+
+## Unknowns
+
+- Observe: QA は仕様不一致の照合と AC-1〜AC-6 の作成を完了した。Owner の詳細条件を独立試行で再現したことは意味しない。追加 Observe は現時点では不要。
+- Diagnose / Plan: 共有無敵フラグの解除競合に対する計画は作成済み。追加 Plan の結果 `19-technical-director-to-studio.md` は、既存モデル・記録の取得可否に応じた条件付き検証計画である。取得可否自体は未確認。
+- Decide: 既存仕様への修正に方向選択は不要。D-002 は不足入力を補完して継続する Owner の決定。D-003 は既存仕様を維持する技術方式の決定。
+- Design: 既存クールダウン起点を原資料から回復できるかは未解決。回復不能または矛盾が確認された場合は game-designer に戻す。入力不能中の予約入力や完全同時境界の新規定義は行わない。
+- Build: `15-gameplay-engineer-to-studio.md` に模擬実装変更を定義済み。Handoff 17 の照合報告に基づき `sim/build-0.4.md` を変更識別子 `0.3-G001-15` の模擬ビルドとして扱う。ファイル名を合わせる再生成は不要。
+- Verify: 必須かつ未完了。PC・30 / 60 FPS・キーボード / ゲームパッドの全4組合せ、AC-1〜AC-6 と必要な回帰を維持する。条件別資料の生成可能性と、独立 QA が採用できる証拠の範囲は未確定。
+- Play: 体験や感触の改善依頼ではないため省略。
+- Review: 体験 Goal や方向 Decision を伴わないため省略。
+- Next: 独立検証後に Studio が Owner 向けの結果と残件をまとめる。
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | qa | reproduce-defect | done | 01-studio-to-qa.md |
+| 1b | Observe | qa | reproduce-defect | done | 03-studio-to-qa.md |
+| 1c | Observe | qa | reproduce-defect | done | 05-studio-to-qa.md |
+| 1d | Observe | qa | reproduce-defect | done | 07-studio-to-qa.md |
+| 1e | Observe | qa | reproduce-defect | done | 10-studio-to-qa.md |
+| 2 | Diagnose / Plan | technical-director | technical-plan | done | 12-studio-to-technical-director.md |
+| 3 | Decide | game-director | make-decision, prepare-owner-escalation | skipped | — |
+| 4 | Design | game-designer | write-design-spec | skipped | — |
+| 5 | Plan | technical-director | technical-plan | skipped | — |
+| 6 | Build | gameplay-engineer | implement-change | done | 14-studio-to-gameplay-engineer.md |
+| 6b | Build 資料照合・補完 | gameplay-engineer | implement-change | done | 16-studio-to-gameplay-engineer.md |
+| 6c | Plan 検証成立性の再検討 | technical-director | technical-plan | done | 18-studio-to-technical-director.md |
+| 6d | Route 入力取得経路・packet 補完 | studio | — | open | 19-technical-director-to-studio.md |
+| 7 | Verify | qa | verify-change | planned | — |
+| 8 | Play | playtester | playtest-session | skipped | — |
+| 9 | Review | game-director | review-outcome | skipped | — |
+| 10 | Next | studio | — | planned | — |
+
+行 6d は Role の技術作業ではなく、Studio 宛て Handoff 19 に基づく未完了のルーティング作業である。入力取得経路の確認と次 packet の補完を開始するため open とし、後続 Role の作業開始を意味しない。
+
+過去の Observe の done は入力確認作業の終了を表し、再現確認の成功を表さない。1d の結果は `08-qa-to-studio.md`。1e の結果は `11-qa-to-studio.md`（done）。行 2 の結果は `13-technical-director-to-studio.md`（done）。独立した Plan 行 5 は行 2 に統合したため skipped。
+
+行 6 の結果は `15-gameplay-engineer-to-studio.md`（done）。変更記述を模擬実装とする規約に従う完了であり、資料生成や独立 Verify の合格を意味しない。
+
+行 6b の結果は `17-gameplay-engineer-to-studio.md`（question）。done は照合と不足報告の終了を示す。
+
+行 6c の結果は `19-technical-director-to-studio.md`（done）。条件付き計画の完成を示し、モデル照会・取得、試行生成、QA 判定の完了を意味しない。
+
+## Route changes
+
+2026-10-10 — `02-qa-to-studio.md`（question）を受領し、1 を done とした。再現条件不足により追加 Observe を設けた。期待挙動の仕様不足ではないという QA の報告を受け、Design を skipped とした。
+
+2026-10-10 — `04-qa-to-studio.md`（question）を受領し、1b を done とした。補足資料が未提供のため、資料受領を開始条件とする 1c を設けた。
+
+2026-10-10 — `06-qa-to-studio.md`（question）を受領し、1c を done とした。資料受領を開始条件とする 1d を設け、実行環境側の補完を待つ方針とした。当時は Owner escalation を行わなかった。
+
+2026-10-10 — `08-qa-to-studio.md`（question）を受領し、1d を done とした。同じ不足入力について新しい該当資料がないまま question が二回以上返ったため、loop limits を適用した。`09-studio-to-owner.md` に必要入力と選択肢をまとめ、Goal を blocked-on-owner とした。
+
+2026-10-10 — Owner が Option A を選び、新しい観察を提供した。選択と回答原文を D-002 に記録し、09 を resolved、Goal を active とした。Observe 1e を追加した。体感による時刻や頻度を計測値とせず、部分資料から判断可能な範囲を QA に委ねた。
+
+2026-10-10 — `11-qa-to-studio.md`（done）を受領し、1e を done とした。QA は不具合報告と AC-1〜AC-6 を作成し、追加の Owner 計測を必須とせず技術調査へ進めると報告した。Diagnose と Plan を行 2 に統合し、行 5 は skipped とした。Build と Verify は維持した。
+
+2026-10-10 — `13-technical-director-to-studio.md`（done）を受領し、行 2 を done、行 6 を open とした。D-003 に基づく方式と実装順序を technical-director の判断として引き継いだ。実装は逐次、完了後に独立 QA の Verify を行う。視覚変更は計画にないため art-director の追加は不要。
+
+2026-10-11 — `15-gameplay-engineer-to-studio.md`（done）を受領し、行 6 を done とした。模擬実装の定義は完了したが、指定生成先は存在一覧になかった。一覧の `sim/build-0.4.md` の照合・補完のため行 6b を追加し、Verify は planned とした。
+
+2026-10-11 — `17-gameplay-engineer-to-studio.md`（question）を受領し、行 6b を done とした。照合報告に基づき build-0.4 と変更識別子 `0.3-G001-15` の対応を採用した。条件別試行記録、既存モデル、クールダウン起点の不足について、同じ補完要求を繰り返さず technical-director に検証成立性を戻した。これは QA の fail や同一 AC の二回目の失敗ではない。
+
+2026-10-11 — `19-technical-director-to-studio.md`（done）を受領し、行 6c を done とした。取得経路確認を前提とする条件付き計画であり、その前提を満たしたことにはしない。行 6d を open とし、Studio が入力取得経路と packet の不足を解消する作業を明示した。
+
+今回の packet には runtime 管理側の窓口・照会手段がない。したがって取得経路の状態は「照会手段未確保」であり、「モデル不存在」「取得不能」ではない。また、存在一覧はあるが、仕様・AC・対象ビルド・repo-notes および従来試行要件の原文は収録されていない。取得可能な場合の engineering 経路にも、取得不能時の QA 文書評価経路にも、現時点で十分な開始入力がない。
+
+packet 不足を報告することで今回の Route を停止する。同じ情報で technical-director や gameplay-engineer に再照会せず、原文のない QA 判定も依頼しない。新しい Handoff 20 は作成せず、seq 20 を次の有効な Role 引き渡しに残す。Handoff 19 は変更しない。
+
+Owner にしか解消できない必須入力は未確定であり、現段階では Owner escalation を作成しない。ただし、必須材料をどの Role も取得・生成できないと確定した場合は orchestration の escalation 規則を適用する。計画の条件によって Studio の escalation 義務を免除しない。
+
+## Next action
+
+Studio が `19-technical-director-to-studio.md` を開始 Handoff とする行 6d を継続する。次の Route packet には以下を補完する必要がある。
+
+- runtime 管理側の実際の照会窓口・手段、または管理側によるモデル・記録の提供可否の回答と根拠。現時点では照会未実施であり、モデルの有無は不明。
+- `design/combat.md`、`sim/build-0.4.md`、`sim/repo-notes.md` の原文。
+- `11-qa-to-studio.md` の受け入れ条件と再現・比較手順、`13-technical-director-to-studio.md` の検証計画、`15-gameplay-engineer-to-studio.md` の設定・資料生成要求の原文。
+- 取得できた場合は、既存モデル・記録の識別子、出典、取得可能範囲、生成可能な観察項目。
+
+モデル・記録を取得できた場合は、その具体的な入力を添えて gameplay-engineer に充足照合と資料生成要求の作成を渡す。取得できないと確認された場合は、仕様・AC とビルドの原文、不足一覧を用意して独立 QA に文書評価の範囲と証拠十分性の判断を渡す。
+
+QA 宛て packet には実装理由・自己評価を含めず、Handoff 19 全文を無加工で渡さない。未生成資料を Load に指定しない。受信 Role の必要入力を確認できてから Handoff 20 を作成する。
+
+## Outcome
+
+未完了。仕様不一致の確認、受け入れ条件、技術計画、模擬実装変更の定義、更新ビルドの識別、および検証資料の取得可否に応じた条件付き計画が完了した。
+
+現在の停止理由は、runtime への照会手段と次工程に必要な原文が今回の packet にないことである。Studio の入力取得・packet 補完作業を open とし、独立 Verify を planned のまま維持する。条件別試行の実施、QA 合格、Goal 達成は確認されていない。現時点で Owner に新たな判断や計測を求める事項はない。
+>>>END

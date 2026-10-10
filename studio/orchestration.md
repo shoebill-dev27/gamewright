@@ -80,7 +80,9 @@ Load: `goal.md`, the latest Handoff, this file, `studio/workflows/development-lo
    permitted information only. To make that possible, the Handoff that routes work to the sender
    says in its Expected output: address the result to `studio`.
 5. **Select context.** Fill the Handoff's Load list: the recipient's Role contract, its Skills, the
-   Project Context sections and Decisions this step needs, and the previous Handoff.
+   Project Context sections and Decisions this step needs, and the previous Handoff. You choose
+   files by name (the project file list); you do not need to read a file to list it — the recipient
+   reads it. Never route a step to `studio` itself: the open step is always a Role's or the Owner's.
 6. **Mark the next step `open`** in the route table, with the Handoff that starts it, and update
    Next action in `goal.md`. If the Goal is met, Close.
 

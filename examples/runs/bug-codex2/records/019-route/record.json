@@ -1,0 +1,76 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "codex",
+   "session_id": "01a12687-3535-76a3-93b0-6267313e28ff",
+   "model": "gpt-6-astra",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 24754,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 3958,
+    "reasoning_output_tokens": 59
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 1,
+   "started": "2026-10-11T00:55:57",
+   "seconds": 79.8,
+   "errors": [
+    "goals/G-001-dash-damage/16-studio-to-gameplay-engineer.md: Load entry missing: sim/build-0.3-G001-15.md (existing files there: build-0.3.md, build-0.4.md, repo-notes.md)",
+    "goals/G-001-dash-damage/16-studio-to-gameplay-engineer.md: Load entry missing: sim/qa-G001-15.md (existing files there: build-0.3.md, build-0.4.md, repo-notes.md)"
+   ]
+  },
+  {
+   "runtime": "codex",
+   "session_id": "01a12688-6b90-73f3-8aa6-0600b6a0b0a2",
+   "model": "gpt-6-astra",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 24894,
+    "cached_input_tokens": 2688,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 3970,
+    "reasoning_output_tokens": 56
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 2,
+   "started": "2026-10-11T00:57:16",
+   "seconds": 87.7,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-dash-damage/goal.md": "6bf90aaf0e6c71d7e5b32d7c8acb89c055c8a0921940d484d5079b8e0868bf79",
+  "goals/G-001-dash-damage/16-studio-to-gameplay-engineer.md": "e6f1b74897e1c9384a660d2c6083f9ad3bc74a142f6e8c4bf399a3713481e0b9"
+ },
+ "decision": {
+  "status": "active",
+  "open": [
+   [
+    "gameplay-engineer",
+    "Build 資料照合・補完"
+   ]
+  ],
+  "new": [
+   "gameplay-engineer",
+   "Build material reconciliation"
+  ]
+ }
+}

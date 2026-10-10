@@ -4,7 +4,9 @@
 
 ## 1. 結論
 
-Phase 2 の受け入れ基準は、**Codex での Goal の完走を除いて満たした**。Codex は、実行できた範囲で互換性を確認したところで利用上限に達した（§4.3）。
+Phase 2 の受け入れ基準は、**Codex での Goal の完走を除いて満たした**。
+
+Codex では、同じ fixture からバグ Goal を **25 オペレーション（Close の 2 手前）まで**実行した。そこで Codex の週間利用上限に達し、次の解除は 2026-10-14 17:56（§4.3）。その範囲で、Phase 1 の artifact 形式と隔離が Codex でも成立することを確認した。
 
 - Phase 1 のバグ Goal と戦闘改善 Goal を、**すべてのオペレーションを fresh executor で**、同じ fixture から完走した。合計 67 オペレーション、セッション id はすべて異なる。
 - Step に渡された入力は、毎回 Handoff の Load 一覧と一致した。manifest とハッシュで全件を検証している。
@@ -150,14 +152,47 @@ Agent tool の subagent は採用しなかった。会話は新しく始まる�
 
 ### 4.3 Codex（cross-runtime）
 
-- 同じ fixture と同じ packet で Codex に Intake を実行させた（セッション `01a1246d-…`、ツール使用なし）。
-- 出力は Phase 1 と同じ artifact 形式（goal.md と最初の Handoff）だった。この実行で、2 つの書式の曖昧さが表に出た（#3、#4）。
-- 修正した検証器で記録済みの出力を再検査すると、違反は壊れたアンカー 1 件（`#Current`）だけだった。これは通常の再試行で直る種類の違反である。
-- 再試行は Codex の利用上限で中断した。この日、上限は数回の実行で 2 度尽きている。Codex で Goal を完走するのは、上限の回復後になる。
-- 隔離の実測:
-  - プロジェクトの情報は届かなかった。
-  - 個人の指示（`~/.codex/AGENTS.md`）は届いた。
-  - 残ったツールは使われなかった（§5 の未解決 1、2）。
+`examples/runs/bug-codex2` は、同じ fixture と同じ packet 形式で、バグ Goal を Codex（`gpt-6-astra`、推論 low）だけで実行したもの。
+
+**進み方**
+
+1. Intake
+2. QA が「模擬ビルドの記述では再現条件を確定できない」と 3 回差し戻した
+3. （#8 の規則を追加したあと）Route が Owner へ escalation した
+4. Owner（模擬）が観察を提供し、D-002 として fresh な Resume で再開した
+5. QA の不具合報告
+6. TD の計画（D-003）
+7. Build
+8. Simulator
+9. Engineer による記述と模擬ビルドの照合、TD
+10. QA の検証用 Handoff を作成
+
+**到達点**
+
+- 25 オペレーション、32 セッション（すべて異なる）、ツール使用なし。
+- 残りは「QA 検証 → Close の Route」の 2 オペレーション。
+- 週間上限が解除されたら `python3 scripts/studio_run.py next examples/runs/bug-codex2 --runtime codex --model gpt-6-astra` を繰り返して完走できる。
+
+**互換性**
+
+- Codex の出力は、Claude と同じ検証器（Phase 1 の構造規則と Role ポリシー）をすべて通った。Phase 1 の artifact 形式は変えていない。
+- Codex は、Claude が書かない形を 2 つ使い、どちらも仕様の穴として直した（#3、#4）:
+  - Handoff 列をパスで書く
+  - アンカーを見出しの文字列で書く
+
+**Codex で表に出た orchestration の穴**
+
+- どの Role も作れない入力（#8）。
+- Route がファイルを「読まないと Load に載せられない」と考え、資料の取得を求め続けた。「Load にはファイル名で載せればよく、受け手が読む」と Route 手順 5 に明記したところ、解消した。
+
+**隔離**
+
+- QA の packet に実装側のカナリアは入っていない。
+- 混入が判明している唯一の入力は `~/.codex/AGENTS.md`（Owner の判断で受け入れ、記録済み）。
+
+**最初の試行（`examples/runs/bug-codex`）**
+
+前日の枠で Intake の 1 回目だけが実行され、ランナーのパーサ不備で拒否された。この記録はそのまま残してある。
 
 ### 4.4 利用量と時間（Sonnet、記録値）
 
@@ -206,6 +241,7 @@ Agent tool の subagent は採用しなかった。会話は新しく始まる�
 | 6 | 戦闘改善 Goal で、Engineer が「リポジトリがないので実装できない」と差し戻しを続け、最後は TD が Owner に escalation した | fixture の Project Context に、dry-run での Build の扱いが書かれていなかった（Phase 1 の probe ではプロンプトで補っていた） | Owner（模擬）が判断し、D-008 として再開した。fixture の Constraints に dry-run の Build の扱いを追記した（Project 固有の規約なので Role 側ではなく Project Context に置いた） |
 | 7 | 利用上限で Simulator が途中で失敗し、record.json のない記録が残った | 実行時エラーの経路で記録を書いていなかった | エラー時にも `status: error` の記録を残すようにした。Simulator だけを再実行する `simulate` コマンドを追加した |
 | 8 | Codex のバグ Goal で、QA が「模擬ビルドの記述だけでは再現条件を確定できない」と差し戻し、Route が同じ QA へ 3 回戻した（ループ） | orchestration に「どの Role も作れない入力（Owner だけが持つ再現情報など）」の扱いがなかった。既存のループ上限は Verify の失敗と Diagnose の再入しか対象にしていなかった（仕様の穴） | escalation の条件に「どの Role も作れない情報・素材で止まった」を追加した。ループ上限に「同じ不足入力で `question` が 2 回返ったら、Role に戻さず Owner へ escalation」を追加した。修正後、Codex の Route は Owner へ escalation した（必要な観察項目を列挙）。Owner（模擬）の観察を受けて再開した |
+| 9 | Codex の Route が、設計書・模擬ビルド・過去の Handoff の原文を取得しないと次の Handoff を組めないとして、`studio` 自身を次のステップに置いた（2 回拒否） | Route は最新の成果物とファイル名しか見ない設計なのに、「Load にはファイル名を載せればよく、読む必要はない」と書いていなかった | Route 手順 5 に明記した。あわせて、次のステップは必ず Role か Owner にすることも明記した。修正後、Codex の Route は QA への検証 Handoff を組めた |
 
 executor の規則違反による拒否は 3 回あり、3 回とも新しい executor での再試行（検証エラーのみを渡す）で通った。内訳:
 
@@ -243,13 +279,11 @@ executor の規則違反による拒否は 3 回あり、3 回とも新しい ex
 
 ## 7. 次の候補
 
-1. **Codex で Goal を 1 件完走する。** 上限の回復後に次のコマンドで実行する。
+1. **Codex の Goal を完走する（残り 2 オペレーション）。** 2026-10-14 17:56 以降に次のコマンドを実行する。
 
    ```bash
-   python3 scripts/studio_run.py init examples/runs/bug-codex2 --from examples/fixtures/lantern-depths
+   python3 scripts/studio_run.py next examples/runs/bug-codex2 --runtime codex --model gpt-6-astra
    ```
-
-   続けて `intake … --runtime codex` と `next … --runtime codex` を実行する。
 
    `~/.codex/AGENTS.md` の混入は受け入れて記録する（Owner の判断）。
 2. **Route の packet に「保留中の並列ステップが依存する成果物」を含める**（未解決 3）。または、1 回の Route で複数の Handoff を書けるようにする。

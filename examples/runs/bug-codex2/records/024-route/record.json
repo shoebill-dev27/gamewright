@@ -1,0 +1,75 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "codex",
+   "session_id": "01a12693-5083-7a71-b88f-7705ab996d55",
+   "model": "gpt-6-astra",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 24937,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 5027,
+    "reasoning_output_tokens": 52
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 1,
+   "started": "2026-10-11T01:09:10",
+   "seconds": 100.5,
+   "errors": [
+    "goals/G-001-dash-damage/20-studio-to-qa.md: Load entry missing: 19-technical-director-to-studio.md (existing files there: project.md)"
+   ]
+  },
+  {
+   "runtime": "codex",
+   "session_id": "01a12694-d92a-7971-ac42-a342f4e71c1c",
+   "model": "gpt-6-astra",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 25002,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 5253,
+    "reasoning_output_tokens": 82
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 2,
+   "started": "2026-10-11T01:10:51",
+   "seconds": 88.8,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-dash-damage/goal.md": "f5f88327bef252df2e4471654969e8c1d4de60cfec286abd66d8a8daed0ac6da",
+  "goals/G-001-dash-damage/20-studio-to-qa.md": "b2bbf5985c1635061649f3c38a618f782355216f0d7dc5cd6914282ec8af2d91"
+ },
+ "decision": {
+  "status": "active",
+  "open": [
+   [
+    "qa",
+    "Verify 文書評価・証拠充足性確認"
+   ]
+  ],
+  "new": [
+   "qa",
+   "Verify"
+  ]
+ }
+}
