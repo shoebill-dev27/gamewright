@@ -1,0 +1,12 @@
+{
+ "op": "Run",
+ "goal": "G-001",
+ "operations": [
+  "030-step-technical-director",
+  "031-route"
+ ],
+ "stop_reason": "blocked-on-owner",
+ "status": "blocked-on-owner",
+ "owner_reads": "goals/G-001-dash-damage/23-technical-director-to-owner.md",
+ "next": "decide examples/runs/bug-codex2 \"<answer>\""
+}

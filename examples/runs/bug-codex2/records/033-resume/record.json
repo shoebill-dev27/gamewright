@@ -1,0 +1,52 @@
+{
+ "op": "Resume",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "codex",
+   "session_id": "01a12a86-4a32-7712-9a92-331c9b897a37",
+   "model": "gpt-6-astra",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 23383,
+    "cached_input_tokens": 2688,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 5640,
+    "reasoning_output_tokens": 88
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 1,
+   "started": "2026-10-11T19:33:26",
+   "seconds": 133.5,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "decisions/D-004-document-evaluation-scope.md": "c67f35885f62d641251755da2f641f4b42d693b173907596b220decb2479fccb",
+  "goals/G-001-dash-damage/23-technical-director-to-owner.md": "c9721073426e5ccbb7fd36eb9547c078b8808989d2e997d1240d284d33c7ffb8",
+  "goals/G-001-dash-damage/goal.md": "0f7153ebd9e4a45374f8648c14aa299a59cf36aa5fffe8207e109773f3924024",
+  "goals/G-001-dash-damage/24-studio-to-technical-director.md": "cab0e02f611788ec691081a39be14d46700f68e81c34890f3b719d9bcd109376"
+ },
+ "decision": {
+  "status": "active",
+  "open": [
+   [
+    "technical-director",
+    "Diagnose 文書評価報告の整理"
+   ]
+  ],
+  "new": [
+   "technical-director",
+   "Diagnose"
+  ]
+ },
+ "seen_through_seq": 24
+}

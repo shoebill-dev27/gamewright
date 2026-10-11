@@ -1,0 +1,50 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "codex",
+   "session_id": "01a12a8a-4b1d-7932-b8ce-b85553f3bc00",
+   "model": "gpt-6-astra",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 25257,
+    "cached_input_tokens": 6784,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 3585,
+    "reasoning_output_tokens": 29
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 1,
+   "started": "2026-10-11T19:37:47",
+   "seconds": 77.8,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-dash-damage/goal.md": "64cdb8f31f1e682e8ecdde67645fdbd0213b4426bf968f3de813b58935ebfafe",
+  "goals/G-001-dash-damage/26-studio-to-game-director.md": "4daf0a818f1d142a0123c10b3be2bd73c7caf68d2edc17199fd348d32261ff28"
+ },
+ "decision": {
+  "status": "active",
+  "open": [
+   [
+    "game-director",
+    "Review 変更後の完了条件"
+   ]
+  ],
+  "new": [
+   "game-director",
+   "Review"
+  ]
+ },
+ "seen_through_seq": 26
+}

@@ -6,7 +6,7 @@
 
 Phase 2 の受け入れ基準は、**Codex での Goal の完走を除いて満たした**。
 
-**Phase 2 は完了とする（Owner の判断、2026-10-11）。** Codex での完走（残り 2 オペレーション）は保留とし、Codex の利用上限が戻りしだい §7 の手順で実行する。後続の開発はこの結果を待たない。
+**Phase 2 は完了とする（Owner の判断、2026-10-11）。** 保留していた Codex での完走も、同日、Codex の利用枠が回復したあとに達成した（§4.3 の追記）。
 
 Codex では、同じ fixture からバグ Goal を **25 オペレーション（Close の 2 手前）まで**実行した。そこで Codex の週間利用上限に達し、次の解除は 2026-10-14 17:56（§4.3）。その範囲で、Phase 1 の artifact 形式と隔離が Codex でも成立することを確認した。
 
@@ -192,6 +192,18 @@ Agent tool の subagent は採用しなかった。会話は新しく始まる�
 - QA の packet に実装側のカナリアは入っていない。
 - 混入が判明している唯一の入力は `~/.codex/AGENTS.md`（Owner の判断で受け入れ、記録済み）。
 
+**完走（2026-10-11 追記）**
+
+Codex の利用枠の回復後、Phase 3 の `run --runtime codex` で再開し、**Close（status: done）まで完走**した。
+
+- 合計 35 オペレーション、44 セッション（すべて異なる）、ツール使用 0、QA の packet に実装側のカナリアなし。
+- 途中の出来事:
+  1. 2 回目の Owner escalation（TD が作成）が起きた。条件別の実測記録は dry-run では作れないためで、Owner（模擬）が「文書評価に範囲を縮小し、計測できない項目は未判定と明記」を選んだ（D-004）。
+  2. Game Director のレビューで goal-met（縮小後の条件で）となった。
+- Outcome には「全 4 環境での条件別挙動は未判定」などの限界が明記されている。
+
+あわせて、Route が Escalation の作成前に Goal を `blocked-on-owner` にした誤りが見つかった。これを拒否する検証規則と、受理済みの Route をやり直す `route --since N` を追加した（`docs/phase3.md` の §12 #9）。
+
 **最初の試行（`examples/runs/bug-codex`）**
 
 前日の枠で Intake の 1 回目だけが実行され、ランナーのパーサ不備で拒否された。この記録はそのまま残してある。
@@ -281,11 +293,7 @@ executor の規則違反による拒否は 3 回あり、3 回とも新しい ex
 
 ## 7. 次の候補
 
-1. **Codex の Goal を完走する（残り 2 オペレーション）。** 2026-10-14 17:56 以降に次のコマンドを実行する。
-
-   ```bash
-   python3 scripts/studio_run.py next examples/runs/bug-codex2 --runtime codex --model gpt-6-astra
-   ```
+1. ~~Codex の Goal を完走する~~ — 2026-10-11 に達成（§4.3）。
 
    `~/.codex/AGENTS.md` の混入は受け入れて記録する（Owner の判断）。
 2. **Route の packet に「保留中の並列ステップが依存する成果物」を含める**（未解決 3）。または、1 回の Route で複数の Handoff を書けるようにする。

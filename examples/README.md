@@ -24,7 +24,7 @@ How the dry-runs were produced and what they revealed: `docs/phase1.md`.
 | `runs/combat-claude` | The combat Goal end to end, including an Owner escalation and resume, an engineer spec hand-back, the Art Director joining only when needed, and a blind re-playtest. |
 | `runs/resume-claude` | Owner decision on a frozen escalation → fresh Resume → a fresh Designer consuming the Owner Decision. |
 | `runs/bug-codex` | The same fixture on Codex: Intake output produced, retry stopped by a usage limit. |
-| `runs/bug-codex2` | The bug Goal on Codex only: 25 operations including an Owner escalation for missing reproduction details and a fresh resume; stopped two operations before Close by Codex's weekly usage limit. |
+| `runs/bug-codex2` | The bug Goal on Codex only, completed to Close (35 operations): Owner escalations for missing reproduction details and for unmeasurable criteria, fresh resumes, and a recovery re-route (`route --since`). |
 
 Results and findings: `docs/phase2.md`.
 

@@ -182,7 +182,7 @@ Owner 判断が必要になるまで自動で進む `run` は機能した。
 | 進展なしの検知 | 同じ Role の `question` が 2 回続いたあとに再び開かれた場合と、1 回の `run` で同じ Role が 4 回目に開かれる場合に止める |
 | 再開の安全性 | Route が失敗したあとの `run` は、まだ Route が見ていない成果物を先に Route する（Step の二重実行を防ぐ） |
 | 仕様 | `studio/execution.md` に「連続実行」と「追加資料の要求」を追加。`orchestration.md` に複数 Handoff、Load はファイル名で選ぶこと、Route changes を短く書くことを追記（いずれもツール名なし） |
-| テスト | `tests/test_phase3.py` 13 件。合計 51 件（Phase 1 の 20 件と Phase 2 の 18 件を含む）。Phase 3 の仕組みをわざと壊す変更を 6 種類入れ、すべて検出された |
+| テスト | `tests/test_phase3.py` 15 件。合計 53 件（Phase 1 の 20 件と Phase 2 の 18 件を含む）。Phase 3 の仕組みをわざと壊す変更を 6 種類入れ、すべて検出された |
 
 ## 11. 実行結果（Claude、Sonnet。金額は API 換算の推定値で、実際の請求ではない）
 
@@ -223,6 +223,7 @@ Owner 判断が必要になるまで自動で進む `run` は機能した。
 | 6 | `@need` をファイルブロックで包まずに書いた | 書式を明示し、包んでいない形も受け付けるようにした |
 | 7 | goal.md が肥大化した（Route ごとに全文を書き直すので、出力が 2 万トークンを超えた） | Route changes を 1〜2 行にする規則を追加した。§13 の 1 も参照 |
 | 8 | Route が Load にファイル名だけ（`goals/…` なし）を書いた | 拒否メッセージで正しいパスを示すようにした（再試行で直る） |
+| 9 | （Codex）Route が「TD に Escalation を作らせる」と決めたのに、Escalation がまだないうちに Goal を `blocked-on-owner` にした。`run` は止まったが、Owner が読むものがなかった | `blocked-on-owner` には open な Escalation が必要という検証を追加した（ブリーフの作成中は active のまま、作成する Role のステップを open にする）。受理済みの誤った Route をやり直すために `route --since N` を追加した。修正後、同じ誤りは 1 回目で拒否され、再試行で正しい状態になった |
 
 確認できた良い挙動:
 
@@ -233,4 +234,4 @@ Owner 判断が必要になるまで自動で進む `run` は機能した。
 
 1. **goal.md の構造を見直す。** Route ごとに全文を書き直す方式は、Goal が長くなるとコストが比例して増える。変更履歴を追記専用の別ファイルに分け、goal.md には現在の Route 表と状態だけを置く案がある。
 2. **実ビルドの Playtest / QA harness。** 今回も、数値を測る基準は「未判定」になった（D-010）。dry-run の限界がそのまま出ている。
-3. **Codex の残り 2 オペレーション**（Phase 2 から保留）。上限が戻ったら `run --runtime codex` で実行する。
+3. ~~Codex の残り 2 オペレーション~~ — 2026-10-11 に `run --runtime codex` で完走した（Owner escalation 1 回を含む）。

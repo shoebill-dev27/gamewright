@@ -1,0 +1,91 @@
+<<<FILE goals/G-001-dash-damage/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: blocked-on-owner
+created: 2026-10-10
+---
+# G-001: ダッシュ中の被ダメージ不具合を修正する
+
+## Owner request
+
+> ダッシュ中なのにダメージを受けることがある。再現できるので直してほしい。
+
+## Interpretation
+
+報告された被ダメージを再現し、仕様に反する挙動を修正して、ダッシュ時のダメージ判定が既存の仕様どおりに動くことを独立した検証で確認する。
+
+戦闘の方向性変更、新しい入力の追加、無関係なバランス調整は対象外。
+
+## Unknowns
+
+- Observe: QA は仕様不一致の照合と AC-1〜AC-6 の作成を完了した。Owner の詳細条件を独立した試行で再現したわけではない。
+- Diagnose / Plan: 発生源別保護の計画と D-003 は確定済み。Handoff 19 の条件付き検証計画に対し、モデル・記録の取得経路は依然未確保。
+- Decide: ゲームの方向選択は不要。必要な外部資料へのアクセス、または Goal の範囲縮小・中止について Owner 向けの選択肢を準備する。
+- Design: AC-6 のクールダウン起点は仕様不足。継続時に既存原資料で解決できなければ game-designer が判断する。Studio や技術側では決めない。
+- Build: 模擬実装変更の定義は完了。対象は最新の `sim/build-0.4.md`、変更識別子 `0.3-G001-15`。資料不足を理由とする追加修正は開始しない。
+- Verify: Handoff 21 の文書評価は完了したが、総合結果は question。AC-1〜AC-6、全4環境、必要な回帰の条件別証拠が不足している。具体的な仕様不一致による fail ではない。
+- Play / Review: 体験 Goal や方向 Decision を伴わないため省略。
+- Next: 独立検証の結果、または Owner による範囲変更・中止の決定を受けて結果をまとめる。
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | qa | reproduce-defect | done | 01-studio-to-qa.md |
+| 1b | Observe | qa | reproduce-defect | done | 03-studio-to-qa.md |
+| 1c | Observe | qa | reproduce-defect | done | 05-studio-to-qa.md |
+| 1d | Observe | qa | reproduce-defect | done | 07-studio-to-qa.md |
+| 1e | Observe | qa | reproduce-defect | done | 10-studio-to-qa.md |
+| 2 | Diagnose / Plan | technical-director | technical-plan | done | 12-studio-to-technical-director.md |
+| 3 | Decide | game-director | make-decision, prepare-owner-escalation | skipped | — |
+| 4 | Design | game-designer | write-design-spec | skipped | — |
+| 5 | Plan | technical-director | technical-plan | skipped | — |
+| 6 | Build | gameplay-engineer | implement-change | done | 14-studio-to-gameplay-engineer.md |
+| 6b | Build 資料照合・補完 | gameplay-engineer | implement-change | done | 16-studio-to-gameplay-engineer.md |
+| 6c | Plan 検証成立性の再検討 | technical-director | technical-plan | done | 18-studio-to-technical-director.md |
+| 7 | Verify 文書評価・証拠充足性確認 | qa | verify-change | done | 20-studio-to-qa.md |
+| 7a | Owner escalation 準備 | technical-director | prepare-owner-escalation | open | 22-studio-to-technical-director.md |
+| 7b | Design クールダウン起点 | game-designer | write-design-spec | tentative | — |
+| 7c | Verify 補完後の独立検証 | qa | verify-change | planned | — |
+| 8 | Play | playtester | playtest-session | skipped | — |
+| 9 | Review | game-director | review-outcome | skipped | — |
+| 10 | Next | studio | — | planned | — |
+
+done は各 Step の作業終了を示し、再現成功や Verify 合格を意味しない。主要な結果は Observe 1e＝`11-qa-to-studio.md`、Plan 2＝`13-technical-director-to-studio.md`、Build 6＝`15-gameplay-engineer-to-studio.md`、資料照合 6b＝`17-gameplay-engineer-to-studio.md`（question）、再計画 6c＝`19-technical-director-to-studio.md`、Verify 7＝`21-qa-to-studio.md`（question）。
+
+行 7b は修正継続時に既存起点を回復できない、または資料間の矛盾が残る場合に実施する。既存原資料で解決すれば skipped とする。行 7c は元の Goal を維持する限り必須。両行は Owner 判断と必要入力の補完待ちであり、現在は開始しない。
+
+## Route changes
+
+2026-10-10 — Handoff 02・04・06 の question に対して追加 Observe を設定した。08 でも同じ不足が解消せず、loop limits により 09 で Owner に escalation した。
+
+2026-10-10 — Owner が継続と補足観察を選び、D-002 を記録。11 の不具合報告・AC を受け、Diagnose / Plan を行 2 に統合した。
+
+2026-10-10 — 13 と D-003 を受け Build を開始。方向・視覚変更は不要として、game-director・art-director は追加しなかった。
+
+2026-10-11 — 15 の模擬実装定義を受領。資料照合 6b を追加し、17 に基づき build-0.4 と変更識別子の対応を採用した。
+
+2026-10-11 — 17 の不足報告を受け Plan 6c に戻した。19 の条件付き計画に従い、照会手段未確保のまま文書評価分岐を独立 QA に渡した。モデル不存在や取得不能の確認とは扱わない。
+
+2026-10-11 — 21 を受領し、行 7 を done とした。条件別証拠不足による question であり、Build への修正差し戻しや「同じ AC の二回目の失敗」は適用しない。
+
+2026-10-11 — 外部入力の取得経路が確保されていないため、22 で technical-director に Owner 向け brief の準備を依頼した。Goal は blocked-on-owner とし、依存工程を停止。クールダウン起点の仕様判断は game-designer の権限に残す。
+
+2026-10-11 — 今回の Route では、21 の結果と既存の 22 を照合した。22 は未実行の routed Handoff であり、technical-director の成果物ではない。行 7a を open のまま維持し、重複する Handoff や Studio による代理の技術 Escalation は作成しない。
+
+## Next action
+
+technical-director が `22-studio-to-technical-director.md` とその Load に指定された資料から、Owner 向け Escalation を作成する。必要な外部入力、未確保の取得経路、影響する検証条件、アクセス提供・範囲縮小・中止の選択肢と推奨案を日本語で示す。
+
+22 の Load は、技術上の問題、プロジェクト制約、模擬リポジトリの制限、関連 Decisions、QA の不足報告、前の計画を指定しており、technical-director の Works from に対応している。既存の 22 を次の Step の入力として使用する。
+
+成果物を受領後、Studio が Route して Owner に提示する。現時点では新しい Escalation の作成・提示・Owner 回答はいずれも未完了。QA・実装への同じ不足入力での再依頼は行わない。
+
+## Outcome
+
+未完了。仕様不一致の照合、受け入れ条件、D-003 に基づく模擬実装変更と対象ビルドの識別は完了した。独立 QA は文書上の整合を確認したが、全4環境の条件別証拠不足とクールダウン起点の未定義により、検証結果は question。
+
+次は technical-director による Owner 向け選択肢の準備。修正完了・検証合格とは報告しない。追加 Owner 計測、新規 simulator 開発、検証要件の緩和は決定していない。
+>>>END

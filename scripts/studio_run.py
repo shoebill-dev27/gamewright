@@ -696,9 +696,9 @@ def check_need(project, entries):
     return errors
 
 
-def build_route(project, gdir, records=None):
+def build_route(project, gdir, records=None, since=None):
     artifacts, gid, seq = goal_artifacts(gdir), gdir.name[:5], next_seq(gdir)
-    seen = seen_through(records, gid)
+    seen = since if since is not None else seen_through(records, gid)
     fresh = [
         (p, m) for p, m in artifacts if seen is not None and int(p.name[:2]) > seen
     ] or artifacts[-1:]
@@ -789,6 +789,22 @@ def build_route(project, gdir, records=None):
             and status != "blocked-on-owner"
         ):
             errors.append("an open Escalation must set the Goal to blocked-on-owner")
+        written = [
+            t for f, t in files.items() if any(fnmatch.fnmatch(f, n) for n in news)
+        ]
+        open_escalation = any(
+            m.get("kind") == "escalation" and m.get("status") == "open"
+            for _, m in artifacts
+        ) or any(
+            parse(t)[0].get("kind") == "escalation"
+            and parse(t)[0].get("status") == "open"
+            for t in written
+        )
+        if status == "blocked-on-owner" and not open_escalation:
+            errors.append(
+                "blocked-on-owner needs an open Escalation; while a Role prepares the brief, keep the "
+                "Goal active with that Role's step open"
+            )
         return errors + check_open_steps(project, grel, files, request)
 
     return packet, validate
@@ -1261,7 +1277,10 @@ def do_simulate(ws, args):
 def do_route(ws, args):
     project = ws / "project"
     packet, validate = build_route(
-        project, goal_dir(project, args.goal), ws / "records"
+        project,
+        goal_dir(project, args.goal),
+        ws / "records",
+        getattr(args, "since", None),
     )
     execute(ws, packet, validate, args)
     do_status(ws, args)
@@ -1434,6 +1453,11 @@ def main(argv=None):
     parser.add_argument("--retries", type=int, default=1)
     parser.add_argument(
         "--max-ops", type=int, default=25, help="run: operation budget per invocation"
+    )
+    parser.add_argument(
+        "--since",
+        type=int,
+        help="route: re-route the artifacts after this seq (recovery)",
     )
     args = parser.parse_args(argv)
     ws, project = args.workspace.resolve(), args.workspace.resolve() / "project"

@@ -382,3 +382,58 @@ def test_an_unwrapped_context_request_is_still_understood():
         "@need": "design/combat.md\nproject.md\n"
     }
     assert sr.parse_output("thinking\n" + block("a.md", "x\n")) == {"a.md": "x\n"}
+
+
+def test_blocked_on_owner_needs_an_open_escalation(ws):
+    start(ws, QA_OPEN, [(1, "Observe", "qa", "reproduce-defect", "done", QA_OPEN[0])])
+    write(
+        ws,
+        f"{G}/02-qa-to-studio.md",
+        handoff(2, "qa", "studio", "Route", [], outcome="question"),
+    )
+    project = ws / "project"
+    _, validate = sr.build_route(project, project / G, ws / "records")
+    td = handoff(
+        3,
+        "studio",
+        "technical-director",
+        "Decide",
+        ["studio/roles/technical-director.md"],
+    )
+    rows = [
+        (
+            2,
+            "Decide",
+            "technical-director",
+            "prepare-owner-escalation",
+            "open",
+            "03-studio-to-technical-director.md",
+        )
+    ]
+    premature = {
+        f"{G}/goal.md": goal(rows, status="blocked-on-owner"),
+        f"{G}/03-studio-to-technical-director.md": td,
+    }
+    assert any("needs an open Escalation" in e for e in validate(premature))
+    assert (
+        validate(
+            {f"{G}/goal.md": goal(rows), f"{G}/03-studio-to-technical-director.md": td}
+        )
+        == []
+    )
+
+
+def test_route_since_re_routes_earlier_artifacts(ws):
+    start(ws, QA_OPEN, [(1, "Observe", "qa", "reproduce-defect", "done", QA_OPEN[0])])
+    write(
+        ws,
+        f"{G}/02-qa-to-studio.md",
+        handoff(2, "qa", "studio", "Route", [], outcome="question"),
+    )
+    write(ws, f"{G}/03-studio-to-qa.md", handoff(3, "studio", "qa", "Observe", QA_LOAD))
+    project = ws / "project"
+    packet, _ = sr.build_route(project, project / G, ws / "records", since=1)
+    assert (
+        packet.header["step_artifacts"]
+        == f"{G}/02-qa-to-studio.md, {G}/03-studio-to-qa.md"
+    )
