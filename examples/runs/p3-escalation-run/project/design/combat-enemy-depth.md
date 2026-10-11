@@ -1,0 +1,193 @@
+# Enemy-side combat depth (G-002, Option A, per D-002)
+
+Status: spec for build 0.4, with the spec questions SQ1–SQ5, N1, Q-A and Q-B settled (handoff 11, D-005). Builds on `design/combat.md`. Player kit is unchanged: one attack button plus dash (D-001). No new inputs.
+
+## 1. Intent
+
+Enemies must ask the player questions: where to stand, when to dash, which enemy to deal with first. No single tactic should clear every room. The dash should be the best answer to some threats. Each enemy type should need a different response. Every threat is visible before it can hurt (pillar 3).
+
+Symptoms addressed: S1 (one tactic clears every room), S2 (dash unused in combat), S3 (enemies fought identically). Out of scope: run length, biomes, meta-progression, player kit changes.
+
+## 2. Global rules
+
+### 2.1 Time basis (30 and 60 FPS)
+- Every duration, speed and cooldown below is in real seconds or tiles per second. Timers advance by elapsed time, not by frame count.
+- Minimum telegraph length is 0.4 s (12 frames at 30 FPS). No telegraph in this spec is shorter.
+- Measured durations must be within ±0.05 s of the spec at both 30 and 60 FPS. Outcomes (hit or miss, dodge or no dodge) must be identical at both frame rates for the same input timing.
+
+### 2.2 Telegraph
+- Every enemy attack that can damage the player has a telegraph phase: a visible, unmistakable cue that starts at least the stated duration before damage can occur.
+- The cue uses the saturated orange/red threat palette. It must tell the player (a) which enemy is about to attack and (b) where the attack will land (direction and area). Visuals are in `design/combat-enemy-visuals.md`.
+- The telegraph cue is shown only for the attack phase and is not shown on idle, moving or waiting enemies, so the cue stays meaningful.
+- Damage is never dealt before the telegraph has run its full duration.
+- Getting hit, dashing, or attacking does not shorten any enemy's telegraph.
+- If the player leaves the attack area during the telegraph, the attack still plays out (no cancel, no re-aim) except where a rule below says the enemy tracks.
+- The cue area is the real hit area (same geometry). Hit-area sizes are fixed in sections 3 and 4.
+
+### 2.3 Attack limit and slots (readability)
+- At most 2 enemies may be in a Telegraph or Active phase at the same time. This is what "in a telegraph or attack phase" means (D-003).
+- Slot lifetime:
+  - An enemy takes a slot in the same update in which its Telegraph starts. It cannot start a Telegraph without one.
+  - It holds the slot through Telegraph and Active, and releases it at the start of Recovery.
+  - A Spitter releases when the shot is fired (its Active phase is the firing instant).
+  - A slot is also released when the enemy dies or the room ends.
+  - Recovery, Stunned, Cooldown, Waiting, Chase and Idle hold no slot. Spitter shots in flight hold no slot.
+- An enemy requests a slot only when it has a valid attack to start (its trigger conditions are met). If no slot is free it enters Waiting.
+- Grant order is first come, first served by the time of the request. If two requests come in the same update, the enemy with the lower spawn index goes first.
+- Waiting behavior (no threat cue is shown while Waiting; the enemy never damages the player in Waiting):
+  - Grub: keeps walking toward the player until 1.5 tiles away, then stops closing in and circles the player at half walk speed, staying 1.5 tiles away (±0.25). The circling direction is an implementation choice with no gameplay effect.
+  - Charger: moves at its approach speed to a spot 4–7 tiles from the player with line of sight, and holds still once there. It does not wind up.
+  - Shieldbearer: keeps walking toward the player and turning at 90°/s, and stops moving at 1.0 tile from the player. It does not start a bash.
+  - Spitter: stays put and does not aim.
+  - When a slot is granted the enemy starts its Telegraph at once, if its trigger conditions still hold. If they no longer hold, it returns to its normal behavior and keeps its place in the order only while it is still requesting.
+
+### 2.4 Damage and invulnerability
+- All enemy attacks deal 1 heart. Existing hit rules (0.3 s hit-stun, invulnerable until 0.8 s after the hit) and dash invulnerability (full 0.25 s) apply to all new attacks.
+- A projectile or charge that touches the player while invulnerable does nothing and keeps going.
+
+### 2.5 Hit reactions (Flinch)
+Build 0.3 has a 0.2 s Flinch when an enemy is hit. The ruling for build 0.4:
+- The Flinch applies only while the enemy is Idle, in Chase, or Waiting. The state at the moment the hit is resolved counts.
+- The Flinch is ignored (no pause, no displacement, no timer change) in Telegraph, Active, Recovery, Stunned and Cooldown. This holds for all four types. Damage from the hit still applies.
+- A hit that deals 0 damage (a blocked swipe, see 4.2) causes no Flinch.
+- A Flinch is a 0.2 s pause in the enemy's movement and turning. It does not take away or shift a slot request, and a Waiting enemy keeps its place in the order.
+- Per type, the Flinch can therefore occur: Grub in Chase and Waiting; Charger in Chase and Waiting; Shieldbearer in Chase and Waiting; Spitter only when Idle or Waiting. The Spitter's 2 s fire interval is Cooldown, so it is never interrupted.
+- A swipe never shortens, delays, cancels or re-aims any telegraph, attack or recovery. Only death cancels (edge case 4).
+
+## 3. Existing enemies, updated
+
+### 3.1 Grub (HP 2)
+- Approaches at current walking speed until within 1.5 tiles of the player.
+- Then (needs a free slot, see 2.3): telegraph 0.5 s. The Grub stops and flashes the threat cue toward the player. It tracks the player for the first 0.2 s. **The direction locks at 0.2 s into the telegraph, so it is fixed for the last 0.3 s** (the same reaction window as the Charger). Lunge 2 tiles in 0.15 s; damages the player on contact during the lunge only. Recovery 0.6 s, during which it does not move or attack.
+- Lunge hit area: a rectangle 1.0 tile wide and 2.0 tiles long, from the Grub's center along the locked direction. The player is hit if their hitbox overlaps it during the lunge.
+- Contact damage while merely walking is removed: touching a walking Grub deals no damage. Damage comes only from the lunge.
+- Intent: a Grub can still be killed in two swipes, but standing still lets it lunge, so the player must swipe in its recovery window, or sidestep or dash during the locked 0.3 s.
+
+### 3.2 Spitter (HP 2)
+- Stationary. Fire interval stays 2 s, measured from the end of one shot to the start of the next telegraph.
+- It starts a telegraph (needs a free slot) only when the player is within 12 tiles of it.
+- Telegraph 0.6 s before each shot: the cue shows the aim line. The aim tracks the player until 0.2 s before firing, then locks. The projectile travels in the locked direction at current speed.
+- Projectile range: 12 tiles. It disappears at that distance. It is also destroyed on hitting a static solid (wall or obstacle) or a Shieldbearer's front guard (see 4.2), whoever fired it.
+- Projectile hit width: 0.25 tile (the aim line is drawn at that width). If the existing projectile has a different collision size, the 0.25 tile in this spec replaces it.
+
+## 4. New enemies
+
+### 4.1 Charger (HP 3)
+Intent: teaches the dash. A straight-line threat that is best answered by a dash or a sidestep, and that exposes itself after a charge.
+
+| Parameter | Value |
+|---|---|
+| HP | 3 |
+| Approach speed | 1.5 tiles/s, toward the player until within 7 tiles and in line of sight |
+| Windup (telegraph) | 0.8 s |
+| Tracking | Turns to follow the player for the first 0.5 s of the windup. Direction locks for the last 0.3 s. |
+| Charge speed | 12 tiles/s, in a straight line, max 8 tiles |
+| Charge hit | 1 damage on contact with the player. It does not stop on hitting the player. |
+| Charge end | Stops at the first static solid (wall or obstacle) or after 8 tiles. |
+| Recovery after a charge in the open (8 tiles, no solid) | 0.8 s, vulnerable, no attack. |
+| Recovery after hitting a static solid | 1.5 s stunned, vulnerable, no attack. Visible stun cue. |
+| Cooldown | 1.0 s after recovery before the next windup can start. |
+
+Rules:
+- A static solid is any wall or obstacle that does not move. Enemies, the player and projectiles are not solids for the Charger.
+- The telegraph shows the charge lane: direction and the length of travel (up to the first static solid or 8 tiles). The lane is shown during the whole windup and updates while tracking.
+- The charge can be avoided by leaving the lane (lane is 1 tile wide) or by dashing through it. Dashing invulnerability (0.25 s) covers the moment of contact.
+- Swiping a Charger deals 1 damage but does not interrupt windup, charge or recovery (2.5). It is not knocked back.
+- A Charger passes through other enemies without hurting them. Enemies do not block the lane.
+- A Charger that is killed during the windup or charge stops immediately and deals no damage.
+- Player in a corner: the Charger still charges. The lane ends at the wall behind the player. The player can dash out. Standing still takes 1 damage.
+- Edge case 5 applies to any static solid within 1 tile of the lane start.
+
+### 4.2 Shieldbearer (HP 3)
+Intent: teaches positioning and target order. Frontal attacks do nothing, so the player must move around it. Dashing past it is the fast way to get behind.
+
+| Parameter | Value |
+|---|---|
+| HP | 3 |
+| Walk speed | 1.2 tiles/s, always facing the player |
+| Turn rate | 90°/s maximum |
+| Guard arc | 120° centered on its facing (±60°). Attacks from within the arc deal 0 damage. |
+| Bash telegraph | 0.6 s. The Shieldbearer stops moving and does not turn. The cue shows the bash area. |
+| Bash | Hits a cone 90° wide (±45° from facing) and 1.5 tiles long from the Shieldbearer's center, within 0.1 s. 1 damage. The player is hit if their hitbox overlaps the cone during the 0.1 s. |
+| Recovery after bash | 0.8 s with the guard down: the front is vulnerable. It does not turn during this. |
+| Cooldown | 0.6 s before the next bash telegraph. |
+| Bash trigger | After the cooldown, when the player is within 1.5 tiles and inside the front 60° (±30° from facing), and a slot is free. |
+
+Rules:
+- Guard check (one rule for swipes and projectiles):
+  - The attack origin is the player's position at the moment the swipe is made, or the projectile's position when it reaches the Shieldbearer. The swipe must also actually hit the Shieldbearer.
+  - It is blocked if the angle between the Shieldbearer's facing at that moment and the direction to the origin is 60° or less, and the guard is up. The swipe hitbox center is not used.
+- A swipe that lands inside the guard arc deals no damage, causes no Flinch, and shows a distinct block cue (visual and sound, see the visual spec).
+- A swipe from outside the arc (side or back) deals 1 damage.
+- Spitter projectiles that hit the guard arc are destroyed.
+- The guard is down only during bash recovery (and the telegraph and bash themselves count as guard up).
+- If the player is outside the front 60° or beyond 1.5 tiles, the Shieldbearer turns toward the player at up to 90°/s and does not bash.
+- The player's dash passes through the Shieldbearer's space (no collision during dash). Positioning behind it takes one dash.
+
+## 5. Room composition (5-room slice)
+
+Counts stay within 3–6 enemies per room. A room still ends when all enemies are defeated. Each room has a primary question for the player.
+
+| Room | Enemies | Question |
+|---|---|---|
+| 1 | 3 Grubs | Learn the Grub's telegraph: when do I step or swipe? Standing still in a corner is punished by lunges. |
+| 2 | 2 Grubs + 1 Charger | Where do I stand to avoid the charge lane while Grubs are on me? First use of the dash against a charge. |
+| 3 | 2 Spitters + 1 Shieldbearer | Which first? Shield blocks shots, so the player must get around it or use it as cover. Where do I stand relative to Spitters' aim? |
+| 4 | 2 Chargers + 2 Grubs | When do I dash? Chargers' lanes cross; the stun after hitting a solid is the opening to attack. |
+| 5 | 1 Shieldbearer + 1 Charger + 1 Spitter + 2 Grubs | Mixed: all three questions at once, with the attack limit (2.3) keeping it readable. |
+
+Room geometry: rooms 2–5 need walls or obstacles so that a Charger's stun is achievable and lanes can be avoided. The layout audit and any edits are Build's task (T7).
+
+## 6. Edge cases
+
+1. Player dashes during a telegraph: telegraph continues, attack resolves as normal; invulnerability applies if timing overlaps.
+2. Player is hit-stunned when a second attack lands: the existing invulnerability window (until 0.8 s after the hit) protects them.
+3. Two lunges or a lunge plus a bash resolve in the same moment: the player takes 1 damage at most per invulnerability window.
+4. Enemy dies during its telegraph: the telegraph and attack are cancelled with no damage, and the slot is released.
+5. Charger lane blocked by a static solid less than 1 tile away: it does not request a slot or start a windup toward that solid, and repositions first.
+6. Pause during any phase: all timers pause.
+7. Frame-rate change or hitch (a frame longer than 0.1 s): timers must not skip a telegraph. Damage is never applied in the same update in which a telegraph starts. The telegraph is shown for at least one rendered frame before any damage.
+8. An enemy is hit in Telegraph, Active, Recovery, Stunned or Cooldown: it takes the damage and nothing else changes (2.5).
+9. All slots are taken and a third enemy wants to attack: it waits (2.3) with no cue, and starts its telegraph in the update in which a slot is released.
+10. A Charger charge ends on an obstacle: it is stunned for 1.5 s, the same as for a wall.
+
+## 7. Acceptance criteria
+
+### 7.1 Verification (QA)
+All checks run at 30 FPS and 60 FPS with the same result.
+
+- V1 Telegraph exists: for each of Grub lunge, Spitter shot, Charger charge and Shieldbearer bash, a threat cue is visible for at least 0.4 s before damage, and damage never occurs before the stated telegraph time elapsed (±0.05 s).
+- V2 Durations: Charger windup 0.8 s, Shieldbearer bash telegraph 0.6 s, Grub telegraph 0.5 s, Spitter telegraph 0.6 s, each measured ±0.05 s. Lock points: Grub direction fixed from 0.2 s ±0.05 s into its telegraph, Charger from 0.5 s, Spitter from 0.4 s.
+- V3 Grub: walking into a walking Grub deals no damage. A completed lunge deals 1 heart. A player standing still in a corner takes lunge damage. The lunge rectangle is 1.0 tile wide and 2.0 tiles long.
+- V4 Charger dodge: leaving the lane during the final 0.3 s of the windup avoids damage. A dash timed over the moment of contact avoids damage. Standing in the lane takes 1 heart.
+- V5 Charger stop: a charge ending in a wall or an obstacle leaves it stunned and attackable for 1.5 s, and attacks during that time deal 1 damage. A charge that runs the full 8 tiles ends in a 0.8 s recovery with no stun.
+- V6 Shieldbearer guard: a swipe from the front deals 0 damage, causes no Flinch and shows the block cue. A swipe from the side or back deals 1 damage. The guard check uses the player's position at swipe time, with a 60° half-angle (60° counts as blocked). A Spitter projectile hitting the front arc is destroyed.
+- V7 Shieldbearer recovery: after a bash, the front is vulnerable for 0.8 s. The bash cone is 90° wide and 1.5 tiles long, and it only starts with the player within 1.5 tiles and ±30° of its facing.
+- V8 Attack limit: in room 5, never more than 2 enemies are in a Telegraph or Active phase at the same moment. A slot is taken when Telegraph starts and released when Recovery starts (a Spitter's when it fires), when the enemy dies, or when the room ends.
+- V9 Rooms: each room contains exactly the enemies listed in section 5, and the room ends only when all are defeated.
+- V10 Input: no new buttons exist, attack and dash inputs behave as in build 0.3.
+- V11 Edge cases: items 1, 4 and 7 of section 6 behave as written.
+- V12 Grub dodge: leaving the lunge rectangle during the final 0.3 s of the Grub telegraph avoids damage. A dash timed over the lunge avoids damage.
+- V13 No flinch cancel: swiping an enemy that is in Telegraph, Active, Recovery, Stunned or Cooldown does not change the timing of any of its phases (±0.05 s) or its direction, for every type. An enemy hit while in Chase or Waiting pauses for 0.2 s. Edge cases 8 and 10.
+- V14 Waiting: with both slots held, a third enemy (any type) shows no threat cue and deals no damage, and follows the Waiting behavior in 2.3. It starts its telegraph in the update in which a slot frees up (edge case 9). Requests are granted in order. A Spitter does not start a telegraph with the player more than 12 tiles away, and its projectile disappears after 12 tiles or on a static solid.
+
+### 7.2 Experience signals (playtest and Review)
+These are kept out of the Playtester's handoff.
+- E1 The player does not report that one position or tactic clears every room.
+- E2 The player uses the dash in combat for a reason (dodging a charge, getting behind a shield), not only to cross the room.
+- E3 The player describes the enemy types as needing different handling.
+- E4 The player can say what killed or hurt them and could have seen it coming (readable threats).
+- E5 Minute 2 and minute 15 do not feel the same.
+The verdict on whether the monotony is addressed belongs to Review.
+
+## 8. Open questions
+
+- Q1 (Art Director): answered by `design/combat-enemy-visuals.md`. One cue changes because of the Grub lock point in 3.1 (see handoff 11).
+- Q2 (Technical Director): answered in handoff 08 (the cap fits the controller; layout audit is Build's T7).
+- Q3 (tuning, after playtest): turn rate 90°/s, Charger windup 0.8 s and stun 1.5 s, the Grub 0.2 s tracking and 0.3 s locked window, and the Spitter range of 12 tiles are first values. Retune from playtest results, not before. Watch for: a player standing next to a Grub and killing it with two swipes inside its 0.5 s telegraph. That is allowed (edge case 4), but check it does not become the one tactic that clears every room.
+
+## 9. Changed documents
+
+- `design/combat.md` updated to point to this spec. It does not mention the build 0.3 Flinch; section 2.5 here is the rule for build 0.4.
+- D-003 records the time-based telegraph and attack-limit choices. D-005 records the Flinch ruling, the slot lifetime and the Grub lock point.
+- `project.md` Design index should link this file and `design/combat-enemy-visuals.md` (the Game Designer cannot edit `project.md`; the Studio should).

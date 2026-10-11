@@ -1,0 +1,239 @@
+Step 1 is marked done in `goal.md`. Step 2 is now two parallel steps: 2a Diagnose by `game-designer` (the edited `02` handoff) and 2b Observe by `qa` (the new `03` handoff), because the Playtester reported a possible dash defect. The two do not depend on each other. I did not use the context request.
+
+<<<FILE goals/G-001-combat-monotony/02-playtester-to-game-designer.md
+---
+kind: handoff
+goal: G-001
+seq: 2
+from: playtester
+to: game-designer
+stage: Diagnose
+outcome: done
+---
+# 02: playtester → game-designer — Playtest report on combat in the current build
+
+## Task
+
+Diagnose why combat in the current build is experienced as monotonous, using the playtest report and the Owner's original report below. Give causes and solution options in design terms, staying within D-001 and the vision pillars. This is a player-side observation report only; it contains no causes or fixes.
+
+## Context
+
+Goal G-001: the Owner said (verbatim): 「戦闘が単調なので改善したい」 ("Combat is monotonous and I want to improve it"). The success condition is that a player from the project's player profile finds combat varied and engaging rather than repetitive, without new input buttons (D-001), while keeping threats readable and playing correctly at 30 and 60 FPS.
+
+The first playtest of the current prototype (build 0.3), focused on combat, is below. The Playtester did not see the Owner's wording.
+
+The dash-damage behavior the Playtester saw is being checked separately by `qa` (handoff 03, running in parallel). It is not part of your Diagnose scope except where it affects your reading of "dash feels pointless". If QA's result arrives before you finish, the Studio will pass it on. Do not wait for it.
+
+## Findings
+
+### Method
+
+There is no executable. I "played" by reading `sim/build-0.3.md` and following the player-observable description as a player from the profile would (action player, short intense runs, comfortable with dodging and spacing, dislikes combo memorization, gamepad). This is a described walkthrough, not live play, so I could not observe things like feel of controls, timing, animation, audio, or exact damage numbers. I only played the content the description covers (rooms 1–5 and the run as a whole).
+
+### Session summary
+
+I went through rooms 1–5 using the same approach almost every time: stand my ground, press attack, step aside for projectiles. It worked each time with little risk. By the later rooms I was repeating what I did in room 1.
+
+### Moments in sequence
+
+1. **Rooms 1–2 (Grubs).** Grubs crawl toward me. I stood still and pressed attack. Two swipes killed each one before it reached me. I only took damage when three arrived together. Felt: easy, no tension. I did not need to move.
+2. **Room 3 (Spitters).** Their projectile is slow, and one step sideways avoided it. I walked up and swiped each twice. Felt: a small new action (the sidestep), but it was trivial. Not a real threat.
+3. **Rooms 4–5 (mixed).** I backed into a corner, faced the Grubs, swiped, and stepped aside from projectiles. The same pattern worked again. Felt: nothing new. My attention dropped here.
+4. **Dash.** I rarely needed it. I used it mostly to cross the room faster, not to fight. Felt: as if I had a tool I was never asked to use. For a player who likes dodging and spacing, this was a letdown.
+5. **Whole run.** Every room ended the same way: hold position, swipe until empty. Minute 2 felt the same as minute 15. I wanted escalation, and none came.
+
+### Issues and impact
+
+- **Combat is the same in every room (high impact).** One approach (hold position, swipe) wins everywhere. Player quote: "I figured out the answer in room 1 and it never stopped being the answer."
+- **Little pressure to move or dodge (high impact).** Standing in a corner is safe. Damage only came when three Grubs arrived at once. Spitters needed one step. As a player who wants intense runs, I did not feel intensity.
+- **Dash feels pointless in combat (medium–high impact).** I only used it for travel. Player quote: "Why do I have a dash?"
+- **No sense of progression within a run (medium–high impact).** Later rooms did not feel harder or different.
+- **Enemy variety feels shallow (medium).** Spitters and Grubs mixed together did not change what I did.
+
+### Positives
+
+- Attacks are quick to kill: two swipes per enemy. This is clear and readable.
+- Spitter projectiles are easy to read.
+- Nothing felt unfair or confusing.
+
+### Behavior that looks plainly broken
+
+- **Dash after being hit:** occasionally, if I dash right after taking a hit, I take damage partway through the dash. As a player it looked like the dash did not protect me, or damage landed late. It was rare, and I could not tell what triggered it. This may be a defect. I am reporting only what I saw. (Routed to `qa` by the Studio, handoff 03.)
+- No crashes or stuck states observed.
+
+### Not observed
+
+- Controller feel, hit feedback, sound, visuals, and enemy types beyond Grubs and Spitters.
+- Anything past room 5, and the overall length of a run in real time.
+- How the damage-during-dash case is triggered.
+
+## Decisions already made
+
+- D-001: Combat uses one attack button plus dash. No new input buttons without Owner approval.
+
+## Constraints
+
+- This report covers only what a player could see and feel. It makes no claims about causes in code or design.
+- I have no authority over design decisions.
+- Solutions must stay inside D-001 and the pillars: one-button combat, short runs (15–20 minutes), readable threats. They must work at 30 and 60 FPS, and should reuse existing systems where possible (small team).
+- If the only viable options need a new button or change a pillar, say so plainly. That triggers an Owner escalation through `game-director`.
+
+## Open questions
+
+- Is the dash meant to protect the player? As a player I expected it to, and it sometimes did not. (Check against `design/combat.md`; QA is checking the build.)
+- Are there rooms beyond 5 that change the pattern? I could not tell.
+
+## Expected output
+
+A diagnosis with causes and solution options in design terms (skill `diagnose-experience`). Put it in Findings of your outgoing Handoff. Recommend which options to pursue, and name any option that touches D-001 or a pillar.
+
+Send the outgoing Handoff to `game-director` for the Decide stage if the diagnosis offers a real choice of direction, priority or scope. If the diagnosis shows a single obvious fix inside your own authority (rules, tuning, enemy behavior), say so. The Studio will then route to Design instead.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/diagnose-experience.md
+- Project: project.md#vision; project.md#player-profile; project.md#constraints; design/combat.md; sim/build-0.3.md
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-001-combat-monotony/01-studio-to-playtester.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/03-studio-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 3
+from: studio
+to: qa
+stage: Observe
+outcome: routed
+---
+# 03: studio → qa — Check a possible dash-damage defect in build 0.3
+
+## Task
+
+Try to reproduce the behavior below in build 0.3 and compare it with the dash and invulnerability rules in `design/combat.md`. Report whether it is a defect, or intended behavior that merely looked wrong to a player. If it is a defect, write a defect report with acceptance criteria (skill `reproduce-defect`).
+
+## Context
+
+Goal G-001 is about monotonous combat. During a first combat playtest, the Playtester saw something that looked plainly broken and is outside the experience question. It is checked here in parallel with the design diagnosis, because neither step uses the other's output.
+
+Player-observed behavior (a player's words, with no cause known):
+
+- Occasionally, when the player dashes right after taking a hit, they take damage partway through the dash. It looked as if the dash did not protect them, or damage landed late.
+- It was rare. The trigger is unknown: which enemy, how soon after the hit, which direction, and so on.
+- Seen only while playing rooms 1–5 of build 0.3. No crashes or stuck states were seen.
+
+The same playtest also noted that the dash felt pointless in combat. That is a design question handled elsewhere. Do not judge it here.
+
+## Findings
+
+None yet. This is the first Observe for this behavior.
+
+## Decisions already made
+
+- D-001: Combat uses one attack button plus dash.
+
+## Constraints
+
+- Verify against the design documents and the build only.
+- The build must play correctly at both 30 and 60 FPS. If the behavior depends on frame rate, say so and record the frame rate.
+- Dry-run project: "running the build" means reading `sim/build-0.3.md`, which stands in for the build. If it does not give enough detail to reproduce or exclude the behavior, say exactly what is missing instead of guessing.
+
+## Open questions
+
+- Does `design/combat.md` say the dash gives invulnerability, and over what window? If the damage lands inside that window, it is a defect. If it lands outside the window, or in a case the design does not cover, it is not a defect, and the design may be unclear.
+- Does the behavior depend on a hit having just landed (for example, overlapping invulnerability from damage and from dash), or on the frame rate?
+
+## Expected output
+
+A defect report if the behavior is a confirmed defect: reproduction steps, severity, and player-observable acceptance criteria. Otherwise a short report saying it is intended behavior, cannot be reproduced, or hits a design gap. For a design gap, state exactly which case is undefined.
+
+Address the result to `studio`. The Studio will route it to `gameplay-engineer` (confirmed defect, intended behavior specified), `game-designer` (undefined behavior), or no one (not reproducible, or intended).
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/reproduce-defect.md
+- Project: design/combat.md; sim/build-0.3.md; project.md#constraints
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-001-combat-monotony/02-playtester-to-game-designer.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-11
+---
+# G-001: Improve monotonous combat
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): a player from the project's player profile experiences combat in the current build as varied and engaging rather than repetitive. Playing a run involves meaningful moment-to-moment variation in how the player positions, times and responds to enemies. Numeric thresholds belong to Design; the final verdict belongs to Review.
+
+Constraints that shape any solution:
+- Pillar 1 and D-001: combat stays one-button (attack + dash). No new input buttons without Owner approval. Variety must come from positioning, timing and enemy behavior.
+- Readable threats (pillar 3) and 30/60 FPS correctness must be preserved.
+- Small team: prefer reusing existing systems.
+
+Out of scope: new input buttons or a larger player kit, changes to run length, new biomes or rooms unrelated to combat variety, and non-combat systems.
+
+Not an immediate escalation: the Goal does not conflict with the vision or D-001. It must be solved inside them. If Diagnose finds that the only viable fixes need a new button or change a pillar, that triggers an Owner escalation then.
+
+## Unknowns
+
+Entry questions from `development-loop.md`:
+- Observe: has the problem been observed first-hand? No. It is an experience problem (the game may work as specified but feel wrong), so `playtester` observes. The Owner's wording is not given to the Playtester, to avoid confirming a hypothesis.
+- Diagnose: is the cause understood? No. What makes the combat feel monotonous is unknown (enemy behavior, kit depth, room design, pacing). Stage created.
+- Decide: is there a real choice of direction, priority or scope? Probably, once the diagnosis offers options. Tentative.
+- Design: is the intended behavior specified well enough to build? Not for any change yet. Tentative on the chosen option.
+- Plan: tentative. Needed only if the chosen change is non-obvious, risky or cross-system.
+- Build: tentative. Needed only if the chosen option changes the game.
+- Verify: always after Build (tentative with Build).
+- Play: the Goal is about how the game feels, so a Playtester re-evaluates after Build (tentative with Build).
+- Review: experience Goal, so the Game Director judges the outcome. Planned.
+- Observe (defect), added after step 1: the Playtester saw a possible dash-damage defect. Whether it contradicts the design is unknown, so `qa` observes it (step 2b).
+
+Skipped: none yet. The Project Context does not answer any entry question.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | [01-studio-to-playtester.md](01-studio-to-playtester.md) → report in [02-playtester-to-game-designer.md](02-playtester-to-game-designer.md) |
+| 2a | Diagnose | game-designer | diagnose-experience | open | 02-playtester-to-game-designer.md |
+| 2b | Observe (possible defect: damage during dash) | qa | reproduce-defect | open | 03-studio-to-qa.md |
+| 3 | Decide | game-director | make-decision (prepare-owner-escalation if a trigger fires) | tentative (if the diagnosis offers a real choice of direction, priority or scope, or implies something that conflicts with D-001) | — |
+| 4 | Design | game-designer | write-design-spec | tentative (if a change is chosen) | — |
+| 5 | Plan | technical-director | technical-plan | tentative (if the chosen change is non-obvious, risky or cross-system) | — |
+| 6 | Build | gameplay-engineer | implement-change | tentative (if a change is chosen, or if 2b confirms a defect) | — |
+| 7 | Verify | qa | verify-change | tentative (after Build) | — |
+| 8 | Play | playtester | playtest-session | tentative (after Build; fresh Handoff composed by the Studio without implementation history) | — |
+| 9 | Review | game-director | review-outcome | planned | — |
+
+Status: planned | tentative | open | done | skipped.
+
+## Route changes
+
+- After step 1 (Observe, playtester): the report matches the plan on the experience side (monotony confirmed: one winning approach in every room, little pressure to move, dash unused in combat), so Diagnose follows as planned. It also contained a possible defect (damage during a dash after being hit). Per the return rule "Play/Observe: defect → Observe (`qa`)", added step 2b as a parallel step, because neither 2a nor 2b uses the other's output. The Route waits for both before moving on. If 2b confirms a defect against a specified behavior, a Build (`gameplay-engineer`) and Verify (`qa`) for the fix join the route. If it shows the behavior is undefined, `game-designer` is involved. 2b's finding may also change how 2a's "dash feels pointless" should be read, so the Studio passes it to the Designer if it arrives early.
+- Handoff 02 was edited in place (still from `playtester`): the Owner's original report was added to Context, the dash-defect item was marked as routed to `qa`, and the Load list and Expected output were filled in.
+
+## Next action
+
+Two parallel steps are open:
+- 2a: `game-designer` runs Diagnose from `02-playtester-to-game-designer.md` (skill `diagnose-experience`).
+- 2b: `qa` runs Observe on the possible dash-damage defect from `03-studio-to-qa.md` (skill `reproduce-defect`), with the result addressed to `studio`.
+
+After both finish, run Route again. Step 3 (Decide) follows 2a if the diagnosis offers a real choice. The result of 2b is routed as its report calls for.
+
+## Outcome
+
+(To be filled at close, in Japanese.)
+>>>END

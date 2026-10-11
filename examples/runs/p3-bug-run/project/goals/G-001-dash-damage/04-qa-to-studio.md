@@ -1,0 +1,76 @@
+---
+kind: handoff
+goal: G-001
+seq: 4
+from: qa
+to: studio
+stage: Review
+outcome: pass
+---
+# 04: qa → studio — Verification of G-001 fix (damage during dash): PASS at 30 FPS and 60 FPS
+
+## Task
+
+Review the verification result below and decide whether Goal G-001 is met.
+
+## Context
+
+Goal G-001. The Owner reported: "Sometimes I take damage even while dashing." QA's defect report (02) set the acceptance criteria from `design/combat.md`: the dash is invulnerable for its full 0.25 s, and a hit is followed by 0.3 s hit-stun and then invulnerability until 0.8 s after the hit. The gameplay engineer's change (03) counts as made under the dry-run rules in `project.md#constraints`.
+
+This verification worked from the acceptance criteria in 02, the design in `design/combat.md`, and the observed behavior in `sim/build-0.4.md`. It did not rely on the engineer's explanation of why the change should work. `sim/build-0.4.md` states that observations are the same at 30 FPS and 60 FPS, apart from timing differences of up to about one frame (about 33 ms at 30 FPS, about 17 ms at 60 FPS) at the moment protection after a hit runs out. Each criterion below is therefore recorded for both frame rates, with that tolerance noted where it applies.
+
+## Findings
+
+### Verdict: pass. Every criterion passes at both 30 FPS and 60 FPS.
+
+### Per-criterion results
+
+| # | Criterion (from 02) | 30 FPS | 60 FPS | Evidence (`sim/build-0.4.md`) |
+|---|---|---|---|---|
+| 1 | Dash at about 0.3 s after a hit, Grub in contact range: no damage for the full 0.25 s dash | Pass | Pass | "Dashing at about 0.3 … s after a hit, with a Grub touching you … you take no damage for the whole dash, including its last moment. This holds at both frame rates." |
+| 2 | Same with dashes at about 0.4, 0.55, 0.7 and 0.79 s after the hit, including a dash that runs past the 0.8 s post-hit invulnerability end | Pass | Pass | The same bullet lists 0.4, 0.55, 0.7 and 0.79 s. The 0.55, 0.7 and 0.79 s dashes outlast 0.8 s after the hit, and no damage is taken "including its last moment". |
+| 3 | Same with a Spitter projectile crossing the dash path | Pass | Pass | The same bullet covers "a Spitter projectile crossing your path": no damage for the whole dash. |
+| 4 | Dash with no recent hit: damage-free for its full duration | Pass | Pass | "Dashing with no recent hit, with enemies in contact range or projectiles crossing the path: no damage during the dash." |
+| 5a | Dash is still 4 tiles over 0.25 s, 0.6 s cooldown | Pass | Pass | "It covers 4 tiles in 0.25 s, with a 0.6 s wait before you can dash again." |
+| 5b | Attack pressed during a dash is queued and fires when the dash ends | Pass | Pass | "An attack pressed during a dash is remembered and swings as soon as the dash ends." |
+| 5c | A hit deals 1 heart, 0.3 s hit-stun, invulnerability until 0.8 s after the hit | Pass | Pass | "After a hit you lose 1 heart and are stunned for 0.3 s. You are then untouchable until 0.8 s after the hit." |
+| 5d | Damage resumes normally once the dash and post-hit invulnerability have both ended | Pass | Pass | "Once both the dash and the period after a hit are over, enemies and projectiles hurt you normally (1 heart per hit)." |
+
+### Additional checks
+
+- **Early dash does not cut post-hit invulnerability short.** If a dash begins early after a hit and ends before 0.8 s, the player stays untouchable until 0.8 s after the hit, as the design requires. Passes at both frame rates.
+- **Edge frames of the dash.** A dash that begins or ends while an enemy is touching the player causes no damage during the dash. Damage can land on the first frame after the dash ends only if the 0.8 s post-hit window is also over, which is correct. Passes at both frame rates.
+- **Original reproduction.** The original steps were: get hit, dash as soon as input returns, with Grubs or Spitter projectiles present. This no longer produces damage during the dash. The "occasional damage mid-dash" symptom does not reproduce.
+- **Frame-rate tolerance.** The only difference between 30 and 60 FPS is the expiry of post-hit protection, which can shift by up to one frame. That is inside the "about" timing the criteria use and does not change any pass or fail result.
+
+### Notes, not failures
+
+- `sim/build-0.4.md` says the player may feel "slightly safer right after being hit than in build 0.3". This matches `design/combat.md`: invulnerability lasts until 0.8 s after the hit, and an early dash no longer cuts it short. It is not a spec violation. If the Owner wants this softened, that is a design question for `game-designer`, not a defect.
+- The evidence for both frame rates comes from one build description that states the results hold at both. There are no separate per-frame-rate recordings or logs in this dry-run.
+- QA did not modify production code.
+
+## Decisions already made
+
+- D-001: no new input buttons beyond attack, dash and pause. The change added none.
+
+## Constraints
+
+- Must play correctly at both 30 and 60 FPS. Verified.
+- Desktop, keyboard and gamepad.
+- No new input buttons (D-001).
+
+## Open questions
+
+None. No criterion was undefined, so there is no spec gap.
+
+## Expected output
+
+The Studio reviews this pass against Goal G-001 and records goal-met or goal-not-met. No further engineering work is requested.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: project.md#constraints, design/combat.md, sim/build-0.4.md
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-001-dash-damage/03-gameplay-engineer-to-qa.md

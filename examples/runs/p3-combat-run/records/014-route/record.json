@@ -1,0 +1,107 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "493ee2a0-57a3-4e08-902f-03053c6bdf50",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 21004,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 888,
+    "output_tokens_details": {
+     "thinking_tokens": 803
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 21004,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 888,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 21004,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 21004
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.0929,
+   "attempt": 1,
+   "started": "2026-10-11T10:40:15",
+   "seconds": 11.3,
+   "errors": [
+    "goal.md must be written"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "57118abb-3def-4ed9-b558-f7ba02f6ef65",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 21052,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 9253,
+    "output_tokens_details": {
+     "thinking_tokens": 1930
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 21052,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 9253,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 21052,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 21052
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.176742,
+   "attempt": 2,
+   "started": "2026-10-11T10:40:26",
+   "seconds": 57.6,
+   "errors": [
+    "goal.md: only one step (or one group of parallel steps 2a, 2b) may be open",
+    "open step 4a: handoff [12-studio-to-qa.md](12-studio-to-qa.md) (earlier: [09-studio-to-qa.md](09-studio-to-qa.md) → [10-qa-to-studio.md](10-qa-to-studio.md)) does not exist"
+   ]
+  }
+ ],
+ "status": "rejected"
+}

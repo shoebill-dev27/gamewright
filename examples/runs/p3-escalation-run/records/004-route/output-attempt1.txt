@@ -1,0 +1,216 @@
+Step 5 is closed and I've routed two parallel steps: the technical plan (6a) and the art-director cue design (6b). Q1 in the handoff asks for art-director involvement, and the cue visuals don't depend on the technical plan, so the two can run side by side.
+
+`project.md` isn't in my write list, so the Design-index link to `design/combat-enemy-depth.md` is still pending. I've recorded it in `goal.md` under Next action.
+
+<<<FILE goals/G-002-combat-monotony/goal.md
+---
+kind: goal
+id: G-002
+project: lantern-depths
+status: active
+created: 2026-10-10
+---
+# G-002: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success: in a playtest of the 5-room slice, the player has to make different decisions across rooms
+(where to stand, when to dash, which enemy first) instead of repeating one pattern, and the Game
+Director judges the monotony addressed on that evidence. Out of scope: new biomes,
+meta-progression, run length. Also out of scope (Owner, D-002): a hold-to-charge attack.
+
+## Unknowns
+
+All stages of route pattern 2 are open: the monotony has not been observed or diagnosed, a
+direction choice is likely (D-001 limits some options), new behavior will need a spec and a plan,
+and it is an experience Goal (Play, Review).
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 01-studio-to-playtester.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 02-playtester-to-game-designer.md |
+| 3 | Decide | game-director | make-decision, prepare-owner-escalation | done (escalated) | 03-game-designer-to-game-director.md |
+| 4 | Decide | owner | — | done (Option A, D-002) | 04-game-director-to-owner.md |
+| 5 | Design | game-designer | write-design-spec | done | 05-studio-to-game-designer.md |
+| 6a | Plan | technical-director | technical-plan | open | 06-game-designer-to-technical-director.md |
+| 6b | Design (visual cues) | art-director | write-design-spec | open | 07-studio-to-art-director.md |
+| 7 | Build | gameplay-engineer | implement-change | planned | — |
+| 8a | Verify | qa | verify-change | planned | — |
+| 8b | Verify (visual) | art-director | visual-review | planned | — |
+| 9 | Play | playtester | playtest-session | planned | — |
+| 10 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+- After step 3: Option B would change Owner Decision D-001 while the evidence leaves A and B both
+  viable → escalation triggers → step 4 (Owner); all later steps paused.
+- After step 4: the Owner chose Option A (D-002) with the condition that a hold-to-charge attack is
+  not part of this Goal. The remaining route matches Option A's "If chosen" (Design → Plan → Build →
+  Verify → Play → Review), so steps 5–10 are unchanged. Goal set back to `active`. Step 9 must be
+  routed to the Playtester through a fresh Studio-composed Handoff without implementation
+  knowledge.
+- After step 5: the spec leaves the visual design of telegraph cues, the Charger lane indicator and
+  the block/stun cues undecided (Designer's Q1), and these affect what the player sees (pillar 3,
+  readable threats). Added step 6b (Design, `art-director`) in parallel with Plan 6a: neither
+  consumes the other's output. Because the change affects visuals, Verify gains a parallel visual
+  review (8b). Build (7) waits for both 6a and 6b. If the cue designs need timing changes, they go
+  back to `game-designer`, not decided by the Art Director.
+
+## Next action
+
+Two steps are open in parallel:
+- technical-director starts 6a (Plan) from `06-game-designer-to-technical-director.md`.
+- art-director starts 6b (Design, visual cues) from `07-studio-to-art-director.md`.
+
+Both address their results to `studio`; the Route operation waits for both before writing the Build Handoff.
+Pending Studio item: add `design/combat-enemy-depth.md` to the Design index in `project.md` (not writable in this operation; do it in the next operation that can edit `project.md`).
+When Build and Verify are routed, their Handoffs must ask for results addressed to `studio` (needed to compose the independent Playtester Handoff for step 9).
+
+## Outcome
+
+—
+>>>END
+
+<<<FILE goals/G-002-combat-monotony/06-game-designer-to-technical-director.md
+---
+kind: handoff
+goal: G-002
+seq: 6
+from: game-designer
+to: technical-director
+stage: Plan
+outcome: done
+---
+# 06: game-designer → technical-director — Plan the enemy-side combat depth (Option A)
+
+## Task
+
+Plan the technical approach and work breakdown for the spec in `design/combat-enemy-depth.md`: enemy telegraphs, Charger, Shieldbearer and the 5-room composition. Answer feasibility and cost questions Q2 below.
+
+## Context
+
+G-002 「戦闘が単調なので改善したい」. The playtest and diagnosis found monotonous combat (one tactic clears every room, dash unused in combat, enemies fought identically). The Owner chose Option A, enemy-side depth with one-button combat kept (D-002). The spec is now written.
+
+## Findings
+
+Spec summary (full numbers and acceptance criteria are in `design/combat-enemy-depth.md`):
+
+- **Time basis:** all timings in real seconds; minimum telegraph 0.4 s; outcomes identical at 30 and 60 FPS (D-003).
+- **Telegraph for every damaging attack,** in the orange/red threat palette, showing which enemy and where. At most 2 enemies in telegraph/attack at once (D-003).
+- **Grub:** stops 1.5 tiles away, 0.5 s telegraph, lunge 2 tiles in 0.15 s, 0.6 s recovery. Walking contact no longer damages.
+- **Spitter:** 0.6 s aim telegraph, aim locks 0.2 s before firing, interval 2 s.
+- **Charger (HP 3):** 0.8 s windup (tracks 0.5 s, locks 0.3 s), shows the charge lane; charges 12 tiles/s up to 8 tiles; 1.0 s cooldown; 0.8 s recovery in the open, 1.5 s stun after a wall hit.
+- **Shieldbearer (HP 3):** 120° guard arc, 90°/s turn rate, front attacks deal 0 with a block cue, blocks Spitter shots; bash with 0.6 s telegraph and 0.8 s guard-down recovery.
+- **Rooms:** 1: 3 Grubs. 2: 2 Grubs + Charger. 3: 2 Spitters + Shieldbearer. 4: 2 Chargers + 2 Grubs. 5: Shieldbearer + Charger + Spitter + 2 Grubs.
+- **Acceptance:** V1–V11 (QA checks at 30 and 60 FPS) and E1–E5 (experience signals, kept for Review and not for the Playtester).
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no new input buttons.
+- D-002 (Owner): enemy-side depth; the spec contains only the items listed above.
+- D-003 (Game Designer): time-based telegraphs with a 0.4 s floor and a limit of 2 simultaneous attackers.
+
+## Constraints
+
+- No new inputs. Small team: reuse the shared enemy controller where possible.
+- Must play correctly at 30 and 60 FPS.
+- Scope: the 5-room slice only. No new biomes, meta-progression or run-length changes.
+- Dry-run project: a Build step states the change exactly in its Handoff (what, where, how to exercise it); it then counts as made.
+
+## Open questions
+
+- Q1 (visual cues): handled by the Studio in parallel. The `art-director` designs the telegraph cues, Charger lane indicator, and block and stun cues in step 6b (`07-studio-to-art-director.md`). Do not decide their visuals; plan the telegraph/cue system so that cue visuals can be swapped without logic changes, and note any technical limits on cues (e.g., lane indicator drawing, draw cost) in your plan for the Studio to pass on.
+- Q2 (Technical Director): do rooms 2–5 need layout changes (walls, obstacles) for charge lanes and wall-stun? Does the 2-attacker cap fit the existing enemy controller? Rough cost and risks.
+- Q3: first tuning values (turn rate, windup, stun) are to be retuned after playtest; the plan should keep them easy to change (data-driven where the existing systems allow).
+
+## Expected output
+
+A technical plan and work breakdown (Technical Director's own contract, `technical-plan`), with answers to Q2 and any spec questions, including tests (with 30 and 60 FPS checks) and sequencing for the Build step. Address the result to `studio`: the Studio merges it with the Art Director's cue design (step 6b) before writing the Build Handoff.
+
+## Sender assessment
+
+Routing instructions from the Studio for later steps:
+
+- The Verify and Build steps must address their result Handoffs to `studio` when the route reaches them.
+- The Playtester step (9) needs a fresh Handoff composed by the Studio from the build only. Nothing in sections 7.2 (experience signals) or design-side files should be put into the Playtester's Handoff.
+
+Confidence: the structure and values are first tuning guesses; the biggest risks are readability of mixed rooms (room 5) and whether the Shieldbearer's turn rate makes flanking too easy or too hard.
+
+## Load
+
+- Role: studio/roles/technical-director.md
+- Skills: studio/skills/technical-plan.md
+- Project: project.md#constraints, design/combat-enemy-depth.md, design/combat.md, sim/build-0.3.md, sim/repo-notes.md
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-002-enemy-side-combat-depth.md, decisions/D-003-time-based-telegraphs-and-attack-limit.md
+- Previous handoff: goals/G-002-combat-monotony/05-studio-to-game-designer.md
+>>>END
+
+<<<FILE goals/G-002-combat-monotony/07-studio-to-art-director.md
+---
+kind: handoff
+goal: G-002
+seq: 7
+from: studio
+to: art-director
+stage: Design
+outcome: routed
+---
+# 07: studio → art-director — Design the visual cues for enemy telegraphs, charge lane, block and stun
+
+## Task
+
+Specify what the player sees for the new enemy-side combat behavior: telegraph cues for every damaging attack, the Charger's charge-lane indicator, the Shieldbearer's block cue, and the Charger's wall-stun cue. The cues must read clearly against the dark cave art direction.
+
+## Context
+
+Goal G-002 「戦闘が単調なので改善したい」. The Owner chose enemy-side combat depth with one-button combat kept (D-002). The Game Designer wrote the behavior spec in `design/combat-enemy-depth.md` and left the visual design of these cues undecided. A technical plan is made in parallel by the Technical Director (you do not need it, and it does not need your output to start). After both are done, the Studio routes Build.
+
+## Findings
+
+Visual-relevant parts of the spec (numbers and full detail are in `design/combat-enemy-depth.md`; that file is authoritative):
+
+- Every damaging enemy attack has a telegraph in the orange/red threat palette that shows which enemy is attacking and where the attack will land. Minimum telegraph duration is 0.4 s.
+- At most 2 enemies are in telegraph/attack at once (D-003), so cues need to be distinguishable when 2 are active alongside non-attacking enemies.
+- Grub: 0.5 s telegraph, then lunge. Spitter: 0.6 s aim telegraph, aim locks 0.2 s before firing. Charger: 0.8 s windup showing the charge lane (tracks 0.5 s, then locked 0.3 s); charges up to 8 tiles; stuns 1.5 s after hitting a wall. Shieldbearer: 120° guard arc, front attacks deal 0 with a block cue; bash with 0.6 s telegraph and 0.8 s guard-down recovery.
+- Hardest readability case: room 5 (Shieldbearer + Charger + Spitter + 2 Grubs).
+- The Charger's "locked" phase and the Spitter's "aim lock" are points where the player's dodge window depends on seeing the change; the lock moment should be visible.
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no new input buttons.
+- D-002 (Owner): enemy-side depth only; no hold-to-charge attack.
+- D-003: time-based telegraphs, 0.4 s floor, at most 2 simultaneous attackers.
+
+## Constraints
+
+- Art direction (`project.md#art-direction`): warm lantern light against cold blue-black; threats saturated orange/red so they read against the dark. Pillar 3: every threat is visible before it can hurt the player.
+- Small team: prefer cues that reuse one shared telegraph/cue approach (shape, fill, flash) over per-enemy bespoke assets.
+- Cues must read the same at 30 and 60 FPS (durations are real seconds; do not rely on frame counts).
+- Do not change timings, damage, ranges or rules. If a cue cannot work with a spec value, say so and hand back to `game-designer` through the Studio instead of changing it.
+- No new input or UI buttons.
+- Scope: the 5-room slice only.
+
+## Open questions
+
+- How do the telegraph, charge lane, lock moment, block cue and stun cue look, and how are they told apart from each other and from the lantern light?
+- Which cue design keeps room 5 readable when 2 enemies are active and others are visible?
+- Any technical or asset-cost limits you assume (the Technical Director will state technical limits; flag what you need checked)?
+
+## Expected output
+
+A visual design of the cues, written to `design/combat-enemy-visuals.md` (or in Findings of your Handoff), including player-observable readability criteria that `qa` and the Art Director's later visual review can check. Address the result Handoff to `studio`.
+
+## Load
+
+- Role: studio/roles/art-director.md
+- Skills: studio/skills/write-design-spec.md
+- Project: project.md#art-direction, project.md#vision, design/combat-enemy-depth.md, design/combat.md, sim/build-0.3.md
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-002-enemy-side-combat-depth.md, decisions/D-003-time-based-telegraphs-and-attack-limit.md
+- Previous handoff: goals/G-002-combat-monotony/06-game-designer-to-technical-director.md
+>>>END

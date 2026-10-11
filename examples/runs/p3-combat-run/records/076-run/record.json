@@ -1,0 +1,12 @@
+{
+ "op": "Run",
+ "goal": "G-001",
+ "operations": [
+  "074-step-game-director",
+  "075-route"
+ ],
+ "stop_reason": "done",
+ "status": "done",
+ "owner_reads": "goals/G-001-combat-monotony/goal.md#outcome",
+ "next": null
+}

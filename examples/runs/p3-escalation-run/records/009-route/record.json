@@ -1,0 +1,73 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-002",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "2f96b1e4-3f57-4724-b674-97fa3cefba24",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 18881,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 6588,
+    "output_tokens_details": {
+     "thinking_tokens": 1888
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 18881,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 6588,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 18881,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 18881
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.14140799999999998,
+   "attempt": 1,
+   "started": "2026-10-11T10:28:35",
+   "seconds": 44.4,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-002-combat-monotony/12-studio-to-art-director.md": "e795b6ca1d66d814ff38430c74525da84f1d1f80d17acfe14e03ea2fc7a9b24f",
+  "goals/G-002-combat-monotony/goal.md": "bc3c8fcb1acfdc37e55135bc6fcd4ceafe84084ab532c2d37a9f12180fba772b"
+ },
+ "decision": {
+  "new": [
+   "art-director",
+   "Design"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "art-director",
+    "Design (Grub lock cue update)"
+   ]
+  ]
+ },
+ "seen_through_seq": 12
+}

@@ -1,0 +1,195 @@
+<<<FILE design/g001-telegraph-visuals.md
+# Visual spec: G-001 telegraphs (Phase 1 spawn marker, Phase 2 Lunge Grub and Fan Spitter)
+
+Author: art-director. Source: handoff 14, `design/g001-combat-escalation.md` (sections 3.3, 4.1, 4.2), `project.md` art direction and pillar 3.
+Status: **Phase 1 marker is ready to build.** The Phase 2 visuals are ready from the art side, and Phase 2 still waits for the technical-director's feasibility answer.
+No timings or player-facing rules are changed. No new duration is needed (see 6).
+
+## 1. Intent
+
+The player must be able to answer three questions from the screen alone, without the lantern:
+1. Something is about to appear there (spawn marker).
+2. Something is about to hit along that line (lunge lane, fan rays).
+3. How long do I have, and when is the "now" moment?
+
+Shape and motion carry the meaning. Colour alone does not, because all threats share orange/red.
+
+## 2. Shared visual rules
+
+- **Palette (proposed)**: threat orange-red `#FF5A1F`, hot core `#FFC14D`. The floor is cold blue-black. Telegraphs use no warm-light colour except these two, so the lantern's warm light is never confused with a threat.
+- **Self-lit**: telegraphs are drawn emissive and do not depend on the lantern's light radius. They must be visible when the player stands far from them.
+- **Three-stage progression (all telegraphs)**: *appearing* (dim, outline), *building* (fill rises), *committed* (solid and brightest). The committed stage is the "act now / too late to change" cue.
+- **Time-driven, not frame-driven**: every animation is a function of elapsed game time, `progress = t / duration`. No per-frame flicker or random jitter. Any pulse has a period of at least 0.2 s. This keeps 30 and 60 FPS identical.
+- **Sync**: a telegraph starts on the same logic frame as its timer, and its committed stage ends on the frame damage can begin (±1 frame at 30 FPS, ±0.034 s).
+- **Removal**: a telegraph is removed on the same frame its source enemy dies. It also ends when its attack resolves. The lane or ray never lingers after the attack.
+- **Draw order**: telegraphs sit on the ground under characters and projectiles, so they never hide the player or an enemy.
+- **Identity at rest (not only during the telegraph)**: Lunge Grub and Fan Spitter must be recognisable *before* they telegraph, so that a player can anticipate them.
+  - Lunge Grub: the Grub silhouette with a visible orange-red crest or spikes on the head and a slightly darker body.
+  - Fan Spitter: the Spitter silhouette with three small orange-red mouth ports or fins in a fan.
+  - Exact art is the artist's choice. Acceptance is the check in 7.
+
+## 3. (a) Phase 1 spawn marker, 0.8 s
+
+**Reuse or new?** I cannot answer this from the packet. No file describing existing effects (such as `sim/repo-notes.md`) was included. Rule:
+- If an existing spawn, summon or ground-ring effect exists and passes the acceptance checks in 7 (A1–A5), **reuse it** and only tune its colour and timing.
+- If none exists, or none passes, build **one new minimal effect**, described below. It is a single sprite or shader using the existing particle or decal path. It is not a new system.
+- Build must state which case applied in its handoff, naming the effect.
+
+**Minimal marker (if new is needed)**
+- Shape: a flat ground ring, outer diameter about 1.5 tiles, with a dim ember dot at its centre. No direction mark, because it is non-directional. This separates it from lunge lanes and fan rays.
+- 0.0–0.8 s: the ring **contracts** from 1.5 tiles to about 0.75 tiles while its brightness rises from dim to bright. The contraction is linear in time.
+- Last 0.2 s (0.6–0.8 s): the ring is at full brightness and solid, with the ember dot at hot-core colour.
+- At 0.8 s: the ring pops (one short burst of at most 0.15 s) as the enemy appears. The burst must not hide the new enemy and does not damage.
+- No fill area larger than the ring, because a spawn marker is not a hazard and must not look like one.
+- The marker is the same for Grub and Spitter in Phase 1, so mixed waves stay simple. The sprite that appears tells them apart.
+- The ring must be fully on screen, which follows the on-screen spawn rule in the spec.
+
+## 4. (b) Lunge Grub wind-up, 0.6 s
+
+**Direction and path must be shown.** The lunge is 5 tiles in 0.3 s (about 0.55 tile per frame at 30 FPS), and the player cannot react to it after it starts. So the wind-up shows the whole path.
+
+- **Lane**: a straight rectangular ground strip from the Grub along the locked direction. The length is the true lunge length: 5 tiles, **shortened to the wall** if a wall stops it earlier. Width equals the lunge hit width (Build reports the value; the strip must not look narrower than the real hit area).
+- **Locked direction**: the lane is drawn at wind-up start and does **not** rotate afterwards, matching the rule that the direction is locked at wind-up start.
+- **Stages**:
+  - 0.00–0.35 s *building*: lane outline plus a fill that grows outward from the Grub toward the far end, reaching the end at 0.35 s. Brightness is medium.
+  - 0.35–0.60 s *committed*: lane fully solid, hot-core edge, with chevrons (››) pointing along the lane. This 0.25 s stage matches the dash window starting at 0.35 s in spec 4.1, so "chevrons solid = dash now" is the learnable cue.
+- **Body cue**: the Grub squashes backward (crouch away from the lane) and its crest glows. The crouch is driven by `progress` and holds at its maximum for the committed stage.
+- **At lunge start**: the lane flashes once and disappears within 0.1 s. Do not keep a trailing lane during the 0.3 s lunge.
+- **Recovery (0.8 s)**: no lane. The Grub shows a dimmed crest and a slumped pose, so "vulnerable now" is readable.
+
+## 5. (c) Fan Spitter charge, 0.6 s
+
+**Show the three directions.**
+- **Rays**: three thin lines, at −25°, 0° and +25°, from the Spitter's mouth along the aim lines locked at charge start. Each ray runs to the wall, or to a fade-out at the longest projectile range if Build reports one. Rays stop at walls.
+- **Gaps stay dark**: the area between the rays is not filled, so the safe gaps read as dark floor. The rays are thin (about 0.15 tile) so the gaps are obviously wider than the rays. Optionally a faint arc at about 3 tiles from the Spitter links the three rays and shows the spread.
+- **Stages**:
+  - 0.00–0.40 s *building*: rays grow outward from the Spitter and brighten, dashed.
+  - 0.40–0.60 s *committed*: rays become solid with hot-core colour. The three ports on the Spitter body light up.
+- **At fire**: rays vanish within 0.1 s as the projectiles launch along them.
+- **Why this is not a lunge lane**: three thin rays plus a lit Spitter, never a wide strip, and the origin is a stationary Spitter.
+
+## 6. Timings
+
+No change to any gameplay duration. The marker is 0.8 s, the wind-up 0.6 s and the charge 0.6 s, all above the 0.5 s minimum visible-before-damage in acceptance criterion 4. The sub-stage times above (0.35 s, 0.4 s, 0.2 s) are visual only.
+
+For the game-designer: the cue "committed stage starts at 0.35 s" ties the lunge visual to the spec's dash window. If the dash window in 4.1 is retuned, change the committed-stage start to match.
+
+## 7. Distinguishability and acceptance criteria
+
+QA = verifiable by screenshot or a recorded clip. XP = experience signal for the playtest and Review.
+
+| ID | Criterion | QA check | XP signal |
+|---|---|---|---|
+| A1 | Marker is visible in the dark | With the player at least 8 tiles away or outside lantern light, the marker is visible in a screenshot for its whole 0.8 s. | Tester notices spawns before enemies appear. |
+| A2 | Marker timing matches the spec | Marker starts on the logic frame its 0.8 s begins. Enemy appears 0.8 s ±1 frame (±0.034 s at 30 FPS) later. No enemy sprite exists during the marker. | None needed. |
+| A3 | Marker is non-directional and non-hazardous | Marker has no lane or ray element. Standing in a marker does not hurt (the spec's 5-tile rule means this should rarely happen). | Tester does not try to dodge a marker as if it were an attack. |
+| A4 | Lunge lane is accurate | Lane length equals the real lunge length (5 tiles, or shorter at a wall). Lane does not change direction after wind-up start. A player standing just outside the lane edge is not hit. | Tester says they could see where the Grub would go. |
+| A5 | Lunge committed stage cue | Lane is solid with chevrons from 0.35 s to 0.60 s of the wind-up. A dash begun when the chevrons first appear avoids the lunge hit, per spec 4.1. | Tester reports dashing at the "solid" moment. |
+| A6 | Fan rays are accurate | Three rays are at −25°, 0°, +25° from the locked aim line, and each projectile travels along its ray. Gaps between rays are unfilled. | Tester can point to the safe gap. |
+| A7 | Types are distinguishable | In a single screenshot containing a marker, a lunge lane and fan rays, each is identified by shape alone with colour removed (greyscale test): ring, wide strip with chevrons, thin rays. | Tester names the three correctly. |
+| A8 | Types are distinguishable from existing attacks | Grub bite (no telegraph) and the normal Spitter projectile do not use a ring, lane or ray. The normal Spitter has no charge glow or ports. | Tester does not confuse a normal Spitter with a Fan Spitter. |
+| A9 | Enemies identifiable at rest | In a screenshot with the telegraph hidden, Lunge Grub is distinguishable from Grub, and Fan Spitter from Spitter, by silhouette or marking. | Tester says "that one is the dangerous one" before it telegraphs. |
+| A10 | Frame-rate independence | A recorded run at 30 and 60 FPS shows the same stage start times (±1 frame at 30 FPS) and the same lane and ray geometry. No flicker-dependent element. | None needed. |
+| A11 | Clean removal | Telegraph disappears on the same frame the enemy dies, and within 0.1 s after the attack starts. No lane or ray remains during lunge recovery. | None needed. |
+| A12 | Crowded rooms stay readable | In the room 5 layout with 3 Lunge Grubs and 1 Fan Spitter telegraphing together, every lane and ray is still visible and separable. Overlapping lanes do not exceed the single-lane peak brightness. | Tester does not report "I couldn't tell what was coming". |
+
+## 8. Edge cases
+
+- **Player hit during a wind-up or charge**: the telegraph continues unchanged (no stagger in the spec).
+- **Player standing in the lane or rays when they start**: unchanged. The telegraph draws under the player and is still readable.
+- **Lane ends at a wall**: the lane is shortened to the real stopping point.
+- **Overlapping lanes (several Lunge Grubs)**: draw additively but cap brightness at the single-lane peak. The chevron direction remains legible.
+- **Spawn marker near a room edge**: the ring stays fully on screen (spec rule). A marker that would sit partially under a wall sprite is drawn on top of floor decoration but under walls.
+- **Pause or hit-stop (if any)**: telegraph progress follows game time and freezes with it.
+- **Reduced contrast settings**: none are specified in the packet. Shape-based distinction (A7) is the fallback, and colour is never the only cue.
+
+## 9. Open questions
+
+- Does an existing spawn effect exist, and does it pass A1–A5? (Build checks and reports.)
+- Lunge hit width, projectile range and Spitter mouth position: needed to size the lane and rays. (Build reports.)
+- Whether the cost of the identity-at-rest art (A9) fits the small team. If the technical-director rates Phase 2 as high cost, A9 for the dropped variant is moot.
+- Playtest after Phase 2 should confirm that 0.6 s plus these visuals reads clearly in a dark cave. This is not verifiable from a described walkthrough.
+
+## 10. Changed design documents
+
+None besides this file. The spec in `design/g001-combat-escalation.md` is unchanged.
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/17-art-director-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 17
+from: art-director
+to: studio
+stage: Route
+outcome: done
+---
+# 17: art-director → studio — Telegraph visual spec for the Phase 1 spawn marker and the Phase 2 Lunge Grub and Fan Spitter
+
+## Task
+
+Hold this answer until the technical-director's Phase 2 feasibility answer arrives, then route both to `game-designer`. The Phase 1 spawn-marker answer below can go to Build now.
+
+## Context
+
+Handoff 14 asked for the player-visible telegraphs for the 0.8 s spawn marker (Phase 1), the Lunge Grub 0.6 s wind-up and the Fan Spitter 0.6 s charge (Phase 2), plus whether an existing spawn effect can serve as the marker. The full spec is `design/g001-telegraph-visuals.md`.
+
+## Findings
+
+### Spawn marker (answer first, so Phase 1 is not blocked)
+- **I cannot confirm whether an existing spawn effect exists.** The packet had no code-side description of effects. The spec gives a decision rule instead. Build checks the effects, and if one exists and passes acceptance checks A1–A5, it reuses it with only colour and timing tuned. Otherwise it builds the minimal marker: a flat orange-red ground ring that contracts from about 1.5 to 0.75 tiles over 0.8 s, brightest and solid for the last 0.2 s, with a short pop when the enemy appears (spec section 3).
+- It is non-directional and not filled, so it cannot be mistaken for a hazard.
+- Build must say in its handoff which case applied and name the effect.
+
+### Lunge Grub (spec section 4)
+- **The path is shown.** The telegraph is a strip along the locked direction, as long as the real lunge (5 tiles, shortened at a wall). It does not rotate after wind-up starts.
+- 0–0.35 s: the strip fills outward from the Grub. 0.35–0.60 s: it is solid with chevrons. This committed stage lines up with the dash window in spec 4.1, so the learnable cue is "chevrons solid = dash now".
+- Body cue: crouch away from the lane with a glowing crest. The strip is removed at lunge start. Recovery has a slumped pose and no strip.
+
+### Fan Spitter (spec section 5)
+- Three thin rays at −25°, 0° and +25° from the locked aim line, ending at walls, with the gaps left dark so the safe spaces read clearly. Rays are dashed and growing until 0.40 s, then solid until fire at 0.60 s. The Spitter's mouth ports light up.
+
+### Distinguishability
+- Shape separates the three: ring (spawn), wide strip with chevrons (lunge), thin rays (fan). Colour is never the only cue (greyscale test A7). The variants also get an identity at rest (crest on the Lunge Grub, fan of ports on the Fan Spitter), so the player sees the dangerous type before it telegraphs.
+- The existing Grub bite and normal Spitter projectile do not use any of these shapes.
+
+### Timings
+- **No gameplay timing change is needed.** All three telegraphs already exceed the 0.5 s minimum. Sub-stage times (0.35 s, 0.4 s, 0.2 s) are visual only.
+- Note for the designer: the lunge's 0.35 s committed-stage start is tied to the spec 4.1 dash window. If that window changes, change the visual to match.
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no new input.
+- D-002: B then A, C in reserve. Phase 2 needs both the technical-director and art-director answers before Build.
+- No new decision was recorded. The choices here are visual direction within the existing art direction, with no pillar change.
+
+## Constraints
+
+- Phase 2 must not be built before the technical-director has answered.
+- All animation is a function of elapsed game time (30 and 60 FPS identical, ±1 frame at 30 FPS).
+- Small team: the marker reuses an existing effect if one passes. The new fallback is a single minimal effect.
+
+## Open questions
+
+- Build: does an existing spawn effect exist, and does it pass A1–A5?
+- Build: report lunge hit width, projectile range and Spitter mouth position, which size the strip and rays.
+- Technical-director: cost of the identity-at-rest art (A9) and the telegraph rendering for each Phase 2 variant. If one variant is dropped, drop its visual section with it.
+- Playtest after Phase 2: does the committed-stage cue let players dash on purpose? Is the room 5 crowd readable (A12)? A described walkthrough cannot show this.
+
+## Expected output
+
+Route the Phase 1 marker answer to Build now, and both answers (art and technical) to `game-designer` once the technical-director has answered. The designer then adjusts the Phase 2 spec to point at `design/g001-telegraph-visuals.md` and hands it back for Build. Review of the built visuals uses acceptance criteria A1–A12.
+
+## Sender assessment
+
+Confidence is high that the shape-and-stage language is readable and distinct. Confidence is medium on the exact sizes, colour values and 0.35 s cue timing, which need a look in the real dark-cave scene. The unknown about an existing spawn effect is real, so the decision rule above avoids guessing. No escalation trigger applies: no pillar change and no gameplay rule change.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: design/g001-telegraph-visuals.md; design/g001-combat-escalation.md; design/combat.md; project.md#art-direction; project.md#vision; project.md#constraints
+- Decisions: decisions/D-001-one-button-combat.md; decisions/D-002-combat-variety-direction.md
+- Previous handoff: goals/G-001-combat-monotony/14-studio-to-art-director.md
+>>>END

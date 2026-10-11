@@ -1,0 +1,127 @@
+{
+ "op": "Resume",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "bdd29a3b-3ec8-4e8a-ab9f-1841e8b4a552",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 21724,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 9135,
+    "output_tokens_details": {
+     "thinking_tokens": 1138
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 21724,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 9135,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 21724,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 21724
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.17825000000000002,
+   "attempt": 1,
+   "started": "2026-10-11T15:37:41",
+   "seconds": 54.4,
+   "errors": [
+    "goals/G-001-combat-monotony/59-studio-to-game-director.md: Load entry missing: 31-qa-to-studio.md (did you mean goals/G-001-combat-monotony/31-qa-to-studio.md? Paths are relative to the project)",
+    "goals/G-001-combat-monotony/59-studio-to-game-director.md: Load entry missing: 50-qa-to-studio.md (did you mean goals/G-001-combat-monotony/50-qa-to-studio.md? Paths are relative to the project)",
+    "goals/G-001-combat-monotony/59-studio-to-game-director.md: Load entry missing: 51-art-director-to-studio.md (did you mean goals/G-001-combat-monotony/51-art-director-to-studio.md? Paths are relative to the project)",
+    "goals/G-001-combat-monotony/59-studio-to-game-director.md: Load entry missing: 58-studio-to-owner.md (did you mean goals/G-001-combat-monotony/58-studio-to-owner.md? Paths are relative to the project)"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "59eac5c8-fd78-4d1b-8ce8-6603cbd1e5d9",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 22129,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 9218,
+    "output_tokens_details": {
+     "thinking_tokens": 662
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 22129,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 9218,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 22129,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 22129
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.18070000000000003,
+   "attempt": 2,
+   "started": "2026-10-11T15:38:35",
+   "seconds": 52.2,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "decisions/D-010-owner-accepts-unjudged-criteria-and-skips-phase-2.md": "594c006a5f61ff584c82ff0ffa3e18b7358aed1b7bdad75a651687f881b7619b",
+  "goals/G-001-combat-monotony/58-studio-to-owner.md": "e9a73c58978471b9e25d9ec6fae408a01bc42d13de115ddab3ddbd694683c9db",
+  "goals/G-001-combat-monotony/59-studio-to-game-director.md": "3a0000c96dc1dc97944aaa809177f94914e806c811472c6867b2a8d46efde9e7",
+  "goals/G-001-combat-monotony/goal.md": "8b26604d0b43d51664d8a586e5fb1f2a562445814713badd12e2428846e26080"
+ },
+ "decision": {
+  "new": [
+   "game-director",
+   "Review"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "game-director",
+    "Review"
+   ]
+  ]
+ },
+ "seen_through_seq": 59
+}

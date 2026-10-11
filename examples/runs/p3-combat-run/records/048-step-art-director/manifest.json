@@ -1,0 +1,57 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/39-studio-to-art-director.md",
+  "sha256": "8b3abc797e1c0e3be9ad2729685f3cbb1168cf82e0be01d50107b77378aa0616",
+  "bytes": 3407
+ },
+ {
+  "path": "studio/roles/art-director.md",
+  "sha256": "0a782e71d7d5344b9f3701549fa91d3ea4243ec75a6816a68dbcbf56ac5c71df",
+  "bytes": 1139
+ },
+ {
+  "path": "studio/skills/visual-review.md",
+  "sha256": "a4c0a2bc09a91a5af5765901e80bae9296517858e7d87341f54a53f006c1a263",
+  "bytes": 1066
+ },
+ {
+  "path": "design/g001-telegraph-visuals.md",
+  "sha256": "2d72848ec9961094dd39e3514911aa59fb684facccdacd07041c1ed64e469de2",
+  "bytes": 21201
+ },
+ {
+  "path": "project.md#art-direction",
+  "sha256": "8ef4190e8e145d993682898fbb7fe0ca8bd81e86b7a123e263644b95ce51119b",
+  "bytes": 158
+ },
+ {
+  "path": "sim/build-0.6.md",
+  "sha256": "56c97168a218ad065b1cac55d495f9325cc427ee2a48a644ab58563830adb942",
+  "bytes": 8143
+ },
+ {
+  "path": "decisions/D-006-lunge-cue-realignment-and-flinch-immune-hit-feedback.md",
+  "sha256": "13604b02593cd1ce694f3aa63a379c5039ce015cdfca5fc506b7d124bfcfadbb",
+  "bytes": 3195
+ },
+ {
+  "path": "goals/G-001-combat-monotony/17-art-director-to-studio.md",
+  "sha256": "d29034ffeac8e8d173f9bee47753fc4df40f377a35ad31e719f411e5d077c8fa",
+  "bytes": 5365
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

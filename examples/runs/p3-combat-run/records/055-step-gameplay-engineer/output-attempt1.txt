@@ -1,0 +1,160 @@
+<<<FILE goals/G-001-combat-monotony/47-gameplay-engineer-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 47
+from: gameplay-engineer
+to: studio
+stage: Build
+outcome: done
+---
+# 47: gameplay-engineer → studio — Ring dot `#FFC14D`, statements S0–S3, and points (a)–(d) stated; QA re-verify and Art Director re-review follow
+
+## Task
+
+Update `sim/build-0.6.md` from the Findings below. Send it to QA (without the Sender assessment) for the narrow re-verify, and to the Art Director for the dot and S0–S3 re-review in parallel.
+
+## Context
+
+G-001, Phase 1, build 0.6. This is the narrow Build from handoff 46. It covers the Art Director's dot change and statements (handoff 45) and the Game Designer's clarification of the amended spec (handoff 44, D-009).
+
+This step could not run the game or read its code. The facts below come from the packet: `sim/build-0.6.md`, `sim/repo-notes.md` and my handoff 37. Where those documents did not state a behavior, I say so and treat it as set by this change. I do not claim the code already did it.
+
+## Findings
+
+### 1. Part A: change made
+
+Arrival ring, solid phase (0.6–0.8 s) only:
+
+- The centre dot is `#FFC14D` at full brightness. It has no tint toward white or blue.
+- There is no white or cold-white bloom or glow. Any glow around the dot uses only `#FFC14D` or `#FF5A1F`.
+- Before 0.6 s the dot stays dim amber, as built.
+- Unchanged: ring colour `#FF5A1F`, all timings (solid phase starts at 0.6 s, burst at 0.8 s), the ring's size and shape, and all rules.
+
+Why this counts as "changed": `sim/build-0.6.md` said the dot turned to "a hot, near-white core colour". `sim/repo-notes.md` names `#FFC14D` as the dot's palette value but says only "hot-core colour" for the solid phase, with no hex. Because the build description stated near-white, I set the solid-phase dot explicitly to `#FFC14D`, with no white component.
+
+**Wording for `sim/build-0.6.md`, "The arrival ring" section:**
+
+- Replace "the dot turns to a hot, near-white core colour" with the S0 sentence below.
+- Add S1, S2 and S3 as ring bullets.
+
+### 2. Statements S0–S3, final wording
+
+- **S0 — changed.** "In the last 0.2 s (0.6 to 0.8 s) the dot is amber `#FFC14D` at full brightness." This replaces "hot, near-white core colour".
+- **S1 — changed.** "The ring and its dot are drawn self-lit and do not depend on the lantern's light. At 0.0 s the ring's brightness is at least 40% of its brightness at 0.6–0.8 s."
+  - Before: the packet said only that the ring is visible from 8 or more tiles for its whole 0.8 s. It did not state lantern independence or a brightness at 0.0 s, and I cannot read the values.
+  - Now: the ring and dot are drawn emissive and do not read the lantern's light radius. The brightness ramp is linear in game time from 40% of peak at 0.0 s to 100% at 0.6 s, and 100% from 0.6 s to 0.8 s.
+- **S2 — changed.** "The 0.8 s burst uses only `#FF5A1F` and `#FFC14D`. It contains no white, near-white or cold-white element."
+  - Before: the burst colour was not stated.
+  - Now: the burst palette is restricted to those two colours. Its duration (at most 0.15 s) and its not hiding the new enemy are unchanged.
+- **S3 — partly already so, partly changed.** "Rings are outlines with no fill. Where two rings overlap or touch, brightness does not add above a single ring's peak, and each ring keeps its own dot."
+  - Already so: the ring has no fill larger than the ring itself (build description, repo notes).
+  - Changed: overlap handling was not stated. Where rings overlap, brightness is now capped at a single ring's peak, and each ring draws its own dot.
+
+### 3. Part B: points (a)–(d) as the build behaves
+
+**(a) Point choice (3.3).** The routine walks the candidate list in order, per enemy, once at its marker start.
+
+- Step A: take the first candidate that is both at least 5 tiles from the player and not occupied. Occupied means an active marker at the point, or a living enemy within 1.5 tiles.
+- Step B: if none passes both, take the farthest candidate that is not occupied. This is the mixed case: a near, free point wins over a far, occupied point.
+- Step C: if all candidates are occupied, take the farthest overall.
+- Ties in B or C go to the earlier list entry.
+- This matches the amended order. `sim/repo-notes.md` and handoff 37 already described the same order, including the mixed case.
+- Changed: the tie-break was not stated in those documents. It is now explicit and implemented as "earlier list entry wins on equal distance".
+- Enemies with the same marker start are processed in table order on the same frame. An earlier enemy's new marker is therefore active (occupying its point) when the next one is evaluated.
+- Pending enemies do not count as occupancy.
+- Every step B or C choice writes a `SPAWN_FALLBACK` line.
+
+**(b) Sampling.** The player position and the occupancy are both read on the first logic frame at or after the scheduled marker start.
+
+- Handoff 37 described this only for the player position. The occupancy check runs in the same routine on the same frame, so it is covered. This was not stated before; the behavior is now confirmed and stated.
+- At 30 FPS this can be up to one frame (0.034 s) later than at 60 FPS.
+- The marker's end and the enemy's appearance use the scheduled timestamps, not the frame time.
+
+**(c) Spitter first shot.** It is scheduled at the scheduled appearance (`markerStart + 0.8 s`) + 1.0 s, then every 2 s. It is already so.
+
+- The shot is a scheduled timestamp on the game clock. The log line for it carries that scheduled value.
+- A Spitter never fires on the frame it appears.
+
+**(d) Existing values (3.8).** All are **not available**. I did not estimate any.
+
+| Value | Status |
+|---|---|
+| Grub speed | not available |
+| Player speed | not available |
+| Projectile speed | not available |
+| Projectile range | not available |
+| Player hearts | not available |
+| Room size (W×H) | not available |
+| Grub hitbox size | not available |
+| Player hitbox size | not available |
+| Spitter hitbox size | not available |
+
+- The packet gives none of these, and I had no way to read the game.
+- Phase 1 data uses only tiles, seconds and room-relative points, so it needs none of them.
+- QA and the playtest record them (spec 3.8, 6a).
+
+### 4. Other described behavior of build 0.6 that is different
+
+- The ring's brightness curve from 0.0 to 0.6 s now starts at 40% of peak. The build said only "dim to bright" and "gets brighter", and gave no start value. The rule is still a rise to full brightness, reaching it at 0.6 s as before.
+- The solid-phase dot and the burst colours are as stated in Parts 1 and 2.
+- Apart from those, **none**. No timing, wave rule, spawn rule, dash, hit-stun or invulnerability behavior (the build 0.5 baseline) is touched. No new input. No Phase 2 content.
+
+### How to exercise it
+
+- Dot colour: capture the ring at 0.5 s and at 0.7 s. The dot should be dim amber before 0.6 s and `#FFC14D` at full brightness from 0.6 s, with no white in the dot or its glow.
+- Burst colour: capture the burst frames. They contain only `#FF5A1F` and `#FFC14D`.
+- Brightness at the start: compare ring brightness at 0.0 s with that at 0.6–0.8 s. The ratio should be at least 0.40.
+- Lantern independence: stand 8 or more tiles away, outside lantern light, and check the ring is visible for its whole 0.8 s.
+- Two rings: room 3 wave 2 and room 5 wave 1 (west edge) have simultaneous markers. Check that overlapping or touching rings never exceed a single ring's peak and that each keeps its dot.
+- Points (a)–(c): spec criterion 10(c), (d) and (g), criterion 4 (first-shot basis) and criterion 5 (1-tile margin rule).
+
+Criteria addressed: criterion 4 (first-shot basis), criterion 5, criterion 10 (c)(d)(g), and the Art Director's pass condition for the ring and burst.
+
+Known risks:
+
+- The 40% brightness floor and the overlap cap are explicit settings from this change. They have no capture evidence behind them.
+- The ring is still a placeholder.
+
+## Decisions already made
+
+- D-001: one-button combat. D-004: gameplay numbers are data.
+- D-006: cold-white `#E8F4FF` is reserved for hit feedback on flinch-immune enemies.
+- D-008: Phase 1 spawn and wave rules.
+- D-009: judging basis for criteria 1 and 2, and the D2–D6 answers.
+
+## Constraints
+
+- No timing or rule was changed.
+- The dash, hit-stun and invulnerability behavior (build 0.5 baseline) is untouched.
+- Behavior is correct at 30 and 60 FPS. There is no RNG in spawn choice. No new input. No Phase 2 content.
+
+## Open questions
+
+None blocking.
+
+- The existing values in (d) are still not available. They stay a request to QA and the playtest.
+- The `SPAWN_FALLBACK` count per room is still unknown.
+
+## Expected output
+
+- The Studio updates `sim/build-0.6.md` with the S0–S3 wording above and the Part B statements.
+- The Studio sends the result to QA (without the Sender assessment) for the narrow re-verify: criterion 10 (c)(d)(g), criterion 4 first-shot basis, criterion 5 margin rule. Criteria 1 and 2 stay "deferred to playtest".
+- The Studio sends the dot and S0–S3 to the Art Director for re-review. The pass condition is that the build description states `#FFC14D` for the dot and no ring or burst element is white or near-white.
+
+## Sender assessment
+
+- I could not run or read the game, and I ran no tests. Nothing here is a passing run.
+- S0 is high confidence: the colour is exactly specified, and it is a data-level fix.
+- S1 and S2 are medium confidence. The packet did not state the prior behavior, so I labelled them "changed" rather than claim they already held. If the code already behaved this way, only the documentation changed.
+- The tie-break and the occupancy-sampling statements in (a) and (b) are consistent with the notes, but those notes did not state them. QA should check them in a scripted run, using criterion 10(g).
+- The 40% ramp start is my choice of how to meet the Art Director's "at least 40%" floor. It can be raised by changing one data value.
+
+## Load
+
+- Role: studio/roles/qa.md (QA), studio/roles/art-director.md (Art Director)
+- Skills: Studio to settle when routing
+- Project: design/g001-combat-escalation.md (3.3, 3.8, 6, 6a, criteria 4, 5, 10); design/g001-telegraph-visuals.md (sections 2, 3, 7 A1–A3); sim/build-0.6.md
+- Decisions: decisions/D-006-lunge-cue-realignment-and-flinch-immune-hit-feedback.md; decisions/D-008-phase-1-spawn-and-wave-rules.md; decisions/D-009-judging-basis-criteria-1-and-2.md
+- Previous handoff: goals/G-001-combat-monotony/46-studio-to-gameplay-engineer.md
+>>>END

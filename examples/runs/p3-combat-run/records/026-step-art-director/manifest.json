@@ -1,0 +1,67 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/24-studio-to-art-director.md",
+  "sha256": "a7d4ffb067f3564a4a59dd780e4e5280209767e4f745972604544fc410e444c4",
+  "bytes": 3996
+ },
+ {
+  "path": "studio/roles/art-director.md",
+  "sha256": "0a782e71d7d5344b9f3701549fa91d3ea4243ec75a6816a68dbcbf56ac5c71df",
+  "bytes": 1139
+ },
+ {
+  "path": "studio/skills/write-design-spec.md",
+  "sha256": "f60b4ce8c6e89c2dc27ff87184c54b91452c45db8422fc378ca9253b45a0efd2",
+  "bytes": 1367
+ },
+ {
+  "path": "design/g001-telegraph-visuals.md",
+  "sha256": "ff5f3ff42b2c2c1a2a2f54a173b5cf20f8174277901a717f5f21e88b53c9d047",
+  "bytes": 11788
+ },
+ {
+  "path": "design/g001-combat-escalation.md",
+  "sha256": "95095a59bc8b30094dafd5cbe8f18566793f58a9e7ec0d590d48e98b3d45e4dc",
+  "bytes": 23150
+ },
+ {
+  "path": "project.md#art-direction",
+  "sha256": "8ef4190e8e145d993682898fbb7fe0ca8bd81e86b7a123e263644b95ce51119b",
+  "bytes": 158
+ },
+ {
+  "path": "project.md#vision",
+  "sha256": "d3086d29c74b4ce7bd4b6ef724e73f4f0f3dde2be7fda791c0154917fee0cf66",
+  "bytes": 408
+ },
+ {
+  "path": "decisions/D-004-phase-2-technical-approach.md",
+  "sha256": "5bc136e0c68729afa3dee3b630865de90efe5e038a7306075b2e0eb35f88a0a0",
+  "bytes": 3502
+ },
+ {
+  "path": "decisions/D-005-phase-2-flinch-contact-and-dash-window.md",
+  "sha256": "baf8ab3288f92ecb0fa38cf5a47ab2d4dd82553c08f74c58621598d8e6e9b6c3",
+  "bytes": 3666
+ },
+ {
+  "path": "goals/G-001-combat-monotony/22-game-designer-to-studio.md",
+  "sha256": "2807247488c0f88322dc82c9b08d2e12cd43924d38d8fe1b13f3925b8d6acad8",
+  "bytes": 6348
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

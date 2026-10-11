@@ -1,0 +1,9 @@
+{
+ "op": "Run",
+ "goal": "G-002",
+ "operations": [],
+ "stop_reason": "blocked-on-owner",
+ "status": "blocked-on-owner",
+ "owner_reads": "goals/G-002-combat-monotony/04-game-director-to-owner.md",
+ "next": "decide examples/runs/p3-escalation-run \"<answer>\""
+}

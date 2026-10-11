@@ -1,0 +1,62 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/42-studio-to-game-designer.md",
+  "sha256": "08236f296d66b1cd3db855498a0d5c20355ae4c42b6f451481fb3a5c0b95e6bd",
+  "bytes": 6741
+ },
+ {
+  "path": "studio/roles/game-designer.md",
+  "sha256": "7e48b1058cca3a1dc59a4240cf232256acb047fb5b659c317fa11197f4017ca4",
+  "bytes": 1578
+ },
+ {
+  "path": "studio/skills/write-design-spec.md",
+  "sha256": "f60b4ce8c6e89c2dc27ff87184c54b91452c45db8422fc378ca9253b45a0efd2",
+  "bytes": 1367
+ },
+ {
+  "path": "design/g001-combat-escalation.md",
+  "sha256": "5b50b16cd8e32ccf4f7b6b973b72e6f228be799c031fe47455719c8a412f233f",
+  "bytes": 33112
+ },
+ {
+  "path": "sim/build-0.6.md",
+  "sha256": "56c97168a218ad065b1cac55d495f9325cc427ee2a48a644ab58563830adb942",
+  "bytes": 8143
+ },
+ {
+  "path": "decisions/D-002-combat-variety-direction.md",
+  "sha256": "30df41b2030f32d52f18181543eb191f3cf9043b4f8cd8e3f94d6fa5b1a23831",
+  "bytes": 4166
+ },
+ {
+  "path": "decisions/D-004-phase-2-technical-approach.md",
+  "sha256": "5bc136e0c68729afa3dee3b630865de90efe5e038a7306075b2e0eb35f88a0a0",
+  "bytes": 3502
+ },
+ {
+  "path": "decisions/D-008-phase-1-spawn-and-wave-rules.md",
+  "sha256": "5c1ab64e3deb2a5f16e75cde9312ca34b5e954ed2d65d04d18ed20f8b37aa48f",
+  "bytes": 3945
+ },
+ {
+  "path": "goals/G-001-combat-monotony/40-qa-to-studio.md",
+  "sha256": "0679e33d5fe230eb5e1203b83dba226f426cf0388437e1777c3ac9591a4696b4",
+  "bytes": 16992
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

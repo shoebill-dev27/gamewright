@@ -20,8 +20,9 @@ Arguments: $ARGUMENTS
 
 Claude Code execution notes (how to execute, not Studio rules):
 
-- Prefer the isolated runner for `next` / `decide` / goals in a workspace:
-  `python3 scripts/studio_run.py next <ws>` (see AGENTS.md). It starts each operation as a separate
+- Prefer the isolated runner for `next` / `run` / `decide` / goals in a workspace:
+  `python3 scripts/studio_run.py next <ws>`, or `run <ws>` to continue until the Owner is needed
+  (see AGENTS.md). Relay the run's stop summary to the user: what to read, what to decide. It starts each operation as a separate
   `claude -p` process with no tools, no user settings, memory or MCP, and only the packet as input.
   Do not write the Step's prompt yourself: your conversation must not reach the executor.
 - Without the runner, run `qa` and `playtester` Steps in a fresh subagent via the Agent tool, giving

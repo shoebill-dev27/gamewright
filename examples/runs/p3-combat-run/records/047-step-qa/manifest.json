@@ -1,0 +1,92 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/38-studio-to-qa.md",
+  "sha256": "a6474940e417b1cc64c2f8bf5c8d6d750af84d3c7201c7b27a91e9dc10e11cb5",
+  "bytes": 12011
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "e65b1378195da3373e0b30e3a5fc9a454a2aedebe1ce953fd80da8237e4e641c",
+  "bytes": 1734
+ },
+ {
+  "path": "studio/skills/verify-change.md",
+  "sha256": "da40d2c0030e078ac6d085ea06b17bb9b452495f4e2f412a9e1bd723ac72ddf5",
+  "bytes": 1281
+ },
+ {
+  "path": "design/g001-combat-escalation.md",
+  "sha256": "5b50b16cd8e32ccf4f7b6b973b72e6f228be799c031fe47455719c8a412f233f",
+  "bytes": 33112
+ },
+ {
+  "path": "design/g001-telegraph-visuals.md",
+  "sha256": "2d72848ec9961094dd39e3514911aa59fb684facccdacd07041c1ed64e469de2",
+  "bytes": 21201
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "ba95c32f8285b29ee4f29074cb24be95d82d4f7d84f86bfaa40b9c954fc21ae4",
+  "bytes": 1801
+ },
+ {
+  "path": "sim/build-0.6.md",
+  "sha256": "56c97168a218ad065b1cac55d495f9325cc427ee2a48a644ab58563830adb942",
+  "bytes": 8143
+ },
+ {
+  "path": "sim/build-0.5.md",
+  "sha256": "c02f46f99f0946efa0cac8fc9a656733b8e2fe3fe11787761732517937877662",
+  "bytes": 2943
+ },
+ {
+  "path": "sim/repo-notes.md",
+  "sha256": "20ae4f73a83ba12e816d25cce0ce34418c311fa93c04eea1c30b7896e08d8733",
+  "bytes": 6997
+ },
+ {
+  "path": "decisions/D-001-one-button-combat.md",
+  "sha256": "c7fe9ca23a369707a5ab439e44789a25a0a8544efce4703a676f8fd180f82ec1",
+  "bytes": 798
+ },
+ {
+  "path": "decisions/D-002-combat-variety-direction.md",
+  "sha256": "30df41b2030f32d52f18181543eb191f3cf9043b4f8cd8e3f94d6fa5b1a23831",
+  "bytes": 4166
+ },
+ {
+  "path": "decisions/D-004-phase-2-technical-approach.md",
+  "sha256": "5bc136e0c68729afa3dee3b630865de90efe5e038a7306075b2e0eb35f88a0a0",
+  "bytes": 3502
+ },
+ {
+  "path": "decisions/D-007-verify-against-build-0-5.md",
+  "sha256": "a730366e8c618bde07e71b5a8e22d983eadc7f24488a75f1c1ac250e311db371",
+  "bytes": 1817
+ },
+ {
+  "path": "decisions/D-008-phase-1-spawn-and-wave-rules.md",
+  "sha256": "5c1ab64e3deb2a5f16e75cde9312ca34b5e954ed2d65d04d18ed20f8b37aa48f",
+  "bytes": 3945
+ },
+ {
+  "path": "goals/G-001-combat-monotony/05-qa-to-studio.md",
+  "sha256": "9bed3d206444da18c45059e7b025803499b75ae46c750de798140f055c5a74b7",
+  "bytes": 7162
+ },
+ {
+  "path": "goals/G-001-combat-monotony/31-qa-to-studio.md",
+  "sha256": "1009963b2e6e572e2bf61d93f8d7bf7978525f1c202fd09bea3472a708f75923",
+  "bytes": 8321
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ }
+]

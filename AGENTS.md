@@ -31,8 +31,12 @@ artifacts, per `studio/execution.md`. It works on a workspace (`<ws>/project`, `
 python3 scripts/studio_run.py init <ws> --from <project-or-fixture-dir>
 python3 scripts/studio_run.py intake <ws> "<goal>"
 python3 scripts/studio_run.py next <ws>              # Step, then Route, as separate executors
+python3 scripts/studio_run.py run <ws>               # repeat until done, an Owner escalation, or a stop condition
 python3 scripts/studio_run.py decide <ws> "<owner's answer>"
 ```
+
+`run` stops on its own when the Owner is needed, on a rejected output, a runtime error, its
+operation budget (`--max-ops`, default 25), or when no progress is being made.
 
 `--runtime claude|codex` picks the executor runtime. Never paste your own conversation into a
 Step; the packet is the only input. The manual operations above remain valid.

@@ -1,0 +1,107 @@
+{
+ "op": "Intake",
+ "role": null,
+ "goal": "G-001 (new)",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "c6786aba-eb8a-4339-a05e-94809174b4cd",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 12161,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 3546,
+    "output_tokens_details": {
+     "thinking_tokens": 1014
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 12161,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 3546,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 12161,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 12161
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.08410799999999999,
+   "attempt": 1,
+   "started": "2026-10-11T10:21:41",
+   "seconds": 30.4,
+   "errors": [
+    "goal.md: route row 4 has unknown role game-designer (art-director if visuals are involved)",
+    "goal.md: route row 7 has unknown role qa (∥ art-director if visuals change)"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "bec519f3-2572-4fc7-898f-c7e1a87b36b7",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 12267,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 3362,
+    "output_tokens_details": {
+     "thinking_tokens": 1098
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 12267,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 3362,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 12267,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 12267
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.08269199999999999,
+   "attempt": 2,
+   "started": "2026-10-11T10:22:11",
+   "seconds": 27.7,
+   "errors": [
+    "goals/G-001-combat-monotony/01-studio-to-playtester.md: Decisions and Sender assessment must not reach the Playtester"
+   ]
+  }
+ ],
+ "status": "rejected"
+}

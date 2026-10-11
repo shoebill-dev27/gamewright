@@ -30,11 +30,33 @@ file block. Its manifest lists every input with a content hash.
 |---|---|
 | Intake | executor instructions; `studio/README.md`, `orchestration.md`, `workflows/development-loop.md`; each Role's `#works-from` and `#independence` sections; templates `goal.md`, `handoff.md`; `project.md`; the project file list; Decision titles; the Owner request |
 | Step | executor instructions; the incoming Handoff; every file in its Load list (only the named section for `file#section`); the templates the Role may write |
-| Route | executor instructions; `orchestration.md`, `workflows/development-loop.md`, `studio/README.md`; each Role's `#works-from` and `#independence` sections; templates `handoff.md`, `escalation.md`, `goal.md`; `goal.md`; the artifact the Step produced; `project.md`; the project file list; Decision titles |
+| Route | executor instructions; `orchestration.md`, `workflows/development-loop.md`, `studio/README.md`; each Role's `#works-from` and `#independence` sections; templates `handoff.md`, `escalation.md`, `goal.md`; `goal.md`; every artifact produced since the previous Studio operation on this Goal (all parallel Steps' results); `project.md`; the project file list; Decision titles |
 | Resume | as Route, with the Escalation (the Owner's words appended verbatim) in place of the Step artifact, and template `decision.md` |
 
 A Step's packet is derived from its Handoff alone: **the Load list is the allowlist.** The project
 file list gives names only, never contents.
+
+**Context request (Route only, once).** Instead of routing, a Route may answer with a single
+`@need` block listing up to 8 project or Studio files, one per line. The runtime adds exactly those
+files to the packet and runs a new executor once more; a second request is rejected. The request
+and the enlarged packet are recorded.
+
+## Continuous execution
+
+A runtime may repeat Steps and Routes without a person starting each one. It runs every open Step
+(parallel Steps one after another), then one Route, and repeats until a stop condition holds:
+
+| Stop | Meaning |
+|---|---|
+| Goal `done` or `abandoned` | The Owner reads the Outcome. |
+| Goal `blocked-on-owner` | The Owner answers the Escalation; Resume, then continue. |
+| Output rejected after its retry | A person looks at the record; nothing was written. |
+| Runtime error | The executor could not run (e.g., a usage limit); continue later. |
+| Operation budget reached | A person decides whether to continue. The budget is checked between cycles, so a cycle (its Steps and Route) is never cut in half. |
+| No progress | A Role handed back `question` twice and would be opened again, or a Role would be opened a 4th time in one continuous run. A mechanical backstop for the loop limits in `orchestration.md`. |
+
+Every stop is recorded with its reason, what the Owner should read, and how to continue. A
+continuous run never decides anything a Route or Role would not decide one operation at a time.
 
 ## Independence policies
 

@@ -27,3 +27,11 @@ How the dry-runs were produced and what they revealed: `docs/phase1.md`.
 | `runs/bug-codex2` | The bug Goal on Codex only: 25 operations including an Owner escalation for missing reproduction details and a fresh resume; stopped two operations before Close by Codex's weekly usage limit. |
 
 Results and findings: `docs/phase2.md`.
+
+## Phase 3: continuous runs
+
+| Run | What it shows |
+|---|---|
+| `runs/p3-bug-run` | The bug Goal finished by a single `run` (7 operations), no person in between. |
+| `runs/p3-escalation-run` | `run` stops at once on an open escalation; after `decide`, it continues through parallel steps until its budget. |
+| `runs/p3-combat-run` | The combat Goal under `run`: two genuine Owner escalations, parallel steps joined by one Route, a context request, policy rejections, and the runner fixes made along the way (see `docs/phase3.md`). |

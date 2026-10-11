@@ -1,0 +1,148 @@
+Both parallel steps (2a, 2b) are finished, so I routed their results. The diagnosis goes to `game-director` for the Decide stage, and QA's confirmed dash-damage defect goes to `gameplay-engineer` for a fix. The two are independent, so they run as one parallel group (3a, 3b). The earlier validation errors came from a route row with an invalid role (`qa ∥ art-director`) and from more than one open step outside a parallel group; the route below fixes both.
+
+<<<FILE goals/G-001-combat-monotony/06-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-001
+seq: 6
+from: studio
+to: gameplay-engineer
+stage: Build
+outcome: routed
+---
+# 06: studio → gameplay-engineer — Fix damage taken during a dash after being hit (build 0.3)
+
+## Task
+
+Fix the defect so the player takes no damage at any point of a dash, including a dash begun right after being hit. State the change exactly (what changes, where, how to exercise it), as the dry-run project requires. Find and report the trigger (frame rate, timing, damage source).
+
+## Context
+
+Goal G-001 (combat monotony). The Playtester saw the player take damage partway through a dash shortly after being hit. QA reproduced it against `design/combat.md` and confirmed a defect: the design says the dash is invulnerable for its full duration, and hit invulnerability lasts until 0.8 s after the hit. Together they should cover any dash begun after hit-stun. The expected behavior is already specified, so no Design or Plan stage is needed. This step runs in parallel with the Game Director's direction decision (step 3a) because it restores specified behavior and does not depend on that decision.
+
+## Findings
+
+The full defect report is in `05-qa-to-studio.md`. Summary:
+
+- **Expected** (`design/combat.md`): the dash (4 tiles over 0.25 s, cooldown 0.6 s) is invulnerable for its full duration. A hit costs 1 heart, causes 0.3 s of hit-stun with no input, then invulnerability until 0.8 s after the hit.
+- **Actual** (`sim/build-0.3.md`): occasionally, a dash right after a hit lets the player take damage partway through the dash.
+- **Unknown**: frame rate (30, 60 or both), exact hit-to-dash timing, damage source (Grub contact or Spitter projectile), dash direction, and which half of the dash the damage lands in.
+- **Severity**: hurts the experience and undermines trust in the dash. It blocks no progress. Frequency is rare.
+- **Unverified hypothesis from QA**: the hit-invulnerability and dash-invulnerability timers interact badly, for example one's expiry or reset clears the other's flag. Confirm or discard this; the root cause is yours to decide.
+
+Acceptance criteria (each must pass at both 30 FPS and 60 FPS):
+
+1. After a hit, a dash at the earliest accepted input (0.3 s after the hit) takes no damage at any point of the 0.25 s dash, even with a Grub in contact or a Spitter projectile arriving mid-dash. Repeat at least 20 times per frame rate.
+2. Repeat criterion 1 with dash presses at several delays after the hit, including during hit-stun and just before, at and just after the 0.8 s mark. No damage during an active dash.
+3. Repeat criterion 1 with different dash directions (towards and away from the damage source) and in rooms 1–5 with both Grubs and Spitters.
+4. A dash with no preceding hit still gives full invulnerability for 0.25 s (no regression).
+5. Existing rules still hold: hit-stun 0.3 s with no input, hit invulnerability until 0.8 s after the hit, dash cooldown 0.6 s, and an attack pressed during a dash fires when the dash ends.
+6. Damage previously taken mid-dash is not merely delayed to land right after the dash ends while an invulnerability window is still active. A hit landing after all windows have expired is normal.
+
+## Decisions already made
+
+- D-001: Combat uses one attack button plus dash. This fix needs no new input.
+
+## Constraints
+
+- Must play correctly at 30 and 60 FPS. Do not make the fix depend on frame rate.
+- Prefer reusing existing systems (small team).
+- Do not change the specified values in `design/combat.md`. If the spec turns out to be ambiguous or contradictory, hand back with `question` and do not decide it yourself. The handling of a dash pressed during hit-stun (ignored or buffered) is unspecified. That is a non-blocking clarification for `game-designer`, so do not decide it here.
+
+## Open questions
+
+- Which frame rate(s) and hit-to-dash timings trigger the damage? Find this first and report it.
+
+## Expected output
+
+The change, stated exactly (what, where, how to exercise it), with the trigger you found and your root cause. Write it as an outgoing Handoff **addressed to `studio`**, because the Studio composes the QA verification Handoff from it. Do not self-certify the fix as verified; QA verifies it independently against the criteria above.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: design/combat.md; sim/build-0.3.md; sim/repo-notes.md; project.md#constraints
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-001-combat-monotony/05-qa-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-11
+---
+# G-001: Improve monotonous combat
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): a player from the project's player profile experiences combat in the current build as varied and engaging rather than repetitive. Playing a run involves meaningful moment-to-moment variation in how the player positions, times and responds to enemies. Numeric thresholds belong to Design; the final verdict belongs to Review.
+
+Constraints that shape any solution:
+- Pillar 1 and D-001: combat stays one-button (attack + dash). No new input buttons without Owner approval. Variety must come from positioning, timing and enemy behavior.
+- Readable threats (pillar 3) and 30/60 FPS correctness must be preserved.
+- Small team: prefer reusing existing systems.
+
+Out of scope: new input buttons or a larger player kit, changes to run length, new biomes or rooms unrelated to combat variety, and non-combat systems.
+
+Not an immediate escalation: the Goal does not conflict with the vision or D-001. It must be solved inside them. If Diagnose finds that the only viable fixes need a new button or change a pillar, that triggers an Owner escalation then.
+
+## Unknowns
+
+Entry questions from `development-loop.md`:
+- Observe: has the problem been observed first-hand? No. It is an experience problem (the game may work as specified but feel wrong), so `playtester` observes. The Owner's wording is not given to the Playtester, to avoid confirming a hypothesis.
+- Diagnose: is the cause understood? No. What makes the combat feel monotonous is unknown (enemy behavior, kit depth, room design, pacing). Stage created.
+- Decide: is there a real choice of direction, priority or scope? Yes. The diagnosis (handoff 04) offers three options (A: enemy behaviors, B: encounter design and escalation, C: rule rewards) that differ in scope and cost.
+- Design: is the intended behavior specified well enough to build? Not for any change yet. Tentative on the chosen option.
+- Plan: tentative. Needed only if the chosen change is non-obvious, risky or cross-system.
+- Build: tentative for the chosen direction. Planned for the dash-damage defect fix (confirmed by QA).
+- Verify: always after Build.
+- Play: the Goal is about how the game feels, so a Playtester re-evaluates after Build (tentative with Build of the chosen direction).
+- Review: experience Goal, so the Game Director judges the outcome. Planned.
+- Observe (defect): the Playtester saw a possible dash-damage defect. QA confirmed it against `design/combat.md` (handoff 05). Intended behavior is already specified, so the fix needs no Design or Plan.
+
+Skipped: none.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | [01-studio-to-playtester.md](01-studio-to-playtester.md) → report in [02-playtester-to-game-designer.md](02-playtester-to-game-designer.md) |
+| 2a | Diagnose | game-designer | diagnose-experience | done | [02-playtester-to-game-designer.md](02-playtester-to-game-designer.md) → diagnosis in [04-game-designer-to-game-director.md](04-game-designer-to-game-director.md) |
+| 2b | Observe (possible defect: damage during dash) | qa | reproduce-defect | done | [03-studio-to-qa.md](03-studio-to-qa.md) → report in [05-qa-to-studio.md](05-qa-to-studio.md) |
+| 3a | Decide | game-director | make-decision (prepare-owner-escalation if a trigger fires) | open | [04-game-designer-to-game-director.md](04-game-designer-to-game-director.md) |
+| 3b | Build (fix dash-damage defect) | gameplay-engineer | implement-change | open | [06-studio-to-gameplay-engineer.md](06-studio-to-gameplay-engineer.md) |
+| 4 | Verify (dash-damage fix) | qa | verify-change | planned (after 3b; Studio composes the Handoff from the engineer's report addressed to `studio`) | — |
+| 5 | Design | game-designer | write-design-spec | tentative (if 3a chooses a change) | — |
+| 6 | Plan | technical-director | technical-plan | tentative (if the chosen change is non-obvious, risky or cross-system) | — |
+| 7 | Build (chosen direction) | gameplay-engineer | implement-change | tentative (if 3a chooses a change) | — |
+| 8a | Verify (chosen direction) | qa | verify-change | tentative (after 7) | — |
+| 8b | Verify (visuals, e.g. telegraphs) | art-director | visual-review | tentative (after 7, only if the change affects visuals; parallel with 8a) | — |
+| 9 | Play | playtester | playtest-session | tentative (after 7; fresh Handoff composed by the Studio without implementation history) | — |
+| 10 | Review | game-director | review-outcome | planned | — |
+
+Status: planned | tentative | open | done | skipped.
+
+## Route changes
+
+- After step 1 (Observe, playtester): the report matches the plan on the experience side (monotony confirmed: one winning approach in every room, little pressure to move, dash unused in combat), so Diagnose followed as planned. It also contained a possible defect (damage during a dash after being hit). Per the return rule "Play/Observe: defect → Observe (`qa`)", step 2b was added as a parallel step. Handoff 02 was edited in place (still from `playtester`) to add the Owner's report, mark the dash-defect item as routed to `qa`, and fill in Load and Expected output.
+- After steps 2a and 2b: 2a produced a diagnosis with three options of different scope and cost (handoff 04), so Decide (`game-director`) follows. No Owner escalation trigger fires: every option stays within D-001 and the pillars. 2b confirmed a defect against specified behavior (handoff 05), so Build (`gameplay-engineer`) and Verify (`qa`) for the fix join the route. No Design is needed because `design/combat.md` already specifies the behavior. The fix restores specified behavior and does not consume the Decide output, so 3a and 3b run in parallel and the Route waits for both. The earlier tentative Build and Verify rows were split into one pair for the defect fix (3b, 4) and one pair for the chosen direction (7, 8a/8b). The `art-director` visual review (8b) is its own parallel row with the proper role. QA's non-blocking question (how to treat a dash pressed during hit-stun) is left for `game-designer` to fold into any later spec. It does not block the fix.
+
+## Next action
+
+Two parallel steps are open:
+- 3a: `game-director` runs Decide from `04-game-designer-to-game-director.md` (skill `make-decision`). The expected output is a Decision with the chosen direction and scope.
+- 3b: `gameplay-engineer` fixes the dash-damage defect from `06-studio-to-gameplay-engineer.md` (skill `implement-change`), with the result addressed to `studio`.
+
+After both finish, run Route again. Step 4 (Verify the fix with `qa`) follows 3b, with a fresh Handoff composed by the Studio without the engineer's self-assessment. Step 5 (Design) follows 3a if a change is chosen.
+
+## Outcome
+
+(To be filled at close, in Japanese.)
+>>>END

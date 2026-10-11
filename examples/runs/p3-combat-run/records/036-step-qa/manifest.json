@@ -1,0 +1,62 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/28-studio-to-qa.md",
+  "sha256": "503853da7679a983bd2a62828b77535754e119ed3831e739f81be0bda95a0325",
+  "bytes": 3333
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "e65b1378195da3373e0b30e3a5fc9a454a2aedebe1ce953fd80da8237e4e641c",
+  "bytes": 1734
+ },
+ {
+  "path": "studio/skills/verify-change.md",
+  "sha256": "da40d2c0030e078ac6d085ea06b17bb9b452495f4e2f412a9e1bd723ac72ddf5",
+  "bytes": 1281
+ },
+ {
+  "path": "sim/build-0.5.md",
+  "sha256": "c02f46f99f0946efa0cac8fc9a656733b8e2fe3fe11787761732517937877662",
+  "bytes": 2943
+ },
+ {
+  "path": "sim/build-0.3.md",
+  "sha256": "3159bf3f32d15e24e59b3276d1b8618ee3b0d65f884c8681aa7b2b85f4eb6d64",
+  "bytes": 851
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "ba95c32f8285b29ee4f29074cb24be95d82d4f7d84f86bfaa40b9c954fc21ae4",
+  "bytes": 1801
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "35d04ba78f0574457c6c379efd3ab930a1f4e729e41fe06c133511c5b4cb53a5",
+  "bytes": 534
+ },
+ {
+  "path": "decisions/D-003-input-during-hit-stun.md",
+  "sha256": "9bc00493de64e1438d283bd77d3512043a3b9e8df10b4611c56cccbe418b66a4",
+  "bytes": 1177
+ },
+ {
+  "path": "decisions/D-007-verify-against-build-0-5.md",
+  "sha256": "a730366e8c618bde07e71b5a8e22d983eadc7f24488a75f1c1ac250e311db371",
+  "bytes": 1817
+ },
+ {
+  "path": "goals/G-001-combat-monotony/23-studio-to-qa.md",
+  "sha256": "6a040fd3fd5e8cb2133d07ebca797825bbc8c12d69016890b6b51b2d59eeb3b5",
+  "bytes": 4571
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ }
+]

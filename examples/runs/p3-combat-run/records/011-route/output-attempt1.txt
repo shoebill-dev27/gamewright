@@ -1,0 +1,257 @@
+Routing the two finished steps. 3a (Decide) produced D-002 and a Design handoff. 3b (Build) produced a fix ready for independent verification. Neither consumes the other's output, so Verify (QA) and Design run in parallel.
+
+<<<FILE goals/G-001-combat-monotony/09-studio-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 9
+from: studio
+to: qa
+stage: Verify
+outcome: routed
+---
+# 09: studio → qa — Verify the dash/hit invulnerability fix (build 0.3 → 0.3.1)
+
+## Task
+
+Verify, independently and against the acceptance criteria in `05-qa-to-studio.md`, that the defect "player takes damage partway through a dash, or just after a dash, shortly after being hit" is fixed. Check for regressions. Return a pass/fail verdict per criterion, at both 30 FPS and 60 FPS.
+
+## Context
+
+Goal G-001 (combat monotony). While observing combat, a possible defect was found and you confirmed it against `design/combat.md` (report in `05-qa-to-studio.md`). The gameplay engineer has made a fix. The intended behavior is already specified in `design/combat.md`, and no spec value was changed. This Handoff does not contain the engineer's reasoning on purpose: verify from the spec, the criteria and the build.
+
+## Findings
+
+### What changed (stated exactly)
+
+Player invulnerability was one shared on/off flag written by both the dash and the hit reaction. It is now two expiry timestamps on the accumulated game clock (sum of delta times, so independent of frame rate):
+
+- On a hit: `hitInvulnUntil = hitTime + 0.8 s`. Hit-stun stays 0.3 s with no input.
+- On dash start: `dashInvulnUntil = dashStartTime + 0.25 s`. Dash distance, duration and the 0.6 s cooldown are unchanged.
+- `isInvulnerable(now)` is `now < max(hitInvulnUntil, dashInvulnUntil)`. Every damage source (Grub contact, Spitter projectile) uses this check. Neither window can cancel or shorten the other.
+- Unchanged: an attack queued during a dash fires when the dash ends; handling of a dash pressed during hit-stun (unspecified in the spec, not part of this fix).
+
+### How to exercise it
+
+At 30 FPS and 60 FPS, in rooms 1–5 with Grubs and Spitters:
+
+1. Take a hit. Then dash at delays after the hit of about 0.3, 0.4, 0.5, 0.55, 0.6, 0.7, 0.79, 0.8 and 0.85 s, with a damage source (Grub in contact, or a Spitter projectile timed to arrive) present through the dash and the time after it.
+2. Check there is no damage during the dash.
+3. Check there is no damage between the dash end and 0.8 s after the hit.
+4. Check damage can land again normally after 0.8 s after the hit, if no dash is active.
+5. Dash with no preceding hit. Check the full 0.25 s is invulnerable and damage can land right after it.
+6. Repeat with dash directions towards and away from the damage source.
+
+Also check what the fix leaves alone: hit-stun duration, the 0.8 s hit window, the 0.6 s dash cooldown, the queued attack firing after the dash.
+
+### Criteria addressed
+
+The change is intended to address all six criteria in `05-qa-to-studio.md`. Judge each yourself from the spec and the build.
+
+### Known risks to watch
+
+- A dash begun soon after a hit now keeps invulnerability until 0.8 s after the hit. The spec requires this, but it may feel like more safe time. Report what you see; do not treat it as a defect if it matches `design/combat.md`.
+- Boundary frames: the check is `now < expiry`, so damage exactly on the 0.8 s or 0.25 s boundary counts as expired. A one-frame difference at the exact boundary at variable delta time is expected, not a failure.
+- The old flag may have fed other effects (flicker, sound cues for invulnerability). Watch for any change in them.
+- A dash pressed during hit-stun is unspecified. If you see a problem, report it as a spec question, not a failure.
+
+## Decisions already made
+
+- D-001: Combat uses one attack button plus dash. No new input was added.
+
+## Constraints
+
+- Must play correctly at both 30 and 60 FPS.
+- Do not change the spec. If the expected behavior is undefined for a case you find, report it as a spec question (it goes to `game-designer`).
+- This is a dry-run project: "the build" is the simulated state under `sim/`; the change counts as made.
+
+## Open questions
+
+- Is the fix correct at both frame rates for every delay in the exercise list?
+- Does it change anything else you can observe?
+
+## Expected output
+
+A verification report (skill `verify-change`) with pass/fail per criterion, evidence for each, regressions found, and any spec questions. Address the result to `studio`, with outcome `pass` or `fail`.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: design/combat.md; sim/build-0.3.md; project.md#constraints
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-001-combat-monotony/05-qa-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/07-game-director-to-game-designer.md
+---
+kind: handoff
+goal: G-001
+seq: 7
+from: game-director
+to: game-designer
+stage: Design
+outcome: done
+---
+# 07: game-director → game-designer — Write the design spec for G-001 per D-002 (escalation first, then enemy behaviors)
+
+## Task
+
+Write the design spec (skill `write-design-spec`) for the direction chosen in D-002. Phase 1 is encounter escalation within the existing 5 rooms. Phase 2 is 1–2 telegraphed enemy behavior variants. Include player-observable acceptance criteria.
+
+## Context
+
+Goal G-001: the Owner said 「戦闘が単調なので改善したい」. Your diagnosis (handoff 04) found that enemy behavior gives no reason to move (C1) and that encounters do not escalate (C3). The Playtester's walkthrough found that "hold position and swipe" wins every room. I chose B then A, with C in reserve, and recorded it as D-002. This handoff carries the scope and limits so you can write the spec.
+
+## Findings
+
+### Direction chosen (D-002)
+
+- **Phase 1, Option B.** Using existing Grubs and Spitters, escalate across rooms 1–5 in count, Grub/Spitter mix, spawn positions and Spitter placement. Use multi-side spawns and staggered waves so a corner is not a complete answer in later rooms. One or two room-layout variants that make corners less safe are optional. Room 1 should stay approachable, and the ramp should read as a clear arc.
+- **Phase 2, Option A.** In scope. Add 1–2 behavior variants on the existing enemies, for example a Grub with a telegraphed wind-up and lunge (so the dash is the answer) and/or a Spitter that repositions or fires a spread or faster shot. Specify the behaviors, but mark them **pending feasibility (`technical-director`) and telegraph visual direction (`art-director`)**.
+- **Option C is not adopted.** Do not add attack/dash reward rules or passivity penalties in this spec. Do not add hit-stun or invulnerability retuning either. Note it only as a possible follow-up if passivity persists after Phases 1 and 2.
+
+### Scope decisions answered from your open questions
+
+- Adding new enemy behavior (A) is in scope for G-001, as Phase 2.
+- `art-director` should be involved for telegraph visuals, and `technical-director` for feasibility, before Phase 2 is built. I am asking the Studio to route these (see Open questions). Do not wait for them to write the Phase 1 spec.
+- B stays inside the 5-room, 15–20 min structure. Do not add rooms or lengthen the run. Real-time run length is unmeasured, so the spec should ask the next playtest to record it.
+
+### Acceptance criteria (player-observable)
+
+Use these as a base and make them testable in the spec:
+
+1. A player cannot clear a later room (e.g. rooms 4–5) by holding one position and attacking.
+2. The dash is used in combat in a typical room. This is expected to be fully met only after Phase 2.
+3. Later rooms feel different from room 1 in composition, spawn directions or structure.
+4. Every threat is visible before it can hurt.
+5. Behavior and timing are identical at 30 and 60 FPS.
+6. Run length stays within 15–20 minutes. It needs a real-time measurement, which a described walkthrough cannot give.
+
+Mark which criteria belong to Phase 1 and which only to Phase 2.
+
+## Decisions already made
+
+- D-001: Combat uses one attack button plus dash. No new input buttons without Owner approval.
+- D-002: Pursue B (encounter escalation, existing enemies) first, then A (telegraphed behavior variants, gated on technical and art review). C in reserve. 5 rooms and the 15–20 min run stay.
+
+## Constraints
+
+- No new input and no pillar change. If the spec would need either, hand it back to me for an Owner escalation.
+- All timing must be frame-rate independent (30 and 60 FPS).
+- Reuse existing systems (small team). Prefer data and tuning for Phase 1.
+- The mid-dash damage oddity was confirmed by `qa` as a build defect against the existing spec. The engineer has fixed it (no spec value changed) and `qa` is now verifying the fix. Do not change the spec for it. If it shows a spec ambiguity (for example how hit invulnerability interacts with dash invulnerability), amend `design/combat.md` as a spec clarification.
+- Choose exact numbers (counts, speeds, telegraph durations) in the spec. They are your call. Flag any you cannot justify from the evidence as needing playtest tuning.
+
+## Open questions
+
+- Request to the Studio: route `technical-director` (feasibility and cost of the Phase 2 behaviors for a small team) and `art-director` (telegraph visuals meeting pillar 3) once your Phase 2 behavior proposal is written. Their input gates the Phase 2 build, not the Phase 1 build. (The Studio will do this after your step.)
+- Can the Phase 1 ramp make corners unsafe enough without layout changes, or are one or two layout variants needed? Decide in the spec.
+- Does any Phase 1 composition rely on behavior the current Grub/Spitter cannot show (for example, simultaneous multi-side arrival at the current Grub speed)? Flag it if so.
+- Non-blocking, from the dash-fix Build: should a dash pressed during hit-stun be ignored or buffered? `design/combat.md` does not say, and the current behavior was left unchanged. Decide it in the spec or note it as a clarification of `design/combat.md`, as it fits.
+
+## Expected output
+
+A design spec for G-001 (written via `write-design-spec`) that:
+- covers Phase 1 in full and Phase 2 as proposed behaviors pending review;
+- includes the player-observable acceptance criteria above, mapped to phases;
+- states what is out of scope (new input, extra rooms, Option C rules).
+
+Put the spec in a design document under `design/` (and add it to the design index if you can), and write the outgoing Handoff **addressed to `studio`**. It should say which parts are ready to build (Phase 1) and which Phase 2 proposals need `technical-director` and `art-director` input. The Studio then sends Phase 1 to Build (or Plan, if you flag it as non-obvious or cross-system) and the Phase 2 proposals to `technical-director` and `art-director`. Playtest follows each phase and should record real-time run length.
+
+## Sender assessment
+
+Confidence is high that B-then-A is the right order. It fits the evidence, the vision and the small team, and it keeps Phase 2 cost visible before it is committed. The main uncertainties are tuning and Phase 2 feasibility, which a described walkthrough cannot settle, so the decision leaves both to later review and playtest. No escalation trigger applies.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: project.md#vision; project.md#player-profile; project.md#constraints; project.md#art-direction; design/combat.md
+- Decisions: decisions/D-001-one-button-combat.md; decisions/D-002-combat-variety-direction.md
+- Previous handoff: goals/G-001-combat-monotony/04-game-designer-to-game-director.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-11
+---
+# G-001: Improve monotonous combat
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): a player from the project's player profile experiences combat in the current build as varied and engaging rather than repetitive. Playing a run involves meaningful moment-to-moment variation in how the player positions, times and responds to enemies. Numeric thresholds belong to Design; the final verdict belongs to Review.
+
+Constraints that shape any solution:
+- Pillar 1 and D-001: combat stays one-button (attack + dash). No new input buttons without Owner approval. Variety must come from positioning, timing and enemy behavior.
+- Readable threats (pillar 3) and 30/60 FPS correctness must be preserved.
+- Small team: prefer reusing existing systems.
+
+Out of scope: new input buttons or a larger player kit, changes to run length, new biomes or rooms unrelated to combat variety, and non-combat systems.
+
+Not an immediate escalation: the Goal does not conflict with the vision or D-001. It must be solved inside them. If Diagnose finds that the only viable fixes need a new button or change a pillar, that triggers an Owner escalation then.
+
+## Unknowns
+
+Entry questions from `development-loop.md`:
+- Observe: has the problem been observed first-hand? No. It is an experience problem (the game may work as specified but feel wrong), so `playtester` observes. The Owner's wording is not given to the Playtester, to avoid confirming a hypothesis.
+- Diagnose: is the cause understood? No. What makes the combat feel monotonous is unknown (enemy behavior, kit depth, room design, pacing). Stage created.
+- Decide: is there a real choice of direction, priority or scope? Yes. The diagnosis (handoff 04) offers three options (A: enemy behaviors, B: encounter design and escalation, C: rule rewards) that differ in scope and cost. Resolved by D-002.
+- Design: is the intended behavior specified well enough to build? Not for any change yet. Now needed: D-002 chose a change.
+- Plan: tentative. Needed only if the chosen change is non-obvious, risky or cross-system. For Phase 2 the Game Director asked for a `technical-director` feasibility review.
+- Build: planned for the chosen direction (Phase 1, then Phase 2). Done for the dash-damage defect fix (handoff 08).
+- Verify: always after Build.
+- Play: the Goal is about how the game feels, so a Playtester re-evaluates after Build of the chosen direction.
+- Review: experience Goal, so the Game Director judges the outcome. Planned.
+- Observe (defect): the Playtester saw a possible dash-damage defect. QA confirmed it against `design/combat.md` (handoff 05). Intended behavior is already specified, so the fix needs no Design or Plan.
+
+Skipped: none.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | [01-studio-to-playtester.md](01-studio-to-playtester.md) → report in [02-playtester-to-game-designer.md](02-playtester-to-game-designer.md) |
+| 2a | Diagnose | game-designer | diagnose-experience | done | [02-playtester-to-game-designer.md](02-playtester-to-game-designer.md) → diagnosis in [04-game-designer-to-game-director.md](04-game-designer-to-game-director.md) |
+| 2b | Observe (possible defect: damage during dash) | qa | reproduce-defect | done | [03-studio-to-qa.md](03-studio-to-qa.md) → report in [05-qa-to-studio.md](05-qa-to-studio.md) |
+| 3a | Decide | game-director | make-decision | done | [04-game-designer-to-game-director.md](04-game-designer-to-game-director.md) → D-002 and [07-game-director-to-game-designer.md](07-game-director-to-game-designer.md) |
+| 3b | Build (fix dash-damage defect) | gameplay-engineer | implement-change | done | [06-studio-to-gameplay-engineer.md](06-studio-to-gameplay-engineer.md) → report in [08-gameplay-engineer-to-studio.md](08-gameplay-engineer-to-studio.md) |
+| 4 | Verify (dash-damage fix) | qa | verify-change | open | [09-studio-to-qa.md](09-studio-to-qa.md) |
+| 5 | Design (Phase 1 in full; Phase 2 proposals) | game-designer | write-design-spec | open (parallel with 4) | [07-game-director-to-game-designer.md](07-game-director-to-game-designer.md) |
+| 6a | Plan / feasibility (Phase 2 behaviors; Phase 1 too if the spec flags it non-obvious) | technical-director | technical-plan | planned (after 5) | — |
+| 6b | Design (telegraph visuals for Phase 2) | art-director | write-design-spec | planned (after 5; parallel with 6a) | — |
+| 7a | Build (Phase 1: encounter escalation) | gameplay-engineer | implement-change | planned (after 5; does not wait for 6; after 6a if the spec flags it for Plan) | — |
+| 7b | Build (Phase 2: behavior variants) | gameplay-engineer | implement-change | tentative (after 6a and 6b, if they find it feasible) | — |
+| 8a | Verify (chosen direction) | qa | verify-change | tentative (after each of 7a, 7b) | — |
+| 8b | Verify (visuals, e.g. telegraphs) | art-director | visual-review | tentative (after 7b, or 7a if it affects visuals; parallel with 8a) | — |
+| 9 | Play | playtester | playtest-session | tentative (after 7a, and again after 7b; fresh Handoff composed by the Studio without implementation history; record real-time run length) | — |
+| 10 | Review | game-director | review-outcome | planned | — |
+
+Status: planned | tentative | open | done | skipped.
+
+## Route changes
+
+- After step 1 (Observe, playtester): the report matches the plan on the experience side (monotony confirmed: one winning approach in every room, little pressure to move, dash unused in combat), so Diagnose followed as planned. It also contained a possible defect (damage during a dash after being hit). Per the return rule "Play/Observe: defect → Observe (`qa`)", step 2b was added as a parallel step. Handoff 02 was edited in place (still from `playtester`) to add the Owner's report, mark the dash-defect item as routed to `qa`, and fill in Load and Expected output.
+- After steps 2a and 2b: 2a produced a diagnosis with three options of different scope and cost (handoff 04), so Decide (`game-director`) followed. No Owner escalation trigger fired: every option stays within D-001 and the pillars. 2b confirmed a defect against specified behavior (handoff 05), so Build and Verify for the fix joined the route. No Design is needed for the fix because `design/combat.md` already specifies the behavior. The earlier tentative Build and Verify rows were split into one pair for the defect fix (3b, 4) and one pair for the chosen direction (7, 8a/8b). QA's non-blocking question (how to treat a dash pressed during hit-stun) was left for `game-designer` to fold into a later spec.
+- After steps 3a and 3b: 3a recorded D-002 (B then A, C in reserve; no escalation trigger: stays within D-001, the pillars and 5 rooms / 15–20 min) and handed Design to `game-designer` (handoff 07), so the tentative Design row is now planned and open. 3b delivered the dash/hit invulnerability fix (handoff 08) with the result addressed to `studio`. Verify (step 4) opens with a fresh Handoff (09) composed for `qa` from the engineer's Findings only; the engineer's Sender assessment (root cause reasoning, confidence) was left out per QA's policy. Verify and Design do not consume each other's output, so they run in parallel; the Route waits for both. The Game Director's request to involve `technical-director` and `art-director` for Phase 2 is added as rows 6a/6b, after Design, because they review the designer's Phase 2 proposals. The Phase 1 Build (7a) does not wait for them. Build (7) was split into Phase 1 (7a, planned) and Phase 2 (7b, tentative on the 6a/6b results), with Verify and Play after each. The dash-hit-stun question (08, open questions) was added to handoff 07 for `game-designer`. No change was needed to handoff 08 itself.
+
+## Next action
+
+Two parallel steps are open:
+- 4: `qa` verifies the dash/hit invulnerability fix from `09-studio-to-qa.md` (skill `verify-change`), at 30 and 60 FPS. The result is addressed to `studio`.
+- 5: `game-designer` writes the design spec from `07-game-director-to-game-designer.md` (skill `write-design-spec`). The result is addressed to `studio`.
+
+After both finish, run Route again. If 4 fails, apply the return rules (Build with the failure report; Plan on a second failure of the same criterion). After 5, open 7a (Phase 1 Build) and 6a/6b (feasibility and telegraph visuals for Phase 2) from the designer's outgoing Handoff.
+
+## Outcome
+
+(To be filled at close, in Japanese.)
+>>>END

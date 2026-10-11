@@ -89,6 +89,14 @@ python3 scripts/studio_run.py intake examples/runs/my-run "戦闘が単調なの
 python3 scripts/studio_run.py next examples/runs/my-run
 ```
 
+Or let the Studio continue on its own until the Owner is needed (Phase 3):
+
+```bash
+python3 scripts/studio_run.py run examples/runs/my-run
+```
+
+`run` stops at an Owner escalation, at the Goal's close, on a rejected output, a runtime error, its
+operation budget, or when no progress is being made, and says what to read and run next.
 `decide <ws> "<answer>"` resumes after an Owner escalation; `--runtime codex` runs the same packets
 on Codex. Every operation leaves a record (packet, manifest, session id) under `<ws>/records/`.
 
@@ -111,7 +119,7 @@ The same Roles, Skills and Workflow serve every project; nothing about your game
 | Path | What it is |
 |---|---|
 | `docs/spec/initial-spec.md` | Canonical spec: what the Studio is for and which principles it keeps. Not edited by implementation work. |
-| `docs/phase1.md`, `docs/phase2.md` | Phase notes: design, dry-run results, known gaps. |
+| `docs/phase1.md`, `docs/phase2.md`, `docs/phase3.md` | Phase notes: design, dry-run results, known gaps. |
 | `studio/` | The tool-neutral Studio: concepts and catalogue (`README.md`), `orchestration.md`, `workflows/`, `roles/`, `skills/`, `templates/`. |
 | `examples/projects/` | Two sample Project Contexts with dry-run Goals. Builds are simulated (`sim/`). |
 | `examples/fixtures/`, `examples/runs/` | Pristine Project Contexts, and Goals re-run from them by the isolated runner (with records). |

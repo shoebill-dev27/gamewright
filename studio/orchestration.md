@@ -68,8 +68,9 @@ Load: `goal.md`, the latest Handoff, this file, `studio/workflows/development-lo
 1. Mark the step done in the route table, linking its Handoff.
 2. **Compare the outcome with the plan.** If it fits, the next planned step follows. If not, apply
    the return rules in `development-loop.md`, revise the remaining route, and log why under
-   *Route changes*. Confirm (`planned`) or drop (`skipped`) any `tentative` stage whose condition
-   this result settles. The route is a plan, not a contract.
+   *Route changes* in one or two lines (the Handoffs carry the details; `goal.md` is rewritten by
+   every Route, so keep it short). Confirm (`planned`) or drop (`skipped`) any `tentative` stage
+   whose condition this result settles. The route is a plan, not a contract.
 3. **Check escalation triggers** (below). If one fires, write an Escalation instead of a Handoff.
 4. **Check the recipient's inputs.** Compare the outgoing Handoff with the recipient Role's
    "Works from" section; remove what the recipient must not receive and add what is missing,
@@ -83,6 +84,9 @@ Load: `goal.md`, the latest Handoff, this file, `studio/workflows/development-lo
    Project Context sections and Decisions this step needs, and the previous Handoff. You choose
    files by name (the project file list); you do not need to read a file to list it — the recipient
    reads it. Never route a step to `studio` itself: the open step is always a Role's or the Owner's.
+   When opening parallel steps, write one Handoff per step in the same Route (consecutive `seq`).
+   If you truly cannot route without reading an artifact's content, an isolated runtime lets you
+   request specific files once (`execution.md`, context request).
 6. **Mark the next step `open`** in the route table, with the Handoff that starts it, and update
    Next action in `goal.md`. If the Goal is met, Close.
 
@@ -159,9 +163,9 @@ rejected, or when the Owner made it. Smaller choices are noted in the Handoff.
 ## Parallel work, workspaces and sub-executors
 
 - **Parallel steps** only when neither consumes the other's output (e.g., QA verification and an
-  Art Director visual review of the same build). Each gets its own Handoff (consecutive `seq`) and
-  shares one route number with a letter suffix (2a, 2b). The Route operation waits for all of them
-  before moving on.
+  Art Director visual review of the same build). Each gets its own Handoff (consecutive `seq`).
+  Steps open at the same time are parallel; label their rows as you like (e.g., 2a, 2b). The Route
+  operation waits for all of them before moving on.
 - **Isolated code workspaces** (e.g., separate working trees) only when independent code changes
   run in parallel, as decided in a Technical Director plan. Never to separate Roles (spec §15).
 - **Sub-executors** may do specialist research or independent review for a Role. They report to

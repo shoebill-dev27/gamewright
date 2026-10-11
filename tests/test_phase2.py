@@ -750,10 +750,11 @@ def test_recorded_isolation_canaries():
                     )
         if (
             record.get("op") == "Route"
-        ):  # the Step's artifact only — no earlier handoffs, no records
-            assert (
-                len(re.findall(r"^<<<FILE goals/\S+/\d\d-\S+$", packet, re.M)) == 1
-            ), rec
+        ):  # only the step artifacts its header names; no records
+            header = re.search(r"^step_artifacts?: (.+)$", packet, re.M).group(1)
+            listed = {a.strip() for a in header.split(",")}
+            shown = set(re.findall(r"^<<<FILE (goals/\S+/\d\d-\S+)$", packet, re.M))
+            assert shown == listed, rec
             assert "records/" not in packet, rec
 
 

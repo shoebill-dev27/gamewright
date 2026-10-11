@@ -1,0 +1,5 @@
+@need:
+sim/build-0.4.md
+goals/G-001-combat-monotony/20-gameplay-engineer-to-studio.md
+goals/G-001-combat-monotony/23-studio-to-qa.md
+sim/repo-notes.md

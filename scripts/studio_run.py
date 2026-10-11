@@ -7,6 +7,7 @@ A workspace holds a Project Context in <ws>/project and one record directory per
   studio_run.py init   <ws> --from <fixture-dir>
   studio_run.py intake <ws> "<owner request>"
   studio_run.py next   <ws>                 # Step (+ dry-run simulator), then Route: separate executors
+  studio_run.py run    <ws> [--max-ops 25]  # repeat until done, Owner escalation, or a stop condition
   studio_run.py step   <ws>  |  route <ws>  |  simulate <ws>   # simulate: re-run the dry-run simulator
   studio_run.py decide <ws> "<owner words>" # Resume after an Owner escalation
   studio_run.py replay <ws> <record-dir>    # re-run a recorded Route packet; compare the decision
@@ -28,6 +29,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -167,12 +169,10 @@ def route_rows(goal_text):
     rows = []
     for line in section(goal_text, "Route").splitlines():
         cells = [c.strip() for c in line.strip().strip("|").split("|")]
-        if len(cells) == 6 and re.fullmatch(r"\d+[a-z]?", cells[0]):
-            cells[5] = re.sub(
-                r"^\[[^\]]*\]\(([^)]+)\)$", r"\1", cells[5].strip("`")
-            )  # tolerate links
-            if "/" in cells[5] and " " not in cells[5]:
-                cells[5] = Path(cells[5]).name  # tolerate project-relative paths
+        if len(cells) == 6 and re.fullmatch(r"\d+\S*", cells[0]):
+            # The file name of the incoming Handoff; tolerate links, paths and trailing notes.
+            name = re.search(r"\d\d-[\w-]+\.md", cells[5])
+            cells[5] = name.group(0) if name else cells[5]
             rows.append(
                 dict(zip(["n", "stage", "role", "skills", "status", "handoff"], cells))
             )
@@ -333,15 +333,18 @@ def check_artifact(project, name, text, request=None, full=True, pending=None):
         if content is None and path.is_file():
             content = path.read_text(encoding="utf-8")
         if content is None:
-            folder = path.parent
-            nearby = (
-                sorted(f.name for f in folder.glob("*") if f.is_file())
-                if folder.is_dir()
-                else []
-            )
-            errors.append(
-                f"{name}: Load entry missing: {entry} (existing files there: {', '.join(nearby) or 'none'})"
-            )
+            in_goal = Path(name).parent / entry.partition("#")[0]
+            if "/" not in entry and (project / in_goal).is_file():
+                hint = f"did you mean {in_goal}? Paths are relative to the project"
+            else:
+                folder = path.parent
+                nearby = (
+                    sorted(f.name for f in folder.glob("*") if f.is_file())
+                    if folder.is_dir()
+                    else []
+                )
+                hint = f"existing files there: {', '.join(nearby) or 'none'}"
+            errors.append(f"{name}: Load entry missing: {entry} ({hint})")
         elif anchor and anchor not in {slug(h) for h in headings(content)}:
             errors.append(f"{name}: Load section missing: {entry}")
     if f"studio/roles/{to}.md" not in loads:
@@ -438,10 +441,6 @@ def check_open_steps(project, gdir_rel, files, request):
         errors.append(
             "goal.md: an active Goal needs its next step marked `open` with its Handoff"
         )
-    if len({r["n"].rstrip("abcdefgh") for r in opened}) > 1:
-        errors.append(
-            "goal.md: only one step (or one group of parallel steps 2a, 2b) may be open"
-        )
     for row in route_rows(goal_text):
         if row["status"].lower().startswith("open") and row["role"] in ROLES:
             name = f"{gdir_rel}/{row['handoff']}"
@@ -489,6 +488,7 @@ def decision_summary(files):
 class Packet:
     def __init__(self, op, **header):
         self.op, self.header, self.inputs, self.writes = op, header, [], []
+        self.allow_need = False
 
     def add(self, label, content):
         self.inputs.append((label, content.rstrip() + "\n"))
@@ -541,6 +541,15 @@ def executor_instructions():
     return extract(
         (STUDIO / "execution.md").read_text(encoding="utf-8"), "executor-instructions"
     )
+
+
+def current_build(project):
+    """Dry-run harness: the newest simulated build (older builds are history)."""
+    builds = sorted(
+        (project / "sim").glob("build-*.md"),
+        key=lambda p: [int(x) for x in re.findall(r"\d+", p.stem)],
+    )
+    return str(builds[-1].relative_to(project)) if builds else None
 
 
 def new_packet(op, **header):
@@ -644,56 +653,139 @@ def build_step(project, gdir, handoff):
     return packet, validate
 
 
-def build_route(project, gdir):
-    latest, lmeta = goal_artifacts(gdir)[-1]
-    lrel, gid, seq = str(latest.relative_to(project)), gdir.name[:5], next_seq(gdir)
-    packet = new_packet("Route", goal=gid, step_artifact=lrel, next_seq=seq)
-    packet.add_studio_context(project, ["handoff", "escalation", "goal"])
-    packet.add_entry(project, str((gdir / "goal.md").relative_to(project)))
-    packet.add_entry(project, lrel)
+STUDIO_OPS = ("Intake", "Route", "Resume")
+MAX_NEW_HANDOFFS = 3
+MAX_NEED = 8
+
+
+def seen_through(records, gid):
+    """Highest artifact seq the last Studio operation on this goal had in view (None if unknown)."""
+    if not records or not records.is_dir():
+        return None
+    for rec in sorted(records.iterdir(), reverse=True):
+        path = rec / "record.json"
+        if not path.is_file():
+            continue
+        record = json.loads(path.read_text(encoding="utf-8"))
+        if (
+            record.get("op") in STUDIO_OPS
+            and str(record.get("goal", "")).startswith(gid)
+            and record.get("status") == "ok"
+        ):
+            return record.get("seen_through_seq")
+    return None
+
+
+def check_need(project, entries):
+    """A Route's one-time request for more context: project or Studio files only."""
+    errors = [] if entries else ["@need lists no paths"]
+    if len(entries) > MAX_NEED:
+        errors.append(f"@need may list at most {MAX_NEED} paths")
+    for entry in entries:
+        file, _, anchor = entry.partition("#")
+        if file.startswith(("/", "records")) or ".." in Path(file).parts:
+            errors.append(f"@need: {entry} is outside the project and Studio files")
+            continue
+        path, _ = resolve(project, entry)
+        if not path.is_file():
+            errors.append(f"@need: {entry} does not exist")
+        elif anchor and slug(anchor) not in {
+            slug(h) for h in headings(path.read_text(encoding="utf-8"))
+        }:
+            errors.append(f"@need: no section #{anchor} in {file}")
+    return errors
+
+
+def build_route(project, gdir, records=None):
+    artifacts, gid, seq = goal_artifacts(gdir), gdir.name[:5], next_seq(gdir)
+    seen = seen_through(records, gid)
+    fresh = [
+        (p, m) for p, m in artifacts if seen is not None and int(p.name[:2]) > seen
+    ] or artifacts[-1:]
+    rels = [str(p.relative_to(project)) for p, _ in fresh]
     grel = str(gdir.relative_to(project))
-    new = f"{grel}/{seq:02d}-studio-to-*.md"
-    packet.writes = [
-        f"{grel}/goal.md",
-        f"{lrel} (in place: keep kind, goal, seq, from, to)",
-        new.replace("*", "<role>"),
+    packet = new_packet(
+        "Route",
+        goal=gid,
+        step_artifacts=", ".join(rels),
+        next_seq=seq,
+        context_request=f"allowed once (@need, up to {MAX_NEED} paths)",
+    )
+    if current_build(project):
+        packet.header["current_build"] = (
+            f"{current_build(project)} (newest simulated build; older ones are history)"
+        )
+    packet.add_studio_context(project, ["handoff", "escalation", "goal"])
+    packet.add_entry(project, f"{grel}/goal.md")
+    for rel in rels:
+        packet.add_entry(project, rel)
+    news = [
+        f"{grel}/{s:02d}-studio-to-*.md" for s in range(seq, seq + MAX_NEW_HANDOFFS)
     ]
+    packet.writes = (
+        [f"{grel}/goal.md"]
+        + [
+            f"{rel} (in place: keep kind, goal, seq, from, to and any Sender assessment)"
+            for rel in rels
+        ]
+        + [
+            f"{grel}/NN-studio-to-<role or owner>.md: up to {MAX_NEW_HANDOFFS} new artifacts, "
+            f"consecutive NN starting at {seq:02d}",
+            f"@need: instead of all other files, once: a file block `<<<FILE @need` with one path per "
+            f"line (up to {MAX_NEED} project or Studio files), then `>>>END`, to add them to this "
+            "packet before you route",
+        ]
+    )
+    packet.allow_need = True
     request = owner_request(gdir)
 
     def validate(files):
-        errors = check_writes(files, [f"{grel}/goal.md", lrel, new], project)
+        errors = check_writes(files, [f"{grel}/goal.md"] + rels + news, project)
         if f"{grel}/goal.md" not in files:
             return errors + ["goal.md must be written"]
         errors += check_goal(files[f"{grel}/goal.md"])
-        if lrel in files:
-            nmeta = parse(files[lrel])[0]
+        for (path, meta), rel in zip(fresh, rels):
+            if rel not in files:
+                continue
+            nmeta = parse(files[rel])[0]
             if any(
-                nmeta.get(k) != lmeta.get(k)
+                nmeta.get(k) != meta.get(k)
                 for k in ("kind", "goal", "seq", "from", "to")
             ):
                 errors.append(
-                    f"{lrel}: in-place edits must keep kind, goal, seq, from and to"
+                    f"{rel}: in-place edits must keep kind, goal, seq, from and to"
                 )
             kept = section(
-                parse(latest.read_text(encoding="utf-8"))[1], "Sender assessment"
+                parse(path.read_text(encoding="utf-8"))[1], "Sender assessment"
             )
             if (
                 kept.strip()
-                and section(parse(files[lrel])[1], "Sender assessment").strip()
+                and section(parse(files[rel])[1], "Sender assessment").strip()
                 != kept.strip()
             ):
                 errors.append(
-                    f"{lrel}: keep ## Sender assessment unchanged; the runtime withholds it where needed"
+                    f"{rel}: keep ## Sender assessment unchanged; the runtime withholds it where needed"
                 )
+        created = sorted(
+            int(Path(p).name[:2])
+            for p in files
+            if any(fnmatch.fnmatch(p, n) for n in news)
+        )
+        if created != list(range(seq, seq + len(created))):
+            errors.append(
+                f"new artifacts must use consecutive seq numbers starting at {seq:02d}"
+            )
         for path in files:
-            if fnmatch.fnmatch(path, new):
+            if any(fnmatch.fnmatch(path, n) for n in news):
                 errors += check_artifact(
                     project, path, files[path], request, pending=files
                 )
         status = parse(files[f"{grel}/goal.md"])[0].get("status")
         if (
-            lmeta.get("kind") == "escalation"
-            and lmeta.get("status") == "open"
+            any(
+                m.get("kind") == "escalation" and m.get("status") == "open"
+                for _, m in fresh
+            )
             and status != "blocked-on-owner"
         ):
             errors.append("an open Escalation must set the Goal to blocked-on-owner")
@@ -723,6 +815,10 @@ def build_resume(project, gdir):
     packet = new_packet(
         "Resume", goal=gid, escalation=erel, next_seq=seq, next_decision=decision
     )
+    if current_build(project):
+        packet.header["current_build"] = (
+            f"{current_build(project)} (newest simulated build; older ones are history)"
+        )
     packet.add_studio_context(project, ["decision", "handoff", "goal", "escalation"])
     packet.add_entry(project, f"{grel}/goal.md")
     packet.add_entry(project, erel)
@@ -980,7 +1076,13 @@ RUNTIMES = {"claude": run_claude, "codex": run_codex}
 
 
 def parse_output(text):
-    return {m.group(1): m.group(2).rstrip() + "\n" for m in BLOCK.finditer(text)}
+    files = {m.group(1): m.group(2).rstrip() + "\n" for m in BLOCK.finditer(text)}
+    bare = text.strip().splitlines()
+    if (
+        not files and bare and bare[0].strip() == "@need"
+    ):  # tolerate an unwrapped context request
+        files["@need"] = "\n".join(bare[1:]) + "\n"
+    return files
 
 
 def record_dir(ws, op, role=None):
@@ -992,8 +1094,17 @@ def record_dir(ws, op, role=None):
     return path
 
 
+def save_record(rec, record):
+    (rec / "record.json").write_text(
+        json.dumps(record, indent=1, ensure_ascii=False), encoding="utf-8"
+    )
+
+
 def execute(ws, packet, validate, args, role=None):
-    """Run one operation in fresh executors (one per attempt); write only validated files."""
+    """Run one operation in fresh executors (one per attempt); write only validated files.
+
+    A Route may first answer with an @need block: its listed files are added to the packet and a
+    new executor runs once more. That round does not count as a retry."""
     rec = record_dir(ws, packet.op, role)
     base = packet.render()
     (rec / "packet.md").write_text(base, encoding="utf-8")
@@ -1006,10 +1117,11 @@ def execute(ws, packet, validate, args, role=None):
         "goal": packet.header.get("goal"),
         "attempts": [],
     }
-    feedback = ""
-    for attempt in range(1, args.retries + 2):
+    feedback, retries_left, attempt = "", args.retries, 0
+    while True:
+        attempt += 1
         started = time.time()
-        if feedback:
+        if attempt > 1:
             (rec / f"packet-attempt{attempt}.md").write_text(
                 base + feedback, encoding="utf-8"
             )
@@ -1017,14 +1129,26 @@ def execute(ws, packet, validate, args, role=None):
             result = RUNTIMES[args.runtime](base + feedback, args.model)
         except (RuntimeError, Rejected) as error:
             record.update(status="error", errors=[str(error)])
-            (rec / "record.json").write_text(
-                json.dumps(record, indent=1, ensure_ascii=False), encoding="utf-8"
-            )
+            save_record(rec, record)
             raise
         text = result.pop("text")
         (rec / f"output-attempt{attempt}.txt").write_text(text, encoding="utf-8")
         files = parse_output(text)
-        errors = list(dict.fromkeys(validate(files)))
+        need = None
+        if "@need" in files:
+            if packet.allow_need:
+                need = [
+                    l.strip().lstrip("-* ").strip()
+                    for l in files["@need"].splitlines()
+                    if l.strip()
+                ]
+                errors = check_need(ws / "project", need)
+            else:
+                errors = [
+                    "@need is not available here (only once, and only for a Route)"
+                ]
+        else:
+            errors = list(dict.fromkeys(validate(files)))
         record["attempts"].append(
             {
                 **result,
@@ -1034,8 +1158,23 @@ def execute(ws, packet, validate, args, role=None):
                 ),
                 "seconds": round(time.time() - started, 1),
                 "errors": errors,
+                **({"need": need} if need is not None else {}),
             }
         )
+        if need is not None and not errors:
+            for entry in need:
+                packet.add_entry(ws / "project", entry)
+            packet.allow_need = False
+            packet.writes = [w for w in packet.writes if not w.startswith("@need")]
+            packet.header["context_request"] = (
+                "used (the requested files are in Inputs)"
+            )
+            base, feedback = packet.render(), ""
+            (rec / f"manifest-attempt{attempt + 1}.json").write_text(
+                json.dumps(packet.manifest(), indent=1), encoding="utf-8"
+            )
+            print(f"[{rec.name}] context requested: {', '.join(need)}")
+            continue
         if not errors:
             for path, content in files.items():
                 (ws / "project" / path).parent.mkdir(parents=True, exist_ok=True)
@@ -1045,27 +1184,33 @@ def execute(ws, packet, validate, args, role=None):
                 written={p: sha(c) for p, c in files.items()},
                 decision=decision_summary(files),
             )
-            (rec / "record.json").write_text(
-                json.dumps(record, indent=1, ensure_ascii=False), encoding="utf-8"
-            )
+            goal_file = next((p for p in files if p.endswith("/goal.md")), None)
+            if packet.op in STUDIO_OPS and goal_file:
+                gdir = ws / "project" / Path(goal_file).parent
+                record["seen_through_seq"] = max(
+                    [int(a.name[:2]) for a, _ in goal_artifacts(gdir)] + [0]
+                )
+            save_record(rec, record)
             print(
                 f"[{rec.name}] ok ({result['runtime']}, session {result['session_id']}): {', '.join(files)}"
             )
             return files
+        print(f"[{rec.name}] attempt {attempt} rejected:\n  " + "\n  ".join(errors))
+        if retries_left == 0:
+            break
+        retries_left -= 1
         feedback = (
             "\n## Validation feedback\n\nA previous executor's output was rejected for these reasons. "
             "Produce the operation's files again, fixing them:\n\n"
             + "".join(f"- {e}\n" for e in errors)
         )
-        print(f"[{rec.name}] attempt {attempt} rejected:\n  " + "\n  ".join(errors))
     record["status"] = "rejected"
-    (rec / "record.json").write_text(
-        json.dumps(record, indent=1, ensure_ascii=False), encoding="utf-8"
-    )
-    raise Rejected(f"{rec.name}: output rejected after {args.retries + 1} attempts")
+    save_record(rec, record)
+    raise Rejected(f"{rec.name}: output rejected after {attempt} attempts")
 
 
-def do_step(ws, args):
+def do_step(ws, args, handoff=None):
+    """One Step (and the dry-run simulator after a finished Build). Returns (role, outcome)."""
     project = ws / "project"
     gdir = goal_dir(project, args.goal)
     status = parse((gdir / "goal.md").read_text(encoding="utf-8"))[0].get("status")
@@ -1074,12 +1219,14 @@ def do_step(ws, args):
             f"goal is {status}; "
             + ("run decide" if status == "blocked-on-owner" else "nothing to run")
         )
-    handoffs = [project / args.handoff] if args.handoff else open_handoffs(gdir)
-    if len(handoffs) != 1:
-        raise Rejected(
-            f"expected one open step, found {[h.name for h in handoffs]} (use --handoff)"
-        )
-    packet, validate = build_step(project, gdir, handoffs[0])
+    if handoff is None:
+        handoffs = [project / args.handoff] if args.handoff else open_handoffs(gdir)
+        if len(handoffs) != 1:
+            raise Rejected(
+                f"expected one open step, found {[h.name for h in handoffs]} (use --handoff or run)"
+            )
+        handoff = handoffs[0]
+    packet, validate = build_step(project, gdir, handoff)
     files = execute(ws, packet, validate, args, role=packet.header["role"])
     artifact = next(project / p for p in files if p.startswith("goals/"))
     meta = parse(artifact.read_text(encoding="utf-8"))[0]
@@ -1090,6 +1237,7 @@ def do_step(ws, args):
     ):
         sim_packet, sim_validate = build_simulator(project, gdir, artifact)
         execute(ws, sim_packet, sim_validate, args, role="simulator")
+    return packet.header["role"], meta.get("outcome")
 
 
 def do_simulate(ws, args):
@@ -1112,9 +1260,116 @@ def do_simulate(ws, args):
 
 def do_route(ws, args):
     project = ws / "project"
-    packet, validate = build_route(project, goal_dir(project, args.goal))
+    packet, validate = build_route(
+        project, goal_dir(project, args.goal), ws / "records"
+    )
     execute(ws, packet, validate, args)
     do_status(ws, args)
+
+
+def no_progress(role, history, opened):
+    """Mechanical backstop for the orchestration loop limits within one `run`."""
+    if history.get(role, [])[-2:] == ["question", "question"]:
+        return f"no progress: {role} handed back `question` twice and was opened again"
+    if opened[role] >= 3:
+        return f"no progress: {role} would be opened a 4th time in this run"
+    return None
+
+
+def unrouted(records, gdir):
+    """Artifacts newer than the last Studio operation's view (e.g., a Route failed after a Step)."""
+    seen = seen_through(records, gdir.name[:5])
+    return seen is not None and any(
+        int(p.name[:2]) > seen for p, _ in goal_artifacts(gdir)
+    )
+
+
+def do_run(ws, args):
+    """Run Steps and Routes until the Goal closes, needs the Owner, or a stop condition fires."""
+    project, records = ws / "project", ws / "records"
+    gdir = goal_dir(project, args.goal)
+    before = {d.name for d in records.iterdir()}
+    used = lambda: len(
+        {d.name for d in records.iterdir() if d.is_dir()} - before
+    )  # noqa: E731
+    history, opened, reason, code = {}, Counter(), None, 0
+    try:
+        while reason is None:
+            status = parse((gdir / "goal.md").read_text(encoding="utf-8"))[0].get(
+                "status"
+            )
+            handoffs = open_handoffs(gdir) if status == "active" else []
+            roles = [
+                parse(h.read_text(encoding="utf-8"))[0].get("to") for h in handoffs
+            ]
+            if status != "active":
+                reason = status
+            elif used() >= args.max_ops:
+                reason = f"operation budget reached ({args.max_ops})"
+            elif not handoffs:
+                reason = "no open step"
+            else:
+                reason = next(
+                    (r for r in (no_progress(x, history, opened) for x in roles) if r),
+                    None,
+                )
+            if reason:
+                break
+            if unrouted(
+                records, gdir
+            ):  # route what earlier Steps produced before stepping again
+                do_route(ws, args)
+                continue
+            for handoff in handoffs:
+                role, outcome = do_step(ws, args, handoff=handoff)
+                opened[role] += 1
+                history.setdefault(role, []).append(outcome)
+            do_route(ws, args)
+    except Rejected as error:
+        reason, code = f"rejected: {error}", 2
+    except RuntimeError as error:
+        reason, code = f"runtime error: {error}", 3
+    text = (gdir / "goal.md").read_text(encoding="utf-8")
+    status = parse(text)[0].get("status")
+    escalation = next(
+        (
+            str(p.relative_to(project))
+            for p, m in reversed(goal_artifacts(gdir))
+            if m.get("kind") == "escalation" and m.get("status") == "open"
+        ),
+        None,
+    )
+    wsr = os.path.relpath(ws, ROOT) if ws.is_relative_to(ROOT) else str(ws)
+    summary = {
+        "op": "Run",
+        "goal": gdir.name[:5],
+        "operations": sorted(
+            {d.name for d in records.iterdir() if d.is_dir()} - before
+        ),
+        "stop_reason": reason,
+        "status": status,
+        "owner_reads": (
+            escalation
+            if status == "blocked-on-owner"
+            else (
+                str((gdir / "goal.md").relative_to(project)) + "#outcome"
+                if status == "done"
+                else None
+            )
+        ),
+        "next": {
+            "done": None,
+            "abandoned": None,
+            "blocked-on-owner": f'decide {wsr} "<answer>"',
+        }.get(status, f"run {wsr}"),
+    }
+    save_record(record_dir(ws, "run"), summary)
+    print(f"\n[run] {len(summary['operations'])} operations; stopped: {reason}")
+    if summary["owner_reads"]:
+        print(f"[run] Owner: read {summary['owner_reads']}")
+    if summary["next"]:
+        print(f"[run] next: python3 scripts/studio_run.py {summary['next']}")
+    return code
 
 
 def do_decide(ws, args):
@@ -1166,6 +1421,7 @@ def main(argv=None):
             "replay",
             "packet",
             "status",
+            "run",
         ],
     )
     parser.add_argument("workspace", type=Path)
@@ -1176,6 +1432,9 @@ def main(argv=None):
     parser.add_argument("--goal")
     parser.add_argument("--handoff")
     parser.add_argument("--retries", type=int, default=1)
+    parser.add_argument(
+        "--max-ops", type=int, default=25, help="run: operation budget per invocation"
+    )
     args = parser.parse_args(argv)
     ws, project = args.workspace.resolve(), args.workspace.resolve() / "project"
     try:
@@ -1183,6 +1442,8 @@ def main(argv=None):
             shutil.copytree(args.source, project)
             (project / "goals").mkdir(exist_ok=True)
             (ws / "records").mkdir()
+        elif args.command == "run":
+            return do_run(ws, args)
         elif args.command == "intake":
             packet, validate = build_intake(project, args.text)
             execute(ws, packet, validate, args)
