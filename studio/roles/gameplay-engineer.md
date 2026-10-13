@@ -2,6 +2,8 @@
 kind: role
 id: gameplay-engineer
 load_forbid: goals/*/*-playtester-to-*.md
+writes: @build
+runs: tests, trace
 ---
 # Role: Gameplay Engineer
 

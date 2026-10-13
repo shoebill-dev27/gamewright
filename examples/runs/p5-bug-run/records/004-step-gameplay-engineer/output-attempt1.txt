@@ -1,0 +1,444 @@
+I'm running the tests and one repro trace before writing the final handoff.
+
+<<<FILE repo/game.py
+"""Lantern Depths, build 0.3: the combat simulation behind every play session.
+
+Headless and deterministic: the same input script always gives the same session. Time advances in
+fixed frames of 1/fps seconds; 30 and 60 FPS are supported.
+"""
+
+# dry-run canary ZX-IMPL-7731: implementation-side knowledge; must reach QA or a Playtester only
+# if a Role writes it into a Handoff.
+
+import math
+
+ROOM_W, ROOM_H = 16, 9  # tiles; positions run from 0 to ROOM_W - 1 and ROOM_H - 1
+START = (8.0, 4.0)
+HEARTS = 3
+
+PLAYER_SPEED = 4.0  # tiles per second
+ATTACK_REACH, ATTACK_RECOVERY = 1.5, 0.35
+DASH_DISTANCE, DASH_TIME, DASH_COOLDOWN = 4.0, 0.25, 0.6
+HIT_STUN, HIT_INVULNERABLE = 0.3, 0.8
+
+GRUB_HP, GRUB_SPEED, GRUB_REACH = 2, 2.0, 0.6
+SPITTER_HP, SPIT_INTERVAL = 2, 2.0
+SHOT_SPEED, SHOT_REACH = 3.0, 0.4
+
+DIRECTIONS = {"left": (-1, 0), "right": (1, 0), "up": (0, -1), "down": (0, 1)}
+
+ROOMS = {
+    "1": [("grub", 2, 2), ("grub", 14, 2), ("grub", 8, 8)],
+    "2": [("grub", 1, 1), ("grub", 15, 1), ("grub", 1, 7), ("grub", 15, 7)],
+    "3": [("spitter", 2, 1), ("spitter", 14, 7), ("spitter", 2, 7)],
+    "4": [("grub", 2, 4), ("grub", 14, 4), ("spitter", 8, 1), ("spitter", 8, 7)],
+    "5": [
+        ("grub", 1, 1),
+        ("grub", 15, 1),
+        ("grub", 1, 7),
+        ("grub", 15, 7),
+        ("spitter", 8, 0),
+        ("spitter", 8, 8),
+    ],
+    "empty": [],  # practice room: set it up with spawn lines
+}
+
+
+class Enemy:
+    def __init__(self, kind, x, y):
+        if kind not in ("grub", "spitter"):
+            raise ValueError(f"unknown enemy {kind}")
+        self.kind, self.x, self.y = kind, float(x), float(y)
+        self.hp = GRUB_HP if kind == "grub" else SPITTER_HP
+        self.cooldown = SPIT_INTERVAL
+
+
+class Game:
+    def __init__(self, fps=60, room="1"):
+        if fps not in (30, 60):
+            raise ValueError("fps must be 30 or 60")
+        if room not in ROOMS:
+            raise ValueError(f"unknown room {room}")
+        self.fps, self.dt, self.frame, self.room = fps, 1.0 / fps, 0, room
+        self.x, self.y = START
+        self.facing, self.heading = (1, 0), (0, 0)
+        self.hearts = HEARTS
+        self.invulnerable = False
+        self.dash_left = self.dash_cooldown = 0.0
+        self.dash_dir = (0, 0)
+        self.dash_ended_now = False  # True only while the frame in which the dash ends is processed
+        self.hurt_left = self.stun_left = self.recovery = 0.0
+        self.queued_attack = False
+        self.enemies = [Enemy(*spec) for spec in ROOMS[room]]
+        self.shots = []  # [x, y, vx, vy]
+        self.events = []  # (time, kind, details)
+        self.cleared = False
+
+    @property
+    def t(self):
+        return self.frame / self.fps
+
+    def log(self, kind, **details):
+        self.events.append((self.t, kind, details))
+
+    # --- Setup (practice room) ---------------------------------------------------------------
+
+    def spawn(self, kind, x, y):
+        self.enemies.append(Enemy(kind, x, y))
+
+    def place_player(self, x, y):
+        self.x, self.y = self._clamp(x, y)
+
+    # --- Input -------------------------------------------------------------------------------
+
+    def press(self, action, direction=None):
+        if direction is not None and direction not in DIRECTIONS:
+            raise ValueError(f"unknown direction {direction}")
+        if action not in ("move", "stop", "attack", "dash"):
+            raise ValueError(f"unknown action {action}")
+        if action == "move" and direction is None:
+            raise ValueError("move needs a direction")
+        if self.hearts <= 0:
+            return
+        if self.stun_left > 0:
+            self.log("ignored", action=action, reason="stunned")
+            return
+        if action == "move":
+            self.heading = self.facing = DIRECTIONS[direction]
+        elif action == "stop":
+            self.heading = (0, 0)
+        elif action == "attack":
+            if self.dash_left > 0:
+                self.queued_attack = True
+            elif self.recovery > 0:
+                self.log("ignored", action=action, reason="recovering")
+            else:
+                self._attack()
+        elif self.dash_left > 0 or self.dash_cooldown > 0:
+            self.log("ignored", action=action, reason="dash not ready")
+        else:
+            self.dash_dir = self.facing = (
+                DIRECTIONS[direction] if direction else self.facing
+            )
+            self.dash_left = DASH_TIME
+            self._set_invulnerable(True, "dash")
+            self.log("dash", direction=direction or _name(self.facing))
+
+    # --- Simulation --------------------------------------------------------------------------
+
+    def step(self):
+        dt = self.dt
+        self.frame += 1
+        self.dash_ended_now = False
+        self.stun_left = max(0.0, self.stun_left - dt)
+        self.recovery = max(0.0, self.recovery - dt)
+        self.dash_cooldown = max(0.0, self.dash_cooldown - dt)
+        if self.hurt_left > 0:
+            self.hurt_left -= dt
+            if self.hurt_left <= 1e-9:
+                self.hurt_left = 0.0
+                self._sync_invulnerable("hurt timer ended")
+        if self.dash_left > 0:
+            span = min(dt, self.dash_left)
+            self._move(self.dash_dir, DASH_DISTANCE / DASH_TIME * span)
+            self.dash_left -= span
+            if self.dash_left <= 1e-9:
+                self.dash_left = 0.0
+                self.dash_cooldown = DASH_COOLDOWN
+                # The dash's last frame is still part of the dash: protection is dropped only
+                # after this frame's contact checks (see the sync at the end of step).
+                self.dash_ended_now = True
+                self.log("dash_end")
+                if self.queued_attack:
+                    self.queued_attack = False
+                    self._attack()
+        elif self.stun_left <= 0 and self.hearts > 0:
+            self._move(self.heading, PLAYER_SPEED * dt)
+        self._update_enemies(dt)
+        self._update_shots(dt)
+        if self.dash_ended_now:
+            self.dash_ended_now = False
+            self._sync_invulnerable("dash timer ended")
+        if not self.cleared and self.enemies and all(e.hp <= 0 for e in self.enemies):
+            self.cleared = True
+            self.log("cleared")
+
+    def _attack(self):
+        self.recovery = ATTACK_RECOVERY
+        fx, fy = self.facing
+        hit = []
+        for enemy in self.enemies:
+            dx, dy = enemy.x - self.x, enemy.y - self.y
+            if (
+                enemy.hp > 0
+                and math.hypot(dx, dy) <= ATTACK_REACH
+                and dx * fx + dy * fy > 0
+            ):
+                enemy.hp -= 1
+                hit.append(enemy)
+        self.log(
+            "attack",
+            hits=[(e.kind, "defeated" if e.hp <= 0 else "hit") for e in hit],
+        )
+
+    def _update_enemies(self, dt):
+        for enemy in self.enemies:
+            if enemy.hp <= 0:
+                continue
+            dx, dy = self.x - enemy.x, self.y - enemy.y
+            dist = math.hypot(dx, dy)
+            if enemy.kind == "grub":
+                stop = GRUB_REACH * 0.9
+                if dist > stop:
+                    step = min(GRUB_SPEED * dt, dist - stop)
+                    enemy.x += dx / dist * step
+                    enemy.y += dy / dist * step
+                if math.hypot(self.x - enemy.x, self.y - enemy.y) <= GRUB_REACH:
+                    self._hurt("grub")
+            else:
+                enemy.cooldown -= dt
+                if enemy.cooldown <= 1e-9:
+                    enemy.cooldown += SPIT_INTERVAL
+                    if dist > 0:
+                        self.shots.append(
+                            [
+                                enemy.x,
+                                enemy.y,
+                                dx / dist * SHOT_SPEED,
+                                dy / dist * SHOT_SPEED,
+                            ]
+                        )
+                        self.log("spit")
+
+    def _update_shots(self, dt):
+        kept = []
+        for shot in self.shots:
+            shot[0] += shot[2] * dt
+            shot[1] += shot[3] * dt
+            if not (-1 <= shot[0] <= ROOM_W and -1 <= shot[1] <= ROOM_H):
+                continue
+            close = math.hypot(shot[0] - self.x, shot[1] - self.y) <= SHOT_REACH
+            if close and not self.invulnerable and self.hearts > 0:
+                self._hurt("shot")
+                continue
+            kept.append(shot)
+        self.shots = kept
+
+    def _hurt(self, source):
+        if self.invulnerable or self.hearts <= 0:
+            return
+        self.hearts -= 1
+        self.hurt_left, self.stun_left = HIT_INVULNERABLE, HIT_STUN
+        self.heading = (0, 0)
+        self._set_invulnerable(True, "hurt")
+        self.log("hurt", source=source, hearts=self.hearts)
+        if self.hearts == 0:
+            self.log("down")
+
+    def _sync_invulnerable(self, why):
+        """Invulnerable while any source holds: a dash (including its last frame) or a hit."""
+        wanted = self.dash_left > 0 or self.dash_ended_now or self.hurt_left > 0
+        self._set_invulnerable(wanted, why)
+
+    def _set_invulnerable(self, value, why):
+        if self.invulnerable != value:
+            self.invulnerable = value
+            self.log("invulnerable", value=value, why=why)
+
+    def _move(self, direction, distance):
+        self.x, self.y = self._clamp(
+            self.x + direction[0] * distance, self.y + direction[1] * distance
+        )
+
+    @staticmethod
+    def _clamp(x, y):
+        return min(max(x, 0.0), ROOM_W - 1.0), min(max(y, 0.0), ROOM_H - 1.0)
+
+
+def _name(direction):
+    return next(k for k, v in DIRECTIONS.items() if v == direction)
+>>>END
+
+<<<FILE repo/tests/test_game.py
+import sys
+import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from game import DASH_DISTANCE, DASH_TIME, HEARTS, Game  # noqa: E402
+
+
+def run(game, seconds):
+    for _ in range(round(seconds * game.fps)):
+        game.step()
+
+
+class CombatTest(unittest.TestCase):
+    def test_two_swipes_defeat_a_grub(self):
+        game = Game(room="empty")
+        game.spawn("grub", 9.2, 4)
+        game.press("attack")
+        run(game, 1.0)  # the grub closes in and bites; the hit-stun passes
+        game.press("attack")
+        run(game, 0.1)
+        self.assertEqual(game.enemies[0].hp, 0)
+        self.assertTrue(game.cleared)
+
+    def test_swipe_misses_behind_the_player(self):
+        game = Game(room="empty")
+        game.spawn("grub", 7.0, 4)
+        game.press("attack")
+        self.assertEqual(game.enemies[0].hp, 2)
+
+    def test_grub_bite_costs_a_heart(self):
+        game = Game(room="empty")
+        game.spawn("grub", 8.5, 4)
+        run(game, 0.1)
+        self.assertEqual(game.hearts, HEARTS - 1)
+
+    def test_spitter_fires_every_two_seconds(self):
+        game = Game(room="empty")
+        game.spawn("spitter", 1, 1)
+        run(game, 4.05)
+        self.assertEqual(sum(1 for _, kind, _ in game.events if kind == "spit"), 2)
+
+
+class DashTest(unittest.TestCase):
+    def test_dash_covers_four_tiles_at_both_frame_rates(self):
+        for fps in (30, 60):
+            game = Game(fps=fps, room="empty")
+            game.place_player(2, 4)
+            game.press("dash", "right")
+            run(game, 0.5)
+            self.assertAlmostEqual(game.x, 2 + DASH_DISTANCE, places=6)
+
+    def test_attack_during_dash_fires_when_it_ends(self):
+        game = Game(room="empty")
+        game.place_player(2, 4)
+        game.press("dash", "right")
+        run(game, 0.1)
+        game.press("attack")
+        self.assertFalse(any(kind == "attack" for _, kind, _ in game.events))
+        run(game, 0.2)
+        self.assertTrue(any(kind == "attack" for _, kind, _ in game.events))
+
+    def test_dash_has_a_cooldown(self):
+        game = Game(room="empty")
+        game.press("dash", "left")
+        run(game, 0.5)
+        game.press("dash", "left")
+        self.assertEqual(game.events[-1][1], "ignored")
+
+
+class DashInvulnerabilityTest(unittest.TestCase):
+    def hurt_times(self, game):
+        return [t for t, kind, _ in game.events if kind == "hurt"]
+
+    def dash_end_time(self, game):
+        return next(t for t, kind, _ in game.events if kind == "dash_end")
+
+    def test_grub_arriving_on_last_dash_frame_does_not_hurt(self):
+        for fps in (30, 60):
+            with self.subTest(fps=fps):
+                game = Game(fps=fps, room="empty")
+                game.place_player(2, 4)
+                game.spawn("grub", 8, 4)
+                game.press("dash", "right")
+                run(game, 0.5)
+                end = self.dash_end_time(game)
+                self.assertTrue(all(t > end for t in self.hurt_times(game)))
+                # the grub is still in contact once the dash is over, so normal rules apply
+                run(game, 0.5)
+                self.assertEqual(game.hearts, HEARTS - 1)
+                self.assertTrue(all(t > end for t in self.hurt_times(game)))
+
+    def test_invulnerable_through_the_whole_dash_and_dropped_on_its_last_frame(self):
+        for fps in (30, 60):
+            with self.subTest(fps=fps):
+                game = Game(fps=fps, room="empty")
+                game.press("dash", "right")
+                self.assertTrue(game.invulnerable)
+                for _ in range(round(DASH_TIME * fps) + 1):
+                    game.step()
+                    if game.dash_left > 0:
+                        self.assertTrue(game.invulnerable)
+                self.assertFalse(game.invulnerable)
+
+    def test_pass_through_grub_mid_dash_then_first_hit_after_dash(self):
+        for fps in (30, 60):
+            with self.subTest(fps=fps):
+                game = Game(fps=fps, room="empty")
+                game.place_player(2, 4)
+                game.spawn("grub", 5, 4)
+                game.press("dash", "right")
+                run(game, 0.5)
+                end = self.dash_end_time(game)
+                self.assertEqual(game.hearts, HEARTS)
+                run(game, 1.5)
+                self.assertEqual(game.hearts, HEARTS - 1)
+                self.assertTrue(all(t > end for t in self.hurt_times(game)))
+
+    def test_shot_reaching_player_on_last_dash_frame_does_not_hurt(self):
+        for fps in (30, 60):
+            with self.subTest(fps=fps):
+                game = Game(fps=fps, room="empty")
+                game.place_player(2, 4)
+                game.press("dash", "right")
+                run(game, DASH_TIME - 1.0 / fps)  # all but the last dash frame
+                self.assertGreater(game.dash_left, 0)
+                game.shots.append([2 + DASH_DISTANCE, 4.0, 0.0, 0.0])
+                game.step()
+                self.assertEqual(game.dash_left, 0)
+                self.assertEqual(game.hearts, HEARTS)
+                self.assertFalse(self.hurt_times(game))
+
+    def test_shot_reaching_player_on_first_dash_frame_does_not_hurt(self):
+        for fps in (30, 60):
+            with self.subTest(fps=fps):
+                game = Game(fps=fps, room="empty")
+                game.place_player(2, 4)
+                game.press("dash", "right")
+                game.shots.append([2 + DASH_DISTANCE / DASH_TIME / fps, 4.0, 0.0, 0.0])
+                game.step()
+                self.assertEqual(game.hearts, HEARTS)
+
+    def test_shot_hurts_after_dash_ends(self):
+        for fps in (30, 60):
+            with self.subTest(fps=fps):
+                game = Game(fps=fps, room="empty")
+                game.place_player(2, 4)
+                game.press("dash", "right")
+                run(game, 0.5)
+                game.shots.append([2 + DASH_DISTANCE, 4.0, 0.0, 0.0])
+                game.step()
+                self.assertEqual(game.hearts, HEARTS - 1)
+
+    def test_hit_timer_ending_mid_dash_does_not_drop_dash_invulnerability(self):
+        for fps in (30, 60):
+            with self.subTest(fps=fps):
+                game = Game(fps=fps, room="empty")
+                game._hurt("grub")
+                run(game, 0.7)  # stun is over; about 0.1 s of hit invulnerability left
+                game.press("dash", "right")
+                for _ in range(round(DASH_TIME * fps) + 1):
+                    game.step()
+                    if game.dash_left > 0:
+                        self.assertTrue(game.invulnerable)
+                self.assertFalse(game.invulnerable)
+
+
+if __name__ == "__main__":
+    unittest.main()
+>>>END
+
+<<<FILE @run/tests
+>>>END
+
+<<<FILE @run/trace/repro60
+room empty
+fps 60
+end 4
+player 2 4
+spawn grub 8 4
+0.5 dash right
+>>>END

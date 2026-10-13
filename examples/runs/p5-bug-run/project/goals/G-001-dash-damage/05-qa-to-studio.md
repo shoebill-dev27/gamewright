@@ -1,0 +1,102 @@
+---
+kind: handoff
+goal: G-001
+seq: 5
+from: qa
+to: studio
+stage: Review
+outcome: pass
+---
+# 05: qa → studio — Verification of the dash-damage fix (build sha 36b3b8f9a16e): PASS
+
+## Task
+
+Route this verification report. Every acceptance criterion from handoff 02 passed. No regressions were found, and one residual coverage limit and one observation are listed below. Neither blocks the pass.
+
+## Context
+
+Goal G-001. The Owner reported damage taken while dashing. Handoff 02 reproduced it as a hit on the last dash frame at 30 and 60 FPS. Expected behavior comes from `design/combat.md`: "The player is invulnerable for the full dash duration." QA verified from the spec, the acceptance criteria and the build, using the `tests`, `trace` and `play` runs through the project's run commands. Two run rounds were used.
+
+## Findings
+
+### Verdict per acceptance criterion (handoff 02)
+
+**1. Repro script, 60 FPS: PASS.**
+- Run `repro60`: dash starts at frame 31 (t=0.517) with `invulnerable True`.
+- At frame 45 (t=0.750) the events are only `dash_end` and `invulnerable False (dash timer ended)`. There is no `hurt`, and hearts stay 3.
+- The first hit is at frame 46 (t=0.767), after the dash, with hearts 3→2, `hurt_left=0.800` and `stun_left=0.300`.
+- Before the fix, the hit came in the same step as the dash end.
+
+**2. Repro script, 30 FPS: PASS.**
+- Run `repro30`: the dash is frames 16–23. At frame 23 (t=0.767) the events are only `dash_end` and `invulnerable False`. There is no hurt, and hearts stay 3.
+- The first hit is at frame 24 (t=0.800), after the dash, with the normal 0.8 s and 0.3 s timers.
+
+**3. Trace invariant at both frame rates: PASS.**
+- In `repro60`, `repro30`, `passthru60/30`, `up60`, `down30`, `queued60`, `spitter30`, `spitlast60/30` and `hurtmid60`, no `hurt` event falls in a dash frame or in the dash-end frame.
+- Every `hurt` is at least one frame after `dash_end`.
+- `invulnerable` is True from the dash start and drops only with `dash timer ended` on the dash-end frame.
+
+**4. Pass-through regression: PASS.**
+- `passthru60` and `passthru30`: hearts stay 3 through the dash, with no hurt before the dash ends.
+- The first hit is at t=1.433 at both frame rates, after the dash, as in the original report.
+
+**5. Other attackers (Spitter projectiles, first and last dash frame): PASS on the test suite, with a coverage limit in the play runs (see Residual limit).**
+- The unit tests `test_shot_reaching_player_on_last_dash_frame_does_not_hurt` and `test_shot_reaching_player_on_first_dash_frame_does_not_hurt` pass at 30 and 60 FPS. Both place a projectile exactly on the player on that frame, and the player takes no damage.
+- `test_shot_hurts_after_dash_ends` passes, so projectiles still hurt normally after the dash.
+- Spitter play runs `spitter30` (a spit mid-dash), `spitlast60`, `spitlast30` and room 3 (dashes with 3 Spitters firing): no hurt occurs during any dash. Hits come only after `dash_end`.
+
+**6. Normal rules unchanged: PASS.**
+- Grub bite: 1 heart, `stun_left=0.300`, `hurt_left=0.800`. Hits repeat every 0.8 s while the Grub stays in contact, at both frame rates.
+- Dash distance: 4 tiles in all directions. Right: x 2→6. Up: y 7→3. Down: y 1→5. Left: x 8→4.
+- Dash duration: it ends at frame 45 (0.233 s after the first dash frame, 15 frames at 60 FPS). At 30 FPS it ends at frame 23 (8 frames).
+- Cooldown: covered by the existing `test_dash_has_a_cooldown`, which passes. The play runs show no cooldown anomaly.
+- Queued attack: in `queued60`, an attack pressed at 0.6 s during the dash fires in the dash-end frame (`attack {'hits': [('grub','hit')]}`, Grub hp 2→1). The first hit on the player is on the following frame, at normal timing.
+
+**7. Test suite: PASS.** QA's own run of `python3 -m unittest discover -s tests` gave exit 0 with 14 tests, all OK. The suite was 7 tests before the fix. The new tests cover the last-frame boundary, first-frame contact, pass-through, the hit timer ending mid-dash, and shots on the first and last frame, at both frame rates.
+
+### Additional areas from handoff 04
+
+- **Dash directions:** `up60` and `down30` (a Grub arriving at the end point, vertical dash). Hearts stay 3 through the dash. The first hit is after `dash_end` (t=1.200 and t=1.233).
+- **Rooms 1–5 with several enemies:** `room3` at 60 FPS, four dashes (left, right, up, down) with 3 Spitters shooting. No hit occurs during a dash. Two hits occur outside dashes, at t≈6.267 and t≈10.100, with hearts 3→2→1.
+- **Hit invulnerability timer ending during a dash:** `hurtmid60`.
+  - The player was hit at t=0.017.
+  - A dash started with `hurt_left=0.050`, so the hit timer would have ended mid-dash.
+  - `invulnerable` stayed True through the whole dash. It dropped once, with `dash timer ended`, at the dash end.
+  - The next hit was much later (t=2.717), with normal timers.
+  - This also matches the unit test.
+- **Queued attack together with contact on the last dash frame:** `queued60`, as described under criterion 6. No damage on the dash-end frame.
+- **Damage resuming after the dash:** a Grub still in contact hurts one frame after the dash end (frame 46 at 60 FPS, frame 24 at 30 FPS). This was accepted in handoff 02 and does not contradict `design/combat.md`.
+
+### Regressions
+
+None found. All existing behavior (Grub bite, hit timers, Spitter cadence of one spit per 2 s, dash distance, queued attack) behaves as before. The 7 original tests still pass.
+
+### Residual limit and observation (not defects)
+
+- **Residual limit:** the two play scripts that aimed a real Spitter shot at the last dash frame (`spitlast60`, `spitlast30`) did not land the shot's contact on that exact frame. The hit came on the frame after `dash_end`. The exact last-frame and first-frame projectile cases are therefore evidenced only by the unit tests, which place the shot directly. This is a play-timing limit, not an observed failure. The real-script behavior is consistent with the fix.
+- **Observation:** a projectile or Grub touching the player on the last dash frame is not consumed and can hurt on the next frame if still overlapping. For Grubs this was accepted in 02. `design/combat.md` is silent on a projectile doing the same. If the Owner or `game-designer` wants a grace period after the dash, that is a design change and is out of scope for this verification.
+
+## Decisions already made
+
+D-001: one attack button plus dash. The fix adds no inputs, and none were found.
+
+## Constraints
+
+- Frame rates 30 and 60 were both exercised for the repro, pass-through and spitter cases. Down was exercised at 30 FPS only and up at 60 FPS only. Neither direction showed a boundary problem.
+- No production code was modified.
+
+## Open questions
+
+None blocking. Optional: whether projectile contact on the last dash frame should be consumed or graced. This is a design question for `game-designer`, only if the Owner cares.
+
+## Expected output
+
+Studio routes this report to Review. QA's verdict is `pass`. Severity and reproducibility do not apply, because no criterion failed.
+
+## Load
+
+- Role: studio/roles/studio.md
+- Skills: none
+- Project: project.md#constraints, design/combat.md
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-001-dash-damage/04-studio-to-qa.md

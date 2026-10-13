@@ -24,6 +24,7 @@ import hashlib
 import json
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -69,7 +70,7 @@ REQUIRED = {
 SELF_ASSESSMENT = re.compile(
     r"(?i)\b(root cause|own tests?|tests? (all )?pass(ed|es)?|confiden(t|ce))\b"
 )
-BLOCK = re.compile(r"^<<<FILE (\S+)[ \t]*\n(.*?)\n>>>END[ \t]*$", re.M | re.S)
+BLOCK = re.compile(r"^<<<FILE (\S+)[ \t]*\n(.*?)^>>>END[ \t]*$", re.M | re.S)
 SYSTEM_PROMPT = (
     "You execute one operation of a game-development studio process. Everything you "
     "need is in the user's message; follow it exactly."
@@ -157,8 +158,13 @@ def strip(text, names):
 
 
 def load_entries(text):
-    """Load list entries; section anchors normalized to the heading slug (`#Constraints` -> `#constraints`)."""
-    entries = re.findall(r"[\w./-]+\.md(?:#[\w-]+)?", section(parse(text)[1], "Load"))
+    """Load list entries: Markdown files (with an optional `#section`, normalized to the heading
+    slug) and files of any type given with a directory, such as build sources (`repo/game.py`).
+    """
+    entries = re.findall(
+        r"[\w./-]+\.md(?:#[\w-]+)?|[\w.-]+/[\w./-]*\.\w+",
+        section(parse(text)[1], "Load"),
+    )
     return [
         e.partition("#")[0] + ("#" + slug(e.partition("#")[2]) if "#" in e else "")
         for e in entries
@@ -209,6 +215,7 @@ def role_policy(role):
             "load_forbid",
             "strip_sections",
             "writes",
+            "runs",
         )
     }
     policy["escalates"] = "prepare-owner-escalation" in section(body, "Typical skills")
@@ -228,6 +235,14 @@ def matches(entry, patterns, project_meta):
 
 def project_meta(project):
     return parse((project / "project.md").read_text(encoding="utf-8"))[0]
+
+
+def run_commands(project):
+    """The build commands a project declares (`run_<name>: <command>`), if it has a build."""
+    meta = project_meta(project)
+    if not meta.get("build"):
+        return {}
+    return {k[4:]: v for k, v in meta.items() if k.startswith("run_") and v}
 
 
 def goal_dir(project, goal_id=None):
@@ -540,6 +555,9 @@ class Packet:
     def __init__(self, op, **header):
         self.op, self.header, self.inputs, self.writes = op, header, [], []
         self.allow_need = False
+        # Run requests (Steps of Roles that may run the build): see run_round().
+        self.runs, self.build, self.write_patterns, self.rounds = [], None, [], 0
+        self.proposed, self.run_log, self.base_inputs = {}, [], None
 
     def add(self, label, content):
         self.inputs.append((label, content.rstrip() + "\n"))
@@ -595,12 +613,23 @@ def executor_instructions():
 
 
 def current_build(project):
-    """Dry-run harness: the newest simulated build (older builds are history)."""
+    """The build Verify and Play observe: the project's build directory, or the newest simulated one."""
+    build = project_meta(project).get("build")
+    if build:
+        digest = hashlib.sha256()
+        for path in sorted(p for p in (project / build).rglob("*") if p.is_file()):
+            digest.update(str(path.relative_to(project)).encode() + path.read_bytes())
+        digest = digest.hexdigest()
+        return f"{build}/ (sha {digest[:12]}; run through the project's run commands)"
     builds = sorted(
         (project / "sim").glob("build-*.md"),
         key=lambda p: [int(x) for x in re.findall(r"\d+", p.stem)],
     )
-    return str(builds[-1].relative_to(project)) if builds else None
+    return (
+        f"{builds[-1].relative_to(project)} (newest simulated build; older ones are history)"
+        if builds
+        else None
+    )
 
 
 def new_packet(op, **header):
@@ -671,14 +700,30 @@ def build_step(project, gdir, handoff):
     for name in templates:
         packet.add_entry(project, f"studio/templates/{name}.md")
     out = f"goals/{gdir.name}/{seq:02d}-{role}-to-*.md"
-    decision = next_decision(project)
-    extra = [
-        f"decisions/{decision}-*.md" if w == "decisions/*" else w
-        for w in policy["writes"]
-    ]
+    decision, build = next_decision(project), project_meta(project).get("build")
+    extra = []
+    for w in policy["writes"]:
+        if w == "@build":
+            extra += [f"{build}/*"] if build else []
+        else:
+            extra.append(f"decisions/{decision}-*.md" if w == "decisions/*" else w)
     packet.writes = [out.replace("*", "<recipient>")] + [
-        w.replace("*", "<name>") for w in extra
+        w.replace("*", "<path> (full file content)" if w == f"{build}/*" else "<name>")
+        for w in extra
     ]
+    commands = run_commands(project)
+    runs = [r for r in policy["runs"] if r in commands]
+    if runs:
+        packet.runs, packet.build, packet.write_patterns = runs, build, [out] + extra
+        packet.header["runs"] = f"{', '.join(runs)} (up to {MAX_RUNS} rounds)"
+        for name in runs:
+            packet.header[f"run_{name}"] = commands[name]
+        packet.writes.append(
+            f"@run/<{'|'.join(runs)}>[/<label>]: instead of your final files, up to {MAX_RUNS} "
+            "times: one block per run, holding its input script for a command with {script} (empty "
+            f"otherwise), plus any {build}/ files you may write that the run should use. A new "
+            "executor gets the results and must write every file to keep in its final answer"
+        )
 
     def validate(files):
         errors = check_writes(
@@ -815,9 +860,7 @@ def build_route(project, gdir, records=None, since=None):
         context_request=f"allowed once (@need, up to {MAX_NEED} paths)",
     )
     if current_build(project):
-        packet.header["current_build"] = (
-            f"{current_build(project)} (newest simulated build; older ones are history)"
-        )
+        packet.header["current_build"] = current_build(project)
     packet.add_studio_context(project, ["handoff", "escalation", "goal"])
     packet.add_entry(project, f"{grel}/goal.md")
     add_log(packet, gdir, grel)
@@ -941,9 +984,7 @@ def build_resume(project, gdir):
         "Resume", goal=gid, escalation=erel, next_seq=seq, next_decision=decision
     )
     if current_build(project):
-        packet.header["current_build"] = (
-            f"{current_build(project)} (newest simulated build; older ones are history)"
-        )
+        packet.header["current_build"] = current_build(project)
     packet.add_studio_context(project, ["decision", "handoff", "goal", "escalation"])
     packet.add_entry(project, f"{grel}/goal.md")
     add_log(packet, gdir, grel)
@@ -1214,6 +1255,150 @@ def parse_output(text):
     return files
 
 
+# --- Build runs (sandboxed) -------------------------------------------------------------------
+
+MAX_RUNS, RUN_TIMEOUT, RUN_OUTPUT_MAX = 3, 30, 20_000
+SCRIPT_NAME = "input.script"
+SANDBOX = [
+    "bwrap",
+    "--ro-bind", "/usr", "/usr",
+    "--symlink", "usr/bin", "/bin",
+    "--symlink", "usr/lib", "/lib",
+    "--symlink", "usr/lib64", "/lib64",
+    "--symlink", "usr/sbin", "/sbin",
+    "--dev", "/dev",
+    "--proc", "/proc",
+    "--tmpfs", "/tmp",
+    "--unshare-all",
+    "--die-with-parent",
+    "--new-session",
+    "--clearenv",
+    "--setenv", "PATH", "/usr/bin",
+    "--setenv", "HOME", "/work",
+    "--setenv", "PYTHONDONTWRITEBYTECODE", "1",
+]  # fmt: skip
+
+
+def sandboxed(work, argv):
+    """Run one build command where only /usr (read-only) and the build copy (/work) exist, offline."""
+    if not shutil.which("bwrap"):
+        raise RuntimeError(
+            "sandbox unavailable: bubblewrap (bwrap) not found; build commands never run unsandboxed"
+        )
+    started = time.time()
+    try:
+        proc = subprocess.run(
+            SANDBOX + ["--bind", str(work), "/work", "--chdir", "/work"] + argv,
+            capture_output=True,
+            text=True,
+            timeout=RUN_TIMEOUT,
+        )
+        code, output = proc.returncode, proc.stdout + proc.stderr
+    except subprocess.TimeoutExpired as error:
+        parts = [error.stdout, error.stderr]
+        code = "timeout"
+        output = (
+            "".join(
+                p.decode(errors="replace") if isinstance(p, bytes) else (p or "")
+                for p in parts
+            )
+            + f"\n[stopped after {RUN_TIMEOUT} s]"
+        )
+    if len(output) > RUN_OUTPUT_MAX:
+        output = (
+            output[:RUN_OUTPUT_MAX] + f"\n[output cut at {RUN_OUTPUT_MAX} characters]"
+        )
+    return code, output, round(time.time() - started, 1)
+
+
+def check_runs(packet, files):
+    if not packet.runs:
+        return [
+            "@run is not available here (only in a Step whose Role may run the project's build)"
+        ]
+    if packet.rounds >= MAX_RUNS:
+        return [f"all {MAX_RUNS} run rounds are used; write your final files now"]
+    errors = []
+    for path in files:
+        if path.startswith("@run/"):
+            if path.split("/")[1] not in packet.runs:
+                errors.append(f"{path}: you may run only {', '.join(packet.runs)}")
+        elif (
+            path.startswith("/")
+            or ".." in Path(path).parts
+            or not path.startswith(packet.build + "/")
+            or not any(fnmatch.fnmatch(path, p) for p in packet.write_patterns)
+        ):
+            errors.append(
+                f"{path}: a run round carries only {packet.build}/ files your Role may write; "
+                "write everything else in your final answer"
+            )
+    return errors
+
+
+def run_round(project, packet, files, rec):
+    """Run the requested commands on a copy of the build with every proposed file applied, and put
+    the results (and the proposals, which are not written) into the packet for a new executor.
+    """
+    commands = run_commands(project)
+    packet.proposed.update(
+        {p: c for p, c in files.items() if not p.startswith("@run/")}
+    )
+    packet.rounds += 1
+    results = []
+    with tempfile.TemporaryDirectory(prefix="build-") as tmp:
+        work = Path(tmp) / "work"
+        shutil.copytree(project / packet.build, work)
+        for path, content in packet.proposed.items():
+            target = work / Path(path).relative_to(packet.build)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(content, encoding="utf-8")
+        for label, script in files.items():
+            if not label.startswith("@run/"):
+                continue
+            command = commands[label.split("/")[1]]
+            (work / SCRIPT_NAME).write_text(script, encoding="utf-8")
+            code, output, seconds = sandboxed(
+                work, shlex.split(command.replace("{script}", SCRIPT_NAME))
+            )
+            results.append(
+                {
+                    "run": label,
+                    "command": command,
+                    "script": script,
+                    "exit": code,
+                    "seconds": seconds,
+                    "output": output,
+                }
+            )
+    (rec / f"runs-round{packet.rounds}.json").write_text(
+        json.dumps(results, indent=1, ensure_ascii=False), encoding="utf-8"
+    )
+    for r in results:
+        script = (
+            f"Script:\n\n```text\n{r['script'].rstrip()}\n```\n\n"
+            if r["script"].strip()
+            else ""
+        )
+        packet.run_log.append(
+            f"### Round {packet.rounds}: {r['run']} — `{r['command']}`\n\n{script}"
+            f"Exit: {r['exit']} ({r['seconds']} s). Output:\n\n```text\n{r['output'].rstrip()}\n```\n"
+        )
+    if packet.base_inputs is None:
+        packet.base_inputs = list(packet.inputs)
+    packet.inputs = list(packet.base_inputs)
+    for path, content in packet.proposed.items():
+        packet.add(f"{path} (proposed in a run round; not written)", content)
+    packet.add("@run-results", "\n".join(packet.run_log))
+    left = MAX_RUNS - packet.rounds
+    packet.header["runs"] = (
+        f"{', '.join(packet.runs)} ({left} rounds left; results in @run-results)"
+    )
+    if not left:
+        packet.writes = [w for w in packet.writes if not w.startswith("@run/")]
+    return results
+
+
 def record_dir(ws, op, role=None):
     records = ws / "records"
     records.mkdir(parents=True, exist_ok=True)
@@ -1267,7 +1452,10 @@ def execute(ws, packet, validate, args, role=None):
         (rec / f"output-attempt{attempt}.txt").write_text(text, encoding="utf-8")
         files = parse_output(text)
         need = None
-        if "@need" in files:
+        runs = [p for p in files if p.startswith("@run/")]
+        if runs and "@need" not in files:
+            errors = check_runs(packet, files)
+        elif "@need" in files:
             if packet.allow_need:
                 need = [
                     l.strip().lstrip("-* ").strip()
@@ -1291,6 +1479,7 @@ def execute(ws, packet, validate, args, role=None):
                 "seconds": round(time.time() - started, 1),
                 "errors": errors,
                 **({"need": need} if need is not None else {}),
+                **({"runs": runs} if runs else {}),
             }
         )
         if need is not None and not errors:
@@ -1306,6 +1495,22 @@ def execute(ws, packet, validate, args, role=None):
                 json.dumps(packet.manifest(), indent=1), encoding="utf-8"
             )
             print(f"[{rec.name}] context requested: {', '.join(need)}")
+            continue
+        if runs and not errors:
+            try:
+                results = run_round(ws / "project", packet, files, rec)
+            except RuntimeError as error:
+                record.update(status="error", errors=[str(error)])
+                save_record(rec, record)
+                raise
+            base, feedback = packet.render(), ""
+            (rec / f"manifest-attempt{attempt + 1}.json").write_text(
+                json.dumps(packet.manifest(), indent=1), encoding="utf-8"
+            )
+            print(
+                f"[{rec.name}] run round {packet.rounds}: "
+                + ", ".join(f"{r['run']} exit {r['exit']}" for r in results)
+            )
             continue
         if not errors:
             goal_file = next((p for p in files if p.endswith("/goal.md")), None)

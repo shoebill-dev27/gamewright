@@ -1,0 +1,26 @@
+<<<FILE @run/trace/spitlast60
+room empty
+fps 60
+end 5
+player 2 4
+spawn spitter 12 4
+3.6166 dash right
+>>>END
+
+<<<FILE @run/trace/spitlast30
+room empty
+fps 30
+end 5
+player 2 4
+spawn spitter 12 4
+3.6 dash right
+>>>END
+
+<<<FILE @run/trace/hurtmid60
+room empty
+fps 60
+end 3
+player 8 4
+spawn grub 8.5 4
+0.75 dash left
+>>>END

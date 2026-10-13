@@ -35,6 +35,10 @@ python3 scripts/studio_run.py run <ws>               # repeat until done, an Own
 python3 scripts/studio_run.py decide <ws> "<owner's answer>"
 ```
 
+A project that declares a build (`build:`, `run_<name>:` in `project.md`) lets Steps request runs
+of those commands; the runner executes them in a bubblewrap sandbox (no network, only the build
+copy writable) and never without it.
+
 `run` stops on its own when the Owner is needed, on a rejected output, a runtime error, its
 operation budget (`--max-ops`, default 25), or when no progress is being made.
 
@@ -50,4 +54,5 @@ Step; the packet is the only input. The manual operations above remain valid.
 - Tool-specific material belongs only in entry points: this file, `CLAUDE.md`, `.claude/`.
 - Repository language is English. Owner-facing artifacts use the project's `owner_language`.
 - Check: `python3 -m pytest tests/` (Phase 1 structure: `tests/test_studio.py`; isolation: `tests/test_phase2.py`;
-  continuous runs: `tests/test_phase3.py`; Goal log and `goal.md` limits: `tests/test_phase4.py`).
+  continuous runs: `tests/test_phase3.py`; Goal log and `goal.md` limits: `tests/test_phase4.py`;
+  build runs and sandbox: `tests/test_phase5.py`, which needs `bwrap`).

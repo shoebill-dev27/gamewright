@@ -11,7 +11,9 @@ defines what an isolated runtime must guarantee when one is used.
    session cannot be resumed.
 2. **The packet is the whole input.** The executor receives exactly one packet. It has no tools,
    no file access, and no ambient instructions or memory. Where a runtime cannot remove a tool,
-   every tool use is recorded and an operation that used one is rejected.
+   every tool use is recorded and an operation that used one is rejected. Running the build is
+   not a tool: the runtime runs a project's declared commands on request (Build runs) and adds
+   the results to the packet of a new executor.
 3. **Only artifacts carry over.** The executor's output is parsed for file blocks, and only files
    on the operation's write list are written. Everything else is discarded and never enters a
    later packet. Each operation sees earlier work only through artifacts.
@@ -42,6 +44,28 @@ file list gives names only, never contents.
 files to the packet and runs a new executor once more; a second request is rejected. The request
 and the enlarged packet are recorded.
 
+## Build runs
+
+A project with a runnable build declares it in `project.md` frontmatter: `build: <directory>` and
+one `run_<name>: <command>` per command (e.g., `run_tests`, `run_play`, `run_trace`; `{script}` in a
+command stands for an input script). A Role's `runs` policy names the commands its Steps may use.
+
+Instead of its final files, a Step may answer with run requests, one `@run/<name>` block per run
+(holding the input script, or nothing), plus the build files it proposes to change if its Role may
+write them. The runtime then:
+
+1. copies the build, applies every proposal made so far, and runs each requested command;
+2. runs a new executor with the same packet plus the proposals (marked as not written) and the
+   results (script, exit code, output).
+
+A Step has at most 3 run rounds and ends with its normal artifact; files are written only from
+that final answer. Commands run in a sandbox: only the system's programs (read-only) and the build
+copy are visible, there is no network, and each command is stopped after 30 seconds. Without a
+sandbox, build commands are not run. Rounds, scripts and outputs are recorded.
+
+Run output carries what the command prints. A Playtester's commands therefore print only what a
+player perceives; internal state belongs in commands that only other Roles may run.
+
 ## Continuous execution
 
 A runtime may repeat Steps and Routes without a person starting each one. It runs every open Step
@@ -70,7 +94,8 @@ when it builds a Step packet and when it validates any Handoff addressed to that
 | `load_only` | Every Load entry must match one of these patterns; `@player_visible` expands to the project's `player_visible` patterns |
 | `load_forbid` | No Load entry may match these patterns |
 | `strip_sections` | Sections removed from every Handoff before it enters the packet |
-| `writes` | Project files the Role may create or change besides its outgoing artifact |
+| `writes` | Project files the Role may create or change besides its outgoing artifact; `@build` means the files of the project's build |
+| `runs` | Build commands (Build runs) the Role's Steps may request |
 
 Values are comma-separated; patterns are paths relative to the project (or `studio/...`) with `*`
 wildcards. Further checks on Handoffs to independent Roles:
@@ -115,10 +140,11 @@ Outcome.
 
 ## Dry-run simulation
 
-When a project's build is simulated (`sim/`), the runtime runs a simulator after a Build step that
-finished: a fresh executor that rewrites the build description from the implemented change, so
-that Verify and Play observe the change rather than the implementer's intent. The simulator is a
-test harness, not a Role, and its output is limited to `sim/`.
+When a project has no runnable build and simulates one under `sim/`, the runtime runs a simulator
+after a Build step that finished: a fresh executor that rewrites the build description from the
+implemented change, so that Verify and Play observe the change rather than the implementer's
+intent. The simulator is a test harness, not a Role, and its output is limited to `sim/`. A
+simulated build cannot settle numeric criteria; a declared build (Build runs) can.
 
 ## Executor instructions
 

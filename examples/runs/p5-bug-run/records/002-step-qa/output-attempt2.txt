@@ -1,0 +1,26 @@
+<<<FILE @run/trace/dash-midcontact-60
+room empty
+fps 60
+end 3
+player 2 4
+spawn grub 5 4
+0.5 dash right
+>>>END
+
+<<<FILE @run/trace/dash-midcontact-30
+room empty
+fps 30
+end 3
+player 2 4
+spawn grub 5 4
+0.5 dash right
+>>>END
+
+<<<FILE @run/play/dash-grub-60-player
+room empty
+fps 60
+end 4
+player 2 4
+spawn grub 8 4
+0.5 dash right
+>>>END

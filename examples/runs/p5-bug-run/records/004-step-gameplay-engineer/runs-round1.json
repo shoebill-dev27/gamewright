@@ -1,0 +1,18 @@
+[
+ {
+  "run": "@run/tests",
+  "command": "python3 -m unittest discover -s tests",
+  "script": "\n",
+  "exit": 1,
+  "seconds": 0.0,
+  "output": "............\n======================================================================\nFAIL: test_pass_through_grub_mid_dash_then_first_hit_after_dash (test_game.DashInvulnerabilityTest) (fps=30)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/work/tests/test_game.py\", line 116, in test_pass_through_grub_mid_dash_then_first_hit_after_dash\n    self.assertEqual(game.hearts, HEARTS - 1)\nAssertionError: 1 != 2\n\n======================================================================\nFAIL: test_pass_through_grub_mid_dash_then_first_hit_after_dash (test_game.DashInvulnerabilityTest) (fps=60)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/work/tests/test_game.py\", line 116, in test_pass_through_grub_mid_dash_then_first_hit_after_dash\n    self.assertEqual(game.hearts, HEARTS - 1)\nAssertionError: 1 != 2\n\n======================================================================\nFAIL: test_shot_reaching_player_on_last_dash_frame_does_not_hurt (test_game.DashInvulnerabilityTest) (fps=30)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/work/tests/test_game.py\", line 129, in test_shot_reaching_player_on_last_dash_frame_does_not_hurt\n    self.assertEqual(game.dash_left, 0)\nAssertionError: 0.016666666666666705 != 0\n\n----------------------------------------------------------------------\nRan 14 tests in 0.002s\n\nFAILED (failures=3)\n"
+ },
+ {
+  "run": "@run/trace/repro60",
+  "command": "python3 play.py --view trace {script}",
+  "script": "room empty\nfps 60\nend 4\nplayer 2 4\nspawn grub 8 4\n0.5 dash right\n",
+  "exit": 0,
+  "seconds": 0.0,
+  "output": "trace: fps=60 room=empty dt=0.01667\nt=0.000 frame=0 pos=(2.00,4.00) hearts=3 invulnerable=False dash_left=0.000 hurt_left=0.000 stun_left=0.000 | grub(8.00,4.00,hp=2) | setup\nt=0.517 frame=31 pos=(2.27,4.00) hearts=3 invulnerable=True dash_left=0.233 hurt_left=0.000 stun_left=0.000 | grub(6.97,4.00,hp=2) | invulnerable {'value': True, 'why': 'dash'}; dash {'direction': 'right'}\nt=0.750 frame=45 pos=(6.00,4.00) hearts=3 invulnerable=False dash_left=0.000 hurt_left=0.000 stun_left=0.000 | grub(6.53,4.00,hp=2) | dash_end; invulnerable {'value': False, 'why': 'dash timer ended'}\nt=0.767 frame=46 pos=(6.00,4.00) hearts=2 invulnerable=True dash_left=0.000 hurt_left=0.800 stun_left=0.300 | grub(6.53,4.00,hp=2) | invulnerable {'value': True, 'why': 'hurt'}; hurt {'source': 'grub', 'hearts': 2}\nt=1.567 frame=94 pos=(6.00,4.00) hearts=1 invulnerable=True dash_left=0.000 hurt_left=0.800 stun_left=0.300 | grub(6.53,4.00,hp=2) | invulnerable {'value': False, 'why': 'hurt timer ended'}; invulnerable {'value': True, 'why': 'hurt'}; hurt {'source': 'grub', 'hearts': 1}\nt=2.367 frame=142 pos=(6.00,4.00) hearts=0 invulnerable=True dash_left=0.000 hurt_left=0.800 stun_left=0.300 | grub(6.53,4.00,hp=2) | invulnerable {'value': False, 'why': 'hurt timer ended'}; invulnerable {'value': True, 'why': 'hurt'}; hurt {'source': 'grub', 'hearts': 0}; down\nt=3.167 frame=190 pos=(6.00,4.00) hearts=0 invulnerable=False dash_left=0.000 hurt_left=0.000 stun_left=0.000 | grub(6.53,4.00,hp=2) | invulnerable {'value': False, 'why': 'hurt timer ended'}\nt=4.000 frame=240 pos=(6.00,4.00) hearts=0 invulnerable=False dash_left=0.000 hurt_left=0.000 stun_left=0.000 | grub(6.53,4.00,hp=2) | end\n"
+ }
+]

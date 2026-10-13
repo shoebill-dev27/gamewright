@@ -1,0 +1,87 @@
+Round 1: I'll run the test suite, the original repro at both frame rates, the pass-through case, vertical dashes, a queued attack, and a Spitter scenario.
+
+<<<FILE @run/tests
+>>>END
+
+<<<FILE @run/trace/repro60
+room empty
+fps 60
+end 4
+player 2 4
+spawn grub 8 4
+0.5 dash right
+>>>END
+
+<<<FILE @run/trace/repro30
+room empty
+fps 30
+end 4
+player 2 4
+spawn grub 8 4
+0.5 dash right
+>>>END
+
+<<<FILE @run/trace/passthru60
+room empty
+fps 60
+end 4
+player 2 4
+spawn grub 5 4
+0.5 dash right
+>>>END
+
+<<<FILE @run/trace/passthru30
+room empty
+fps 30
+end 4
+player 2 4
+spawn grub 5 4
+0.5 dash right
+>>>END
+
+<<<FILE @run/trace/up60
+room empty
+fps 60
+end 4
+player 8 7
+spawn grub 8 0
+0.5 dash up
+>>>END
+
+<<<FILE @run/trace/down30
+room empty
+fps 30
+end 4
+player 8 1
+spawn grub 8 8
+0.5 dash down
+>>>END
+
+<<<FILE @run/trace/queued60
+room empty
+fps 60
+end 4
+player 2 4
+spawn grub 8 4
+0.5 dash right
+0.6 attack
+>>>END
+
+<<<FILE @run/trace/spitter30
+room empty
+fps 30
+end 6
+player 2 4
+spawn spitter 12 4
+1.9 dash right
+>>>END
+
+<<<FILE @run/play/room3
+room 3
+fps 60
+end 12
+0.5 dash left
+2 dash right
+4 dash up
+6 dash down
+>>>END

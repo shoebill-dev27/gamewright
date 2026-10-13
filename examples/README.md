@@ -44,3 +44,11 @@ Results and findings: `docs/phase2.md`.
 
 Results and findings: `docs/phase4.md`.
 
+## Phase 5: playable build
+
+| Run | What it shows |
+|---|---|
+| `runs/p5-bug-run` | The bug Goal on `fixtures/lantern-depths-real`, one `intake` and one `run` (7 operations): QA reproduces with real traces at 30 and 60 FPS, the engineer fixes `repo/game.py` and adds tests it runs in the sandbox, QA verifies independently with 13 more runs, Close. The final build passes an oracle that never entered a packet (`tests/test_phase5.py`). Each Step's `runs-round*.json` holds the scripts and outputs. |
+
+Results and findings: `docs/phase5.md`.
+
