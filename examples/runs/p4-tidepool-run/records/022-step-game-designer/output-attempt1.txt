@@ -1,0 +1,305 @@
+<<<FILE design/onboarding.md
+# Onboarding (build 0.2, level 1 spec targets the next build)
+
+## Teaching plan
+
+Teaching intent: each level introduces exactly one idea, discovered by touching. No level depends on reading text. Level 1 teaches "a tide pool can be dragged to the home" through look, motion and touch feedback only.
+
+- **Level 1:** see the spec below.
+- **Level 2:** two pools; the crab must pass through both. (Unchanged. Out of scope for G-001.)
+- **Level 3:** introduces a starfish that only moves when a pool touches it. (Unchanged. Out of scope for G-001.)
+
+## Level 1 spec (G-001, for the build after 0.2)
+
+"Build 0.3" in the earlier header and "build 0.2" in Handoff 08 mean the same thing: the next build after 0.2, level 1 only (Q6). Revision 2 (Handoff 16) changed rules 1, 3 and 5, the edge cases and checks 4 and 13–16. Revision 3 (Handoff 20) settles the sand tap during the ease-back, the window origin and the held pool. See "Revision 2 changes" and "Revision 3 changes".
+
+### Experience intent
+
+A child aged 7–10 looks at the scene and their eye goes to the pool. They touch it within a few seconds, drag it to the home and finish without reading anything. A touch on any other object never feels ignored: it answers and points the child back to the pool. Nothing can be lost, there are no timers, and every move can be undone (D-001).
+
+### Scene content
+
+The scene has one pool, one crab, one home and sand. It uses the existing sprite sheet only. Tint, recolor, scale, rotation, flip and brightness changes on existing sprites count as within the "no new art" constraint (confirmed). No hand, arrow or other new sprite is used. A procedurally drawn soft shadow under the lifted pool also counts as within the constraint (it is not an image asset; see rule 1).
+
+### Rules and parameters
+
+All numbers are tunable after re-playtest.
+
+**1. Pool (the only draggable)**
+- Outline: the same weight and darkness the crab has in build 0.2.
+- Idle motion: a continuous scale pulse, 1.00 to 1.06, period 2.0 s, ease-in-out, looping. It never stops while the pool is idle, except while a redirect pulse is running (rule 5).
+- Color: recolor the pool to a more saturated pastel water blue/teal.
+  - In grayscale, the luminance contrast ratio between the pool fill and the surrounding sand is at least 1.5:1.
+  - Verify in grayscale, not by eye in color.
+- **Hit area (revision 2, N1):** the pool's hit area is its drawn size at every moment: at least the at-rest size, and larger while the pool pulses (idle pulse up to 1.06, redirect pulse up to 1.15). A touch on any visible part of the pool grabs it. The pool's hit area never shrinks below the at-rest size. During the intro the hit area also follows the drawn position (rule 2).
+- Touch-down on the pool: the idle pulse stops, the pool scales to 1.10 within 0.1 s, and a soft shadow appears. On release it returns to scale 1.00 over 0.15 s and the idle pulse resumes.
+  - Shadow source (N3): no particular source is required. A soft dark ellipse under the pool, either drawn procedurally or made from an existing sprite with color and size changes, is acceptable. No new image asset is added.
+  - If a redirect pulse is running or pending at touch-down, the touch-down wins: the pulse is cancelled and the 1.10 lift applies from the current scale (Q5).
+- Drag: the pool follows the finger 1:1. On release away from the home it stays where it was dropped, and undo restores the previous position (D-001).
+- Drop on the home: the level completes (unchanged).
+
+**2. Start-of-level intro motion (the non-text teaching cue)**
+- When level 1 loads, the pool slides 25% of the distance toward the home over 0.8 s, then back over 0.8 s, once. The idle pulse starts after that.
+- The motion is made only of position changes of the existing pool sprite.
+- **Visual offset only (Q2).** The intro never pushes an undo history entry. The pool's logical position is the authored start position from load until a real drag is dropped. Undo after the first real drag returns the pool to the authored start position, never to a mid-intro position.
+- **The pool's hit area follows its drawn position during the intro**, so a touch on the visible pool always grabs it.
+- **Touch-down on the pool during the intro:** the intro is cancelled at once and the pool follows the finger from its current position. On release away from the home, the pool stays where it was dropped.
+- **Touch-down on the crab, the home or the sand during the intro (Q1, Option B):**
+  1. The intro is cancelled at once.
+  2. The pool eases back to its authored start position over a fixed 0.15 s, ease-out, whatever its current distance.
+  3. The touched object's own response (crab flip and wiggle, home glow) starts at once, within 0.1 s, and plays during the ease-back.
+  4. The redirect pulse (rule 5) starts when the ease-back ends, which is 0.15 s after touch-down. This is inside the existing 0.2 s window, so the criterion does not change. From touch-down until it starts, this pulse is **pending**.
+  5. **Pulse precedence (N4):** at the end of the ease-back the redirect pulse plays and the idle pulse is not shown during it. The idle pulse starts when the redirect pulse ends, from scale 1.00. **(Revision 3)** The pending pulse always starts: the cancelling touch is the first non-pool touch of the level load, so the 1.5 s limit cannot block it. Its start is the origin of the 1.5 s window (rule 5).
+  6. If the child touches the pool during the ease-back, the ease-back is cancelled, the pending pulse is cancelled (it never starts and starts no window), and the pool follows the finger from its current position.
+  7. **(Revision 3) A touch that lands during the ease-back on another non-pool object** plays that object's own response at once. The pending pulse is the pool's response to it. No second pulse is requested, and no blip plays. This holds for a second tap on the sand, the crab or the home, at any moment from 0.01 s to 0.15 s after the first touch. The pending pulse starts at most 0.15 s after that second touch, so it is inside 0.2 s.
+- It plays once per level load, including a level restart.
+- It is not tied to inactivity. There is no countdown, no repeat and no consequence. This is why it is not the idle hint (Option C), and it does not need a timer.
+
+**3. Crab (responds to touch, not draggable, styling demoted)**
+- Decision: the crab responds to touch. This is Option B and it removes the dead end. To keep the pool the only "touch me" signal, the crab's styling is demoted. This differs slightly from art-director direction 3, which allowed keeping the styling if the crab responds.
+- Idle: no bob. The outline is lightened to the same weight as other scenery, so the crab does not look draggable. The pool is then the only element with a darker outline plus idle motion, which satisfies pillar 3.
+- Tap: the crab turns to face the pool and wiggles (rotation ±8°, 0.4 s). The pool then gives a "look here" double pulse (see rule 5).
+  - "Turns to face" (Q3): a horizontal flip (scale x of −1 or +1) of the existing sprite so it faces the side the pool is on, as seen from the crab's center, plus the wiggle. If the pool is on the same side the crab already faces, no flip. The flip is instant, and the wiggle starts at the same time.
+  - **Which pool position counts (revision 2, N2):** the pool's position for the flip is its logical position. While the pool is in the intro slide or the ease-back, that is the authored start position, not the drawn position. A held pool uses the position under the finger. The crab then faces where the pool will be after an intro-cancel.
+- Drag attempt on the crab: the crab does not move from its place. It leans about 10° toward the pool while the finger is down and springs back on release. The pool gives one double pulse at touch-down.
+- While the pool is being dragged, the crab keeps facing the pool.
+- On level completion the crab goes to the home (existing behavior, unchanged).
+
+**4. Home (responds to touch, not interactive)**
+- Idle: no darker outline and no idle motion, the same as the sand and scenery. Build 0.2 does not show the home's styling. A capture is required, and any interactive styling found is removed.
+- Tap: a soft brightness glow (+20% brightness for 0.6 s, fading out). The pool then gives a double pulse (rule 5).
+- While the pool is dragged within 1.5 pool-widths of the home, the home glows steadily. This shows where the pool is meant to go. The glow ends when the pool moves away or on drop.
+  - Distance (Q4): measured center to center, using the pool's at-rest width (not the pulsing or lifted size). This is unchanged by the hit-area change in rule 1.
+  - The glow applies only while the pool is being dragged. It never applies to a pool at rest, so the intro and its ease-back never trigger it.
+
+**5. Redirect pulse ("look here") and sand-tap blip**
+- Used by touches on the crab, the home and empty sand.
+- The pool scales 1.00 to 1.15 and back, twice, over 0.6 s in total. While it runs, the idle pulse is not shown. The idle pulse resumes from scale 1.00 when it ends.
+- It starts within 0.2 s of the touch-down. The visible response itself (crab wiggle, home glow) starts within 0.1 s. In the intro-cancel case the pulse starts at the end of the 0.15 s ease-back (rule 2).
+- Rate limit: at most one redirect pulse per 1.5 s, so repeated tapping does not stack animations. The crab or home reaction still plays on every tap.
+- **Window origin (revision 3):** the 1.5 s window counts from the **start of the previous redirect pulse**, not from the touch-down that requested it. In the intro-cancel case that is 0.15 s after the cancelling touch. A tap at 1.5 s or more after the previous pulse start starts a new pulse. A tap sooner than that is blocked.
+- A tap on empty sand triggers the redirect pulse. If the rate limit blocks it, the sand tap triggers the blip instead (below).
+- **Sand-tap blip (revision 2, G1; revision 3 clarifications):**
+  - What: the pool's brightness rises by 15% within 0.1 s of the touch-down, then fades back over 0.3 s. There is no scale change and no movement, so it cannot stack with or look like a pulse.
+  - When: a sand tap gets the blip only if all of these hold: (1) the 1.5 s limit blocks a pulse (less than 1.5 s since the previous pulse start); (2) no redirect pulse is running (the previous pulse started more than 0.6 s ago); (3) no redirect pulse is pending (rule 2, step 7). A sand tap during the first 0.6 s of a pulse, or during the ease-back with a pending pulse, needs no blip, because the pulse is already the visible response.
+  - If a blip is already running, a new sand tap does not restart it. The running blip is the visible response. At most one blip runs at a time.
+  - It is triggered only by a touch. It is never started by inactivity (D-001).
+  - It uses brightness only, on the existing pool sprite. It also applies with the reduced-motion setting on (it is already a brightness change).
+  - The blip does not start or move the 1.5 s window, and it does not affect the idle pulse.
+  - Why this and not silence: the child's touch always gets an answer on the pool, which is where the child is meant to look. The rate limit still holds, because it limits motion, not feedback.
+- **Held pool, second finger (revision 3):** while a finger holds the pool, a touch by another finger gets these responses:
+  - Crab or home: its own response as usual (flip and wiggle, or glow). The pool gets no redirect pulse and no blip. The held pool is already lifted and moving under the finger. No pulse is requested and the 1.5 s window is not started or changed.
+  - Sand: the blip (brightness only), unless one is already running. No redirect pulse is started, and the 1.5 s window is not started or changed. The blip applies whatever the time since the last pulse. It keeps every touch answered without a scale change on the lifted pool.
+- A touch-down on the pool cancels a running or pending redirect pulse (rule 1) and a running blip.
+
+**6. Text bubble**
+- It may stay as a supplement. No part of level 1 depends on it, and it is not changed in this spec.
+- It must not carry information that is not also shown by the look and motion above.
+
+### Edge cases
+
+- **Multi-touch:** only the first touch that lands on the pool drags it. A second finger on the crab, home or sand gets its normal response; while the pool is held, the pool part of that response follows rule 5 ("Held pool, second finger"). A second finger on the pool while it is already held is ignored.
+- **Touch during the intro:** see rule 2 (pool touch, non-pool touch and touch during the ease-back are all defined).
+- **Sand, crab or home tap during the ease-back (revision 3):** the object's own response plays; the pending pulse is the pool's response; no blip, no second pulse (rule 2, step 7).
+- **Pool touch during the ease-back:** the ease-back and the pending pulse are cancelled (rule 2, step 6).
+- **Undo and the intro:** the intro is never in the history. Undo does not replay it and never returns to a mid-intro position (rule 2).
+- **Pool dropped on the crab:** treated as a drop away from the home. The pool stays and the crab does not react. Nothing is lost, and undo works.
+- **Pool dragged off screen:** the pool is clamped to the play area.
+- **Touch on a moving or pulsing object (revised):** the pool's hit area is its drawn size, never below the at-rest size (rule 1). The crab and the home keep hit areas at rest size. The pool's drawn size can overlap the sand around it, and a touch there grabs the pool.
+- **Touch-down on the pool during a redirect pulse:** the touch-down wins (rule 1).
+- **Sand tap in the rate-limit window:** the blip (rule 5), unless a pulse is running or pending. A tap on the crab or home in that window gets its own object response.
+- **Pulse precedence:** the redirect pulse is shown over the idle pulse. The idle pulse resumes from 1.00 (rule 5, rule 2).
+- **Level restart:** the intro plays again, because the level reloads.
+- **Reduced-motion OS setting:** if it is on, the idle pulse, redirect pulse, wiggle and intro are replaced by static brightness changes of about 0.4 s.
+  - The outline and the color/value separation still carry the affordance.
+  - The intro is skipped, so the intro-cancel case does not arise.
+  - The engineer reads the OS flag where it exists and adds no in-game toggle. The Studio handles the platform availability check outside Design. If a platform has no such setting, this case is unreachable there.
+- **Orientation change:** layout and rules are unchanged, the intro does not replay, and the idle pulse continues.
+- **Color-vision differences:** the pool is separated by value (grayscale check), not hue alone.
+
+### Acceptance criteria
+
+**Verification checks (for QA on the built level 1):**
+1. A capture at level start (after the intro) shows the pool as the only element with a darker outline plus idle motion.
+2. In grayscale, the pool fill and the sand have a luminance contrast ratio of at least 1.5:1.
+3. The crab has no idle bob. The home has no interactive styling. No non-interactive element has an outline darker than scenery.
+4. (Revised, revision 3) Touch-down on the crab, the home, the sand and the pool each produces a visible response within 0.2 s of the touch-down (for a redirect pulse after an intro-cancel, within 0.2 s as in check 11). This holds for every tap, whatever the time since the previous tap, including a second tap during the ease-back and a second-finger tap while the pool is held. Tapping each object 10 times, both at 2 s spacing and as fast as possible, leaves no silent touches.
+5. Dragging the crab does not move it. It leans and springs back, and the pool gives a redirect pulse.
+6. The redirect pulse does not start more than once per 1.5 s of rapid tapping, counted from the previous pulse start. The sand-tap blip is not a pulse and does not count toward this.
+7. The intro runs once on level load. A touch-down on the pool cancels it, and the pool follows the finger from its current position.
+8. Level 1 can be completed with the text bubble hidden.
+9. D-001 holds: no failure state, no timer, no inactivity-triggered cue, and undo restores the pool position.
+10. No image asset outside the existing sprite sheet is used. A procedurally drawn shadow is allowed.
+11. Intro-cancel by a non-pool touch: touch the crab, the home and the sand in turn during the intro (separate loads). In each case the intro stops, the pool is back at its authored start position within 0.15 s, the touched object responds within 0.1 s, the redirect pulse starts no later than 0.2 s after touch-down, and the idle pulse then runs.
+12. Undo after the intro: after any intro-cancel, drag the pool away and drop it, then undo. The pool returns to the authored start position, and no extra undo step exists for the intro.
+13. (Revised, revision 3) Sand-tap blip: tap the sand, then tap the sand again 0.8–1.3 s after the first pulse **start** (before the 1.5 s limit ends; the pulse has ended by 0.6 s). The second tap shows a 15% pool brightness rise within 0.1 s that fades over 0.3 s, with no scale change by the blip and no new redirect pulse. A third tap during the blip does not restart it. A sand tap 1.5 s or more after the first pulse start starts a new pulse and no blip.
+14. Pool hit area: while the pool is at its largest in the idle pulse (1.06) and in the redirect pulse (1.15), a touch on the outermost visible rim grabs the pool (lift to 1.10, no sand response). A touch just outside the visible pool at its smallest size does not grab it.
+15. Crab flip after an intro-cancel: touch the crab mid-intro with the crab's center between the drawn pool position and the authored start position. The crab faces the side of the authored start position.
+16. Pulse precedence: after an intro-cancel by a non-pool touch, the redirect pulse is shown from the end of the ease-back, the idle pulse is not shown during it and starts from 1.00 when the redirect pulse ends. After a sand tap that was blocked by the rate limit (blip only), the idle pulse is unaffected.
+17. (New, revision 3) Second tap during the ease-back: during the intro, tap the sand (or crab, or home), then tap the sand again at about 0.05 s and 0.10 s after the first touch (separate loads, and a variant with the crab or home as the second tap). Each time: the second object's own response (if any) starts within 0.1 s, no blip plays, exactly one redirect pulse starts, at 0.15 s after the first touch, and the pool shows no brightness rise before it. The next sand tap that lands 0.6–1.3 s after that pulse start gets the blip.
+18. (New, revision 3) Held pool, second finger: hold the pool and tap the sand with a second finger. The pool brightens by the blip (15%, within 0.1 s, fades over 0.3 s), with no redirect pulse and no scale change beyond the lift. A tap on the crab or home with a second finger gives that object's response and no pool pulse or blip. After release, a sand tap within 1.5 s of the previous pulse start still behaves as in check 13, and taps made while the pool was held did not move that window.
+
+**Experience signals (for the playtest and Review):**
+Test with children aged 7–10, no adult help and no adult explanation. Include at least one early reader and one child who does not read the bubble.
+1. The first touch-down on the pool comes within about 10 s of level start for every child. Baseline: the age 9 child needed 10 s with the bubble.
+2. No pause longer than about 8 s with no touch interaction before the first pool drag. Looking to a parent for help counts as a pause.
+3. A first touch on the crab or home leads to the pool within about 5 s, without parent help.
+4. Children complete level 1 without reading aloud or being told what to do, and show no sign of "my touch did not work".
+
+These numbers come from three simulated sessions and are tunable. If the re-playtest still shows a stall, raise the matter as an open question and hand back. See below.
+
+### Revision 2 changes (Handoff 16)
+
+Player-facing changes, so Build and Verify run again:
+- Sand taps blocked by the rate limit now show the pool brightness blip (rule 5, G1, D-003).
+- The pool's hit area follows its drawn size instead of the at-rest size (rule 1, N1, D-003).
+- The crab's flip after an intro-cancel looks at the authored start position (rule 3, N2). A clarification that may change behavior.
+- Redirect pulse over idle pulse (rule 2 and 5, N4). A clarification that may match existing behavior.
+Not player-facing: the shadow source (N3) is answered in rule 1.
+
+### Revision 3 changes (Handoff 20, D-004)
+
+Settles the gaps the engineer found while implementing revision 2. Items 2–5 of the engineer's change set (hit area, crab flip target, pulse precedence, shadow source) are unaffected. Only the blip trigger (item 1) changes:
+- A sand tap during the 0.15 s ease-back gets no blip. The pending redirect pulse is the response (option 1). A second crab or home tap there gets only its own object response (rule 2 step 7, rule 5).
+- The pending pulse always starts, so the "blocked" branch in rule 2 step 5 is removed. A pool touch during the ease-back cancels the pending pulse.
+- The 1.5 s window counts from the previous redirect pulse start (rule 5).
+- Held pool, second finger: the sand gets the blip, the crab and home get their own response, and there is no pulse (rule 5). This differs from the engineer's assumption of "no blip".
+- Check 4 and 13 reworded; checks 17 and 18 added. Checks 1–3, 5–12 and 14–16 are unchanged.
+
+### Plan or Build
+
+This change is local. It covers parameters, a tint/recolor, existing sprite animations (scale, rotation, flip, position, brightness) and a per-object touch response in level 1. It touches no cross-system structure. **A Plan is not needed. The Studio can route Build.**
+
+### Settled spec questions (Handoff 09, Handoff 16 and Handoff 19)
+
+- Q1: Option B with a fixed 0.15 s ease-back. The redirect pulse starts at the end of it. The 0.2 s criterion is unchanged (D-002).
+- Q2: the intro is a visual offset only and never enters the undo history (D-002).
+- Q3: horizontal flip plus wiggle (rule 3).
+- Q4: center to center, at-rest width (rule 4).
+- Q5: touch-down on the pool wins over a running or pending redirect pulse (rule 1).
+- Q6: "build 0.3" means the next build after 0.2, level 1 only.
+- G1: a sand tap blocked by the rate limit shows a pool brightness blip (rule 5, D-003).
+- N1: the pool's hit area follows its drawn size (rule 1, D-003).
+- N2: the flip uses the pool's logical position (rule 3).
+- N3: no required shadow source; a drawn effect is acceptable (rule 1).
+- N4: the redirect pulse is shown, the idle pulse resumes after it (rule 2 and 5).
+- R3-1: a sand tap during the ease-back gets no blip; the pending pulse answers it (rule 2 step 7, D-004). A crab or home tap there gets only its object response.
+- R3-2: the 1.5 s window counts from the previous pulse start (rule 5, D-004).
+- R3-3: a second-finger sand tap while the pool is held gets the blip and no pulse; crab and home get only their own response (rule 5, D-004).
+
+### Open questions
+
+- Whether the reduced-motion setting is available on target platforms (iOS "Reduce Motion", Android "Remove animations"). The Studio decides who checks it. It does not block Build.
+- The home's current styling is not known from the packet. The engineer sets the scenery outline style and no idle animation. A real capture is needed at Verify (check 3).
+- If the re-playtest still shows a stall, an idle hint (Option C) would need a Director reading of D-001. It is not in this spec and is not needed for it.
+>>>END
+
+<<<FILE decisions/D-004-ease-back-taps-window-origin-held-pool.md
+---
+kind: decision
+id: D-004
+status: accepted
+decided_by: game-designer
+goal: G-001
+date: 2026-10-12
+supersedes: none
+---
+# D-004: Taps during the ease-back, the 1.5 s window origin, and second-finger taps on a held pool
+
+## Decision
+
+Amends the rules of D-003 for three cases. Level 1 only.
+
+- **Sand tap during the 0.15 s ease-back:** no blip. The redirect pulse that is pending (due at the end of the ease-back) is the pool's response. No second pulse is requested. A crab or home tap in that time gets only its own object response. The pending pulse always starts, because the cancelling touch is the first non-pool touch of the load. A pool touch during the ease-back cancels it.
+- **Window origin:** the 1.5 s redirect limit counts from the start of the previous redirect pulse, not from the touch-down. A sand tap gets the blip only when the limit blocks it, no pulse is running (within 0.6 s of its start) and none is pending.
+- **Held pool, second finger:** no redirect pulse for any object, and the 1.5 s window is not started or changed. A sand tap gets the blip (brightness only); a crab or home tap gets its own response only.
+
+Limits: no timer, no failure, no inactivity trigger (D-001). The 0.2 s criterion and the blip parameters are unchanged.
+
+## Rationale
+
+- The pending pulse starts at most 0.15 s after the second tap, which is inside the 0.2 s criterion, so the child's touch is answered. A blip in the same 0.15 s would brighten the pool and then scale it almost at once, which reads as noise for a child tapping fast.
+- Counting from the pulse start matches build 0.3, so no existing behavior changes.
+- A held pool is already lifted and moving, so a scale pulse would fight the lift. But a silent sand tap would break "no silent touches". The brightness blip answers without moving the pool.
+
+## Alternatives considered
+
+- Blip at once, pulse still at 0.15 s (option 2): the blip and the pulse overlap for about 0.25 s, and check 13 would need an exception for scale.
+- Blip at once, pulse start ends the blip (option 3): the same visible clutter, and it needs a cancel hook.
+- Window from touch-down: changes build 0.3 behavior, and the intro-cancel pulse would be at 0.15 s inside its own window.
+- Held pool shows nothing: it leaves a second-finger sand tap with no visible answer.
+- Pulse on a held pool: its scale conflicts with the 1.10 lift.
+
+## Revisit when
+
+The re-playtest shows children confused by a blip on the held pool, or the ease-back length changes so the pending pulse could exceed the 0.2 s window.
+>>>END
+
+<<<FILE goals/G-001-first-puzzle-stall/20-game-designer-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 20
+from: game-designer
+to: studio
+stage: Design
+outcome: done
+---
+# 20: game-designer → studio — spec revision 3 settles the ease-back sand tap, window origin and held pool; return to gameplay-engineer for Build 4d
+
+## Task
+
+Return the work to `gameplay-engineer` for Build 4d (finish revision 2 items 1–5 with the answers below, write `sim/build-0.4.md`, hand to QA), then Verify 5b.
+
+## Context
+
+Handoff 19 asked for the one gap the engineer found in item 1 (sand tap during the 0.15 s ease-back), plus the window origin and the held pool. `design/onboarding.md` is now revision 3. D-004 records the answers and amends the rules of D-003.
+
+## Findings
+
+Answers (the rules are in `design/onboarding.md` rules 2 and 5, edge cases, checks 4 and 13–18):
+
+1. **Sub-case (a), sand tap during the ease-back: option 1.** No blip. The pending redirect pulse is the response, and it starts at most 0.15 s after the second tap (inside 0.2 s). No second pulse is requested. The pending pulse always starts, because the cancelling touch is the first non-pool touch of the load, so the 1.5 s limit cannot block it. A pool touch during the ease-back cancels the ease-back and the pending pulse.
+2. **Sub-case (b), crab or home tap during the ease-back:** confirmed. Its own object response only, with no pool response beyond the pending pulse.
+3. **Window origin:** the 1.5 s window counts from the start of the previous redirect pulse (as in 0.3). In the intro-cancel case that is 0.15 s after the cancelling touch. The blip applies only when the limit blocks the tap, no pulse is running (0.6 s) and none is pending. The blip does not start or move the window.
+4. **Held pool, second finger:** this differs from the engineer's assumption. No pulse for any object and no window change. A sand tap gets the blip (brightness only), so it is not silent. A crab or home tap gets its own response only.
+5. **Checks:** check 4 and check 13 reworded. Checks 17 (second tap in the ease-back) and 18 (held pool) are new. Checks 1–3, 5–12 and 14–16 are unchanged. The 0.2 s criterion is unchanged.
+
+## Effect on what the engineer must build
+
+- **Items 2–5: unchanged.**
+- **Item 1 changes:**
+  - Add a "pulse pending" state from the cancelling touch until the ease-back ends. While it is set, the blip trigger and further pulse requests are skipped. A pool touch-down clears it.
+  - The pulse at the end of the ease-back is not subject to the 1.5 s limit and starts the window.
+  - The 1.5 s window is measured from the pulse start.
+  - Held pool: a second-finger sand tap starts the blip (if none is running) even when the 1.5 s limit has passed; crab and home taps do not request a pulse, and no request starts or changes the window. This replaces the engineer's "no pulse or blip" assumption.
+- Tests to add: pending-pulse sand/crab/home taps at 0.05 s and 0.10 s; pool touch clearing the pending state; the window measured from the pulse start; the held-pool sand blip with no window change.
+
+## Decisions already made
+
+- D-001: no failure, no timers, every move undoable.
+- D-002: intro cancel eases back over 0.15 s; the intro is never in the undo history.
+- D-003: blip and hit area. Amended in these three cases by D-004.
+- D-004: this handoff's answers.
+
+## Constraints
+
+- Level 1 only. Touch only. No text-dependent mechanic. Existing sprite sheet plus the procedural shadow.
+- Touch-triggered only. No timer or inactivity trigger.
+
+## Open questions
+
+- None for Design. Still open and non-blocking: the reduced-motion platform availability check, and the home capture for check 3.
+
+## Expected output
+
+- `gameplay-engineer` Build 4d: implement item 1 as above and items 2–5 as planned, write `sim/build-0.4.md`, and hand to QA with checks 1–18, noting 4, 13 and 17–18 as new or changed.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: none
+- Project: design/onboarding.md, sim/build-0.3.md, sim/repo-notes.md
+- Decisions: decisions/D-001-no-fail-states.md, decisions/D-002-intro-cancel-and-undo.md, decisions/D-003-sand-tap-blip-and-pool-hit-area.md, decisions/D-004-ease-back-taps-window-origin-held-pool.md
+- Previous handoff: goals/G-001-first-puzzle-stall/18-gameplay-engineer-to-studio.md
+>>>END

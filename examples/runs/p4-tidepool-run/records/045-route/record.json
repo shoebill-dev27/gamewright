@@ -1,0 +1,73 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "ea1f7655-432f-45cf-93f9-818351caaea4",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 21118,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 7028,
+    "output_tokens_details": {
+     "thinking_tokens": 1830
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 21118,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 7028,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 21118,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 21118
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.154756,
+   "attempt": 1,
+   "started": "2026-10-13T12:06:59",
+   "seconds": 46.3,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-first-puzzle-stall/goal.md": "61457dae9dedcbafebbbc6070ab54f1b291504d5535ac88cdb3f98f22764f3cf",
+  "goals/G-001-first-puzzle-stall/39-studio-to-game-director.md": "9a37aa598f325382609a96ed9ec05538c2833363869da7fa4c8bd857f4d65410"
+ },
+ "decision": {
+  "status": "active",
+  "open": [
+   [
+    "game-director",
+    "Review"
+   ]
+  ],
+  "new": [
+   "game-director",
+   "Review"
+  ]
+ },
+ "seen_through_seq": 39
+}

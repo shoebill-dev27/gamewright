@@ -1,0 +1,100 @@
+<<<FILE goals/G-001-first-puzzle-stall/05-art-director-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 5
+from: art-director
+to: studio
+stage: Diagnose
+outcome: done
+---
+# 05: art-director → studio — visual review of level 1 (build 0.2): the pool does not read as touchable, and the crab does
+
+<!-- Self-contained: the recipient (any executor, any session) starts from this file and its Load
+list alone. -->
+
+## Task
+
+Return the visual verdict (`visual-review`) on level 1 of build 0.2 to the Studio for the Route operation, which merges it with the `game-designer` diagnosis before Design.
+
+## Context
+
+Goal G-001 (first-puzzle-stall). Owner's words, verbatim: 「最初のパズルで子どもが手を止めてしまう。直したい」
+
+Handoff 03 asked whether the player can tell at a glance what to touch, what is visual versus rules, and what visual direction to take. The evidence is the observation report (`02-playtester-to-game-designer.md`) and `sim/build-0.2.md`: three children (ages 7, 8, 9), simulated sessions, no timings beyond those given, no quotes. The `game-designer` result was not available to me.
+
+## Findings
+
+### Visual verdict
+
+| Criterion | Verdict | Evidence |
+|---|---|---|
+| Readability: the interactable is identifiable at a glance | **Fail** | The tide pool, the only interactable, has the same pastel tone as the sand and looks like part of the sand pattern. In the sessions, the 7- and 8-year-olds did not touch it for about 20 s (until the parent read the bubble) and about 35 s (by chance). The 9-year-old found it only by reading the bubble. |
+| Consistency with the art direction ("interactive pieces have a darker outline and a gentle idle motion") | **Fail, in two directions** | (a) The pool is interactive but has no outline or idle motion. (b) The crab has the outline and the bob but is not interactive, so it is a false affordance. Two of three children went to the crab first, tapped it repeatedly (age 7), and tried to drag it (age 8). |
+| Palette and shapes (pastel, rounded) | Pass, as far as the report shows | No complaint or evidence against it. The problem is that the palette gives no separation, not that it is off-style. |
+| Text bubble as a visual aid | Fail as an affordance | The 7-year-old ignored it. It is placed apart from the pool and points at nothing. It also cannot carry information (constraint: no mechanic may depend on reading text). Whether to keep it as supplementary text is a design question. |
+
+The shell-shaped home: the packet does not say whether it has an outline or idle motion. The 7-year-old tapped it, so it may be read as touchable. This is an unknown and needs a capture check.
+
+### Separating visual from rules
+
+**Visual (mine):**
+- The pool has no affordance cues.
+- The crab and possibly the home carry affordance cues they should not have, as long as they are not interactive.
+
+**Rules, feedback and text (route to `game-designer`; I do not decide these):**
+- Taps on the crab and home give no response, and dragging the crab does nothing. This reads to children as touch that did not register. If it is not intended, it may be a defect for `qa`.
+- Whether the crab should respond at all, for example by guiding toward the pool. If it does, its outline and bob become correct.
+- The reliance on a text bubble in level 1.
+- What counts as a stall (a threshold for Design).
+
+The visual problem is real and separable. It is not only a rules problem, but it is probably not the whole cause. The silent, non-responding crab and home extend the stall once a child picks the wrong target, so a visual fix alone may not be enough. Evidence is three simulated sessions, and I cannot say how much each cause contributes.
+
+### Proposed visual direction (within the art direction and the existing sprite sheet)
+
+1. **Make the pool the unmistakable interactable.** Give it the same darker outline weight the crab has now, and the same kind of gentle idle motion (slow scale pulse or ripple using the existing sprite, no new art).
+2. **Separate the pool from the sand by value and hue.** Use a more saturated pastel water blue or teal, still pastel and rounded. Check by squinting or viewing in grayscale: the pool must still separate from the sand there.
+3. **Make interactivity exclusive.** Among everything in the scene, the pool is the only element with outline plus idle motion, unless the game-designer makes another element interactive. If the crab stays non-interactive, remove its interactive styling: lighter or no outline, static, or only a one-off ambient motion different from the pool's. If the crab is made responsive, keep the styling and make sure the response (the game-designer's call) matches it.
+4. **Do not rely on the text bubble.** It can stay as a supplement. Any pictorial cue such as a hand or arrow would be new art, which is out of scope. Reusing an existing sprite as a cue would need a check of the sheet.
+5. **Home:** apply the same rule. Confirm in a capture whether it carries interactive styling and remove it if it does and is not interactive.
+
+Whether recoloring or tinting the pool counts as "new art beyond the existing sprite sheet" should be confirmed by Design. I read a tint or recolor of an existing sprite as within the constraint.
+
+### Proposed visual acceptance criteria (for Design to adopt or adjust)
+
+- In a capture of level 1 at start, the pool is the only element with a darker outline plus idle motion, and it is distinguishable from the sand in grayscale.
+- No non-interactive element has interactive styling.
+- Playtest (children aged 7–10, no adult help): the first purposeful touch goes to the pool. The pause threshold is set by Design, not here.
+
+## Decisions already made
+
+None. No style pillar changes, so no escalation is needed, and no decision file was written.
+
+## Constraints
+
+- No change to gameplay rules or parameters, no change to style pillars, and no new art beyond the existing sprite sheet.
+- Must not conflict with D-001 (no failure, no timers).
+
+## Open questions
+
+- For `game-designer` and Design: should the crab respond to touch? This decides whether its styling stays (direction 3).
+- Is the home interactable? Check styling against the build.
+- Is the missing response to taps an intended behavior or a defect for `qa`?
+- After the visual fix, a playtest should check whether the stall is gone without the text bubble.
+
+## Expected output
+
+The Studio merges this verdict with the `game-designer` diagnosis at Route, then moves to Design, where the visual direction above becomes the visual part of the spec and its acceptance criteria.
+
+## Sender assessment
+
+Confidence is high that the pool's lack of affordance and the crab's false affordance are visual causes of the stall. Confidence is moderate that they are the main cause, because the report shows silent non-response as an aggravating factor. Evidence is limited to three simulated sessions.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: project.md#art-direction, project.md#constraints, sim/build-0.2.md
+- Decisions: none
+- Previous handoff: goals/G-001-first-puzzle-stall/03-studio-to-art-director.md
+>>>END

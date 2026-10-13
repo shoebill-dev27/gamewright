@@ -1,0 +1,21 @@
+{
+ "op": "Run",
+ "goal": "G-001",
+ "operations": [
+  "037-step-game-designer",
+  "038-route",
+  "039-step-gameplay-engineer",
+  "040-simulate-simulator",
+  "041-route",
+  "042-step-qa",
+  "043-route",
+  "044-step-playtester",
+  "045-route",
+  "046-step-game-director",
+  "047-route"
+ ],
+ "stop_reason": "done",
+ "status": "done",
+ "owner_reads": "goals/G-001-first-puzzle-stall/goal.md#outcome",
+ "next": null
+}

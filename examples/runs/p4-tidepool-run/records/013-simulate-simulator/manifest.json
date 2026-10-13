@@ -1,0 +1,27 @@
+[
+ {
+  "path": "simulator-instructions",
+  "sha256": "9a2f90e328cfa5cf9c79dd30bf7719b236244cca1d868e87b8cd77c435fc5ee5",
+  "bytes": 1164
+ },
+ {
+  "path": "goals/G-001-first-puzzle-stall/12-gameplay-engineer-to-studio.md",
+  "sha256": "289c3a17c11692526655720f139bfeb179637f49faab7bdf78835d6a17dc80c7",
+  "bytes": 14238
+ },
+ {
+  "path": "sim/build-0.2.md",
+  "sha256": "ad6c91fd6243a41ed2b939839b7699c3dea2b49505bdcaf1d9f59a9e5543b2b4",
+  "bytes": 1084
+ },
+ {
+  "path": "sim/repo-notes.md",
+  "sha256": "0d29b6a735765e34d960e37fa13864d8960e1d8b2877ad73b2649af3fc098de8",
+  "bytes": 814
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "53351d1620ff2ecebedb3bc15243f68f6dbdee48df5382cc16e2eae8b09bbaf7",
+  "bytes": 488
+ }
+]

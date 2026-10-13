@@ -1,0 +1,173 @@
+Step 3d is done and the spec gaps are settled, so Build (4b) is now open for `gameplay-engineer`. I wrote Handoff 11 for it and updated the route in `goal.md`. I did not write `log.md`, since it isn't in my write list, so the runtime needs to append the Route entry. I left Handoff 10 unchanged because it already carries what the Route needed.
+
+<<<FILE goals/G-001-first-puzzle-stall/11-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-001
+seq: 11
+from: studio
+to: gameplay-engineer
+stage: Build
+outcome: routed
+---
+# 11: studio → gameplay-engineer — implement the level 1 opening spec (retry after spec gaps were settled)
+
+## Task
+
+Implement the whole Level 1 opening spec in `design/onboarding.md` for build 0.3 (the next build after 0.2, level 1 only). State the change exactly in your outgoing Handoff: what changes, where, and how to exercise it. Stop and hand back a `question` if you find another gap.
+
+## Context
+
+Goal G-001. Owner request (verbatim): 「最初のパズルで子どもが手を止めてしまう。直したい」. Success condition: children aged 7–10 playing level 1 begin purposeful touch interaction on their own, without a long pause and without an adult explaining.
+
+You held Build earlier (Handoff 09) because the spec did not define a non-pool touch during the intro, the intro's relation to undo, and minor points Q3–Q6. The game-designer has settled all six in `design/onboarding.md` (Handoff 10), and `decisions/D-002-intro-cancel-and-undo.md` records the main ruling. Nothing was built before this step.
+
+## Findings
+
+Settled answers to your questions (the spec text is authoritative; this is a summary):
+
+- **Q1, intro cancelled by a touch on the crab, home or sand:** the pool eases back to its authored start position in a fixed 0.15 s, then the idle pulse starts there. The touched object responds at once (within 0.1 s). The redirect pulse starts when the ease-back ends, 0.15 s after touch-down, so the "within 0.2 s" criterion is unchanged.
+  - A touch on the pool during the ease-back cancels it, and the pool follows the finger from its current position.
+  - A touch on the pool during the intro cancels the intro, and the pool follows the finger from where it is. The pool's hit area follows its drawn position during the intro.
+- **Q2, intro and undo:** the intro is a visual offset only and never enters the undo history. The logical position is the authored start until a real drag is dropped. Undo returns to the authored start.
+- **Q3:** the crab flips horizontally to face the pool side, plus the ±8° wiggle. No flip if it already faces that side.
+- **Q4:** distance is measured center to center, using the pool's at-rest width. The home glow applies only while the pool is being dragged, so a pool at rest after the intro or ease-back never triggers it.
+- **Q5:** touch-down on the pool cancels a running redirect pulse, and the 1.10 lift applies from the current scale.
+- **Q6:** "Build 0.3" means the next build after 0.2, level 1 only.
+- **Reduced motion:** the spec keeps the static-brightness fallback, and the intro is skipped there, so the intro-cancel case does not arise. Read the OS flag where it exists; add no in-game toggle.
+- **Home styling:** your plan (scenery outline style, no idle animation) satisfies rule 4. It is checked on a real capture at Verify.
+
+New or changed QA checks, so you can design for them: check 11 (intro cancelled by a non-pool touch, with timings), check 12 (undo after an intro-cancel returns to the authored start and adds no extra step), and check 7 reworded to the pool-touch cancel case. The spec lists all 12 checks.
+
+## Decisions already made
+
+- D-001: no failure, no timers, every move undoable. Do not add a timer, an inactivity trigger or an irreversible step.
+- D-002: intro cancel eases the pool back in 0.15 s; the intro is never in the undo history.
+- Idle hint (Option C) is excluded from the spec. Do not add one.
+
+## Constraints
+
+- Level 1 only. Existing sprite sheet only (tint, recolor, flip, scale, rotation, position and brightness changes are allowed).
+- Touch only. No mechanic may depend on reading text.
+- Dry-run project: `sim/repo-notes.md` stands in for the code. A change counts as made when you state it exactly in your Handoff.
+- If the change turns out not to be local to level 1, hand back for Plan (`technical-director`) per the return rules. If you find a further spec gap, hand back `question` to `game-designer`; do not decide it yourself.
+
+## Open questions
+
+- Whether iOS "Reduce Motion" and Android "Remove animations" exist on the target platforms is unconfirmed. This does not block Build. The Studio assigns the check to `qa` at Verify, and the static-brightness fallback works either way.
+- Home's current styling needs a real capture at Verify (check 3).
+
+## Expected output
+
+Your outgoing Handoff has `outcome: done` and covers the whole Level 1 spec: every rule, edge case and settled answer above. State exactly what changes, where, and how to exercise each of the 12 checks. Address the result to `studio`, so the Studio can send it to `qa` for Verify without your Sender assessment and then compose a fresh Playtester handoff from permitted information only. If blocked, hand back `question` to the Role that can answer.
+
+## Sender assessment
+
+None (written by the Studio at routing).
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: project.md#constraints, project.md#art-direction, design/onboarding.md, sim/build-0.2.md, sim/repo-notes.md
+- Decisions: decisions/D-001-no-fail-states.md, decisions/D-002-intro-cancel-and-undo.md
+- Previous handoff: goals/G-001-first-puzzle-stall/10-game-designer-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-first-puzzle-stall/goal.md
+---
+kind: goal
+id: G-001
+project: tidepool-garden
+status: active
+created: 2026-10-10
+---
+# G-001: Children stall at the first puzzle
+
+## Owner request
+
+> 最初のパズルで子どもが手を止めてしまう。直したい
+
+## Interpretation
+
+Success condition: when children in the target group (ages 7–10) play the first puzzle (level 1 in
+build 0.2), they begin purposeful touch interaction with the puzzle on their own, without a long
+pause and without an adult having to explain what to do. How long a pause counts as "a stall" is
+not set here; Observe reports what actually happens and Design turns it into a player-observable
+acceptance criterion.
+
+Out of scope:
+
+- Levels 2 and later. If the same problem shows up there, it becomes a proposed new Goal.
+- Changing a vision pillar or Decision D-001 (no failure, no timers). Any fix must stay inside them.
+- New art beyond the existing sprite sheet (project constraint).
+
+## Unknowns
+
+Entry questions (`studio/workflows/development-loop.md`) the Project Context cannot answer:
+
+- **Observe** — Has the stall been observed first-hand? No: the Project Context holds only the
+  Owner's report. It is an experience problem, not a reproducible defect, so the Role is
+  `playtester` (not `qa`). Creates stage 1.
+- **Diagnose** — Is the cause understood? No. Creates stage 2 (`game-designer`). `art-director` was
+  added in parallel (2b) because the observation pointed to something visual.
+- **Design** — Is the intended behavior of the fixed first puzzle specified? No:
+  `design/onboarding.md` specified the current level 1 and its teaching intent, not a fix. Creates
+  stage 3. Build later found a gap (intro-cancel case), which reopens Design as 3d.
+- **Build** — Must the game change? The Owner wants it fixed, so yes. Creates stage 4.
+- **Verify** — Always after Build. Stage 5.
+- **Play** — Is the Goal about how the game plays or feels? Yes. Stage 6, in a fresh context
+  without the implementation history.
+- **Review** — Is it an experience Goal? Yes. Stage 7 (`game-director`).
+- **Next** — Always. Stage 8.
+
+Skipped:
+
+- **Decide** — Is there a real choice of direction, priority or scope? Not so far. The fix choices
+  (A + B) are player-facing behavior inside the approved direction, which is `game-designer`
+  authority. Option C (idle hint) is excluded from the spec; if it is wanted later, route Decide
+  because it touches D-001.
+- **Plan** — Is the technical approach non-obvious, risky, cross-system or parallelizable? No. The
+  designer's spec describes a local level 1 change (parameters, a recolor, existing-sprite
+  animation, per-object touch response); no cross-system structure is touched. Skipped. If Build
+  finds the change is not local, the return rules send it to Plan.
+
+Flag for Review (not a conclusion): the start-of-level intro motion is judged by the designer to be
+outside D-001 (one-time, no timer, no inactivity trigger). `game-director` should confirm at Review.
+
+Open item (not a Role question): whether iOS "Reduce Motion" / Android "Remove animations" are
+available on the target platforms is unconfirmed. The spec's static-brightness fallback works either
+way; a platform check is assigned to `qa` at Verify and does not block Build.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 01-studio-to-playtester.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 02-playtester-to-game-designer.md |
+| 2b | Diagnose | art-director | visual-review | done | 03-studio-to-art-director.md |
+| 3 | Design | game-designer | write-design-spec | done | 06-studio-to-game-designer.md |
+| 3c | Plan | technical-director | technical-plan | skipped | — |
+| 4 | Build | gameplay-engineer | implement-change | done | 08-studio-to-gameplay-engineer.md (held: question, no change made) |
+| 3d | Design | game-designer | write-design-spec | done | 09-gameplay-engineer-to-game-designer.md (answered in 10) |
+| 4b | Build | gameplay-engineer | implement-change | open | 11-studio-to-gameplay-engineer.md |
+| 5 | Verify | qa | verify-change | planned | — |
+| 6 | Play | playtester | playtest-session | planned | — |
+| 7 | Review | game-director | review-outcome | planned | — |
+| 8 | Next | studio | — | planned | — |
+
+Status: planned | tentative | open | done | skipped. The route is a plan; the Route operation
+revises it.
+
+## Route changes
+
+After step 3d (10): the designer settled Q1–Q6 in `design/onboarding.md` and D-002; no spec gap remains and the 0.2 s criterion is unchanged. Plan stays skipped. Build resumes (4b) with a Handoff addressed to `studio`; QA also gets the 12 checks and the platform reduced-motion check. No escalation.
+
+## Next action
+
+Run step 4b (Step operation): `gameplay-engineer` on `11-studio-to-gameplay-engineer.md`. Implement the Level 1 spec and hand off to `studio` (outcome `done`). Then Route, which opens Verify (5) for `qa` without the Sender assessment. Phase 1: the Studio stops after every Route.
+
+## Outcome
+
+<!-- Filled at close, for the Owner, in owner_language (ja). -->
+>>>END

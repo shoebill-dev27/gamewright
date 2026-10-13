@@ -8,7 +8,7 @@ of the Project Context layout.
 | Project | Genre and audience | Goals |
 |---|---|---|
 | `lantern-depths` | Top-down action roguelite; one-button combat | G-001 reproducible bug (short route, QA failure loop). G-002 monotonous combat (full expansion, Owner escalation and resume, spec question handed back, blind re-playtest). |
-| `tidepool-garden` | Calm touch puzzle for children 7–10 | G-001 children stall at the first puzzle (in progress: Intake and the first Step/Route were run by fresh executors with no prior context; the Studio added the Art Director in parallel). |
+| `tidepool-garden` | Calm touch puzzle for children 7–10 | G-001 children stall at the first puzzle (left in progress here: Intake and the first Step/Route were run by fresh executors with no prior context; the Studio added the Art Director in parallel). Completed in `runs/p4-tidepool-run`. |
 
 How the dry-runs were produced and what they revealed: `docs/phase1.md`.
 
@@ -35,3 +35,12 @@ Results and findings: `docs/phase2.md`.
 | `runs/p3-bug-run` | The bug Goal finished by a single `run` (7 operations), no person in between. |
 | `runs/p3-escalation-run` | `run` stops at once on an open escalation; after `decide`, it continues through parallel steps until its budget. |
 | `runs/p3-combat-run` | The combat Goal under `run`: two genuine Owner escalations, parallel steps joined by one Route, a context request, policy rejections, and the runner fixes made along the way (see `docs/phase3.md`). |
+
+## Phase 4: Goal log
+
+| Run | What it shows |
+|---|---|
+| `runs/p4-tidepool-run` | tidepool-garden G-001 resumed from its Phase 1 state (`fixtures/tidepool-garden`) and finished by `run`: the Phase 1 *Route changes* history kept as the first Goal log entry, one log entry per Studio operation, `goal.md` holding only the current state, Route output flat across 19 Routes, spec gaps sent back to Design, a blind Playtester, and Close. `records/014-route` predates the runner's handling of an executor that cannot start (no `record.json`). |
+
+Results and findings: `docs/phase4.md`.
+

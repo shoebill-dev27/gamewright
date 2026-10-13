@@ -15,6 +15,14 @@ the Studio stops after Intake and after every Route, and states the next action 
 `execution.md` defines how a runtime runs each operation in a fresh, isolated executor that sees
 only its packet; the procedures below are the same either way.
 
+`goal.md` holds the Goal's current state; its history is the **Goal log**, `log.md` in the
+Goal's directory. After every Intake, Route and Resume, whoever runs the operation appends one
+entry (an isolated runtime does it itself): the operation and date, the Goal's status and open
+steps, and the *Route changes* text just written. Entries are never edited or removed, and no Role
+or Studio operation rewrites the log. Every operation keeps *Owner request* exactly as quoted at
+Intake. Only Resume, after an Owner decision, may change *Interpretation*; a Route that would need
+to reinterpret the Goal escalates instead.
+
 ### Intake — a new Goal
 
 Load: `studio/README.md`, this file, `studio/workflows/development-loop.md`, `<project>/project.md`,
@@ -62,15 +70,18 @@ file's headings to find it is fine.
 
 ### Route — after every step
 
-Load: `goal.md`, the latest Handoff, this file, `studio/workflows/development-loop.md`; for steps
-4–5 also the recipient's Role contract and the files you put in its Load list.
+Load: `goal.md`, the last few entries of the Goal log, the latest Handoff, this file,
+`studio/workflows/development-loop.md`; for steps 4–5 also the recipient's Role contract and the
+files you put in its Load list.
 
 1. Mark the step done in the route table, linking its Handoff.
 2. **Compare the outcome with the plan.** If it fits, the next planned step follows. If not, apply
-   the return rules in `development-loop.md`, revise the remaining route, and log why under
-   *Route changes* in one or two lines (the Handoffs carry the details; `goal.md` is rewritten by
-   every Route, so keep it short). Confirm (`planned`) or drop (`skipped`) any `tentative` stage
-   whose condition this result settles. The route is a plan, not a contract.
+   the return rules in `development-loop.md`, revise the remaining route, and say why under
+   *Route changes* in one to three lines (600 characters at most), replacing the previous text
+   (the Goal log keeps the history; the Handoffs carry the details). Keep *Unknowns* current the
+   same way: update a stage's line, do not narrate earlier passes. Confirm (`planned`) or drop
+   (`skipped`) any `tentative` stage whose condition this result settles. The route is a plan,
+   not a contract.
 3. **Check escalation triggers** (below). If one fires, write an Escalation instead of a Handoff.
 4. **Check the recipient's inputs.** Compare the outgoing Handoff with the recipient Role's
    "Works from" section; remove what the recipient must not receive and add what is missing,

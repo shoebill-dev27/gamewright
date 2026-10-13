@@ -1,0 +1,197 @@
+Route for step 18: the engineer's result is `question`, a spec gap in the ease-back case. Under the return rules (Build, spec ambiguous) Design reopens as 3f for `game-designer`. No escalation trigger fires, and Plan stays skipped. I wrote `19-studio-to-game-designer.md` and updated `goal.md`. I did not append to `log.md` because it is not in my write list.
+
+<<<FILE goals/G-001-first-puzzle-stall/19-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-001
+seq: 19
+from: studio
+to: game-designer
+stage: Design
+outcome: routed
+---
+# 19: studio → game-designer — settle the sand tap during the 0.15 s ease-back (spec revision 3)
+
+## Task
+
+Settle the one spec gap the engineer found while implementing revision 2: what a sand tap gets when it lands during the 0.15 s ease-back, after a non-pool touch cancels the intro and before the pending redirect pulse starts. Also settle the two small related points below. Update `design/onboarding.md` (revision 3) and record a Decision if it constrains later work.
+
+## Context
+
+Goal G-001 (children stall at the first puzzle, level 1). Revision 2 (blip, larger pool hit area, crab flip target, pulse precedence; D-003) went to Build as 4c. The engineer listed every player-observable behavior before coding and found that item 1 (the sand-tap blip) has one undefined case. Items 2–5 are fully defined and unaffected by the answer. The engineer wrote no `sim/build-0.4.md` and delivered nothing to QA. Build resumes as 4d after your answer.
+
+## Findings
+
+From the engineer's Handoff 18 (`goals/G-001-first-puzzle-stall/18-gameplay-engineer-to-studio.md`):
+
+**The case.** A non-pool touch (sand, crab or home) cancels the intro. The 0.15 s ease-back starts, and the redirect pulse is due at its end (rule 2, step 4). A second sand tap lands during that 0.15 s, e.g. at 0.10 s. Rapid tapping makes this realistic.
+
+**Why the spec does not decide it.**
+- Rule 5 gives the blip to a sand tap blocked by the 1.5 s limit that "lands while no redirect pulse is running". The pulse is due but not running yet, so the tap could count as blocked.
+- Rule 5's reasoning for the first 0.6 s of a pulse (the pulse is the visible response) also applies, since the pulse starts at most 0.15 s later.
+- Rule 2, step 7 says only that "the redirect rate limit and the sand-tap blip apply as usual".
+- Rule 5 does not say whether the 1.5 s limit counts from the touch-down or from the pulse start. In build 0.3 it counts from the pulse start.
+- Rule 2, step 5 does not say whether a pending pulse blocks a second request.
+
+**Sub-cases.** (a) The first touch is on sand, crab or home, and the second tap is on sand at 0.01–0.15 s. (b) The second tap is on the crab or home. The engineer expects no question for (b), since the pending pulse is the pool response, but confirm.
+
+**The engineer's options (the engineer chose none):**
+1. **No blip.** The pending pulse is the response; the second tap's response arrives within 0.15 s. Cost: one "pulse pending" flag. The engineer proposes this as the default.
+2. **Blip at once, and the pulse still starts at 0.15 s.** Brightness and scale overlap for about 0.25 s. Cost: low. Check 13 ("no scale change") would then need to say the blip alone has none.
+3. **Blip at once, and the pulse start ends the blip.** Cost: slightly higher, as it needs a blip-cancel hook at pulse start.
+
+**Related points for you to settle:**
+- **Window origin.** Does the 1.5 s window count from the touch-down or from the pulse start? Name it explicitly in rule 2 step 7 or rule 5.
+- **Held pool (second finger).** Existing 0.3 behavior: a second finger on the sand while the pool is held requests a pulse or blip on an already-lifted pool. Revision 2 does not define this. The engineer assumes a held pool shows no pulse or blip until told otherwise. Confirm that or define it.
+
+## Decisions already made
+
+- D-001: no failure, no timers, every move undoable. The blip is touch-triggered only.
+- D-002: intro cancel eases back over 0.15 s; the intro is never in the undo history.
+- D-003: rate-limited sand taps show a pool brightness blip; the pool's hit area follows its drawn size.
+
+## Constraints
+
+- Level 1 only. Touch only. No mechanic depends on text. Existing sprite sheet only, plus the procedural shadow.
+- Stay inside D-001: no timers and no inactivity triggers. The blip is touch-triggered only.
+- "No silent touches": the answer must keep every touch visibly answered.
+- Keep the answer small and local. Do not reopen revision 2 items 2–5 unless your answer forces it.
+- Player-facing behavior is yours to decide. Do not hand design choices back to the engineer.
+- The 0.2 s response criterion and the other acceptance criteria stay unchanged unless you say otherwise.
+
+## Open questions
+
+- Which option (1, 2, 3 or another) applies to sub-case (a)? Confirm sub-case (b).
+- Where does the 1.5 s window start?
+- What does a second-finger sand tap get while the pool is held?
+- Do checks 4 and 13–16 need new wording or a new check? Revision 2's checks 1–16 stay the verification set unless you change them.
+
+## Expected output
+
+- Revision 3 of `design/onboarding.md`: the three answers stated in the rules, the edge cases and the checks, as player-observable acceptance criteria.
+- A Decision (D-004, or an amendment note on D-003) if the answer constrains later work or a real alternative was rejected.
+- Your Handoff addressed to `studio`, stating the outcome and whether the change alters what the engineer must build for items 1–5. The Studio then returns the work to `gameplay-engineer` (Build 4d), then Verify 5b.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md, studio/skills/make-decision.md
+- Project: design/onboarding.md, sim/build-0.3.md, sim/repo-notes.md, project.md#vision, project.md#constraints
+- Decisions: decisions/D-001-no-fail-states.md, decisions/D-002-intro-cancel-and-undo.md, decisions/D-003-sand-tap-blip-and-pool-hit-area.md
+- Previous handoff: goals/G-001-first-puzzle-stall/18-gameplay-engineer-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-first-puzzle-stall/goal.md
+---
+kind: goal
+id: G-001
+project: tidepool-garden
+status: active
+created: 2026-10-10
+---
+# G-001: Children stall at the first puzzle
+
+## Owner request
+
+> 最初のパズルで子どもが手を止めてしまう。直したい
+
+## Interpretation
+
+Success condition: when children in the target group (ages 7–10) play the first puzzle (level 1 in
+build 0.2), they begin purposeful touch interaction with the puzzle on their own, without a long
+pause and without an adult having to explain what to do. How long a pause counts as "a stall" is
+not set here; Observe reports what actually happens and Design turns it into a player-observable
+acceptance criterion.
+
+Out of scope:
+
+- Levels 2 and later. If the same problem shows up there, it becomes a proposed new Goal.
+- Changing a vision pillar or Decision D-001 (no failure, no timers). Any fix must stay inside them.
+- New art beyond the existing sprite sheet (project constraint).
+
+## Unknowns
+
+Entry questions (`studio/workflows/development-loop.md`) the Project Context cannot answer:
+
+- **Observe** — Has the stall been observed first-hand? No: the Project Context holds only the
+  Owner's report. It is an experience problem, not a reproducible defect, so the Role is
+  `playtester` (not `qa`). Creates stage 1.
+- **Diagnose** — Is the cause understood? No. Creates stage 2 (`game-designer`). `art-director` was
+  added in parallel (2b) because the observation pointed to something visual.
+- **Design** — Is the intended behavior of the fixed first puzzle specified? No:
+  `design/onboarding.md` specified the current level 1 and its teaching intent, not a fix. Creates
+  stage 3. Build later found a gap (intro-cancel case), which reopened Design as 3d. Verify then
+  found a gap (sand taps inside the pulse rate-limit window), which reopened Design as 3e; 3e is
+  done (blip, hit area and notes settled in spec revision 2 and D-003). Build 4c then found one
+  more gap (a sand tap during the 0.15 s ease-back, plus the 1.5 s window origin and a held-pool
+  second finger), which reopens Design as 3f.
+- **Build** — Must the game change? The Owner wants it fixed, so yes. Creates stage 4. Spec
+  revision 2 changes player-facing behavior, so Build runs again as 4c; 4c held on the gap above,
+  so Build resumes as 4d after 3f.
+- **Verify** — Always after Build. Stage 5, and 5b after 4d.
+- **Play** — Is the Goal about how the game plays or feels? Yes. Stage 6, in a fresh context
+  without the implementation history.
+- **Review** — Is it an experience Goal? Yes. Stage 7 (`game-director`).
+- **Next** — Always. Stage 8.
+
+Skipped:
+
+- **Decide** — Is there a real choice of direction, priority or scope? Not so far. The fix choices
+  (A + B) are player-facing behavior inside the approved direction, which is `game-designer`
+  authority. Option C (idle hint) is excluded from the spec; if it is wanted later, route Decide
+  because it touches D-001.
+- **Plan** — Is the technical approach non-obvious, risky, cross-system or parallelizable? No. The
+  designer's spec describes a local level 1 change (parameters, a recolor, existing-sprite
+  animation, per-object touch response); no cross-system structure is touched. Skipped. If Build
+  finds the change is not local, the return rules send it to Plan.
+
+Flag for Review (not a conclusion): the start-of-level intro motion is judged by the designer to be
+outside D-001 (one-time, no timer, no inactivity trigger). `game-director` should confirm at Review.
+
+Open item (not a Role question): whether iOS "Reduce Motion" / Android "Remove animations" are
+available on the target platforms is unconfirmed. QA could not confirm it at Verify (target OS
+versions are not named in the Project Context). The spec's static-brightness fallback works either
+way. It does not block the Goal; carry it to Review / Close as an item for the Owner.
+
+Resolved item: the source of the lifted pool's shadow was settled in 3e (no specific source
+required; not player-facing; check 10 clarified).
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 01-studio-to-playtester.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 02-playtester-to-game-designer.md |
+| 2b | Diagnose | art-director | visual-review | done | 03-studio-to-art-director.md |
+| 3 | Design | game-designer | write-design-spec | done | 06-studio-to-game-designer.md |
+| 3c | Plan | technical-director | technical-plan | skipped | — |
+| 4 | Build | gameplay-engineer | implement-change | done | 08-studio-to-gameplay-engineer.md (held: question, no change made) |
+| 3d | Design | game-designer | write-design-spec | done | 09-gameplay-engineer-to-game-designer.md (answered in 10) |
+| 4b | Build | gameplay-engineer | implement-change | done | 11-studio-to-gameplay-engineer.md (result: 12) |
+| 5 | Verify | qa | verify-change | done | 13-studio-to-qa.md (pass, 12/12; report: 14) |
+| 3e | Design | game-designer | write-design-spec | done | 15-studio-to-game-designer.md (result: 16) |
+| 4c | Build | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md (held: question 18, no build 0.4) |
+| 3f | Design | game-designer | write-design-spec | open | 19-studio-to-game-designer.md |
+| 4d | Build | gameplay-engineer | implement-change | planned | — |
+| 5b | Verify | qa | verify-change | planned | — |
+| 6 | Play | playtester | playtest-session | planned | — |
+| 7 | Review | game-director | review-outcome | planned | — |
+| 8 | Next | studio | — | planned | — |
+
+Status: planned | tentative | open | done | skipped. The route is a plan; the Route operation
+revises it.
+
+## Route changes
+
+After step 4c (18): Build held with `question` — a sand tap during the 0.15 s ease-back (pending pulse) is undefined; also the 1.5 s window origin and a held-pool second finger. Spec ambiguous, so Design reopens as 3f (game-designer); Build resumes as 4d, then Verify 5b (checks 1–16). Items 2–5 stay settled. Plan stays skipped; no escalation.
+
+## Next action
+
+Run step 3f (Step operation): `game-designer` on `19-studio-to-game-designer.md`. Report to `studio`. Then Route: return to `gameplay-engineer` for 4d (finish item 1, write `sim/build-0.4.md`, report to `studio`). Then compose a fresh QA Handoff for 5b without the Sender assessment (checks 1–16 as revised, the reduced-motion platform check, the home capture for check 3). After Verify passes, compose a Playtester Handoff from permitted information only (build and player profile), and open Play (6). Phase 1: the Studio stops after every Route.
+
+## Outcome
+
+<!-- Filled at close, for the Owner, in owner_language (ja). -->
+>>>END
+
+Next action: run step 3f with `game-designer` on `19-studio-to-game-designer.md`. Per Phase 1, the Studio stops here.

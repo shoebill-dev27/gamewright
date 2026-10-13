@@ -1,0 +1,175 @@
+Verify 5d passed, so I'm marking it done and opening Play (6) with a fresh Playtester Handoff. It is built only from permitted information: the build, the player profile and a neutral focus. It says nothing about what changed or what result is expected.
+
+<<<FILE goals/G-001-first-puzzle-stall/37-studio-to-playtester.md
+---
+kind: handoff
+goal: G-001
+seq: 37
+from: studio
+to: playtester
+stage: Play
+outcome: routed
+---
+# 37: studio → playtester — Play the first puzzle as a child would
+
+## Task
+
+Play the first puzzle (level 1) of the current build as a player from the profile below, from the moment the level starts until it is solved. Report what you observe as a player: what you do, when, and what you notice. Report observable experience only.
+
+## Context
+
+This is a playtest session on the newest build of a touch puzzle game for children. You have no history of the build and need none. Your report goes back to the Studio.
+
+## Findings
+
+Nothing to report from the sender. Run the build as follows:
+
+- Build: `sim/build-0.6.md`. This is a dry-run project with no device. "Running the build" means reading that file as the player-visible description of the game, and playing through it step by step as the player would.
+- Part to play: level 1 only, from the first moment after it loads, to the solved state.
+- Player profile: children aged 7–10, some still early readers, often playing beside a parent. Sessions of 5–15 minutes. They quickly lose interest when nothing responds to their touch. Play as such a child would, not as a developer. Do not rely on reading text, and do not use outside knowledge of how the game is meant to work.
+- Play focus: the first puzzle from start to finish. Note moments where you hesitate, what you try, what responds, and what you would do next as the child.
+
+## Decisions already made
+
+None.
+
+## Constraints
+
+- Touch only; judge only what a player can see and do.
+- Report observations, not fixes or design changes. You have no authority over the game.
+- If part of the build description is unclear or you cannot tell what a player would see, say so instead of guessing.
+- Levels 2 and later are out of scope.
+
+## Open questions
+
+None.
+
+## Expected output
+
+An observation report (per `playtest-session`): the sequence of what you did and noticed, any hesitation or pause and where it occurred, what responded to your touch and how clearly, and anything confusing, frustrating or delightful. Address it to `studio`.
+
+## Load
+
+- Role: studio/roles/playtester.md
+- Skills: studio/skills/playtest-session.md
+- Project: project.md#player-profile, sim/build-0.6.md
+- Decisions: none
+- Previous handoff: none
+>>>END
+
+<<<FILE goals/G-001-first-puzzle-stall/goal.md
+---
+kind: goal
+id: G-001
+project: tidepool-garden
+status: active
+created: 2026-10-10
+---
+# G-001: Children stall at the first puzzle
+
+## Owner request
+
+> 最初のパズルで子どもが手を止めてしまう。直したい
+
+## Interpretation
+
+Success condition: when children in the target group (ages 7–10) play the first puzzle (level 1 in
+build 0.2), they begin purposeful touch interaction with the puzzle on their own, without a long
+pause and without an adult having to explain what to do. How long a pause counts as "a stall" is
+not set here; Observe reports what actually happens and Design turns it into a player-observable
+acceptance criterion.
+
+Out of scope:
+
+- Levels 2 and later. If the same problem shows up there, it becomes a proposed new Goal.
+- Changing a vision pillar or Decision D-001 (no failure, no timers). Any fix must stay inside them.
+- New art beyond the existing sprite sheet (project constraint).
+
+## Unknowns
+
+Entry questions (`studio/workflows/development-loop.md`) the Project Context cannot answer:
+
+- **Observe** — done (stage 1, playtester; an experience problem, not a defect).
+- **Diagnose** — done (2 game-designer, 2b art-director).
+- **Design** — done. Spec revision 5 is settled (3h; D-006). Earlier gaps are closed in revisions 2–4 and D-003 to D-005.
+- **Build** — done. Build 0.6 implements revision 5. The code change counts as made only through the simulated build record.
+- **Verify** — done. 5d passed checks 4, 13, 18, 19, 20, 21 on the build record (36). No blocking gap.
+- **Play** — Is the Goal about how the game plays or feels? Yes. Stage 6 is open (37): fresh context, build 0.6 and player profile only, no implementation history.
+- **Review** — Experience Goal: yes. Stage 7 (`game-director`).
+- **Next** — Always. Stage 8.
+
+Skipped:
+
+- **Decide** — The fix choices are player-facing behavior inside the approved direction
+  (`game-designer` authority). Option C (idle hint) is excluded; if wanted later, route Decide
+  because it touches D-001.
+- **Plan** — The change is local to level 1; no Build step found otherwise.
+
+Flag for Review: the start-of-level intro motion is judged by the designer to be outside D-001
+(one-time, no timer, no inactivity trigger). `game-director` should confirm. Also watch whether a
+child reads the post-cancel pool blip as an error (D-006 revisit trigger).
+
+Open items (non-blocking, carry to Review / Close):
+
+- Whether iOS "Reduce Motion" / Android "Remove animations" are readable on target platforms is
+  unconfirmed. The spec's fallback works either way. An item for the Owner.
+- No device: checks 2, 3, 11, 17–21 rest on the build record's stated values. A 60 fps capture is
+  needed for the reduce-motion single frame between beats, the 0.55–0.6 s pulse tail, and the 0.1 s
+  and 0.3 s flash timings.
+- Levels 2 and 3 were not run by QA (stated unchanged). Checks 1–3, 5–12, 14–17 were not re-run on 0.6.
+- Build record wording (low severity, from 36): the reduce-motion crab brightening should read
+  "about 0.4 s in total, peak at 0.2 s"; the default-mode "Touching the pool" line should mention
+  ending a running flash (spec rule 5), or confirm it on a capture.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 01-studio-to-playtester.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 02-playtester-to-game-designer.md |
+| 2b | Diagnose | art-director | visual-review | done | 03-studio-to-art-director.md |
+| 3 | Design | game-designer | write-design-spec | done | 06-studio-to-game-designer.md |
+| 3c | Plan | technical-director | technical-plan | skipped | — |
+| 4 | Build | gameplay-engineer | implement-change | done | 08-studio-to-gameplay-engineer.md (held: question, no change made) |
+| 3d | Design | game-designer | write-design-spec | done | 09-gameplay-engineer-to-game-designer.md (answered in 10) |
+| 4b | Build | gameplay-engineer | implement-change | done | 11-studio-to-gameplay-engineer.md (result: 12) |
+| 5 | Verify | qa | verify-change | done | 13-studio-to-qa.md (pass, 12/12; report: 14) |
+| 3e | Design | game-designer | write-design-spec | done | 15-studio-to-game-designer.md (result: 16) |
+| 4c | Build | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md (held: question 18, no build 0.4) |
+| 3f | Design | game-designer | write-design-spec | done | 19-studio-to-game-designer.md (result: 20) |
+| 4d | Build | gameplay-engineer | implement-change | done | 21-studio-to-gameplay-engineer.md (result: 22, build 0.4) |
+| 5b | Verify | qa | verify-change | done | 23-studio-to-qa.md (fail: check 4 under reduce-motion; report: 24) |
+| 3g | Design | game-designer | write-design-spec | done | 25-studio-to-game-designer.md (result: 26, spec rev 4, D-005) |
+| 4e | Build | gameplay-engineer | implement-change | done | 27-studio-to-gameplay-engineer.md (result: 28, build 0.5) |
+| 5c | Verify | qa | verify-change | done | 29-studio-to-qa.md (pass 20/20 on record; SG-1, O1; report: 30) |
+| 3h | Design | game-designer | write-design-spec | done | 31-studio-to-game-designer.md (result: 32, spec rev 5, D-006) |
+| 4f | Build | gameplay-engineer | implement-change | done | 33-studio-to-gameplay-engineer.md (result: 34, build 0.6) |
+| 5d | Verify | qa | verify-change | done | 35-studio-to-qa.md (pass; report: 36) |
+| 6 | Play | playtester | playtest-session | open | 37-studio-to-playtester.md |
+| 7 | Review | game-director | review-outcome | planned | — |
+| 8 | Next | studio | — | planned | — |
+
+Status: planned | tentative | open | done | skipped. The route is a plan; the Route operation
+revises it.
+
+## Route changes
+
+After step 5d (36): QA passed checks 4, 13, 18, 19, 20, 21 on build 0.6 with no failure, regression or blocking spec gap, so the plan holds. Play 6 is open for `playtester` (37), a fresh Handoff with the build and player profile only. The two low-severity record wording notes are carried to Review / Close, not sent back to Build. No escalation.
+
+## Next action
+
+Run step 6 (Step operation): `playtester` on `37-studio-to-playtester.md`, in a fresh context, reporting to `studio`. Then Route: if the observations show a design or experience issue, Diagnose again (`game-designer`; `game-director` if direction or priority is implied); a defect goes to `qa`; otherwise open Review 7 (`game-director`) with the observation report, the QA results and the carried open items. Phase 1: the Studio stops after every Route.
+
+## Outcome
+
+<!-- Filled at close, for the Owner, in owner_language (ja). -->
+>>>END
+
+Step 5d is done and Play (stage 6) is open as `37-studio-to-playtester.md`.
+
+- **Verify result:** QA passed all six checks on build 0.6 (4, 13, 18, 19, 20, 21) with no failures, regressions or blocking spec gaps. The plan holds, nothing escalates, and Plan stays skipped.
+- **Playtester Handoff:** it gives only the build, the player profile and a neutral focus (level 1 from start to solved). It does not say what changed or what result to expect.
+- **Carried to Review / Close:** the two low-severity build record wording notes, the missing 60 fps capture, the unconfirmed reduce-motion platform settings, and the fact that checks 1–3, 5–12 and 14–17 were not re-run on 0.6. I did not send the wording notes back to Build.
+- **Log entry:** I could not append the 042 Route entry to `log.md` because it is not in my write list. The runtime has to add it.
+
+**Next:** run the Step for `playtester` on `37-studio-to-playtester.md` in a fresh context, then Route.

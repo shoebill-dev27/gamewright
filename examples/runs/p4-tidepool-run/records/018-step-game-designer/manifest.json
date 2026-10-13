@@ -1,0 +1,77 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-first-puzzle-stall/15-studio-to-game-designer.md",
+  "sha256": "3a347ff9d641e0867283af6048ba25590b68dc4ac7f818aae5798a39f25c79cf",
+  "bytes": 5710
+ },
+ {
+  "path": "studio/roles/game-designer.md",
+  "sha256": "7e48b1058cca3a1dc59a4240cf232256acb047fb5b659c317fa11197f4017ca4",
+  "bytes": 1578
+ },
+ {
+  "path": "studio/skills/write-design-spec.md",
+  "sha256": "f60b4ce8c6e89c2dc27ff87184c54b91452c45db8422fc378ca9253b45a0efd2",
+  "bytes": 1367
+ },
+ {
+  "path": "project.md#vision",
+  "sha256": "616233cc48c794ce453d953e5998d8990829cb066031eb49e0b42ff3e133906c",
+  "bytes": 355
+ },
+ {
+  "path": "project.md#player-profile",
+  "sha256": "2774d3f4bc5bca9e4a621744c24d4e37e4977b1ae950d28aa5a88992a5c817de",
+  "bytes": 191
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "53351d1620ff2ecebedb3bc15243f68f6dbdee48df5382cc16e2eae8b09bbaf7",
+  "bytes": 488
+ },
+ {
+  "path": "project.md#art-direction",
+  "sha256": "c165f5eeb2bf1388d32bde8ec04f06cef64ed458b187700a8279e2ccc1054c8d",
+  "bytes": 117
+ },
+ {
+  "path": "design/onboarding.md",
+  "sha256": "252ffd609c38e453d5710ac1dc289cb277d57e80ed7c7d3069fbf49da3969229",
+  "bytes": 13082
+ },
+ {
+  "path": "sim/build-0.3.md",
+  "sha256": "23988d5d60202292cda3e1c2239d3e74c9709f3347dd174f4a5f294d898778d5",
+  "bytes": 6074
+ },
+ {
+  "path": "decisions/D-001-no-fail-states.md",
+  "sha256": "99362efd3625e792d862dcbec7744a761cee478a97eae271621290daff508b4e",
+  "bytes": 505
+ },
+ {
+  "path": "decisions/D-002-intro-cancel-and-undo.md",
+  "sha256": "5f412d0a7512397658d74382c84055ca1fb1159b52df5cc705e1e23a687f5cd2",
+  "bytes": 1949
+ },
+ {
+  "path": "goals/G-001-first-puzzle-stall/14-qa-to-studio.md",
+  "sha256": "acc0e1aeb5da02a416618d02d2db702c16514881f1e30bb2a0cbbf51ea42a59c",
+  "bytes": 11102
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

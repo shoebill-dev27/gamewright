@@ -1,0 +1,62 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-first-puzzle-stall/02-playtester-to-game-designer.md",
+  "sha256": "e39135f260d6938a3c673bc02cf58adb00f46a2267e7ef561212f330733b698f",
+  "bytes": 6173
+ },
+ {
+  "path": "studio/roles/game-designer.md",
+  "sha256": "7e48b1058cca3a1dc59a4240cf232256acb047fb5b659c317fa11197f4017ca4",
+  "bytes": 1578
+ },
+ {
+  "path": "studio/skills/diagnose-experience.md",
+  "sha256": "150f05492cedfb6cde7acc97f359fb979a23ef60141742193a68f3ab491845e0",
+  "bytes": 1322
+ },
+ {
+  "path": "project.md#vision",
+  "sha256": "616233cc48c794ce453d953e5998d8990829cb066031eb49e0b42ff3e133906c",
+  "bytes": 355
+ },
+ {
+  "path": "project.md#player-profile",
+  "sha256": "2774d3f4bc5bca9e4a621744c24d4e37e4977b1ae950d28aa5a88992a5c817de",
+  "bytes": 191
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "53351d1620ff2ecebedb3bc15243f68f6dbdee48df5382cc16e2eae8b09bbaf7",
+  "bytes": 488
+ },
+ {
+  "path": "design/onboarding.md",
+  "sha256": "cf8e4e69925a756bb68fdb9ea21f9a184ceb58e564e132a5444876b54d524220",
+  "bytes": 388
+ },
+ {
+  "path": "decisions/D-001-no-fail-states.md",
+  "sha256": "99362efd3625e792d862dcbec7744a761cee478a97eae271621290daff508b4e",
+  "bytes": 505
+ },
+ {
+  "path": "goals/G-001-first-puzzle-stall/01-studio-to-playtester.md",
+  "sha256": "3eeb68e4a5177d83678d45b2b322fdeea6ebec48dd226967505c818f9b671081",
+  "bytes": 2056
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

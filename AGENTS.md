@@ -49,4 +49,5 @@ Step; the packet is the only input. The manual operations above remain valid.
   game-specific facts). The tests enforce both.
 - Tool-specific material belongs only in entry points: this file, `CLAUDE.md`, `.claude/`.
 - Repository language is English. Owner-facing artifacts use the project's `owner_language`.
-- Check: `python3 -m pytest tests/` (Phase 1 structure: `tests/test_studio.py`; isolation: `tests/test_phase2.py`).
+- Check: `python3 -m pytest tests/` (Phase 1 structure: `tests/test_studio.py`; isolation: `tests/test_phase2.py`;
+  continuous runs: `tests/test_phase3.py`; Goal log and `goal.md` limits: `tests/test_phase4.py`).

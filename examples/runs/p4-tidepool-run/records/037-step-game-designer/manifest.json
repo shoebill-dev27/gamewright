@@ -1,0 +1,82 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-first-puzzle-stall/31-studio-to-game-designer.md",
+  "sha256": "7f8566694c43b120e6185efd05d5203bf8bf3f08fcbc1fe9389be97c04e441fa",
+  "bytes": 6552
+ },
+ {
+  "path": "studio/roles/game-designer.md",
+  "sha256": "7e48b1058cca3a1dc59a4240cf232256acb047fb5b659c317fa11197f4017ca4",
+  "bytes": 1578
+ },
+ {
+  "path": "studio/skills/write-design-spec.md",
+  "sha256": "f60b4ce8c6e89c2dc27ff87184c54b91452c45db8422fc378ca9253b45a0efd2",
+  "bytes": 1367
+ },
+ {
+  "path": "studio/skills/make-decision.md",
+  "sha256": "68436360ad82bd660f2153934ae7305118489c26ad3255d10e5018773d9eb4b6",
+  "bytes": 1129
+ },
+ {
+  "path": "project.md#vision",
+  "sha256": "616233cc48c794ce453d953e5998d8990829cb066031eb49e0b42ff3e133906c",
+  "bytes": 355
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "53351d1620ff2ecebedb3bc15243f68f6dbdee48df5382cc16e2eae8b09bbaf7",
+  "bytes": 488
+ },
+ {
+  "path": "design/onboarding.md",
+  "sha256": "d2b2ccafb5e53738387218dec47df4fbe2ae4863d557fb62f05c1978a6a272c3",
+  "bytes": 31178
+ },
+ {
+  "path": "sim/build-0.5.md",
+  "sha256": "dd81bc6bafb3baddb5f94fae2ab048d176efc2f49000273516e0a020f038b9d1",
+  "bytes": 11146
+ },
+ {
+  "path": "decisions/D-001-no-fail-states.md",
+  "sha256": "99362efd3625e792d862dcbec7744a761cee478a97eae271621290daff508b4e",
+  "bytes": 505
+ },
+ {
+  "path": "decisions/D-003-sand-tap-blip-and-pool-hit-area.md",
+  "sha256": "33f6904beaa5ff202abf355b91f021c4c5bfa9f036932b5385933fb643d304e1",
+  "bytes": 2412
+ },
+ {
+  "path": "decisions/D-004-ease-back-taps-window-origin-held-pool.md",
+  "sha256": "e78d4050831064e759af427628b44ca3dd1a81e81b1b4130ef6f2c25e6d76633",
+  "bytes": 2544
+ },
+ {
+  "path": "decisions/D-005-reduce-motion-pulse-fills-window.md",
+  "sha256": "ef5c5e50142b2ee4c4d7ea26c9cfaab8a6c85df13bba7d99456074d5c88756a1",
+  "bytes": 2785
+ },
+ {
+  "path": "goals/G-001-first-puzzle-stall/30-qa-to-studio.md",
+  "sha256": "4e018f768fee79ee4dbf09931292c8eaaa6461f51114cb3f3929cb72ce20fc8a",
+  "bytes": 15039
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

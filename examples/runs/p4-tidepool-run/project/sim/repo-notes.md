@@ -1,0 +1,96 @@
+# Simulated repository notes — tidepool-garden (build 0.6)
+
+Implementation facts only. Never load this for a Playtester.
+
+- Levels are data files listing pieces (tide pools, creatures, homes) with positions. Every piece names a sprite from the shared sprite sheet, an outline style and an idle animation.
+- Level 1 data (from 0.3, unchanged in 0.4, 0.5 and 0.6):
+  - Pool: darker outline, idle scale pulse 1.00–1.06, 2.0 s, ease-in-out, loop. Tint is saturated pastel blue/teal, about `#4FB8C4`. The sand's real value must be read from the level palette (assumed about `#F2E3C0`).
+  - Crab: scenery outline, no idle animation, touch-responsive, not draggable.
+  - Home: scenery outline, no idle animation, touch-responsive, not interactive.
+  - Sand and other scenery unchanged. Empty sand is a touch target for the redirect pulse and the blip.
+  - Flags, off by default, on only in level 1:
+    - `introSlide`: 0.25 of the distance to home, 0.8 s out, 0.8 s back, once per load.
+    - `easeBackSeconds`: 0.15, ease-out.
+    - `redirectPulse`: scale 1.00–1.15 and back twice, 0.6 s, min gap 1.5 s measured from `lastPulseStart`. Reduce-motion branch: see "Reduced motion".
+    - `homeNearGlow`: threshold 1.5 pool-widths.
+  - The text bubble is unchanged and nothing depends on it.
+- Levels 2 and 3 data and behavior unchanged. The generic input and animation code is extended only through the flags above.
+- Input in level 1: touch-down is routed by what is hit.
+  - Hit areas:
+    - Pool: follows its drawn size (idle pulse up to 1.06, redirect pulse up to 1.15, lift 1.10), never below the at-rest size. It follows the drawn position during the intro. Under reduced motion there is no pulse scale, so it is the at-rest size plus the 1.10 lift.
+    - Crab and home: at-rest sprite size.
+    - The home near-glow still uses the at-rest pool width.
+  - Pool:
+    - Only the first touch drags. A second finger on the pool is ignored.
+    - Touch-down cancels any intro, ease-back, running redirect pulse, running blip and `pulsePending`.
+    - Touch-down that cancels a running redirect pulse (0 ≤ now − `lastPulseStart` < 0.6 s) sets `lastPulseCancelled` to true. A cancelled pending pulse (touch during `EASE_BACK`) never sets it. A pool touch with no running pulse leaves it unchanged.
+    - The pool scales to 1.10 within 0.1 s, a procedural soft dark ellipse shadow appears under it (no new asset), and it follows the finger 1:1 from its drawn position, clamped to the play area.
+    - On release it scales to 1.00 over 0.15 s and the idle pulse resumes.
+    - A drop on the home completes the level. A drop on the crab counts as a drop away from the home.
+    - A real drag-drop pushes one undo entry holding the previous logical position.
+  - Crab: responds within 0.1 s. It flips (scale x ±1) to face the pool's logical position, only if needed. The logical position is the authored start during intro or ease-back, and the finger position when the pool is held. The ±8° wiggle (0.4 s) starts with the flip. While the finger is down it leans about 10° toward the pool and springs back on release. It makes one redirect pulse request at touch-down, unless the pool is held or `pulsePending` is set. While the pool is dragged, the crab re-applies the flip rule. Reduce-motion branch: wiggle and lean are replaced by a one-shot crab brightness change (0 → +20% → 0, linear, peak at 0.2 s, about 0.4 s) at touch-down, also for a drag attempt; it does not stay on while the finger is down and nothing happens on release; it retriggers on every tap. The flip is instant and the flip rule is unchanged.
+  - Home: +20% brightness glow for 0.6 s, fading, within 0.1 s. It makes a redirect pulse request unless the pool is held or `pulsePending` is set.
+  - Sand: makes a redirect pulse request, or a blip (see below).
+  - Redirect pulse:
+    - A request is allowed when now − `lastPulseStart` ≥ 1.5 s. A denied request is dropped, but the crab or home reaction still plays.
+    - `lastPulseStart` is the start time of the last redirect pulse. It is written only when a pulse starts. It is not set at touch-down. Blips and held-pool taps never write it. A pool touch cancelling a running pulse leaves it unchanged.
+    - `lastPulseCancelled`: true when a pool touch-down cancelled a running pulse (see Pool). Set to false whenever a new redirect pulse starts. Read only by blip condition 2. The held-pool path, the pending-pulse path and the 1.5 s limit do not read it. It stays true after 0.6 s until the next pulse start, which has no effect because condition 2 is already met by time then.
+    - The pulse starts in the frame that processes the touch-down request. With the intro skipped, the first non-pool touch of a load has no previous pulse, so it is allowed.
+    - While a redirect pulse runs, the idle pulse is hidden. It restarts from scale 1.00 when the pulse ends (reduce-motion: idle brightness restarts from 0). A blip does not touch the idle pulse.
+  - Blip (sand tap, pool not held): brightness +15% within 0.1 s, fade over 0.3 s, no scale or movement. At most one runs, and a new sand tap does not restart it. It works under reduced motion. It starts only if all hold:
+    1. the limit blocks a pulse (now − `lastPulseStart` < 1.5 s);
+    2. no pulse is running: now − `lastPulseStart` ≥ 0.6 s, or `lastPulseCancelled` is true;
+    3. `pulsePending` is not set;
+    4. no blip is running.
+    - Otherwise an allowed sand tap starts a pulse. A sand tap in the first 0.6 s of an uncancelled pulse has the pulse as its response.
+    - After a cancel the blip is available from the cancel moment, including inside the first 0.6 s after the pulse start and during the pool's 0.15 s release shrink. The blip does not move the 1.5 s window.
+    - The 0.6 s running window is the same in both modes. Condition 2 uses `≥ 0.6 s` (changed from `> 0.6 s` in 0.5), so a tap on exactly the 0.6 s frame gets the blip in both modes. Under reduced motion the pulse fills the whole 0.6 s, so there is no silent interval for an uncancelled pulse.
+  - Held pool, second finger: no pulse request for any object, and `lastPulseStart` is untouched. Sand starts the blip if none is running, whatever the time since the last pulse. Crab and home give their own response only. A second finger on the pool is ignored.
+  - Home near-glow: only while the pool is held. Distance is center to center against 1.5 × the pool's at-rest width. It ends on leaving range or on drop.
+- Intro state machine (level 1 load and restart), states `INTRO_OUT`, `INTRO_BACK`, `EASE_BACK`, `IDLE`, `HELD`:
+  - The intro is a visual offset on the pool's drawn position only. It never writes to the logical position or the undo stack.
+  - It plays once per level load, including a restart, not on an orientation change.
+  - A pool touch in `INTRO_*` or `EASE_BACK` goes to `HELD`, and the offset becomes the drag position. In `EASE_BACK` it clears `pulsePending`, so no pulse and no window start; `lastPulseCancelled` is not set.
+  - A crab, home or sand touch in `INTRO_*` goes to `EASE_BACK` and sets `pulsePending`. The offset eases to zero in a fixed 0.15 s. The object's response starts at once (sand has none).
+  - `pulsePending` stays set until the ease-back ends. At 0.15 s the redirect pulse starts, exempt from the 1.5 s limit, `lastPulseStart` is set, `lastPulseCancelled` is cleared, `pulsePending` is cleared, and `IDLE` begins with the idle pulse at the authored position (hidden while the pulse runs).
+  - A crab, home or sand touch during `EASE_BACK` plays only its own object response (sand has none). It triggers no blip and no extra pulse request. The ease-back continues.
+  - A touch exactly on the 0.15 s end frame counts as pending if the frame has not yet processed the pulse start. The result is the same: one pulse, no blip.
+  - The undo stack is never touched by the intro. After the first real drop, undo restores the authored start.
+  - There is no timer, inactivity trigger or idle hint.
+- Reduced motion: level 1 reads the OS flag at load only, where it exists (iOS Reduce Motion, Android Remove animations); where it is not readable, full motion is shown. There is no in-game toggle. Availability on the target platforms is unconfirmed. When on, the intro is skipped and:
+  - Redirect pulse: a two-beat brightness pulse, 0.6 s. With `u` = seconds since pulse start, beat 1 covers `u` in [0, 0.3) and beat 2 covers [0.3, 0.6), so beat 2 starts the instant beat 1 ends (at most one frame at normal brightness between them). Within a beat, with `v` = `u` (beat 1) or `u − 0.3` (beat 2): brightness rises linearly 0 → +30% for `v` in [0, 0.1] and falls linearly +30% → 0 for `v` in [0.1, 0.3]. No scale or position change. Request, allow, deny and `lastPulseStart` logic is unchanged.
+  - Pool brightness is one composited value: the maximum of the active sources (pulse beat, flash, idle brightness), never a sum. A pulse start clears a running flash. The flash never delays a pulse and is unchanged (+15% within 0.1 s, 0.3 s fade, not restarted while running). A pool touch-down cancels a running pulse and flash (brightness 0).
+  - Idle brightness: one rise and fall per 2.0 s period, ease-in-out, 0 → +8% at 1.0 s → 0 at 2.0 s, looping. Starts at 0 at load. Hidden during a pulse and resumes from 0 when it ends. Stops at pool touch-down and resumes from 0 on release. Not affected by the flash apart from the larger-of display. No timer or hint starts it.
+  - Crab response: brightness change described under Crab (one 0.4 s change per touch-down, within 0.1 s, not held while the finger is down, nothing extra on release).
+  - Not replaced: the pool lift, shadow and drag, the crab flip, the home glow, the blip.
+- Rendering: the level 1 pool uses its own tint. Other tide pools use the level's sand palette. Creatures use their own colors. Only the existing sprite sheet is used, with tint, recolor, flip, scale, rotation, position and brightness changes, plus the procedural shadow ellipse under the lifted pool.
+- Undo: every move is pushed on a history stack. The intro and ease-back add nothing.
+- Tests:
+  - Level data validation, extended for level 1: the pool has the darker outline and idle animation, the crab and home have none, no sprite outside the sheet is used, and the pool/sand grayscale luminance ratio is at least 1.5.
+  - Logic tests for the intro state machine on a fake clock:
+    - Intro cancel by a pool touch.
+    - Intro cancel by a crab, home or sand touch, with the pulse at 0.15 s.
+    - A pool touch during `EASE_BACK`: `pulsePending` cleared, no pulse, `lastPulseStart` unchanged, `lastPulseCancelled` unchanged (at 0.05 s and 0.10 s).
+    - Pending-pulse sand tap at 0.05 s and 0.10 s: no blip, exactly one pulse at 0.15 s after the first touch.
+    - Pending-pulse crab and home taps at 0.05 s and 0.10 s: own response within 0.1 s, no blip, one pulse at 0.15 s.
+    - Window from pulse start: pulse at t=0.15, sand tap at 1.60 gets a blip, sand tap at 1.65 starts a pulse.
+    - A blip does not move the window.
+    - Held-pool sand tap: blip, no pulse, window unchanged, also when ≥1.5 s have passed. A running blip is not restarted.
+    - Held-pool crab and home tap: object response, no pulse, no blip.
+    - The undo stack is empty after an intro and after an intro-cancel.
+    - Undo after a drop gives the authored start.
+    - The rate limit at 1.5 s.
+    - A pool touch-down cancels a running redirect pulse (extended to assert `lastPulseCancelled` is true and `lastPulseStart` unchanged).
+    - The near-glow measures center to center with the at-rest width and never applies to a pool at rest.
+    - A sand tap at exactly 0.6 s after a pulse start gives the blip, in both modes.
+    - Pulse at P, pool touch-down at P+0.1 and P+0.4, release, sand tap at several times before P+1.5 (including inside the release shrink and at P+0.45): blip, no pulse, `lastPulseStart` unchanged.
+    - Sand tap at P+1.5 or later after a cancel: new pulse, no blip, `lastPulseCancelled` cleared.
+    - Uncancelled pulse, sand tap at P+0.1 to P+0.59: no blip.
+    - Reduce-motion repeat of the cancelled-pulse cases.
+  - Reduce-motion logic tests on the fake clock:
+    - Pulse brightness at u = 0, 0.05, 0.1, 0.2, 0.3, 0.35, 0.4, 0.5, 0.6: 0, 15%, 30%, 15%, 0, 15%, 30%, 15%, 0. No scale or position output.
+    - Sand tap at pulse start + t for t = 0.0 to 1.4 in 0.1 steps plus 0.55, 0.6 and 1.5: pulse beat, flash or new pulse; never none.
+    - Larger-of rule: a flash falling when a pulse starts gives pulse-only brightness and the flash is cleared; idle (≤8%) with a flash gives the max, not the sum.
+    - Idle brightness: 0 at load, peak 8% at 1.0 s, hidden during a pulse, 0 at resume, stopped by a pool touch.
+    - Crab tap: 0.4 s brightness change 0 → +20% → 0, instant flip, no rotation or position change.
+  - These tests were designed but not run on a device. Frame-level timing (beat shape, the single frame between beats, the 0.55–0.6 s tail, the 0.15 s cases, the timing of the blip after a cancel) is unchecked and needs a 60 fps capture. Nothing else has input or tutorial tests.

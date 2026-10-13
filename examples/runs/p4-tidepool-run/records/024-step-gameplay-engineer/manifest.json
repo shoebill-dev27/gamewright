@@ -1,0 +1,67 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-first-puzzle-stall/21-studio-to-gameplay-engineer.md",
+  "sha256": "6507872a13f69c259f5dfd001dc5b2a0e5e7479d5dc0e3ab70131957231d0acd",
+  "bytes": 4642
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md",
+  "sha256": "ec063b0c2f3a86b58d7fc1774ef705d02b02e87267f735b8f4c058bb1a3ab5e8",
+  "bytes": 1569
+ },
+ {
+  "path": "studio/skills/implement-change.md",
+  "sha256": "a9befd7f1d9e09eb94c51a066f030db88c5061ad1b522d9795e62bc2c242964a",
+  "bytes": 1823
+ },
+ {
+  "path": "design/onboarding.md",
+  "sha256": "2c319f2e9a20d7a23294b80b6752d1de0735d066332a61f399e9bea038f0fad8",
+  "bytes": 23686
+ },
+ {
+  "path": "sim/build-0.3.md",
+  "sha256": "23988d5d60202292cda3e1c2239d3e74c9709f3347dd174f4a5f294d898778d5",
+  "bytes": 6074
+ },
+ {
+  "path": "sim/repo-notes.md",
+  "sha256": "c4c55841e5fc5347f50395ed955ae78e14581ab980254277615ea5c1c5c69352",
+  "bytes": 5738
+ },
+ {
+  "path": "decisions/D-001-no-fail-states.md",
+  "sha256": "99362efd3625e792d862dcbec7744a761cee478a97eae271621290daff508b4e",
+  "bytes": 505
+ },
+ {
+  "path": "decisions/D-002-intro-cancel-and-undo.md",
+  "sha256": "5f412d0a7512397658d74382c84055ca1fb1159b52df5cc705e1e23a687f5cd2",
+  "bytes": 1949
+ },
+ {
+  "path": "decisions/D-003-sand-tap-blip-and-pool-hit-area.md",
+  "sha256": "33f6904beaa5ff202abf355b91f021c4c5bfa9f036932b5385933fb643d304e1",
+  "bytes": 2412
+ },
+ {
+  "path": "decisions/D-004-ease-back-taps-window-origin-held-pool.md",
+  "sha256": "e78d4050831064e759af427628b44ca3dd1a81e81b1b4130ef6f2c25e6d76633",
+  "bytes": 2544
+ },
+ {
+  "path": "goals/G-001-first-puzzle-stall/20-game-designer-to-studio.md",
+  "sha256": "1f0715a4cb4c10524d03f9906fbbc38ced404b6799d5f0836d391e0af5095c9b",
+  "bytes": 4254
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ }
+]

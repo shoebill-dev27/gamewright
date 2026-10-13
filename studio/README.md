@@ -10,7 +10,7 @@ files to do the work. Canonical intent: `docs/spec/initial-spec.md`.
 |---|---|---|
 | Owner | The human. Gives Goals, decides Owner-level questions. | — |
 | Studio | The orchestration function. Turns a Goal into routed Steps. Owns process (who works next, on what), never game content. | `orchestration.md` |
-| Goal | An Owner request, tracked as a Goal record with a route plan. | `<project>/goals/<goal>/goal.md` |
+| Goal | An Owner request, tracked as a Goal record (current state and route plan) and an append-only Goal log (history). | `<project>/goals/<goal>/goal.md`, `log.md` |
 | Step | One unit of work by one Role, started from one incoming Handoff. | — |
 | Role | A responsibility with authority and boundaries. Not a model, not an agent. | `roles/` |
 | Skill | A method for doing a kind of work. Usable by any Role whose responsibility covers that work. | `skills/` |

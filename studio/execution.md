@@ -18,7 +18,8 @@ defines what an isolated runtime must guarantee when one is used.
 4. **Steps do not route; Route does not do the work.** A Step writes only its one outgoing Handoff
    (or Escalation) and the project files its Role may write. Only Route and Resume write `goal.md`.
    The executor of a Step never chooses which Role runs next: its `to` is a proposal that a
-   separate Route executor confirms or changes, using artifacts only.
+   separate Route executor confirms or changes, using artifacts only. Only the runtime appends to
+   the Goal log (`orchestration.md`); it is on no write list.
 5. **Every operation leaves a record** (see Records).
 
 ## Packets
@@ -30,7 +31,7 @@ file block. Its manifest lists every input with a content hash.
 |---|---|
 | Intake | executor instructions; `studio/README.md`, `orchestration.md`, `workflows/development-loop.md`; each Role's `#works-from` and `#independence` sections; templates `goal.md`, `handoff.md`; `project.md`; the project file list; Decision titles; the Owner request |
 | Step | executor instructions; the incoming Handoff; every file in its Load list (only the named section for `file#section`); the templates the Role may write |
-| Route | executor instructions; `orchestration.md`, `workflows/development-loop.md`, `studio/README.md`; each Role's `#works-from` and `#independence` sections; templates `handoff.md`, `escalation.md`, `goal.md`; `goal.md`; every artifact produced since the previous Studio operation on this Goal (all parallel Steps' results); `project.md`; the project file list; Decision titles |
+| Route | executor instructions; `orchestration.md`, `workflows/development-loop.md`, `studio/README.md`; each Role's `#works-from` and `#independence` sections; templates `handoff.md`, `escalation.md`, `goal.md`; `goal.md`; the last 5 entries of the Goal log; every artifact produced since the previous Studio operation on this Goal (all parallel Steps' results); `project.md`; the project file list; Decision titles |
 | Resume | as Route, with the Escalation (the Owner's words appended verbatim) in place of the Step artifact, and template `decision.md` |
 
 A Step's packet is derived from its Handoff alone: **the Load list is the allowlist.** The project
@@ -102,6 +103,15 @@ Each operation keeps: the packet, its manifest, the raw output (for audit only â
 another operation), and a record with the operation, goal, Role, runtime, model, session identity,
 tools available to the executor, timing, files written with hashes, and validation results. Session
 identities differ for every operation.
+
+After an Intake, Route or Resume is written, the runtime appends that operation's entry to the
+Goal log, named by its record. The first entry of a Goal that predates its log preserves the
+*Route changes* text it had. Older entries reach a Route only through a context request for
+`log.md`.
+
+A written `goal.md` must stay small: *Route changes* at most 600 characters, *Unknowns* at most
+3,000, each Stage and Status cell at most 80, and the file at most 20,000 bytes without its
+Outcome.
 
 ## Dry-run simulation
 

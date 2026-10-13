@@ -387,9 +387,60 @@ def check_goal(text):
     for row in route_rows(body):
         if row["role"] not in PARTICIPANTS:
             errors.append(
-                f"goal.md: route row {row['n']} has unknown role {row['role']}"
+                f"goal.md: route row {row['n']} has unknown role {row['role']}; a Role cell holds "
+                "exactly one role id (or studio, owner), and a parallel step gets its own row (5, 5b)"
             )
     return errors
+
+
+ROUTE_CHANGES_MAX, UNKNOWNS_MAX, CELL_MAX, GOAL_MAX_BYTES = 600, 3000, 80, 20_000
+
+
+def check_goal_size(text):
+    """goal.md holds the current state only; the history lives in log.md."""
+    errors = []
+    changes = section(text, "Route changes").strip()
+    if len(changes) > ROUTE_CHANGES_MAX:
+        errors.append(
+            f"goal.md: ## Route changes has {len(changes)} characters (limit {ROUTE_CHANGES_MAX}); "
+            "write only this operation's change in 1-3 lines, the runtime keeps the history in log.md"
+        )
+    unknowns = section(text, "Unknowns").strip()
+    if len(unknowns) > UNKNOWNS_MAX:
+        errors.append(
+            f"goal.md: ## Unknowns has {len(unknowns)} characters (limit {UNKNOWNS_MAX}); keep what is "
+            "still unknown and why each stage exists, not the story of earlier passes (log.md and the "
+            "Handoffs keep it)"
+        )
+    for row in route_rows(text):
+        for cell in ("stage", "status"):
+            if len(row[cell]) > CELL_MAX:
+                errors.append(
+                    f"goal.md: route row {row['n']} {cell} cell has {len(row[cell])} characters "
+                    f"(limit {CELL_MAX}); put the details in the Handoff"
+                )
+    size = len(strip(text, ["Outcome"]).encode())
+    if size > GOAL_MAX_BYTES:
+        errors.append(
+            f"goal.md is {size} bytes without its Outcome (limit {GOAL_MAX_BYTES}); "
+            "shorten it, the Handoffs and log.md carry the details"
+        )
+    return errors
+
+
+KEPT_WHY = {
+    "Owner request": "the Owner's words never change",
+    "Interpretation": "reinterpreting the Goal is the Owner's decision, so escalate instead",
+}
+
+
+def check_kept(before, after, names):
+    """Sections an operation must leave as they were (whitespace aside)."""
+    return [
+        f"goal.md: keep ## {name} exactly as it was; {KEPT_WHY[name]}"
+        for name in names
+        if section(before, name).split() != section(after, name).split()
+    ]
 
 
 def check_decision(name, text, decided_by=None):
@@ -589,6 +640,7 @@ def build_intake(project, request):
         if f"{gdir}/goal.md" not in files:
             return errors + ["goal.md missing"]
         errors += check_goal(files[f"{gdir}/goal.md"])
+        errors += check_goal_size(files[f"{gdir}/goal.md"])
         if request.strip() not in files[f"{gdir}/goal.md"]:
             errors.append("goal.md must quote the Owner request verbatim")
         return errors + check_open_steps(project, gdir, files, request)
@@ -656,6 +708,49 @@ def build_step(project, gdir, handoff):
 STUDIO_OPS = ("Intake", "Route", "Resume")
 MAX_NEW_HANDOFFS = 3
 MAX_NEED = 8
+LOG_RECENT = 5
+LOG_HEAD = (
+    "# Goal log\n\nOne entry per Intake, Route and Resume, appended by whoever runs the operation.\n"
+    "Entries are never edited.\n"
+)
+
+
+def log_recent(gdir):
+    """The last LOG_RECENT entries of the Goal log (None if there is no log), and the entry count."""
+    log = gdir / "log.md"
+    if not log.is_file():
+        return None, 0
+    text = log.read_text(encoding="utf-8")
+    entries = _sections(text)
+    return (text[entries[-LOG_RECENT:][0][1] :] if entries else ""), len(entries)
+
+
+def append_log(gdir, name, before=None):
+    """Append the operation's entry to the Goal log. Only the runtime writes it: no write list has it."""
+    log, text = gdir / "log.md", (gdir / "goal.md").read_text(encoding="utf-8")
+    if not log.exists():
+        old = section(before or "", "Route changes").strip()
+        log.write_text(
+            LOG_HEAD + (f"\n## Before the log\n\n{old}\n" if old else ""),
+            encoding="utf-8",
+        )
+    opened = ", ".join(h.name for h in open_handoffs(gdir)) or "none"
+    with log.open("a", encoding="utf-8") as f:
+        f.write(
+            f"\n## {name} · {datetime.date.today().isoformat()}\n\n"
+            f"Status: {parse(text)[0].get('status')}. Open: {opened}.\n\n"
+            f"{section(text, 'Route changes').strip() or '—'}\n"
+        )
+
+
+def add_log(packet, gdir, grel):
+    recent, count = log_recent(gdir)
+    if recent is not None:
+        packet.header["log"] = (
+            f"last {min(count, LOG_RECENT)} of {count} entries in @log-recent; "
+            f"the full history is {grel}/log.md"
+        )
+        packet.add("@log-recent", recent or "(no entries yet)")
 
 
 def seen_through(records, gid):
@@ -674,6 +769,16 @@ def seen_through(records, gid):
         ):
             return record.get("seen_through_seq")
     return None
+
+
+def unseen(gdir, seen):
+    """Artifacts after seq `seen`; with no Studio operation on record (a Goal run by hand so far),
+    the artifacts goal.md does not name yet."""
+    artifacts = goal_artifacts(gdir)
+    if seen is None:
+        named = (gdir / "goal.md").read_text(encoding="utf-8")
+        return [(p, m) for p, m in artifacts if p.name not in named]
+    return [(p, m) for p, m in artifacts if int(p.name[:2]) > seen]
 
 
 def check_need(project, entries):
@@ -699,9 +804,7 @@ def check_need(project, entries):
 def build_route(project, gdir, records=None, since=None):
     artifacts, gid, seq = goal_artifacts(gdir), gdir.name[:5], next_seq(gdir)
     seen = since if since is not None else seen_through(records, gid)
-    fresh = [
-        (p, m) for p, m in artifacts if seen is not None and int(p.name[:2]) > seen
-    ] or artifacts[-1:]
+    fresh = unseen(gdir, seen) or artifacts[-1:]
     rels = [str(p.relative_to(project)) for p, _ in fresh]
     grel = str(gdir.relative_to(project))
     packet = new_packet(
@@ -717,6 +820,7 @@ def build_route(project, gdir, records=None, since=None):
         )
     packet.add_studio_context(project, ["handoff", "escalation", "goal"])
     packet.add_entry(project, f"{grel}/goal.md")
+    add_log(packet, gdir, grel)
     for rel in rels:
         packet.add_entry(project, rel)
     news = [
@@ -738,12 +842,17 @@ def build_route(project, gdir, records=None, since=None):
     )
     packet.allow_need = True
     request = owner_request(gdir)
+    before = (gdir / "goal.md").read_text(encoding="utf-8")
 
     def validate(files):
         errors = check_writes(files, [f"{grel}/goal.md"] + rels + news, project)
         if f"{grel}/goal.md" not in files:
             return errors + ["goal.md must be written"]
         errors += check_goal(files[f"{grel}/goal.md"])
+        errors += check_goal_size(files[f"{grel}/goal.md"])
+        errors += check_kept(
+            before, files[f"{grel}/goal.md"], ["Owner request", "Interpretation"]
+        )
         for (path, meta), rel in zip(fresh, rels):
             if rel not in files:
                 continue
@@ -837,6 +946,7 @@ def build_resume(project, gdir):
         )
     packet.add_studio_context(project, ["decision", "handoff", "goal", "escalation"])
     packet.add_entry(project, f"{grel}/goal.md")
+    add_log(packet, gdir, grel)
     packet.add_entry(project, erel)
     new = f"{grel}/{seq:02d}-studio-to-*.md"
     packet.writes = [
@@ -851,6 +961,7 @@ def build_resume(project, gdir):
         esc.read_text(encoding="utf-8"),
         re.M,
     )
+    before = (gdir / "goal.md").read_text(encoding="utf-8")
 
     def validate(files):
         errors = check_writes(
@@ -870,6 +981,8 @@ def build_resume(project, gdir):
         if emeta.get("status") != "resolved" or emeta.get("decision") != decision:
             errors.append(f"{erel}: status must be resolved with decision: {decision}")
         errors += check_goal(files[f"{grel}/goal.md"])
+        errors += check_goal_size(files[f"{grel}/goal.md"])
+        errors += check_kept(before, files[f"{grel}/goal.md"], ["Owner request"])
         if parse(files[f"{grel}/goal.md"])[0].get("status") != "active":
             errors.append("goal.md: status must return to active")
         for path in files:
@@ -1143,9 +1256,12 @@ def execute(ws, packet, validate, args, role=None):
             )
         try:
             result = RUNTIMES[args.runtime](base + feedback, args.model)
-        except (RuntimeError, Rejected) as error:
+        except (RuntimeError, Rejected, OSError) as error:
             record.update(status="error", errors=[str(error)])
             save_record(rec, record)
+            # An OSError means the runtime could not start (e.g., its CLI is missing or mid-update).
+            if isinstance(error, OSError):
+                raise RuntimeError(f"runtime could not start: {error}") from error
             raise
         text = result.pop("text")
         (rec / f"output-attempt{attempt}.txt").write_text(text, encoding="utf-8")
@@ -1192,6 +1308,13 @@ def execute(ws, packet, validate, args, role=None):
             print(f"[{rec.name}] context requested: {', '.join(need)}")
             continue
         if not errors:
+            goal_file = next((p for p in files if p.endswith("/goal.md")), None)
+            goal_path = ws / "project" / goal_file if goal_file else None
+            before = (
+                goal_path.read_text(encoding="utf-8")
+                if goal_path and goal_path.is_file()
+                else None
+            )
             for path, content in files.items():
                 (ws / "project" / path).parent.mkdir(parents=True, exist_ok=True)
                 (ws / "project" / path).write_text(content, encoding="utf-8")
@@ -1200,12 +1323,12 @@ def execute(ws, packet, validate, args, role=None):
                 written={p: sha(c) for p, c in files.items()},
                 decision=decision_summary(files),
             )
-            goal_file = next((p for p in files if p.endswith("/goal.md")), None)
             if packet.op in STUDIO_OPS and goal_file:
-                gdir = ws / "project" / Path(goal_file).parent
+                gdir = goal_path.parent
                 record["seen_through_seq"] = max(
                     [int(a.name[:2]) for a, _ in goal_artifacts(gdir)] + [0]
                 )
+                append_log(gdir, rec.name, before)
             save_record(rec, record)
             print(
                 f"[{rec.name}] ok ({result['runtime']}, session {result['session_id']}): {', '.join(files)}"
@@ -1297,10 +1420,7 @@ def no_progress(role, history, opened):
 
 def unrouted(records, gdir):
     """Artifacts newer than the last Studio operation's view (e.g., a Route failed after a Step)."""
-    seen = seen_through(records, gdir.name[:5])
-    return seen is not None and any(
-        int(p.name[:2]) > seen for p, _ in goal_artifacts(gdir)
-    )
+    return bool(unseen(gdir, seen_through(records, gdir.name[:5])))
 
 
 def do_run(ws, args):

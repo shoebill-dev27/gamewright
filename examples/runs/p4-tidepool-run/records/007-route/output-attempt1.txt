@@ -1,0 +1,156 @@
+Route done. Step 3 (Design) is complete and no Plan is needed, so Build is open for `gameplay-engineer` on `08-studio-to-gameplay-engineer.md`. I could not append the entry to `log.md`, because it is not in my writable paths. I did not read `design/onboarding.md` or the sim files; they are in the Build Load list for the engineer.
+
+<<<FILE goals/G-001-first-puzzle-stall/goal.md
+---
+kind: goal
+id: G-001
+project: tidepool-garden
+status: active
+created: 2026-10-10
+---
+# G-001: Children stall at the first puzzle
+
+## Owner request
+
+> 最初のパズルで子どもが手を止めてしまう。直したい
+
+## Interpretation
+
+Success condition: when children in the target group (ages 7–10) play the first puzzle (level 1 in
+build 0.2), they begin purposeful touch interaction with the puzzle on their own, without a long
+pause and without an adult having to explain what to do. How long a pause counts as "a stall" is
+not set here; Observe reports what actually happens and Design turns it into a player-observable
+acceptance criterion.
+
+Out of scope:
+
+- Levels 2 and later. If the same problem shows up there, it becomes a proposed new Goal.
+- Changing a vision pillar or Decision D-001 (no failure, no timers). Any fix must stay inside them.
+- New art beyond the existing sprite sheet (project constraint).
+
+## Unknowns
+
+Entry questions (`studio/workflows/development-loop.md`) the Project Context cannot answer:
+
+- **Observe** — Has the stall been observed first-hand? No: the Project Context holds only the
+  Owner's report. It is an experience problem, not a reproducible defect, so the Role is
+  `playtester` (not `qa`). Creates stage 1.
+- **Diagnose** — Is the cause understood? No. Creates stage 2 (`game-designer`). `art-director` was
+  added in parallel (2b) because the observation pointed to something visual.
+- **Design** — Is the intended behavior of the fixed first puzzle specified? No:
+  `design/onboarding.md` specified the current level 1 and its teaching intent, not a fix. Creates
+  stage 3.
+- **Build** — Must the game change? The Owner wants it fixed, so yes. Creates stage 4.
+- **Verify** — Always after Build. Stage 5.
+- **Play** — Is the Goal about how the game plays or feels? Yes. Stage 6, in a fresh context
+  without the implementation history.
+- **Review** — Is it an experience Goal? Yes. Stage 7 (`game-director`).
+- **Next** — Always. Stage 8.
+
+Skipped:
+
+- **Decide** — Is there a real choice of direction, priority or scope? Not so far. The fix choices
+  (A + B) are player-facing behavior inside the approved direction, which is `game-designer`
+  authority. Option C (idle hint) is excluded from the spec; if it is wanted later, route Decide
+  because it touches D-001.
+- **Plan** — Is the technical approach non-obvious, risky, cross-system or parallelizable? No. The
+  designer's spec describes a local level 1 change (parameters, a recolor, existing-sprite
+  animation, per-object touch response); no cross-system structure is touched. Skipped. If Build
+  finds the change is not local, the return rules send it to Plan.
+
+Flag for Review (not a conclusion): the start-of-level intro motion is judged by the designer to be
+outside D-001 (one-time, no timer, no inactivity trigger). `game-director` should confirm at Review.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 01-studio-to-playtester.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 02-playtester-to-game-designer.md |
+| 2b | Diagnose | art-director | visual-review | done | 03-studio-to-art-director.md |
+| 3 | Design | game-designer | write-design-spec | done | 06-studio-to-game-designer.md |
+| 3c | Plan | technical-director | technical-plan | skipped | — |
+| 4 | Build | gameplay-engineer | implement-change | open | 08-studio-to-gameplay-engineer.md |
+| 5 | Verify | qa | verify-change | planned | — |
+| 6 | Play | playtester | playtest-session | planned | — |
+| 7 | Review | game-director | review-outcome | planned | — |
+| 8 | Next | studio | — | planned | — |
+
+Status: planned | tentative | open | done | skipped. The route is a plan; the Route operation
+revises it.
+
+## Route changes
+
+After step 3 (07): the spec is written in `design/onboarding.md` (options A + B, no Option C). Plan is skipped: the change is local to level 1. Build (4) is open for `gameplay-engineer`. Verify must be addressed to `studio` so a fresh Playtester handoff can be composed afterward. The intro-motion vs D-001 judgment is left for Review.
+
+## Next action
+
+Run step 4 (Step operation): `gameplay-engineer` on `08-studio-to-gameplay-engineer.md`, stating the exact change in its Handoff and addressing the result to `studio` (outcome `done`). Then Route, which composes the QA Verify handoff (without the Sender assessment). Phase 1: the Studio stops after every Route.
+
+## Outcome
+
+<!-- Filled at close, for the Owner, in owner_language (ja). -->
+>>>END
+
+<<<FILE goals/G-001-first-puzzle-stall/08-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-001
+seq: 8
+from: studio
+to: gameplay-engineer
+stage: Build
+outcome: routed
+---
+# 08: studio → gameplay-engineer — implement the level 1 opening spec
+
+## Task
+
+Implement the level 1 opening spec in `design/onboarding.md` (Level 1 spec section) for build 0.2. State the change exactly in your outgoing Handoff: what changes, where, and how to exercise it. Stop and hand back if the spec is ambiguous, contradictory or missing a case.
+
+## Context
+
+Goal G-001. Owner's words: 「最初のパズルで子どもが手を止めてしまう。直したい」. Success condition: children aged 7–10 begin purposeful touch interaction with level 1 on their own, with no long pause and no adult explanation. Playtest observation showed children stalling 20–35 s at the start of level 1. Diagnosis found that the pool lacks affordance, the crab is a false affordance, touches get no response, and the teaching is text-only. The game-designer wrote the spec (Handoff 07). Plan was skipped because the change is local.
+
+## Findings
+
+Summary of the spec (the full spec in `design/onboarding.md` governs):
+
+- **Pool:** darker outline weighted like the crab's, a continuous idle scale pulse (1.00–1.06, 2.0 s), recolored to a saturated pastel blue/teal with grayscale luminance contrast against the sand of at least 1.5:1. Touch-down lifts it (scale 1.10 with a shadow).
+- **Intro motion:** once at level load, the pool slides 25% toward the home and back over 1.6 s. Any touch cancels it. It uses motion of the existing pool sprite only. It is not tied to inactivity and has no countdown or repeat.
+- **Crab:** responds to touch. A tap makes it face the pool and wiggle. A drag attempt makes it lean about 10° and spring back. It does not move. Its styling is demoted: no idle bob and a lightened outline.
+- **Home:** no interactive styling (check current styling by capture; build 0.2 does not show it). A tap gives a soft glow. It also glows while the pool is dragged near it.
+- **Redirect pulse:** a tap on the crab, the home or the sand makes the pool double-pulse (scale up to 1.15, twice, 0.6 s), rate-limited to once per 1.5 s.
+- **Every touch** gets a visible response within 0.2 s.
+- **Text bubble:** may stay as a supplement. Nothing depends on it.
+- **Edge cases** are in the spec: multi-touch, touch during the intro, a drop on the crab, off-screen drag, hit areas, undo, restart, reduced-motion, orientation change.
+
+## Decisions already made
+
+- D-001 (no failure, no timers, every move undoable): all changes must respect it. The designer chose A + B and excluded Option C (idle hint timer).
+
+## Constraints
+
+- Level 1 only. Existing sprite sheet only (tint/recolor of existing sprites is allowed; every effect is a scale, rotation, position or brightness change).
+- No mechanic may depend on reading text. Touch only; phones and tablets.
+- No timers or inactivity triggers, and nothing may be lost or irreversible.
+- Dry-run project: `sim/repo-notes.md` stands in for the code; the change counts as made when stated exactly in your Handoff.
+
+## Open questions
+
+- Capture the home's current styling and remove any interactive styling, as the spec requires.
+- Confirm whether a reduced-motion setting is available on the target platforms, and how the spec's reduced-motion case is satisfied.
+- Report whether the crab and home currently register touch at all (no handler vs. no input); it does not change the spec.
+
+## Expected output
+
+An outgoing Handoff (templates/handoff.md) stating the exact change and how to exercise it, with `outcome: done`, addressed to `studio` (so Route can compose the QA Verify handoff without your Sender assessment). Put any spec ambiguity in Open questions and hand back with `outcome: question` instead of deciding.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: project.md#constraints, project.md#art-direction, design/onboarding.md, sim/build-0.2.md, sim/repo-notes.md
+- Decisions: decisions/D-001-no-fail-states.md
+- Previous handoff: goals/G-001-first-puzzle-stall/07-game-designer-to-studio.md
+>>>END

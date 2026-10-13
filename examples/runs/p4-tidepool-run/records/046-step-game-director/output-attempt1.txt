@@ -1,0 +1,134 @@
+I judge G-001 met, with the caveat that the evidence is a read-through of the build record and not play by real children. The two files below record the verdict and the intro-motion decision (D-007).
+
+<<<FILE decisions/D-007-intro-motion-outside-d001.md
+---
+kind: decision
+id: D-007
+status: accepted
+decided_by: game-director
+goal: G-001
+date: 2026-10-13
+supersedes: none
+---
+# D-007: The level 1 start-of-level intro motion is outside D-001
+
+## Decision
+
+The level 1 intro motion (the pool slides about 25% toward the home and back, 0.8 s each way, once per level load) does not conflict with D-001. This confirms the designer's judgment. D-001 is unchanged and remains the Owner's pillar. This Decision interprets it and does not amend it.
+
+Limits that keep it outside D-001. If any of these changes, this Decision no longer applies:
+- It plays once per level load (including a level restart the player chose). It does not repeat.
+- It is not tied to inactivity, to a countdown or to a score. Nothing happens on its own if the screen is left untouched afterwards.
+- Cancelling it has no consequence. The pool eases back (D-002), and the intro is never in the undo history.
+- It is a fixed demonstration of the goal, not a rule the child must obey. No state is lost, and any touch is answered.
+
+## Rationale
+
+D-001 forbids failure, timers and irreversible moves. The intro is a one-off animation on load. It does not pressure the player, measure time against them, or limit what they can do. It is also not the idle hint (Option C): that would trigger from inactivity, and this does not.
+
+## Alternatives considered
+
+- Treat the intro as touching D-001 and escalate to the Owner: not needed, because none of the three things D-001 forbids is present.
+- Remove the intro: it would drop the only non-text teaching motion without any evidence against it.
+
+## Revisit when
+
+The intro is made to repeat, is triggered by waiting, or becomes a countdown. Also if real-child play shows the intro confuses children (D-002 trigger). An idle hint of any kind needs a Decide step and an Owner reading of D-001.
+>>>END
+
+<<<FILE goals/G-001-first-puzzle-stall/40-game-director-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 40
+from: game-director
+to: studio
+stage: Route
+outcome: goal-met
+---
+# 40: game-director → studio — Review verdict for G-001: goal-met (on simulated evidence), with device confirmation outstanding
+
+## Task
+
+Route the Review result for G-001: close the Goal (stage 8) and carry the proposed Goals and open items below.
+
+## Context
+
+Owner request: 「最初のパズルで子どもが手を止めてしまう。直したい」. Success condition: children aged 7–10 begin purposeful touch interaction with the first puzzle on their own, without a long pause and without an adult explaining. Evidence: QA on build 0.6 (36) and a playtester read-through of `sim/build-0.6.md` (38). This is a dry-run project with no device and no real children.
+
+## Findings
+
+### Verdict: goal-met
+
+I compared the evidence with the success condition, not with the plan.
+
+- **What leads a child to begin:** the pool is the only object with a darker outline, a blue/teal color separated by value and a continuous pulse. The crab and home have lost their interactive styling. The intro slide shows motion before any touch. The playtester, reading as a child, found the pool the obvious thing to touch and did not need the text bubble.
+- **Path A (pool first):** clear and responsive. The pool grows 10% within 0.1 s, gets a shadow, follows the finger 1:1, and the home glows when the pool is near.
+- **Path B (crab, home or sand first):** this was the original dead end. Every touch now gets a visible response within 0.2 s, and the crab and home responses point back to the pool through the pool pulse. The 1.5 s limit makes later taps less rewarding, but a tap is never silent (the flash).
+- **QA (36):** checks 4, 13, 18, 19, 20 and 21 pass with no regression and no blocking spec gap.
+- **Why the issues do not make it goal-not-met:** none of the issues the playtester raised blocks the first purposeful interaction. They concern what happens after the child has started (the solved state, drops, undo access), or are unverified doubts about the strength of a cue (the faint flash). None contradicts the success condition.
+
+### What the verdict rests on
+
+It rests on the build record read against the spec, plus a simulated child's read-through. It does not rest on live play. These parts need device or real-child confirmation, and I am not claiming them:
+1. That real children aged 7–10 touch the pool within about 10 s and pause no longer than about 8 s (experience signals 1–3 in the spec). This is the actual success condition, and it is only predicted here.
+2. That the intro slide is connected by a child to "the pool goes to the house".
+3. That the sand-tap flash (+15%, 0.3 s) is noticeable enough on a screen to count as an answer.
+4. The 60 fps captures: the single frame between the reduce-motion beats, the 0.55–0.6 s tail, and the 0.1 s and 0.3 s flash timings. Also the contrast and home-styling captures (checks 2 and 3).
+5. Reduce-motion as a lived path (not played in detail).
+
+These are outstanding confirmations, not reasons to reopen Diagnose. If a later real-child session shows a stall, the Goal reopens from that evidence.
+
+### Intro motion and D-001
+
+Confirmed as outside D-001. It is once per load, has no timer or inactivity trigger, and cancelling it has no consequence. Recorded as D-007, with limits.
+
+### Decisions to revisit
+
+No "revisit when" condition has been reached for D-002 to D-006. Nothing in the evidence shows children confused by the ease-back, the flash or the reduce-motion pulse. The D-006 trigger (a child reading the post-cancel flash as an error) is untested rather than reached. The playtest worry runs the other way: the flash may be too faint. D-001 and D-007 are not in conflict.
+
+### Placing the playtest issues
+
+None belongs in G-001. The Goal's success condition covers starting to interact, so these become proposed Goals, not Diagnose work for G-001. Priority order:
+
+1. **Proposed: undo access (high).** The playtester and build record show no way for a player to trigger undo. Pillar 1 says any move can be undone, so this concerns the vision's integrity. First step is a check of whether an undo control exists in the game and the build record is only silent. If it does not exist or is text-dependent, it is a defect against the pillar and the touch-only constraint. This is a Diagnose-or-defect item, not a direction change.
+2. **Proposed: solved-state feedback (medium to high).** The end of level 1 is unobserved, and a child's reward moment is unknown. Should be checked across levels, since it likely is not level-specific.
+3. **Proposed: real-child or device playtest of level 1 (medium).** This confirms the unverified items above. It should come before any further tuning of the cues.
+4. **Proposed: silent drops (medium).** Dropping the pool on the crab or open sand gives no response. Note that it does not violate check 4 (a drop is a release, not a touch-down), so it is a new design question. Any response must respect D-001: nothing may read as failure.
+5. **Proposed: faint flash and no cue after waiting (low to medium).** Wait for the device check (3 above) before any change. If the flash is found to be too faint, strengthening it is within designer authority. An idle hint (Option C) is not proposed. It touches D-001 and would need a Decide step and an Owner reading if a real-child session ever shows stalls after waiting.
+
+### Escalation to the Owner
+
+No direction or priority change is implied, so no escalation brief (`prepare-owner-escalation`) is prepared. Two items go to the Owner as information at Close, neither blocking: (a) whether iOS "Reduce Motion" and Android "Remove animations" are readable on the target platforms (the spec's fallback works either way); (b) that G-001 is closed on simulated evidence, and a real-child session would be the true test.
+
+### Housekeeping (low severity)
+
+Ask for two build record wording fixes when convenient: the reduce-motion crab brightening should read "about 0.4 s in total, peak at 0.2 s", and the default-mode "Touching the pool" line should mention ending a running flash (spec rule 5), or have it confirmed on a capture.
+
+## Decisions already made
+
+- D-001 (Owner): no fail states, no timers. Unchanged.
+- D-002 to D-006: unchanged, no revisit trigger reached.
+- D-007 (new, game-director): the intro motion is outside D-001.
+
+## Constraints
+
+- Levels 2+ stay out of scope. New issues are proposed Goals, not growth of G-001.
+- Any cue change stays inside the vision pillars and D-001, touch only, no text dependence, existing sprite sheet.
+
+## Open questions
+
+None for this step. For Close: confirm the Owner-facing summary (in Japanese, per `owner_language`) states plainly that the verdict rests on a read-through, not live play with children.
+
+## Expected output
+
+Studio: record `goal-met` for G-001, route to Close (stage 8). Write the Outcome for the Owner. Register the five proposed Goals above, in the stated priority order, and carry the device and capture items and the Owner information items.
+
+## Load
+
+- Role: studio/roles/studio.md
+- Skills: none
+- Project: goals/G-001-first-puzzle-stall/goal.md, design/onboarding.md
+- Decisions: decisions/D-001-no-fail-states.md, decisions/D-006-cancelled-pulse-and-reduce-motion-beats.md, decisions/D-007-intro-motion-outside-d001.md
+- Previous handoff: goals/G-001-first-puzzle-stall/39-studio-to-game-director.md
+>>>END

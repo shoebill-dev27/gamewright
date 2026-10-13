@@ -1,0 +1,118 @@
+---
+kind: goal
+id: G-001
+project: tidepool-garden
+status: done
+created: 2026-10-10
+---
+# G-001: Children stall at the first puzzle
+
+## Owner request
+
+> 最初のパズルで子どもが手を止めてしまう。直したい
+
+## Interpretation
+
+Success condition: when children in the target group (ages 7–10) play the first puzzle (level 1 in
+build 0.2), they begin purposeful touch interaction with the puzzle on their own, without a long
+pause and without an adult having to explain what to do. How long a pause counts as "a stall" is
+not set here; Observe reports what actually happens and Design turns it into a player-observable
+acceptance criterion.
+
+Out of scope:
+
+- Levels 2 and later. If the same problem shows up there, it becomes a proposed new Goal.
+- Changing a vision pillar or Decision D-001 (no failure, no timers). Any fix must stay inside them.
+- New art beyond the existing sprite sheet (project constraint).
+
+## Unknowns
+
+All stages have run; the Goal is closed. Current state:
+
+- **Observe, Diagnose, Design, Build, Verify, Play** — done. Spec revision 5 (D-006) was built as build 0.6; QA passed checks 4, 13, 18, 19, 20, 21 (36); the playtester read-through (38) found the main path (touch the pool) clear and responsive.
+- **Review** — done (40, `game-director`): goal-met on simulated evidence. The intro motion was confirmed outside D-001 (D-007). No "revisit when" condition of D-002 to D-006 has been reached.
+- **Next** — done (Close).
+
+Skipped:
+
+- **Decide** — The fix choices were player-facing behavior inside the approved direction (`game-designer` authority). Option C (idle hint) was excluded; if wanted later, route Decide because it touches D-001.
+- **Plan** — The change is local to level 1; no Build step found otherwise.
+
+Open items carried past Close (non-blocking):
+
+- No device and no real children: checks 2, 3, 11, 17–21 rest on the build record's stated values. A 60 fps capture is needed for the reduce-motion single frame between beats, the 0.55–0.6 s pulse tail, and the 0.1 s and 0.3 s flash timings.
+- Levels 2 and 3 were not run by QA. Checks 1–3, 5–12, 14–17 were not re-run on 0.6.
+- Build record wording (low severity): the reduce-motion crab brightening should read "about 0.4 s in total, peak at 0.2 s"; the default-mode "Touching the pool" line should mention ending a running flash (spec rule 5), or confirm it on a capture.
+- Whether iOS "Reduce Motion" / Android "Remove animations" are readable on target platforms is unconfirmed (spec fallback works either way).
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 01-studio-to-playtester.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 02-playtester-to-game-designer.md |
+| 2b | Diagnose | art-director | visual-review | done | 03-studio-to-art-director.md |
+| 3 | Design | game-designer | write-design-spec | done | 06-studio-to-game-designer.md |
+| 3c | Plan | technical-director | technical-plan | skipped | — |
+| 4 | Build | gameplay-engineer | implement-change | done | 08-studio-to-gameplay-engineer.md (held: question, no change made) |
+| 3d | Design | game-designer | write-design-spec | done | 09-gameplay-engineer-to-game-designer.md (answered in 10) |
+| 4b | Build | gameplay-engineer | implement-change | done | 11-studio-to-gameplay-engineer.md (result: 12) |
+| 5 | Verify | qa | verify-change | done | 13-studio-to-qa.md (pass, 12/12; report: 14) |
+| 3e | Design | game-designer | write-design-spec | done | 15-studio-to-game-designer.md (result: 16) |
+| 4c | Build | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md (held: question 18, no build 0.4) |
+| 3f | Design | game-designer | write-design-spec | done | 19-studio-to-game-designer.md (result: 20) |
+| 4d | Build | gameplay-engineer | implement-change | done | 21-studio-to-gameplay-engineer.md (result: 22, build 0.4) |
+| 5b | Verify | qa | verify-change | done | 23-studio-to-qa.md (fail: check 4 under reduce-motion; report: 24) |
+| 3g | Design | game-designer | write-design-spec | done | 25-studio-to-game-designer.md (result: 26, spec rev 4, D-005) |
+| 4e | Build | gameplay-engineer | implement-change | done | 27-studio-to-gameplay-engineer.md (result: 28, build 0.5) |
+| 5c | Verify | qa | verify-change | done | 29-studio-to-qa.md (pass 20/20 on record; SG-1, O1; report: 30) |
+| 3h | Design | game-designer | write-design-spec | done | 31-studio-to-game-designer.md (result: 32, spec rev 5, D-006) |
+| 4f | Build | gameplay-engineer | implement-change | done | 33-studio-to-gameplay-engineer.md (result: 34, build 0.6) |
+| 5d | Verify | qa | verify-change | done | 35-studio-to-qa.md (pass; report: 36) |
+| 6 | Play | playtester | playtest-session | done | 37-studio-to-playtester.md (report: 38) |
+| 7 | Review | game-director | review-outcome | done | 39-studio-to-game-director.md (goal-met; verdict: 40) |
+| 8 | Next | studio | — | done | 40-game-director-to-studio.md (Close) |
+
+Status: planned | tentative | open | done | skipped. The route is a plan; the Route operation
+revises it.
+
+## Route changes
+
+After step 7 (40): `game-director` ruled goal-met on simulated evidence (QA record check and a playtester read-through, no device, no real children). The playtest issues are secondary and concern play after the first interaction, so they become proposed Goals, not a return to Diagnose. No direction change, no escalation. Close (8) done.
+
+## Next action
+
+None; the Goal is closed. The Owner reads the Outcome below and decides whether to start any proposed Goal.
+
+## Outcome
+
+<!-- For the Owner, in owner_language (ja). -->
+
+**結果: 目標達成(ただしシミュレーション上の根拠による判定です)**
+
+最初のパズル(レベル1)で子どもが手を止めてしまう問題について、ビルド0.6まで修正を行い、ゲームディレクターが「目標達成」と判定しました。
+
+**重要な注意:** この判定の根拠は、QAによるビルド記録とデザイン仕様の照合、およびプレイテスターによるビルド記録の読み込み(子どもの視点での読み通し)です。実機でのプレイや、実際の子どもによるテストは行っていません。「7〜10歳の子どもが約10秒以内にタップ池へ触れ、約8秒を超えて止まらない」という本来の成功条件は、予測であり実証されていません。
+
+**何が変わったか**
+- タップ池だけが濃い輪郭・明暗で分かれた青緑色・連続した脈動を持ち、触れるものとして一番目立つようになりました。カニと家からは「触れる物」の見た目を外しました。
+- レベル開始時に池が家へ向かって滑るイントロ動作を入れ、触る前から動きで示します。
+- 池以外(カニ・家・砂)を先に触っても、0.2秒以内に必ず見える反応があり、カニと家では池の脈動で池へ誘導します。何も反応しない状態はなくなりました。
+- 「動きを減らす」設定時の代替表現(0.6秒の2拍の明るさ脈動)も定めました。
+
+**行った決定(Decision)**
+- D-002〜D-006: イントロのキャンセルと元に戻す動作、砂タップの反応と池の当たり判定、押している池への2本目の指、動きを減らす設定時の脈動、キャンセルされた脈動の扱い。見直しが必要になる条件には、どれも到達していません。
+- D-007(新規・ゲームディレクター): レベル開始時のイントロ動作はD-001(失敗なし・タイマーなし)の対象外。1回のみで、タイマーや無操作での発動はなく、キャンセルしても何も起きないためです。ビジョンの柱とD-001は変更していません。
+
+**次の課題(新しいGoal案、優先順)**
+1. **元に戻す操作の入口(高):** ビルド記録上、プレイヤーが「元に戻す」を起動する方法が見当たりません。柱1(どの手も取り消せる)に関わるため最優先です。まず、操作自体が存在して記録に書かれていないだけかを確認します。存在しない、または文字に依存する場合は、柱とタッチのみの制約に反する不具合です。
+2. **クリア時のフィードバック(中〜高):** レベル1の終わり方と子どもへのご褒美が確認できていません。レベル横断で見る必要があります。
+3. **実機・実際の子どもによるレベル1のプレイテスト(中):** 上記の未確認事項を確かめます。合図のさらなる調整より先に行うべきです。
+4. **無反応のドロップ(中):** 池をカニや砂の上で離しても反応がありません(失敗に見えない反応が必要。D-001を守る)。
+5. **砂タップの光が弱い可能性と、待っても追加の合図がないこと(低〜中):** 実機確認(3)の後に判断します。放置時のヒント(案C)は提案しません。D-001に触れるため、実際の子どもが待機後に止まることが確認された場合のみ、Decideステップとオーナー判断が必要です。
+
+**オーナーへのお知らせ(ブロックなし)**
+- iOSの「視差効果を減らす」/Androidの「アニメーションを削除」が対象端末で読み取れるかは未確認です(仕様のフォールバックはどちらでも動作します)。
+- 60fpsの画面キャプチャが必要です(動きを減らす設定時の2拍の間の1フレーム、0.55〜0.6秒の脈動の終わり、0.1秒・0.3秒のタイミング、コントラストと家の見た目)。
+- レベル2・3は変更なしとされ、QAでは実行していません。
+- ビルド記録の文言修正が2点(優先度低): 動きを減らす設定時のカニの明るさ「合計約0.4秒、ピークは0.2秒」、および通常時の「池に触れる」行に実行中の光を終わらせる記述を加える、または実機で確認すること。

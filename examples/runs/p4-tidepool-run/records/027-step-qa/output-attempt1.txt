@@ -1,0 +1,106 @@
+<<<FILE goals/G-001-first-puzzle-stall/24-qa-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 24
+from: qa
+to: studio
+stage: Route
+outcome: fail
+---
+# 24: qa → studio — build 0.4 level 1 verification: 17 of 18 checks pass, check 4 fails under the reduce-motion setting
+
+## Task
+
+Route the failure of check 4 (reduce-motion condition) and the related spec gap. Compose the next handoffs. The Playtester must not receive this report's implementation details.
+
+## Context
+
+Goal G-001, verification of build 0.4 (level 1) against checks 1–18 of `design/onboarding.md` revision 3. This is a dry-run project. I verified by reading `sim/build-0.4.md` against the spec and decisions D-001 to D-004. I made no device capture or 60 fps recording. Every value below is what the build record states, not my own measurement. No implementer assessment was received. Checks 11, 17 and 18 have tight timing cases (0.05 s, 0.10 s, 0.15 s). These are judged from the stated build timings and need a real 60 fps recording to confirm.
+
+## Findings
+
+### Verdict per check
+
+| # | Result | Evidence |
+|---|--------|----------|
+| 1 | PASS | About 1.6 s after load, only the pool has the darker outline and the continuous idle pulse (1.00–1.06, 2 s period). The crab and home have the lighter scenery outline and are still. |
+| 2 | PASS (thin margin, stated value) | The build states about 1.8:1 in grayscale on the starting colors, against a threshold of 1.5:1. This is a stated value, not my pixel measurement. Re-measure on a real capture. |
+| 3 | PASS (home capture still needed) | The crab has no bob and the lighter outline. The home has the lighter outline and no motion. Nothing else has a darker outline. The home capture is from the build text, not an image (non-blocking). |
+| 4 | **FAIL under reduce-motion**; PASS in the default mode | See Failure F1. Default mode: crab, home, sand and pool taps all answer within 0.2 s, at 2 s spacing and as fast as possible. This also holds for a second tap during the ease-back (the pending pulse answers a sand tap, and the crab and home answer themselves) and for a second finger on a held pool (sand blip, or the object's own response). |
+| 5 | PASS | The crab does not move. It leans about 10° and springs back. One pool pulse at touch-down, subject to the 1.5 s limit. |
+| 6 | PASS | Pulses start at least 1.5 s apart, counted from the previous pulse start. Flashes do not count and do not delay a pulse. Five seconds of rapid tapping gives three or four pulses. |
+| 7 | PASS | The intro plays once per load and not on rotation. A pool touch-down cancels it. The pool follows the finger from its drawn position, and the hit area follows the drawn position. |
+| 8 | PASS | The level is completed by touch with the bubble hidden. |
+| 9 | PASS | No failure, timer or inactivity cue. Nothing happens if the screen is left alone. Undo restores the previous position, and a second undo does nothing. |
+| 10 | PASS | Only the existing sheet plus the procedural oval shadow. |
+| 11 | PASS | In each of the three non-pool cases, the intro stops. The pool glides back in 0.15 s. The crab flip and wiggle, or the home glow, start within 0.1 s. For sand the response is the pulse. The pulse starts 0.15 s after touch-down. The idle pulse is hidden during it and then starts from 1.00. The pulse is not blocked, because it is the first non-pool touch of the load. |
+| 12 | PASS | After any intro-cancel, drag, drop and undo return the pool to the authored start. A second undo does nothing, so there is no extra undo step. |
+| 13 | PASS | After a pulse at t=0, a sand tap from 0.6 s to just under 1.5 s gives the 15% brightness rise (within 0.1 s, fade 0.3 s), with no scale change and no new pulse. It covers the whole 0.8–1.3 s range. A second tap while the flash shows does not restart it. A tap at 1.5 s or later starts a pulse and no flash. A tap in the first 0.6 s shows the pulse itself and no flash. |
+| 14 | PASS | The outermost visible rim grabs the pool at idle 1.06 and redirect 1.15. A touch just outside the smallest size goes to the sand. The hit area is never below at-rest. |
+| 15 | PASS | The flip uses the pool's logical position (authored start) during the slide and the ease-back. |
+| 16 | PASS | After an intro-cancel by a non-pool touch, the pulse is shown from the end of the ease-back. The idle pulse is hidden during it and restarts from 1.00. After a flash-only tap, the idle pulse is unaffected. |
+| 17 | PASS (confirm on 60 fps recording) | A second crab, home or sand tap during the glide plays only that object's own response. There is no flash and no extra pulse. Exactly one pulse starts, 0.15 s after the first touch, including for a tap at the 0.15 s boundary. The pool shows no brightness rise before it. A sand tap 0.6 s to under 1.5 s after that pulse start gives the flash. |
+| 18 | PASS | A second-finger sand tap on a held pool gives the 15% flash (within 0.1 s, 0.3 s fade) whatever the time since the last pulse, unless one is already showing. The pool keeps its lift and shadow, with no pulse and no scale change. A crab or home tap gives only its own response. These taps do not move the 1.5 s window. After release, a sand tap behaves as in check 13, counted from the last pulse that actually started. |
+
+### Failure F1: check 4, reduce-motion, silent sand tap 0.4–0.6 s after a pulse start
+
+- **Criterion:** check 4, "Touch-down on … the sand … each produces a visible response within 0.2 s … This holds for every tap, whatever the time since the previous tap … leaves no silent touches."
+- **Observed (build record, "Devices with a reduce-motion setting turned on"):** with the setting on, a pulse is replaced by a brightness change of about 0.4 s. A sand tap 0.4–0.6 s after a pulse started shows nothing. The brightness change has ended, no new pulse is allowed, and no flash plays. The build itself calls this "a gap in the response". It also states the one exception to "every touch shows a response" in the default list.
+- **Cause (spec):** rule 5 says a sand tap gets no flash during the first 0.6 s after a pulse start, because "the pulse is already the visible response". That window is sized for the 0.6 s scale pulse. The reduce-motion edge case shortens the visible pulse to about 0.4 s. For 0.2 s of the window, nothing is visible.
+- **Conditions:** devices where the OS reduce-motion setting exists and is on (iOS "Reduce Motion", Android "Remove animations"), on level 1, any sand tap in that 0.2 s span after a pulse start. In the default mode this window is covered by the 0.6 s pulse.
+- **Reproducibility:** always, for the stated timing, from the build text. Not run on a device.
+- **Severity:** low to medium. The window is 0.2 s wide and only on reduce-motion devices. It breaks the "no silent touches" intent for the affected children. It does not block the level, and D-001 is not affected.
+- **Why QA does not pass it:** the criterion is explicit, and the build knowingly leaves the gap. I do not decide how to close it.
+- **Fix is a design choice (for `game-designer`):** the criterion states the outcome (a visible response), but the mechanism is open. For example: end the "pulse is the response" window at 0.4 s when reduce-motion is on, so the flash covers 0.4 s onward. Or make the reduce-motion pulse last 0.6 s. Either changes rule 5 condition (2) or the reduce-motion edge case. Then `gameplay-engineer` implements it.
+- **Acceptance for the fix:** with reduce-motion on, a sand tap at any time from 0 s to 1.5 s after a pulse start shows a visible response within 0.2 s (the pulse brightness change or the flash), and check 13 still holds. In default mode nothing changes.
+
+### Spec gaps and notes (no other check fails)
+
+- **S1 (same root as F1):** the spec says the flash "cannot look like a pulse" because it has no scale change. With reduce-motion on, both the pulse and the flash are plain brightness changes, so the two cannot be told apart by scale. The spec does not say whether that is acceptable. Not a failure. Ask the game-designer to confirm.
+- **S2: reduce-motion cannot exercise the intro checks.** The intro is skipped with the setting on, so checks 7, 11, 15 and 17 do not arise there, as the spec says. Check 16 and the other checks are the ones to run in that mode.
+- **S3: tight timing.** Checks 11, 17 and 18 need a 60 fps recording to confirm the 0.05 s, 0.10 s and 0.15 s cases on a real device. I confirmed them only from the build's stated behavior.
+
+### Regressions checked
+
+- Levels 2 and 3: the build record says they are unchanged. No level 1 rule touches them. I did not run them. No regression found.
+- Level 1: pool drag 1:1, clamping, release shrink over 0.15 s, drop on home completes, drop on crab leaves the pool with no crab reaction, home glow within 1.5 pool-widths while dragged only, crab facing the pool while dragged, rotation not replaying the intro, a second finger on a held pool ignored. All as in the spec.
+- A pool touch during the ease-back cancels the ease-back and the pending pulse, and starts no window. Undo is unchanged in every intro case.
+- Pulse cut short by grabbing the pool: the 1.5 s still counts from its start. The spec and the build agree.
+
+## Decisions already made
+
+- D-001: holds in 0.4. No failure, timer or inactivity cue.
+- D-002: holds. The ease-back is 0.15 s and the intro is never in the undo history.
+- D-003 and D-004: the build matches them in the default mode (blip, hit area, ease-back taps, window origin, held pool). The reduce-motion gap in F1 sits at the edge of D-003's "pulse is already the response" assumption.
+
+## Constraints
+
+- Level 1 only. Touch only. No mechanic may depend on reading text.
+- Existing sprite sheet only, plus the procedural shadow.
+- Studio rule: this is the first failure of this form for check 4. In handoff 14 check 4 passed with the then-defined window gap reported as G1. If check 4 fails again after the fix, the Studio routes to `technical-director`.
+- The Playtester receives only permitted information. Do not pass this report's reading of the build, F1 or S1 to the Playtester.
+
+## Open questions
+
+- **Reduce-motion availability (non-blocking):** iOS has "Reduce Motion" and apps can read it. Android has "Remove animations" (Android 9 and later), readable through the system animation scale settings. This is general platform knowledge, not from the packet. The target OS versions and devices are not named, so I cannot confirm availability on the actual targets. It matters now, because F1 is reachable only where the setting exists. If a target platform has no such setting, F1 is unreachable there. The Studio should name the target platforms and versions.
+- **Home styling capture (non-blocking):** the build text describes the lighter scenery outline and no motion. No real image was available. Take one at level start for the record.
+- **For game-designer:** choose how reduce-motion closes the 0.4–0.6 s silent window (F1) and say whether S1 is acceptable.
+
+## Expected output
+
+Route F1 to `game-designer` for the mechanism choice, then to `gameplay-engineer` for the fix, then back to QA to re-verify check 4 under reduce-motion and checks 13 and 16 for regressions. The default-mode behavior of build 0.4 is clean. The Playtester round can proceed on devices with the reduce-motion setting off. Tell the Playtester only what children should be observed doing:
+- Does the child touch the pool within about 10 s?
+- Does the child tap the sand, crab or home and then go to the pool?
+- Does the child ever tap repeatedly and seem to feel ignored?
+- Does the child touch the pool's edge and fail to pick it up?
+- Do any touches look like the game did not notice them?
+
+## Load
+
+- Role: studio/roles/studio.md
+- Skills: none
+- Project: design/onboarding.md, sim/build-0.4.md
+- Decisions: decisions/D-001-no-fail-states.md, decisions/D-002-intro-cancel-and-undo.md, decisions/D-003-sand-tap-blip-and-pool-hit-area.md, decisions/D-004-ease-back-taps-window-origin-held-pool.md
+- Previous handoff: goals/G-001-first-puzzle-stall/23-studio-to-qa.md
+>>>END
