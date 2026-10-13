@@ -1346,17 +1346,18 @@ def run_round(project, packet, files, rec):
     )
     packet.rounds += 1
     results = []
+    labels = [label for label in files if label.startswith("@run/")]
     with tempfile.TemporaryDirectory(prefix="build-") as tmp:
-        work = Path(tmp) / "work"
-        shutil.copytree(project / packet.build, work)
-        for path, content in packet.proposed.items():
-            target = work / Path(path).relative_to(packet.build)
-            target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_text(content, encoding="utf-8")
-        for label, script in files.items():
-            if not label.startswith("@run/"):
-                continue
-            command = commands[label.split("/")[1]]
+        for number, label in enumerate(labels):
+            # A fresh copy per run, prepared before any sandboxed code touches it: the host never
+            # writes into a directory a command could have filled with links.
+            work = Path(tmp) / f"run{number}"
+            shutil.copytree(project / packet.build, work)
+            for path, content in packet.proposed.items():
+                target = work / Path(path).relative_to(packet.build)
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text(content, encoding="utf-8")
+            script, command = files[label], commands[label.split("/")[1]]
             (work / SCRIPT_NAME).write_text(script, encoding="utf-8")
             code, output, seconds = sandboxed(
                 work, shlex.split(command.replace("{script}", SCRIPT_NAME))

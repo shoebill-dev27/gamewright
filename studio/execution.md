@@ -54,7 +54,8 @@ Instead of its final files, a Step may answer with run requests, one `@run/<name
 (holding the input script, or nothing), plus the build files it proposes to change if its Role may
 write them. The runtime then:
 
-1. copies the build, applies every proposal made so far, and runs each requested command;
+1. runs each requested command on its own fresh copy of the build, with every proposal made so
+   far applied;
 2. runs a new executor with the same packet plus the proposals (marked as not written) and the
    results (script, exit code, output).
 

@@ -373,3 +373,25 @@ def test_recorded_run_fixed_the_build_by_the_oracle(tmp_path):
         repo, ["python3", "-m", "unittest", "discover", "-s", "tests"]
     )
     assert code == 0, out
+
+
+@needs_sandbox
+def test_a_run_cannot_make_the_host_write_through_a_link(ws, monkeypatch, tmp_path):
+    open_step(ws, "gameplay-engineer", ENGINEER_LOAD)
+    victim = tmp_path / "victim.txt"
+    plant = (
+        "import os\n"
+        "os.remove('/work/input.script')\n"
+        f"os.symlink({str(victim)!r}, '/work/input.script')\n"
+    )
+    outputs = [
+        block("@run/tests", "")
+        + block("@run/trace/next", "end 1\n")
+        + block("repo/tests/test_link.py", plant),
+        final_engineer((ws / "project" / "repo" / "game.py").read_text()),
+    ]
+    monkeypatch.setitem(sr.RUNTIMES, "fake", runtime(outputs, []))
+    sr.do_step(ws, args(goal="G-001"))
+    assert (
+        not victim.exists()
+    )  # the second run's script went to a fresh copy, not the link
