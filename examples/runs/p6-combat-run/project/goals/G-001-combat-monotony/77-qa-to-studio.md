@@ -1,0 +1,2506 @@
+---
+kind: handoff
+goal: G-001
+seq: 77
+from: qa
+to: studio
+stage: Verify (report to Studio; the Studio composes the next step)
+outcome: pass
+---
+# 77: qa → studio — Verification of the D-014 rebuild (sha cf0f0ee63752) at 30 and 60 FPS: no failures found; V-15 and the AC-15 suite run still depend on the Owner
+
+## Task
+
+Report the verification of the rebuilt `repo/` against AC-1…AC-30 and V-1…V-18 at 30 and 60 FPS. Route the result. Give the art-director the verbatim player-view captures of the six setups from 71 (Appendix A).
+
+## Context
+
+G-001, Option A. Report 70 failed AC-17, AC-22 (suite), AC-28(b) at 30 FPS, V-10, V-14, V-16 and V-15. D-014 (73) ruled the three spec gaps. This is the first verification of the rebuild. I verified from the spec, the criteria and the build only: the suite, play and trace runs of this round, and a reading of the test source. All runs are in `@run-results`. I did not edit the repo, `manual.md` or the design documents.
+
+## Findings
+
+### Verdict
+
+- **No criterion failed on anything observed.** Every item that failed in 70 and could be re-run now passes at both rates (AC-17 as far as observed, AC-22 suite, AC-28(b), V-10, V-14, V-16), and the new AC-29, AC-30 and V-18 pass where observed. So this is not a second failure of any criterion.
+- **Not complete.**
+  - V-15 (manual text) is not in place: `manual.md` is unchanged and still says only "drawn on a free tile next to you". I report it as not checkable and did not judge it.
+  - AC-15 (the two `ManualTest` tests) could not be run here. The environment has no `manual.md` beside `repo/`, and I may not place one.
+  - Some items were covered only by the passing suite and not played; they are marked below.
+- The art-director's live visual review (V-9…V-18 first-hand, colour, the reverse-video cell) is still open. Appendix A is the material for it.
+
+### 1. Test suite (`python3 -m unittest discover -s tests`)
+
+- Ran 73 tests, **71 passed, 2 errors**.
+- Both errors are `ManualTest.*` with `FileNotFoundError: '/manual.md'`. That is the environment gap, not a build result.
+- **AC-15 is not judged by me.**
+  - By reading the unchanged `manual.md`: every glyph in `play.GLYPHS` is listed as `` `c` ``, the 12 required phrases are present, and the On screen section contains `` `x` ``, "The practice room (`room empty`)" and "drawn on a free tile next to you". I expect it to pass.
+  - The Owner's run (route step 13e-O) decides it.
+- `CrowdTest.test_hit_stun_is_short` now **passes at both rates**. This is the 70 failure.
+  - Test source vs AC-22: it hits the player, then an attack 0.05 s later must be "stunned" and one at +0.25 s must swipe. The invulnerability checks are at +0.75 s (true) and +0.85 s (false). That matches the spec: stun 0.15 s, invulnerability until 0.8 s.
+  - The earlier 0.79 check landed on a frame where invulnerability had correctly ended, so the test was wrong, not the build.
+  - The test does not exercise "a dash behaves the same way". That is a coverage gap, not a spec mismatch.
+- `KnockbackTest.test_edge_grub_is_shown_and_knocked_left` matches AC-28(b) and AC-29(c).
+  - It checks the first draw (P at column 15, grub at column 14, `on you: g walking (shown left)`, no "(shown right)").
+  - It checks the end at x 13.5 ± 0.1 in cell 14 with no entry, and that the first wind-up and hit words are "left", at both rates.
+  - It does not check that every line before the hit says "(on you)"; my play captures do.
+- `CellRuleTest.test_line_words_match_the_next_draw` matches AC-30(c) only partly.
+  - It skips lines that read "on you", and for "is open" lines it accepts a match with any lowercase `g/w` in the draw.
+  - Room 2 always has several, so a wrong word on an "open" line could pass. In this run the only checked lines are the two "rears back" lines (top left, top right).
+  - The behaviour is correct in my captures (see AC-30(c)). The test is weaker than the spec and should be tightened, but it is not a failure.
+- The traceback line numbers (1135, 1145) exceed the length of the `test_game.py` copy in my packet. I cannot tell whether the executed file equals that copy. The Owner's run should use the repo as built.
+
+### 2. Per-criterion table (30 / 60 FPS)
+
+- "Observed" means seen in this round's play or trace runs.
+- "Suite" means a passing suite test that loops both rates, with the test read against the spec. It is not a play observation.
+
+| ID | 30 | 60 | Evidence |
+|---|---|---|---|
+| AC-1 | pass | pass | Suite (`test_telegraph_and_timing`, `test_grub_glyph_telegraph_before_first_hit`). Indirect: in every capture the wind-up line and `G` come 0.5 s before the first hit (ac29: 0.033→0.567 / 0.017→0.533). No distance-4 play run. |
+| AC-2 | pass | pass | Observed (ac29 trace): wind-up 0.5, strike 0.15 (0.533→0.683 / 0.517→0.667), recovery 0.9 (0.683→1.583 / 0.667→1.567). |
+| AC-3 | pass | pass | Suite only. |
+| AC-4 | pass | pass | Suite only (`test_swipe_in_recovery_hits_and_next_bite_is_late`). Not played this round. |
+| AC-5 | pass | pass | Observed (ac28b trace): swipe at 0.200 during Wind-up gives `recover interrupted`, the next wind-up at 0.800 (0.6 s), no heart lost before it. |
+| AC-6 | pass | pass | Suite; room 2 shows one grub in Wind-up/Strike per sample. |
+| AC-7 | pass | pass | Observed for one spitter (first charge 1.000, next 3.500). Two-spitter stagger: suite only. |
+| AC-8 | pass | pass | Observed (spit): "spitter (right) charges" 1.000, "spits" 1.800 (0.8 s later), second pair 3.500 / 4.300; named, no duplicates. |
+| AC-9 | pass | pass | Observed: a still player on the line is hit for 1 heart (3.367 / 3.333). Dodge and dash-through: suite only. |
+| AC-10 | pass | pass | Suite only. |
+| AC-11 | pass | pass | Observed: "(miss) too far", "(miss) not in front". Other reasons: suite. |
+| AC-12 | pass | pass | Suite only (`test_multi_hit`). |
+| AC-13 | pass | pass | Observed in room 2 (down at 5.267 / 5.250): "you went down", `x`, enemies calm, no on-you line, hit line "(on you)". Run-over screen and restart: suite only (`test_zero_hearts`, `test_down_screen_in_the_player_view`). |
+| AC-14 | pass | pass | Suite only (`test_room_clear`, `test_clearing_room_5_completes_the_run`). No real-room clear was played. |
+| AC-15 | not judged | not judged | The two `ManualTest` tests could not run (§1). Owner step. |
+| AC-16 | pass | pass | Suite (`test_layouts`); room 2 setup row seen in the trace. |
+| AC-17 | pass (as observed) | pass (as observed) | See "AC-17 detail". The AC-15 part is open. |
+| AC-18 | pass | pass | Observed: in every on-you draw the grub's `g/G/w/W` is beside `P`, and every on-you "rears back" and "is open" line has a matching glyph in its draw. Not played: the distance-4 idle run to 5.5 s, and the spitter-on-`P` case (suite `VisibilityTest` passes). |
+| AC-19 | pass | pass | Observed, room 2: wind-ups at 2.733, 3.733, 4.733 at both rates (gaps 1.0 s). |
+| AC-20 | pass (sampled) | pass (sampled) | Trace at 3.233: grubs #0 and #2 inside 1.5, #1 and #3 `waiting-cap` at 2.00. Suite checks every tick (`test_engagement_cap`). |
+| AC-21 | pass | pass | Re-measured: first heart to third heart 3.300→5.267 = **1.967 s** (30), 3.283→5.250 = **1.967 s** (60). Limit 1.9, margin 0.067 s. One grub is committed at a time. |
+| AC-22 behaviour | pass | pass | Observed: stun_left 0.150 at the hit; invulnerability ends 0.800 s after the hit (0.567→1.367, 0.533→1.333). Attack at +0.05 and +0.25: suite. |
+| AC-22 suite | pass | pass | `test_hit_stun_is_short` passes (§1). |
+| AC-23 | pass | pass | Suite (`test_body_hit`, cases a/b/c). In play, a swipe on a grub at 8.2 hit it (knock82). |
+| AC-24, 25, 26 | pass | pass | Suite only. Not re-observed in play or trace. |
+| AC-27 | pass | pass | Observed: "(miss) too far" (grub 2.0 ahead) and "(miss) not in front" (grub 1.0 below), arc drawn in both. The third case: suite. |
+| AC-28(a) | pass | pass | Observed: `spawn grub 8 4` and `8.2 4` are shown right in every draw (`on you: … (shown right)`) until the hit. 0.3 s later the draw shows `Pw` right, no entry. True position 9.0 ± 0.1: suite only (`test_on_tile_grub_steps_to_its_display_side`, `test_grub_02_tile_away_ends_one_tile_on_its_shown_side`). No trace this round. |
+| AC-28(b) | pass | pass | Observed and traced, see "AC-28(b) detail". This was the 70 failure. |
+| AC-28(c) | pass | pass | Suite only (`test_slots_and_distance`). Not played in room 2. |
+| AC-28(d) | pass | pass | Observed (ac28b trace): the knockback leaves the Recovery timer alone (interrupt at 0.200 → next wind-up 0.800). The 1.5 s bite gap: suite. |
+| AC-28(e) | pass | pass | Observed: "you swipe: grub hit (1 left)" with no "(on you)". |
+| AC-29(a) | pass | pass | Observed (ac29): `gP` in columns 14/15 at 0 s and in every draw while the grub is still. "rears back (left)", hit "(left)". |
+| AC-29(b) | pass | pass | Suite only (`test_one_tile_either_side_of_8_5`): 9.5 reads "right", 7.5 reads "left", never "on you". |
+| AC-29(c) | pass | pass | Observed (ac28b): the grub rests at 13.5. `wP` is in cell 14 at 0.50 s, `WP` at 0.80 and 1.00, identical at both rates. Lines say "left". |
+| AC-30(a) | pass | pass | Observed on `spawn grub 8.2 4` for 1.5 s with an attack at 0.2 (knock82). Every line for the grub within 0.5 tile reads "(on you)" with an on-you entry, and no side word appears with an entry. The 4 s run without an attack was not played. |
+| AC-30(b) | pass | pass | Suite only (`test_shared_cell_beyond_half_tile_is_not_on_you`): "left", drawn left, no entry, "(miss) not in front". Not played. |
+| AC-30(c) | pass | pass | Observed, room 2 to 6 s. "rears back (top left)" at 2.733 and "(top right)" at 3.733 have the `G` in that corner of the next draw. The 3.383 and 4.383 "is open" lines read "(on you)" and the draws carry the entries. |
+| AC-30(d) | pass | pass | Observed. Hit words are top left (3.300 / 3.283), top right (4.300 / 4.283), and on you (5.267 / 5.250). Each equals the word and the `G` corner at its wind-up start. 4.3 s is "top right" at both rates, as expected. |
+| AC-30(e) | pass | pass | Observed (v14): right grub strikes → "(right)" (0.600 / 0.567). Swapped (trace, spawn order 6.75 then 9.25) → "(left)". |
+| V-1 | pass | pass | Grubs and the spitter `S` observed. |
+| V-2 | pass | pass | Wind-up, charge, swipe and recovery draws exist at the event times at both rates. |
+| V-3 | pass | pass | |
+| V-4 | pass | pass | `g/G/w/W` and `s/S` observed. `z/Z` not observed. |
+| V-5, V-8 | pass | pass | Document only, V-5 and V-8 as in 70. The run-over screen was not played; suite `test_down_screen_in_the_player_view` passes. |
+| V-6 | not assessable | not assessable | Text view. |
+| V-7 | pass | pass | One spitter observed; the two-spitter distinction is in the suite (`test_two_spitters_in_one_spot_get_numbers`). |
+| V-9 | pass | pass | Observed: the line sits under the hearts line, and is absent when nothing is on you. |
+| V-10 | pass | pass | Observed in every on-you draw: the line's letter is in the cell on the side it names, and the case matches the state (`G … biting soon`, `g … open`, `g … walking`). No side word for an enemy with an entry, and no "(on you)" without one. |
+| V-11 | pass | pass | Observed (neighbor): `gPg`, one entry only (shown left), the real neighbour at 9,4 has none. |
+| V-12 | pass | pass | Observed: "rears back (on you)" with `G … biting soon`; "is open (on you)" with `g … open`. Room 2, 3.383 and 4.383: "(on you)", never "(left)" or "(right)". |
+| V-13 | pass | pass | Observed: grub hit lines always carry a word. Shot hit: "YOU ARE HIT by a spit shot from spitter (right)". |
+| V-14 | pass | pass | Observed, scripted case and the swap. General sentence, room 2: see AC-30(d). |
+| V-15 | not checkable | not checkable | The manual text is not in place (Owner). |
+| V-16 | pass | pass | Observed: half-tile cell, `Pw`/`WP` and the hit words are identical at 30 and 60; no extra draws seen. |
+| V-17 | not re-observed | not re-observed | Passed in 70. The defeat draw and the dash-off draw were not re-run. The first-hit draw behaves as specified (entry present in the immediate draw, gone 0.3 s later). |
+| V-18 | pass | pass | Observed in every room 2 and `player 14.5` line and draw. See the note below on hit-line words in lunge draws. |
+
+### 3. AC-17 detail (30 / 60 identity)
+
+- Event times agree within 0.02 s in all compared pairs (e.g. room 2 wind-ups 2.733 / 3.733 / 4.733 at both rates).
+- The same events occur in the same order.
+- The compared draws are identical: ac28b, ac29, knock8, neighbor and v14.
+- The hit words are identical: top left, top right, on you.
+- Cells and words at rest are identical (13.5 → cell 14).
+
+### 4. AC-28(b) detail (the 70 failure)
+
+- Script: `player 14.5 4`, `spawn grub 14.5 4`, `0.2 attack`, `end 2`. See Appendix B for the full output.
+- Before the hit (0–0.2 s): `gP` / `GP`, `on you: … (shown left)`, "rears back (on you)". The grub is never drawn right.
+- After the hit (trace): the grub moves 14.50→14.33 (30) or 14.42 (60) and rests at **13.50**, 1.0 tile left, inside the room.
+- At rest: `wP` / `WP` in cell 14, no on-you entry. The wind-up line at 0.800 reads "(left)" and the hit line at 1.333 / 1.317 reads "(left)", both identical at 30 and 60.
+- Later: after its lunge the grub is on the player again. "the grub is open (on you)" at 1.450 and `on you: w open (shown left)` appear at both rates.
+
+### 5. Observations for the designer and the art-director (not failures)
+
+1. **Lunge draws and the hit-line word.**
+   - Draws made at the moment of a hit show the lunged grub.
+   - Room 2, 30 FPS, 4.300: `G` is drawn right of `P` (grub at 8.67,3.55), while the hit line says "(top right)". At 60 FPS, 4.283, the grub is at 8.76,3.49 and `G` is still drawn top right. The same event is therefore drawn in different cells at the two rates.
+   - Room 2, 3.300 / 3.283: `G` is left of `P` while the line says "(top left)" at both rates.
+   - V-14 and D-014 allow this (draws during the Strike are not compared, and the hit line names the Wind-up position). Rule 6 of "Cells, sides and 'on you'" and AC-17 only speak of resting positions.
+   - Please confirm that this reads acceptably (art-director, as D-014 anticipated). The designer could state whether the carve-out also covers AC-17.
+2. **"Never inside 0.9 tile" in AC-28(b).** During the 0.2 s knockback the grub is in flight (14.33 at 0.233 s, 14.42 at 0.217 s). I read the sentence as applying after the knockback ends, and it holds at rest (1.0 tile). The designer may want to say so.
+3. **Shot at spawn.** In the draw at the moment of a spit ("1.800 spitter (right) spits") no `*` is visible, because the shot starts in the spitter's own cell and the spitter glyph is drawn over it. The `*` first shows in the 2.00 s draw. The glyph table says the projectile is "visible from spawn to removal". Principle 4 asks for a draw at projectile spawn, and that draw exists. The art-director decides whether this matters.
+4. **Weak test.** `test_line_words_match_the_next_draw` is weaker than AC-30(c) (§1).
+
+### 6. Still not observed
+
+- Distance-4 idle run (AC-1/18), dash-away in wind-up (AC-3), projectile dodge and dash-through (AC-9), spitter walk-up (AC-10), multi-hit (AC-12), AC-28(c) in room 2, AC-29(b) and AC-30(b) in play, and the 4 s run for AC-30(a). All of these pass in the suite at both rates.
+- Real-room clear, heal and next room, "run complete", run-over screen and restart (AC-13/14, V-8): suite only.
+- V-17 defeat and dash-off draws, `z/Z` glyphs (V-4), colour (V-6, reverse video).
+- AC-24, 25, 26 in play (suite only).
+
+### 7. Failed before?
+
+- AC-17, AC-22, AC-28(b), V-10, V-14 and V-16 each failed once, in 70. They pass now, so none is failing a second time.
+- V-15 failed in 70 and 71 because the manual lacked the text. It is not judged now, because the text is still not placed.
+- No criterion goes to `technical-director`.
+
+## Decisions already made
+
+- D-001, D-011, D-012, D-013, D-014 as listed in 76.
+
+## Constraints
+
+- No change to the repo, `manual.md` or the design documents. No spec decisions by QA.
+
+## Open questions
+
+1. **To the Owner:**
+   - Run `python3 -m unittest discover -s tests` with the unchanged `manual.md` beside `repo/` and report counts and any failure by name. Expected: 73 tests, 0 failures if the `ManualTest` pair passes (AC-15).
+   - Place the V-15 text (lines in 73). QA then checks V-15.
+2. **To the art-director:** the live visual review of V-9…V-18 from Appendix A and the build, including the observations in §5 (items 1 and 3), colour and the reverse-video cell.
+3. **To the game-designer** (optional): whether AC-17 and rule 6 should say anything about draws made during a Strike (§5 item 1), and the reading of "never inside 0.9 tile" (§5 item 2).
+4. **To the Studio:** if a play-view run of the §6 items is wanted before closing, QA can do it in a further Verify round. I consider the suite coverage of those items sufficient for no-failure but not for "observed".
+
+## Expected output
+
+The Studio routes the Owner steps (suite run, V-15 text) and the art-director's visual review. If both come back clean, G-001 Verify can be closed. Appendices A and B hold the captures.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: project.md, design/combat.md, design/combat-visuals.md, manual.md, repo/ (build)
+- Decisions: decisions/D-011-grub-turns-stun-body-hit-dash-facing.md, decisions/D-012-on-you-line-for-displaced-enemies.md, decisions/D-013-knockback-of-grub-on-players-tile.md, decisions/D-014-one-rule-for-cells-on-you-and-hit-line-word.md
+- Previous handoff: goals/G-001-combat-monotony/76-studio-to-qa.md
+
+---
+
+# Appendix A — verbatim player-view captures of the six setups in 71 (`python3 play.py --view player`)
+
+## A1. Grub on the player's tile, then attack (`room empty`, `player 8 4`, `spawn grub 8 4`, `0.2 attack`, `end 1.5`)
+
+### 30 FPS
+
+```text
+Lantern Depths 0.5 — room empty — 30 FPS
+   [0.00 s] hearts 3/3
+on you: g walking (shown right)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        Pg      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.033  a grub rears back (on you)
+   [0.03 s] hearts 3/3
+on you: G biting soon (shown right)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        PG      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.200  you swipe: grub hit (1 left)
+  0.200  the grub is open (on you)
+   [0.23 s] hearts 3/3
+on you: w open (shown right)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |         )      |
+   |        Pw      |
+   |         )      |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [0.50 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        Pw      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.800  a grub rears back (right)
+   [0.80 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        PW      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [1.00 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        PW      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  1.333  YOU ARE HIT by a grub (right) — hearts 2/3
+   [1.33 s] hearts 2/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        PW      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  1.450  the grub is open (on you)
+   [1.47 s] hearts 2/3
+on you: w open (shown right)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        Pw      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [1.50 s] hearts 2/3
+on you: w open (shown right)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        Pw      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+end at 1.50 s: hearts 2/3, enemies left 1
+```
+
+### 60 FPS
+
+```text
+Lantern Depths 0.5 — room empty — 60 FPS
+   [0.00 s] hearts 3/3
+on you: g walking (shown right)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        Pg      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.017  a grub rears back (on you)
+   [0.02 s] hearts 3/3
+on you: G biting soon (shown right)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        PG      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.200  you swipe: grub hit (1 left)
+  0.200  the grub is open (on you)
+   [0.22 s] hearts 3/3
+on you: w open (shown right)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |         )      |
+   |        Pw      |
+   |         )      |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [0.50 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        Pw      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.800  a grub rears back (right)
+   [0.80 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        PW      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [1.00 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        PW      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  1.317  YOU ARE HIT by a grub (right) — hearts 2/3
+   [1.32 s] hearts 2/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        PW      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  1.450  the grub is open (on you)
+   [1.45 s] hearts 2/3
+on you: w open (shown right)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        Pw      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [1.50 s] hearts 2/3
+on you: w open (shown right)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        Pw      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+end at 1.50 s: hearts 2/3, enemies left 1
+```
+
+## A2. One grub on the tile plus one on the tile to its right (`room empty`, `player 8 4`, `spawn grub 8 4`, `spawn grub 9 4`, `end 1`)
+
+### 30 FPS
+
+```text
+Lantern Depths 0.5 — room empty — 30 FPS
+   [0.00 s] hearts 3/3
+on you: g walking (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gPg      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.033  a grub rears back (on you)
+   [0.03 s] hearts 3/3
+on you: G biting soon (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       GPg      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [0.50 s] hearts 3/3
+on you: G biting soon (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       GPg      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.567  YOU ARE HIT by a grub (on you) — hearts 2/3
+   [0.57 s] hearts 2/3
+on you: G biting soon (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       GPg      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.683  the grub is open (on you)
+   [0.70 s] hearts 2/3
+on you: g open (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gPg      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [1.00 s] hearts 2/3
+on you: g open (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gPg      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+end at 1.00 s: hearts 2/3, enemies left 2
+```
+
+### 60 FPS
+
+```text
+Lantern Depths 0.5 — room empty — 60 FPS
+   [0.00 s] hearts 3/3
+on you: g walking (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gPg      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.017  a grub rears back (on you)
+   [0.02 s] hearts 3/3
+on you: G biting soon (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       GPg      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [0.50 s] hearts 3/3
+on you: G biting soon (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       GPg      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.533  YOU ARE HIT by a grub (on you) — hearts 2/3
+   [0.53 s] hearts 2/3
+on you: G biting soon (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       GPg      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.667  the grub is open (on you)
+   [0.67 s] hearts 2/3
+on you: g open (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gPg      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [1.00 s] hearts 2/3
+on you: g open (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gPg      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+end at 1.00 s: hearts 2/3, enemies left 2
+```
+
+## A3. One grub left, one right, only the right one strikes first (`room empty`, `player 8 4`, `spawn grub 9.25 4`, `spawn grub 6.75 4`, `end 1.5`)
+
+### 30 FPS
+
+```text
+Lantern Depths 0.5 — room empty — 30 FPS
+   [0.00 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gPg      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.033  a grub rears back (right)
+   [0.03 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gPG      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [0.50 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gPG      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.600  YOU ARE HIT by a grub (right) — hearts 2/3
+   [0.60 s] hearts 2/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gPG      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.683  the grub is open (on you)
+   [0.70 s] hearts 2/3
+on you: g open (shown right)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gPg      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [1.00 s] hearts 2/3
+on you: g open (shown right)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gPg      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  1.033  a grub rears back (left)
+   [1.03 s] hearts 2/3
+on you: g open (shown right)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       GPg      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [1.50 s] hearts 2/3
+on you: g open (shown right)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       GPg      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+end at 1.50 s: hearts 2/3, enemies left 2
+```
+
+### 60 FPS
+
+```text
+Lantern Depths 0.5 — room empty — 60 FPS
+   [0.00 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gPg      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.017  a grub rears back (right)
+   [0.02 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gPG      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [0.50 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gPG      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.567  YOU ARE HIT by a grub (right) — hearts 2/3
+   [0.57 s] hearts 2/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gPG      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.667  the grub is open (on you)
+   [0.67 s] hearts 2/3
+on you: g open (shown right)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gPg      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [1.00 s] hearts 2/3
+on you: g open (shown right)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gPg      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  1.017  a grub rears back (left)
+   [1.02 s] hearts 2/3
+on you: g open (shown right)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       GPg      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [1.50 s] hearts 2/3
+on you: g open (shown right)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       GPg      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+end at 1.50 s: hearts 2/3, enemies left 2
+```
+
+The swap (left grub strikes first, spawn order 6.75 then 9.25) was run in the trace view only: hit `pos: 'left'` at 0.600 (30) and 0.567 (60), then the right grub winds up at 1.033 / 1.017 with `side: 'right'`.
+
+## A4. A spit shot hitting the player (`room empty`, `player 8 4`, `spawn spitter 13 4`, `end 5`)
+
+### 30 FPS
+
+```text
+Lantern Depths 0.5 — room empty — 30 FPS
+   [0.00 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P    s  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [0.50 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P    s  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  1.000  spitter (right) charges
+   [1.00 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P    S  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [1.50 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P    S  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  1.800  spitter (right) spits
+   [1.80 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P    s  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [2.00 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P   *s  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [2.50 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P  * s  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [3.00 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P*   s  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  3.367  YOU ARE HIT by a spit shot from spitter (right) — hearts 2/3
+   [3.37 s] hearts 2/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P    s  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  3.500  spitter (right) charges
+   [3.50 s] hearts 2/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P    S  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [4.00 s] hearts 2/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P    S  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  4.300  spitter (right) spits
+   [4.30 s] hearts 2/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P    s  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [4.50 s] hearts 2/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P   *s  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [5.00 s] hearts 2/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P  * s  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+end at 5.00 s: hearts 2/3, enemies left 1
+```
+
+### 60 FPS
+
+```text
+Lantern Depths 0.5 — room empty — 60 FPS
+   [0.00 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P    s  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [0.50 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P    s  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  1.000  spitter (right) charges
+   [1.00 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P    S  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [1.50 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P    S  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  1.800  spitter (right) spits
+   [1.80 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P    s  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [2.00 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P   *s  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [2.50 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P  * s  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [3.00 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P*   s  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  3.333  YOU ARE HIT by a spit shot from spitter (right) — hearts 2/3
+   [3.33 s] hearts 2/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P    s  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  3.500  spitter (right) charges
+   [3.50 s] hearts 2/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P    S  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [4.00 s] hearts 2/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P    S  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  4.300  spitter (right) spits
+   [4.30 s] hearts 2/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P    s  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [4.50 s] hearts 2/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P   *s  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [5.00 s] hearts 2/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P  * s  |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+end at 5.00 s: hearts 2/3, enemies left 1
+```
+
+## A5. Room 2 with four grubs, still player (`room 2`, `end 6`)
+
+### 30 FPS
+
+```text
+Lantern Depths 0.5 — room 2 — 30 FPS
+   [0.00 s] hearts 3/3
+   +----------------+
+   |              g |
+   |  g             |
+   |                |
+   |                |
+   |        P       |
+   |                |
+   |                |
+   |               g|
+   | g              |
+   +----------------+
+   [0.50 s] hearts 3/3
+   +----------------+
+   |                |
+   |   g         g  |
+   |                |
+   |                |
+   |        P       |
+   |                |
+   |                |
+   |              g |
+   |  g             |
+   +----------------+
+   [1.00 s] hearts 3/3
+   +----------------+
+   |                |
+   |            g   |
+   |    g           |
+   |                |
+   |        P       |
+   |                |
+   |             g  |
+   |   g            |
+   |                |
+   +----------------+
+   [1.50 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |     g      g   |
+   |                |
+   |        P       |
+   |                |
+   |            g   |
+   |    g           |
+   |                |
+   +----------------+
+   [2.00 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |           g    |
+   |      g         |
+   |        P       |
+   |           g    |
+   |    g           |
+   |                |
+   |                |
+   +----------------+
+   [2.50 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |      g   g     |
+   |        P       |
+   |          g     |
+   |     g          |
+   |                |
+   |                |
+   +----------------+
+  2.733  a grub rears back (top left)
+   [2.73 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |       G g      |
+   |        P       |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [3.00 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |       G g      |
+   |        P       |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  3.300  YOU ARE HIT by a grub (top left) — hearts 2/3
+   [3.30 s] hearts 2/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |         g      |
+   |       GP       |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  3.383  the grub is open (on you)
+   [3.40 s] hearts 2/3
+on you: g open (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |         g      |
+   |       gP       |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [3.50 s] hearts 2/3
+on you: g open (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |         g      |
+   |       gP       |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  3.733  a grub rears back (top right)
+   [3.73 s] hearts 2/3
+on you: g open (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |         G      |
+   |       gP       |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [4.00 s] hearts 2/3
+on you: g open (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |         G      |
+   |       gP       |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  4.300  YOU ARE HIT by a grub (top right) — hearts 1/3
+   [4.30 s] hearts 1/3
+on you: g walking (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gPG      |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  4.383  the grub is open (on you)
+   [4.40 s] hearts 1/3
+on you: g walking (shown left); g open (shown right)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gPg      |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [4.50 s] hearts 1/3
+on you: g walking (shown left); g open (shown right)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gPg      |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  4.733  a grub rears back (on you)
+   [4.73 s] hearts 1/3
+on you: G biting soon (shown left); g open (shown right)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       GPg      |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [5.00 s] hearts 1/3
+on you: G biting soon (shown left); g open (shown right)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       GPg      |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  5.267  YOU ARE HIT by a grub (on you) — hearts 0/3
+  5.267  you went down
+   [5.27 s] hearts 0/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gxg      |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [5.50 s] hearts 0/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gxg      |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [6.00 s] hearts 0/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gxg      |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+end at 6.00 s: hearts 0/3, enemies left 4
+```
+
+### 60 FPS
+
+```text
+Lantern Depths 0.5 — room 2 — 60 FPS
+   [0.00 s] hearts 3/3
+   +----------------+
+   |              g |
+   |  g             |
+   |                |
+   |                |
+   |        P       |
+   |                |
+   |                |
+   |               g|
+   | g              |
+   +----------------+
+   [0.50 s] hearts 3/3
+   +----------------+
+   |                |
+   |   g         g  |
+   |                |
+   |                |
+   |        P       |
+   |                |
+   |                |
+   |              g |
+   |  g             |
+   +----------------+
+   [1.00 s] hearts 3/3
+   +----------------+
+   |                |
+   |            g   |
+   |    g           |
+   |                |
+   |        P       |
+   |                |
+   |             g  |
+   |   g            |
+   |                |
+   +----------------+
+   [1.50 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |     g      g   |
+   |                |
+   |        P       |
+   |                |
+   |            g   |
+   |    g           |
+   |                |
+   +----------------+
+   [2.00 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |           g    |
+   |      g         |
+   |        P       |
+   |           g    |
+   |    g           |
+   |                |
+   |                |
+   +----------------+
+   [2.50 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |      g   g     |
+   |        P       |
+   |          g     |
+   |     g          |
+   |                |
+   |                |
+   +----------------+
+  2.733  a grub rears back (top left)
+   [2.73 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |       G g      |
+   |        P       |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [3.00 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |       G g      |
+   |        P       |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  3.283  YOU ARE HIT by a grub (top left) — hearts 2/3
+   [3.28 s] hearts 2/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |         g      |
+   |       GP       |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  3.383  the grub is open (on you)
+   [3.38 s] hearts 2/3
+on you: g open (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |         g      |
+   |       gP       |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [3.50 s] hearts 2/3
+on you: g open (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |         g      |
+   |       gP       |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  3.733  a grub rears back (top right)
+   [3.73 s] hearts 2/3
+on you: g open (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |         G      |
+   |       gP       |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [4.00 s] hearts 2/3
+on you: g open (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |         G      |
+   |       gP       |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  4.283  YOU ARE HIT by a grub (top right) — hearts 1/3
+   [4.28 s] hearts 1/3
+on you: g walking (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |         G      |
+   |       gP       |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  4.383  the grub is open (on you)
+   [4.38 s] hearts 1/3
+on you: g walking (shown left); g open (shown right)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gPg      |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [4.50 s] hearts 1/3
+on you: g walking (shown left); g open (shown right)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gPg      |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  4.733  a grub rears back (on you)
+   [4.73 s] hearts 1/3
+on you: G biting soon (shown left); g open (shown right)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       GPg      |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [5.00 s] hearts 1/3
+on you: G biting soon (shown left); g open (shown right)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       GPg      |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  5.250  YOU ARE HIT by a grub (on you) — hearts 0/3
+  5.250  you went down
+   [5.25 s] hearts 0/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gxg      |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [5.50 s] hearts 0/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gxg      |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [6.00 s] hearts 0/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |       gxg      |
+   |      g   g     |
+   |                |
+   |                |
+   |                |
+   +----------------+
+end at 6.00 s: hearts 0/3, enemies left 4
+```
+
+## A6. Misses: too far, and enemy not in front
+
+### A6a. Too far (`room empty`, `player 8 4`, `spawn grub 10 4`, `0 attack`, `end 0.5`), 30 FPS
+
+```text
+Lantern Depths 0.5 — room empty — 30 FPS
+   [0.00 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P g     |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.000  you swipe: (miss) too far
+   [0.03 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |         )      |
+   |        P)g     |
+   |         )      |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.400  a grub rears back (right)
+   [0.40 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        PG      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [0.50 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        PG      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+end at 0.50 s: hearts 3/3, enemies left 1
+```
+
+### A6a. Too far, 60 FPS
+
+```text
+Lantern Depths 0.5 — room empty — 60 FPS
+   [0.00 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P g     |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.000  you swipe: (miss) too far
+   [0.02 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |         )      |
+   |        P)g     |
+   |         )      |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.383  a grub rears back (right)
+   [0.38 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        PG      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [0.50 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        PG      |
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+end at 0.50 s: hearts 3/3, enemies left 1
+```
+
+### A6b. Not in front (`room empty`, `player 8 4`, `spawn grub 8 5`, `0 attack`, `end 0.5`), 30 FPS
+
+```text
+Lantern Depths 0.5 — room empty — 30 FPS
+   [0.00 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P       |
+   |        g       |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.000  you swipe: (miss) not in front
+  0.033  a grub rears back (below)
+   [0.03 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |         )      |
+   |        P)      |
+   |        G)      |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [0.50 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P       |
+   |        G       |
+   |                |
+   |                |
+   |                |
+   +----------------+
+end at 0.50 s: hearts 3/3, enemies left 1
+```
+
+### A6b. Not in front, 60 FPS
+
+```text
+Lantern Depths 0.5 — room empty — 60 FPS
+   [0.00 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P       |
+   |        g       |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.000  you swipe: (miss) not in front
+  0.017  a grub rears back (below)
+   [0.02 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |         )      |
+   |        P)      |
+   |        G)      |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [0.50 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |        P       |
+   |        G       |
+   |                |
+   |                |
+   |                |
+   +----------------+
+end at 0.50 s: hearts 3/3, enemies left 1
+```
+
+---
+
+# Appendix B — AC-28(b) (the 70 failure) and AC-29(a), player view
+
+## B1. AC-28(b): `fps N`, `room empty`, `player 14.5 4`, `spawn grub 14.5 4`, `0.2 attack`, `end 2`
+
+Trace summary (positions at rest): 30 FPS, windup `side: 'on you'` at 0.033, interrupt and knockback at 0.200, grub at 14.33 at 0.233 and at **13.50** from 0.800. Windup `side: 'left'` at 0.800, strike 1.300, hurt `pos: 'left'` at 1.333. 60 FPS: same sequence, grub 14.42 at 0.217, windup `left` at 0.800, hurt `pos: 'left'` at 1.317.
+
+### 30 FPS
+
+```text
+Lantern Depths 0.5 — room empty — 30 FPS
+   [0.00 s] hearts 3/3
+on you: g walking (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              gP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.033  a grub rears back (on you)
+   [0.03 s] hearts 3/3
+on you: G biting soon (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              GP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.200  you swipe: grub hit (1 left)
+  0.200  the grub is open (on you)
+   [0.23 s] hearts 3/3
+on you: w open (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              wP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [0.50 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              wP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.800  a grub rears back (left)
+   [0.80 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              WP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [1.00 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              WP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  1.333  YOU ARE HIT by a grub (left) — hearts 2/3
+   [1.33 s] hearts 2/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              WP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  1.450  the grub is open (on you)
+   [1.47 s] hearts 2/3
+on you: w open (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              wP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [1.50 s] hearts 2/3
+on you: w open (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              wP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [2.00 s] hearts 2/3
+on you: w open (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              wP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+end at 2.00 s: hearts 2/3, enemies left 1
+```
+
+### 60 FPS
+
+```text
+Lantern Depths 0.5 — room empty — 60 FPS
+   [0.00 s] hearts 3/3
+on you: g walking (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              gP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.017  a grub rears back (on you)
+   [0.02 s] hearts 3/3
+on you: G biting soon (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              GP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.200  you swipe: grub hit (1 left)
+  0.200  the grub is open (on you)
+   [0.22 s] hearts 3/3
+on you: w open (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              wP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [0.50 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              wP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.800  a grub rears back (left)
+   [0.80 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              WP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [1.00 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              WP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  1.317  YOU ARE HIT by a grub (left) — hearts 2/3
+   [1.32 s] hearts 2/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              WP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  1.450  the grub is open (on you)
+   [1.45 s] hearts 2/3
+on you: w open (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              wP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [1.50 s] hearts 2/3
+on you: w open (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              wP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [2.00 s] hearts 2/3
+on you: w open (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              wP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+end at 2.00 s: hearts 2/3, enemies left 1
+```
+
+## B2. AC-29(a): `fps N`, `room empty`, `player 14.5 4`, `spawn grub 13.5 4`, `end 2`
+
+### 30 FPS
+
+```text
+Lantern Depths 0.5 — room empty — 30 FPS
+   [0.00 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              gP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.033  a grub rears back (left)
+   [0.03 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              GP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [0.50 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              GP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.567  YOU ARE HIT by a grub (left) — hearts 2/3
+   [0.57 s] hearts 2/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              GP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.683  the grub is open (on you)
+   [0.70 s] hearts 2/3
+on you: g open (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              gP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [1.00 s] hearts 2/3
+on you: g open (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              gP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [1.50 s] hearts 2/3
+on you: g open (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              gP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  1.583  a grub rears back (on you)
+   [1.60 s] hearts 2/3
+on you: G biting soon (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              GP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [2.00 s] hearts 2/3
+on you: G biting soon (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              GP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+end at 2.00 s: hearts 2/3, enemies left 1
+```
+
+### 60 FPS
+
+```text
+Lantern Depths 0.5 — room empty — 60 FPS
+   [0.00 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              gP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.017  a grub rears back (left)
+   [0.02 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              GP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [0.50 s] hearts 3/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              GP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.533  YOU ARE HIT by a grub (left) — hearts 2/3
+   [0.53 s] hearts 2/3
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              GP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  0.667  the grub is open (on you)
+   [0.67 s] hearts 2/3
+on you: g open (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              gP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [1.00 s] hearts 2/3
+on you: g open (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              gP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [1.50 s] hearts 2/3
+on you: g open (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              gP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+  1.567  a grub rears back (on you)
+   [1.57 s] hearts 2/3
+on you: G biting soon (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              GP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+   [2.00 s] hearts 2/3
+on you: G biting soon (shown left)
+   +----------------+
+   |                |
+   |                |
+   |                |
+   |                |
+   |              GP|
+   |                |
+   |                |
+   |                |
+   |                |
+   +----------------+
+end at 2.00 s: hearts 2/3, enemies left 1
+```

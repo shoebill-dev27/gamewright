@@ -1,0 +1,47 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/04-studio-to-qa.md",
+  "sha256": "afdf06934b13740c51ea4ecf4abc7ee2b98e230b11640a35bcf26a6ad6c6ff7f",
+  "bytes": 2649
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "381742c8f2afe2e1a2a6af9d031dcc91f98f490ada7c90e2a990d6a1aaf27639",
+  "bytes": 1765
+ },
+ {
+  "path": "studio/skills/reproduce-defect.md",
+  "sha256": "aa7e161cc1fcb38fd92ede1719446f05eee1c7ac431a28a04d570ce451a2291d",
+  "bytes": 1407
+ },
+ {
+  "path": "project.md#current-state",
+  "sha256": "436e88de306f72ff84a8ce375998cbbc27ac71246d336b9bd06217aebf180f5b",
+  "bytes": 460
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "05a33c6f8e50caa20ddf4f3844885137c4261ad4a3e5f3db3eb1b5312b129a9f",
+  "bytes": 237
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "b8b48982e06dba7707a632aaff9e5960b78dd702d2620370591d20069b0662c1",
+  "bytes": 854
+ },
+ {
+  "path": "manual.md",
+  "sha256": "4ec9f212cc2c7d9680ba630a7c496167031350638c74291b07db68b744c5822b",
+  "bytes": 1266
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ }
+]

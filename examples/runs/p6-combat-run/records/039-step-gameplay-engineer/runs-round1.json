@@ -1,0 +1,10 @@
+[
+ {
+  "run": "@run/tests",
+  "command": "python3 -m unittest discover -s tests",
+  "script": "\n",
+  "exit": 1,
+  "seconds": 0.1,
+  "output": ".....................EE.................\n======================================================================\nERROR: test_manual_lists_glyphs_and_lines (test_game.ManualTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/work/tests/test_game.py\", line 625, in test_manual_lists_glyphs_and_lines\n    text = MANUAL.read_text(encoding=\"utf-8\")\n  File \"/usr/lib/python3.10/pathlib.py\", line 1134, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n  File \"/usr/lib/python3.10/pathlib.py\", line 1119, in open\n    return self._accessor.open(self, mode, buffering, encoding, errors,\nFileNotFoundError: [Errno 2] No such file or directory: '/manual.md'\n\n======================================================================\nERROR: test_on_screen_section_lists_x_and_the_practice_room (test_game.ManualTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/work/tests/test_game.py\", line 634, in test_on_screen_section_lists_x_and_the_practice_room\n    text = MANUAL.read_text(encoding=\"utf-8\")\n  File \"/usr/lib/python3.10/pathlib.py\", line 1134, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n  File \"/usr/lib/python3.10/pathlib.py\", line 1119, in open\n    return self._accessor.open(self, mode, buffering, encoding, errors,\nFileNotFoundError: [Errno 2] No such file or directory: '/manual.md'\n\n----------------------------------------------------------------------\nRan 40 tests in 0.059s\n\nFAILED (errors=2)\n"
+ }
+]

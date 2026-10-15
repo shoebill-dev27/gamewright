@@ -255,23 +255,23 @@ def test_run_rounds_are_limited(ws, monkeypatch):
             "playtester",
             PLAYTESTER_LOAD,
             block("@run/play", "") + block("repo/game.py", "x\n"),
-            "carries only repo/",
+            "not a file your Role may write",
         ),
         (
             "qa",
             ["studio/roles/qa.md"],
             block("@run/play", "") + block("repo/game.py", "x\n"),
-            "carries only repo/",
+            "not a file your Role may write",
         ),
         (
             "gameplay-engineer",
             ENGINEER_LOAD,
             block("@run/tests", "") + block("repo/../escape.py", "x\n"),
-            "carries only repo/",
+            "not a file your Role may write",
         ),
         (
-            "game-designer",
-            ["studio/roles/game-designer.md"],
+            "technical-director",
+            ["studio/roles/technical-director.md"],
             block("@run/play", ""),
             "not available here",
         ),
@@ -299,6 +299,18 @@ def test_run_requests_follow_the_role_policy(ws, monkeypatch, role, loads, answe
     errors = json.loads((rec / "record.json").read_text())["attempts"][0]["errors"]
     assert any(why in e for e in errors), errors
     assert not (ws / "project" / "escape.py").exists()
+
+
+@needs_sandbox
+def test_a_run_round_keeps_other_writable_files_for_the_final_answer(ws, monkeypatch):
+    open_step(ws, "gameplay-engineer", ENGINEER_LOAD)
+    outputs = [block("@run/tests", "") + final_engineer("x\n")]
+    monkeypatch.setitem(sr.RUNTIMES, "fake", runtime(outputs, []))
+    with pytest.raises(sr.Rejected):
+        sr.do_step(ws, args(goal="G-001"))
+    rec = next((ws / "records").glob("*-step-gameplay-engineer"))
+    errors = json.loads((rec / "record.json").read_text())["attempts"][0]["errors"]
+    assert any("write it in your final answer" in e for e in errors), errors
 
 
 def test_route_cannot_run_the_build(ws, monkeypatch):

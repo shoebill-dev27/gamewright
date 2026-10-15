@@ -1,0 +1,26 @@
+[
+ {
+  "run": "@run/tests",
+  "command": "python3 -m unittest discover -s tests",
+  "script": "\n",
+  "exit": 1,
+  "seconds": 0.1,
+  "output": ".....................E............\n======================================================================\nERROR: test_manual_lists_glyphs_and_lines (test_game.ManualTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/work/tests/test_game.py\", line 528, in test_manual_lists_glyphs_and_lines\n    text = MANUAL.read_text(encoding=\"utf-8\")\n  File \"/usr/lib/python3.10/pathlib.py\", line 1134, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n  File \"/usr/lib/python3.10/pathlib.py\", line 1119, in open\n    return self._accessor.open(self, mode, buffering, encoding, errors,\nFileNotFoundError: [Errno 2] No such file or directory: '/manual.md'\n\n----------------------------------------------------------------------\nRan 34 tests in 0.050s\n\nFAILED (errors=1)\n"
+ },
+ {
+  "run": "@run/bots/fps30",
+  "command": "python3 bots.py {script}",
+  "script": "fps 30\n",
+  "exit": 0,
+  "seconds": 0.0,
+  "output": "bots at 30 FPS, up to 60 s per room, 3 hearts each\ncamper   room 1: cleared in 3.5 s; hearts lost 0 (hit by: none); attacks 6, dashes 0\ncamper   room 2: cleared in 4.9 s; hearts lost 0 (hit by: none); attacks 7, dashes 0\ncamper   room 3: NOT cleared (5.5 s); hearts lost 3 (hit by: shot 3); attacks 0, dashes 0\ncamper   room 4: NOT cleared (6.9 s); hearts lost 3 (hit by: shot 3); attacks 4, dashes 0\ncamper   room 5: NOT cleared (6.9 s); hearts lost 3 (hit by: shot 3); attacks 6, dashes 0\ncamper   total: cleared 2/5, hearts lost 9, dashes 0\nwalker   room 1: cleared in 3.5 s; hearts lost 0 (hit by: none); attacks 6, dashes 0\nwalker   room 2: cleared in 4.8 s; hearts lost 0 (hit by: none); attacks 8, dashes 0\nwalker   room 3: cleared in 9.2 s; hearts lost 0 (hit by: none); attacks 6, dashes 0\nwalker   room 4: cleared in 9.1 s; hearts lost 0 (hit by: none); attacks 8, dashes 0\nwalker   room 5: cleared in 12.3 s; hearts lost 0 (hit by: none); attacks 10, dashes 0\nwalker   total: cleared 5/5, hearts lost 0, dashes 0\ndodger   room 1: cleared in 3.5 s; hearts lost 0 (hit by: none); attacks 6, dashes 0\ndodger   room 2: cleared in 4.8 s; hearts lost 0 (hit by: none); attacks 8, dashes 0\ndodger   room 3: cleared in 9.5 s; hearts lost 0 (hit by: none); attacks 6, dashes 2\ndodger   room 4: cleared in 10.1 s; hearts lost 0 (hit by: none); attacks 8, dashes 1\ndodger   room 5: cleared in 14.5 s; hearts lost 0 (hit by: none); attacks 10, dashes 6\ndodger   total: cleared 5/5, hearts lost 0, dashes 9\nreactive room 1: cleared in 3.5 s; hearts lost 0 (hit by: none); attacks 6, dashes 0\nreactive room 2: cleared in 4.8 s; hearts lost 0 (hit by: none); attacks 8, dashes 0\nreactive room 3: cleared in 9.5 s; hearts lost 0 (hit by: none); attacks 6, dashes 2\nreactive room 4: cleared in 14.3 s; hearts lost 0 (hit by: none); attacks 8, dashes 6\nreactive room 5: cleared in 11.1 s; hearts lost 0 (hit by: none); attacks 10, dashes 2\nreactive total: cleared 5/5, hearts lost 0, dashes 10\n"
+ },
+ {
+  "run": "@run/bots/fps60",
+  "command": "python3 bots.py {script}",
+  "script": "fps 60\n",
+  "exit": 0,
+  "seconds": 0.1,
+  "output": "bots at 60 FPS, up to 60 s per room, 3 hearts each\ncamper   room 1: cleared in 3.5 s; hearts lost 0 (hit by: none); attacks 6, dashes 0\ncamper   room 2: cleared in 4.8 s; hearts lost 0 (hit by: none); attacks 7, dashes 0\ncamper   room 3: NOT cleared (5.5 s); hearts lost 3 (hit by: shot 3); attacks 0, dashes 0\ncamper   room 4: NOT cleared (6.9 s); hearts lost 3 (hit by: shot 3); attacks 4, dashes 0\ncamper   room 5: NOT cleared (6.9 s); hearts lost 3 (hit by: shot 3); attacks 6, dashes 0\ncamper   total: cleared 2/5, hearts lost 9, dashes 0\nwalker   room 1: cleared in 3.5 s; hearts lost 0 (hit by: none); attacks 6, dashes 0\nwalker   room 2: cleared in 5.1 s; hearts lost 0 (hit by: none); attacks 8, dashes 0\nwalker   room 3: cleared in 9.0 s; hearts lost 0 (hit by: none); attacks 6, dashes 0\nwalker   room 4: cleared in 9.1 s; hearts lost 0 (hit by: none); attacks 8, dashes 0\nwalker   room 5: cleared in 11.2 s; hearts lost 0 (hit by: none); attacks 10, dashes 0\nwalker   total: cleared 5/5, hearts lost 0, dashes 0\ndodger   room 1: cleared in 3.5 s; hearts lost 0 (hit by: none); attacks 6, dashes 0\ndodger   room 2: cleared in 5.1 s; hearts lost 0 (hit by: none); attacks 8, dashes 0\ndodger   room 3: cleared in 11.8 s; hearts lost 0 (hit by: none); attacks 6, dashes 4\ndodger   room 4: cleared in 10.0 s; hearts lost 0 (hit by: none); attacks 8, dashes 1\ndodger   room 5: cleared in 9.8 s; hearts lost 0 (hit by: none); attacks 10, dashes 2\ndodger   total: cleared 5/5, hearts lost 0, dashes 7\nreactive room 1: cleared in 3.5 s; hearts lost 0 (hit by: none); attacks 6, dashes 0\nreactive room 2: cleared in 6.3 s; hearts lost 1 (hit by: grub 1); attacks 8, dashes 3\nreactive room 3: cleared in 11.8 s; hearts lost 0 (hit by: none); attacks 6, dashes 4\nreactive room 4: cleared in 12.9 s; hearts lost 0 (hit by: none); attacks 9, dashes 5\nreactive room 5: cleared in 11.1 s; hearts lost 0 (hit by: none); attacks 11, dashes 2\nreactive total: cleared 5/5, hearts lost 1, dashes 14\n"
+ }
+]

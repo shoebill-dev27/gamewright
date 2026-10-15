@@ -1,0 +1,249 @@
+<<<FILE decisions/D-007-practice-room-paragraph-placed-by-owner.md
+---
+kind: decision
+id: D-007
+status: accepted
+decided_by: owner
+goal: G-001
+date: 2026-10-15
+supersedes: none
+---
+# D-007: The Owner places the practice-room paragraph in `manual.md` (Option A)
+
+## Decision
+
+The Owner chose Option A of escalation 36. The Owner added the following paragraph to `manual.md`, in the `## On screen` section, at the end of the section, with no change to the wording:
+
+> The practice room (`room empty`) is not part of a run. Enemies appear only where your script places them (`spawn`), and you stand where `player` puts you. Nothing heals, there is no next room, and the session ends a moment after you go down. If a grub or spitter is on your tile, it is drawn on a free tile next to you, so you can always see it.
+
+Owner's words (2026-10-15): 「A。36 の段落を一字も変えずに manual.md の ## On screen セクションの末尾に追記しました（Owner の代理として Studio の推奨案を採用）。」
+
+Limits:
+- This settles only who places the paragraph and that Option A applies. It does not change D-005 (the Owner places `manual.md` content) or D-006 (the practice room is listed in the On screen section). Options B and C were not chosen.
+- The placement is the Owner's statement. QA verifies it independently (AC-15, `ManualTest`) and does not take it on trust.
+- The Owner's reply says the choice follows the Studio's recommendation, made on the Owner's behalf. The Studio records it as the Owner's decision as given.
+
+## Rationale
+
+The wording was already fixed by D-006 and AC-15, and only the file edit was missing. It is a small, reversible edit. Options B (a permanent change to write permissions or D-005) and C (overturning D-006) were out of proportion to the gap.
+
+## Alternatives considered
+
+- B: let roles edit `manual.md`. It changes the D-005 policy and needs an environment change, which is too much for one paragraph.
+- C: drop the practice-room entry from AC-15. It reverses D-006 and needs a Design re-decision, which is unnecessary.
+
+## Revisit when
+
+- QA finds the paragraph missing, altered, or outside `## On screen`, or `ManualTest` still fails for a manual-related reason.
+- Roles repeatedly need to edit `manual.md`. Then reconsider Option B and D-005.
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/36-studio-to-owner.md
+---
+kind: escalation
+goal: G-001
+seq: 36
+from: studio
+to: owner
+status: resolved
+decision: D-007
+---
+# 36: オーナー判断のお願い — `manual.md` に練習部屋の段落を入れてください
+
+## Question
+
+`manual.md` の `## On screen` セクションに、下記の英文1段落を (文言そのままで) 追記してもらえますか。
+
+## Why this needs the Owner
+
+作業は、どのロールも作れない素材 (書き込めない `manual.md`) で止まっています。D-005 により `manual.md` はオーナーが置くもので、エンジニアの書き込み範囲にも入っていません。同じ入力 (`manual.md` の更新) が3回続けて足りず、その間に新しい材料も供給されていないため、ロールへは再度回さずオーナーに上げます (orchestration.md の「ロールが作れない情報・素材で止まる場合」)。
+
+## Options
+
+### Option A — オーナーが段落を追記する (推奨)
+
+`manual.md` の `## On screen` セクション (記号表のあと、"With color on…" 段落の前後どちらでも可、セクション内であること) に次の段落を一字も変えずに入れます。`manual.md` は `repo/` と同じ階層に置いてください (`ManualTest` がそこを参照します)。
+
+> The practice room (`room empty`) is not part of a run. Enemies appear only where your script places them (`spawn`), and you stand where `player` puts you. Nothing heals, there is no next room, and the session ends a moment after you go down. If a grub or spitter is on your tile, it is drawn on a free tile next to you, so you can always see it.
+
+数分の作業で、可逆です。AC-15 (D-006 の練習部屋の記載) が満たされ、`ManualTest` 2件が通るようになります。
+If chosen: Resume。D-007 として記録し、Goal を `active` に戻し、QA (7g) の AC-15 確認を `ManualTest` 込みで行います。7h (アートディレクター)、Play、Review は計画どおりです。
+
+### Option B — 今後 `manual.md` をロールが編集できるようにする
+
+オーナーが実行環境の書き込み許可を広げ (または D-005 を改め)、エンジニアが `manual.md` を直接編集できるようにします。以後の手戻りは減りますが、D-005 (オーナーが置く) の方針変更になり、設定変更の手間もあります。
+If chosen: D-005 を改める Decision を記録し、7f を書き込み許可付きで再度エンジニアに回します。
+
+### Option C — 練習部屋の段落を見送る
+
+AC-15 のうち練習部屋の記載を外し、プレイヤー向けマニュアルは現状のままにします。D-006 の「練習部屋は On screen セクションに載せる」という裁定を覆すので、game-designer / game-director の再判断が必要です。
+If chosen: Design (game-designer) に戻して AC-15 と D-006 を見直し、`ManualTest` の該当テストを削ります。
+
+## Studio recommendation
+
+Option A。
+
+## Reasoning
+
+文面はすでに確定していて (D-006、AC-15)、必要なのは追記だけです。B は恒久的な方針変更、C は既存の裁定を覆すため、この小さな欠落には釣り合いません。A が長引く場合に B を検討してください。
+
+## Meanwhile
+
+描画変更 (F1/AC-18、F3、AC-17) の検証は `manual.md` に依存しないため続行します。QA 7g (37) を開き、AC-15 と `ManualTest` は「未実行」として扱います。アートディレクターの 7h は 7g の後に、Play と Review はその後に続きます。
+
+## Owner decision required
+
+A / B / C — 選択肢と条件を返信してください。
+
+---
+
+**Owner response (2026-10-15):** A。36 の段落を一字も変えずに manual.md の ## On screen セクションの末尾に追記しました（Owner の代理として Studio の推奨案を採用）。
+
+**Resolved (2026-10-15):** Option A を D-007 として記録。Goal は `active` に戻し、AC-15 と `ManualTest` の確認は QA 7i (38) で行う。
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/38-studio-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 38
+from: studio
+to: qa
+stage: Verify
+outcome: routed
+---
+# 38: studio → qa — Verify AC-15 (practice-room paragraph in `manual.md`) and run `ManualTest`
+
+## Task
+
+Verify AC-15 against the build and `manual.md`. Read the `## On screen` section of `manual.md` and check that it contains the practice-room paragraph below, word for word. Then run `run_tests` and report the result of the two `ManualTest` tests in particular.
+
+## Context
+
+Goal G-001 (combat feels monotonous) is in Verify. In earlier rounds `ManualTest` had no valid result: the QA and engineer workspaces lacked `manual.md`. The Owner has now added the paragraph (D-007). A separate Verify step (37) covers the other acceptance criteria and does not cover AC-15. Do not repeat that work except where AC-15 needs it.
+
+## Findings
+
+Nothing to report from earlier work for this check. The Owner states they appended the following paragraph at the end of `## On screen`:
+
+> The practice room (`room empty`) is not part of a run. Enemies appear only where your script places them (`spawn`), and you stand where `player` puts you. Nothing heals, there is no next room, and the session ends a moment after you go down. If a grub or spitter is on your tile, it is drawn on a free tile next to you, so you can always see it.
+
+This is the Owner's statement; verify it independently.
+
+## Decisions already made
+
+- D-005: the Owner places `manual.md` content. Roles do not edit it. Report problems, do not fix them.
+- D-006: the practice room is listed in the On screen section; enemies may overlap the player but are never hidden.
+- D-007: the Owner placed the paragraph above (Option A).
+
+## Constraints
+
+- `manual.md` must sit beside `repo/` in your workspace, because `ManualTest` reads it there. If it is missing, report that as a blocker. Do not call it a test failure.
+- Do not edit `manual.md` or the build.
+- Use the project's run commands: `run_tests`, and `run_play` / `run_trace` with your own input scripts.
+
+## Open questions
+
+- Is the paragraph present in `## On screen`, word for word and inside that section?
+- Do the two `ManualTest` tests pass with `manual.md` placed?
+- Does the behavior the paragraph describes match the build? Check with scripts: the practice room is not part of a run, enemies appear only where `spawn` places them, nothing heals, there is no next room, the session ends shortly after you go down, and an enemy on the player's tile is drawn on a free adjacent tile.
+
+## Expected output
+
+A pass/fail report on AC-15, covering the paragraph check, the `ManualTest` results, and the behavior checks, with raw command output as evidence. Address the result to `studio`. If anything cannot be run, say what is missing.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: manual.md; design/combat.md (AC-15, AC-18); project.md#current-state; repo (build; use `run_tests`, `run_play`, `run_trace`)
+- Decisions: decisions/D-005-owner-places-manual-draft.md, decisions/D-006-overlap-display-and-practice-room-manual.md, decisions/D-007-practice-room-paragraph-placed-by-owner.md
+- Previous handoff: goals/G-001-combat-monotony/37-studio-to-qa.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-15
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): when an action player from the project's player profile plays through combat encounters, the fights feel varied and engaging, and the player's moment-to-moment choices (positioning, timing, enemy behavior) visibly matter. The player no longer experiences the fights as the same repeated pattern.
+
+Out of scope: adding input buttons beyond attack, dash and pause (D-001, Owner approval needed); changes to the run length or the non-combat systems; numeric targets (these belong to Design as acceptance criteria, and the final verdict to Review).
+
+No immediate escalation: the Goal does not conflict with the vision or D-001, and it needs no reinterpretation. Improving depth through positioning, timing and enemy behavior is what pillar 1 asks for.
+
+## Unknowns
+
+- Observe (playtester, qa): done (02, 08, 06, 15). Not observed: room 5 fight, approaching a spitter, projectile hits, room clear, dash dodging; Play covers them.
+- Diagnose, Decide: done (03; D-002, D-005, D-006). Cause: single-state, untelegraphed enemy behavior; Option A.
+- Design: done (10, 16, 33). Spec `design/combat.md` (AC-1…AC-18), D-003, D-006, `design/combat-visuals.md` (V-1…V-8).
+- Plan: done (14, D-004). Gap defaults F1–F11; the designer confirms them at Review, F1 (grub speed) matters most.
+- Build: done. Code (18, 22, 23, 35), render fix F1/AC-18 and F3 in `play.py` (38 of 40 tests pass). The Owner placed the AC-15 practice-room paragraph in `manual.md` (D-007, as stated by the Owner; QA checks it in 7i). F2 is cosmetic.
+- Verify: no AC observed failing so far. 7g (37) covers all but AC-15. Suite-only: AC-14, AC-10 2-swipe kill, "(too soon)" and "(down)" lines. Pause (F11) not implemented. 7i (38) checks AC-15 and `ManualTest`, which has no valid result yet and needs `manual.md` beside `repo/`.
+- Verify, visuals: earlier V-1 fail (hidden grub), F3. Open: V-6 (color) needs a `--color` capture; V-2 gaps (60 FPS charge-start draw, draw after a missed swipe). 7h re-judges V-1, V-2, V-6 and the displaced cell from QA's captures.
+- Play: `playtester`, live and reactive, from a Handoff composed by the Studio from permitted information. Watch slot starvation. Planned, after Verify passes.
+- Review: `game-director` with `review-outcome`. Planned. Open: run progression after "run over"; F1, F6, F7; numbering of same-type enemies in one cell; a still player going down in about 5 s.
+- Skipped: none.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 02-playtester-to-game-designer.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-game-designer-to-game-director.md |
+| 3a | Decide | game-director | make-decision | done | 05-game-director-to-studio.md |
+| 3b | Observe (defects) | qa | reproduce-defect | done | 06-qa-to-game-designer.md |
+| 3c | Observe (rooms 4–5) | playtester | playtest-session | done | 08-playtester-to-game-designer.md |
+| 4 | Design | game-designer | write-design-spec | done | 10-game-designer-to-studio.md |
+| 5a | Plan | technical-director | technical-plan | done | 14-technical-director-to-studio.md |
+| 5b | Observe (spit line) | qa | reproduce-defect | done | 15-qa-to-studio.md |
+| 5c | Design (visuals) | art-director | visual-review, write-design-spec | done | 16-art-director-to-studio.md |
+| 6a | Build (code) | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md |
+| 6b | Build (`run_tests` check, manual placed) | gameplay-engineer | implement-change | done | 23-gameplay-engineer-to-studio.md |
+| 7a | Verify | qa | verify-change | done (question, no AC failed) | 26-qa-to-studio.md |
+| 7b | Verify (visuals) | art-director | visual-review | done (question, no build output) | 27-art-director-to-studio.md |
+| 7c | Verify (rerun: manual, runs, captures) | qa | verify-change | done (question, no AC failed) | 29-qa-to-studio.md |
+| 7d | Verify (visuals, from captures) | art-director | visual-review | done (fail: V-1, F3) | 32-art-director-to-studio.md |
+| 7e | Design (F1 overlap, AC-15 wording) | game-designer | write-design-spec | done | 33-game-designer-to-studio.md |
+| 7f | Build (F1/F3 render, manual paragraph) | gameplay-engineer | implement-change | done (render built) | 35-gameplay-engineer-to-studio.md |
+| 7f-O | Owner: place the manual paragraph | owner | — | done (Option A, D-007) | 36-studio-to-owner.md |
+| 7g | Verify (all but AC-15) | qa | verify-change | open | 37-studio-to-qa.md |
+| 7i | Verify (AC-15, `ManualTest`) | qa | verify-change | open (parallel to 7g) | 38-studio-to-qa.md |
+| 7h | Verify (visuals) | art-director | visual-review | planned | — |
+| 8 | Play | playtester | playtest-session | planned | — |
+| 9 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+Resume after the Owner chose Option A (36, D-007): the Owner placed the manual paragraph. Goal back to `active`. 7i (AC-15, `ManualTest`) is confirmed and opened as 38 in parallel with 7g (37); 7h, Play and Review unchanged.
+
+## Next action
+
+Run `37-studio-to-qa.md` (7g) and `38-studio-to-qa.md` (7i) as parallel QA steps (results addressed to `studio`), then Route:
+- If both pass, open 7h (art director, from QA's captures).
+- On a QA fail, return to Build with the report (a second fail on the same criterion goes to `technical-director`).
+- If `manual.md` is missing or altered, QA reports it and the Studio re-checks with the Owner (D-007, Revisit when).
+
+## Outcome
+
+(Filled at Close.)
+>>>END
+
+Resume is done, but I could not append the Resume entry to `goals/G-001-combat-monotony/log.md`. That path is not in my write list, so the Resume entry (active; open 37 and 38; the Route changes text above) still has to be added by whoever can write the log.
+
+- **Decision:** I recorded the Owner's choice of Option A as `decisions/D-007-practice-room-paragraph-placed-by-owner.md`, with the Owner's words quoted. The Owner's reply says it adopts the Studio's recommendation on the Owner's behalf, and the decision file notes that. QA will check the paragraph itself rather than trust the Owner's statement.
+- **Escalation 36:** It is now `status: resolved` with `decision: D-007`, and the Owner response is kept.
+- **Goal G-001:** It is back to `active`. The route table marks the Owner step 7f-O done and adds step 7i, which is open.
+- **Next steps:** I wrote `38-studio-to-qa.md` for step 7i. It asks QA to confirm the paragraph is in `## On screen` word for word, run the two `ManualTest` tests, and check that the build matches what the paragraph says. Step 7g (`37-studio-to-qa.md`) is still open, and 7i can run alongside it.
+- **After both QA steps:** Run both, then Route. If both pass, step 7h (art director) opens, followed by Play and Review.

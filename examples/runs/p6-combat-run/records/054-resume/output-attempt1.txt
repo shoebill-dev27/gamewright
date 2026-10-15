@@ -1,0 +1,244 @@
+Resume is done. The Owner's Option A run came back 40/40, so AC-15 passes, 7l is dropped, and Play opens with a Handoff composed from permitted information only. I did not append the Resume entry to `log.md`, because it is outside my write list; the next runtime step needs to add it.
+
+<<<FILE decisions/D-010-owner-ran-suite-ac15-passes.md
+---
+kind: decision
+id: D-010
+status: accepted
+decided_by: owner
+goal: G-001
+date: 2026-10-15
+supersedes: none
+---
+# D-010: The Owner ran `run_tests` for the AC-15 rerun (Option A); 40/40 passes
+
+## Decision
+
+The Owner chose Option A of Escalation 48. The Owner ran `python3 -m unittest discover -s tests` in `repo/` with the unchanged `manual.md` beside it, and reported: Ran 40 tests, OK (40 of 40 passed, 0 failures).
+
+AC-15 is therefore treated as passing. Together with 7g (39) and 7h (44), all Verify steps are done and Play (stage 8) opens. Limit: the run is the Owner's, not QA's. It was made in a sandbox on the Owner's behalf, against `manual.md` unchanged (D-009), and the result is the raw test output.
+
+Owner's own words (2026-10-15): "A。manual.md は変更せず repo/ の隣に置いた環境で python3 -m unittest discover を実行しました（Owner の代理、サンドボックス内）。結果: Ran 40 tests — OK（40件中40件成功、失敗0）。"
+
+No conditions were added by the Owner.
+
+## Rationale
+
+The test output itself is objective. It is the same procedure as D-008, and it clears the only open Verify item. Another QA round would have lacked the same input (`manual.md`, see 29, 40, 47).
+
+## Alternatives considered
+
+- Option B (the Owner places `manual.md` in QA's workspace, QA reruns): higher independence, but it was unclear whether the Owner could place the file there. It was not needed once A returned 40/40.
+
+## Revisit when
+
+The suite or `manual.md` changes after this run, so that AC-15 must be re-verified. Or a later build fails `ManualTest`. In that case the designer rules (D-009 "Revisit when").
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/48-studio-to-owner.md
+---
+kind: escalation
+goal: G-001
+seq: 48
+from: studio
+to: owner
+status: resolved
+decision: D-010
+---
+# 48: Owner decision needed — AC-15 の再実行（`run_tests` を 40/40 で通す）をどう行うか
+
+## Question
+
+修正済みの `ManualTest` を、変更していない `manual.md` と一緒に実行する作業を、前回と同じくオーナーにお願いしてよいですか（それとも QA の作業場所に `manual.md` を置きますか）。
+
+## Why this needs the Owner
+
+`studio/orchestration.md` の「どの役割も用意できない情報・資料でブロックされている」に該当します。AC-15 の合否には、`repo/` の隣にある変更前のままの `manual.md` が必要です。QA の作業場所にはそれがありません（29、40）。エンジニアの作業場所にあるかも確認できず、47 ではスイートを実行していません。どの役割も `manual.md` を編集・配置できないため、Studio は決められません。QA を同じ入力不足のまま三度目に送ることは、ループ上限で禁止されています。
+
+## Options
+
+### Option A — オーナーが `run_tests` を実行して結果を報告する（D-008 と同じ手順）
+
+`manual.md` が `repo/` の隣にある環境で、`repo/` から `python3 -m unittest discover -s tests` を実行します。`manual.md` は変更しないでください。報告してほしいのは、実行総数、失敗数、失敗があればそのメッセージの原文です。
+期待結果は 40/40 です。コストは数分で、元に戻せます。実行の独立性は QA より弱いものの、結果はテスト出力そのものなので十分に客観的です。
+If chosen: 結果を Decision（`decided_by: owner`）に記録します。40/40 なら AC-15 は合格で、次に Play（8）を開きます（許された情報だけで Studio が Handoff を作成）。失敗が残る場合は、D-009 の「見直し条件」に従いデザイナーが裁定します。
+
+### Option B — オーナーが変更していない `manual.md` のコピーを QA の作業場所の `repo/` の隣に置く
+
+その後、QA が独立して `run_tests` を実行します。独立性は最も高く、今後の再検証でも入力不足が再発しません。ただし、QA の作業場所にオーナーが置けるかは Studio には分かりません。置けない場合は A に戻ります。
+If chosen: QA への Verify Handoff（7l）を、`manual.md` が置かれていることを前提に作成します。合格すれば Play（8）、失敗なら通常の戻りルールに従います。
+
+## Studio recommendation
+
+Option A。
+
+## Reasoning
+
+A は前例（D-008）があり、確実に1回で終わります。結果が 40/40 なら、AC-15 の判定に必要な証拠はそろいます。B は独立性が高いものの、QA の作業場所へ置けるか不明で、置けなければ時間を失います。QA の作業場所に置ける手段が簡単にあるなら B に変えてもかまいません。
+
+## Meanwhile
+
+すべての残りのステップ（7l、Play、Review）は、この答えに依存します。独立して進められる作業はありません。
+
+## Owner decision required
+
+A / B — 選択肢と条件があれば返信してください。A の場合は、`run_tests` の出力（総数、失敗数、失敗メッセージ）も添えてください。
+
+---
+
+**Owner response (2026-10-15):** A。manual.md は変更せず repo/ の隣に置いた環境で python3 -m unittest discover を実行しました（Owner の代理、サンドボックス内）。結果: Ran 40 tests — OK（40件中40件成功、失敗0）。
+
+**Resolution:** Option A を採用。D-010 に記録。AC-15 は合格、Play（8）を開く。
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-15
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): when an action player from the project's player profile plays through combat encounters, the fights feel varied and engaging, and the player's moment-to-moment choices (positioning, timing, enemy behavior) visibly matter. The player no longer experiences the fights as the same repeated pattern.
+
+Out of scope: adding input buttons beyond attack, dash and pause (D-001, Owner approval needed); changes to the run length or the non-combat systems; numeric targets (these belong to Design as acceptance criteria, and the final verdict to Review).
+
+No immediate escalation: the Goal does not conflict with the vision or D-001, and it needs no reinterpretation. Improving depth through positioning, timing and enemy behavior is what pillar 1 asks for.
+
+## Unknowns
+
+- Observe (playtester, qa): done (02, 08, 06, 15). Not observed: room 5 fight, approaching a spitter, projectile hits, room clear, dash dodging; Play covers them.
+- Diagnose, Decide: done (03; D-002, D-005, D-006). Cause: single-state, untelegraphed enemy behavior; Option A.
+- Design: done (10, 16, 33, 45). Spec `design/combat.md` (AC-1…AC-18), D-003, D-006, `design/combat-visuals.md` (V-1…V-8), D-009 (test ruling).
+- Plan: done (14, D-004). Gap defaults F1–F11; the designer confirms them at Review, F1 (grub speed) matters most.
+- Build: done (18, 22, 23, 35, 47; manual paragraph placed by the Owner, D-007). F2 is cosmetic. Pause (F11) not implemented.
+- Verify: done. Behavior 7g (39) passed, AC-17 and AC-18 hold. AC-15 passes: the Owner ran the suite, 40/40 with the unchanged `manual.md` (D-010, after D-008 and D-009).
+- Verify, visuals: done (44). V-4 `z/Z` and V-6 are from code only. V-7 (two spitters, room 4) not observed: Play watches it. F4 (a shot hidden under a glyph on the same tile) is optional polish, left for Review.
+- Play: `playtester`, live and reactive, from a Handoff composed by the Studio from permitted information only (49). Open now.
+- Review: `game-director` with `review-outcome`. Planned. Open: run progression after "run over"; F1, F4, F6, F7; numbering of same-type enemies in one cell; a still player going down in about 5 s.
+- Skipped: none.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 02-playtester-to-game-designer.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-game-designer-to-game-director.md |
+| 3a | Decide | game-director | make-decision | done | 05-game-director-to-studio.md |
+| 3b | Observe (defects) | qa | reproduce-defect | done | 06-qa-to-game-designer.md |
+| 3c | Observe (rooms 4–5) | playtester | playtest-session | done | 08-playtester-to-game-designer.md |
+| 4 | Design | game-designer | write-design-spec | done | 10-game-designer-to-studio.md |
+| 5a | Plan | technical-director | technical-plan | done | 14-technical-director-to-studio.md |
+| 5b | Observe (spit line) | qa | reproduce-defect | done | 15-qa-to-studio.md |
+| 5c | Design (visuals) | art-director | visual-review, write-design-spec | done | 16-art-director-to-studio.md |
+| 6a | Build (code) | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md |
+| 6b | Build (`run_tests` check, manual placed) | gameplay-engineer | implement-change | done | 23-gameplay-engineer-to-studio.md |
+| 7a | Verify | qa | verify-change | done (question, no AC failed) | 26-qa-to-studio.md |
+| 7b | Verify (visuals) | art-director | visual-review | done (question, no build output) | 27-art-director-to-studio.md |
+| 7c | Verify (rerun: manual, runs, captures) | qa | verify-change | done (question, no AC failed) | 29-qa-to-studio.md |
+| 7d | Verify (visuals, from captures) | art-director | visual-review | done (fail: V-1, F3) | 32-art-director-to-studio.md |
+| 7e | Design (F1 overlap, AC-15 wording) | game-designer | write-design-spec | done | 33-game-designer-to-studio.md |
+| 7f | Build (F1/F3 render, manual paragraph) | gameplay-engineer | implement-change | done (render built) | 35-gameplay-engineer-to-studio.md |
+| 7f-O | Owner: place the manual paragraph | owner | — | done (Option A, D-007) | 36-studio-to-owner.md |
+| 7g | Verify (all but AC-15) | qa | verify-change | done (pass) | 37-studio-to-qa.md |
+| 7i | Verify (AC-15, `ManualTest`) | qa | verify-change | done (question: ManualTest blocked) | 38-studio-to-qa.md |
+| 7i-O | Owner: `ManualTest` result | owner | — | done (Option A, D-008: 39/40) | 42-studio-to-owner.md |
+| 7h | Verify (visuals) | art-director | visual-review | done (pass; V-6 from code, V-7 not seen) | 41-studio-to-art-director.md |
+| 7j | Design (`run over` manual test failure) | game-designer | write-design-spec | done (test too literal, D-009) | 43-studio-to-game-designer.md |
+| 7k | Build (test fix, line wraps) | gameplay-engineer | implement-change | done (test changed, suite not run) | 46-studio-to-gameplay-engineer.md |
+| 7k-O | Owner: place manual text | owner | — | skipped (manual unchanged, D-009) | — |
+| 7l-O | Owner: AC-15 rerun | owner | — | done (Option A, D-010: 40/40) | 48-studio-to-owner.md |
+| 7l | Verify (AC-15 rerun by QA) | qa | verify-change | skipped (Owner's 40/40 run, D-010) | — |
+| 8 | Play | playtester | playtest-session | open | 49-studio-to-playtester.md |
+| 9 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+After the Owner chose A (48, D-010): the suite ran 40/40 with the unchanged `manual.md`, so AC-15 passes. Goal back to `active`. 7l is skipped, and Play (8) opens as 49, a fresh Handoff composed from permitted information only. Review unchanged.
+
+## Next action
+
+- `playtester` starts Play from `49-studio-to-playtester.md` in a fresh executor context. Its result is addressed to `studio` (`50-playtester-to-studio.md`).
+- Then Route: design or experience issues go to Diagnose (`game-designer`); defects go to Observe (`qa`); otherwise Review (`game-director`).
+
+## Outcome
+
+(Filled at Close.)
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/49-studio-to-playtester.md
+---
+kind: handoff
+goal: G-001
+seq: 49
+from: studio
+to: playtester
+stage: Play
+outcome: routed
+---
+# 49: studio → playtester — Play the build as a player and report what you experience
+
+## Task
+
+Play the game as a player from the profile below, through to the end of room 5 if you can. Report what you experience, from observable experience only.
+
+## Context
+
+A new session of the sample game. You have no history with this build. Judge it as a first-time player who has read the manual.
+
+## Findings
+
+Nothing to hand over. This Handoff intentionally contains no information about the build's implementation, history or expected results.
+
+How to run the build (from `repo/`, the build directory):
+
+- Write an input script in the format described in `manual.md`, then run `python3 play.py --view player {script}`. This shows what a player sees.
+- Play reactively: run, read what is on screen, decide your next inputs, run again. Try more than one approach to the rooms (for example, different positioning, timing, or use of attack and dash). Replay a room if you want to compare.
+- Cover all five rooms in order if you can. Note where you stop and why (for example, the run ended).
+
+Player profile: Action players who want short, intense runs. Comfortable with dodging and spacing; not interested in memorizing combo lists. Mostly play with a gamepad.
+
+Play focus: pay attention to combat.
+
+## Decisions already made
+
+None.
+
+## Constraints
+
+- Use only the player view (`--view player`) and `manual.md`. Do not read source code, tests, bots, design documents, Decisions, other Goal files or the simulation trace.
+- Report what you observed as a player: what you saw, what you tried, what you felt. Label guesses about causes as guesses.
+- You have no authority over the game. Do not propose rule changes as decisions; observations and player-level suggestions are fine.
+
+## Open questions
+
+None.
+
+## Expected output
+
+An observation report (`50-playtester-to-studio.md`, handoff template, `to: studio`, `outcome: done`) in Findings. Include:
+
+- what you played and in what order (which rooms, how many attempts);
+- how the fights felt over time (varied or repetitive, engaging or dull), with the moments that show it;
+- whether your choices (positioning, timing, attack, dash) seemed to matter, and examples;
+- anything unclear, unreadable or unfair as a player;
+- anything that looked broken (state it plainly, with the script lines that show it).
+
+Address the result to `studio`.
+
+## Load
+
+- Role: studio/roles/playtester.md
+- Skills: studio/skills/playtest-session.md
+- Project: project.md#player-profile, manual.md, the build `repo/` (run with `run_play` only)
+- Decisions: none
+- Previous handoff: none
+>>>END

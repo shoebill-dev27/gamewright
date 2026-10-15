@@ -1,0 +1,229 @@
+<<<FILE decisions/D-005-owner-places-manual-draft.md
+---
+kind: decision
+id: D-005
+status: accepted
+decided_by: owner
+goal: G-001
+date: 2026-10-15
+supersedes: none
+---
+# D-005: The Owner places the `manual.md` draft by hand (Option A)
+
+## Decision
+
+The Owner saved the "Draft `manual.md`" from `18-gameplay-engineer-to-studio.md` unchanged as `manual.md` in the project root. The gameplay-engineer does not write `manual.md`. The next Build step only checks that the placed file satisfies `ManualTest` (`run_tests`, expected 34/34). If it passes, Verify opens.
+
+Owner's words (Escalation 21): 「A。18 の Draft manual.md を変更せずにプロジェクト直下の manual.md として置きました（Owner の代理として Studio の推奨案を採用）。」
+
+Conditions: the draft is placed unchanged. If `run_tests` shows the draft is wrong, the fix goes back to the Owner or to a Role the Owner authorizes. The gameplay-engineer's write list does not include `manual.md`.
+
+Limits: this covers only how `manual.md` for build 0.5 got into place. It does not change D-004 item 5 (the gameplay-engineer owns the manual in principle) and grants no standing write access.
+
+## Rationale
+
+The draft was checked against the implementation by reading, so placing it is low risk and reversible. It removes the block with one manual action and needs no change to the execution environment. `run_tests` then confirms what was only read before.
+
+## Alternatives considered
+
+- **B, write access for the gameplay-engineer:** the roles fit, but it needs an environment change. The outcome would be the same as A.
+- **C, skip `manual.md` and go to Verify:** AC-15, V-5 and `ManualTest` would stay unverified and the problem would return before Review. Not chosen.
+
+## Revisit when
+
+`ManualTest` fails on the placed file, or a later change to controls or the script format makes `manual.md` need edits again. Then ask for write access (B) rather than another manual placement.
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/21-studio-to-owner.md
+---
+kind: escalation
+goal: G-001
+seq: 21
+from: studio
+to: owner
+status: resolved
+decision: D-005
+---
+# 21: オーナーの判断が必要 — `manual.md` を誰がどうやって書くか
+
+## Question
+
+ビルド 0.5 のコードは完成しましたが、プロジェクト直下の `manual.md` を書ける担当がいません。Owner が手で置くか、書き込み権限を与えるか、`manual.md` なしで先へ進むかを選んでください。
+
+## Why this needs the Owner
+
+`manual.md` の作成が2回続けて同じ理由(書き込み権限がない)で差し戻されました(18 と 20)。その間に新しい入力はありません。`studio/orchestration.md` の Loop limits により、同じ入力不足を3回目も Role に回すことはできません。Owner への escalation が必要です。どの Role も作れない材料(書き込み権限)で作業が止まっているケースにも当たります。
+
+状況:
+- コード T1–T7, T9 は完了し、34 テスト中 33 が通っています(18)。
+- 残りは T8 の `manual.md` だけです。ドラフトは `18-gameplay-engineer-to-studio.md` の "Draft `manual.md`" にあります。
+- `ManualTest` は `REPO.parent / "manual.md"`(プロジェクト直下)を読みます。`repo/` 以下に置いても満たされません。
+- QA の AC-15 と V-5 は `manual.md` に依存します。
+- gameplay-engineer がドラフトを実装と照らし合わせて読んだ限り、矛盾はなく、そのまま置けるはずです。ただしテストは未実行です。
+
+## Options
+
+### Option A — Owner がドラフトを手で置く
+
+Owner が 18 の "Draft `manual.md`" を、変更せずにプロジェクト直下へ `manual.md` として保存します。
+コスト: Owner の手作業が1回。リスクは小さく、いつでも元に戻せます。
+If chosen: Owner が置いたと返信したら、Studio は gameplay-engineer に `run_tests`(34/34 の確認)だけを依頼します。通れば QA(Sender assessment なしの新しい Handoff)と art-director(視覚レビュー)を並列で開きます。
+
+### Option B — gameplay-engineer に `manual.md` の書き込み権限を与える
+
+次の gameplay-engineer のステップの書き込み許可リストに `manual.md` を加えます。
+コスト: 実行環境の設定変更。D-004 の項目5(マニュアルは gameplay-engineer の担当)に沿います。
+If chosen: Studio は 19 と同じ内容で gameplay-engineer を再実行します(ドラフトを配置し、`run_tests` を確認)。通れば Option A と同じ Verify へ進みます。
+
+### Option C — `manual.md` なしで Verify に進む
+
+`manual.md` をいったん後回しにして、QA と art-director に進みます。
+コスト: AC-15 と V-5 は検証不能になり、`ManualTest` が失敗したままです。後で同じ問題に戻ります。
+If chosen: QA の Handoff に「AC-15・V-5・ManualTest は対象外」と明記して Verify を開きます。`manual.md` は最終 Review 前に再度 escalate します。
+
+## Studio recommendation
+
+Option A(手軽さを優先するなら)。実行環境の設定を変えられるなら Option B でも構いません。
+
+## Reasoning
+
+ドラフトは確認済みで、置くだけで済みます。Option A はすぐできて、Option B と結果は同じです。Option B は担当の筋は通りますが、設定変更が必要です。Option C は問題を先送りするだけで、AC-15・V-5 が未検証のまま Play と Review に進むことになるため勧めません。ドラフトの実装との整合は読んで確かめただけでテストは未実行ですが、置いた後に `run_tests` で確認できます。
+
+## Meanwhile
+
+Nothing; all remaining steps depend on this answer. (Verify、Play、Review はすべて `manual.md` の有無に依存します。)
+
+## Owner decision required
+
+A / B / C — 選択肢を返信してください(条件があれば併せて)。A の場合は、置き終わったことも知らせてください。
+
+---
+
+**Owner response (2026-10-15):** A。18 の Draft manual.md を変更せずにプロジェクト直下の manual.md として置きました（Owner の代理として Studio の推奨案を採用）。
+
+**Resolved:** recorded as D-005 (`decisions/D-005-owner-places-manual-draft.md`).
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-15
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): when an action player from the project's player profile plays through combat encounters, the fights feel varied and engaging, and the player's moment-to-moment choices (positioning, timing, enemy behavior) visibly matter. The player no longer experiences the fights as the same repeated pattern.
+
+Out of scope: adding input buttons beyond attack, dash and pause (D-001, Owner approval needed); changes to the run length or the non-combat systems; numeric targets (these belong to Design as acceptance criteria, and the final verdict to Review).
+
+No immediate escalation: the Goal does not conflict with the vision or D-001, and it needs no reinterpretation. Improving depth through positioning, timing and enemy behavior is what pillar 1 asks for.
+
+## Unknowns
+
+- Observe (playtester): done (02 rooms 1–3, 08 rooms 4–5). Not observed: room 5 fight, approaching a spitter, projectile hits, room clear, dash dodging; the Play step after Build covers them.
+- Observe (qa): done (06, 15). The doubled spit line is two spitters printing identical text, a presentation defect covered by AC-8 and now a Build requirement (17). Nothing verified at 30 FPS yet beyond that report.
+- Diagnose: done (03). Cause: single-state, untelegraphed enemy behavior. Option A chosen (D-002); B deferred; C out of scope.
+- Decide: done (D-002). Owner decided the `manual.md` blocker (D-005, option A).
+- Design: done (10, 16). Spec in `design/combat.md` (AC-1…AC-17), run/room rules in D-003, visual spec in `design/combat-visuals.md` (V-1…V-8).
+- Plan: done (14, D-004). Feasible, one change set. Gap defaults F1–F11 set by the technical-director; the designer confirms them at Review, F1 (grub speed) matters most.
+- Build: code T1–T7, T9 done (18, build 0.5, 33/34 tests). T8 `manual.md`: the Owner placed the draft unchanged (D-005). Remaining: the gameplay-engineer runs `run_tests` and confirms 34/34 (22). Not yet run against the placed file.
+- Verify: `qa` after Build; `art-director` in parallel because visuals change (color, V-6, needs the art-director). Planned. QA works from a fresh Handoff without the Sender assessment. Pause (F11) is not implemented; QA marks it not verifiable.
+- Play: `playtester` replays the changed build, live and reactive. Watch slot starvation. Planned.
+- Review: experience Goal. `game-director` with `review-outcome`. Planned. Run progression after "run over" is not defined; the designer confirms F1, F6, F7 and the numbering of same-type enemies in one cell.
+- Skipped: none.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 02-playtester-to-game-designer.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-game-designer-to-game-director.md |
+| 3a | Decide | game-director | make-decision | done | 05-game-director-to-studio.md |
+| 3b | Observe (defects) | qa | reproduce-defect | done | 06-qa-to-game-designer.md |
+| 3c | Observe (rooms 4–5) | playtester | playtest-session | done | 08-playtester-to-game-designer.md |
+| 4 | Design | game-designer | write-design-spec | done | 10-game-designer-to-studio.md |
+| 5a | Plan | technical-director | technical-plan | done | 14-technical-director-to-studio.md |
+| 5b | Observe (spit line) | qa | reproduce-defect | done | 15-qa-to-studio.md |
+| 5c | Design (visuals) | art-director | visual-review, write-design-spec | done | 16-art-director-to-studio.md |
+| 6a | Build (code) | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md |
+| 6b | Build (confirm `manual.md`) | gameplay-engineer | implement-change | open | 22-studio-to-gameplay-engineer.md |
+| 7a | Verify | qa | verify-change | planned | — |
+| 7b | Verify (visuals) | art-director | visual-review | planned | — |
+| 8 | Play | playtester | playtest-session | planned | — |
+| 9 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+Resume after Owner decision D-005 (Escalation 21, option A): the Owner placed the `manual.md` draft unchanged. Goal is `active` again. Step 6b is narrowed to running `run_tests` and confirming 34/34 (22); the engineer does not write `manual.md`. Verify, Play and Review are unchanged.
+
+## Next action
+
+Run the gameplay-engineer on `22-studio-to-gameplay-engineer.md` (`run_tests` only, report to `studio`). Then Route: on 34/34, open Verify as two parallel steps (`qa` with a fresh Handoff without the Sender assessment, and `art-director`). If `ManualTest` fails, the failure goes to the Owner and is not retried by the engineer (D-005).
+
+## Outcome
+
+(Filled at Close.)
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/22-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-001
+seq: 22
+from: studio
+to: gameplay-engineer
+stage: Build
+outcome: routed
+---
+# 22: studio → gameplay-engineer — confirm the placed `manual.md` with `run_tests` (34/34)
+
+## Task
+
+Run the project's `run_tests` against build 0.5 with the Owner-placed `manual.md` and report the result. Do not write or edit `manual.md`, and do not change code unless a failure points to a defect inside your own earlier change set (see Open questions).
+
+## Context
+
+Goal G-001 (combat feels monotonous). Build 0.5 code (T1–T7, T9) was finished in 18 with 33/34 tests passing; the only gap was T8, the project-root `manual.md`, which `ManualTest` reads from `REPO.parent / "manual.md"`. You were blocked on write access twice (18, 20), so the Studio escalated to the Owner (21). The Owner chose option A (D-005): they saved your "Draft `manual.md`" from 18 unchanged as `manual.md` in the project root. This step confirms the result.
+
+## Findings
+
+Nothing new has been built since 18. The placed file is expected to be the 18 draft byte for byte; the draft was checked against the implementation by reading, but the tests have not been run against it.
+
+## Decisions already made
+
+- D-005: the Owner placed the `manual.md` draft by hand, unchanged. The engineer does not write `manual.md`.
+- D-004: Option A is built as one sequential change set on the existing simulation.
+- D-001: no new input buttons beyond attack, dash and pause.
+
+## Constraints
+
+- Write only what this step's write list allows; `manual.md` is not on it. If the engineer's write list is empty for this step, report only.
+- Must play correctly at 30 and 60 FPS (project constraint).
+- Pause (F11) is not implemented; leave it so.
+
+## Open questions
+
+- Does `python3 -m unittest discover -s tests` give 34/34? If yes, `outcome: done`.
+- If `ManualTest` (or any test) fails, `outcome: fail` or `question`: give the exact failing test, the message, and whether the cause is in `manual.md` (placed by the Owner, not yours to edit) or in your code. If the cause is in your code and your write list allows the fix, fix it and rerun; otherwise report it. Do not ask for `manual.md` write access again; D-005 settles that.
+- Check that the placed `manual.md` matches the draft in 18 and report any difference (do not correct it).
+
+## Expected output
+
+A handoff `23-gameplay-engineer-to-studio.md` (templates/handoff.md) with the full `run_tests` result (counts and any failures) and any difference between the placed `manual.md` and the 18 draft. Address the result to `studio`: the next Verify steps go to `qa`, which works without implementation history, so the Studio composes those Handoffs itself.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: project.md#constraints, manual.md, design/combat.md (acceptance criteria AC-15), repo/ (run `run_tests`; `repo/tests/test_game.py` for `ManualTest`)
+- Decisions: decisions/D-004-option-a-single-change-set.md, decisions/D-005-owner-places-manual-draft.md
+- Previous handoff: goals/G-001-combat-monotony/18-gameplay-engineer-to-studio.md (holds the draft `manual.md`); escalation 21-studio-to-owner.md records the Owner's choice
+>>>END

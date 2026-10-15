@@ -1,0 +1,133 @@
+<<<FILE @run/play/ac3dash30
+room empty
+fps 30
+player 8 4
+spawn grub 12 4
+1.5 dash left
+end 3.5
+>>>END
+
+<<<FILE @run/play/ac3dash60
+room empty
+fps 60
+player 8 4
+spawn grub 12 4
+1.5 dash left
+end 3.5
+>>>END
+
+<<<FILE @run/play/ac9still30
+room empty
+fps 30
+player 8 4
+spawn spitter 13 4
+end 4.2
+>>>END
+
+<<<FILE @run/play/ac9still60
+room empty
+fps 60
+player 8 4
+spawn spitter 13 4
+end 4.2
+>>>END
+
+<<<FILE @run/play/ac9side30
+room empty
+fps 30
+player 8 4
+spawn spitter 13 4
+2.0 move up
+2.5 stop
+end 4.2
+>>>END
+
+<<<FILE @run/play/ac9side60
+room empty
+fps 60
+player 8 4
+spawn spitter 13 4
+2.0 move up
+2.5 stop
+end 4.2
+>>>END
+
+<<<FILE @run/play/ac9dash30
+room empty
+fps 30
+player 8 4
+spawn spitter 13 4
+3.1 dash right
+end 4.2
+>>>END
+
+<<<FILE @run/play/ac9dash60
+room empty
+fps 60
+player 8 4
+spawn spitter 13 4
+3.1 dash right
+end 4.2
+>>>END
+
+<<<FILE @run/play/room3walk30
+room 3
+fps 30
+0 move up
+0.75 move left
+2.0 stop
+2.05 attack
+2.5 attack
+end 3.5
+>>>END
+
+<<<FILE @run/play/room3walk60
+room 3
+fps 60
+0 move up
+0.75 move left
+2.0 stop
+2.05 attack
+2.5 attack
+end 3.5
+>>>END
+
+<<<FILE @run/play/ac10cancel30
+room empty
+fps 30
+player 8 4
+spawn spitter 9.2 4
+1.2 attack
+end 3.0
+>>>END
+
+<<<FILE @run/play/ac10cancel60
+room empty
+fps 60
+player 8 4
+spawn spitter 9.2 4
+1.2 attack
+end 3.0
+>>>END
+
+<<<FILE @run/play/ac12multi30
+room empty
+fps 30
+player 8 4
+spawn grub 9.2 4
+spawn grub 9 3.2
+0 attack
+0.5 attack
+end 1.5
+>>>END
+
+<<<FILE @run/play/ac12multi60
+room empty
+fps 60
+player 8 4
+spawn grub 9.2 4
+spawn grub 9 3.2
+0 attack
+0.5 attack
+end 1.5
+>>>END

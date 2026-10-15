@@ -1,0 +1,137 @@
+Routing: the Director's decision and the QA observation are both in, so the playtester round on rooms 4–5 (3c) opens now. I compose that Handoff from player-permitted information only. The designer step follows afterwards and will take the playtest report, the Director's direction (05) and the QA rulings (06) together.
+
+<<<FILE goals/G-001-combat-monotony/07-studio-to-playtester.md
+---
+kind: handoff
+goal: G-001
+seq: 7
+from: studio
+to: playtester
+stage: Observe
+outcome: routed
+---
+# 07: studio → playtester — Play rooms 4 and 5 of the build and report what you experience
+
+## Task
+
+Play rooms 4 and 5 of the build as an action player would, and report what you observe. Rooms 1–3 and the practice room are not part of this round.
+
+## Context
+
+G-001: the Owner finds combat monotonous. This round collects first-hand player experience for rooms 4 and 5, which have not been played yet. You are given no further information about the build, on purpose.
+
+## Findings
+
+Nothing to pass on: your report is the evidence.
+
+How to play: the build is in `repo/`. A session is an input script; `manual.md` describes the controls and the script format. Run a script with:
+
+`python3 play.py --view player {script}`
+
+Use the player view only, as a player would see the game.
+
+Play focus: pay attention to combat.
+
+Please report, as observed:
+
+- Rooms 4 and 5: which enemy types appear, how many, and what they do over time and between rooms.
+- Whether rooms 4 and 5 feel different from each other, and how.
+- First contact with each enemy type: what you can see before taking damage, and whether you have a way to respond.
+- How your choices (movement, timing, attack, dash) affect the outcome. Prefer short scripts, inspecting the result between runs and reacting, over one long blind script per room.
+- What you see when your own attack lands, and how many attacks it takes to defeat each enemy type.
+- Whether you can approach any ranged enemy, and when.
+- How many hits you can take.
+- What happens after you go down or clear a room (record only what you observe).
+- Anything that looks broken or confusing. Report it as an observation; do not diagnose it.
+
+## Decisions already made
+
+None that you need.
+
+## Constraints
+
+- Act as a player: use only the player view and `manual.md`.
+- No new input buttons exist beyond attack, dash and pause.
+- Report observable experience only. Do not propose fixes or design changes.
+
+## Open questions
+
+None.
+
+## Expected output
+
+An observation report (templates/handoff.md) addressed to `game-designer`, stage Diagnose. Put the observations in Findings and write nothing about causes or solutions.
+
+## Load
+
+- Role: studio/roles/playtester.md
+- Skills: studio/skills/playtest-session.md
+- Project: project.md#player-profile, manual.md, the build in repo/ (run with the command above)
+- Decisions: none
+- Previous handoff: none
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-15
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): when an action player from the project's player profile plays through combat encounters, the fights feel varied and engaging, and the player's moment-to-moment choices (positioning, timing, enemy behavior) visibly matter. The player no longer experiences the fights as the same repeated pattern.
+
+Out of scope: adding input buttons beyond attack, dash and pause (D-001, Owner approval needed); changes to the run length or the non-combat systems; numeric targets (these belong to Design as acceptance criteria, and the final verdict to Review).
+
+No immediate escalation: the Goal does not conflict with the vision or D-001, and it needs no reinterpretation. Improving depth through positioning, timing and enemy behavior is what pillar 1 asks for.
+
+## Unknowns
+
+- Observe (playtester): rooms 1–3 done. Rooms 4–5 `open` (07): the Director (D-002) wants this round before the spec is finalized.
+- Observe (qa): done (06). Room mix: spec ambiguous ("mixed" per room or across rooms; rooms 1–3 are single-type). Zero hearts and room cleared: spec undefined (no down state, game-over or post-clear rule). Practice room and the downed marker are undocumented. Nothing verified at 30 FPS. These become Design rulings, not defects yet.
+- Diagnose: done (03). Cause: single-state, untelegraphed enemy behavior. Option A chosen (D-002); B deferred; C out of scope for now.
+- Decide: done (D-002). No Owner escalation.
+- Design: `planned`. `game-designer` with `write-design-spec`: Option A spec plus rulings on the QA questions (06), after the rooms 4–5 report.
+- Plan: `technical-director`. Tentative: only if the spec's change is non-obvious, risky or cross-system.
+- Build: `gameplay-engineer`. Tentative: follows the spec, including any QA-driven fixes.
+- Verify: `qa`, always after Build (add `art-director` in parallel if visuals change). Tentative, same condition as Build.
+- Play: `playtester` replays the changed build. Tentative, same condition as Build.
+- Review: experience Goal. `game-director` with `review-outcome`. Planned.
+- Skipped: none.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 02-playtester-to-game-designer.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-game-designer-to-game-director.md |
+| 3a | Decide | game-director | make-decision | done | 05-game-director-to-studio.md |
+| 3b | Observe (defects) | qa | reproduce-defect | done | 06-qa-to-game-designer.md |
+| 3c | Observe (rooms 4–5) | playtester | playtest-session | open | 07-studio-to-playtester.md |
+| 4 | Design | game-designer | write-design-spec | planned | — |
+| 5 | Plan | technical-director | technical-plan | tentative | — |
+| 6 | Build | gameplay-engineer | implement-change | tentative | — |
+| 7 | Verify | qa | verify-change | tentative | — |
+| 8 | Play | playtester | playtest-session | tentative | — |
+| 9 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+After steps 3a and 3b: the Director chose Option A (D-002) and asked for a rooms 4–5 play round first, so 3c is confirmed and opened (07). QA found spec gaps, not defects; they join the Design step, which is now planned and waits for the 3c report.
+
+## Next action
+
+Start step 3c: a `playtester` executor, fresh and without implementation history, runs `goals/G-001-combat-monotony/07-studio-to-playtester.md`. When it finishes, run Route. The next Route composes the Handoff to `game-designer` (Design, `write-design-spec`) from the playtest report, `05-game-director-to-studio.md` (direction for the designer) and `06-qa-to-game-designer.md` (spec questions), and adds the missing Skill and Decisions (D-001, D-002) to its Load list.
+
+## Outcome
+
+(Filled at Close.)
+>>>END

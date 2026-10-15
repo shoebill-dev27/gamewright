@@ -1,0 +1,14 @@
+{
+ "op": "Run",
+ "goal": "G-001",
+ "operations": [
+  "023-step-gameplay-engineer",
+  "024-route",
+  "025-step-gameplay-engineer",
+  "026-route"
+ ],
+ "stop_reason": "blocked-on-owner",
+ "status": "blocked-on-owner",
+ "owner_reads": "goals/G-001-combat-monotony/21-studio-to-owner.md",
+ "next": "decide examples/runs/p6-combat-run \"<answer>\""
+}

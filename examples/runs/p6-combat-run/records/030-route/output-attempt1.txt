@@ -1,0 +1,184 @@
+Route for step 23: the engineer's `run_tests` ran in a workspace without `manual.md`, so it shows 33/34 and says nothing about the placed text. I opened Verify as two parallel steps (QA and art-director) instead of asking the Owner again. QA's run covers the `ManualTest` gap, and I added a rule that a missing `manual.md` in QA's workspace goes to the Owner. I could not append the Goal log entry because `log.md` is not in my write list.
+
+<<<FILE goals/G-001-combat-monotony/24-studio-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 24
+from: studio
+to: qa
+stage: Verify
+outcome: routed
+---
+# 24: studio → qa — verify Build 0.5 against the combat spec (AC-1…AC-17)
+
+## Task
+
+Verify the current build in `repo/` against the acceptance criteria in `design/combat.md` (AC-1…AC-17) and the run and room rules in D-003. Check for regressions, including at both 30 and 60 FPS. Report pass/fail per criterion.
+
+## Context
+
+Goal G-001 (combat feels monotonous). Option A (D-002) reworks existing enemy behavior, built as one change set (D-004). Build 0.5 is ready for independent verification. This Handoff is composed by the Studio and contains no implementer reasoning. Verify from the spec and the build.
+
+## Findings
+
+- Build: `repo/`, run through the project's run commands: `run_tests`, `run_play`, `run_trace`, `run_bots` (see `project.md` front matter). Controls and script format are in `manual.md`.
+- `run_tests` layout: `ManualTest` reads `manual.md` from the directory above `repo/`. Run the tests in a layout where `manual.md` sits next to `repo/`, as in the project directory. Report the `ManualTest` result separately. The Owner placed `manual.md` (D-005); one earlier test run in a layout without it errored with FileNotFoundError, so that test has no valid result yet.
+- Known scope limit: the pause behavior (F11 in the plan) is not implemented. Mark it "not verifiable", not as a failure.
+- AC-8 (the doubled spit line when two spitters print identical text) and AC-15 (`manual.md` content) are in scope.
+- Visuals (colors, glyph readability; `design/combat-visuals.md`) are reviewed in parallel by the art-director. Check only what the acceptance criteria in `combat.md` state about them.
+
+## Decisions already made
+
+- D-002: Option A, rework existing enemy behavior first.
+- D-003: room mix is across rooms; zero hearts ends the run; a room clear heals one heart.
+- D-004: one sequential change set on the existing simulation.
+- D-005: the Owner placed the draft `manual.md` unchanged.
+
+## Constraints
+
+- Must play correctly at 30 and 60 FPS.
+- No new input buttons beyond attack, dash and pause (D-001).
+- Do not edit the build. Report failures with a script that reproduces them.
+
+## Open questions
+
+- If `manual.md` cannot be placed next to `repo/` in your workspace, say so exactly. Do not mark `ManualTest` pass or fail. Report it as blocked on the Owner.
+
+## Expected output
+
+A pass/fail report per criterion (AC-1…AC-17) plus the `run_tests` totals, regressions found, and items not verifiable, each with reproduction scripts for failures. Address the result to `studio`. The result is used to compose the playtester's Handoff without implementation history.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md, studio/skills/reproduce-defect.md
+- Project: project.md, design/combat.md, manual.md, repo/ (build), repo/tests/test_game.py
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-003-run-end-and-room-rules.md
+- Previous handoff: none (composed by the Studio; earlier handoffs contain the implementer's self-assessment)
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/25-studio-to-art-director.md
+---
+kind: handoff
+goal: G-001
+seq: 25
+from: studio
+to: art-director
+stage: Verify
+outcome: routed
+---
+# 25: studio → art-director — visual review of Build 0.5 against V-1…V-8
+
+## Task
+
+Review what the player sees in the current build against your visual spec (`design/combat-visuals.md`, V-1…V-8) and the project's art direction. Report pass/fail per item and any readability problems.
+
+## Context
+
+Goal G-001. The Option A change set (D-002, D-004) changed enemy telegraphs, colors and the player-facing text output. QA verifies behavior in parallel (24); you review readability and consistency only.
+
+## Findings
+
+- Run the build with `run_play` (player view, what the player sees) on the scripts described in `manual.md`. Use `run_trace` to see which state is on screen at a given moment. The player view is text-based and headless.
+- V-5 (manual) and V-6 (color) are in your scope.
+- The `manual.md` placed by the Owner is the player-facing text to review for V-5.
+- The pause behavior is not implemented. Skip it.
+
+## Decisions already made
+
+- D-001: one attack button plus dash.
+- D-002: rework existing enemy behavior first.
+- D-005: the Owner placed the draft `manual.md` unchanged.
+
+## Constraints
+
+- Art direction: dark caves, warm light against cold blue-black; threats in saturated orange/red so they read against the dark.
+- Small team: prefer fixes that reuse existing systems.
+- Threats must be visible before they can hurt the player (pillar 3).
+
+## Open questions
+
+- If the headless text view cannot show an item (for example real color), say which V items you could check only from the spec and `manual.md`.
+
+## Expected output
+
+A pass/fail report per V item with specific fixes for failures. Address the result to `studio`.
+
+## Load
+
+- Role: studio/roles/art-director.md
+- Skills: studio/skills/visual-review.md
+- Project: project.md#art-direction, design/combat-visuals.md, design/combat.md, manual.md, repo/ (build)
+- Decisions: decisions/D-002-combat-response-scope.md
+- Previous handoff: none (composed by the Studio)
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-15
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): when an action player from the project's player profile plays through combat encounters, the fights feel varied and engaging, and the player's moment-to-moment choices (positioning, timing, enemy behavior) visibly matter. The player no longer experiences the fights as the same repeated pattern.
+
+Out of scope: adding input buttons beyond attack, dash and pause (D-001, Owner approval needed); changes to the run length or the non-combat systems; numeric targets (these belong to Design as acceptance criteria, and the final verdict to Review).
+
+No immediate escalation: the Goal does not conflict with the vision or D-001, and it needs no reinterpretation. Improving depth through positioning, timing and enemy behavior is what pillar 1 asks for.
+
+## Unknowns
+
+- Observe (playtester): done (02 rooms 1–3, 08 rooms 4–5). Not observed: room 5 fight, approaching a spitter, projectile hits, room clear, dash dodging; the Play step after Build covers them.
+- Observe (qa): done (06, 15). The doubled spit line is a presentation defect covered by AC-8 and a Build requirement.
+- Diagnose: done (03). Cause: single-state, untelegraphed enemy behavior. Option A chosen (D-002); B deferred; C out of scope.
+- Decide: done (D-002). Owner decision D-005 resolved Escalation 21.
+- Design: done (10, 16). Spec in `design/combat.md` (AC-1…AC-17), run/room rules in D-003, visual spec in `design/combat-visuals.md` (V-1…V-8).
+- Plan: done (14, D-004). Gap defaults F1–F11 set by the technical-director; the designer confirms them at Review, F1 (grub speed) matters most.
+- Build: done (18, 22, 23). Build 0.5; code T1–T7, T9 done, `manual.md` placed by the Owner (D-005). `run_tests` in the engineer's workspace was 33/34: `ManualTest` errored because that workspace had no `manual.md` (FileNotFoundError), so the placed text is untested by a run. A static check found no mismatch. QA runs the tests with `manual.md` placed and reports `ManualTest` separately (24).
+- Verify: open, two parallel steps. `qa` (24, fresh Handoff, no Sender assessment) and `art-director` (25, visuals V-1…V-8). Pause (F11) is not implemented; QA marks it not verifiable.
+- Play: `playtester` replays the changed build, live and reactive, from a Handoff composed by the Studio from permitted information. Watch slot starvation. Planned.
+- Review: experience Goal. `game-director` with `review-outcome`. Planned. Run progression after "run over" is not defined; the designer confirms F1, F6, F7 and the numbering of same-type enemies in one cell.
+- Skipped: none.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 02-playtester-to-game-designer.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-game-designer-to-game-director.md |
+| 3a | Decide | game-director | make-decision | done | 05-game-director-to-studio.md |
+| 3b | Observe (defects) | qa | reproduce-defect | done | 06-qa-to-game-designer.md |
+| 3c | Observe (rooms 4–5) | playtester | playtest-session | done | 08-playtester-to-game-designer.md |
+| 4 | Design | game-designer | write-design-spec | done | 10-game-designer-to-studio.md |
+| 5a | Plan | technical-director | technical-plan | done | 14-technical-director-to-studio.md |
+| 5b | Observe (spit line) | qa | reproduce-defect | done | 15-qa-to-studio.md |
+| 5c | Design (visuals) | art-director | visual-review, write-design-spec | done | 16-art-director-to-studio.md |
+| 6a | Build (code) | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md |
+| 6b | Build (`run_tests` check, manual placed) | gameplay-engineer | implement-change | done | 23-gameplay-engineer-to-studio.md |
+| 7a | Verify | qa | verify-change | open | 24-studio-to-qa.md |
+| 7b | Verify (visuals) | art-director | visual-review | open | 25-studio-to-art-director.md |
+| 8 | Play | playtester | playtest-session | planned | — |
+| 9 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+After step 6b (23): `run_tests` was 33/34 only because the engineer's workspace lacked `manual.md`; the draft's text is statically consistent. Not an Owner matter, so Verify opens as parallel 7a (QA, also runs `ManualTest` with the manual placed) and 7b (visuals). Rest unchanged.
+
+## Next action
+
+Run `24-studio-to-qa.md` and `25-studio-to-art-director.md` in parallel (both address results to `studio`). Then Route: if both pass, compose the playtester's Handoff from permitted information only. If QA cannot get `manual.md` placed beside `repo/`, escalate to the Owner for that input. If an AC fails, return to Build with the failure report.
+
+## Outcome
+
+(Filled at Close.)
+>>>END

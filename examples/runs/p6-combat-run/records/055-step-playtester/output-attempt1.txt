@@ -1,0 +1,14 @@
+I'll start with room 1 and a simple approach to see what the fights look like.
+
+<<<FILE @run/play/room1-first
+room 1
+fps 30
+end 20
+0.5 attack
+1.5 move right
+2.5 attack
+3.5 stop
+4 attack
+6 attack
+8 dash left
+>>>END

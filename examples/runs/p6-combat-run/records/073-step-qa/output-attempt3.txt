@@ -1,0 +1,59 @@
+I need one more round of runs before I can write the report. I'm re-checking the knockback near a wall at 30 FPS, which looks different from the 60 FPS run. I'm also checking V-17 (an on-tile grub defeated, and a dash off the tile), and getting bot numbers at 30 FPS.
+
+<<<FILE @run/trace/wall-30
+fps 30
+room empty
+player 14.5 4
+spawn grub 14.5 4
+end 2
+0.2 attack
+>>>END
+
+<<<FILE @run/play/defeat-ontile-30
+fps 30
+room empty
+player 8 4
+spawn grub 8 4
+end 2.2
+0.2 attack
+1.6 attack
+>>>END
+
+<<<FILE @run/play/defeat-ontile-60
+fps 60
+room empty
+player 8 4
+spawn grub 8 4
+end 2.2
+0.2 attack
+1.6 attack
+>>>END
+
+<<<FILE @run/play/dashoff-30
+fps 30
+room empty
+player 8 4
+spawn grub 8 4
+end 2.4
+0.2 attack
+1.6 dash right
+>>>END
+
+<<<FILE @run/play/dashoff-60
+fps 60
+room empty
+player 8 4
+spawn grub 8 4
+end 2.4
+0.2 attack
+1.6 dash right
+>>>END
+
+<<<FILE @run/bots/fps30-all
+fps 30
+>>>END
+
+<<<FILE @run/bots/fps30-room1
+rooms 1
+fps 30
+>>>END

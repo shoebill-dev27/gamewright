@@ -1,0 +1,163 @@
+Route decision: the playtest surfaced experience issues, not defects (nothing crashed, and every result matched the screen text). Per the return rule "Play → design or experience issue → Diagnose", I route to `game-designer` and write handoff 51. Play covered room 1 only, so the Goal stays open for another Play after any change.
+
+I could not append to `log.md` because it is not in my write list. The runtime or the Owner needs to add the entry for this Route.
+
+<<<FILE goals/G-001-combat-monotony/51-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-001
+seq: 51
+from: studio
+to: game-designer
+stage: Diagnose
+outcome: routed
+---
+# 51: studio → game-designer — Diagnose the room-1 experience reported by the first Play session
+
+## Task
+
+Diagnose why the first-time Play session (room 1, two attempts, both defeats) felt pinned, harsh and partly unreadable. Separate what is intended by `design/combat.md` from what is a real experience problem, then give causes and options in design terms.
+
+## Context
+
+G-001: "戦闘が単調なので改善したい" (combat feels monotonous). Option A (rework existing enemy behavior; D-002) is built and verified (AC-1…AC-18 pass, visuals accepted). The first Play step (50) was run by a playtester from permitted information only. The playtester worked by writing timed input scripts and reading text frames, not live, so some failures may be the tester's own timing. Treat these as observations to check, not facts about the build.
+
+## Findings
+
+Summary of the playtest report (full text in 50):
+
+- Played only room 1 (3 grubs that all walk toward the player at once). Attempt 1: down at 4.8 s, no kills. Attempt 2: one kill (at 3.5 s), down at 8.5 s. Rooms 2–5 and the spitter were not seen, so there is no observation of whether the loop varies later.
+- Loop seen: grub walks up, "rears back" (`G`), bites about 0.5 s later, then "open" (`g`). The tester saw no other behavior in room 1 in about 10 s, so every grub did the same thing. This is the original monotony concern, so check whether it holds in room 1 or only looks that way from the opening.
+- **Pressure:** several grubs reared back within about 0.03–0.04 s of each other (3.90/3.93 s; 6.43/6.47 s). One safe response (step away or dash) covers one grub, and the dash recovers slowly. The tester felt pinned, not skillful. Hearts went at 2.5, 4.0 and 4.8 s in attempt 1.
+- **Positive:** dash through a bite, then punish the opening (hit at 2.8 s, kill at 3.5 s) was the best moment. The `g`/`G` letters and the "rears back"/"open" lines were easy to learn.
+- **Swipes into a grub that is reared back or biting** showed over the grub's tile and reported "(miss)" (2.1 s, 4.0 s). The tester guessed the grub is unhittable during wind-up or bite and said the manual does not say so. They also asked for the swipe to show on the grub's tile when it is drawn `G`.
+- **Hit stun:** after being hit, a swipe was refused with "(stunned)" (2.5 s, 7.0 s), right when a second grub was winding up. The tester called this the sharpest frustration.
+- **Facing:** the player can only turn by moving. After a dash to the right wall the player faced right while the grubs were on the left, so three swipes hit empty air. The tester suggested turning without moving, or a swipe that works behind the player.
+- **Dash:** it covers about 2–3 tiles and its end point was hard to judge. The first dash landed next to a grub that reared back on arrival.
+- **Same-tile grub:** the display drew it next to the player ("on you") and the text said "the grub is open (on you)", which was unclear about which side to hit.
+- Nothing broken: no crashes, every result matched the screen text.
+
+Already open from earlier steps (relevant here, so please address them): F1 (grub speed) is the Plan gap default that matters most; Review already lists "a still player going down in about 5 s", the same thing as the tester's quick defeats; numbering of same-type enemies in one cell.
+
+## Decisions already made
+
+- D-001: attack and dash only, plus pause. No new buttons. A turn-in-place input is not allowed without Owner approval. Options that need one must say so.
+- D-002: respond by reworking existing enemy behavior first (Option A).
+- D-003: zero hearts ends the run; room clear heals one heart; room mix is across rooms.
+- D-006: enemies may overlap the player but are never hidden.
+- D-009: ruling on the manual test (AC-15 passes).
+
+## Constraints
+
+- Stay within the vision: one-button combat, short runs, readable threats (threats visible before they can hurt).
+- Must play correctly at 30 and 60 FPS; prefer changes that reuse existing systems.
+- Do not weaken the monotony fix: the answer to "room 1 is too harsh" must not bring back sameness.
+- You decide rules and tuning inside the direction. If an option changes direction, priority or scope, hand it to `game-director` (Decide) instead of choosing it. If an option needs a new input, say it needs Owner approval.
+
+## Open questions
+
+1. Is each observation intended behavior (per `design/combat.md`), a tuning problem, a readability or manual gap, or a probable artifact of scripted play? Use `run_play` and `run_trace` on room 1 and `run_bots` to check, rather than trusting the report.
+2. Does a still or lightly active player really go down in about 5 s in room 1? Is that intended?
+3. Is the simultaneous three-grub opener plus hit stun too harsh for the player profile? What is the cause (spawn timing, wind-up sync, stun length, grub speed, hearts)?
+4. Is the wind-up/bite unhittable window specified? If so, is only the manual and swipe feedback missing, or is the rule itself the problem?
+5. Facing: is there a problem to solve within D-001 (for example swipe reach or an auto-face rule), or is it a scripting artifact?
+
+## Expected output
+
+A diagnosis with options (`diagnose-experience`): causes, which observations are real, and options with trade-offs in design terms. Say which options you can decide yourself and which need `game-director`. Say which later rooms or enemy states still need a live Play to judge. Write it as a Handoff addressed to `studio` so the Studio can route to Decide, Design or Review; `studio` is the recipient even when no direction decision is needed.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/diagnose-experience.md
+- Project: project.md#vision, project.md#player-profile, project.md#constraints, design/combat.md, design/combat-visuals.md, manual.md, the build `repo/` (run commands `run_play`, `run_trace`, `run_bots` in project.md)
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-002-combat-response-scope.md, decisions/D-003-run-end-and-room-rules.md, decisions/D-006-overlap-display-and-practice-room-manual.md
+- Previous handoff: goals/G-001-combat-monotony/50-playtester-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-15
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): when an action player from the project's player profile plays through combat encounters, the fights feel varied and engaging, and the player's moment-to-moment choices (positioning, timing, enemy behavior) visibly matter. The player no longer experiences the fights as the same repeated pattern.
+
+Out of scope: adding input buttons beyond attack, dash and pause (D-001, Owner approval needed); changes to the run length or the non-combat systems; numeric targets (these belong to Design as acceptance criteria, and the final verdict to Review).
+
+No immediate escalation: the Goal does not conflict with the vision or D-001, and it needs no reinterpretation. Improving depth through positioning, timing and enemy behavior is what pillar 1 asks for.
+
+## Unknowns
+
+- Observe (playtester, qa): done (02, 08, 06, 15). Not observed: room 5 fight, approaching a spitter, projectile hits, room clear, dash dodging.
+- Diagnose, Decide: done once (03; D-002, D-005, D-006). Cause: single-state, untelegraphed enemy behavior; Option A. Diagnose now runs again (51) on the Play findings: room 1 felt pinned and harsh, hit stun, facing, undocumented wind-up unhittable window, quick defeat.
+- Design: done (10, 16, 33, 45). Spec `design/combat.md` (AC-1…AC-18), D-003, D-006, `design/combat-visuals.md` (V-1…V-8), D-009 (test ruling).
+- Plan: done (14, D-004). Gap defaults F1–F11; F1 (grub speed) matters most and is now in the Diagnose scope. Pause (F11) not implemented.
+- Build and Verify: done. AC-1…AC-18 hold, AC-15 passes (D-010, 40/40). Visuals accepted (44); V-7 (two spitters, room 4) and F4 not observed.
+- Play: first session done (50), but only room 1, two attempts, both defeats, by scripted (not live) input. Rooms 2–5 and the spitter are still unobserved. Another Play is needed after any change, ideally reaching later rooms.
+- Review: `game-director` with `review-outcome`. Planned. Open: run progression after "run over"; F1, F4, F6, F7; numbering of same-type enemies in one cell; a still player going down in about 5 s.
+- Skipped: none.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 02-playtester-to-game-designer.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-game-designer-to-game-director.md |
+| 3a | Decide | game-director | make-decision | done | 05-game-director-to-studio.md |
+| 3b | Observe (defects) | qa | reproduce-defect | done | 06-qa-to-game-designer.md |
+| 3c | Observe (rooms 4–5) | playtester | playtest-session | done | 08-playtester-to-game-designer.md |
+| 4 | Design | game-designer | write-design-spec | done | 10-game-designer-to-studio.md |
+| 5a | Plan | technical-director | technical-plan | done | 14-technical-director-to-studio.md |
+| 5b | Observe (spit line) | qa | reproduce-defect | done | 15-qa-to-studio.md |
+| 5c | Design (visuals) | art-director | visual-review, write-design-spec | done | 16-art-director-to-studio.md |
+| 6a | Build (code) | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md |
+| 6b | Build (`run_tests` check, manual placed) | gameplay-engineer | implement-change | done | 23-gameplay-engineer-to-studio.md |
+| 7a | Verify | qa | verify-change | done (question, no AC failed) | 26-qa-to-studio.md |
+| 7b | Verify (visuals) | art-director | visual-review | done (question, no build output) | 27-art-director-to-studio.md |
+| 7c | Verify (rerun: manual, runs, captures) | qa | verify-change | done (question, no AC failed) | 29-qa-to-studio.md |
+| 7d | Verify (visuals, from captures) | art-director | visual-review | done (fail: V-1, F3) | 32-art-director-to-studio.md |
+| 7e | Design (F1 overlap, AC-15 wording) | game-designer | write-design-spec | done | 33-game-designer-to-studio.md |
+| 7f | Build (F1/F3 render, manual paragraph) | gameplay-engineer | implement-change | done (render built) | 35-gameplay-engineer-to-studio.md |
+| 7f-O | Owner: place the manual paragraph | owner | — | done (Option A, D-007) | 36-studio-to-owner.md |
+| 7g | Verify (all but AC-15) | qa | verify-change | done (pass) | 37-studio-to-qa.md |
+| 7i | Verify (AC-15, `ManualTest`) | qa | verify-change | done (question: ManualTest blocked) | 38-studio-to-qa.md |
+| 7i-O | Owner: `ManualTest` result | owner | — | done (Option A, D-008: 39/40) | 42-studio-to-owner.md |
+| 7h | Verify (visuals) | art-director | visual-review | done (pass; V-6 from code, V-7 not seen) | 41-studio-to-art-director.md |
+| 7j | Design (`run over` manual test failure) | game-designer | write-design-spec | done (test too literal, D-009) | 43-studio-to-game-designer.md |
+| 7k | Build (test fix, line wraps) | gameplay-engineer | implement-change | done (test changed, suite not run) | 46-studio-to-gameplay-engineer.md |
+| 7k-O | Owner: place manual text | owner | — | skipped (manual unchanged, D-009) | — |
+| 7l-O | Owner: AC-15 rerun | owner | — | done (Option A, D-010: 40/40) | 48-studio-to-owner.md |
+| 7l | Verify (AC-15 rerun by QA) | qa | verify-change | skipped (Owner's 40/40 run, D-010) | — |
+| 8 | Play (first session) | playtester | playtest-session | done (room 1 only, scripted; design/experience issues) | 50-playtester-to-studio.md |
+| 9 | Diagnose (Play findings) | game-designer | diagnose-experience | open | 51-studio-to-game-designer.md |
+| 10 | Decide | game-director | make-decision | tentative: if an option changes direction, priority or scope | — |
+| 11 | Design | game-designer | write-design-spec | tentative: if the diagnosis calls for a rule or manual change | — |
+| 12 | Plan / Build | technical-director, gameplay-engineer | technical-plan, implement-change | tentative: after Design | — |
+| 13 | Verify | qa | verify-change | tentative: after any Build | — |
+| 14 | Play (rerun, later rooms) | playtester | playtest-session | tentative: after any Build | — |
+| 15 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+After Play (50): room 1 only, scripted; the tester felt pinned (three grubs wind up together, hit stun, facing, undocumented wind-up unhittable window). No defect, no escalation. Back to Diagnose (51, `game-designer`) per the Play return rule. Decide, Design, Build, Verify and a second Play are tentative on the diagnosis. Review unchanged.
+
+## Next action
+
+- `game-designer` starts Diagnose from `51-studio-to-game-designer.md`. Its result is addressed to `studio`.
+- Then Route: a direction, priority or scope choice goes to Decide (`game-director`); a rule or manual change goes to Design; if the diagnosis finds the issues are artifacts of scripted play and the existing design stands, go to Review (`game-director`), noting that rooms 2–5 remain unobserved.
+
+## Outcome
+
+(Filled at Close.)
+>>>END

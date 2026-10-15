@@ -1,0 +1,26 @@
+{
+ "op": "Run",
+ "goal": "G-001",
+ "operations": [
+  "002-step-playtester",
+  "003-route",
+  "004-step-game-designer",
+  "005-route",
+  "006-step-game-director",
+  "007-step-qa",
+  "008-route",
+  "009-step-playtester",
+  "010-route",
+  "011-step-game-designer",
+  "012-route",
+  "013-step-technical-director",
+  "014-step-qa",
+  "015-step-art-director",
+  "016-route",
+  "017-step-gameplay-engineer"
+ ],
+ "stop_reason": "rejected: 017-step-gameplay-engineer: output rejected after 2 attempts",
+ "status": "active",
+ "owner_reads": null,
+ "next": "run examples/runs/p6-combat-run"
+}

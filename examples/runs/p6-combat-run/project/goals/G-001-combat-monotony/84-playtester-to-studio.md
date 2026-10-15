@@ -1,0 +1,95 @@
+---
+kind: handoff
+goal: G-001
+seq: 84
+from: playtester
+to: studio
+stage: Review of play observations (rooms 1–5)
+outcome: done
+---
+# 84: playtester → studio — Observation report: three room-1 sessions, never got past room 1
+
+## Task
+
+Report what a player experiences in the build, with the scripts used, so the Studio can route experience issues to game-designer and defects to qa.
+
+## Context
+
+The Studio asked for a player-view playthrough of rooms 1 to 5 with attention on combat (handoff 81). I played through input scripts with `python3 play.py --view player {script}`, three sessions, all in room 1. I had no history of the build and did not read source, tests or design documents. The play budget ended after three sessions (0 rounds left). **I never cleared room 1, never reached rooms 2 to 5, and never saw a spitter.** Every session ended in defeat in room 1; one session (s1) and one (s2) auto-restarted into a second run that also ended in defeat.
+
+Method: input automation. Each script was written blind, with fixed times, from the previous output. I could not react in real time within a session, which limits how well I could dodge. Text frames only; I could not see color, hear sound or feel controller input.
+
+## Findings
+
+### Scripts used (re-runnable)
+
+- **s1-room1-probe**: `room 1`, fps 30, end 15; swipes at 0.5, 2.5, 3, 5.5, 8, 10; move left at 1, stop 2; move right at 4, stop 5; dash right at 7.
+- **s2-room1-hold**: `room 1`, fps 30, end 14; swipes at 1.0, 1.8, 2.6, 3.4, 4.2, 5.0, 5.8, 6.6, 7.4, 8.2; dash left at 2.0, dash right at 4.0.
+- **s3-room1-dash-on-cue**: `room 1`, fps 30, end 12; dash down at 1.55 (just after a "rears back" cue), move up at 2.2, stop 2.3; swipes at 2.4, 3.0, 4.2, 4.8, 5.4, 6.0; dash left at 3.6.
+
+Exact script text is in the run results for each session.
+
+### The room and the enemies
+
+Room 1 starts with three grubs (top centre, left, right edge) that drift toward you. Only grubs seen. Start is x 8, y 4.
+
+### Session outcomes
+
+- **s1**: Defeated at ~4.0 s in run 1 (rooms cleared 0). The restarted run was defeated at ~11.9 s. I hit a grub once in the first run and never defeated one.
+- **s2**: Defeated at ~3.9 s, and again at ~10.5 s in the second run. Two grubs hit once; none defeated.
+- **s3**: Defeated at ~7.4 s. This was my best attempt: my one dash on cue avoided a bite entirely (hearts stayed 3/3 until 5.4 s), and I got one grub defeated at 6.0 s. Then two grubs bit me in turn at 5.4, 6.4 and 7.4 s.
+
+### What I saw and felt
+
+1. **Grubs bite in a predictable rhythm.** Each grub shows "rears back" and then bites about 0.5 s later (e.g. 1.30 rear, 1.83 hit; 9.40 rear, 9.97 hit). The cue is readable (`G`), but the gap is short.
+2. **Getting hit leaves me stunned right when I want to counter.** Several swipes returned "(stunned)" (3.0 s in s1; 10.0 s in s1; 5.4 s in s3). The grub then becomes "open" within about 0.1 s, but I cannot use that opening because I am stunned. This felt unfair: the opening arrives after I was hit, not because I dodged.
+3. **Being surrounded is lethal and fast.** In every session two or three grubs ended up on or beside me, and bites chained one after another (e.g. s1 3.0, 3.97; s2 1.97, 2.97, 3.93). Once flanked I lost a heart roughly every second and never found a way out. Hearts went 3 to 0 in about 2 seconds of contact.
+4. **My swipes mostly missed.** Messages: "(miss) too far" (s2 1.0 s, 7.4 s), "(miss) not in front" (s2 1.8 s, 8.2 s; s3 4.8 s). Reach is a bit over one tile and facing matters. Because I script blind, I often faced the wrong way. A player with live control would likely do better, so I do not count this as a build defect.
+5. **Dash works as described.** In s3 dashing down at the rears-back cue avoided the bite completely and cost nothing. That was the only time a fight felt skillful. Dash on cooldown ("dash not ready") never appeared, but I only dashed twice per run.
+6. **A swipe's cone hits several enemies and hits seem to need "open" timing.** In s3, swiping at 3.0 s hit a grub as it rose. Hits on an `open` grub felt rewarding but I got few chances.
+7. **The fights all felt the same.** Every encounter was: grubs close in, one rears back, I dash or take a hit, another rears back. I met no second enemy type, so I cannot say whether later rooms vary. Within room 1 the three grubs behave identically, and the only decision was "when to dash". I never needed spacing or positioning beyond that, and moving away from grubs did not seem to shake them, as they kept pace.
+8. **Dying and restarting is quick**, about 2 s from "run over" to a new run when my script kept pressing attack. That suits short runs.
+
+### Confusion
+
+- "(miss) too far" versus "(miss) not in front" are clear once you know them, but nothing on screen told me my facing. I could not see which way `P` was facing.
+- The "on you:" lines (e.g. "g open (shown left)") are hard to read when a grub shares my tile; the drawn position is only an approximation.
+- The manual says "you can move while you swipe" and "hits every enemy inside it", but my swipes rarely hit more than one, so I could not confirm the multi-hit.
+
+### Impact ranking
+
+- High: flanked-by-grubs deaths within a few seconds, and being stunned during the open window. Together these made room 1 feel punishing for a first room.
+- Medium: sameness of fights; one clear answer (dash on cue).
+- Low: no facing indicator.
+
+### Positives
+
+- Clear telegraph letters (`g` vs `G`) and the text cue "rears back".
+- Dash i-frames work and feel good when timed.
+- Fast restart.
+
+## Decisions already made
+
+None. I decide nothing about the game.
+
+## Constraints
+
+- Observations come from three scripted sessions in room 1 only. Repeats across sessions: flanking deaths, stun-after-hit, fights feeling uniform (all three). Single-session only: the successful dash dodge and the grub defeat (s3).
+- Could not observe: rooms 2 to 5, spitters, clearing a room or the heal, "run complete", color, sound, controller feel, real-time reaction.
+
+## Open questions
+
+- Does any later room change how fights feel? Not answered, because I never got past room 1.
+- Is room 1 meant to be this hard for a first-time player? A live human or a longer-budget playtest should check, ideally with scripts that react to each cue.
+
+## Expected output
+
+The Studio reads this report, routes experience issues (flanking lethality, stun while the open window is live, sameness of fights) to `game-designer`, and sends no defects to `qa` unless it judges the facing indicator or the "on you" display a defect. A further playtest should try for rooms 2 to 5.
+
+## Load
+
+- Role: studio/roles/playtester.md
+- Skills: studio/skills/playtest-session.md
+- Project: project.md#player-profile, manual.md, the build in repo/ (player view only)
+- Decisions: none
+- Previous handoff: goals/G-001-combat-monotony/81-studio-to-playtester.md

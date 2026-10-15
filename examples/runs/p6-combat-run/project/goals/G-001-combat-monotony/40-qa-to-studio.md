@@ -1,0 +1,96 @@
+---
+kind: handoff
+goal: G-001
+seq: 40
+from: qa
+to: studio
+stage: Verify
+outcome: question
+---
+# 40: qa → studio — AC-15: paragraph present and behavior matches, but `ManualTest` is blocked (`manual.md` is missing in the run workspace)
+
+## Task
+
+Report the AC-15 verification requested in handoff 38. Verdict: **AC-15 cannot be passed yet.** The paragraph and the behavior checks are fine, but the two `ManualTest` tests have no valid result because `manual.md` is not in the run workspace. This is a blocker, not a test failure. Studio needs to get `manual.md` into the QA workspace and route a re-run of `run_tests`.
+
+## Context
+
+G-001 (combat feels monotonous) is in Verify. D-007 says the Owner appended the practice-room paragraph to `## On screen` in `manual.md`. Handoff 38 asked for three checks:
+1. The paragraph is present, word for word, inside `## On screen`.
+2. The two `ManualTest` tests pass.
+3. The build behaves as the paragraph says.
+
+I used one run round (round 1) for all the runs listed below. No further runs were needed for the behavior checks. A re-run of `run_tests` cannot help until `manual.md` exists in the workspace, so I did not spend the other rounds.
+
+## Findings
+
+### 1. Paragraph check (read from the `manual.md` supplied in this packet): present
+
+- The `## On screen` section contains, after the color note, a final paragraph reading: "The practice room (`room empty`) is not part of a run. Enemies appear only where your script places them (`spawn`), and you stand where `player` puts you. Nothing heals, there is no next room, and the session ends a moment after you go down. If a grub or spitter is on your tile, it is drawn on a free tile next to you, so you can always see it."
+- I compared it with the D-007 text sentence by sentence. It is identical.
+- It sits before the `## What you hear and read` heading, so it is inside `## On screen`.
+- Caveat: this is the packet's copy of `manual.md`, not the file that `run_tests` reads. I could not confirm that the two are the same file (see item 2).
+
+### 2. `run_tests`: BLOCKED (environment), not a failure
+
+Command: `python3 -m unittest discover -s tests`. Exit 1, 40 tests run, 2 errors, both in `ManualTest`:
+- `test_manual_lists_glyphs_and_lines`: `FileNotFoundError: [Errno 2] No such file or directory: '/manual.md'`
+- `test_on_screen_section_lists_x_and_the_practice_room`: `FileNotFoundError: [Errno 2] No such file or directory: '/manual.md'`
+
+The other 38 tests passed (`.....................EE.................`).
+
+Both errors are raised by `MANUAL.read_text(...)`, before any content check. The error path is `/manual.md`, so in the run workspace `REPO.parent / "manual.md"` resolves to the filesystem root, with the tests under `/work/tests`. The file is simply not at that location. The test never saw the paragraph, so **I report no pass or fail for these two tests.** The earlier situation from handoff 37 is unchanged: `manual.md` is still not beside `repo/` in the QA workspace.
+
+### 3. Behavior checks (all at the build as run)
+
+| Paragraph claim | Evidence | Result |
+|---|---|---|
+| Enemies appear only where the script places them | Scripts `grub-d4` and `clear-practice` spawn exactly one grub each. The trace setup row shows only `grub#0` at the spawn coordinates. No other enemy appears. | OK |
+| You stand where `player` puts you | Trace setup: `pos=(8.00,4.00)` for `player 8 4`. | OK |
+| Not part of a run | `down-practice` ends with the plain line `end at 5.63 s: hearts 0/3, enemies left 1`. No "run over — rooms cleared" and no "press attack to start again" appear. | OK |
+| Nothing heals | `clear-practice`: the grub is defeated at t=1.317 and "cleared" is traced. Hearts stay 2 at t=1.333 and 6.000, with no heal. | OK |
+| No next room | In `clear-practice` the trace stays `room=empty phase=playing` to t=6.000. No room load occurs. | OK |
+| Session ends a moment after you go down | `down-practice`: down at 3.633 s, `end 20`, but the session ends at 5.63 s. That is 3.633 + 2.0 s, matching design "Practice room (Q4)". | OK |
+| Enemy on your tile is drawn on a free adjacent tile | `down-practice` at 0.00 s: the grub at x 8.2 is drawn `Pg`. The trace shows "grub open (on you)" at 3.583 s with the grub at (8.00,4.00), and the draw is `Pg`. Wind-up "on you" at 4.483 s draws `PG`. The spitter at x 8.2 draws `Ps` and `PS` during its charge (30 FPS). The glyph is never hidden under `P`. A down player is drawn `xg`. | OK |
+
+Further observations:
+- The AC-18 display behavior holds for every "(on you)" line in the captured runs (`Pg` when open, `PG` when winding up).
+- In `grub-d4` (60 FPS), the wind-up begins at 1.383 s with the grub at distance 1.25. The strike lands at 1.933 s. The recovery follows at 2.033 s. The next wind-up begins at 2.933 s, and the cycle is about 1.55 s per bite.
+- The spitter-on-tile run (30 FPS) shows first charge at 1.000 s, spit at 1.800 s, and the next charge at 3.500 s. These match the design.
+
+Coverage limits: the grub and practice-room checks were run at 60 FPS and the spitter-on-tile check at 30 FPS. I did not repeat each practice-room check at both frame rates, since AC-15 and handoff 38 do not require it. The wider AC-17 comparison belongs to step 37.
+
+## Decisions already made
+
+- D-005: the Owner places `manual.md` content. I did not edit it and I report a problem rather than fix it.
+- D-006: the practice room is listed in On screen; enemies may overlap the player but are never hidden. The overlap behavior was observed to match.
+- D-007: the Owner placed the paragraph. I verified it independently from the packet copy, not on trust. The packet copy matches the decision text.
+
+## Constraints
+
+- I did not modify `manual.md` or the build.
+- Handoff 38 says that if `manual.md` is missing, I report a blocker and not a test failure. I have done that.
+- I used only the project's run commands.
+
+## Open questions
+
+1. **For Studio / Owner:** why is `manual.md` still absent from the QA run workspace? The `ManualTest` path resolves to `/manual.md`. Placing the file "beside `repo/`" must match whatever `REPO.parent` is in this environment. Please confirm where the file must sit, or give the QA run environment the file, then route a re-run of `run_tests`.
+2. The expected result is 40/40 if the placed file is the same text as the packet copy. I cannot predict the content checks in `test_on_screen_section_lists_x_and_the_practice_room`, because the tests have not read the file in this workspace.
+
+## Expected output
+
+Studio resolves the workspace blocker and re-routes QA for a short re-run of `run_tests`. QA then reports the two `ManualTest` results.
+
+Verdict for this step, by item:
+- Paragraph present, word for word, in `## On screen` (packet copy): **pass**
+- Behavior described by the paragraph matches the build: **pass**
+- `ManualTest` (2 tests): **no valid result (blocked: `manual.md` not found at `/manual.md`)**
+- AC-15 overall: **not yet passable**, pending the re-run. This is not a fail and it is not a pass.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: manual.md; design/combat.md (AC-15, AC-18); project.md#current-state; repo (build; `run_tests`, `run_play`, `run_trace`)
+- Decisions: decisions/D-005-owner-places-manual-draft.md, decisions/D-006-overlap-display-and-practice-room-manual.md, decisions/D-007-practice-room-paragraph-placed-by-owner.md
+- Previous handoff: goals/G-001-combat-monotony/38-studio-to-qa.md

@@ -1,0 +1,207 @@
+Route after 77 is below. QA found no failures, so I opened the art-director's visual review from QA's captures (78). I also wrote an Owner request for the suite run and the V-15 text (79). I did not write a `log.md` entry because that file is not on my write list.
+
+<<<FILE goals/G-001-combat-monotony/78-studio-to-art-director.md
+---
+kind: handoff
+goal: G-001
+seq: 78
+from: studio
+to: art-director
+stage: Verify (visuals, from QA's verbatim captures)
+outcome: routed
+---
+# 78: studio → art-director — Visual review of V-9…V-18 from QA's verbatim captures (build cf0f0ee63752)
+
+## Task
+
+Review what the player sees in the D-014 rebuild against V-1…V-18 in `design/combat-visuals.md` and the art direction. Use the verbatim player-view captures in Appendices A and B of `77-qa-to-studio.md` (30 and 60 FPS) as your material. Address the result to `studio`.
+
+## Context
+
+G-001 (combat feels monotonous), Option A. Verify 13f (77, QA) found no failing criterion in the rebuild at 30 and 60 FPS. Report 71 was a question because you could not run the build, and V-15 failed there on the document. The visual review was deferred to these captures. Do not hand back "no live view" again: the captures are the live material for this round. For anything the text view cannot show (colour, the reverse-video cell, V-6), say "not assessable from captures" per item and continue.
+
+## Findings
+
+- QA's captures cover the six setups from 71: grub on the player's tile then attack; grub on the tile plus one to its right; left/right grubs with one striking first; a spit shot hit; room 2 with four grubs to the down screen; the two misses. Appendix B has the edge case (player 14.5, grub on the player's tile, knockback) and the left-neighbour case.
+- QA reports V-9, V-10, V-11, V-12, V-13, V-14, V-16 and V-18 as observed passing at both rates. V-15 is not checkable because the manual text is not placed yet (Owner step). V-6 is not assessable in a text view. V-17 was not re-observed.
+- Two QA observations need your judgement (77 §5):
+  1. **Lunge draws and the hit-line word.** In room 2 the draw made at the moment of a hit shows the lunged grub. At 30 FPS 4.300 the `G` is right of `P` while the line says "(top right)". At 60 FPS 4.283 the `G` is drawn top right. At 3.300 / 3.283 `G` is left of `P` while the line says "(top left)". D-014 and V-14 allow it (the hit line names the Wind-up position; draws during the Strike are not compared). Decide whether this reads acceptably to a player, and whether the same event drawn in different cells at the two rates matters.
+  3. **Shot at spawn.** In the draw at "spitter (right) spits" (1.800 / 4.300) no `*` is visible because the spitter glyph covers it. The first `*` shows in the next draw. The glyph table says the projectile is visible from spawn. Decide whether the spec is met or needs a change.
+- Not seen by QA in play: `z/Z` glyphs, defeat and dash-off draws (V-17), colour.
+
+## Decisions already made
+
+- D-001 (one-button combat), D-011, D-012, D-013, D-014 (cells, sides, "on you", hit-line word).
+
+## Constraints
+
+- You decide visual readability and consistency within the art direction. You do not change numbers, inputs or the rules of D-014. If a change is needed, hand it back as a design question or a spec change within visuals.
+- Do not edit the repo or `manual.md`.
+
+## Open questions
+
+- Items 1 and 3 above (accept, or specify a change).
+- Any V-item that you find failing from the captures: cite the capture and time.
+
+## Expected output
+
+A handoff to `studio` (outcome `pass` or `fail`, or `question` only for input that is truly missing and that captures cannot supply). Give a per-item verdict for V-9…V-18 and the two observations, and mark what is not assessable.
+
+## Load
+
+- Role: studio/roles/art-director.md
+- Skills: studio/skills/visual-review.md
+- Project: project.md#art-direction, design/combat-visuals.md, design/combat.md, manual.md
+- Decisions: decisions/D-011-grub-turns-stun-body-hit-dash-facing.md, decisions/D-012-on-you-line-for-displaced-enemies.md, decisions/D-013-knockback-of-grub-on-players-tile.md, decisions/D-014-one-rule-for-cells-on-you-and-hit-line-word.md
+- Previous handoff: goals/G-001-combat-monotony/77-qa-to-studio.md (Appendices A and B are the captures)
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/79-studio-to-owner.md
+---
+kind: escalation
+goal: G-001
+seq: 79
+from: studio
+to: owner
+status: open
+decision:
+---
+# 79: オーナーの作業依頼 — AC-15 のテスト実行と V-15 マニュアル文の配置
+
+## Question
+
+`repo/` の隣に現在の `manual.md` を置いたままテストスイートを実行し、結果を教えていただけますか。あわせて 73 の V-15 の文を `manual.md` に入れていただけますか。
+
+## Why this needs the Owner
+
+QA の環境には `manual.md` が無く、QA は `manual.md` を置けません(77)。AC-15 の `ManualTest` 2件が実行できず、V-15 の文もまだ入っていません。どちらもオーナーにしかできない作業です(以前の D-007〜D-010 と同じ手順)。
+
+## Options
+
+### Option A — 実行して、文も入れる
+
+`python3 -m unittest discover -s tests` を、変更前の `manual.md` を `repo/` の隣に置いて実行し、テスト数と失敗したテスト名を報告。続いて 73 の V-15 の文を `manual.md` に入れる(`manual.md` を変えた後は、再度スイートを実行して結果を報告)。
+If chosen: Studio は結果を Decision に記録し、AC-15 を確定します。V-15 は QA が確認します。失敗があればデザイナーへ(2回目の AC-15 失敗はテクニカルディレクターへ)。
+
+### Option B — 実行だけ(V-15 は後で)
+
+スイートの結果だけ報告。
+If chosen: AC-15 は確定しますが、V-15 は未確認のまま残り、Review では「未確認」として扱います。
+
+## Studio recommendation
+
+Option A。QA の見込みでは 73 テスト・失敗 0(`ManualTest` が通れば)です。
+
+## Reasoning
+
+QA は `manual.md` を読んで AC-15 を通ると見ています。実行結果で確定できます。V-15 を入れないと、Verify が閉じられません。
+
+## Meanwhile
+
+アートディレクターの視覚レビュー(78)は並行して進みます。この返事を待たずに進みます。
+
+## Owner decision required
+
+A / B — 選択肢と、テスト数・失敗名(あれば)を返信してください。
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-15
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): when an action player from the project's player profile plays through combat encounters, the fights feel varied and engaging, and the player's moment-to-moment choices (positioning, timing, enemy behavior) visibly matter. The player no longer experiences the fights as the same repeated pattern.
+
+Out of scope: adding input buttons beyond attack, dash and pause (D-001, Owner approval needed); changes to the run length or the non-combat systems; numeric targets (these belong to Design as acceptance criteria, and the final verdict to Review).
+
+No immediate escalation: the Goal does not conflict with the vision or D-001, and it needs no reinterpretation. Improving depth through positioning, timing and enemy behavior is what pillar 1 asks for.
+
+## Unknowns
+
+- Observe (playtester, qa): done (02, 08, 06, 15, 58, 70, 77). Still unobserved in play (suite only): distance-4 idle run, AC-3, 9 dodge, 10, 12, 28(c); real-room clear/heal/next room and "run complete" (AC-13, 14); V-17 defeat and dash-off draws; `z/Z` glyphs; colour.
+- Diagnose, Decide: done (03, 53; D-002, D-005, D-006, D-011). A4 (120° cone), D1 (facing mechanic) and D2 (room 1 composition) are held with revisit triggers in 59.
+- Design: spec done (59, 60, 65, 73; D-011…D-014, AC-19…AC-30, V-9…V-18). Final V-15 manual wording is in 73 for the Owner. Optional designer question from 77: whether AC-17 / rule 6 cover draws made during a Strike, and the reading of "never inside 0.9 tile"; decided after the art-director's result.
+- Plan: skipped (Waiting behavior local, per 67). Reopen with the Technical Director if the fix for the 30/60 FPS display or hit-line word fails verification a second time.
+- Build: AC-19…AC-30 built (67, 75), D-014 rulings built. `test_line_words_match_the_next_draw` is weaker than AC-30(c) (77); a tightening is optional.
+- Verify: 13f QA (77): no failing criterion at 30/60 FPS (71 of 73 tests pass; the 2 errors are `ManualTest`, no `manual.md` in QA's environment). No criterion has failed twice. Open: AC-15 (Owner run), V-15 (manual text, Owner), visual review 13g from QA's captures.
+- Play: earlier sessions saw only rooms 1 and 2 by script (50, 54), with defeats. Rooms 3–5, the spitter, projectile hits, room clear, the dash and a survived run are unobserved, so monotony itself is unjudged. Next Play follows Verify: fresh playtester, rooms 1–5, reactive play; judged against the retest guideline, which is not forwarded.
+- Review: `game-director` with `review-outcome`, planned after the next Play. Open: run progression after "run over"; F1, F4, F6, F7; numbering of same-type enemies in one cell; A4, D1, D2.
+- Skipped: none.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 02-playtester-to-game-designer.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-game-designer-to-game-director.md |
+| 3a | Decide | game-director | make-decision | done | 05-game-director-to-studio.md |
+| 3b | Observe (defects) | qa | reproduce-defect | done | 06-qa-to-game-designer.md |
+| 3c | Observe (rooms 4–5) | playtester | playtest-session | done | 08-playtester-to-game-designer.md |
+| 4 | Design | game-designer | write-design-spec | done | 10-game-designer-to-studio.md |
+| 5a | Plan | technical-director | technical-plan | done | 14-technical-director-to-studio.md |
+| 5b | Observe (spit line) | qa | reproduce-defect | done | 15-qa-to-studio.md |
+| 5c | Design (visuals) | art-director | visual-review, write-design-spec | done | 16-art-director-to-studio.md |
+| 6a | Build (code) | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md |
+| 6b | Build (`run_tests` check, manual placed) | gameplay-engineer | implement-change | done | 23-gameplay-engineer-to-studio.md |
+| 7a | Verify | qa | verify-change | done (question, no AC failed) | 26-qa-to-studio.md |
+| 7b | Verify (visuals) | art-director | visual-review | done (question, no build output) | 27-art-director-to-studio.md |
+| 7c | Verify (rerun: manual, runs, captures) | qa | verify-change | done (question, no AC failed) | 29-qa-to-studio.md |
+| 7d | Verify (visuals, from captures) | art-director | visual-review | done (fail: V-1, F3) | 32-art-director-to-studio.md |
+| 7e | Design (F1 overlap, AC-15 wording) | game-designer | write-design-spec | done | 33-game-designer-to-studio.md |
+| 7f | Build (F1/F3 render, manual paragraph) | gameplay-engineer | implement-change | done (render built) | 35-gameplay-engineer-to-studio.md |
+| 7f-O | Owner: place the manual paragraph | owner | — | done (Option A, D-007) | 36-studio-to-owner.md |
+| 7g | Verify (all but AC-15) | qa | verify-change | done (pass) | 37-studio-to-qa.md |
+| 7i | Verify (AC-15, `ManualTest`) | qa | verify-change | done (question: ManualTest blocked) | 38-studio-to-qa.md |
+| 7i-O | Owner: `ManualTest` result | owner | — | done (Option A, D-008: 39/40) | 42-studio-to-owner.md |
+| 7h | Verify (visuals) | art-director | visual-review | done (pass; V-6 from code, V-7 not seen) | 41-studio-to-art-director.md |
+| 7j | Design (`run over` manual test failure) | game-designer | write-design-spec | done (test too literal, D-009) | 43-studio-to-game-designer.md |
+| 7k | Build (test fix, line wraps) | gameplay-engineer | implement-change | done (test changed, suite not run) | 46-studio-to-gameplay-engineer.md |
+| 7k-O | Owner: place manual text | owner | — | skipped (manual unchanged, D-009) | — |
+| 7l-O | Owner: AC-15 rerun | owner | — | done (Option A, D-010: 40/40) | 48-studio-to-owner.md |
+| 7l | Verify (AC-15 rerun by QA) | qa | verify-change | skipped (Owner's 40/40 run, D-010) | — |
+| 8 | Play (room 1) | playtester | playtest-session | done (room 1 only, scripted, 2 defeats) | 49-studio-to-playtester.md |
+| 9a | Diagnose (Play findings) | game-designer | diagnose-experience | done (A1–A3, A5, B, C, D held) | 51-studio-to-game-designer.md |
+| 9b | Play (parts not yet seen) | playtester | playtest-session | done (thin: room 2 only, 1 script) | 52-studio-to-playtester.md |
+| 10a | Observe (open facts, bots) | qa | reproduce-defect | done (6 facts settled, 2 partly; D-58-1 ruled in 59) | 55-studio-to-qa.md |
+| 10b | Design (A1–A3, A5, manual draft) | game-designer | write-design-spec, make-decision | done (spec, D-011, manual draft) | 56-studio-to-game-designer.md |
+| 10c | Design (visuals: "on you", hit source) | art-director | visual-review, write-design-spec | done (V-9…V-17, D-012) | 57-studio-to-art-director.md |
+| 10-O | Owner: place manual draft (59) and V-15 text | owner | — | open (final V-15 wording now in 73; asked again in 79) | 79-studio-to-owner.md |
+| 11 | Plan | technical-director | technical-plan | skipped (Waiting behavior local, per 67; reopen if Verify disagrees) | — |
+| 12 | Build (first attempt) | gameplay-engineer | implement-change | done (question: no repo files; Q1 gap) | 61-studio-to-gameplay-engineer.md |
+| 12a | Design (Q1 knockback at distance 0, Q2, 3 passages) | game-designer | write-design-spec | done (D-013, AC-28) | 64-studio-to-game-designer.md |
+| 12b | Build (re-issue with repo files) | gameplay-engineer | implement-change | done (AC-19…AC-28 built; suite re-run needed) | 66-studio-to-gameplay-engineer.md |
+| 13a | Verify | qa | verify-change | done (fail: AC-17, AC-22 suite, AC-28b at 30, V-14/16; V-15 manual) | 70-qa-to-studio.md |
+| 13b | Verify (visuals) | art-director | visual-review | done (question: no live view; V-15 fails on document) | 71-art-director-to-studio.md |
+| 13c | Design (cell rule at .5, "on you", hit-line word) | game-designer | write-design-spec, make-decision | done (D-014, AC-29/30, V-18) | 73-game-designer-to-studio.md |
+| 13d | Build (suite test, D-A, D-C, 13c rulings) | gameplay-engineer | implement-change | done (rulings built; 2 ManualTest need Owner run) | 75-gameplay-engineer-to-studio.md |
+| 13e-O | Owner: run suite with manual.md (AC-15) | owner | — | open (parallel to 13g) | 79-studio-to-owner.md |
+| 13f | Verify (rerun; verbatim captures for AD) | qa | verify-change | done (pass: no failure; AC-15, V-15 open) | 76-studio-to-qa.md |
+| 13g | Verify (visuals, from QA captures) | art-director | visual-review | open | 78-studio-to-art-director.md |
+| 14 | Play (rooms 1–5, fresh playtester) | playtester | playtest-session | planned | — |
+| 15 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+After 13f (77): pass, no criterion failed, so no Build or TD re-plan. Opened 13g art-director (78) from QA's captures with the two QA observations, and re-asked the Owner for the AC-15 suite run and V-15 text (79). Designer clarification of AC-17 (Strike draws) stays optional, after 13g.
+
+## Next action
+
+- `art-director` runs 13g from `78-studio-to-art-director.md` and addresses the result to `studio`.
+- Owner (13e-O, 10-O): see `79-studio-to-owner.md`: run the suite with `manual.md` beside `repo/`, report the count, and place the V-15 text from 73.
+- Then Route: if 13g passes and AC-15 is confirmed, compose a fresh Play handoff (14) for the playtester from the build and player profile only. V-15 gets a QA check after the Owner places the text. If 13g finds a failure, Design (art-director or game-designer) before Build.
+
+## Outcome
+
+(Filled at Close.)
+>>>END

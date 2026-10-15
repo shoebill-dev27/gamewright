@@ -1,0 +1,359 @@
+I'm requesting a second round of runs before writing the report. Round 1 left several criteria unobserved, and it exposed a possible display defect. In the wall knockback draw at 30 FPS, a grub that is 1.0 tile away is shown as "on you". The bots script format also needs another attempt.
+
+<<<FILE @run/play/wall-60
+fps 60
+room empty
+player 14.5 4
+spawn grub 14.5 4
+end 2
+0.2 attack
+>>>END
+
+<<<FILE @run/trace/stun-30
+fps 30
+room empty
+player 8 4
+spawn grub 9.2 4
+end 2.5
+0.62 attack
+0.65 dash
+0.85 attack
+>>>END
+
+<<<FILE @run/trace/stun-60
+fps 60
+room empty
+player 8 4
+spawn grub 9.2 4
+end 2.5
+0.62 attack
+0.65 dash
+0.85 attack
+>>>END
+
+<<<FILE @run/trace/strike-a-30
+fps 30
+room empty
+player 8 4
+spawn grub 9.2 4
+end 1.5
+0.50 attack
+>>>END
+
+<<<FILE @run/trace/strike-b-30
+fps 30
+room empty
+player 8 4
+spawn grub 9.2 4
+end 1.5
+0.52 attack
+>>>END
+
+<<<FILE @run/trace/strike-c-30
+fps 30
+room empty
+player 8 4
+spawn grub 9.2 4
+end 1.5
+0.53 attack
+>>>END
+
+<<<FILE @run/trace/strike-a-60
+fps 60
+room empty
+player 8 4
+spawn grub 9.2 4
+end 1.5
+0.51 attack
+>>>END
+
+<<<FILE @run/trace/strike-b-60
+fps 60
+room empty
+player 8 4
+spawn grub 9.2 4
+end 1.5
+0.533 attack
+>>>END
+
+<<<FILE @run/trace/cycle-30
+fps 30
+room empty
+player 8 4
+spawn grub 8 4
+end 3
+0.8 attack
+>>>END
+
+<<<FILE @run/trace/cycle-60
+fps 60
+room empty
+player 8 4
+spawn grub 8 4
+end 3
+0.8 attack
+>>>END
+
+<<<FILE @run/trace/body-a-30
+fps 30
+room empty
+player 8 4
+spawn grub 8.2 4
+end 1
+0.05 attack
+>>>END
+
+<<<FILE @run/trace/body-a-60
+fps 60
+room empty
+player 8 4
+spawn grub 8.2 4
+end 1
+0.05 attack
+>>>END
+
+<<<FILE @run/trace/body-br-30
+fps 30
+room empty
+player 8 4
+spawn grub 8.0 4
+end 1
+0.0 move right
+0.1 stop
+0.2 attack
+>>>END
+
+<<<FILE @run/trace/body-br-60
+fps 60
+room empty
+player 8 4
+spawn grub 8.0 4
+end 1
+0.0 move right
+0.1 stop
+0.2 attack
+>>>END
+
+<<<FILE @run/trace/body-bl-30
+fps 30
+room empty
+player 8 4
+spawn grub 8.0 4
+end 1
+0.0 move left
+0.1 stop
+0.2 attack
+>>>END
+
+<<<FILE @run/trace/body-bl-60
+fps 60
+room empty
+player 8 4
+spawn grub 8.0 4
+end 1
+0.0 move left
+0.1 stop
+0.2 attack
+>>>END
+
+<<<FILE @run/trace/body-c-30
+fps 30
+room empty
+player 8 4
+spawn grub 8.0 4
+end 1
+0.0 move right
+0.2 stop
+0.3 attack
+>>>END
+
+<<<FILE @run/trace/body-c-60
+fps 60
+room empty
+player 8 4
+spawn grub 8.0 4
+end 1
+0.0 move right
+0.2 stop
+0.3 attack
+>>>END
+
+<<<FILE @run/trace/dashdir-30
+fps 30
+room empty
+player 8 4
+spawn grub 0 8
+end 2.5
+0.0 move up
+0.1 stop
+0.3 dash
+1.0 attack
+1.5 dash left
+1.55 attack
+>>>END
+
+<<<FILE @run/trace/dashdir-60
+fps 60
+room empty
+player 8 4
+spawn grub 0 8
+end 2.5
+0.0 move up
+0.1 stop
+0.3 dash
+1.0 attack
+1.5 dash left
+1.55 attack
+>>>END
+
+<<<FILE @run/trace/dist-30
+fps 30
+room empty
+player 8 4
+spawn grub 0 8
+end 1.2
+0.1 dash right
+0.5 dash right
+>>>END
+
+<<<FILE @run/trace/dist-60
+fps 60
+room empty
+player 8 4
+spawn grub 0 8
+end 1.2
+0.1 dash right
+0.5 dash right
+>>>END
+
+<<<FILE @run/trace/edge-30
+fps 30
+room empty
+player 2 4
+spawn grub 0 8
+end 1
+0.1 dash left
+>>>END
+
+<<<FILE @run/trace/edge-60
+fps 60
+room empty
+player 2 4
+spawn grub 0 8
+end 1
+0.1 dash left
+>>>END
+
+<<<FILE @run/trace/far-knock-30
+fps 30
+room empty
+player 8 4
+spawn grub 8.6 4
+end 0.45
+0.1 attack
+>>>END
+
+<<<FILE @run/trace/far-knock-60
+fps 60
+room empty
+player 8 4
+spawn grub 8.6 4
+end 0.45
+0.1 attack
+>>>END
+
+<<<FILE @run/play/v11-30
+fps 30
+room empty
+player 8 4
+spawn grub 8 4
+spawn grub 9 4
+end 1
+>>>END
+
+<<<FILE @run/play/v11-60
+fps 60
+room empty
+player 8 4
+spawn grub 8 4
+spawn grub 9 4
+end 1
+>>>END
+
+<<<FILE @run/play/v14-30
+fps 30
+room empty
+player 8 4
+spawn grub 7 4
+spawn grub 9 4
+end 2
+>>>END
+
+<<<FILE @run/play/v14-60
+fps 60
+room empty
+player 8 4
+spawn grub 7 4
+spawn grub 9 4
+end 2
+>>>END
+
+<<<FILE @run/trace/room1-still-30
+fps 30
+room 1
+end 12
+>>>END
+
+<<<FILE @run/trace/room1-still-60
+fps 60
+room 1
+end 12
+>>>END
+
+<<<FILE @run/trace/room5-still-30
+fps 30
+room 5
+end 12
+>>>END
+
+<<<FILE @run/trace/room5-still-60
+fps 60
+room 5
+end 12
+>>>END
+
+<<<FILE @run/play/room2-view-30
+fps 30
+room 2
+end 6
+>>>END
+
+<<<FILE @run/play/room2-view-60
+fps 60
+room 2
+end 6
+>>>END
+
+<<<FILE @run/bots/g-comment
+# usage?
+>>>END
+
+<<<FILE @run/bots/g-help
+help
+>>>END
+
+<<<FILE @run/bots/g-eq
+room=1 fps=30
+>>>END
+
+<<<FILE @run/bots/g-num
+1 30
+>>>END
+
+<<<FILE @run/bots/g-rooms
+rooms 1
+>>>END
+
+<<<FILE @run/bots/g-play
+play room 1 fps 30
+>>>END

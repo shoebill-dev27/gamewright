@@ -1,0 +1,170 @@
+I'm running the checks first, so there is no report yet. The final handoff 39 will follow once the results are back.
+
+<<<FILE @run/tests
+>>>END
+
+<<<FILE @run/play/c1-30
+room empty
+fps 30
+player 8 4
+spawn grub 12 4
+end 8
+>>>END
+
+<<<FILE @run/play/c1-60
+room empty
+fps 60
+player 8 4
+spawn grub 12 4
+end 8
+>>>END
+
+<<<FILE @run/trace/c1-30
+room empty
+fps 30
+player 8 4
+spawn grub 12 4
+end 8
+>>>END
+
+<<<FILE @run/trace/c1-60
+room empty
+fps 60
+player 8 4
+spawn grub 12 4
+end 8
+>>>END
+
+<<<FILE @run/play/c7-30
+room 1
+fps 30
+15 attack
+end 20
+>>>END
+
+<<<FILE @run/play/c7-60
+room 1
+fps 60
+15 attack
+end 20
+>>>END
+
+<<<FILE @run/trace/c7-30
+room 1
+fps 30
+15 attack
+end 20
+>>>END
+
+<<<FILE @run/trace/c7-60
+room 1
+fps 60
+15 attack
+end 20
+>>>END
+
+<<<FILE @run/play/c3-30
+room empty
+fps 30
+player 8 4
+spawn grub 12 4
+2.5 attack
+end 6
+>>>END
+
+<<<FILE @run/play/c3-60
+room empty
+fps 60
+player 8 4
+spawn grub 12 4
+2.5 attack
+end 6
+>>>END
+
+<<<FILE @run/trace/c3-30
+room empty
+fps 30
+player 8 4
+spawn grub 12 4
+2.5 attack
+end 6
+>>>END
+
+<<<FILE @run/trace/c3-60
+room empty
+fps 60
+player 8 4
+spawn grub 12 4
+2.5 attack
+end 6
+>>>END
+
+<<<FILE @run/play/c2-30
+room empty
+fps 30
+player 8 4
+spawn grub 12 4
+1.6 attack
+end 5
+>>>END
+
+<<<FILE @run/play/c2-60
+room empty
+fps 60
+player 8 4
+spawn grub 12 4
+1.6 attack
+end 5
+>>>END
+
+<<<FILE @run/play/spit-30
+room empty
+fps 30
+player 8 4
+spawn spitter 8.2 4
+end 4
+>>>END
+
+<<<FILE @run/play/spit-60
+room empty
+fps 60
+player 8 4
+spawn spitter 8.2 4
+end 4
+>>>END
+
+<<<FILE @run/play/two-30
+room empty
+fps 30
+player 8 4
+spawn grub 8.2 4
+spawn spitter 8.1 4
+end 4
+>>>END
+
+<<<FILE @run/play/two-60
+room empty
+fps 60
+player 8 4
+spawn grub 8.2 4
+spawn spitter 8.1 4
+end 4
+>>>END
+
+<<<FILE @run/play/miss-30
+room empty
+fps 30
+player 8 4
+spawn grub 12 4
+0.5 attack
+end 1.5
+>>>END
+
+<<<FILE @run/play/miss-60
+room empty
+fps 60
+player 8 4
+spawn grub 12 4
+0.5 attack
+end 1.5
+>>>END

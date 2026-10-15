@@ -1,0 +1,156 @@
+<<<FILE goals/G-001-combat-monotony/70-qa-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 70
+from: qa
+to: studio
+stage: Verify
+outcome: fail
+---
+# 70: qa → studio — Verification report, combat response change set (AC-1…AC-28, V-9…V-17) at 30 and 60 FPS
+
+## Verdict: fail
+
+The suite does not pass, V-15 is not met, there are two display defects, and several criteria were not observed. Details follow. I could not run anything beyond the packet's run results (0 rounds left). Every statement below comes from those outputs.
+
+Earlier reports were not in my packet. The handoff says AC-1…AC-27 of the earlier set passed or were settled by the Owner's suite runs (D-008, D-010), so I can't say any criterion below is failing for a second time. The Studio should check the earlier reports against the failures listed here.
+
+## 1. Test suite (`python3 -m unittest discover -s tests`)
+
+Ran 63 tests, FAILED (failures=2, errors=2). The earlier Owner run was 40/40 (D-010), so that figure is stale.
+
+| Test | Result | Reading |
+|---|---|---|
+| `ManualTest.test_manual_lists_glyphs_and_lines` | ERROR | `FileNotFoundError: '/manual.md'` |
+| `ManualTest.test_on_screen_section_lists_x_and_the_practice_room` | ERROR | same file error |
+| `CrowdTest.test_hit_stun_is_short` (fps=30) | FAIL | `test_game.py` line 282, `assertTrue(game.invulnerable)` is False |
+| `CrowdTest.test_hit_stun_is_short` (fps=60) | FAIL | same |
+
+- **ManualTest errors.** These are an environment problem. In my sandbox the tests sit in `/work/tests` and the test resolves `manual.md` to `/`, not to one level above `repo/`. AC-15 cannot be settled by me. The Owner must run the full suite with `manual.md` placed as in D-008/D-010, and report the counts. I read `manual.md` by hand against the AC-15 wording (section 5).
+- **`test_hit_stun_is_short`.** I could not see the test source. The traces show invulnerability true from the hit until 0.8 s after it, at both frame rates (AC-22 below). So I can't tell whether the test is stale or the build is wrong. The `gameplay-engineer` must read line 282 and say which. This failure counts against AC-22 and AC-17 until resolved.
+
+## 2. Per-criterion results
+
+Evidence is trace rows (t = seconds) and player-view draws from the run results. "Both" means 30 and 60 FPS.
+
+| Criterion | Result | Evidence and notes |
+|---|---|---|
+| AC-1 Grub telegraph | pass (partial) | The windup line comes 0.5 s or more before the first heart is lost, e.g. "rears back" 0.400 and hit 0.967 at 30. The practice-room distance-4 script was not run. |
+| AC-2 Grub timing | pass | Wind-up 0.5 s (0.800→1.300). Strike 0.15 s at 60, 0.167 at 30 (one tick). Recovery 0.9 s (stun-30 recover at 0.700, next windup at 1.600). |
+| AC-3 Grub dodge | not observed | No dash-away run. Only the dash of an unrelated grub was seen. |
+| AC-4 Grub counter | pass | The swipe in Recovery hits and the grub becomes `w`. The next bite follows the previous one by 1.533 s at 30 (0.567→2.100) and 1.55 s at 60. |
+| AC-5 Interrupt | pass | A swipe in Wind-up gives "recover interrupted", with 0.567 s left after the tick at 30 and 0.583 at 60 (0.6 s Recovery). No heart lost. |
+| AC-6 Attack limit | pass | Room 5 traces show at most one grub in Wind-up or Strike at every event sample, both. |
+| AC-7 Spitter stagger | pass | Room 5 charges at 1.000 and 1.800, and again at 3.500 and 4.300 (every 2.5 s), both. |
+| AC-8 Spitter telegraph | pass (trace only) | Charge precedes spit by 0.8 s, each with its own `who` and `spot`, `dup False`. Spitter lines in the player view were not viewed. |
+| AC-9 Projectile dodge | not observed | Only a still player being hit by a shot (room 5, down at 4.600/4.567). Dodging was not run. |
+| AC-10 Spitter approach | not observed | Room 3 was not run. |
+| AC-11 Hit feedback | partial pass | Seen: "hit (1 left)", "defeated", "(miss)" with causes, "(stunned)" (trace). Not seen: "(too soon)", "(down)" text. |
+| AC-12 Multi-hit | not observed | |
+| AC-13 Zero hearts | partial | Room 2: "you went down" printed, `x` replaces `P`, enemies stop. Room 5 shots=0 at down. Run-over phase at +2.0 s (7.267 after 5.267). Not seen: "(down)" on attack, run-over screen text, restart. |
+| AC-14 Room clear | not observed in a run | Only the practice room (no heal, by spec). "grub defeated" at 1.600 and "room cleared" at 1.633 (30) / 1.617 (60), one tick later. The spec says the check runs in the same tick as the attack. Not judged; the designer should confirm whether a one-tick lag is acceptable. Heal, next room, "run complete" and the cleared-while-strike case were not observed. |
+| AC-15 Practice room | cannot run | See sections 1 and 5. By reading, `x` and the practice room are both in On screen. |
+| AC-16 Room mix | partial pass | Setup rows match for room 1 (3 grubs), room 2 (4), room 5 (3 grubs + 2 spitters). Rooms 3 and 4 were not viewed. |
+| AC-17 Frame rate | not passed | Event sequences match in the traces and timestamps are within 0.07 s (e.g. room 2 first hit 3.300 vs 3.283). But the suite fails, and F-1 and F-2 below are open. |
+| AC-18 No hidden enemy | partial pass | Every "rears back" line seen has `G`/`W` in the same draw. Every "open (on you)" has `g`/`w`. Not run: the distance-4 idle script to 5.5 s, and the spitter beside `P` case. |
+| AC-19 Wind-up spacing | pass | Room 2 starts at 2.733 / 3.733 / 4.733, both. Room 1: 1.400 / 2.400 / 3.400 at 30 and 1.383 / 2.383 / 3.383 at 60. Room 5: 2.233 / 3.233 / 4.233 at 30 and 2.217 / 3.217 / 4.217 at 60. All gaps are 1.0 s. |
+| AC-20 Engagement cap | pass (event samples) | Room 2 shows 2 grubs inside 1.5 tiles at each sample. The others are `waiting-cap` at 2.0 tiles, lowercase, with no "rears back" line. Samples are event rows only. |
+| AC-21 Turns, not a ring | pass | First to third heart lost: 3.300→5.267 = 1.967 s at 30, 3.283→5.250 = 1.967 s at 60 (limit 1.9). At most one grub in Wind-up or Strike per sample. |
+| AC-22 Hit-stun | pass by observation; suite test fails | Hit at 0.567: attack at 0.62 → "(stunned)", dash at 0.65 → "(stunned)", attack at 0.85 → hit, both. Invulnerability ended 0.8 s after the hit (1.367 at 30, 1.350 at 60). A dash after the stun was not tested. See the `CrowdTest` failure (section 1). |
+| AC-23 Body hit | pass | (a) Grub at 8.2 is hit at 0.05 s, both. (b) Grub 0.4 behind, facing right or left, is hit, both. (c) Grub 0.8 behind gives `miss: 'not in front'`, both (right-facing only). Facings other than right were not tried for (a). |
+| AC-24 Dash and facing | pass | `dash left` then attack → `facing left`, and the 60 FPS view draws `(`. A directionless dash goes up (facing up) and a queued attack fires after the dash in the dash direction, both. |
+| AC-25 Dash distance | pass | `dash right` ends at x=12.00, both. `dash left` from 2 ends at x=0.00. Dash duration is 0.25 s within tolerance (0.267 / 0.233). A dash during cooldown gives "ignored: dash not ready". |
+| AC-26 Swipe in Strike/Recovery | pass (D-58-1 closed) | At 30 FPS: strike starts 0.533 and the swipe lands on tick 0.567, the would-be damage tick. It hits, recovery is interrupted, hearts stay 3. A swipe processed after the damage tick gets "(stunned)" and the heart is lost (strike-hit-30, damage 0.567, swipe 0.600). At 60: swipes at 0.533 and 0.550 both hit with no damage. A swipe in Recovery hits. No "(miss)". Inputs take effect one tick after their script time, so the swipe window is about one tick at 30 FPS. |
+| AC-27 Miss wording | pass | 2.0 in front → "(miss) too far". 1.0 below → "(miss) not in front". Nothing near → "(miss)". All draw the arc, both. |
+| AC-28 Knockback, on-tile | **fail (see F-1)** | (a) pass both: shown right, and after 0.2 s the grub is at (9.00,4.00), 1.0 tile, on the right, with no `on you:` entry. (b) trace pass both: the grub moves to the left side, ending at 13.50. The 30 FPS player view contradicts this (F-1). (c) not observed for the on-tile case; a grub hit from 0.6 tile ends at 9.60, i.e. 1.6 tiles, both. (d) pass: 1.533 / 1.55 s between bites. (e) pass: the line is "you swipe: grub hit (1 left)" with no "(on you)". |
+
+## 3. Visual criteria
+
+| Criterion | Result | Evidence and notes |
+|---|---|---|
+| V-9 `on you:` line | pass | Present in every draw with a grub on the tile (draws that showed an `on you:` line are marked), absent otherwise, both. It is still shown in the immediate draw right after an on-tile hit, which D-013 allows within 0.2 s. |
+| V-10 Line matches picture | pass in scripted cases | Letters, case and sides agree in the v11, v14 and room 2 draws. See F-1 for the exception at 30 FPS. |
+| V-11 Neighbor vs displaced | pass | `gPg` with only one grub named on `on you:`, both. |
+| V-12 Telegraph from the tile | pass for exact overlap; **fail for near-overlap (F-2)** | |
+| V-13 Hit line names attacker | pass | Every grub hit line carries a position word; shots are named by spitter (trace). |
+| V-14 Which grub | pass for the scripted case | Left grub strikes → "(left)", right → "(right)", with `G` at that position in the previous draw, both. In room 2 the lunge crosses cells (see F-3). |
+| V-15 Manual | **fail** | See section 5. |
+| V-16 Both frame rates | **fail for one line** | Scripted V-9…V-14 are identical. Room 2 second hit differs: "(right)" at 30 vs "(top right)" at 60 (F-3). |
+| V-17 Overlap ends | pass | The defeat draw (1.63 / 1.62) has no grub and no `on you:`. The draw after a dash off the tile (2.00) has neither, both. |
+| V-1…V-8 regression | partial | V-1 case, V-2 swipe, windup and recovery draws, V-3, V-4 (`g`/`w`, `G`/`W`) and the `x` marker were seen in passing and agree. Colors (V-6) can't be judged in text. The spitter draws, V-7 and the V-8 run-over screen were not viewed. |
+
+## 4. Findings
+
+- **F-1 (AC-28(b), V-10; severity medium).** The script is `player 14.5 4`, `spawn grub 14.5 4`, attack at 0.2.
+  - The 30 FPS player view shows the grub on the right (cell 15) with `on you: w open (shown right)` at 0.50, 0.80 ("a grub rears back (left)"), 1.00 and 1.333 ("YOU ARE HIT by a grub (left)"). The picture and the `on you:` line contradict the line text.
+  - The 60 FPS view is right: `wP` at 0.50 with no on-you entry. The 30 and 60 FPS traces agree that the grub moves to x=13.50.
+  - The 30 FPS view is wrong, or came from a different build state. A rerun of this one script at 30 FPS, view and trace in the same run, is needed.
+  - Possible cause for the engineer to check: positions at x.5 beside the player, where cell rounding may put a grub 1.0 tile away in the player's cell.
+- **F-2 (V-12 and position words; severity low to medium).** A grub counts as on the player's tile for the picture and the `on you:` line by cell, but the text lines use a direction word.
+  - Room 2 at both frame rates: grub at (7.78,3.89), `on you: g open (shown left)`, yet the line says "the grub is open (left)". Room 1 trace: grub at (8.00,3.75) is "above" while its cell is the player's.
+  - `combat-visuals.md` says "Same tile as the player: `on you`". The spec doesn't say how "same tile" is measured (cell, or distance, as in the 0.05 tile of D-013). **Spec gap** for `art-director` and `game-designer`.
+- **F-3 (V-14, V-16; severity low).** In room 2 the first strike's lunge crosses cells before damage.
+  - V-14 asks that the hit line match the `G` position in the draw before the hit. At 3.30 the previous draw shows top left and the line says "(left)". V-14 also says "position at the moment of the hit", so this is ambiguous.
+  - The second hit differs by frame rate: 30 FPS "(right)", 60 FPS "(top right)", because damage lands on different ticks of the lunge (0.067 vs 0.05 s in). Each is consistent with its own draw. Designer to say whether V-16 means word-identical text in a crowded room.
+- **F-4 (suite).** `CrowdTest.test_hit_stun_is_short` fails, cause unknown (section 1).
+
+## 5. Manual check (`manual.md`, not edited)
+
+- **AC-15 wording present.** `x` (you, down) is a row of the On screen table. The practice room (`room empty`, no heal, no next room, ends after going down, displaced enemy drawn next to you) is in the On screen section as well as the Script table and "Rooms and runs". The AC-15 wording is met by reading. The test itself is not run.
+- **V-15 missing.** `manual.md#on-screen` has no `on you:` line and no sentence that a letter beside `P` named on that line is on the player's tile. `manual.md#what-you-hear-and-read` has no `YOU ARE HIT` line, no position in hit lines, no "(on you)", and no position words (only "rears back (left)" and "spitter (top right)").
+- **Not required by any criterion, listed for the Owner's draft.** The "(miss)" causes ("too far", "not in front"; the manual says only "(miss) nothing in reach"). Body hit. Dash sets facing. Shorter stun. Grubs taking turns. The `Pw`/reverse-video cue.
+- The missing V-15 text is needed by V-15 only. No other criterion depends on it.
+
+## 6. Bot reference data (`python3 bots.py`, numbers only, no balance judgement)
+
+Format: clear time; hearts lost; attacks/dashes. All four bots cleared room 1 and room 2 with 0 hearts lost unless noted.
+
+| Room, FPS | camper | walker | dodger | reactive |
+|---|---|---|---|---|
+| Room 1, 60 | 3.5 s; 6/0 | 3.5 s; 6/0 | 3.5 s; 6/0 | 3.5 s; 6/0 |
+| Room 1, 30 | 3.5 s; 6/0 | 3.5 s; 6/0 | 3.5 s; 6/0 | 3.5 s; 6/0 |
+| Room 2, 60 | 4.5 s; 6/0 | 5.1 s; 8/0 | 5.1 s; 8/0 | 6.7 s; 9/2 |
+| Room 2, 30 | 4.5 s; 6/0 | 4.8 s; 8/0 | 4.8 s; 8/0 | 4.8 s; 8/0 |
+
+Rooms 3–5 for reference (60 FPS, then 30 FPS where it differs):
+- **camper:** rooms 3, 4, 5 not cleared, 3 hearts lost each, all to shots, at both frame rates.
+- **walker:** 9.0 s, 9.1 s and 11.2 s at 60; 9.2 s, 9.1 s and 12.3 s at 30. 0 hearts lost.
+- **dodger:** 11.8 s, 10.0 s and 9.8 s (dashes 4, 1, 2) at 60; 9.5 s, 10.1 s and 14.5 s (dashes 2, 1, 6) at 30.
+- **reactive:** 11.8 s, 12.9 s and 11.1 s (dashes 4, 5, 2) at 60; 9.5 s, 14.3 s and 11.1 s (dashes 2, 6, 2) at 30.
+
+The reactive bot's room 2 and room 4 results differ between frame rates. This is reference data only; AC-17 does not cover bot results.
+
+Still-player reference: down at 5.267 s (30) and 5.250 s (60) in room 2, 5.933 s / 5.900 s in room 1, 4.600 s / 4.567 s in room 5.
+
+## 7. Could not observe
+
+- AC-3, AC-9 (dodge), AC-10, AC-12.
+- AC-13: "(down)" text, run-over screen text, restart.
+- AC-14: heal, next-room load, "run complete", a clearing swipe on the strike tick.
+- AC-16: rooms 3 and 4.
+- AC-18: the idle distance-4 script and the spitter beside `P`.
+- AC-22: a dash accepted after the stun.
+- AC-23: left-facing variant of (c), and other facings for (a).
+- AC-28(c): an on-tile hit in room 2 with two other grubs inside 1.5 tiles.
+- "(too soon)" text.
+- Spitter draws and charge draws in the player view (V-1, V-7).
+- The run-over screen (V-8).
+- Colors and reverse video (not assessable in text).
+- AC-15 by test (needs the Owner's run).
+
+## 8. What I need next
+
+1. `gameplay-engineer`: F-1 (rerun and fix), F-4 (read `test_game.py` line 282), and F-2 once the "same tile" definition is settled.
+2. `game-designer` / `art-director`: decide the "same tile" definition for position words (F-2), whether V-14 and V-16 allow the room 2 word difference (F-3), and whether a one-tick "room cleared" lag is acceptable.
+3. Owner: place the V-15 text in `manual.md`, then run the full suite with `manual.md` one level above `repo/` and report the counts.
+4. After the fixes, QA reruns the unobserved list above, with the Owner running the suite (D-008).
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: design/combat.md, design/combat-visuals.md, manual.md, repo/
+- Decisions: decisions/D-009-manualtest-phrase-check-ignores-line-wraps.md, decisions/D-010-owner-ran-suite-ac15-passes.md, decisions/D-011-grub-turns-stun-body-hit-dash-facing.md, decisions/D-012-on-you-line-for-displaced-enemies.md, decisions/D-013-knockback-of-grub-on-players-tile.md
+- Previous handoff: goals/G-001-combat-monotony/68-studio-to-qa.md
+>>>END

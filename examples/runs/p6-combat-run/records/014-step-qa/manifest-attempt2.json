@@ -1,0 +1,52 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/12-studio-to-qa.md",
+  "sha256": "00a87c5c1523c805b31383ab5acf48ae7f9e13ef608c2b624f7eb21688af033f",
+  "bytes": 2015
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "381742c8f2afe2e1a2a6af9d031dcc91f98f490ada7c90e2a990d6a1aaf27639",
+  "bytes": 1765
+ },
+ {
+  "path": "studio/skills/reproduce-defect.md",
+  "sha256": "aa7e161cc1fcb38fd92ede1719446f05eee1c7ac431a28a04d570ce451a2291d",
+  "bytes": 1407
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "8cc6f664f6db174e1501214e4f87b3e86706a62816667fc6cead10f7863d58c4",
+  "bytes": 14270
+ },
+ {
+  "path": "manual.md",
+  "sha256": "4ec9f212cc2c7d9680ba630a7c496167031350638c74291b07db68b744c5822b",
+  "bytes": 1266
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "05a33c6f8e50caa20ddf4f3844885137c4261ad4a3e5f3db3eb1b5312b129a9f",
+  "bytes": 237
+ },
+ {
+  "path": "goals/G-001-combat-monotony/08-playtester-to-game-designer.md",
+  "sha256": "4c2f64f16f18899f01402cb03f693872a4eb5e4bc2b7b13ac7196624207a18ec",
+  "bytes": 6697
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "@run-results",
+  "sha256": "04b9247050fc7e6c894220a43f5ea69e4c9824e0370f7f0f3cf0bab6b93059bd",
+  "bytes": 14173
+ }
+]

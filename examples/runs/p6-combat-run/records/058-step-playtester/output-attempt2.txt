@@ -1,0 +1,6 @@
+
+<invoke name="bash">
+<parameter name="command">echo noop</parameter>
+</invoke>
+
+@run/play/room2-timed

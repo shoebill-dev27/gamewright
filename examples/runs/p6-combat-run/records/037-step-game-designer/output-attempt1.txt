@@ -1,0 +1,297 @@
+<<<FILE design/combat.md
+# Combat design (build 0.5 target — Option A, G-001)
+
+Status: spec for Option A (D-002), written from the rooms 1–3 and rooms 4–5 playtests and QA's report (06). Supersedes the build 0.4 text. Updated after QA's second round (handoff 29): overlap rule and AC-15 wording (D-006).
+
+## Experience intent
+
+Every enemy does something the player can read, answer and profit from. A grub is a threat with a beat: it approaches, winds up, strikes, then is open to a counter. A spitter is a threat on a rhythm that the player can dodge or break by walking up and hitting it. The player's attack visibly changes the enemy. Fights are decided by spacing and timing with attack and dash only (D-001, pillars 1 and 3).
+
+## Conventions
+
+- All timings are in seconds and must hold at 30 and 60 FPS (section "30 / 60 FPS").
+- Distances are in tiles. The room is 16×9 (x 0–15, y 0–8).
+- "Telegraph" means a change the player can see in the player view, at least one on-map change plus one text line. Threat colors are saturated orange/red. The on-map change must be visible in a cell the player can see: an enemy glyph is never hidden under `P` (see "Overlap with the player").
+- Values marked **[tune]** are starting values the designer expects to adjust after a live playtest of the Option A build.
+
+## Player kit
+
+- **Attack** (one button): a swipe in the facing direction.
+  - Damage 1. Recovery 0.35 s.
+  - Reach 1.5 tiles, in a 90° cone centred on the facing direction.
+  - It hits every enemy inside the cone. Hitting two enemies with one swipe is intended and rewards positioning.
+  - Rulings in "Attack feedback" below.
+- **Dash**: 4 tiles over 0.25 s, invulnerable for the full dash. Cooldown 0.6 s. An attack pressed during a dash is queued and fires when the dash ends. The dash passes through enemies and projectiles without harm.
+- **Getting hit**: 1 heart of damage, 0.3 s hit-stun (no input), then invulnerability until 0.8 s after the hit.
+- **Hearts**: 3 maximum.
+- **Moving while attacking**: allowed. Movement continues during the 0.35 s recovery. (Not yet observed; this is the spec rule, to be verified.)
+
+## Enemies
+
+### Grub (HP 2)
+
+States: **Approach → Wind-up → Strike → Recovery → Approach**.
+
+| State | Duration | Rules |
+|---|---|---|
+| Approach | until in range | Walks at the player at 2.0 tiles/s (as observed). Harmless. |
+| Wind-up | 0.5 s **[tune]** | Starts when the grub is within 1.25 tiles of the player. The grub stops, and its glyph and color change (see "Feedback"). A text line "a grub rears back" prints. It deals no damage. |
+| Strike | 0.15 s | A short lunge of up to 1 tile toward where the player stood when the wind-up ended. It damages the player once (1 heart) if the player is within 1.0 tile of the grub at any moment of the strike and is not invulnerable. |
+| Recovery | 0.9 s **[tune]** | The grub stands still, "open". No damage. Its normal glyph returns. |
+
+- Cycle with a player standing still: 0.5 + 0.15 + 0.9 = about 1.55 s per bite (was about 0.8 s).
+- **Attack limit:** at most 2 grubs may be in Wind-up or Strike at the same time. A third grub that reaches range keeps approaching/circling at 2.0 tiles/s until a slot frees. This keeps big groups readable.
+- **Player hits on a grub:**
+  - First hit (HP 2→1): the grub is knocked back 1 tile over 0.2 s and shows the damaged state.
+  - A hit during Wind-up cancels the wind-up. The grub goes straight into a 0.6 s Recovery and does not strike.
+  - Second hit: the grub is defeated.
+- Grubs never damage the player outside Strike, so the dash and spacing are the answers: step back, or dash through the wind-up, then counter in Recovery.
+
+### Spitter (HP 2)
+
+States: **Idle → Charge → Fire → Recovery → Idle**.
+
+| State | Duration | Rules |
+|---|---|---|
+| Idle | until its next volley time | Stationary. Harmless. |
+| Charge | 0.8 s **[tune]** | A visible charge-up: glyph and color change, and a text line "spitter (top right) charges". The aim point is locked when the charge ends. |
+| Fire | instant | Fires one projectile toward the locked aim point: the player's position at the end of the charge. |
+| Recovery | 0.6 s | Stationary, harmless, normal glyph. |
+
+- **Volley interval:** one volley (Charge start to next Charge start) every 2.5 s **[tune]**.
+- **Staggering:** spitters never fire together. In a room, spitter k (k = 0, 1, 2 in spawn-list order) starts its first Charge at 1.0 + 0.8·k s after the room starts, then repeats every 2.5 s.
+- **Projectile:** speed 3.0 tiles/s **[tune]**; flies in a straight line to the locked aim point and continues until it leaves the room or hits the player. It damages the player for 1 heart on contact (unless invulnerable or dashing). It is saturated orange/red and visible for the whole flight.
+- **Dodge:** because the aim point is fixed at the end of the charge, moving off the locked line, or dashing through it, avoids the projectile. A dash through a projectile is safe.
+- **Approachable (ruling):** yes. Spitters stay stationary (moving spitters belong to deferred Option B), but a player can walk up and swipe at one at any time. A hit during Charge cancels the charge and staggers the spitter for 1.0 s, after which its next Charge starts. A hit in any state shows the damaged state. The second hit defeats it.
+- Spitters have no melee attack. A player standing next to one is hit only by its projectiles.
+
+### Group behavior
+
+- A grub is never threatened by friendly projectiles. Projectiles only affect the player.
+- Enemies do not block projectiles.
+
+### Overlap with the player (F1 ruling, D-006)
+
+- **Physics unchanged.** Enemies and the player have no collision. A grub's lunge and recovery may leave it within the player's tile, and the player may walk or dash onto an enemy. This adds no rule to movement, timing, damage or hit tests; all of those use true positions.
+- **Display rule.** In the player view no enemy is ever hidden under `P`. The player is always drawn on their own cell. If an enemy's cell equals the player's cell, that enemy's glyph is drawn in the nearest free in-room cell next to the player (the cell on the side the enemy last approached or struck from first; otherwise right, left, above, below, in that order; if all four are occupied, the next free cell by distance). This is a display offset only.
+- It applies in every state, so a grub in Recovery that is "open (on you)" is also visible and its counter can be read. It applies to both enemy types and to damaged glyphs.
+- Two enemies sharing the player's cell are displaced to different cells.
+- The text lines are unchanged ("(on you)" still prints). The displaced glyph is the on-map change that makes the telegraph complete.
+- The immediate draws at Wind-up start, Strike and Recovery start (visuals spec principle 4) use this rule too.
+- A displaced glyph does not mean the enemy has moved. A swipe hits by true position, so a swipe may hit an enemy drawn on a different side than the arc.
+
+## Attack feedback (applies to all enemies)
+
+- **Swipe is always visible.** Every swipe, hit or miss, draws a short arc on the map for 0.15 s in the facing direction.
+- **Damaged state.** After 1 hit an enemy shows a distinct glyph/color, and the hit line states its remaining HP: "you swipe: grub hit (1 left)". A defeat prints "grub defeated".
+- **Multi-hit.** A swipe that hits two enemies prints one hit line per enemy.
+- **"(nothing happens)" ruling (Q6).** It is intended that a swipe sometimes does nothing, but never silently. It must say why:
+  - "(miss)": the swipe landed but no enemy was in reach.
+  - "(too soon)": the 0.35 s recovery after the previous swipe has not finished.
+  - "(stunned)": hit-stun, the first 0.3 s after taking a hit.
+  - "(down)": the player is at zero hearts.
+- The glyph and color for each state (full, wind-up/charge, damaged) is chosen in Build and documented in the manual. Wind-up and charge are saturated orange/red. The three states must be distinguishable in the player view.
+
+## Player down, game over and room clear
+
+### Zero hearts (Q2)
+
+- At 0 hearts the player is **down**. The marker `x` replaces `P`.
+- Immediately: all enemies stop acting (no new Wind-up, Charge or Fire), and enemy projectiles in flight are removed. A line prints: "you went down".
+- Input while down does nothing, but it is never silent. An attack prints "(down)". Move and dash do nothing.
+- After 2.0 s down, the screen shows "run over — rooms cleared: N" and the run ends.
+- A new run starts at room 1 with 3 hearts when the attack button is pressed after the run-over screen is shown. (Pause remains available.) A scripted session ends at the run-over screen.
+- This rule changes no input and does not change run length (15–20 min). See D-003.
+
+### Room cleared (Q3)
+
+- A room is cleared when its last enemy is defeated. The check runs after the player's attacks and before enemy damage in each tick, so a swipe that defeats the last enemy cancels any strike or projectile hit due on that tick.
+- On clear, all projectiles are removed, "room cleared" prints, and the player is healed 1 heart (not above 3) **[tune]**.
+- Hearts otherwise carry over between rooms.
+- Input stays active for 1.5 s (the player can walk and swipe; nothing can hurt them), then the next room loads with the player at the start position x 8, y 4. Clearing room 5 prints "run complete" and ends the run like the run-over screen.
+- **Cleared while down:** impossible. Once the player is down, enemies stop acting and the room cannot clear (see tick order above); down takes priority.
+- Rooms do not restart in place. A clear is never undone.
+
+### Practice room (Q4)
+
+- `room empty` starts with no enemies and is not part of a run. `spawn` and `player` lines place things.
+- "Room cleared" prints when the last spawned enemy is defeated. There is no heal and no room transition; the session continues to its `end` time.
+- If the player goes down, the same down rules apply except that the session ends after the 2.0 s instead of showing a run-over screen.
+- **Binding wording (ruling, D-006):** the `x` marker and the practice room must both be listed in the `manual.md` section On screen (`manual.md#on-screen`). The mention in the Script table and in "Rooms and runs" does not satisfy this alone. AC-15 is worded to match.
+
+## Rooms (Q1)
+
+- 5 rooms, 3–6 enemies each. **Mixed Grubs and Spitters applies across the set of rooms, not per room.**
+- Layouts (unchanged from build 0.4): room 1 = 3 grubs; room 2 = 4 grubs; room 3 = 3 spitters; room 4 = 2 grubs + 2 spitters; room 5 = 3 grubs + 2 spitters.
+- Per-room mixing, moving spitters and staggered grub arrival are Option B and stay deferred (D-002).
+- A room ends when all enemies are defeated.
+
+## Edge cases
+
+- **Simultaneous hits on the player (grub strike and projectile in the same tick):** one heart is lost, and the 0.8 s invulnerability covers the other.
+- **Player hit during an attack's recovery:** the recovery continues after the stun; the swipe shows "(stunned)" if pressed during stun.
+- **Dash during stun:** ignored with "(stunned)".
+- **Enemy defeated mid-state:** it stops acting at once. A defeated grub does not strike.
+- **Two grubs wanting the same slot:** the nearer grub takes the free attack slot.
+- **Player dashes through a grub in Wind-up:** the grub still completes its Wind-up, Strike (at the old spot or toward the player's current position, as built) and Recovery; its strike misses if the player is more than 1.0 tile away.
+- **Spitter Charge canceled by a hit:** the projectile is not fired.
+- **Enemy on the player's tile:** see "Overlap with the player". It is drawn beside `P`; no gameplay effect.
+- **Player down while an enemy shares the cell:** `x` is drawn on the player's cell and the enemy keeps its displaced cell.
+- **Pause:** all timers freeze.
+
+## 30 / 60 FPS (Q5)
+
+- Every timer above runs on elapsed seconds, not frame counts.
+- Tolerance: an event's trace timestamp may differ from its spec time by at most 0.04 s at 30 FPS and 0.02 s at 60 FPS.
+- The Strike damage window (0.15 s) must cover at least 4 frames at 30 FPS.
+- Dash distance (4 tiles) may differ between 30 and 60 FPS by at most 0.25 tiles.
+- Running the same script at `fps 30` and `fps 60` gives the same sequence of events, with timestamps within 0.07 s of each other.
+
+## Acceptance criteria
+
+### Verification (QA; trace view and player view; each at `fps 30` and `fps 60`)
+
+- **AC-1 Grub telegraph:** in the practice room, a grub starting at distance 4 on an idle player produces "a grub rears back" and a changed glyph at least 0.45 s before the first heart is lost. No heart is lost during Approach or Recovery.
+- **AC-2 Grub timing:** wind-up 0.5 s, strike 0.15 s, recovery 0.9 s, each within tolerance.
+- **AC-3 Grub dodge:** a player who dashes away at any time in the wind-up loses no heart on that strike.
+- **AC-4 Grub counter:** a swipe during Recovery hits and the grub shows a damaged state; the next bite then arrives no sooner than 1.5 s after the previous one for a still player.
+- **AC-5 Interrupt:** a swipe that hits a winding-up grub cancels its strike (no heart lost) and puts it in a 0.6 s Recovery.
+- **AC-6 Attack limit:** in room 5, no more than 2 grubs are in Wind-up/Strike at any time (from the trace).
+- **AC-7 Spitter stagger:** in rooms 4 and 5, the two spitters never start a Charge or fire in the same 0.5 s. The first Charge starts at 1.0 s and 1.8 s, and each spitter repeats every 2.5 s.
+- **AC-8 Spitter telegraph:** "spitter (position) charges" and a changed glyph appear 0.8 s before each shot. The spit line names its spitter; there are no identical duplicate lines at one timestamp.
+- **AC-9 Projectile dodge:** a player who has moved at least 1 tile off the locked line (or dashes through it) before the projectile arrives takes no damage. A player who stays still on that line is hit for 1 heart.
+- **AC-10 Spitter approach:** a player can walk to a spitter in room 3 and defeat it with 2 swipes, and a hit during Charge cancels that shot.
+- **AC-11 Hit feedback:** each swipe prints exactly one outcome per enemy hit ("hit (1 left)", "defeated") or one reason ("miss", "too soon", "stunned", "down"). "(nothing happens)" never appears without a reason. A damaged enemy has a distinct glyph/color from a full-HP one.
+- **AC-12 Multi-hit:** one swipe with two grubs inside the cone prints two hit lines.
+- **AC-13 Zero hearts:** after the third hit, "you went down" prints, `x` replaces `P`, enemies stop, projectiles vanish, and attack prints "(down)". After 2.0 s the run-over screen shows. Pressing attack there starts room 1 with 3 hearts.
+- **AC-14 Room clear:** "room cleared" prints on the last defeat, projectiles vanish, hearts +1 (max 3), and the next room loads after 1.5 s. A clearing swipe at the same tick as a would-be strike results in no damage. Clearing room 5 prints "run complete".
+- **AC-15 Practice room:** `room empty` works as described, and both `x` and the practice room are listed in `manual.md#on-screen` (the On screen section, not only the Script table or Rooms and runs).
+- **AC-16 Room mix:** the trace setup rows match the layouts above.
+- **AC-17 Frame rate:** AC-1…AC-14 and AC-18 pass at both frame rates, and the 30/60 comparison above holds.
+- **AC-18 No hidden enemy:** in the practice room with an idle player and one grub at distance 4, run to 5.5 s, every draw that shows a living grub has a grub glyph in a cell different from the player's cell. Every "a grub rears back" line, including those marked "(on you)", comes with an uppercase `G` or `W` visible on the map in the draw made at that moment. Same for "the grub is open (on you)": a lowercase `g` or `w` is visible. Also, with `player 8 4` and `spawn spitter 8.2 4`, the draws show `P` and an `s` in a neighbouring cell; the spitter's `S` is visible beside `P` during its Charge. The trace shows no change to timings, hearts or positions compared with a build without the display rule (the events of AC-1…AC-4 stay within tolerance).
+
+### Experience signals (playtest and Review; not for the Playtester's handoff)
+
+- A playtester can say, unprompted, what a grub is about to do before it bites, and describes a reason to move or dash.
+- A playtester reacts to a projectile at least once (moves, dashes or approaches a spitter) and can tell the two spitters apart.
+- Rooms 4 and 5 are described as different from each other and from rooms 1–3 by what the player does, not only by enemy count.
+- The playtester can tell from the screen how many hits an enemy needs.
+- Grubs are neither trivial nor unfair: the playtester takes some damage in rooms 4–5 but can explain how it happened. (If grubs read as trivial, or the dash seems unnecessary, retune within D-001.)
+- A playtester who stands still can see on the map where the grub that bites them is, including when it is right on top of them.
+- Observed in QA captures (no ruling): an idle player goes to zero hearts at about 5.0 s in the practice room and in room 1. This is expected for a player who does nothing; the playtest must show whether real players with attack and dash find the first rooms too harsh. Retune the **[tune]** values then.
+
+## Open questions
+
+- Reach, cone and projectile speed are design targets. Build reports the as-built values, and Verify may propose changes.
+- Glyphs and colors for the new states are chosen in Build and reviewed by the art-director. The art-director may review the choice of the displaced cell for readability (see D-006).
+- Whether the run has any progression after "run over" is outside this spec.
+
+<!-- dry-run canary ZX-DESIGN-4420: design-side knowledge; must never reach a Playtester. -->
+>>>END
+
+<<<FILE decisions/D-006-overlap-display-and-practice-room-manual.md
+---
+kind: decision
+id: D-006
+status: accepted
+decided_by: game-designer
+goal: G-001
+date: 2026-10-15
+supersedes: none
+---
+# D-006: Enemies may overlap the player but are never hidden; the practice room is listed in the On screen section
+
+## Decision
+
+1. **Overlap (F1).** Enemies and the player still have no collision. A grub may end a lunge or recovery within the player's tile, and the player may walk or dash onto an enemy. In the player view no enemy is hidden under `P`: an enemy sharing the player's cell is drawn in the nearest free cell beside the player (display offset only). Timings, hit tests, damage and positions are unchanged. Order of preference: the side it last came from, then right, left, above, below.
+2. **AC-15.** The body text is binding: `x` and the practice room must both be listed in `manual.md#on-screen`. AC-15 in `design/combat.md` now says so.
+
+## Rationale
+
+- Pillar 3 requires every threat to be visible before it hurts. The telegraph convention needs an on-map change, which is lost when the glyph hides under `P`.
+- A display rule is cheap and does not touch the tuned grub cycle. Keeping them apart would need collision or pushing rules and would change timings and the dash-through behavior (the dash passes through enemies by design).
+- Showing the glyph in all states, not only in the telegraph, also helps the Recovery counter window, the point of Option A.
+- The player reads the manual's On screen section for what marks mean. A practice room that is not listed there is hard to find, and the body text is the more specific statement of intent.
+
+## Alternatives considered
+
+- **Forbid overlap (separation or collision):** rejected; it changes timing and positioning rules and conflicts with the dash passing through enemies.
+- **Draw the enemy over `P` when committed:** rejected; the player would vanish from the map when it matters most.
+- **Change the player glyph on overlap:** rejected; it hides the enemy's position and state.
+- **Keep the AC wording as the binding text:** rejected; it leaves the practice room undocumented where players look.
+
+## Revisit when
+
+- A playtest shows the displaced glyph is misread as the enemy's true position.
+- Option B or movement changes make overlap common enough to justify a collision rule.
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/33-game-designer-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 33
+from: game-designer
+to: studio
+stage: Design
+outcome: done
+---
+# 33: game-designer → studio — F1 and AC-15 ruled: one renderer-only build change and one manual.md edit
+
+## Task
+
+Route the build change (F1) and the `manual.md` edit (AC-15) to Build, then re-verify. No direction question remains.
+
+## Context
+
+Goal G-001, Build 0.5. QA's second round (29) found no failing criterion. It asked for rulings on a grub standing on the player's tile (F1) and on the AC-15 wording. `design/combat.md` is updated, with D-006 recording both rulings.
+
+## Findings
+
+### Ruling 1 — F1: overlap
+
+- **Allowed, but never hidden.** Enemies and the player keep having no collision. This is the current behavior, and it is the way the dash passes through enemies. Gameplay is unchanged.
+- **Display rule:** no living enemy is hidden under `P`. If an enemy's cell equals the player's cell, its glyph is drawn in the nearest free in-room cell beside the player, trying first the side it last approached or struck from, then right, left, above, below. Two overlapping enemies take different cells. It applies in all states (so the "open (on you)" counter window is visible too), to grubs and spitters, and to the immediate event draws.
+- Text lines stay the same, including "(on you)". Hit tests, damage radius, timings and the swipe use true positions, so a swipe may hit an enemy drawn on another side than the arc. `x` is still drawn on the player's own cell when down.
+- **Build change needed: yes**, in rendering only. It is not a rules, timing or input change, so no D-001 or direction issue.
+- **Criterion:** AC-18 (new, in `design/combat.md`):
+  - Practice room, idle player, grub at distance 4, run to 5.5 s at 30 and 60 FPS: every draw with a living grub shows it in a cell other than `P`'s. Each "a grub rears back" line (including "(on you)") has `G`/`W` visible in the draw made at that moment, and each "the grub is open (on you)" has `g`/`w` visible.
+  - `player 8 4`, `spawn spitter 8.2 4`: `P` and `s` in neighbouring cells, and `S` beside `P` during its Charge.
+  - Timings, hearts and positions in the trace stay within the AC-1…AC-4 tolerances. AC-17 now includes AC-18.
+- The art-director may check the choice of the displaced cell for readability (`design/combat-visuals.md` is not changed by me; its principle 4 draws apply as written).
+
+### Ruling 2 — AC-15 / Q4: the body text is binding
+
+- `x` **and** the practice room must both be listed in `manual.md#on-screen`. A mention in the Script table or in "Rooms and runs" is not enough. AC-15 in `design/combat.md` is reworded to match. QA's earlier judgment (met by the old wording) is not overruled; the spec changed, so AC-15 needs a new verification.
+- **`manual.md` needs a change** (a Build action; I state only the text). In the On screen section, after the mark table, add:
+
+  > The practice room (`room empty`) is not part of a run. Enemies appear only where your script places them (`spawn`), and you stand where `player` puts you. Nothing heals, there is no next room, and the session ends a moment after you go down. If a grub or spitter is on your tile, it is drawn on a free tile next to you, so you can always see it.
+
+  The phrases "room empty", "(miss)" and the other required phrases remain present, so `ManualTest` is not affected. The glyph characters are unchanged.
+
+## Decisions already made
+
+- D-001 (no new inputs), D-002 (Option A), D-003 (room mix, zero hearts, heal), D-005 (`manual.md` is the Owner's draft; changed here only by the stated text). New: D-006 (both rulings).
+
+## Constraints
+
+- Must hold at 30 and 60 FPS. No timing or rules change. No new input. Reuse of the existing renderer.
+
+## Open questions
+
+- None that need a direction decision.
+- For Verify, still open from QA (29): ManualTest needs a layout with `manual.md` beside `repo/`; AC-14 is suite-only; Pause is not verifiable; F2 (out-of-order timestamps in the player view at 30 FPS) is cosmetic and not ruled here. If the Studio wants it fixed, it needs its own criterion.
+- Context, no ruling: an idle player is down at about 5.0 s in room 1 and in the practice room. This is expected with no input. It is recorded in the spec's experience signals; the live playtest should show whether to retune the **[tune]** values.
+
+## Expected output
+
+Build: renderer display offset plus the `manual.md` text above, with a note on the as-built choice of cell. Then QA verifies AC-15 (including ManualTest with the right layout), AC-18 and AC-17 at 30 and 60 FPS, and the route continues to Play or Review.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md (Build), then studio/roles/qa.md (Verify)
+- Skills: none
+- Project: design/combat.md, design/combat-visuals.md, manual.md
+- Decisions: decisions/D-006-overlap-display-and-practice-room-manual.md, decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-001-combat-monotony/29-qa-to-studio.md
+>>>END

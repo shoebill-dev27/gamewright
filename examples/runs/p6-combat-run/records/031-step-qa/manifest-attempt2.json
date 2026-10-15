@@ -1,0 +1,67 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/24-studio-to-qa.md",
+  "sha256": "6292728c2bad393f8f43c21e3486c2aa57950fc4ed6f388214b9904425b63aa6",
+  "bytes": 3097
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "381742c8f2afe2e1a2a6af9d031dcc91f98f490ada7c90e2a990d6a1aaf27639",
+  "bytes": 1765
+ },
+ {
+  "path": "studio/skills/verify-change.md",
+  "sha256": "da40d2c0030e078ac6d085ea06b17bb9b452495f4e2f412a9e1bd723ac72ddf5",
+  "bytes": 1281
+ },
+ {
+  "path": "studio/skills/reproduce-defect.md",
+  "sha256": "aa7e161cc1fcb38fd92ede1719446f05eee1c7ac431a28a04d570ce451a2291d",
+  "bytes": 1407
+ },
+ {
+  "path": "project.md",
+  "sha256": "ee6eb546e89d58288cd973fec203d4067f49bb3732222a7d2007909d050aa4d8",
+  "bytes": 2047
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "8cc6f664f6db174e1501214e4f87b3e86706a62816667fc6cead10f7863d58c4",
+  "bytes": 14270
+ },
+ {
+  "path": "manual.md",
+  "sha256": "d10c599290afc33475886ba7d8c5f15d8e443a005082fa105bbe0ef8b80c7a26",
+  "bytes": 3781
+ },
+ {
+  "path": "repo/tests/test_game.py",
+  "sha256": "80b49301c500831b1024e9ae0bed82a86ccebb86b38c12f15dc3e488f5d937f7",
+  "bytes": 21258
+ },
+ {
+  "path": "decisions/D-001-one-button-combat.md",
+  "sha256": "c7fe9ca23a369707a5ab439e44789a25a0a8544efce4703a676f8fd180f82ec1",
+  "bytes": 798
+ },
+ {
+  "path": "decisions/D-003-run-end-and-room-rules.md",
+  "sha256": "ce599ae20a298a8465a7dd1d5326e8b79a59efaeedc346b61d4c7823f3529b4a",
+  "bytes": 2046
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "@run-results",
+  "sha256": "a4db5f4a125021cdcbb3ea91112248ef2d52bc02f34bf9731f54e213a4e673c6",
+  "bytes": 20502
+ }
+]

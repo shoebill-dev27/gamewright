@@ -1,0 +1,92 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/51-studio-to-game-designer.md",
+  "sha256": "04f692c38e2001e2adacfff6414a971376fcb77f26092d06d835209b0671a0ad",
+  "bytes": 5450
+ },
+ {
+  "path": "studio/roles/game-designer.md",
+  "sha256": "802be90dc84142d0a16436d842f1da18d7c7b34500089a91a617a10dde90e7fb",
+  "bytes": 1595
+ },
+ {
+  "path": "studio/skills/diagnose-experience.md",
+  "sha256": "150f05492cedfb6cde7acc97f359fb979a23ef60141742193a68f3ab491845e0",
+  "bytes": 1322
+ },
+ {
+  "path": "project.md#vision",
+  "sha256": "d3086d29c74b4ce7bd4b6ef724e73f4f0f3dde2be7fda791c0154917fee0cf66",
+  "bytes": 408
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "05a33c6f8e50caa20ddf4f3844885137c4261ad4a3e5f3db3eb1b5312b129a9f",
+  "bytes": 237
+ },
+ {
+  "path": "project.md#player-profile",
+  "sha256": "8ab7a2aeebd9deea8e5f25fb124acb3213563cbd9b926a869af8ed6dd2881a8f",
+  "bytes": 172
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "6f926dd3d101acce253f39e0f642d62749ff6675386942c23809b9c516bddd84",
+  "bytes": 17692
+ },
+ {
+  "path": "design/combat-visuals.md",
+  "sha256": "da6dfdf9ba7f8a8dec270a75cd8136d21952b4c90b62cee9a1fd35818e6a8419",
+  "bytes": 6739
+ },
+ {
+  "path": "manual.md",
+  "sha256": "fc06710951221dbee76cc6aa69fd5cf82b94b7d64d640b910800bea6be5d6034",
+  "bytes": 4128
+ },
+ {
+  "path": "decisions/D-001-one-button-combat.md",
+  "sha256": "c7fe9ca23a369707a5ab439e44789a25a0a8544efce4703a676f8fd180f82ec1",
+  "bytes": 798
+ },
+ {
+  "path": "decisions/D-002-combat-response-scope.md",
+  "sha256": "5e3f7089e8d9edf660a791139fb7c9b9531a311f03288d2f0040df3182b82068",
+  "bytes": 3716
+ },
+ {
+  "path": "decisions/D-003-run-end-and-room-rules.md",
+  "sha256": "ce599ae20a298a8465a7dd1d5326e8b79a59efaeedc346b61d4c7823f3529b4a",
+  "bytes": 2046
+ },
+ {
+  "path": "decisions/D-006-overlap-display-and-practice-room-manual.md",
+  "sha256": "6855ad2e98922bb21e91d4f879556408dd288bbdfb88576baeb99ebbd75a5656",
+  "bytes": 2280
+ },
+ {
+  "path": "goals/G-001-combat-monotony/50-playtester-to-studio.md",
+  "sha256": "5d50a6d2a1b76b79af1812f87bbf7f66d1a0b739ceb80fbee46bb8749bb6a927",
+  "bytes": 6350
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ },
+ {
+  "path": "@run-results",
+  "sha256": "fe86599f4dad7a3ee63acf7e2ce7acbd35d2078042b2448f329629e22552a2c9",
+  "bytes": 174
+ }
+]

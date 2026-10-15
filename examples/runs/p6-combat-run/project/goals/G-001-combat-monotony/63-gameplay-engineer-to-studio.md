@@ -1,0 +1,111 @@
+---
+kind: handoff
+goal: G-001
+seq: 63
+from: gameplay-engineer
+to: studio
+stage: Build
+outcome: question
+---
+# 63: gameplay-engineer → studio — Build blocked: no `repo/` source in the packet, and one spec gap (knockback of a grub on the player's tile)
+
+## Task
+
+Resolve two blockers so that the build of AC-19…AC-27 and V-9…V-17 can proceed. Route the knockback question to `game-designer` and re-issue the Build with the `repo/` source files attached. Nothing was changed in `repo/`, and no tests were run.
+
+## Context
+
+G-001, Option A. Handoff 61 asks me to change the game per `design/combat.md` (D-011) and `design/combat-visuals.md` (D-012), add tests, and run the suite.
+
+## Findings
+
+### Blocker 1: the repo source is not in this packet (not a spec question)
+
+- The packet contains no file under `repo/`. It has no simulation, no player view, no `play.py`, no `bots.py` and no `tests/`.
+- A repo write must be a complete file, and I cannot write a complete replacement of a file I have not seen. I could not answer the Build questions about the hit event (V-13, V-14) or about the view (V-9). The Waiting-behavior report also needs the code.
+- The `@run` blocks only execute `run_tests`, `run_trace` and `run_bots`. They do not print source. I did not use them because they would not give me file contents.
+- **Needed from the Studio:** re-issue this Step with the relevant `repo/` files readable in the packet, at least:
+  - the simulation module (grub states, player kit, dash, hit-stun, swipe)
+  - the player-view and trace-view code (`play.py` and whatever it uses)
+  - the event and log code
+  - `tests/`
+  - `bots.py` and `repo/README.md`
+- With the files attached, the work can start at once, apart from the part in blocker 2.
+
+### Blocker 2: a case the spec does not define (hand to `game-designer`)
+
+**Q1. In which direction is a grub on the player's exact tile (distance 0) knocked back by the first hit?**
+
+- `design/combat.md` says "First hit (HP 2→1): the grub is knocked back 1 tile over 0.2 s". It gives no direction when the true distance is 0.
+- A3 now makes that hit certain: the body-hit rule hits an on-you grub in every facing. QA's 58 runs could not settle it because every test stood at a wall.
+- It affects:
+  - where the grub stands afterwards
+  - whether it leaves the 1.5-tile engagement zone (a freed slot)
+  - the "(on you)" lines and the `on you:` line
+  - V-17
+  - the AC-4 counter timing
+- Options I can see, with the technical cost:
+  1. Knock it back along the player's facing direction. This is cheap and always defined. It is probably what the build does now, and QA's hypothesis in 58 points the same way.
+  2. Knock it back away from the side it was last displayed on or last approached from. This needs a stored "last side", which D-006 already uses for the display, so the cost is small.
+  3. Knock it back in a fixed direction, such as right with a fallback to left at the wall. This is cheap and simple, but the result is arbitrary for the player.
+  4. No knockback at distance 0 (it keeps the damaged state only). This is the cheapest option, but it breaks the "first hit knocks back" rule for that case.
+- I do not choose. Also needed: what happens when the chosen direction is blocked by the room edge. Clamp at the edge, as the dash does? Or push the other way?
+- What is blocked: the first-hit behavior for an on-tile grub, and the tests for AC-23 and V-17 that depend on where the grub ends up.
+- What can proceed: everything else in 59 and 60 (spacing, cap, stun, dash, miss wording, Strike swipe, the `on you:` line, hit-line positions).
+
+### Minor gap, with a proposed default (not applied)
+
+**Q2. Does a swipe that hits an on-tile grub print "(on you)" in its result line?**
+
+- The visual spec makes no claim, and `combat.md` gives "you swipe: grub hit (1 left)" with no position word.
+- **Proposed default for the designer to accept or change:** no change. The swipe line stays "you swipe: grub hit (1 left)" and the position comes from the `on you:` line. I will not apply any default before the designer accepts it.
+
+### Observations from reading the spec (for the designer, no action blocked)
+
+- **Dash and walls:** the sentence "It still takes 0.25 s at 4 tiles and proportionally less for a shorter dash is not required: the duration is 0.25 s in all cases…" is hard to read. I take it to mean that a dash is always 0.25 s long, even a shortened one. Please confirm with a one-line rewrite.
+- **Waiting distance:** a Waiting grub holds at 2.0 tiles or more. Wind-up starts within 1.25 tiles. A spacing-blocked grub that is already inside 1.5 tiles stays where it is, "standing still or holding position". The cap counts it as one of the two. I read the rules this way. Tell me if "holding position" should mean something else for a grub between 1.25 and 2.0 tiles.
+- **AC-23 text:** the sentence about moving "away 0.3 s then back is not needed" mixes two instructions. I will implement the clear parts: a grub at 0.4 tile behind is hit, and a grub at 0.8 tile behind prints "(miss) not in front". QA may want it tidied.
+
+### Answers to the open questions in 61 (what can be said without the code)
+
+- **Hit event knows the attacker and its position (V-13, V-14):** unknown. I cannot see the code. 58 shows the trace has per-grub rows, a `who` index and a side, so the information exists at least there. I will report once I can read the events.
+- **Extra `on you:` line and inverse video:** unknown for the same reason. The `on you:` line alone meets V-9…V-11, as the spec says.
+- **Waiting-behavior report (local to existing systems?):** unknown for the same reason. I will report it after reading the grub code. If it needs new structures, I will hand back to `technical-director`.
+- **Manual / `ManualTest` (AC-15):** I did not touch `manual.md`. Nothing was run, so there is no result.
+
+### Run result
+
+- `run_tests`: not run. No code changed, and there is nothing yet to report.
+
+## Decisions already made
+
+- D-001, D-002 / D-004, D-006, D-011 and D-012 apply. I decide none of the rules above.
+
+## Constraints
+
+- No `manual.md` edits. Nothing delivered to QA until Q1 is resolved. Do not forward this to QA as a finished build.
+
+## Open questions
+
+- **For `game-designer` (through `studio`):** Q1 (required), Q2 (accept or change the proposed default), plus the three observations.
+- **For `studio`:** please re-issue the Build with the `repo/` source files in the packet.
+
+## Expected output
+
+- The Studio sends Q1, Q2 and the observations to `game-designer`, and re-issues the Build step to `gameplay-engineer` with the repo files and the designer's answer. On that Step I will implement AC-19…AC-27 and V-9…V-17, add tests, run the suite, and write the QA handoff.
+
+## Sender assessment
+
+- This is a hand-back on missing inputs, not a design judgment. I could have guessed at code, but a guessed full-file rewrite of unseen files would very likely break the build.
+- Q1 is a real gap, not just a technical detail. Each option changes what the player sees (slot freed or not, who stands where) and the timing of the next counter.
+- Confidence that the rest of the spec can be built as written: moderate. The spacing and cap rules are clear, and the display rules are clear. The riskiest items are:
+  - the Waiting follow behavior at 2.0 tiles
+  - ordering "swipe resolves before enemy damage in a tick" at 30 FPS
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: design/combat.md, design/combat-visuals.md, manual.md (read only), repo/ (must be supplied)
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-006-overlap-display-and-practice-room-manual.md, decisions/D-011-grub-turns-stun-body-hit-dash-facing.md, decisions/D-012-on-you-line-for-displaced-enemies.md
+- Previous handoff: goals/G-001-combat-monotony/61-studio-to-gameplay-engineer.md

@@ -731,7 +731,15 @@ def build_step(project, gdir, handoff):
         )
         artifacts = [p for p in files if fnmatch.fnmatch(p, out)]
         if len(artifacts) != 1:
-            return errors + ["write exactly one outgoing handoff or escalation"]
+            return errors + [
+                "write exactly one outgoing handoff or escalation"
+                + (
+                    "; to try proposed build files first, add @run/<name> blocks instead"
+                    if packet.runs
+                    and any(p.startswith(f"{packet.build}/") for p in files)
+                    else ""
+                )
+            ]
         ameta = parse(files[artifacts[0]])[0]
         if (
             ameta.get("from") != role
@@ -1326,12 +1334,15 @@ def check_runs(packet, files):
         elif (
             path.startswith("/")
             or ".." in Path(path).parts
-            or not path.startswith(packet.build + "/")
             or not any(fnmatch.fnmatch(path, p) for p in packet.write_patterns)
         ):
             errors.append(
-                f"{path}: a run round carries only {packet.build}/ files your Role may write; "
-                "write everything else in your final answer"
+                f"{path}: not a file your Role may write; leave it out (if it needs changing, say so "
+                "in your Handoff for the Role that owns it)"
+            )
+        elif not path.startswith(packet.build + "/"):
+            errors.append(
+                f"{path}: a run round carries only {packet.build}/ files; write it in your final answer"
             )
     return errors
 

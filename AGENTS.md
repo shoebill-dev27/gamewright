@@ -55,4 +55,5 @@ Step; the packet is the only input. The manual operations above remain valid.
 - Repository language is English. Owner-facing artifacts use the project's `owner_language`.
 - Check: `python3 -m pytest tests/` (Phase 1 structure: `tests/test_studio.py`; isolation: `tests/test_phase2.py`;
   continuous runs: `tests/test_phase3.py`; Goal log and `goal.md` limits: `tests/test_phase4.py`;
-  build runs and sandbox: `tests/test_phase5.py`, which needs `bwrap`).
+  build runs and sandbox: `tests/test_phase5.py`; experience measurement: `tests/test_phase6.py`;
+  both need `bwrap`).

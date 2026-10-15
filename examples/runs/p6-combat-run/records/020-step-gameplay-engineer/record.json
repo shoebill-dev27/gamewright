@@ -1,0 +1,10 @@
+{
+ "op": "Step",
+ "role": "gameplay-engineer",
+ "goal": "G-001",
+ "attempts": [],
+ "status": "error",
+ "errors": [
+  "claude run failed: You've hit your session limit · resets 2:50pm (Asia/Tokyo)"
+ ]
+}

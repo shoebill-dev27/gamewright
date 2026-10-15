@@ -1,0 +1,19 @@
+I'm running a second session before writing the report. This one stands still and swipes on a steady rhythm, with a couple of dashes, to see how the fight works when I don't chase the grubs.
+
+<<<FILE @run/play/s2-room1-hold
+room 1
+fps 30
+end 14
+1.0 attack
+1.8 attack
+2.0 dash left
+2.6 attack
+3.4 attack
+4.0 dash right
+4.2 attack
+5.0 attack
+5.8 attack
+6.6 attack
+7.4 attack
+8.2 attack
+>>>END

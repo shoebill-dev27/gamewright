@@ -1,0 +1,78 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "63b81848-7932-4f1f-bf92-deb047000f3c",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 28246,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 8572,
+    "output_tokens_details": {
+     "thinking_tokens": 2838
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 28246,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 8572,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 28246,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 28246
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.198708,
+   "attempt": 1,
+   "started": "2026-10-15T19:55:11",
+   "seconds": 64.3,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-combat-monotony/goal.md": "57965e0c59847a470b072b8d872ab4f844124673f7d0e6821c40d95c929b81bf",
+  "goals/G-001-combat-monotony/41-studio-to-art-director.md": "ad111c28626a1b57bebfd120d7c4d04d94bc316b9883264ffa7965ddcf584c7b",
+  "goals/G-001-combat-monotony/42-studio-to-owner.md": "487233b0778c714e086a335f2206da135bd95c812db91e94ee0e4c3938304df8"
+ },
+ "decision": {
+  "status": "blocked-on-owner",
+  "open": [
+   [
+    "owner",
+    "Owner: `ManualTest` result or workspace"
+   ],
+   [
+    "art-director",
+    "Verify (visuals)"
+   ]
+  ],
+  "new": [
+   "owner",
+   null
+  ]
+ },
+ "seen_through_seq": 42
+}

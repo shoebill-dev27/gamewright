@@ -1,0 +1,38 @@
+<<<FILE @run/trace/clear-practice
+room empty
+player 8 4
+spawn grub 10 4
+0.1 move right
+0.2 stop
+1.0 attack
+1.5 attack
+2.0 attack
+2.5 attack
+3.0 attack
+3.5 attack
+end 8
+>>>END
+
+<<<FILE @run/trace/down-input
+room 1
+5.5 move left
+6.0 attack
+6.5 dash left
+7.0 stop
+end 10
+>>>END
+
+<<<FILE @run/play/clear-practice
+room empty
+player 8 4
+spawn grub 10 4
+0.1 move right
+0.2 stop
+1.0 attack
+1.5 attack
+2.0 attack
+2.5 attack
+3.0 attack
+3.5 attack
+end 8
+>>>END

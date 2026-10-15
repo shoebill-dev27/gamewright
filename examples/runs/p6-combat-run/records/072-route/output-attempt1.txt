@@ -1,0 +1,227 @@
+Build 12b is done and the result fits the plan. I'm opening Verify as two parallel steps (68 for QA, 69 for the art director). The QA packet is composed without the engineer's Sender assessment, as the QA contract requires.
+
+<<<FILE goals/G-001-combat-monotony/68-studio-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 68
+from: studio
+to: qa
+stage: Verify
+outcome: routed
+---
+# 68: studio → qa — Verify the combat response change set (AC-1…AC-28, V-9…V-17) at 30 and 60 FPS
+
+## Task
+
+Verify the current build in `repo/` against the acceptance criteria in `design/combat.md` (AC-1…AC-28) and the player-visible criteria in `design/combat-visuals.md` (V-9…V-17, with earlier V items as regression). Run each check at both 30 and 60 FPS where the criterion depends on timing. Report pass/fail per criterion, plus regressions.
+
+## Context
+
+Goal G-001, "Combat feels monotonous". The Owner chose to rework existing enemy behavior first (D-002, Option A). A change set has just been built on the existing simulation: grub turn-taking and spacing between Wind-ups, a cap on grubs engaged near the player, shorter hit-stun, a body hit, dash facing, miss causes, a hit in Strike cancelling the strike, knockback of a grub on the player's tile, an `on you:` line, and attacker position in hit lines. The previous verification round (AC-1…AC-27 earlier set) passed or was settled by the Owner's suite runs (D-008, D-010). This round covers the new and changed criteria and checks the old ones for regressions.
+
+## Findings
+
+Nothing to forward from the implementation beyond how to exercise it. Verify from the spec, the criteria and the build.
+
+How to exercise (from `project.md`; the project directory is the one containing `manual.md` and `repo/`):
+
+- Tests: `python3 -m unittest discover -s tests` (run in `repo/`). The manual tests read `manual.md` at the project root, one level above `repo/`. Run the whole suite with it in place and report the counts and any failure by name.
+- Player view: `python3 play.py --view player {script}`; trace view: `python3 play.py --view trace {script}`. Script format is in `manual.md`.
+- Balance bots: `python3 bots.py {script}`. Run at both frame rates for reference data on room 1 and room 2 (clear time, hearts lost, actions used); report the numbers without judging balance.
+
+Items left unobserved by earlier rounds, to check first-hand against the spec:
+
+- The `(miss)` text with its cause, in the player view.
+- Knockback of a grub standing on the player's tile in open floor (AC-28), and near a wall.
+- A hit in Strike at 30 FPS (the earlier open point D-58-1; the spec rule is in `design/combat.md`).
+- Engagement cap and Wind-up spacing in room 2 with the player standing still, at both frame rates.
+
+Also read `manual.md` against V-15 and the AC-15 wording. The Owner may not yet have placed all draft text there (open Owner step); report what is and is not present, and whether any missing text is needed by a criterion. Do not edit `manual.md`.
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no new inputs.
+- D-009: the manual phrase check ignores line wraps.
+- D-010: AC-15 passed on the Owner's suite run (40/40) for the earlier build.
+- D-011: grubs take turns, crowd two deep; hit-stun 0.15 s; body hit; dash sets facing.
+- D-012: `on you:` line for an enemy on the player's tile; hit lines name the attacker position.
+- D-013: a grub on the player's tile is knocked back toward the side it is drawn on.
+
+## Constraints
+
+- Must play correctly at both 30 and 60 FPS.
+- Do not edit the repo or `manual.md`. If something cannot be run in your environment, report exactly what is needed (for example the Owner running the suite, as in D-008) instead of guessing.
+- A criterion failing for the second time goes to re-planning (orchestration, loop limits). Say in the report which criteria failed before, if the earlier reports show it.
+
+## Open questions
+
+None. If a criterion is undefined or ambiguous, say so and name it.
+
+## Expected output
+
+A verification report with per-criterion pass/fail (AC-1…AC-28, V-9…V-17, regressions), suite counts, bot numbers at both frame rates, and an explicit list of what you could not observe. Address the result to `studio` (the Studio composes the next step from it).
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: project.md, design/combat.md, design/combat-visuals.md, manual.md, repo/ (build: run commands in project.md)
+- Decisions: decisions/D-009-manualtest-phrase-check-ignores-line-wraps.md, decisions/D-010-owner-ran-suite-ac15-passes.md, decisions/D-011-grub-turns-stun-body-hit-dash-facing.md, decisions/D-012-on-you-line-for-displaced-enemies.md, decisions/D-013-knockback-of-grub-on-players-tile.md
+- Previous handoff: none (composed fresh without the implementer's assessment)
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/69-studio-to-art-director.md
+---
+kind: handoff
+goal: G-001
+seq: 69
+from: studio
+to: art-director
+stage: Verify
+outcome: routed
+---
+# 69: studio → art-director — Visual review of the changed combat view (V-9…V-17)
+
+## Task
+
+Review what the player sees in the current build against `design/combat-visuals.md` (V-9…V-17, earlier V items as regression) and the project's art direction. Judge readability and consistency, and report pass/fail per V item.
+
+## Context
+
+Goal G-001, "Combat feels monotonous", Option A (D-002). The change set altered the player view: an `on you:` line under the hearts line when an enemy shares the player's tile, a reverse-video cell for the displaced enemy glyph in color mode, hit lines that name the attacker's position or the spitter's spot, and `(miss)` lines with a cause. Your own spec (D-012, V-9…V-17) defines what the view should show. A QA verification of behavior runs in parallel; you review only what the player sees.
+
+## Findings
+
+How to look (from `project.md`; run in `repo/`):
+
+- `python3 play.py --view player {script}` shows what a player sees. Script format is in `manual.md`.
+- Useful setups: an enemy on the player's tile (`room empty`, `player 8 4`, `spawn grub 8 4`, then an attack); a room with several grubs; a spitter shot hitting the player; a swipe that misses too far away and one that misses with the enemy not in front.
+- Check the color view as well as the plain view, in particular the reverse-video cell and whether it reads against the dark background and keeps the threat colors (saturated orange/red).
+
+Points earlier rounds could not see: the reverse-video cell in color mode, and the `on you:` line in a live frame. Report what you saw first-hand versus what you inferred from code.
+
+## Decisions already made
+
+- D-001: no new inputs.
+- D-006: enemies may overlap the player but are never hidden.
+- D-012: `on you:` line for displaced enemies; attacker position in hit lines.
+
+## Constraints
+
+- Art direction in `project.md`: warm light against cold blue-black; threats in saturated orange/red.
+- You review and specify; do not edit the repo. Changes you want go back as findings.
+- Wording placed in `manual.md` is Owner-placed (D-005, D-007); report if V-15 text is missing there, but do not edit it.
+
+## Open questions
+
+None.
+
+## Expected output
+
+A visual review with per-item pass/fail (V-9…V-17, regressions), what was seen first-hand versus inferred, and any specified fixes. Address the result to `studio`.
+
+## Load
+
+- Role: studio/roles/art-director.md
+- Skills: studio/skills/visual-review.md
+- Project: project.md#art-direction, design/combat-visuals.md, manual.md, repo/
+- Decisions: decisions/D-006-overlap-display-and-practice-room-manual.md, decisions/D-012-on-you-line-for-displaced-enemies.md
+- Previous handoff: goals/G-001-combat-monotony/60-art-director-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-15
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): when an action player from the project's player profile plays through combat encounters, the fights feel varied and engaging, and the player's moment-to-moment choices (positioning, timing, enemy behavior) visibly matter. The player no longer experiences the fights as the same repeated pattern.
+
+Out of scope: adding input buttons beyond attack, dash and pause (D-001, Owner approval needed); changes to the run length or the non-combat systems; numeric targets (these belong to Design as acceptance criteria, and the final verdict to Review).
+
+No immediate escalation: the Goal does not conflict with the vision or D-001, and it needs no reinterpretation. Improving depth through positioning, timing and enemy behavior is what pillar 1 asks for.
+
+## Unknowns
+
+- Observe (playtester, qa): done (02, 08, 06, 15, 58). Not settled by QA: "(miss)" text first-hand, knockback of an on-you grub in open floor, D-58-1 at 30 FPS. These go to Verify against the new spec.
+- Diagnose, Decide: done (03, 53; D-002, D-005, D-006, D-011). A4 (120° cone), D1 (facing mechanic) and D2 (room 1 composition) are held with revisit triggers in 59.
+- Design: done (59, 60, 65; `design/combat.md`, `design/combat-visuals.md`, D-011, D-012, D-013, AC-19…AC-28, V-9…V-17).
+- Plan: done (14, D-004). The engineer reports Waiting behavior fits the existing grub movement, so the tentative new Plan is dropped unless Verify says otherwise.
+- Build: done (67). Open caveats: the last suite run had 4 problems (2 `ManualTest` from a missing `manual.md` in that environment, 2 from a test fixed but not re-run); bots and the color view were not run. Manual text for V-15 and the D-013 sentence is Owner-placed (D-005, D-007); 10-O is open.
+- Verify: 13a (qa, 68) and 13b (art-director, 69) open in parallel on the new build: AC-1…AC-28 at both frame rates, V-9…V-17, full suite with `manual.md` present.
+- Play: earlier sessions saw only rooms 1 and 2 by script (50, 54), with defeats. Rooms 3–5, the spitter, projectile hits, room clear, the dash and a survived run are unobserved, so monotony itself is unjudged. Next Play follows Verify: fresh playtester, rooms 1–5, reactive play; judged against the retest guideline, which is not forwarded.
+- Review: `game-director` with `review-outcome`, planned after the next Play. Open: run progression after "run over"; F1, F4, F6, F7; numbering of same-type enemies in one cell; A4, D1, D2.
+- Skipped: none.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 02-playtester-to-game-designer.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-game-designer-to-game-director.md |
+| 3a | Decide | game-director | make-decision | done | 05-game-director-to-studio.md |
+| 3b | Observe (defects) | qa | reproduce-defect | done | 06-qa-to-game-designer.md |
+| 3c | Observe (rooms 4–5) | playtester | playtest-session | done | 08-playtester-to-game-designer.md |
+| 4 | Design | game-designer | write-design-spec | done | 10-game-designer-to-studio.md |
+| 5a | Plan | technical-director | technical-plan | done | 14-technical-director-to-studio.md |
+| 5b | Observe (spit line) | qa | reproduce-defect | done | 15-qa-to-studio.md |
+| 5c | Design (visuals) | art-director | visual-review, write-design-spec | done | 16-art-director-to-studio.md |
+| 6a | Build (code) | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md |
+| 6b | Build (`run_tests` check, manual placed) | gameplay-engineer | implement-change | done | 23-gameplay-engineer-to-studio.md |
+| 7a | Verify | qa | verify-change | done (question, no AC failed) | 26-qa-to-studio.md |
+| 7b | Verify (visuals) | art-director | visual-review | done (question, no build output) | 27-art-director-to-studio.md |
+| 7c | Verify (rerun: manual, runs, captures) | qa | verify-change | done (question, no AC failed) | 29-qa-to-studio.md |
+| 7d | Verify (visuals, from captures) | art-director | visual-review | done (fail: V-1, F3) | 32-art-director-to-studio.md |
+| 7e | Design (F1 overlap, AC-15 wording) | game-designer | write-design-spec | done | 33-game-designer-to-studio.md |
+| 7f | Build (F1/F3 render, manual paragraph) | gameplay-engineer | implement-change | done (render built) | 35-gameplay-engineer-to-studio.md |
+| 7f-O | Owner: place the manual paragraph | owner | — | done (Option A, D-007) | 36-studio-to-owner.md |
+| 7g | Verify (all but AC-15) | qa | verify-change | done (pass) | 37-studio-to-qa.md |
+| 7i | Verify (AC-15, `ManualTest`) | qa | verify-change | done (question: ManualTest blocked) | 38-studio-to-qa.md |
+| 7i-O | Owner: `ManualTest` result | owner | — | done (Option A, D-008: 39/40) | 42-studio-to-owner.md |
+| 7h | Verify (visuals) | art-director | visual-review | done (pass; V-6 from code, V-7 not seen) | 41-studio-to-art-director.md |
+| 7j | Design (`run over` manual test failure) | game-designer | write-design-spec | done (test too literal, D-009) | 43-studio-to-game-designer.md |
+| 7k | Build (test fix, line wraps) | gameplay-engineer | implement-change | done (test changed, suite not run) | 46-studio-to-gameplay-engineer.md |
+| 7k-O | Owner: place manual text | owner | — | skipped (manual unchanged, D-009) | — |
+| 7l-O | Owner: AC-15 rerun | owner | — | done (Option A, D-010: 40/40) | 48-studio-to-owner.md |
+| 7l | Verify (AC-15 rerun by QA) | qa | verify-change | skipped (Owner's 40/40 run, D-010) | — |
+| 8 | Play (room 1) | playtester | playtest-session | done (room 1 only, scripted, 2 defeats) | 49-studio-to-playtester.md |
+| 9a | Diagnose (Play findings) | game-designer | diagnose-experience | done (A1–A3, A5, B, C, D held) | 51-studio-to-game-designer.md |
+| 9b | Play (parts not yet seen) | playtester | playtest-session | done (thin: room 2 only, 1 script) | 52-studio-to-playtester.md |
+| 10a | Observe (open facts, bots) | qa | reproduce-defect | done (6 facts settled, 2 partly; D-58-1 ruled in 59) | 55-studio-to-qa.md |
+| 10b | Design (A1–A3, A5, manual draft) | game-designer | write-design-spec, make-decision | done (spec, D-011, manual draft) | 56-studio-to-game-designer.md |
+| 10c | Design (visuals: "on you", hit source) | art-director | visual-review, write-design-spec | done (V-9…V-17, D-012) | 57-studio-to-art-director.md |
+| 10-O | Owner: place manual draft (59) and V-15 text | owner | — | open | 62-studio-to-owner.md |
+| 11 | Plan | technical-director | technical-plan | skipped (Waiting behavior local, per 67; reopen if Verify disagrees) | — |
+| 12 | Build (first attempt) | gameplay-engineer | implement-change | done (question: no repo files; Q1 gap) | 61-studio-to-gameplay-engineer.md |
+| 12a | Design (Q1 knockback at distance 0, Q2, 3 passages) | game-designer | write-design-spec | done (D-013, AC-28) | 64-studio-to-game-designer.md |
+| 12b | Build (re-issue with repo files) | gameplay-engineer | implement-change | done (AC-19…AC-28 built; suite re-run needed) | 66-studio-to-gameplay-engineer.md |
+| 13a | Verify | qa | verify-change | open | 68-studio-to-qa.md |
+| 13b | Verify (visuals) | art-director | visual-review | open | 69-studio-to-art-director.md |
+| 14 | Play (rooms 1–5, fresh playtester) | playtester | playtest-session | planned | — |
+| 15 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+After 12b (67): done, fits the plan; no spec gap, no escalation. Opened Verify in parallel: 13a QA (68, no Sender assessment, full suite with manual.md plus bots at 30/60 FPS) and 13b art-director (69). Tentative Plan (11) dropped: Waiting behavior is local.
+
+## Next action
+
+- `qa` runs 13a from `68-studio-to-qa.md` and `art-director` runs 13b from `69-studio-to-art-director.md`, in parallel; both address results to `studio`.
+- Owner answers `62-studio-to-owner.md` (A recommended: place the manual text; 65 adds one suggested line for `manual.md`). It does not block Verify, but QA reports which manual text is missing.
+- Then Route waits for both results. If both pass: compose a fresh Play handoff for the playtester (14) from the build and player profile only, with no change or result information.
+
+## Outcome
+
+(Filled at Close.)
+>>>END

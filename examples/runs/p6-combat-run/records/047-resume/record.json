@@ -1,0 +1,79 @@
+{
+ "op": "Resume",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "eeacfd4c-71bd-4e43-8ca9-8b5821467344",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 20358,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 8997,
+    "output_tokens_details": {
+     "thinking_tokens": 1540
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 20358,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 8997,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 20358,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 20358
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.171406,
+   "attempt": 1,
+   "started": "2026-10-15T19:57:15",
+   "seconds": 61.9,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "decisions/D-008-manualtest-run-by-owner-one-failure.md": "142a50dbb49f739694ff3bea4f04a565d55fea3b997a50c9f17dbb8c317c1d5c",
+  "goals/G-001-combat-monotony/42-studio-to-owner.md": "d4dcf4c288bdbad9ed0d6ec6cfd8d4ab1ab885dedbbf7a72e9235bb99a536663",
+  "goals/G-001-combat-monotony/goal.md": "b97f28d7062ce128497f2f5048adf00315d2de74bbef129020327a7ecdb14850",
+  "goals/G-001-combat-monotony/43-studio-to-game-designer.md": "d3d4679e6399b5bd77e5ddbbf79b11974e62192f055a4bbe61d602c1061c7067"
+ },
+ "decision": {
+  "new": [
+   "game-designer",
+   "Design"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "art-director",
+    "Verify (visuals)"
+   ],
+   [
+    "game-designer",
+    "Design (`run over` manual test failure)"
+   ]
+  ]
+ },
+ "seen_through_seq": 43
+}

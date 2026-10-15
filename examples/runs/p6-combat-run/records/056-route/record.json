@@ -1,0 +1,127 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "48d3f21a-f16e-4031-b864-104503c1d1f6",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 21526,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 7091,
+    "output_tokens_details": {
+     "thinking_tokens": 1681
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 21526,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 7091,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 21526,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 21526
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.157018,
+   "attempt": 1,
+   "started": "2026-10-15T20:56:22",
+   "seconds": 49.9,
+   "errors": [
+    "goal.md: route row 12 has unknown role technical-director, gameplay-engineer; a Role cell holds exactly one role id (or studio, owner), and a parallel step gets its own row (5, 5b)"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "4d938640-242c-40e5-ac60-3a3623501871",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 21636,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 8910,
+    "output_tokens_details": {
+     "thinking_tokens": 3104
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 21636,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 8910,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 21636,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 21636
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.175648,
+   "attempt": 2,
+   "started": "2026-10-15T20:57:12",
+   "seconds": 62.3,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-combat-monotony/goal.md": "744cbddfa1d2d7fc693953ea77f48f067bae65ac3d75e0a6252fb807cb15d2f8",
+  "goals/G-001-combat-monotony/51-studio-to-game-designer.md": "04f692c38e2001e2adacfff6414a971376fcb77f26092d06d835209b0671a0ad",
+  "goals/G-001-combat-monotony/52-studio-to-playtester.md": "8274d4ee339a15b5b90c29613c7c005b5842573060706d2516c4af803f4bfb31"
+ },
+ "decision": {
+  "status": "active",
+  "open": [
+   [
+    "game-designer",
+    "Diagnose (Play findings)"
+   ],
+   [
+    "playtester",
+    "Play (parts not yet seen)"
+   ]
+  ],
+  "new": [
+   "playtester",
+   "Play"
+  ]
+ },
+ "seen_through_seq": 52
+}

@@ -1,0 +1,48 @@
+
+<invoke name="noop">
+</invoke>
+```
+@run/play/room3
+```
+
+<<<FILE @run/play/room3
+room 3
+fps 30
+end 30
+0.3 attack
+0.5 move left
+1.0 stop
+1.1 attack
+1.8 dash right
+2.0 attack
+2.8 move up
+3.3 stop
+3.4 attack
+4.2 dash down
+4.4 attack
+5.2 move right
+5.8 stop
+5.9 attack
+6.6 dash left
+6.8 attack
+7.8 move down
+8.3 stop
+8.4 attack
+9.2 dash up
+9.4 attack
+10.4 move left
+11.0 stop
+11.1 attack
+12.0 dash right
+12.2 attack
+13.0 move up
+13.5 stop
+13.6 attack
+14.5 dash down
+14.7 attack
+15.5 move right
+16.0 stop
+16.1 attack
+17.0 dash left
+17.2 attack
+>>>END

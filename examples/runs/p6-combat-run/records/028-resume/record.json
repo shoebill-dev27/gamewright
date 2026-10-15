@@ -1,0 +1,124 @@
+{
+ "op": "Resume",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "cb83433a-871c-4aef-b5b8-1199d04ae368",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 18753,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 6507,
+    "output_tokens_details": {
+     "thinking_tokens": 951
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 18753,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 6507,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 18753,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 18753
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.140086,
+   "attempt": 1,
+   "started": "2026-10-15T19:29:50",
+   "seconds": 43.7,
+   "errors": [
+    "goals/G-001-combat-monotony/22-studio-to-gameplay-engineer.md: Load entry missing: 21-studio-to-owner.md (did you mean goals/G-001-combat-monotony/21-studio-to-owner.md? Paths are relative to the project)"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "96554f49-1eb7-45fa-b6ce-71afb96d5ecc",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 18895,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 6565,
+    "output_tokens_details": {
+     "thinking_tokens": 770
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 18895,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 6565,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 18895,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 18895
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.141234,
+   "attempt": 2,
+   "started": "2026-10-15T19:30:34",
+   "seconds": 41.5,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "decisions/D-005-owner-places-manual-draft.md": "8761e9ad769db4c760c905fce26b38d4f06cee5d28e3fa8af7d4e026bd6608d1",
+  "goals/G-001-combat-monotony/21-studio-to-owner.md": "9323dcbb42a852ef02c798a84d0ff1c808d184618780ccfd1c1bd7838ad04b68",
+  "goals/G-001-combat-monotony/22-studio-to-gameplay-engineer.md": "a71b600fe6dd6149253ce5de086d35b5b920e9a3415bcf71fefd7fd347904f8f",
+  "goals/G-001-combat-monotony/goal.md": "338e86730d00a133cb884303f98eac79641fcd5209ba5b5187a2a71c2610d4e4"
+ },
+ "decision": {
+  "new": [
+   "gameplay-engineer",
+   "Build"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "gameplay-engineer",
+    "Build (`run_tests` check, manual placed)"
+   ]
+  ]
+ },
+ "seen_through_seq": 22
+}

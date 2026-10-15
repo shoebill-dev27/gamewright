@@ -1,0 +1,92 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/56-studio-to-game-designer.md",
+  "sha256": "2737f2bd4839693594b4cc8d1dfe223d44a08e7eb5a204f25a9385b72464e2d3",
+  "bytes": 4015
+ },
+ {
+  "path": "studio/roles/game-designer.md",
+  "sha256": "802be90dc84142d0a16436d842f1da18d7c7b34500089a91a617a10dde90e7fb",
+  "bytes": 1595
+ },
+ {
+  "path": "studio/skills/write-design-spec.md",
+  "sha256": "f60b4ce8c6e89c2dc27ff87184c54b91452c45db8422fc378ca9253b45a0efd2",
+  "bytes": 1367
+ },
+ {
+  "path": "studio/skills/make-decision.md",
+  "sha256": "68436360ad82bd660f2153934ae7305118489c26ad3255d10e5018773d9eb4b6",
+  "bytes": 1129
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "6f926dd3d101acce253f39e0f642d62749ff6675386942c23809b9c516bddd84",
+  "bytes": 17692
+ },
+ {
+  "path": "design/combat-visuals.md",
+  "sha256": "da6dfdf9ba7f8a8dec270a75cd8136d21952b4c90b62cee9a1fd35818e6a8419",
+  "bytes": 6739
+ },
+ {
+  "path": "manual.md",
+  "sha256": "fc06710951221dbee76cc6aa69fd5cf82b94b7d64d640b910800bea6be5d6034",
+  "bytes": 4128
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "05a33c6f8e50caa20ddf4f3844885137c4261ad4a3e5f3db3eb1b5312b129a9f",
+  "bytes": 237
+ },
+ {
+  "path": "goals/G-001-combat-monotony/54-playtester-to-studio.md",
+  "sha256": "c515b2fb4e34d52bcf31104972e97e9c866993a9905306a5d06d6bc1029e047c",
+  "bytes": 7166
+ },
+ {
+  "path": "decisions/D-001-one-button-combat.md",
+  "sha256": "c7fe9ca23a369707a5ab439e44789a25a0a8544efce4703a676f8fd180f82ec1",
+  "bytes": 798
+ },
+ {
+  "path": "decisions/D-002-combat-response-scope.md",
+  "sha256": "5e3f7089e8d9edf660a791139fb7c9b9531a311f03288d2f0040df3182b82068",
+  "bytes": 3716
+ },
+ {
+  "path": "decisions/D-003-run-end-and-room-rules.md",
+  "sha256": "ce599ae20a298a8465a7dd1d5326e8b79a59efaeedc346b61d4c7823f3529b4a",
+  "bytes": 2046
+ },
+ {
+  "path": "decisions/D-006-overlap-display-and-practice-room-manual.md",
+  "sha256": "6855ad2e98922bb21e91d4f879556408dd288bbdfb88576baeb99ebbd75a5656",
+  "bytes": 2280
+ },
+ {
+  "path": "decisions/D-009-manualtest-phrase-check-ignores-line-wraps.md",
+  "sha256": "edda481ff8a7c911414c9ab7b4decac6af949cd3d24716287433cfbee39544b4",
+  "bytes": 1411
+ },
+ {
+  "path": "goals/G-001-combat-monotony/53-game-designer-to-studio.md",
+  "sha256": "86cb67c4c4943791b6f0fd40a01de09985cd6499b8c6eed2db6fc9004a88b3c8",
+  "bytes": 11239
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

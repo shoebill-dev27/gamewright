@@ -1,0 +1,172 @@
+<<<FILE goals/G-001-combat-monotony/84-playtester-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 84
+from: playtester
+to: studio
+stage: Play report (rooms 1–5 attempted; only room 1 reached)
+outcome: done
+---
+# 84: playtester → studio — Observation report: room 1 played in 3 scripted sessions, never cleared
+
+## Task
+
+Report what a player observes when playing the build, with attention to combat.
+
+## Method (what I actually did)
+
+- Input automation only. I ran three scripts with `python3 play.py --view player {script}`, all at 30 fps. I did not play live. I could not react mid-session; each script was written blind and I read the output afterwards.
+- I did not read source, tests, trace view, bots or design documents. I used only the manual and the player view.
+- Only 3 sessions were available. I did not get a fourth to adapt again.
+- I never cleared room 1. I never saw rooms 2–5 or a spitter. I cannot comment on them.
+- I did not try the practice room (`room empty`).
+
+## Session scripts (re-runnable)
+
+**s1-room1-probe**
+```text
+room 1
+fps 30
+end 15
+0.5 attack
+1 move left
+2 stop
+2.5 attack
+3 attack
+4 move right
+5 stop
+5.5 attack
+7 dash right
+8 attack
+10 attack
+```
+**s2-room1-hold**
+```text
+room 1
+fps 30
+end 14
+1.0 attack
+1.8 attack
+2.0 dash left
+2.6 attack
+3.4 attack
+4.0 dash right
+4.2 attack
+5.0 attack
+5.8 attack
+6.6 attack
+7.4 attack
+8.2 attack
+```
+**s3-room1-dash-on-cue**
+```text
+room 1
+fps 30
+end 12
+1.55 dash down
+2.2 move up
+2.3 stop
+2.4 attack
+3.0 attack
+3.6 dash left
+4.2 attack
+4.8 attack
+5.4 attack
+6.0 attack
+```
+
+## Session summary
+
+- Room 1 has 3 grubs and no other enemy type.
+- I died 5 times in 3 sessions, always in room 1 with "rooms cleared: 0". The runs were:
+  - s1: first run down at 3.97 s, second at 11.93 s.
+  - s2: first run down at 3.93 s, second at 10.53 s.
+  - s3: down at 7.4 s.
+- Across all sessions I defeated one grub in total (s3, 6.0 s). Once I was in a fight I never came close to clearing the room.
+
+## Observations
+
+**Grubs: what the fight looked like**
+- Grubs drift toward you from the start. About 1.3–1.4 s into every run, one rears back ("G", and a "rears back" line).
+- The bite lands about 0.5 s after the rear-back (1.3 → 1.83, 9.4 → 9.97, 2.4 → 2.97). That window is readable. The warning is clear in the text and the capital letter.
+- After a bite the grub is "open" for roughly 0.35 s. It then rears back again about 0.35 s later. The cycle is bite, open, rear, bite, about 1 s per grub.
+- The open window is short, and the next threat arrives almost at once. When two or three grubs are on you, there is always one rearing or biting. My swipes mostly landed while another grub was already winding up.
+- All three grubs behaved the same: walk in, rear, bite, open, repeat. I saw no difference in speed, pattern or behavior between them. Every grub I saw fought the same way, so the fights felt identical. Only the number of grubs on me changed.
+- A grub needs two hits ("grub hit (1 left)", then defeated). Getting two hits on one grub while others were biting me never worked.
+
+**Getting hit**
+- Each hit costs a heart and leaves me stunned. My swipe and dash at the moment of a hit or just after were refused ("(stunned)").
+- In s1 and s2 I took a hit, tried to act and was stunned. A second grub then bit me before I recovered.
+- Once two or three grubs were on me, I lost all three hearts in about 2–2.5 s from the first bite (s1: 1.83 / 3.0 / 3.97; s2: 1.97 / 2.97 / 3.93). Once surrounded, it felt like a chain I could not get out of.
+- Grubs can end up on my tile ("on you"). The display moves them to a neighboring tile and tells me which side. That was confusing, because I could not tell where to face or swipe.
+
+**Attack**
+- Many of my swipes did nothing. "(miss) too far", "(miss) not in front" and a plain "(miss)" together account for about half of the swipes I made while enemies were alive.
+- The grubs approached from above and the left, while I started facing right. I did not turn toward them. This is partly my scripting. As a gamepad player I would aim, but the text view does not make facing obvious.
+- I never saw a clear "now I'm winning" moment. The one grub I killed (s3) happened while I was backed into a corner, taking hits.
+
+**Dash**
+- It works. In s3 I dashed down on the rear-back cue (1.55 s) and the bite never landed. The grub became "open" 0.5 s later while I was several tiles away. I felt safe but gained nothing, because I was too far to counter.
+- My later dashes (3.6 s) also avoided damage briefly. The grubs caught up within about 2 s, which was a good escape rather than an engagement.
+- A dash while stunned does nothing (s2, 2.0 s, "(stunned)"). I do not know the recharge time. I never saw "(dash not ready)".
+
+**Pacing**
+- Attention spiked at every "rears back" and flatlined when I was waiting. For several seconds nothing happened (0–1.3 s) except grubs sliding in.
+- Dying took only about 4 s, which is short. Since it was always the same situation, the restart did not feel like a new challenge.
+
+## Issues with impact
+
+1. **High:** In room 1, three same-behavior grubs overwhelmed me quickly. I could not find a rhythm that let me strike safely. The open window is shorter than the cooldown between my swipes plus the aiming I need.
+2. **High:** Getting hit locks me out of acting, so damage chains. A single mistake cascades into a loss.
+3. **Medium:** All grubs felt identical, so the fights did not feel different from one another. I cannot say whether other rooms or the spitter change that.
+4. **Medium:** It is hard to know which way I am facing, and where an enemy on my tile sits.
+5. **Low:** The first 1.3 s of every run is idle waiting.
+
+## Positives
+
+- The rear-back warning line and the `G` letter are clear and fair. I understood each bite before it came.
+- Dash invulnerability is reliable.
+- The messages state the reason for a failed action (stunned, too far, not in front), which helped me work out what I did wrong.
+
+## Single-session vs repeated
+
+- Repeated in all three sessions: the bite cycle and timing; the chain of hits after the first one; stun refusing my actions; death by about 4–12 s; all grubs behaving the same.
+- From a single session: the dash-on-cue dodge (s3 only), the one grub kill (s3), the on-your-tile confusion (s1/s2 two-grub clusters; I note it in both).
+
+## Open player questions
+
+- How do I get two hits in on one grub without taking a bite from another one?
+- Is there a reason to prefer one grub over another? I could not tell them apart.
+- How long does the dash take to recharge?
+
+## What I could not see
+
+- Rooms 2–5, the spitter, and "room cleared" or "run complete".
+- Anything a text view cannot show: the feel of the controller, animation, sound, color.
+- Real reaction timing. My timings were fixed in advance, so some deaths are my script's fault, not proof the fight cannot be won.
+
+## Decisions already made
+
+None.
+
+## Constraints
+
+I did not modify the repository.
+
+## Open questions
+
+Whether a live player with real-time reactions finds the grub fight winnable, and whether later rooms differ. I could not answer either from these three scripts.
+
+## Expected output
+
+Studio to route the experience findings (combat feeling the same, stun chaining, short counter window) to `game-designer` if it agrees, and to schedule another playtest that reaches rooms 2–5.
+
+## Load
+
+- Role: studio/roles/playtester.md
+- Skills: studio/skills/playtest-session.md
+- Project: project.md#player-profile, manual.md, the build in repo/ (player view only)
+- Decisions: none
+- Previous handoff: goals/G-001-combat-monotony/81-studio-to-playtester.md
+>>>END

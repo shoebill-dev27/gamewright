@@ -52,3 +52,11 @@ Results and findings: `docs/phase4.md`.
 
 Results and findings: `docs/phase5.md`.
 
+## Phase 6: experience Goal on the playable build
+
+| Run | What it shows |
+|---|---|
+| `runs/p6-combat-run` | The combat Goal on `fixtures/lantern-depths-combat`, stopped before Close (78 operations, 120 executors). Live Playtesters played the real build from the player view only; the Director chose to rework the existing enemies (D-002); many Design/Build/Verify rounds on display details followed. `measurement.json` holds the held-out bots' measurement (criteria S1–S3 not met). Six Owner questions, all about `manual.md`, which no Role could write. |
+
+Results and findings: `docs/phase6.md`.
+

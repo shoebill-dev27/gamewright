@@ -1,0 +1,23 @@
+<<<FILE @run/tests
+
+>>>END
+
+<<<FILE @run/trace/grub30
+room empty
+fps 30
+spawn grub 12 4
+player 8 4
+end 5
+>>>END
+
+<<<FILE @run/trace/room5_60
+room 5
+fps 60
+end 12
+>>>END
+
+<<<FILE @run/play/room4_30
+room 4
+fps 30
+end 6
+>>>END

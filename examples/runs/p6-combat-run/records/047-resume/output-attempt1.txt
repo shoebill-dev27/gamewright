@@ -1,0 +1,252 @@
+<<<FILE decisions/D-008-manualtest-run-by-owner-one-failure.md
+---
+kind: decision
+id: D-008
+status: accepted
+decided_by: owner
+goal: G-001
+date: 2026-10-15
+supersedes: none
+---
+# D-008: The Owner ran `run_tests` for AC-15 (Option A); one `ManualTest` failure goes to the designer
+
+## Decision
+
+The Owner chose Option A of escalation 42. They ran the full test suite in a sandbox where `manual.md` sits next to `repo/`, as a stand-in for the Owner, and reported the result. AC-15 is **not** accepted on a static check (Option B is rejected). It stays open until the failing test is resolved.
+
+Owner's own words (2026-10-15):
+
+> A。manual.md を repo/ の隣に置いた環境で python3 -m unittest discover を実行しました（Owner の代理、サンドボックス内）。結果: 40件中39件成功、1件失敗。失敗: test_manual_lists_glyphs_and_lines (test_game.ManualTest) — AssertionError: 'run over' not found in manual.md の本文（tests/test_game.py 631行目 self.assertIn(phrase, text, phrase)）。ほかの39件は成功。
+
+Conditions added by the Owner: none.
+
+Facts this Decision records:
+- 39 of 40 tests pass, including `test_on_screen_section_lists_x_and_the_practice_room`.
+- `test_manual_lists_glyphs_and_lines` fails: the phrase `run over` is not in the text of `manual.md` (`tests/test_game.py` line 631).
+- The QA static checks in 29 and 40 did not detect this, because that test could not run in the QA workspace.
+
+Limits: this Decision only settles how AC-15 is verified and what the result was. It does not say whether `manual.md` or the test is wrong. That ruling belongs to `game-designer` (player-facing behavior and spec wording). `manual.md` stays Owner-managed (D-005, D-007): no Role edits it.
+
+## Rationale
+
+The Owner took the option that gives a real test result rather than relying on the paragraph comparison. The result showed what the static check missed, which is why Option A was recommended.
+
+## Alternatives considered
+
+- Option B (accept AC-15 on QA's static check): not chosen by the Owner. The result shows it would have accepted a failing check.
+
+## Revisit when
+
+- The designer's ruling on the `run over` phrase requires a change to a vision pillar, to D-001, or to D-003.
+- The `ManualTest` result in the Owner's environment and in QA's workspace keeps differing after the fix.
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/42-studio-to-owner.md
+---
+kind: escalation
+goal: G-001
+seq: 42
+from: studio
+to: owner
+status: resolved
+decision: D-008
+---
+# 42: Owner decision needed — AC-15 の `ManualTest` をどう確認するか
+
+## Question
+
+QA の環境では `manual.md` が `ManualTest` の読む場所にないため、そのテスト2件を実行できません。ご自身の環境でテストを1回実行して結果を教えていただくか、このテストなしで AC-15 を受け入れるか、どちらにしますか。
+
+## Why this needs the Owner
+
+QA は `manual.md` が欠けていることを 29 と 40 で2回、同じ入力について差し戻しました（間に新しい入力はありません）。ループ制限により、同じ不足入力で3回目を QA に回さず、Owner に確認します。この不足は、どの Role も作れない実行環境側の問題です（Studio も QA ワークスペースを変えられません）。また `manual.md` は D-005 / D-007 により Owner が管理するファイルで、Role は編集しません。
+
+状況:
+- QA は段落（`## On screen` の最後）を D-007 の本文と一語一句照合し、一致を確認しました（40）。
+- 練習部屋の挙動（敵は script で置いた位置のみ、回復なし、次の部屋なし、ダウン後約2秒で終了、プレイヤーのタイルにいる敵は隣の空きタイルに描画）もビルドと一致しました。
+- 残るのは `ManualTest` の2件（`test_manual_lists_glyphs_and_lines`、`test_on_screen_section_lists_x_and_the_practice_room`）だけです。テストは `REPO.parent / "manual.md"` を読み、QA 環境ではこれが `/manual.md` になり `FileNotFoundError` になります。他の38件は通っています。
+
+## Options
+
+### Option A — Owner が実環境で `run_tests` を1回実行して結果を知らせる
+
+`manual.md` が `repo/` の隣にあるプロジェクトのディレクトリで `python3 -m unittest discover -s tests` を実行し、結果（40件中の成否、失敗があればその出力）を返信します。QA 環境に `manual.md` を置く方法をご存じなら、その配置を知らせていただいても構いません。コストは小さく、取り消す必要のある変更はありません。
+If chosen: 40/40 なら AC-15 を合格として記録し、7h（41）の結果が出たら Play に進みます。失敗があれば、その出力を持って `manual.md` の内容か期待値かを `game-designer` に確認し、必要なら Build に戻します。配置を知らせた場合は、QA に短い `run_tests` 再実行（`ManualTest` のみ）を回します。
+
+### Option B — QA の静的確認で AC-15 を受け入れる
+
+段落の一致と挙動の一致を根拠に AC-15 を合格とし、`ManualTest` は「QA 環境では未実行」と記録します。Owner の作業はありません。見落としが残るリスク: 用語・記号一覧を調べるテスト（`test_manual_lists_glyphs_and_lines`）は、段落の照合だけでは確認できていません（ただし 29 の静的確認では問題は見つかっていません）。
+If chosen: 7i を「合格（ManualTest 未実行）」としてクローズし、7h の結果が出たら Play に進みます。Review で未実行の旨を記録します。
+
+## Studio recommendation
+
+Option A。
+
+## Reasoning
+
+テストの2件は、手動の一覧がビルドの記号・文言とずれていないかを機械的に確認するもので、段落の照合だけでは代わりになりません。実行は1コマンドで、Owner が手元で行えば確実です。コストに対して確認の価値が高いと判断します。ただし、Owner が確認に手間をかけたくない場合、静的確認で問題が見つかっていないため Option B も許容範囲です。結果が40/40でない場合や、Owner が実行できない場合は、推奨を B に変えて構いません。
+
+## Meanwhile
+
+7h（美術ディレクターの視覚レビュー、41）は独立しているので続けます。Play と Review は AC-15 の扱いが決まるまで待ちます。
+
+## Owner decision required
+
+A / B — 選択肢と、あれば条件（A の場合は実行結果）をご返信ください。
+
+---
+
+**Owner response (2026-10-15):** A。manual.md を repo/ の隣に置いた環境で python3 -m unittest discover を実行しました（Owner の代理、サンドボックス内）。結果: 40件中39件成功、1件失敗。失敗: test_manual_lists_glyphs_and_lines (test_game.ManualTest) — AssertionError: 'run over' not found in manual.md の本文（tests/test_game.py 631行目 self.assertIn(phrase, text, phrase)）。ほかの39件は成功。
+
+**Resolved:** D-008 (Option A). 失敗1件は `game-designer` の判断へ（43）。
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-15
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): when an action player from the project's player profile plays through combat encounters, the fights feel varied and engaging, and the player's moment-to-moment choices (positioning, timing, enemy behavior) visibly matter. The player no longer experiences the fights as the same repeated pattern.
+
+Out of scope: adding input buttons beyond attack, dash and pause (D-001, Owner approval needed); changes to the run length or the non-combat systems; numeric targets (these belong to Design as acceptance criteria, and the final verdict to Review).
+
+No immediate escalation: the Goal does not conflict with the vision or D-001, and it needs no reinterpretation. Improving depth through positioning, timing and enemy behavior is what pillar 1 asks for.
+
+## Unknowns
+
+- Observe (playtester, qa): done (02, 08, 06, 15). Not observed: room 5 fight, approaching a spitter, projectile hits, room clear, dash dodging; Play covers them.
+- Diagnose, Decide: done (03; D-002, D-005, D-006). Cause: single-state, untelegraphed enemy behavior; Option A.
+- Design: done (10, 16, 33). Spec `design/combat.md` (AC-1…AC-18), D-003, D-006, `design/combat-visuals.md` (V-1…V-8). Reopened for one question (7j, below).
+- Plan: done (14, D-004). Gap defaults F1–F11; the designer confirms them at Review, F1 (grub speed) matters most.
+- Build: done (code 18, 22, 23, 35; render fix F1/AC-18 and F3; manual paragraph placed by the Owner, D-007). F2 is cosmetic.
+- Verify, behavior: 7g (39) passed. AC-17 (30/60 FPS) and AC-18 hold, C1/C7/C3 unchanged, no AC failing. Suite-only: AC-14, AC-10 2-swipe kill, "(too soon)" and "(down)" lines. Pause (F11) not implemented.
+- Verify, AC-15: paragraph identical to D-007 and behavior matching (40). The Owner ran the suite (D-008): 39/40 pass. `test_manual_lists_glyphs_and_lines` fails, `'run over'` not found in `manual.md` text (`tests/test_game.py` line 631). `test_on_screen_section_lists_x_and_the_practice_room` passes. AC-15 is open until the designer rules (7j): is the manual missing the phrase, or is the test's expectation wrong?
+- Verify, visuals: earlier V-1 fail (hidden grub), F3. 7h re-judges V-1, V-2, V-6 and the displaced cell from QA's captures (39, 40). No `--color` capture is obtainable with the project commands, so V-6 may stay unobserved. Not observed: a swipe while an enemy is drawn beside the player.
+- Play: `playtester`, live and reactive, from a Handoff composed by the Studio from permitted information. Watch slot starvation. Planned, after Verify passes (including AC-15).
+- Review: `game-director` with `review-outcome`. Planned. Open: run progression after "run over"; F1, F6, F7; numbering of same-type enemies in one cell; a still player going down in about 5 s.
+- Skipped: none.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 02-playtester-to-game-designer.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-game-designer-to-game-director.md |
+| 3a | Decide | game-director | make-decision | done | 05-game-director-to-studio.md |
+| 3b | Observe (defects) | qa | reproduce-defect | done | 06-qa-to-game-designer.md |
+| 3c | Observe (rooms 4–5) | playtester | playtest-session | done | 08-playtester-to-game-designer.md |
+| 4 | Design | game-designer | write-design-spec | done | 10-game-designer-to-studio.md |
+| 5a | Plan | technical-director | technical-plan | done | 14-technical-director-to-studio.md |
+| 5b | Observe (spit line) | qa | reproduce-defect | done | 15-qa-to-studio.md |
+| 5c | Design (visuals) | art-director | visual-review, write-design-spec | done | 16-art-director-to-studio.md |
+| 6a | Build (code) | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md |
+| 6b | Build (`run_tests` check, manual placed) | gameplay-engineer | implement-change | done | 23-gameplay-engineer-to-studio.md |
+| 7a | Verify | qa | verify-change | done (question, no AC failed) | 26-qa-to-studio.md |
+| 7b | Verify (visuals) | art-director | visual-review | done (question, no build output) | 27-art-director-to-studio.md |
+| 7c | Verify (rerun: manual, runs, captures) | qa | verify-change | done (question, no AC failed) | 29-qa-to-studio.md |
+| 7d | Verify (visuals, from captures) | art-director | visual-review | done (fail: V-1, F3) | 32-art-director-to-studio.md |
+| 7e | Design (F1 overlap, AC-15 wording) | game-designer | write-design-spec | done | 33-game-designer-to-studio.md |
+| 7f | Build (F1/F3 render, manual paragraph) | gameplay-engineer | implement-change | done (render built) | 35-gameplay-engineer-to-studio.md |
+| 7f-O | Owner: place the manual paragraph | owner | — | done (Option A, D-007) | 36-studio-to-owner.md |
+| 7g | Verify (all but AC-15) | qa | verify-change | done (pass) | 37-studio-to-qa.md |
+| 7i | Verify (AC-15, `ManualTest`) | qa | verify-change | done (question: ManualTest blocked) | 38-studio-to-qa.md |
+| 7i-O | Owner: `ManualTest` result | owner | — | done (Option A, D-008: 39/40) | 42-studio-to-owner.md |
+| 7h | Verify (visuals) | art-director | visual-review | open (parallel to 7j) | 41-studio-to-art-director.md |
+| 7j | Design (`run over` manual test failure) | game-designer | write-design-spec | open | 43-studio-to-game-designer.md |
+| 7k | Build (fix test or code) | gameplay-engineer | implement-change | tentative (if the ruling changes test or code) | — |
+| 7k-O | Owner: place manual text | owner | — | tentative (if the ruling changes `manual.md`) | — |
+| 7l | Verify (AC-15 rerun) | qa | verify-change | tentative (after 7k or 7k-O) | — |
+| 8 | Play | playtester | playtest-session | planned | — |
+| 9 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+After the Owner chose A (42, D-008): the suite ran 39/40; `ManualTest` fails on the phrase `run over` missing from `manual.md`. Goal back to `active`. 7j opens (43): the designer rules on manual vs. test. 7k, 7k-O and 7l are tentative on that ruling. 7h continues; Play waits for AC-15.
+
+## Next action
+
+- Run `43-studio-to-game-designer.md` (7j; result addressed to `studio`).
+- Run `41-studio-to-art-director.md` (7h; result addressed to `studio`), in parallel.
+- Then Route: apply 7j's ruling (test or code fix to Build; a manual change goes to the Owner, never edited by a Role), then a QA rerun of AC-15. When AC-15 and 7h both pass, open Play (8) with a Handoff composed from permitted information only.
+
+## Outcome
+
+(Filled at Close.)
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/43-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-001
+seq: 43
+from: studio
+to: game-designer
+stage: Design
+outcome: routed
+---
+# 43: studio → game-designer — rule on the `run over` phrase that `ManualTest` expects in `manual.md`
+
+## Task
+
+Decide why `test_manual_lists_glyphs_and_lines` fails and what the correct fix is. Either the player-facing `manual.md` should mention `run over` and does not, or the test's expectation is stale or wrong against the spec. Write the ruling so that the next step can act without guessing.
+
+## Context
+
+Goal G-001 (combat feels monotonous) is in Verify. Everything behavioral passed in 39. The only open item for AC-15 (the manual describes what the player sees, including the practice room) is a `ManualTest` check. QA could not run `ManualTest` in its workspace, because the test reads `REPO.parent / "manual.md"` and that file is absent there. The Owner then ran the whole suite in an environment where `manual.md` sits next to `repo/` (escalation 42, D-008). Result: 39 of 40 pass. The failing test is `test_manual_lists_glyphs_and_lines` (`test_game.ManualTest`). Failure: `AssertionError: 'run over' not found in manual.md` at `tests/test_game.py` line 631 (`self.assertIn(phrase, text, phrase)`). The other `ManualTest` test, `test_on_screen_section_lists_x_and_the_practice_room`, passes. QA's earlier static check found the practice-room paragraph identical to D-007 and the practice-room behavior matching the build (40), but it could not cover this test.
+
+## Findings
+
+- Failing check: the test iterates over a list of phrases and asserts that each appears in the text of `manual.md`. `run over` is the first (or only) phrase reported missing. The assertion stops at the first missing phrase, so other phrases in the same list may also be missing. Read the test to see the full list.
+- `run over` is the line the build shows when a run ends (D-003: zero hearts ends the run). Check in `repo/game.py` / `repo/play.py` what is actually printed, and whether `manual.md` describes the run end in other words.
+- `manual.md` is player-facing and Owner-managed (D-005, D-007). You may not edit it. If it needs new text, write the exact proposed wording in your Handoff and the Studio will ask the Owner to place it, as was done for the practice-room paragraph.
+- `design/combat.md` AC-15 was reworded in 33. Check whether its wording covers the run-end line, and whether the test checks more than AC-15 requires.
+
+## Decisions already made
+
+- D-003: room mix is across rooms; zero hearts ends the run; room clear heals one heart.
+- D-005, D-007: the Owner places `manual.md` text. Roles do not edit it.
+- D-006: enemies may overlap the player but are never hidden; the practice room is listed in the On screen section.
+- D-008: the Owner ran the suite (39/40); AC-15 is not accepted on a static check; the `run over` question goes to you.
+- D-001: no new input buttons.
+
+## Constraints
+
+- Do not edit `manual.md`. Do not edit the code or tests; that is Build.
+- Stay inside the approved direction (D-002 Option A) and the existing Decisions. If the ruling would change D-001, D-003 or a vision pillar, hand back with that as an open question instead of ruling.
+- Prefer the smallest change that makes the manual, the build and the test agree (small team, reuse existing systems).
+- Player-visible text should stay consistent with what `run_play` actually shows.
+
+## Open questions
+
+1. Is `run over` text that the player sees in the build? If yes, should `manual.md` mention it (and is it mentioned in other words)?
+2. Does the test check anything beyond what the spec (AC-15) requires? Is any other phrase in that list also missing from `manual.md`?
+3. Which fix is right: (a) `manual.md` gets new wording (give the exact text, for the Owner to place), (b) the test's phrase list is corrected (give the exact change, for the Engineer), (c) the build's displayed wording is changed (describe it, for the Engineer), or (d) a combination?
+
+## Expected output
+
+A ruling in this Handoff's Findings (if you change `design/combat.md`, name the section), with:
+- the full list of phrases the test expects and which of them are missing from `manual.md`;
+- the chosen fix (a–d) with exact wording or test/code change;
+- the acceptance check QA should run afterwards (expected: the full `run_tests` result 40/40 in an environment where `manual.md` is beside `repo/`, plus what the Owner or QA must provide for that).
+
+Address the result to `studio`. Set `outcome: done`, or `question` if you need a decision you do not hold.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: design/combat.md (AC-15 and the run-end rules); manual.md; repo/tests/test_game.py (class `ManualTest`, around line 631); repo/game.py and repo/play.py (what the player sees at run end)
+- Decisions: decisions/D-003-run-end-and-room-rules.md, decisions/D-005-owner-places-manual-draft.md, decisions/D-006-overlap-display-and-practice-room-manual.md, decisions/D-007-practice-room-paragraph-placed-by-owner.md, decisions/D-008-manualtest-run-by-owner-one-failure.md
+- Previous handoff: goals/G-001-combat-monotony/42-studio-to-owner.md
+>>>END

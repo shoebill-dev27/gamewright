@@ -1,0 +1,128 @@
+Handoff 18 is a first-time `question`: Build is done except for `manual.md`, which the engineer's step could not write. I can't write `manual.md` either, because it isn't on my write list. Under the loop limits, a first `question` goes back to the Role with the missing permission stated explicitly. So I'm reopening Build as a narrow Handoff (19) for T8 only. If the same write is blocked again, the next Route escalates to the Owner.
+
+<<<FILE goals/G-001-combat-monotony/19-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-001
+seq: 19
+from: studio
+to: gameplay-engineer
+stage: Build
+outcome: routed
+---
+# 19: studio → gameplay-engineer — finish Build: write `manual.md` (T8) and confirm `run_tests`
+
+## Task
+
+Write `manual.md` at the project root (T8). Use the draft in handoff 18, section "Draft `manual.md`", and place it unchanged unless a statement in it contradicts the built game. Then run `run_tests` against the real layout and confirm that all 34 tests pass, `ManualTest` included. `manual.md` is the only file to write for this step; no code changes are expected.
+
+## Context
+
+G-001, Build of Option A (build 0.5). Handoff 18 reports T1–T7 and T9 done in `repo/`. T8 was blocked because `manual.md` was not writable in that step. This step exists to do T8 only, and `manual.md` is in scope here. AC-15 and V-5 depend on the manual, and QA cannot start until it exists.
+
+## Findings
+
+From handoff 18, the facts this step relies on:
+
+- 33 of 34 tests passed; the one error was `ManualTest`, caused by the missing `manual.md`.
+- The draft was written to contain the backticked glyphs and key phrases `ManualTest` checks. It has not been run against the real file.
+- The glyph table, line strings and as-built values are in handoff 18 and in `repo/play.py` (`GLYPHS`, `LINES`).
+
+## Decisions already made
+
+D-001…D-004 hold. The manual is player-facing: it must not name internal states, plan IDs (F1–F11) or acceptance-criterion numbers.
+
+## Constraints
+
+- Write only `manual.md`. If `ManualTest` fails against the draft, or a draft statement contradicts the built behavior, fix the wording in `manual.md` only. If the test or the game would have to change, stop and report it; do not change code in this step.
+- Keep the script format and controls consistent with `repo/play.py`.
+
+## Open questions
+
+- If `manual.md` still cannot be written, say so as the first line of Findings and set `outcome: question`. Do not retry or work around it; the Studio will then escalate to the Owner, since a second hand-back for the same input is not routed to a Role again.
+
+## Expected output
+
+An outgoing Handoff addressed to `studio` (so the Route can compose a fresh Handoff for QA without the Sender assessment), with `outcome: done` and Findings giving:
+
+1. confirmation that `manual.md` exists at the project root;
+2. the `run_tests` result (count and any failures);
+3. any wording you changed from the draft and why.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: manual.md (to create), design/combat-visuals.md, design/combat.md, repo/play.py, repo/tests/test_game.py
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-003-run-end-and-room-rules.md, decisions/D-004-option-a-single-change-set.md
+- Previous handoff: goals/G-001-combat-monotony/18-gameplay-engineer-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-15
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): when an action player from the project's player profile plays through combat encounters, the fights feel varied and engaging, and the player's moment-to-moment choices (positioning, timing, enemy behavior) visibly matter. The player no longer experiences the fights as the same repeated pattern.
+
+Out of scope: adding input buttons beyond attack, dash and pause (D-001, Owner approval needed); changes to the run length or the non-combat systems; numeric targets (these belong to Design as acceptance criteria, and the final verdict to Review).
+
+No immediate escalation: the Goal does not conflict with the vision or D-001, and it needs no reinterpretation. Improving depth through positioning, timing and enemy behavior is what pillar 1 asks for.
+
+## Unknowns
+
+- Observe (playtester): done (02 rooms 1–3, 08 rooms 4–5). Not observed: room 5 fight, approaching a spitter, projectile hits, room clear, dash dodging; the Play step after Build covers them.
+- Observe (qa): done (06, 15). The doubled spit line is two spitters printing identical text, a presentation defect covered by AC-8 and now a Build requirement (17). Nothing verified at 30 FPS yet beyond that report.
+- Diagnose: done (03). Cause: single-state, untelegraphed enemy behavior. Option A chosen (D-002); B deferred; C out of scope.
+- Decide: done (D-002). No Owner escalation.
+- Design: done (10, 16). Spec in `design/combat.md` (AC-1…AC-17), run/room rules in D-003, visual spec in `design/combat-visuals.md` (V-1…V-8).
+- Plan: done (14, D-004). Feasible, one change set. Gap defaults F1–F11 set by the technical-director; the designer confirms them at Review, F1 (grub speed) matters most.
+- Build: `open` (19), `gameplay-engineer`. Code T1–T7, T9 done (18, build 0.5, 33/34 tests). Remaining: T8 `manual.md` (draft in 18) and a full `run_tests` pass. If `manual.md` is blocked again, escalate to the Owner (loop limit).
+- Verify: `qa` after Build; `art-director` in parallel because visuals change (color, V-6, needs the art-director). Planned. QA works from a fresh Handoff without the Sender assessment. Pause (F11) is not implemented; QA marks it not verifiable.
+- Play: `playtester` replays the changed build, live and reactive. Watch slot starvation. Planned.
+- Review: experience Goal. `game-director` with `review-outcome`. Planned. Run progression after "run over" is not defined; the designer confirms F1, F6, F7 and the numbering of same-type enemies in one cell.
+- Skipped: none.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 02-playtester-to-game-designer.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-game-designer-to-game-director.md |
+| 3a | Decide | game-director | make-decision | done | 05-game-director-to-studio.md |
+| 3b | Observe (defects) | qa | reproduce-defect | done | 06-qa-to-game-designer.md |
+| 3c | Observe (rooms 4–5) | playtester | playtest-session | done | 08-playtester-to-game-designer.md |
+| 4 | Design | game-designer | write-design-spec | done | 10-game-designer-to-studio.md |
+| 5a | Plan | technical-director | technical-plan | done | 14-technical-director-to-studio.md |
+| 5b | Observe (spit line) | qa | reproduce-defect | done | 15-qa-to-studio.md |
+| 5c | Design (visuals) | art-director | visual-review, write-design-spec | done | 16-art-director-to-studio.md |
+| 6a | Build (code) | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md |
+| 6b | Build (`manual.md`) | gameplay-engineer | implement-change | open | 19-studio-to-gameplay-engineer.md |
+| 7a | Verify | qa | verify-change | planned | — |
+| 7b | Verify (visuals) | art-director | visual-review | planned | — |
+| 8 | Play | playtester | playtest-session | planned | — |
+| 9 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+After step 6a (18, question): code is done, but `manual.md` (T8) could not be written and QA depends on it (AC-15, V-5). Build is reopened as 6b (19), `manual.md` only, with the draft from 18. A second block on the same write goes to the Owner.
+
+## Next action
+
+Run `19-studio-to-gameplay-engineer.md` (Build, `manual.md` only). The engineer addresses the result to `studio`. Then run Route: if it passes, open Verify as two parallel steps, `qa` (fresh Handoff without the Sender assessment) and `art-director` (visual review). If `manual.md` is blocked again, write an Owner escalation instead.
+
+## Outcome
+
+(Filled at Close.)
+>>>END

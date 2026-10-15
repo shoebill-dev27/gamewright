@@ -1,0 +1,57 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/25-studio-to-art-director.md",
+  "sha256": "142726ad4bc77e2cae11f4e599f598e9e3be15cc4b39cdec3a50a5b0ab91c271",
+  "bytes": 2049
+ },
+ {
+  "path": "studio/roles/art-director.md",
+  "sha256": "0a782e71d7d5344b9f3701549fa91d3ea4243ec75a6816a68dbcbf56ac5c71df",
+  "bytes": 1139
+ },
+ {
+  "path": "studio/skills/visual-review.md",
+  "sha256": "a4c0a2bc09a91a5af5765901e80bae9296517858e7d87341f54a53f006c1a263",
+  "bytes": 1066
+ },
+ {
+  "path": "project.md#art-direction",
+  "sha256": "8ef4190e8e145d993682898fbb7fe0ca8bd81e86b7a123e263644b95ce51119b",
+  "bytes": 158
+ },
+ {
+  "path": "design/combat-visuals.md",
+  "sha256": "da6dfdf9ba7f8a8dec270a75cd8136d21952b4c90b62cee9a1fd35818e6a8419",
+  "bytes": 6739
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "8cc6f664f6db174e1501214e4f87b3e86706a62816667fc6cead10f7863d58c4",
+  "bytes": 14270
+ },
+ {
+  "path": "manual.md",
+  "sha256": "d10c599290afc33475886ba7d8c5f15d8e443a005082fa105bbe0ef8b80c7a26",
+  "bytes": 3781
+ },
+ {
+  "path": "decisions/D-002-combat-response-scope.md",
+  "sha256": "5e3f7089e8d9edf660a791139fb7c9b9531a311f03288d2f0040df3182b82068",
+  "bytes": 3716
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

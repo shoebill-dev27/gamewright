@@ -1,0 +1,170 @@
+<<<FILE goals/G-001-combat-monotony/53-game-designer-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 53
+from: game-designer
+to: studio
+stage: Route
+outcome: done
+---
+# 53: game-designer → studio: Diagnosis of the room-1 play findings (handoff 51)
+
+## Task
+
+Route the options below by authority. `game-director` needs to decide the two items in group D, and the Studio should schedule one cheap re-check (see Expected output). The spec is not edited in this step.
+
+## Context
+
+G-001 (combat monotony), Option A (D-002). The playtester (50) went down twice in room 1 and saw nothing past it. This is my diagnosis from the report, the spec (`design/combat.md`, `design/combat-visuals.md`), `manual.md` and two runs.
+
+**What I could and could not check.** I had no `run_trace` and no usable bot run.
+- The `run_bots` round failed: `script line 1: cannot read 'room 1'`. The bots script format is not the play-script format, and no rounds are left. There is therefore **no passive-bot or active-bot reference**.
+- I used two `run_play` scripts instead: a still player in room 1 (`room1-still`) and a one-grub probe in the practice room (`wind-up-swipe`).
+- Everything about "how a competent player fares" is reasoning, not measurement.
+
+## Findings
+
+### 1. What the runs show
+
+**Still player, room 1** (60 FPS). Hearts are lost at 1.93, 3.43 and 4.95 s, and the player goes down at 4.95 s.
+- This matches the spec note "idle player down at about 5 s".
+- The bites are 1.5 s apart. Several strikes (about 2.4–2.5 s, 4.0–4.2 s) fall inside the 0.8 s post-hit invulnerability and are absorbed.
+- Wind-ups overlap as the report says: 2.883 and 2.933 s, and 3.53 s (left) overlapping the "above" grub's strike. Never more than 2 are committed at once, so the attack limit (AC-6) holds.
+- All three grubs arrive within about 1.5 s of each other (rear-backs at 1.38, 1.88 and 2.88 s) because they start about the same distance away. That is why room 1 produces simultaneous threats.
+
+**Swipe on a rearing grub** (practice room, one grub). A swipe 0.27 s into a wind-up (1.05 s):
+- prints "grub hit (1 left)" and "the grub is open";
+- the glyph drops from `G` to `w`;
+- no heart is lost to that bite (AC-5 interrupt works).
+
+The grub is **hittable during wind-up**. The tester's guess in 50 ("probably not hittable") is wrong, and the manual never says so.
+
+**The "(miss)" results.** In my probe the two misses (1.5 s, 2.0 s) happened because the first hit knocked the grub back 1 tile. It stood about 2 tiles away, outside the 1.5-tile reach. "(miss)" was truthful.
+- The tester's misses at 2.1 s and 4.0 s may be the same effect, or a facing error, or a swipe during Strike.
+- My probe did **not** test a swipe during Strike or an adjacent Recovery. That case is unsettled.
+
+### 2. Classification of the findings
+
+| Finding | Spec-conforming? | Class |
+|---|---|---|
+| Loop is identical in room 1 | Yes. Room 1 is a teaching room (D-003) | Open: see §3 |
+| Simultaneous rear-backs (0.03–0.05 s apart) | Yes. The limit is 2 at once, with no spacing rule | **Tuning / rule gap** |
+| 3 hearts gone fast | Yes. The bites are at least 1.5 s apart for a still player, and 0.8 s apart after invulnerability for a moving one | **Tuning** (stacks with the rows above and below) |
+| Stun 0.3 s blocks the counter | Yes, spec text | **Tuning** (sharpest complaint) |
+| Swipe hits a winding-up grub; the tester thought it can't | The spec is fine, the manual is silent | **Manual** |
+| Swipe "(miss)" next to a grub | Probably knockback or facing; "(miss)" is truthful | **Readability** (cause not fully settled) |
+| Cannot turn without moving; swipes hit air after a dash | Yes. Facing is move-only | **Direction** (D-001 / facing) |
+| Dash end point unclear; felt like 2–3 tiles | Spec says 4 tiles | **Unknown**: possible as-built difference or wall clamp. Needs `run_trace`. The manual gives no distance |
+| Grub "on you" drawn beside `P` | Yes (D-006) | **Display / readability** |
+
+### 3. Causes (design terms)
+
+1. **No spacing between grub commitments.** The spec limits grubs to 2 in Wind-up/Strike but sets no minimum gap between wind-up starts. Three grubs with equal start distance converge together, so one safe response (step or dash) covers one grub. The 0.8 s invulnerability absorbs some bites but not enough to make this read as skill.
+2. **Stun 0.3 s overlaps the counter window.** The best answer to a wind-up is to hit the grub in it (interrupt), but hit-stun removes that answer right after a hit. The wind-up is 0.5 s, so a 0.3 s stun leaves about 0.2 s. This explains the "unfair" feeling in 50.
+3. **The best tools are not taught.** The manual says "step away or dash" for a wind-up and does not mention the interrupt, the knockback after a hit (grub ends about 2 tiles away, out of reach), or the dash distance. The tester therefore concluded the grub is unhittable.
+4. **Facing is move-only, with unspecified edge cases.** Two spec gaps:
+   - The spec does not say whether a dash changes facing.
+   - The spec does not say whether an enemy at distance about 0 (a grub "on you") is inside the 90° cone, since it has no direction.
+
+   Both feed the "I couldn't hit what was next to me" feeling.
+5. **Monotony vs harshness.** In ~10 s of play every grub did the same loop. That is expected in a teaching room and does not show that monotony is solved or still present, because the tester died before any variation (rooms 2–5, spitter). Harshness is now masking the question. Only a survived run (52) can answer it.
+
+### 4. Options
+
+**A. Mine: rules and tuning (game-designer authority; changes the spec in the next step)**
+
+- **A1. Wind-up spacing.** A grub may not start a Wind-up within 0.5 s of another grub's Wind-up start. This reuses the spitter stagger idea.
+  - Addresses: pressure, simultaneous rear-backs.
+  - Cost: a small rule. It must hold at 30 and 60 FPS (use seconds).
+  - Risk: cluster fights become longer. It does not change the single-grub cycle.
+  - Fit: pillar 3. No D-001 effect.
+- **A2. Shorter stun.** 0.3 s → 0.15 s **[tune]**, or keep 0.3 s but let the swipe buffer and fire when the stun ends.
+  - Addresses: the "can't hit back" frustration.
+  - Risk: low. The invulnerability time is unchanged.
+- **A3. Body hit rule.** An enemy within about 0.5 tile of the player (the "on you" case) is always hit by a swipe, regardless of facing.
+  - Addresses: "on you" confusion and part of the facing complaint.
+  - It does not change how the player turns.
+- **A4. Cone width.** 90° → about 120° **[tune]** for more forgiveness.
+  - Cost: low. Risk: it weakens positioning, so try it only if A3 is not enough.
+- **A5. Spec gaps to close either way:** whether a dash changes facing, and the exact distance-0 swipe rule if A3 is not taken.
+
+**B. Manual and clarity (no rule change; the Studio decides who edits `manual.md`)**
+
+- State that a swipe during a rear-back cancels the bite (the best counter).
+- State that a first hit knocks the grub back about a tile, so a follow-up may need a step forward.
+- State the dash distance (about 4 tiles) and that a hit stuns for a moment.
+- Add "(too far)" or similar wording to "(miss)" for a swipe when an enemy is within about 2.5 tiles. This is a display text matter.
+
+**C. Art-director (display)**
+
+- "On you" readability. Suggestion: the text line could name where the glyph is drawn ("open, on you, drawn right"), or the displaced glyph could be marked. This does not change D-006.
+- Review whether "YOU ARE HIT by a grub" should say which grub (left or above).
+
+**D. Needs `game-director` (not mine to choose)**
+
+- **D1. Facing.** The tester's request ("turn without moving" or "swipe behind you") conflicts with D-001 for a new input. Variants that change the facing mechanic are all direction decisions:
+  - Auto-face the nearest enemy on swipe.
+  - A dash that keeps facing (a "backstep").
+  - A 360° swipe.
+  
+  I recommend trying A3 and A4 first and escalating this only if the tester still reports it.
+- **D2. Room 1 composition.** Options:
+  - Fewer grubs. This breaks the spec's "3–6 enemies per room".
+  - Uneven grub start distances. This is the "staggered arrival" that D-002 defers as part of Option B.
+  
+  A1 reaches a similar effect inside Option A, so I do not need either of these now.
+
+### 5. Trade-offs in short
+
+- A1 + A2 + A3 are cheap and keep the Option A reading (one telegraph, one answer). They may leave a still player's time-to-down near 5 s, which is fine because that is a reference value, not a target.
+- B is nearly free and should happen regardless. The tester's central confusion (unhittable while winding up) is a manual gap.
+- D1 and D2 are bigger changes. Taking them before the cheap fixes would change scope or direction on one session of scripted play.
+
+## Decisions already made
+
+- D-001: one attack button plus dash. A turn-without-moving input is not allowed without the Owner.
+- D-002: Option A first; B (including staggered arrival) deferred.
+- D-003: room mix is across rooms; zero hearts ends the run; clear heals 1.
+- D-006: enemies may overlap the player and are never hidden.
+
+## Constraints
+
+- Everything stays within D-001. All timings are in seconds and must hold at 30 and 60 FPS.
+- This note contains design-side reasoning. Do not forward it to a Playtester unchanged; give them only what they need to play.
+
+## Open questions
+
+- **Dash distance.** Does the as-built dash go 4 tiles? The tester saw 2–3. Needs `run_trace` (QA or the engineer).
+- **Swipe during Strike or an adjacent Recovery.** Does it hit? My probe did not test it.
+- **Does a dash change facing?** The spec is silent.
+- **Can a skilled player survive room 1?** I have no bot data (the bots script failed). The next run should find the bots script format first.
+- **Monotony.** Is it still present once players survive? Waiting for 52 (rooms 2–5, spitter).
+
+## Expected output
+
+The Studio, in order:
+
+1. Route group D to `game-director` only if wanted now. My recommendation is not to.
+2. Send group B to whoever owns the manual, and group C to `art-director`.
+3. Next step for me: a design-spec update with A1, A2, A3 and A5 (A4 held back). It must also state the new acceptance criteria and keep the 30/60 FPS requirement.
+4. After that, one new playtest of room 1 and one bots round with a correct script format (a passive bot and a reactive bot), to see whether room 1 is survivable.
+
+## Sender assessment
+
+**Recommendation:** A1 + A2 + A3 together, plus B and C. Hold D until a retest.
+
+- **Confidence in the causes:**
+  - High: the lack of spacing (confirmed in the still run) and the manual gap on the interrupt (confirmed by the probe).
+  - Medium: the stun as the main frustration. Only the tester's report supports it, and no live reaction data exists.
+  - Low: the dash distance and "(miss)" next to a grub. Untested.
+- The tester's own caveat applies: timed scripts, no live reaction. Some failures are likely timing errors.
+
+## Load
+
+- Role: none (Studio routing)
+- Skills: none
+- Project: design/combat.md, design/combat-visuals.md, manual.md
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-002-combat-response-scope.md, decisions/D-006-overlap-display-and-practice-room-manual.md
+- Previous handoff: goals/G-001-combat-monotony/51-studio-to-game-designer.md
+>>>END

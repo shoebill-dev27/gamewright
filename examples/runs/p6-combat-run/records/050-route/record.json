@@ -1,0 +1,73 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "4cb5a046-cd9b-47de-b1d9-100f65dcbd75",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 25236,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 5776,
+    "output_tokens_details": {
+     "thinking_tokens": 1622
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 25236,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 5776,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 25236,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 25236
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.15870800000000002,
+   "attempt": 1,
+   "started": "2026-10-15T20:00:27",
+   "seconds": 39.6,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-combat-monotony/46-studio-to-gameplay-engineer.md": "9791e71fbd23f4fe760e87cfc2fc899c66d3ab83d1fe2881c46d145c2c63dd9b",
+  "goals/G-001-combat-monotony/goal.md": "463a6c21d182701aebe1ad9a0282a0f748ddb865274d0232a8e630e54fd5a96c"
+ },
+ "decision": {
+  "new": [
+   "gameplay-engineer",
+   "Build"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "gameplay-engineer",
+    "Build (test fix, line wraps)"
+   ]
+  ]
+ },
+ "seen_through_seq": 46
+}

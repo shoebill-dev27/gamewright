@@ -1,0 +1,62 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/38-studio-to-qa.md",
+  "sha256": "6f03aa1853c0f98fb88ce1dd15139a3fd954bfbfd2615af6cc8a60e713da206b",
+  "bytes": 3205
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "381742c8f2afe2e1a2a6af9d031dcc91f98f490ada7c90e2a990d6a1aaf27639",
+  "bytes": 1765
+ },
+ {
+  "path": "studio/skills/verify-change.md",
+  "sha256": "da40d2c0030e078ac6d085ea06b17bb9b452495f4e2f412a9e1bd723ac72ddf5",
+  "bytes": 1281
+ },
+ {
+  "path": "manual.md",
+  "sha256": "fc06710951221dbee76cc6aa69fd5cf82b94b7d64d640b910800bea6be5d6034",
+  "bytes": 4128
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "6f926dd3d101acce253f39e0f642d62749ff6675386942c23809b9c516bddd84",
+  "bytes": 17692
+ },
+ {
+  "path": "project.md#current-state",
+  "sha256": "436e88de306f72ff84a8ce375998cbbc27ac71246d336b9bd06217aebf180f5b",
+  "bytes": 460
+ },
+ {
+  "path": "decisions/D-005-owner-places-manual-draft.md",
+  "sha256": "8761e9ad769db4c760c905fce26b38d4f06cee5d28e3fa8af7d4e026bd6608d1",
+  "bytes": 1879
+ },
+ {
+  "path": "decisions/D-006-overlap-display-and-practice-room-manual.md",
+  "sha256": "6855ad2e98922bb21e91d4f879556408dd288bbdfb88576baeb99ebbd75a5656",
+  "bytes": 2280
+ },
+ {
+  "path": "decisions/D-007-practice-room-paragraph-placed-by-owner.md",
+  "sha256": "162a441532b46be13c5667d482c398fafda54a741ec335237c7c40c507fe32cb",
+  "bytes": 2239
+ },
+ {
+  "path": "goals/G-001-combat-monotony/37-studio-to-qa.md",
+  "sha256": "592633bb6ee0008a1074618f485e0a38b1f3aa0c4aa4c14d2207ae256dd7173b",
+  "bytes": 2588
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ }
+]

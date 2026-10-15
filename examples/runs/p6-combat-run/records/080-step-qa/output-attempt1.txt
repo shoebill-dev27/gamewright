@@ -1,0 +1,238 @@
+Round 1: the test suite first, then the player-view and trace scripts at 30 and 60 FPS.
+
+<<<FILE @run/tests
+>>>END
+
+<<<FILE @run/play/ac28b-30
+fps 30
+room empty
+player 14.5 4
+spawn grub 14.5 4
+0.2 attack
+end 2
+>>>END
+
+<<<FILE @run/play/ac28b-60
+fps 60
+room empty
+player 14.5 4
+spawn grub 14.5 4
+0.2 attack
+end 2
+>>>END
+
+<<<FILE @run/trace/ac28b-30
+fps 30
+room empty
+player 14.5 4
+spawn grub 14.5 4
+0.2 attack
+end 2
+>>>END
+
+<<<FILE @run/trace/ac28b-60
+fps 60
+room empty
+player 14.5 4
+spawn grub 14.5 4
+0.2 attack
+end 2
+>>>END
+
+<<<FILE @run/play/ac29-30
+fps 30
+room empty
+player 14.5 4
+spawn grub 13.5 4
+end 2
+>>>END
+
+<<<FILE @run/play/ac29-60
+fps 60
+room empty
+player 14.5 4
+spawn grub 13.5 4
+end 2
+>>>END
+
+<<<FILE @run/trace/ac29-30
+fps 30
+room empty
+player 14.5 4
+spawn grub 13.5 4
+end 2
+>>>END
+
+<<<FILE @run/trace/ac29-60
+fps 60
+room empty
+player 14.5 4
+spawn grub 13.5 4
+end 2
+>>>END
+
+<<<FILE @run/play/knock82-30
+fps 30
+room empty
+player 8 4
+spawn grub 8.2 4
+0.2 attack
+end 1.5
+>>>END
+
+<<<FILE @run/play/knock82-60
+fps 60
+room empty
+player 8 4
+spawn grub 8.2 4
+0.2 attack
+end 1.5
+>>>END
+
+<<<FILE @run/play/knock8-30
+fps 30
+room empty
+player 8 4
+spawn grub 8 4
+0.2 attack
+end 1.5
+>>>END
+
+<<<FILE @run/play/knock8-60
+fps 60
+room empty
+player 8 4
+spawn grub 8 4
+0.2 attack
+end 1.5
+>>>END
+
+<<<FILE @run/play/room2-30
+fps 30
+room 2
+end 6
+>>>END
+
+<<<FILE @run/play/room2-60
+fps 60
+room 2
+end 6
+>>>END
+
+<<<FILE @run/trace/room2-30
+fps 30
+room 2
+end 6
+>>>END
+
+<<<FILE @run/trace/room2-60
+fps 60
+room 2
+end 6
+>>>END
+
+<<<FILE @run/play/v14-30
+fps 30
+room empty
+player 8 4
+spawn grub 9.25 4
+spawn grub 6.75 4
+end 1.5
+>>>END
+
+<<<FILE @run/play/v14-60
+fps 60
+room empty
+player 8 4
+spawn grub 9.25 4
+spawn grub 6.75 4
+end 1.5
+>>>END
+
+<<<FILE @run/trace/v14-30
+fps 30
+room empty
+player 8 4
+spawn grub 6.75 4
+spawn grub 9.25 4
+end 1.5
+>>>END
+
+<<<FILE @run/trace/v14-60
+fps 60
+room empty
+player 8 4
+spawn grub 6.75 4
+spawn grub 9.25 4
+end 1.5
+>>>END
+
+<<<FILE @run/play/neighbor-30
+fps 30
+room empty
+player 8 4
+spawn grub 8 4
+spawn grub 9 4
+end 1
+>>>END
+
+<<<FILE @run/play/neighbor-60
+fps 60
+room empty
+player 8 4
+spawn grub 8 4
+spawn grub 9 4
+end 1
+>>>END
+
+<<<FILE @run/play/spit-30
+fps 30
+room empty
+player 8 4
+spawn spitter 13 4
+end 5
+>>>END
+
+<<<FILE @run/play/spit-60
+fps 60
+room empty
+player 8 4
+spawn spitter 13 4
+end 5
+>>>END
+
+<<<FILE @run/play/missfar-30
+fps 30
+room empty
+player 8 4
+spawn grub 10 4
+0 attack
+end 0.5
+>>>END
+
+<<<FILE @run/play/missfar-60
+fps 60
+room empty
+player 8 4
+spawn grub 10 4
+0 attack
+end 0.5
+>>>END
+
+<<<FILE @run/play/missside-30
+fps 30
+room empty
+player 8 4
+spawn grub 8 5
+0 attack
+end 0.5
+>>>END
+
+<<<FILE @run/play/missside-60
+fps 60
+room empty
+player 8 4
+spawn grub 8 5
+0 attack
+end 0.5
+>>>END

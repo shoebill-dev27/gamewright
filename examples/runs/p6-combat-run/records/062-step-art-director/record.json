@@ -1,0 +1,10 @@
+{
+ "op": "Step",
+ "role": "art-director",
+ "goal": "G-001",
+ "attempts": [],
+ "status": "error",
+ "errors": [
+  "claude run failed: You've hit your session limit · resets 12:10am (Asia/Tokyo)"
+ ]
+}

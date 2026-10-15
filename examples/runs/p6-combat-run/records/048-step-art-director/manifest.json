@@ -1,0 +1,67 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/41-studio-to-art-director.md",
+  "sha256": "ad111c28626a1b57bebfd120d7c4d04d94bc316b9883264ffa7965ddcf584c7b",
+  "bytes": 3785
+ },
+ {
+  "path": "studio/roles/art-director.md",
+  "sha256": "0a782e71d7d5344b9f3701549fa91d3ea4243ec75a6816a68dbcbf56ac5c71df",
+  "bytes": 1139
+ },
+ {
+  "path": "studio/skills/visual-review.md",
+  "sha256": "a4c0a2bc09a91a5af5765901e80bae9296517858e7d87341f54a53f006c1a263",
+  "bytes": 1066
+ },
+ {
+  "path": "design/combat-visuals.md",
+  "sha256": "da6dfdf9ba7f8a8dec270a75cd8136d21952b4c90b62cee9a1fd35818e6a8419",
+  "bytes": 6739
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "6f926dd3d101acce253f39e0f642d62749ff6675386942c23809b9c516bddd84",
+  "bytes": 17692
+ },
+ {
+  "path": "project.md#art-direction",
+  "sha256": "8ef4190e8e145d993682898fbb7fe0ca8bd81e86b7a123e263644b95ce51119b",
+  "bytes": 158
+ },
+ {
+  "path": "repo/play.py",
+  "sha256": "5416d7aec7fe6c734e9a88d88f0f74d9ac2ce28dafe257ff51ec37bab0a02636",
+  "bytes": 14346
+ },
+ {
+  "path": "goals/G-001-combat-monotony/40-qa-to-studio.md",
+  "sha256": "114829cc11c0490531c966db42cc9a7886cab99dc54edf5a69bf4f8f20bbce01",
+  "bytes": 7469
+ },
+ {
+  "path": "decisions/D-006-overlap-display-and-practice-room-manual.md",
+  "sha256": "6855ad2e98922bb21e91d4f879556408dd288bbdfb88576baeb99ebbd75a5656",
+  "bytes": 2280
+ },
+ {
+  "path": "goals/G-001-combat-monotony/39-qa-to-studio.md",
+  "sha256": "e491e0d431a3065671556e43c0014ec44758ff232a75ec9db85bf8c767b08944",
+  "bytes": 15096
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]
