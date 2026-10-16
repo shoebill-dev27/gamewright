@@ -131,9 +131,10 @@ complete or as edits:
 ```
 
 An edit block holds one or more SEARCH/REPLACE pairs, applied in order. Each SEARCH text must occur
-exactly once in the file at that point; otherwise the operation is rejected. Edits apply to the
-file as it is in the project, or to the latest version proposed in an earlier run round. One answer
-writes a file either whole or as edits, not both. The resulting file is checked like any other.
+exactly once in the file at that point; otherwise the operation is rejected. Edits always apply to
+the file as it is in the project, never to a version proposed in a run round: like a whole block,
+each answer carries every change it wants kept. One answer writes a file either whole or as edits,
+not both. The resulting file is checked like any other.
 
 The runtime rejects blocks outside the write list, artifacts that fail the Studio's structural
 rules, and Handoffs that break a recipient's policy. A rejected operation writes nothing and may be

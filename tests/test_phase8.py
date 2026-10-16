@@ -143,7 +143,9 @@ def test_a_route_may_edit_goal_md(ws, monkeypatch):
 
 
 @needs_sandbox
-def test_edits_work_in_run_rounds_and_build_on_the_proposal(tmp_path, monkeypatch):
+def test_edits_in_run_rounds_and_final_answers_apply_to_the_project_file(
+    tmp_path, monkeypatch
+):
     workspace = tmp_path / "ws"
     sr.main(["init", str(workspace), "--from", str(COMBAT)])
     name = "01-studio-to-gameplay-engineer.md"
@@ -158,13 +160,20 @@ def test_edits_work_in_run_rounds_and_build_on_the_proposal(tmp_path, monkeypatc
     speed = "GRUB_HP, GRUB_SPEED, GRUB_REACH = 2, 1.0, 0.6\n"
     shot = "SHOT_SPEED, SHOT_REACH = 1.6, 0.4\n"
     first = edit("repo/game.py", (speed, speed.replace("1.0", "0.9")))
-    second = edit("repo/game.py", (shot, shot.replace("1.6", "1.5")))
+    both = edit(
+        "repo/game.py",
+        (speed, speed.replace("1.0", "0.9")),
+        (shot, shot.replace("1.6", "1.5")),
+    )
     final = block(
         f"{G}/02-gameplay-engineer-to-studio.md",
         handoff(2, "gameplay-engineer", "studio", "Build", [], outcome="done"),
     )
     sessions = []
-    outputs = [block("@run/tests", "") + first, final + second]
+    outputs = [
+        block("@run/tests", "") + first,
+        final + both,
+    ]  # the final answer carries every change
     monkeypatch.setitem(sr.RUNTIMES, "fake", runtime(outputs, sessions))
     sr.do_step(workspace, args(goal="G-001"))
     assert (
@@ -182,3 +191,37 @@ def test_a_long_output_keeps_its_end(tmp_path):
     code, out, _ = sr.sandboxed(work, ["python3", "p.py"])
     assert code == 0 and out.rstrip().endswith("THE END") and "characters cut" in out
     assert len(out) < sr.RUN_OUTPUT_MAX + 100
+
+
+@needs_sandbox
+def test_an_edit_against_a_proposal_is_rejected_with_the_rule(tmp_path, monkeypatch):
+    workspace = tmp_path / "ws"
+    sr.main(["init", str(workspace), "--from", str(COMBAT)])
+    name = "01-studio-to-gameplay-engineer.md"
+    write(
+        workspace,
+        f"{G}/goal.md",
+        goal([(1, "Build", "gameplay-engineer", "x", "open", name)]),
+    )
+    loads = ["studio/roles/gameplay-engineer.md", "repo/game.py"]
+    write(
+        workspace,
+        f"{G}/{name}",
+        handoff(1, "studio", "gameplay-engineer", "Build", loads),
+    )
+    speed = "GRUB_HP, GRUB_SPEED, GRUB_REACH = 2, 1.0, 0.6\n"
+    proposed = speed.replace("1.0", "0.9")
+    final = block(
+        f"{G}/02-gameplay-engineer-to-studio.md",
+        handoff(2, "gameplay-engineer", "studio", "Build", [], outcome="done"),
+    )
+    outputs = [
+        block("@run/tests", "") + edit("repo/game.py", (speed, proposed)),
+        final + edit("repo/game.py", (proposed, proposed.replace("0.9", "0.8"))),
+    ]
+    monkeypatch.setitem(sr.RUNTIMES, "fake", runtime(outputs, []))
+    with pytest.raises(sr.Rejected):
+        sr.do_step(workspace, args(goal="G-001"))
+    rec = next((workspace / "records").glob("*-step-gameplay-engineer"))
+    errors = json.loads((rec / "record.json").read_text())["attempts"][1]["errors"]
+    assert any("not from a run-round proposal" in e for e in errors), errors

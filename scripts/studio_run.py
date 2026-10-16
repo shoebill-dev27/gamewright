@@ -722,7 +722,8 @@ def build_step(project, gdir, handoff):
             f"@run/<{'|'.join(runs)}>[/<label>]: instead of your final files, up to {MAX_RUNS} "
             "times: one block per run, holding its input script for a command with {script} (empty "
             f"otherwise), plus any {build}/ files you may write that the run should use. A new "
-            "executor gets the results and must write every file to keep in its final answer"
+            "executor gets the results and must write every file to keep in its final answer "
+            "(EDIT blocks always apply to the project files as written, never to a proposal)"
         )
 
     def validate(files):
@@ -1321,9 +1322,9 @@ def resolve_edits(project, packet, files):
         if path.startswith("/") or ".." in Path(path).parts:
             errors.append(f"{path}: paths must be inside the project")
             continue
-        if path in packet.proposed:
-            text = packet.proposed[path]
-        elif (project / path).is_file():
+        if (
+            project / path
+        ).is_file():  # never a run-round proposal: every answer is complete
             text = (project / path).read_text(encoding="utf-8")
         else:
             errors.append(
@@ -1348,8 +1349,8 @@ def resolve_edits(project, packet, files):
                 errors.append(
                     f"{path}: EDIT pair {number}: the SEARCH text "
                     + ("is empty" if not search.strip() else f"occurs {found} times")
-                    + "; copy it exactly from the current file, with enough lines around it to match "
-                    "exactly once"
+                    + "; copy it exactly from the project file as written (not from a run-round "
+                    "proposal), with enough lines around it to match exactly once"
                 )
                 break
             text = text.replace(search, replace, 1)
