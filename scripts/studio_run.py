@@ -177,7 +177,7 @@ def route_rows(goal_text):
         cells = [c.strip() for c in line.strip().strip("|").split("|")]
         if len(cells) == 6 and re.fullmatch(r"\d+\S*", cells[0]):
             # The file name of the incoming Handoff; tolerate links, paths and trailing notes.
-            name = re.search(r"\d\d-[\w-]+\.md", cells[5])
+            name = re.search(r"\d{2,}-[\w-]+\.md", cells[5])
             cells[5] = name.group(0) if name else cells[5]
             rows.append(
                 dict(zip(["n", "stage", "role", "skills", "status", "handoff"], cells))
@@ -254,17 +254,24 @@ def goal_dir(project, goal_id=None):
     return dirs[-1]
 
 
+def seq_of(path):
+    """The number an artifact's file name starts with (two digits, more past 99)."""
+    return int(re.match(r"\d+", Path(path).name).group())
+
+
 def goal_artifacts(gdir):
     found = []
-    for path in gdir.glob("[0-9][0-9]-*.md"):
+    for path in gdir.glob("[0-9][0-9]*-*.md"):
+        if not re.match(r"\d+-", path.name):
+            continue
         meta, _ = parse(path.read_text(encoding="utf-8"))
         seq = str(meta.get("seq", ""))
-        found.append((int(seq) if seq.isdigit() else int(path.name[:2]), path, meta))
+        found.append((int(seq) if seq.isdigit() else seq_of(path), path, meta))
     return [(p, m) for _, p, m in sorted(found, key=lambda f: f[0])]
 
 
 def next_seq(gdir):
-    return max([int(p.name[:2]) for p, _ in goal_artifacts(gdir)] + [0]) + 1
+    return max([seq_of(p) for p, _ in goal_artifacts(gdir)] + [0]) + 1
 
 
 def next_decision(project):
@@ -836,7 +843,7 @@ def unseen(gdir, seen):
     if seen is None:
         named = (gdir / "goal.md").read_text(encoding="utf-8")
         return [(p, m) for p, m in artifacts if p.name not in named]
-    return [(p, m) for p, m in artifacts if int(p.name[:2]) > seen]
+    return [(p, m) for p, m in artifacts if seq_of(p) > seen]
 
 
 def check_need(project, entries):
@@ -932,9 +939,7 @@ def build_route(project, gdir, records=None, since=None):
                     f"{rel}: keep ## Sender assessment unchanged; the runtime withholds it where needed"
                 )
         created = sorted(
-            int(Path(p).name[:2])
-            for p in files
-            if any(fnmatch.fnmatch(p, n) for n in news)
+            seq_of(p) for p in files if any(fnmatch.fnmatch(p, n) for n in news)
         )
         if created != list(range(seq, seq + len(created))):
             errors.append(
@@ -1655,7 +1660,7 @@ def execute(ws, packet, validate, args, role=None):
             if packet.op in STUDIO_OPS and goal_file:
                 gdir = goal_path.parent
                 record["seen_through_seq"] = max(
-                    [int(a.name[:2]) for a, _ in goal_artifacts(gdir)] + [0]
+                    [seq_of(a) for a, _ in goal_artifacts(gdir)] + [0]
                 )
                 append_log(gdir, rec.name, before)
             save_record(rec, record)

@@ -12,7 +12,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from test_phase2 import G, args, block, goal, handoff, sr, write, ws  # noqa: E402,F401
-from test_phase3 import QA_OPEN, runtime, start  # noqa: E402
+from test_phase3 import QA_LOAD, QA_OPEN, runtime, start  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 COMBAT = ROOT / "examples" / "fixtures" / "lantern-depths-combat"
@@ -154,6 +154,25 @@ def test_a_route_may_edit_goal_md(ws, monkeypatch):
     sr.do_route(ws, args(goal="G-001", since=1))
     text = (ws / "project" / G / "goal.md").read_text()
     assert "status: done" in text and "| done | 01-studio-to-qa.md |" in text
+
+
+def test_handoff_numbers_go_past_99(ws, monkeypatch):
+    first = ("98-studio-to-qa.md", handoff(98, "studio", "qa", "Observe", QA_LOAD))
+    start(ws, first, [(1, "Observe", "qa", "reproduce-defect", "open", first[0])])
+    write(ws, f"{G}/99-qa-to-studio.md", handoff(99, "qa", "studio", "Observe", []))
+    rows = [
+        (1, "Observe", "qa", "reproduce-defect", "done", first[0]),
+        (2, "Verify", "qa", "verify-build", "open", "100-studio-to-qa.md"),
+    ]
+    answer = block(f"{G}/goal.md", goal(rows)) + block(
+        f"{G}/100-studio-to-qa.md", handoff(100, "studio", "qa", "Verify", QA_LOAD)
+    )
+    monkeypatch.setitem(sr.RUNTIMES, "fake", runtime([answer], []))
+    sr.do_route(ws, args(goal="G-001", since=98))
+    gdir = ws / "project" / G
+    assert [sr.seq_of(p) for p, _ in sr.goal_artifacts(gdir)] == [98, 99, 100]
+    assert sr.next_seq(gdir) == 101
+    assert [p.name for p, _ in sr.unseen(gdir, 99)] == ["100-studio-to-qa.md"]
 
 
 @needs_sandbox
