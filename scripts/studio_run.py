@@ -1267,14 +1267,79 @@ RUNTIMES = {"claude": run_claude, "codex": run_codex}
 # --- Execution ---------------------------------------------------------------------------------
 
 
+EDIT_BLOCK = re.compile(r"^<<<EDIT (\S+)[ \t]*\n(.*?)^>>>END[ \t]*$", re.M | re.S)
+EDIT_PAIR = re.compile(
+    r"^<<<<<<< SEARCH[ \t]*\n(.*?)^=======[ \t]*\n(.*?)^>>>>>>> REPLACE[ \t]*$",
+    re.M | re.S,
+)
+
+
+class Edits(list):
+    """SEARCH/REPLACE pairs for one existing file, applied in order (see resolve_edits)."""
+
+    mixed = False  # the same answer also wrote the file whole
+    malformed = False  # a pair whose markers are not on lines of their own
+
+
 def parse_output(text):
     files = {m.group(1): m.group(2).rstrip() + "\n" for m in BLOCK.finditer(text)}
+    for m in EDIT_BLOCK.finditer(text):
+        edits = Edits(EDIT_PAIR.findall(m.group(2)))
+        edits.mixed = m.group(1) in files
+        edits.malformed = m.group(2).count("<<<<<<< SEARCH") != len(edits)
+        files[m.group(1)] = edits
     bare = text.strip().splitlines()
     if (
         not files and bare and bare[0].strip() == "@need"
     ):  # tolerate an unwrapped context request
         files["@need"] = "\n".join(bare[1:]) + "\n"
     return files
+
+
+def resolve_edits(project, packet, files):
+    """Turn every EDIT block into the whole file it produces, in place; return the errors."""
+    errors = []
+    for path, edits in list(files.items()):
+        if not isinstance(edits, Edits):
+            continue
+        del files[path]
+        if edits.mixed:
+            errors.append(
+                f"{path}: write a file either whole or as EDIT blocks, not both"
+            )
+            continue
+        if path.startswith("/") or ".." in Path(path).parts:
+            errors.append(f"{path}: paths must be inside the project")
+            continue
+        if path in packet.proposed:
+            text = packet.proposed[path]
+        elif (project / path).is_file():
+            text = (project / path).read_text(encoding="utf-8")
+        else:
+            errors.append(
+                f"{path}: an EDIT block changes an existing file; write a new file as a whole <<<FILE block"
+            )
+            continue
+        if not edits or edits.malformed:
+            errors.append(
+                f"{path}: an EDIT block needs <<<<<<< SEARCH / ======= / >>>>>>> REPLACE pairs, each "
+                "marker on a line of its own"
+            )
+            continue
+        for number, (search, replace) in enumerate(edits, 1):
+            found = text.count(search) if search.strip() else 0
+            if found != 1:
+                errors.append(
+                    f"{path}: EDIT pair {number}: the SEARCH text "
+                    + ("is empty" if not search.strip() else f"occurs {found} times")
+                    + "; copy it exactly from the current file, with enough lines around it to match "
+                    "exactly once"
+                )
+                break
+            text = text.replace(search, replace, 1)
+        else:
+            files[path] = text if text.endswith("\n") else text + "\n"
+    return errors
 
 
 # --- Build runs (sandboxed) -------------------------------------------------------------------
@@ -1326,10 +1391,12 @@ def sandboxed(work, argv):
             )
             + f"\n[stopped after {RUN_TIMEOUT} s]"
         )
-    if len(output) > RUN_OUTPUT_MAX:
-        output = (
-            output[:RUN_OUTPUT_MAX] + f"\n[output cut at {RUN_OUTPUT_MAX} characters]"
-        )
+    if (
+        len(output) > RUN_OUTPUT_MAX
+    ):  # keep the start and the end, where results usually are
+        head, tail = RUN_OUTPUT_MAX * 7 // 10, RUN_OUTPUT_MAX * 3 // 10
+        cut = len(output) - head - tail
+        output = output[:head] + f"\n[... {cut} characters cut ...]\n" + output[-tail:]
     return code, output, round(time.time() - started, 1)
 
 
@@ -1477,9 +1544,12 @@ def execute(ws, packet, validate, args, role=None):
         text = result.pop("text")
         (rec / f"output-attempt{attempt}.txt").write_text(text, encoding="utf-8")
         files = parse_output(text)
+        edit_errors = resolve_edits(ws / "project", packet, files)
         need = None
         runs = [p for p in files if p.startswith("@run/")]
-        if runs and "@need" not in files:
+        if edit_errors:
+            errors = edit_errors
+        elif runs and "@need" not in files:
             errors = check_runs(packet, files)
         elif "@need" in files:
             if packet.allow_need:

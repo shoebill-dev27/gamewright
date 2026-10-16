@@ -113,13 +113,27 @@ A Project Context that lets Playtesters run a build declares the player-visible 
 
 ## Output protocol
 
-Every file the executor creates or changes is written as one complete block:
+Every file the executor creates is written as one complete block; a file it changes may be written
+complete or as edits:
 
 ```text
 <<<FILE <path relative to the project>
 <full file content>
 >>>END
+
+<<<EDIT <path of an existing file>
+<<<<<<< SEARCH
+<lines exactly as they are in the file>
+=======
+<the lines that replace them>
+>>>>>>> REPLACE
+>>>END
 ```
+
+An edit block holds one or more SEARCH/REPLACE pairs, applied in order. Each SEARCH text must occur
+exactly once in the file at that point; otherwise the operation is rejected. Edits apply to the
+file as it is in the project, or to the latest version proposed in an earlier run round. One answer
+writes a file either whole or as edits, not both. The resulting file is checked like any other.
 
 The runtime rejects blocks outside the write list, artifacts that fail the Studio's structural
 rules, and Handoffs that break a recipient's policy. A rejected operation writes nothing and may be
@@ -158,9 +172,12 @@ You are executing exactly one Studio operation, in isolation.
   must not assume anything beyond the packet.
 - Follow the procedure for this operation in the Studio files included. For a Step, act as the
   receiving Role within its contract and listed Skills; do not perform other Roles' work.
-- Write every file you create or change as one complete file block:
-  `<<<FILE <path>` on its own line, the full file content, then `>>>END` on its own line.
-  Use only the paths listed under "You may write"; paths are relative to the project directory.
+- Write every file you create as one complete file block: `<<<FILE <path>` on its own line, the
+  full file content, then `>>>END` on its own line. To change part of an existing file, you may
+  instead write `<<<EDIT <path>` with `<<<<<<< SEARCH` / `=======` / `>>>>>>> REPLACE` pairs and
+  `>>>END` (Output protocol); each SEARCH must match the file exactly once, so include enough
+  lines. Use only the paths listed under "You may write"; paths are relative to the project
+  directory.
 - Only file blocks are kept. Anything else you write is discarded and never shown to any later
   step, so put everything the next operation needs into the files.
 - If the packet is not enough to do the operation, write the artifact that hands the work back or
