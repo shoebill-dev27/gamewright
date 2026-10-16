@@ -361,7 +361,11 @@ def check_artifact(project, name, text, request=None, full=True, pending=None):
                 hint = f"existing files there: {', '.join(nearby) or 'none'}"
             errors.append(f"{name}: Load entry missing: {entry} ({hint})")
         elif anchor and anchor not in {slug(h) for h in headings(content)}:
-            errors.append(f"{name}: Load section missing: {entry}")
+            have = ", ".join(f"#{slug(h)}" for h in headings(content)) or "none"
+            errors.append(
+                f"{name}: Load section missing: {entry} (only `## ` headings can be loaded as "
+                f"sections; this file has: {have}; or load the whole file)"
+            )
     if f"studio/roles/{to}.md" not in loads:
         errors.append(f"{name}: Load must include studio/roles/{to}.md")
     policy = role_policy(to)
