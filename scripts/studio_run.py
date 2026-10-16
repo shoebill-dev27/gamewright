@@ -1283,10 +1283,20 @@ class Edits(list):
 
 def parse_output(text):
     files = {m.group(1): m.group(2).rstrip() + "\n" for m in BLOCK.finditer(text)}
+    for path in [p for p, c in files.items() if c.startswith("<<<EDIT ")]:
+        del files[
+            path
+        ]  # an EDIT block wrapped in a FILE block: the EDIT block is what was meant
     for m in EDIT_BLOCK.finditer(text):
-        edits = Edits(EDIT_PAIR.findall(m.group(2)))
+        body = m.group(2)
+        pairs = EDIT_PAIR.findall(body)
+        if (
+            body.count("<<<<<<< SEARCH") == len(pairs) + 1
+        ):  # a forgotten last REPLACE marker
+            pairs = EDIT_PAIR.findall(body.rstrip("\n") + "\n>>>>>>> REPLACE\n")
+        edits = Edits(pairs)
         edits.mixed = m.group(1) in files
-        edits.malformed = m.group(2).count("<<<<<<< SEARCH") != len(edits)
+        edits.malformed = body.count("<<<<<<< SEARCH") != len(edits)
         files[m.group(1)] = edits
     bare = text.strip().splitlines()
     if (
@@ -1328,6 +1338,12 @@ def resolve_edits(project, packet, files):
             continue
         for number, (search, replace) in enumerate(edits, 1):
             found = text.count(search) if search.strip() else 0
+            if found == 0 and search.endswith("\n") and text.count(search[:-1]) == 1:
+                # SEARCH holds part of a line: match it without its line break
+                search, replace = search[:-1], (
+                    replace[:-1] if replace.endswith("\n") else replace
+                )
+                found = 1
             if found != 1:
                 errors.append(
                     f"{path}: EDIT pair {number}: the SEARCH text "

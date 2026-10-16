@@ -716,17 +716,19 @@ def test_recorded_packets_match_their_manifests_and_load_lists():
 
 @pytest.mark.skipif(not run_records(), reason="no recorded runs")
 def test_recorded_runs_use_a_fresh_isolated_executor_per_operation():
-    sessions = []
+    sessions = {}  # per run: a run continued from a copy of another repeats its records
     for path in run_records():
         record = json.loads(path.read_text())
+        run = sessions.setdefault(path.parent.parent.parent.name, [])
         for attempt in record.get("attempts", []):
-            sessions.append(attempt["session_id"])
+            run.append(attempt["session_id"])
             assert attempt["tool_uses"] == [] and attempt["mcp_servers"] == []
             if attempt["runtime"] == "claude":
                 assert attempt["tools"] == []
         if "of" in record:
-            sessions.append(record["session_id"])
-    assert len(sessions) == len(set(sessions)), "a session identity was reused"
+            run.append(record["session_id"])
+    for name, run in sessions.items():
+        assert len(run) == len(set(run)), f"{name}: a session identity was reused"
 
 
 @pytest.mark.skipif(not run_records(), reason="no recorded runs")

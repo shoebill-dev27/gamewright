@@ -101,6 +101,21 @@ def test_bad_edits_are_rejected_and_say_how_to_fix_them(ws, monkeypatch, answer,
     assert (ws / "project" / "design" / "combat.md").read_text() == before
 
 
+def test_common_slips_are_read_as_meant(ws, monkeypatch):
+    path = ws / "project" / "design" / "combat.md"
+    before = path.read_text()
+    partial = "- **Attack** (one button): a short swipe"  # the start of a line
+    answer = (
+        DONE
+        + f"<<<FILE design/combat.md\n"  # wrapped in a FILE block
+        + "<<<EDIT design/combat.md\n<<<<<<< SEARCH\n"
+        + partial
+        + "\n=======\n- **Attack** (one button): a quick swipe\n>>>END\n"  # no REPLACE marker
+    )
+    designer_step(ws, monkeypatch, answer)
+    assert path.read_text() == before.replace("a short swipe", "a quick swipe")
+
+
 def test_an_edit_is_checked_against_the_write_list(ws, monkeypatch):
     start(ws, QA_OPEN, [(1, "Observe", "qa", "reproduce-defect", "open", QA_OPEN[0])])
     answer = block(
