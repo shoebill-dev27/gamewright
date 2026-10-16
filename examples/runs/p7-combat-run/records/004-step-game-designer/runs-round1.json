@@ -1,0 +1,34 @@
+[
+ {
+  "run": "@run/bots/room1",
+  "command": "python3 bots.py {script}",
+  "script": "room 1\n",
+  "exit": 1,
+  "seconds": 0.0,
+  "output": "script line 1: cannot read 'room 1'\nbots script lines (all optional): bots camper,walker,dodger | rooms 1-5 (or 1,3) | fps 30|60 | limit <seconds per room>\n"
+ },
+ {
+  "run": "@run/bots/room3",
+  "command": "python3 bots.py {script}",
+  "script": "room 3\n",
+  "exit": 1,
+  "seconds": 0.0,
+  "output": "script line 1: cannot read 'room 3'\nbots script lines (all optional): bots camper,walker,dodger | rooms 1-5 (or 1,3) | fps 30|60 | limit <seconds per room>\n"
+ },
+ {
+  "run": "@run/bots/room4",
+  "command": "python3 bots.py {script}",
+  "script": "room 4\n",
+  "exit": 1,
+  "seconds": 0.0,
+  "output": "script line 1: cannot read 'room 4'\nbots script lines (all optional): bots camper,walker,dodger | rooms 1-5 (or 1,3) | fps 30|60 | limit <seconds per room>\n"
+ },
+ {
+  "run": "@run/bots/room5",
+  "command": "python3 bots.py {script}",
+  "script": "room 5\n",
+  "exit": 1,
+  "seconds": 0.0,
+  "output": "script line 1: cannot read 'room 5'\nbots script lines (all optional): bots camper,walker,dodger | rooms 1-5 (or 1,3) | fps 30|60 | limit <seconds per room>\n"
+ }
+]

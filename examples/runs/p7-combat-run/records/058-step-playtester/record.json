@@ -1,0 +1,163 @@
+{
+ "op": "Step",
+ "role": "playtester",
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "d301ff4e-7f9f-4fb9-a959-c876b09b59fa",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 6382,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 867,
+    "output_tokens_details": {
+     "thinking_tokens": 352
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 6382,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 867,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 6382,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 6382
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.034201999999999996,
+   "attempt": 1,
+   "started": "2026-10-16T17:33:07",
+   "seconds": 10.2,
+   "errors": [],
+   "runs": [
+    "@run/play/room1-fast",
+    "@run/play/room2-slow",
+    "@run/play/room3-30fps"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "66191537-1f73-464b-9c40-a9bf148dfae4",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 23456,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 985,
+    "output_tokens_details": {
+     "thinking_tokens": 450
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 23456,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 985,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 23456,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 23456
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.103678,
+   "attempt": 2,
+   "started": "2026-10-16T17:33:17",
+   "seconds": 12.2,
+   "errors": [],
+   "runs": [
+    "@run/play/room2-fast",
+    "@run/play/room4-style",
+    "@run/play/room5-slow"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "50e057da-d7ea-47b5-ba91-80b00d4b659f",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 41615,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 4687,
+    "output_tokens_details": {
+     "thinking_tokens": 1366
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 41615,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 4687,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 41615,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 41615
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.213334,
+   "attempt": 3,
+   "started": "2026-10-16T17:33:30",
+   "seconds": 45.4,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-combat-monotony/63-playtester-to-studio.md": "15692fcd5a0e8d4c5b182888d38546791e59baa6194ea467ecb6d254ee9be140"
+ },
+ "decision": {}
+}

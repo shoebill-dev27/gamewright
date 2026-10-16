@@ -1,0 +1,18 @@
+{
+ "op": "Run",
+ "goal": "G-001",
+ "operations": [
+  "027-route",
+  "028-step-game-designer",
+  "029-step-game-designer",
+  "030-step-qa",
+  "031-route",
+  "032-step-game-designer",
+  "033-step-qa",
+  "034-route"
+ ],
+ "stop_reason": "no progress: game-designer would be opened a 4th time in this run",
+ "status": "active",
+ "owner_reads": null,
+ "next": "run examples/runs/p7-combat-run"
+}

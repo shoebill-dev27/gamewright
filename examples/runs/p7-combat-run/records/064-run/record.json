@@ -1,0 +1,24 @@
+{
+ "op": "Run",
+ "goal": "G-001",
+ "operations": [
+  "050-step-playtester",
+  "051-step-game-designer",
+  "052-route",
+  "053-step-qa",
+  "054-route",
+  "055-step-game-designer",
+  "056-step-game-director",
+  "057-route",
+  "058-step-playtester",
+  "059-step-qa",
+  "060-route",
+  "061-step-game-director",
+  "062-step-game-designer",
+  "063-route"
+ ],
+ "stop_reason": "no progress: game-designer would be opened a 4th time in this run",
+ "status": "active",
+ "owner_reads": null,
+ "next": "run examples/runs/p7-combat-run"
+}

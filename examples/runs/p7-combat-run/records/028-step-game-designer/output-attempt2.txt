@@ -1,0 +1,310 @@
+I've updated `design/combat.md`, added D-003 and written the handoff to `studio`. I did not edit D-002, because it is not on my write list, so the lunge-band figures are recorded in a follow-up Decision. No Build or re-Verify is needed.
+
+<<<FILE design/combat.md
+# Combat design (build 0.5, specified in G-001 step 07, rulings in steps 14, 22 and 30)
+
+Status: Build 0.5 implements the Grub, Spitter and room changes below. Step 14 settled criteria 13–16 and the five spec gaps (marked "step 14" in the text). Step 22 settled the contact-edge graze, the shot cap, the walker margin and which document governs each text/visual contradiction (marked "step 22"). Step 30 clarified the wording at exactly the reach and recorded the measured lunge band (marked "step 30"; wording only, see D-003). The player kit is unchanged from 0.4. No build change results from steps 22 or 30.
+
+## Intent
+
+Every threat is visible before it can hurt, and every threat has an answer other than "stand and swing". Walking straight into a fight without reading it should cost hearts. Reading the cue and using a sidestep or the dash should cost fewer. Grub rooms should differ from each other, and the dash should be worth using.
+
+## Player kit (unchanged)
+
+- **Attack** (one button): a short swipe in the facing direction, reach 1.5 tiles. 1 damage. 0.35 s recovery.
+- **Dash**: 4 tiles over 0.25 s. The player is invulnerable for the full dash duration. Cooldown 0.6 s. An attack pressed during a dash is queued and fires when the dash ends.
+- **Getting hit**: 1 heart of damage, 0.3 s hit-stun (no input), then invulnerability until 0.8 s after the hit.
+- Player speed 4 tiles/s. 3 hearts per room. No new inputs (D-001).
+
+## Timing rule (applies to everything below)
+
+All durations are in seconds and run on accumulated time, not frame counts, so 30 and 60 FPS behave the same. Per-frame travel of a lunging grub (at most 8/30 = 0.27 tile) and of a shot (at most 3.0/30 = 0.1 tile) stays below the contact reach (0.6 and 0.4), so nothing tunnels through the player at 30 FPS.
+
+### Contact sampling rule (step 22, accepted limitation, see D-002; step 30 wording, see D-003)
+
+- Contact is a distance check made once per frame, after that frame's movement. A distance of exactly the reach or less counts as contact (`distance <= reach`). Reach: shot 0.4 tile, grub lunge 0.6 tile. There is no swept test between frames.
+- Consequence: when a path passes the player's center at a distance (the "lateral miss") very close to the reach, whether a frame lands close enough to count depends on the frame phase, so 30 and 60 FPS can differ in hit or miss for identical input. This is accepted for the text build.
+- **Step 30 (the band, defined without gaps).** The band is the range of lateral miss that is more than reach − tolerance and at most the reach, the reach itself included:
+  - Shots: more than 0.39 and up to and including 0.40 tile. QA derived about 0.003 tile of actual disagreement.
+  - Lunges: more than 0.57 and up to and including 0.60 tile. Measured by QA (step 24, five probes, not a full scan): a hit is guaranteed up to about 0.585 at 30 FPS, so the disagreement band is about 0.015 tile at 30 FPS and about 0.004 tile at 60 FPS. The rates disagreed only at 0.590. See D-003.
+- Outside the band the result must be the same at both rates and must follow the geometry: a lateral miss of reach − tolerance or less always hits (if the player is not invulnerable), and a lateral miss greater than the reach never hits.
+- **Step 30 (exactly the reach).** A lateral miss of exactly the reach (0.400 shot, 0.600 lunge) is inside the band. Hit or miss are both accepted at either rate, and the result may differ between 30 and 60 FPS. It is not a guaranteed miss, and the `<=` in the build stays.
+- The band changes only hit or miss. It must never change timing, cue, message or phase of anything.
+
+## Enemies
+
+### Grub (A): three-phase attack with a telegraph
+
+Phases:
+
+1. **Approach.** Walks straight at the player at the grub's speed. Bites on contact only during the lunge (see below). Walking alone does not damage. Replaces the old "contact bite while walking".
+2. **Wind-up** (starts when the player is within 2.0 tiles and no other grub is in wind-up or lunge).
+   - The grub stops.
+   - The aim direction is locked to the player's position at the start of the wind-up.
+   - **Step 14:** if the grub is exactly on the player (distance 0), the locked direction is right (+x). The cue and line are shown as usual.
+   - Visible cue for the whole wind-up duration: the grub is tinted saturated orange-red (how it pulses or flashes is presentation, see below) and a line or lane shows the lunge path (length equal to the lunge distance).
+   - **Step 22:** the danger zone of a lunge is 1.2 tiles wide (0.6 either side of the locked line) and 2.4 tiles long. A graphical cue must show the lane at that real width, so the player can see that a 1-tile sidestep clears it. The text view draws a one-cell `~` line; that is the text build's presentation of the same lane and stays.
+   - Text view: message "a grub rears back" when it starts.
+   - Cue visible at least 0.5 s before the hit for the standard grub. The player has time to step out of the line, because player speed is 4 tiles/s and the line is 0.6 tiles to either side.
+3. **Lunge.** Moves along the locked direction at lunge speed for the lunge time (distance 2.4 tiles). It stops early on contact with the player. If the player is inside reach 0.6 and not invulnerable, it deals 1 damage (once per lunge). Contact follows the sampling rule above.
+4. **Recovery.** The grub is stationary and unthreatening for the recovery time, then returns to Approach. This is the safe window to swipe it.
+
+Rules:
+
+- A swipe that damages a grub in wind-up cancels the wind-up. The grub is staggered (no action) for 0.4 s, then returns to Approach.
+- **Step 14:** a swipe that kills a grub does not stagger it. The grub is simply defeated (in wind-up too).
+- **Step 14:** a grub that is hit but not killed during Approach, Lunge, Recovery or Stagger continues its phase unchanged. Only a hit during wind-up changes its phase, and a hit during stagger does not extend the stagger.
+- At most one grub is in wind-up or lunge at a time. Others keep walking and wait. This prevents simultaneous unavoidable lunges.
+- The player's dash invulnerability stops the damage. The lunge is not cancelled. The grub finishes the lunge, wherever it ends, then does its recovery.
+- Hurt-invulnerability (0.8 s) also stops the damage the same way.
+- A lunge is clamped at the room edge like all movement.
+- If the player is dead or the room is cleared, grubs stop.
+- **Step 22 (what is rule and what is presentation):** the rule is that the cue is visible during the whole wind-up, shows the lunge lane at its true size, and disappears at once when the wind-up is cancelled or the grub is killed. Whether the lane stays, fades or is removed during the lunge itself, and whether the tint flashes or holds a slight pulse (no faster than 3 Hz), is presentation owned by `art-director`. The text view removes the line when the lunge starts, and that is fine.
+
+Consequence worth knowing when reading bot results: a wind-up always comes before the first contact. A player who ignores the cue and does not move takes one lunge per grub (1 heart each), then gets the recovery window to swipe it.
+
+Parameters (Grub is one type, with parameter sets only; same behavior and same code path):
+
+| Variant | Mark (text) | HP | Walk speed (tiles/s) | Wind-up (s) | Lunge speed (tiles/s) / time (s) | Recovery (s) |
+|---|---|---|---|---|---|---|
+| Standard grub | `g` | 2 | 1.0 | 0.5 | 8.0 / 0.3 | 0.8 |
+| Runner grub | `r` | 1 | 1.6 | 0.35 | 8.0 / 0.3 | 0.6 |
+| Brute grub | `G` | 4 | 0.7 | 0.7 | 8.0 / 0.3 | 1.2 |
+
+Tuning range allowed to engineering and QA without a new spec (if bots or play need it): wind-up 0.35–0.7 s for any variant. Never below 0.35 s.
+
+### Spitter (B): staggered, with an aim cue
+
+- **Aim cue.** 0.6 s before each shot the spitter glows saturated orange-red, growing brighter. The shot direction is locked to the player's position at the start of the cue. The direction is shown as a thin orange-red line for the 0.6 s of the cue. Text view: "a spitter takes aim" at the start of the cue and "a spitter spits" at the shot. The shot is then fired along the locked line.
+- **Step 22 (glow start):** the rule is that the cue is noticeable from its first frame, the line is at full brightness from the first frame, and only the glow ramps. The starting level of the ramp is presentation. The text view shows 0% in its `cue:` line and stays; a graphical build uses a floor of at least 30% (as in the visual spec). This changes no timing.
+- **Shot.** Speed 3.0 tiles/s (was 1.6). It travels in a straight line, does 1 damage, and disappears at the room edge, on contact with the player, or after 5 s. Dash invulnerability and hurt-invulnerability stop the damage as now. Contact follows the sampling rule above.
+- **Interval and stagger.** Fire interval 2.4 s (was 2.0 s). The first shot of the k-th spitter in room order (k = 0, 1, 2…) is at 1.8 s + 0.8 s × k. After that each spitter fires every 2.4 s after its previous shot. With three spitters, shots are 0.8 s apart.
+- **Spitter index (step 14).** k counts only spitters, in spawn order (room table order; the practice room uses `spawn` order). A defeated spitter does not renumber the others.
+- **Cap (step 22: a limit on cue starts).** A spitter may start a cue only if fewer than 3 shots are in flight at that moment; otherwise it waits 0.2 s and checks again. The cap is not rechecked when a shot fires. So shots from cues that started earlier may briefly take the number in flight above 3. At most, the count at a check is 2, plus the checking spitter's own shot, plus one for each other spitter already in a cue: never more than 2 + the number of living spitters. In every real room (at most 3 spitters, rooms 3–5) the count stays at 3 or fewer (QA: room 3 stays at 3 or fewer over 12 s). Only a practice room with four or more spitters can go above 3 (QA saw 5 with four spitters). This is intended. The reason: the cue is the telegraph, and refusing to fire a shot whose cue is already showing would break "the cue always ends in the shot" and make cues lie.
+- **Cap delay (step 14).** The 0.2 s wait starts at the moment the cue would have started, and repeats until a slot is free. The delay moves that shot later, and the spitter's following shots keep 2.4 s from its actual shot (the delay carries forward). The first-shot times in criterion 11 are not affected, because the cap is not reached by then.
+- **HP** 2, stationary, and can be swiped at any time. No change.
+
+## Rooms (C: light pass, existing enemies and parameter variants only)
+
+5 rooms, 3–6 enemies each. A room ends when all enemies are defeated. Positions are (x, y) in tiles.
+
+| Room | Contents (changes from 0.4 in bold) | Purpose |
+|---|---|---|
+| 1 | Standard grubs at (3,4), (15,4), (8,0) (unchanged) | Teach the lunge cue against one grub at a time |
+| 2 | **Runner (2,1), Runner (1,8), Brute (15,7), Standard (14,0)** | Different from room 1: fast fragile ones plus a slow tough one, from four corners |
+| 3 | Spitters at (2,1), (14,7), (2,7) (unchanged), with the new stagger and cue | Learn the aim cue |
+| 4 | **Runner (1,4)**, Standard (0,1), Spitters (15,0), (15,8) | Grub lunges under fire |
+| 5 | Standard (1,1), Standard (0,6), **Brute (4,8)**, Spitters (15,0), (15,8) | Hardest, most threats at once |
+
+Rooms 4–5 were read from the room data in the repo; no human has seen them yet.
+
+## Acceptance criteria
+
+### Verifiable (QA, with `play` and `bots`)
+
+Scripts for 1–11 use the practice room (`room empty`, `spawn`, `player`), so they work at both `fps 30` and `fps 60`. Every check holds at BOTH rates.
+
+Grub:
+
+1. **Telegraph.** A standard grub within 2.0 tiles of a stationary player shows the wind-up message and the cue. The hit lands no earlier than 0.5 s after the cue first appears, ±1 frame.
+2. **Sidestep works.** A player who moves 1 tile sideways (up or down relative to the grub's line) within 0.4 s after the cue appears takes no damage from that lunge.
+3. **Dash works.** A dash started at any point from the cue until 0.1 s before the lunge ends takes no damage, and the dash is not "ignored".
+4. **Standing still is punished.** A player who does nothing for 3 s next to a standard grub loses at least 1 heart.
+5. **Safe window.** During recovery the grub does not damage the player on contact.
+6. **Cancel.** Two swipes kill a standard grub. A swipe that lands during wind-up stops the lunge. A swipe that kills a grub in wind-up kills it with no stagger and no lunge.
+7. **One at a time.** With 3 grubs close together, no two grubs are in wind-up or lunge at the same moment.
+8. **Variants.** Runner dies to one swipe, brute to four. Marks `r` and `G` appear in the text view and are listed in the manual.
+
+Spitter:
+
+9. **Cue.** The cue and message appear 0.6 s ±1 frame before each shot, and the shot is fired along the locked line.
+10. **Dodge works.** A player who moves aside by 1 tile within 0.4 s after the cue appears is not hit by that shot.
+11. **Stagger and cap (step 22 wording).** In room 3 the first shots are at 1.8, 2.6 and 3.4 s ±1 frame. In rooms 1–5 never more than 3 shots in flight. In a practice room with four or more spitters, a cue may start only when fewer than 3 shots are in flight, and the number in flight never exceeds 2 + the number of living spitters.
+
+Contact edge (new in step 22, wording clarified in step 30):
+
+17. **Contact edge.** At each of 30 and 60 FPS, with the reproduction script from handoff 20 (`room empty`, spitter at a chosen position, player at (8, 3.6)) and positions chosen from the trace so that the shot's lateral miss is known:
+    - a. Shot with a lateral miss of 0.39 tile or less: hit at both rates.
+    - b. Shot with a lateral miss of more than 0.40 tile: no hit at both rates. (Step 30: exactly 0.40 is not covered here, it is in the band, see d.)
+    - c. Lunge with a lateral miss of 0.57 tile or less: hit at both rates; of more than 0.60 tile: no hit at both rates. One scripted grub case at each side of the band is enough.
+    - d. The band is more than 0.39 up to and including 0.40 tile for shots, and more than 0.57 up to and including 0.60 tile for lunges. Inside the band a difference between 30 and 60 FPS is accepted and is not a build defect, and this includes a miss of exactly the reach (step 30). In the band, hit time and hearts lost may differ only by the hit itself. If QA finds that the lunge band is wider than 0.03 tile, it reports back to `game-designer` (it is a tuning or sampling question, not a failure).
+
+Rooms and bots (step 14 rulings). Each bot result is a balance proxy for a player-observable behavior, stated per criterion. The bots are `walker` (a player who walks up, swipes, never dashes and ignores wind-up and aim cues), `dodger` (a player who reads cues, swipes or dodges, and uses the dash) and `camper` (a player who stays put and swings).
+
+12. **Rooms differ.** The contents match the table above.
+13. **Cue-ignoring vs cue-reading, spitter rooms.** Protects: reading the aim cue is clearly better than ignoring it, and ignoring it is costly but not hopeless. At each rate separately, in rooms 3–5 summed: the walker loses at least 3 and at most 6 hearts and clears at least 2 of the 3 rooms. The dodger loses at most half of the walker's total and clears 3/3. The camper clears fewer of rooms 3–5 than the walker.
+    - **Step 22:** the numbers stay as they are. Observed margin: walker 4 lost / 2 cleared at 30 FPS, 6 lost / 3 cleared at 60 FPS (exactly the upper limit). The bots are deterministic, so this is stable for the current build. A later change that moves the 60 FPS walker to 7 hearts is a tuning question for the designer, not a build defect, and is reported back and not "fixed" in the build.
+14. **Cue-ignoring vs cue-reading, grub rooms (ruled in step 14).** Protects: ignoring the lunge cue costs hearts, and reading it makes the grub rooms safe. At each rate separately, in rooms 1–2 summed: the walker loses at least 1 heart; the dodger loses at most 1 heart and clears both rooms. The walker is NOT required to clear room 1 or room 2. Reason: the bot never adapts, so it takes one lunge per grub, and room 1 has three grubs for 3 hearts. A human who is hit by the first lunge can learn the cue from it (see experience signals). Making a non-adapting player always survive room 1 would remove the cost that "ignoring the cue costs hearts" asks for. Observed in build 0.5: walker loses 3 in room 1 (not cleared) and 2 in room 2 (cleared); dodger 0 lost, both cleared. No build or bot change is required.
+15. **Dash is used.** Protects: the dash is worth using. The dodger uses at least 1 dash in each of rooms 3–5, at each rate.
+16. **Frame-rate independence (ruled in step 14, 16e amended in step 22).** Protects: the same fight plays the same at 30 and 60 FPS.
+    - a. Criteria 1–12 and 17 hold at both rates (timings within ±1 frame, as written).
+    - b. Criteria 13–15 are each evaluated at 30 FPS and at 60 FPS, and must hold at both.
+    - c. The dodger must agree between rates: same set of cleared rooms, and hearts lost per room differing by at most 1 (observed: identical, 0 lost, 5/5).
+    - d. The walker is NOT required to produce the same per-room numbers at 30 and 60 FPS. Reason: its decisions run on a 0.15 s grid (4.5 frames at 30, 9 at 60), so a one-frame difference in when it steps aside can decide whether a 1-tile sidestep clears a shot. That is a bot sensitivity and not a player-visible difference.
+    - e. This ruling does not excuse a build defect. QA must still confirm the walker's differences come from bot timing. A difference is a build defect if the same decision at the same game time (±1 frame) from the same positions gives a different outcome, or if any of 1–11 or 17 fails at one rate. **Step 22:** a different hit or miss that is caused only by the contact sampling band (criterion 17d, lateral miss inside the band, including exactly the reach) is NOT a build defect. QA's step 20 result stands: the walker differences come from bot timing (an exact-tie float at the bot's 2.5 threshold in room 1, and diverging positions in room 3), and the graze is accepted. 16e therefore passes.
+
+**Dependency note (step 14):** the earlier condition on bot behavior at 30 and 60 FPS is replaced by 16 c–e. The bots now decide on a 0.15 s time grid and the dodger reads cues; no further bot change is needed for 13–16 as written.
+
+### Experience signals (playtest and Review, not for the Playtester's handoff)
+
+- A player can say, before it hits, that a grub is about to lunge and from where.
+- A player who is hit by the first lunge in room 1 can say what the warning looked like and avoids or cancels the second one.
+- A player can say why they got hit by a shot ("I didn't move") rather than "it came out of nowhere".
+- Rooms 1 and 2 are described as different fights.
+- The dash is used on purpose at least once in a room, not only in panic.
+
+## Edge cases
+
+- Dash through a wind-up or lunge: see Grub rules. The grub finishes its phase in place.
+- Two shots arriving together: the player takes at most 1 damage per hit-invulnerability window as now.
+- Player dies mid-lunge or mid-cue: enemies stop (existing end-of-session handling).
+- Last enemy killed during its wind-up: room cleared as usual.
+- A spitter killed during its cue cancels the shot. Shots already in flight continue.
+- A spitter at the player's exact position (distance 0): no aim line and no shot (as now, no shot when dist is 0).
+- A grub at the player's exact position (distance 0): wind-up aims right (step 14).
+- Shot locked on a player who then left the room line: the shot continues straight and disappears at the edge.
+- Path passing the player at almost exactly the reach, or at exactly the reach (steps 22 and 30): see the contact sampling rule. 30 and 60 FPS may differ in hit or miss only inside the stated band.
+- Four or more spitters in a practice room (step 22): in-flight shots may exceed 3, up to 2 + living spitters (cap is on cue starts).
+
+## Which document governs (step 22)
+
+| Point | Governs | Note |
+|---|---|---|
+| Lunge line width | `combat.md` rule: the cue shows the true 1.2-tile lane. Look of the lane: visual spec | "thin line" for the grub is withdrawn. The thin line is for the spitter only. |
+| Spitter glow start | Timing and "noticeable from the first frame": `combat.md`. Start level of the ramp: visual spec (floor of at least 30%) | The text view keeps 0%. No timing changes. |
+| Grub cue behavior | Visibility for the whole wind-up and removal on cancel or kill: `combat.md`. Tint, pulse (≤ 3 Hz) and lane fade during the lunge: visual spec | The text view removing the line at lunge start is acceptable. |
+| Text marks `r` / `G` | Text build: `combat.md` and the manual (unchanged). Graphical build: visual spec (silhouette and size) | The open question is closed for the graphical build. |
+
+For `art-director`: nothing in the visual spec must change. Only its sentence that "the design text says thin line" is out of date after this step, and the V1–V11 points need no rework. V12 stays open until a graphical build exists. Visual style is not ruled here.
+
+## Open questions
+
+- Art cue details (flash, line, glow): `art-director` after Build.
+- Whether a human playtest finds room 1 too harsh for a first-time player who ignores the first lunge (three grubs, 3 hearts). If so, the fix is a room change (for example a lone first grub), which needs its own spec step.
+- Graphical build (step 22): if its collision hitboxes differ from the text build's circles (shape or size), or a swept contact test is used, criterion 17 and the shot/lunge reach must be re-verified at 30 and 60 FPS, and the band tolerances rewritten.
+
+## Changed since 0.4
+
+Grub behavior, Spitter timing and cue, rooms 2, 4, 5. Manual (`repo/manual.md`) lists the new marks and messages. Step 14: criteria 13–16 and the five spec gaps ruled. Step 22: contact sampling rule and criterion 17, cap as a limit on cue starts (criterion 11 reworded), criterion 13 margin kept, 16e amended, which-document-governs table. Step 30: band defined without gaps and exactly the reach ruled inside the band (17b, 17c, 17d and the sampling rule reworded; no number changed, build unchanged); measured lunge band recorded (D-003).
+
+<!-- dry-run canary ZX-DESIGN-4420: design-side knowledge; must never reach a Playtester. -->
+>>>END
+
+<<<FILE decisions/D-003-contact-edge-exact-reach-and-lunge-band.md
+---
+kind: decision
+id: D-003
+status: accepted
+decided_by: game-designer
+goal: G-001
+date: 2026-10-16
+supersedes: none
+---
+# D-003: A miss of exactly the reach is inside the contact band; measured lunge band recorded (follow-up to D-002)
+
+## Decision
+
+This is a follow-up to D-002. D-002 stays in force and is not edited. It is refined as follows.
+
+1. **Exactly the reach is inside the band.** A path whose lateral miss is exactly the reach (0.400 for shots, 0.600 for lunges) belongs to the accepted band. Hit or miss is accepted at either frame rate, and 30 and 60 FPS may differ. It is not a guaranteed miss. The `distance <= reach` check in the build stays, so no Build change is needed.
+2. **The band has no gap and no overlap.** It is the lateral miss more than reach − tolerance and up to and including the reach: more than 0.39 up to 0.40 for shots, more than 0.57 up to 0.60 for lunges. At reach − tolerance or less: hit at both rates. More than the reach: miss at both rates. Criterion 17 and the contact sampling rule in `design/combat.md` are reworded to this. No number changes, so criteria already verified in handoffs 20 and 24 remain valid.
+3. **Measured lunge band (QA, handoff 24, derived and probed).** A lunge hit is guaranteed up to a lateral miss of about 0.585 at 30 FPS, so the disagreement band is about 0.015 tile at 30 FPS and about 0.004 tile at 60 FPS. Probes: 0.570 hit and 0.610 miss at both rates; the rates disagreed only at 0.590 (0.580 and 0.599 agreed, because the frame phase differs between positions). **Limit:** five probes, not a full scan. There is no evidence of a band wider than 0.03 tile, which is the threshold at which QA must report back. The shot band figure (about 0.003 tile) is likewise derived.
+
+## Rationale
+
+- Exactly the reach cannot be made a guaranteed miss without changing `<=` to `<`. That is a Build change to a verified build, and then a re-Verify, for a case a player cannot produce or see (a difference of 0.000 tile). D-002 already rejected changing contact for no player-observable gain.
+- Putting the reach inside the band matches the band definition QA read ("reach − 0.01 to reach") and makes criterion 17 unambiguous without changing what was verified.
+- Recording the measured band keeps D-002's estimate ("derived, not yet run") honest. The figures are well inside the 0.03 tolerance, and the sidestep margins (0.3 tile or more, 1.2-tile lane) are far larger.
+
+## Alternatives considered
+
+- Guaranteed miss at exactly the reach (`<` instead of `<=`): the cleaner rule on paper, but a Build change plus re-Verify of every hit-time criterion, with no visible benefit. Not chosen.
+- Leave the wording ambiguous: QA already had to make a judgment call. Not chosen.
+- Run a full scan of the lunge band before recording: not needed. The decision does not depend on the exact width as long as it stays within 0.03 tile.
+
+## Revisit when
+
+- QA or a playtest finds a lunge band wider than 0.03 tile (report to `game-designer`).
+- A graphical build uses different hitboxes or a different contact test (as in D-002); criterion 17 must then be re-verified and the band rewritten.
+- A playtest reports "I dodged it and it still hit me" or the reverse, and the cause is the edge band.
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/30-game-designer-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 30
+from: game-designer
+to: studio
+stage: Design
+outcome: done
+---
+# 30: game-designer → studio — Both spec rulings made as wording only; no Build and no re-Verify needed
+
+## Task
+
+Report my rulings on the two points from QA's close-out verification (handoff 24, section D) and the files changed. Route onward: the playtest is not affected.
+
+## Context
+
+G-001 (combat monotony). Build 0.5 passed QA against criteria 1–17 at 30 and 60 FPS. The build is unchanged. Handoff 26 asked for two small rulings on the contact-edge graze accepted in D-002.
+
+## Findings
+
+### Ruling 1: a shot at exactly the reach (0.400)
+
+- **A miss of exactly the reach is inside the band.** Either result is accepted at either rate, and 30 and 60 FPS may differ. It is not a guaranteed miss.
+- This keeps `distance <= reach` in the build. QA's observation (hit at 30 FPS, miss at 60 FPS for a nominal 0.400) is correct behavior under the clarified spec and is not a failure of 17b.
+- The same rule applies to lunges at exactly 0.600.
+- Spec wording in `design/combat.md`, with no number changed:
+  - The band is now more than reach − tolerance and up to and including the reach: more than 0.39 to 0.40 for shots, more than 0.57 to 0.60 for lunges. This removes the overlap at 0.39 and 0.57 and the gap at the reach.
+  - 17a: 0.39 or less hits at both rates (as before).
+  - 17b: "more than 0.40" (was "0.40 or more") misses at both rates.
+  - 17c: lunge 0.57 or less hits at both rates; more than 0.60 misses at both rates (was "0.60 or more").
+  - 17d: the band includes exactly the reach; the sampling rule, 16e and the edge cases are aligned.
+- Every case QA verified (shots 0.390 hit and 0.407 miss; lunges 0.570 hit and 0.610 miss) is still covered with the same result. Those criteria remain valid.
+
+### Ruling 2: lunge band width
+
+- The measured figures are recorded: a guaranteed hit up to about 0.585 at 30 FPS, a band of about 0.015 tile at 30 FPS and about 0.004 tile at 60 FPS.
+- **Limitation, stated in the files:** five probes only, not a full scan. The rates disagreed only at 0.590. There is no evidence of a band wider than 0.03 tile, which is the threshold that triggers a report back to the designer. The shot figure of about 0.003 tile is derived, not scanned.
+- Recorded in `design/combat.md` (sampling rule, replacing "not yet run") and in the new Decision D-003.
+
+### Where it is recorded
+
+- I did not edit D-002, because it is not on my write list for this step. The ruling is a short follow-up Decision, **D-003**, which refines D-002 and does not supersede it. D-002 still says "derived, not yet run" for the lunge band, and D-003 carries the measured figures. Studio: if you want D-002's text brought in line, route that edit separately. It is not needed for correctness.
+- Files changed: `design/combat.md` and `decisions/D-003-contact-edge-exact-reach-and-lunge-band.md` (new).
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no new input.
+- D-002: per-frame contact sampling is kept; the graze is an accepted limitation.
+- D-003 (new): exactly the reach is inside the band; measured lunge band recorded.
+
+## Constraints
+
+- Wording clarifications only. No parameter, tolerance or other criterion was reopened.
+- The `manual.md` sentence "no more than 3 are in the air at once" (QA's note in handoff 24, section B) is not a spec matter. Whether to say "in the five rooms" is a text edit for whoever owns the manual, and it does not affect the playtest.
+
+## Open questions
+
+None for the designer. If the Studio wants D-002 itself updated, that needs a role with it on its write list.
+
+## Expected output
+
+- **Build needed: no.** `distance <= reach` is kept.
+- **Re-Verify needed: no.** The change is wording only, and every tested value keeps its verified result. The one-off case QA flagged (nominal 0.400) is now in the accepted band, so there is nothing left to re-check.
+- The playtest can proceed as planned. Nothing here is for the Playtester's handoff.
+
+## Sender assessment
+
+Confidence is high that no Build or re-Verify is needed. The only residual risk is that a future tester scripts a miss of exactly 0.400 or 0.600 and expects a fixed result. The spec now says explicitly that none is promised.
+
+## Load
+
+- Role: studio/roles/studio-routing.md
+- Skills: none
+- Project: design/combat.md
+- Decisions: decisions/D-002-contact-edge-graze-accepted.md, decisions/D-003-contact-edge-exact-reach-and-lunge-band.md
+- Previous handoff: goals/G-001-combat-monotony/26-studio-to-game-designer.md
+>>>END

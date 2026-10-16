@@ -143,3 +143,49 @@ def test_reaction_rules_let_a_player_clear_a_room_from_the_player_view(tmp_path)
     )
     assert code == 0 and "room cleared" in out, out
     assert not any(word in out for word in ("ZX-", "invulnerable", "(nothing happens)"))
+
+
+# --- Recorded live run ---------------------------------------------------------------------
+
+RUN = ROOT / "examples" / "runs" / "p7-combat-run"
+
+
+@needs_sandbox
+@pytest.mark.skipif(
+    not (RUN / "measurement.json").is_file(), reason="no recorded Phase 7 run"
+)
+def test_recorded_measurement_reproduces(tmp_path):
+    import test_phase6 as t6
+
+    repo = RUN / "project" / "repo"
+    code, _, _ = t6.sandboxed_copy(
+        repo, tmp_path, "t", ["python3", "-m", "unittest", "discover", "-s", "tests"]
+    )
+    recorded = json.loads((RUN / "measurement.json").read_text())
+    m = t6.measure(repo, tmp_path)
+    assert m == recorded["measurement"]
+    assert (
+        t6.verdict(m, code == 0, RUN / "project" / "decisions") == recorded["verdict"]
+    )
+
+
+@pytest.mark.skipif(not RUN.is_dir(), reason="no recorded Phase 7 run")
+def test_recorded_playtesters_reacted_from_the_player_view_only():
+    steps = sorted((RUN / "records").glob("*-step-playtester"))
+    assert steps
+    rules = 0
+    for rec in steps:
+        labels = [m["path"] for m in json.loads((rec / "manifest.json").read_text())]
+        assert not any(l.startswith(("design/", "decisions/")) for l in labels), rec
+        assert not any(
+            l.startswith("repo/") and l != "repo/manual.md" for l in labels
+        ), rec
+        assert not any("ZX-" in p.read_text() for p in rec.glob("packet*.md")), rec
+        for result in rec.glob("runs-round*.json"):
+            for r in json.loads(result.read_text()):
+                assert r["run"].startswith("@run/play"), rec
+                rules += sum(
+                    line.strip().startswith("when ")
+                    for line in r["script"].splitlines()
+                )
+    assert rules > 0  # they played with reaction rules

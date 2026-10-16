@@ -1,0 +1,131 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "701a77f9-ec23-4cca-bb40-27343f505fa8",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 20608,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 7488,
+    "output_tokens_details": {
+     "thinking_tokens": 1644
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 20608,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 7488,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 20608,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 20608
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.157316,
+   "attempt": 1,
+   "started": "2026-10-16T16:22:00",
+   "seconds": 53.6,
+   "errors": [
+    "goal.md: route row 12 has unknown role game-designer, gameplay-engineer, qa; a Role cell holds exactly one role id (or studio, owner), and a parallel step gets its own row (5, 5b)"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "c105e308-dd73-470c-87bb-4c1a860ad8a5",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 20721,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 7455,
+    "output_tokens_details": {
+     "thinking_tokens": 1711
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 20721,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 7455,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 20721,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 20721
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.15743800000000002,
+   "attempt": 2,
+   "started": "2026-10-16T16:22:54",
+   "seconds": 52.3,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-combat-monotony/28-studio-to-game-designer.md": "8f728bfb9b263166bbc32db6fcdddde051901ddca131f8947c7f77254d569c49",
+  "goals/G-001-combat-monotony/29-studio-to-qa.md": "32f0ca90a2f6c9626eaf26c5cc3df1f4bfdd61213851242668014b3907f3d3fd",
+  "goals/G-001-combat-monotony/goal.md": "939a241e316dd76d4c64738d67550b8e84f9d9347dc054222bb03d5a5429dc3b"
+ },
+ "decision": {
+  "new": [
+   "qa",
+   "Observe"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "game-designer",
+    "Design (QA notes: exact-reach miss, lunge band)"
+   ],
+   [
+    "game-designer",
+    "Diagnose (playtest issues 1–4)"
+   ],
+   [
+    "qa",
+    "Observe (room 2 grub hit after swipe)"
+   ]
+  ]
+ },
+ "seen_through_seq": 29
+}

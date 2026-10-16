@@ -1,0 +1,409 @@
+<<<FILE design/combat.md
+# Combat design (build 0.5, specified in G-001 step 07, rulings in steps 14, 22, 30 and 35)
+
+Status: Build 0.5 implements the Grub, Spitter and room changes below. Step 14 settled criteria 13–16 and the five spec gaps (marked "step 14" in the text). Step 22 settled the contact-edge graze, the shot cap, the walker margin and which document governs each text/visual contradiction (marked "step 22"). Step 30 clarified the wording at exactly the reach and recorded the measured lunge band (marked "step 30"; wording only, see D-003). **Step 35 specifies two changes for the next build (0.6): a cue-gap rule for the spitters in rooms 4–5, and a brute whose wind-up is not cancelled by a swipe (marked "step 35"; see D-004). Until 0.6 exists, build 0.5 behaves as described without the step 35 parts.** The player kit is unchanged from 0.4.
+
+## Intent
+
+Every threat is visible before it can hurt, and every threat has an answer other than "stand and swing". Walking straight into a fight without reading it should cost hearts. Reading the cue and using a sidestep or the dash should cost fewer. Grub rooms should differ from each other, and the dash should be worth using.
+
+**Step 35 intent.** The three melee enemies should ask for three different answers: the runner "commit or step out fast", the standard grub "either", the brute "step aside, then punish". In the crossfire rooms a player who reads a cue should have time to act on it before the next cue aims at them.
+
+## Player kit (unchanged)
+
+- **Attack** (one button): a short swipe in the facing direction, reach 1.5 tiles. 1 damage. 0.35 s recovery.
+- **Dash**: 4 tiles over 0.25 s. The player is invulnerable for the full dash duration. Cooldown 0.6 s. An attack pressed during a dash is queued and fires when the dash ends.
+- **Getting hit**: 1 heart of damage, 0.3 s hit-stun (no input), then invulnerability until 0.8 s after the hit.
+- Player speed 4 tiles/s. 3 hearts per room. No new inputs (D-001).
+
+## Timing rule (applies to everything below)
+
+All durations are in seconds and run on accumulated time, not frame counts, so 30 and 60 FPS behave the same. Per-frame travel of a lunging grub (at most 8/30 = 0.27 tile) and of a shot (at most 3.0/30 = 0.1 tile) stays below the contact reach (0.6 and 0.4), so nothing tunnels through the player at 30 FPS.
+
+### Contact sampling rule (step 22, accepted limitation, see D-002; step 30 wording, see D-003)
+
+- Contact is a distance check made once per frame, after that frame's movement. A distance of exactly the reach or less counts as contact (`distance <= reach`). Reach: shot 0.4 tile, grub lunge 0.6 tile. There is no swept test between frames.
+- Consequence: when a path passes the player's center at a distance (the "lateral miss") very close to the reach, whether a frame lands close enough to count depends on the frame phase, so 30 and 60 FPS can differ in hit or miss for identical input. This is accepted for the text build.
+- **Step 30 (the band, defined without gaps).** The band is the range of lateral miss that is more than reach − tolerance and at most the reach, the reach itself included:
+  - Shots: more than 0.39 and up to and including 0.40 tile. QA derived about 0.003 tile of actual disagreement.
+  - Lunges: more than 0.57 and up to and including 0.60 tile. Measured by QA (step 24, five probes, not a full scan): a hit is guaranteed up to about 0.585 at 30 FPS, so the disagreement band is about 0.015 tile at 30 FPS and about 0.004 tile at 60 FPS. The rates disagreed only at 0.590. See D-003.
+- Outside the band the result must be the same at both rates and must follow the geometry: a lateral miss of reach − tolerance or less always hits (if the player is not invulnerable), and a lateral miss greater than the reach never hits.
+- **Step 30 (exactly the reach).** A lateral miss of exactly the reach (0.400 shot, 0.600 lunge) is inside the band. Hit or miss are both accepted at either rate, and the result may differ between 30 and 60 FPS. It is not a guaranteed miss, and the `<=` in the build stays.
+- The band changes only hit or miss. It must never change timing, cue, message or phase of anything.
+
+## Enemies
+
+### Grub (A): three-phase attack with a telegraph
+
+Phases:
+
+1. **Approach.** Walks straight at the player at the grub's speed. Bites on contact only during the lunge (see below). Walking alone does not damage. Replaces the old "contact bite while walking".
+2. **Wind-up** (starts when the player is within 2.0 tiles and no other grub is in wind-up or lunge).
+   - The grub stops.
+   - The aim direction is locked to the player's position at the start of the wind-up.
+   - **Step 14:** if the grub is exactly on the player (distance 0), the locked direction is right (+x). The cue and line are shown as usual.
+   - Visible cue for the whole wind-up duration: the grub is tinted saturated orange-red (how it pulses or flashes is presentation, see below) and a line or lane shows the lunge path (length equal to the lunge distance).
+   - **Step 22:** the danger zone of a lunge is 1.2 tiles wide (0.6 either side of the locked line) and 2.4 tiles long. A graphical cue must show the lane at that real width, so the player can see that a 1-tile sidestep clears it. The text view draws a one-cell `~` line; that is the text build's presentation of the same lane and stays.
+   - Text view: message "a grub rears back" when it starts (all variants, unchanged in step 35).
+   - Cue visible at least 0.5 s before the hit for the standard grub. The player has time to step out of the line, because player speed is 4 tiles/s and the line is 0.6 tiles to either side.
+3. **Lunge.** Moves along the locked direction at lunge speed for the lunge time (distance 2.4 tiles). It stops early on contact with the player. If the player is inside reach 0.6 and not invulnerable, it deals 1 damage (once per lunge). Contact follows the sampling rule above.
+4. **Recovery.** The grub is stationary and unthreatening for the recovery time, then returns to Approach. This is the safe window to swipe it.
+
+Rules:
+
+- **Step 35 (cancel is a per-variant flag, "swipe cancels wind-up").** Standard grub: yes. Runner: yes. Brute: **no**. For a variant with the flag set to yes: a swipe that damages a grub in wind-up cancels the wind-up. The grub is staggered (no action) for 0.4 s, then returns to Approach.
+- **Step 35 (brute, flag no).** A swipe that damages but does not kill a brute in wind-up deals its 1 damage and changes nothing else: the wind-up continues on its original timer, with no stagger, the aim stays locked, and the lunge happens at the normal time. The text view shows the message "the brute shrugs off the swipe" at the moment of the swipe. Any number of swipes in the same wind-up each deal 1 damage and each show the message. A swipe that kills the brute in wind-up defeats it as for every grub (no lunge). The brute is still hit-able and takes damage in every phase, and a hit in Approach, Lunge, Recovery or Stagger changes nothing, as for every grub.
+- **Step 14:** a swipe that kills a grub does not stagger it. The grub is simply defeated (in wind-up too).
+- **Step 14:** a grub that is hit but not killed during Approach, Lunge, Recovery or Stagger continues its phase unchanged. Only a hit during wind-up of a variant with the flag yes changes its phase (step 35), and a hit during stagger does not extend the stagger.
+- At most one grub is in wind-up or lunge at a time. Others keep walking and wait. This prevents simultaneous unavoidable lunges.
+- The player's dash invulnerability stops the damage. The lunge is not cancelled. The grub finishes the lunge, wherever it ends, then does its recovery.
+- Hurt-invulnerability (0.8 s) also stops the damage the same way.
+- A lunge is clamped at the room edge like all movement.
+- If the player is dead or the room is cleared, grubs stop.
+- **Step 22 (what is rule and what is presentation):** the rule is that the cue is visible during the whole wind-up, shows the lunge lane at its true size, and disappears at once when the wind-up is cancelled or the grub is killed. Whether the lane stays, fades or is removed during the lunge itself, and whether the tint flashes or holds a slight pulse (no faster than 3 Hz), is presentation owned by `art-director`. The text view removes the line when the lunge starts, and that is fine.
+- **Step 35 (brute cue stays).** Because a swipe does not cancel the brute, its cue is not removed by a swipe that does not kill it. The cue is removed only by the kill, and as before it ends at the lunge. The lane geometry is identical for all variants.
+
+Consequence worth knowing when reading bot results: a wind-up always comes before the first contact. A player who ignores the cue and does not move takes one lunge per grub (1 heart each), then gets the recovery window to swipe it. **Step 35:** a player who stands and swipes a brute during its wind-up now also takes the lunge. The recovery window of the brute is 1.2 s, in which up to four swipes fit if the player is in reach and facing it from the start (0.35 s per swipe). With a human reaction time of about 0.3 s, about three fit, so killing a full-health brute normally takes two windows. This is a derivation, not a measurement.
+
+Parameters (Grub is one type, with parameter sets only; same behavior and same code path):
+
+| Variant | Mark (text) | HP | Walk speed (tiles/s) | Wind-up (s) | Lunge speed (tiles/s) / time (s) | Recovery (s) | Swipe cancels wind-up (step 35) |
+|---|---|---|---|---|---|---|---|
+| Standard grub | `g` | 2 | 1.0 | 0.5 | 8.0 / 0.3 | 0.8 | yes |
+| Runner grub | `r` | 1 | 1.6 | 0.35 | 8.0 / 0.3 | 0.6 | yes |
+| Brute grub | `G` | 4 | 0.7 | 0.7 | 8.0 / 0.3 | 1.2 | **no** |
+
+Tuning range allowed to engineering and QA without a new spec (if bots or play need it): wind-up 0.35–0.7 s for any variant. Never below 0.35 s. The cancel flag is not part of the tuning range.
+
+### Spitter (B): staggered, with an aim cue
+
+- **Aim cue.** 0.6 s before each shot the spitter glows saturated orange-red, growing brighter. The shot direction is locked to the player's position at the start of the cue. The direction is shown as a thin orange-red line for the 0.6 s of the cue. Text view: "a spitter takes aim" at the start of the cue and "a spitter spits" at the shot. The shot is then fired along the locked line.
+- **Step 22 (glow start):** the rule is that the cue is noticeable from its first frame, the line is at full brightness from the first frame, and only the glow ramps. The starting level of the ramp is presentation. The text view shows 0% in its `cue:` line and stays; a graphical build uses a floor of at least 30% (as in the visual spec). This changes no timing.
+- **Shot.** Speed 3.0 tiles/s (was 1.6). It travels in a straight line, does 1 damage, and disappears at the room edge, on contact with the player, or after 5 s. Dash invulnerability and hurt-invulnerability stop the damage as now. Contact follows the sampling rule above.
+- **Interval and stagger.** Fire interval 2.4 s (was 2.0 s). After the first shot each spitter fires every 2.4 s after its previous shot. The first shot of the k-th spitter in room order (k = 0, 1, 2…) is at 1.8 s + *offset* × k, where *offset* is a per-room parameter (step 35):
+  - Default (rooms 1–3 and practice rooms): offset 0.8 s. With three spitters, shots are 0.8 s apart (room 3, unchanged).
+  - **Rooms 4 and 5 (step 35): offset 1.2 s.** With the two spitters of those rooms the first shots are at 1.8 s and 3.0 s, and then every 1.2 s alternating.
+- **Spitter index (step 14).** k counts only spitters, in spawn order (room table order; the practice room uses `spawn` order). A defeated spitter does not renumber the others.
+- **Cue gap rule (step 35, rooms 4 and 5 only; the rule, not the offset, is what must always hold).** Intent: after a cue ends, the player has at least 0.6 s before any spitter in the room locks onto them again, whatever the spitters' own schedules say (also if two spitters would end up firing together).
+  - A spitter in a gap room may start a cue only if all of these hold at the check:
+    1. no other spitter in the room has a cue running;
+    2. the last shot fired in the room (by any spitter) was at least 0.6 s ago (comparison with a tolerance of 1 ms, so that an exact schedule tie counts as satisfied at both frame rates);
+    3. the shot cap below allows it.
+  - If a condition fails, the spitter waits 0.2 s and checks again (the same mechanism as the cap delay). The delay carries forward as in "Cap delay".
+  - Player-observable form: between the shot of one cue and the start of the next cue (any spitter in rooms 4–5) there are at least 0.6 s, give or take one frame. Cue windows of different spitters never overlap.
+  - A cue that is cancelled because its spitter was killed does not count as a shot for condition 2. Condition 1 only looks at running cues.
+  - With the offsets above the rule is met by the schedule itself (gap exactly 0.6 s), so in the normal case it adds no delay. It acts only if the cap delay or a later change moves cues closer together.
+  - Room 3 and practice rooms do not use this rule. Their gap stays at the old 0.2 s between consecutive cues in the room.
+- **Cap (step 22: a limit on cue starts).** A spitter may start a cue only if fewer than 3 shots are in flight at that moment; otherwise it waits 0.2 s and checks again. The cap is not rechecked when a shot fires. So shots from cues that started earlier may briefly take the number in flight above 3. At most, the count at a check is 2, plus the checking spitter's own shot, plus one for each other spitter already in a cue: never more than 2 + the number of living spitters. In every real room (at most 3 spitters, rooms 3–5) the count stays at 3 or fewer (QA: room 3 stays at 3 or fewer over 12 s). Only a practice room with four or more spitters can go above 3 (QA saw 5 with four spitters). This is intended. The reason: the cue is the telegraph, and refusing to fire a shot whose cue is already showing would break "the cue always ends in the shot" and make cues lie.
+  - **Step 35:** in rooms 4–5 the shots come 1.2 s apart (before: 0.8 s and 1.6 s alternating), and a shot lives up to 5 s, so with the player far from the spitters the cap can now delay a cue. That is accepted and wanted (fewer shots in the air). The cap stays 3 in all rooms; lowering it to 2 was considered and not taken (D-004).
+- **Cap delay (step 14).** The 0.2 s wait starts at the moment the cue would have started, and repeats until a slot is free. The delay moves that shot later, and the spitter's following shots keep 2.4 s from its actual shot (the delay carries forward). The first-shot times in criterion 11 are not affected, because the cap is not reached by then.
+- **HP** 2, stationary, and can be swiped at any time. No change.
+
+## Rooms (C: light pass, existing enemies and parameter variants only)
+
+5 rooms, 3–6 enemies each. A room ends when all enemies are defeated. Positions are (x, y) in tiles. Step 35 changes no room contents.
+
+| Room | Contents | Spitter offset / cue gap rule | Purpose |
+|---|---|---|---|
+| 1 | Standard grubs at (3,4), (15,4), (8,0) | n/a | Teach the lunge cue against one grub at a time |
+| 2 | Runner (2,1), Runner (1,8), Brute (15,7), Standard (14,0) | n/a | Different from room 1: fast fragile ones plus a slow tough one, from four corners. Step 35: the brute now needs "step aside, then punish". |
+| 3 | Spitters at (2,1), (14,7), (2,7), with the stagger and cue | 0.8 s / none | Learn the aim cue |
+| 4 | Runner (1,4), Standard (0,1), Spitters (15,0), (15,8) | **1.2 s / 0.6 s gap rule** | Grub lunges under fire, with time between aims |
+| 5 | Standard (1,1), Standard (0,6), Brute (4,8), Spitters (15,0), (15,8) | **1.2 s / 0.6 s gap rule** | Hardest, most threats at once |
+
+Rooms 4–5 were read from the room data in the repo; no human has seen them yet (a hand-timed playtest of the 0.5 rooms exists in handoff 27; see the step 35 handoff).
+
+Option 3 (swapping room 2's standard grub for a spitter) is **not** part of this slice; see D-004.
+
+## Acceptance criteria
+
+### Verifiable (QA, with `play` and `bots`)
+
+Scripts for 1–11 and 19 use the practice room (`room empty`, `spawn`, `player`), so they work at both `fps 30` and `fps 60`. Every check holds at BOTH rates.
+
+Grub:
+
+1. **Telegraph.** A standard grub within 2.0 tiles of a stationary player shows the wind-up message and the cue. The hit lands no earlier than 0.5 s after the cue first appears, ±1 frame.
+2. **Sidestep works.** A player who moves 1 tile sideways (up or down relative to the grub's line) within 0.4 s after the cue appears takes no damage from that lunge.
+3. **Dash works.** A dash started at any point from the cue until 0.1 s before the lunge ends takes no damage, and the dash is not "ignored". Holds for the standard grub, the runner and the brute (step 35: this is the brute's answer too).
+4. **Standing still is punished.** A player who does nothing for 3 s next to a standard grub loses at least 1 heart.
+5. **Safe window.** During recovery the grub does not damage the player on contact.
+6. **Cancel (step 35: standard grub and runner only).** Two swipes kill a standard grub. For a standard grub and a runner: a swipe that lands during wind-up stops the lunge. A swipe that kills a grub in wind-up kills it with no stagger and no lunge, for every variant. The brute's behavior is criterion 19.
+7. **One at a time.** With 3 grubs close together, no two grubs are in wind-up or lunge at the same moment.
+8. **Variants.** Runner dies to one swipe, brute to four (in any phase; step 35 does not change the hit points). Marks `r` and `G` appear in the text view and are listed in the manual.
+
+Spitter:
+
+9. **Cue.** The cue and message appear 0.6 s ±1 frame before each shot, and the shot is fired along the locked line.
+10. **Dodge works.** A player who moves aside by 1 tile within 0.4 s after the cue appears is not hit by that shot.
+11. **Stagger and cap (step 22 wording; step 35 per-room).** In room 3 the first shots are at 1.8, 2.6 and 3.4 s ±1 frame (unchanged). In rooms 4 and 5 the first shots are at 1.8 and 3.0 s ±1 frame, as long as both spitters are alive and the cap has not delayed a cue (it cannot by then). In rooms 1–5 never more than 3 shots in flight. In a practice room with four or more spitters, a cue may start only when fewer than 3 shots are in flight, and the number in flight never exceeds 2 + the number of living spitters.
+
+Contact edge (new in step 22, wording clarified in step 30):
+
+17. **Contact edge.** At each of 30 and 60 FPS, with the reproduction script from handoff 20 (`room empty`, spitter at a chosen position, player at (8, 3.6)) and positions chosen from the trace so that the shot's lateral miss is known:
+    - a. Shot with a lateral miss of 0.39 tile or less: hit at both rates.
+    - b. Shot with a lateral miss of more than 0.40 tile: no hit at both rates. (Step 30: exactly 0.40 is not covered here, it is in the band, see d.)
+    - c. Lunge with a lateral miss of 0.57 tile or less: hit at both rates; of more than 0.60 tile: no hit at both rates. One scripted grub case at each side of the band is enough.
+    - d. The band is more than 0.39 up to and including 0.40 tile for shots, and more than 0.57 up to and including 0.60 tile for lunges. Inside the band a difference between 30 and 60 FPS is accepted and is not a build defect, and this includes a miss of exactly the reach (step 30). In the band, hit time and hearts lost may differ only by the hit itself. If QA finds that the lunge band is wider than 0.03 tile, it reports back to `game-designer` (it is a tuning or sampling question, not a failure).
+
+New in step 35:
+
+18. **Cue gap in rooms 4–5.** At each of 30 and 60 FPS, in a trace of room 4 and of room 5 of at least 15 s each (any script; the player may be hit or die, check the part of the trace that exists), for every cue start by a spitter:
+    - a. No cue of another spitter is running (cue windows do not overlap).
+    - b. The previous shot fired in that room was at least 0.6 s earlier, minus one frame (0.033 s at 30 FPS, 0.017 s at 60 FPS).
+    - c. The same holds after one spitter has been killed (then trivially, with one spitter every 2.4 s), and with a cap delay in effect (stand far west so shots stay in the air; a delayed cue only makes the gap longer).
+    - d. If the Build step can provide a test that forces both spitters' first shots to the same time, the gap rule must still give a gap of at least 0.6 s, minus one frame. If it cannot, a and b on traces are enough and QA says that d was not run.
+    - e. Cue timing itself (criterion 9: cue 0.6 s ±1 frame before the shot) and the cap (criterion 11) hold in rooms 4–5.
+19. **Brute wind-up is not cancelled (new, step 35).** In the practice room with a brute and the player standing about 1 tile from it, in its lane, not dashing:
+    - a. A swipe landing during the brute's wind-up reduces its hit points by 1, shows the message "the brute shrugs off the swipe" at the moment of the swipe, and does not remove the cue or stagger it. The lunge happens at 0.7 s ±1 frame after the cue appeared and the player loses 1 heart.
+    - b. Two swipes in the same wind-up each deal 1 damage and each show the message. The brute still lunges once.
+    - c. A swipe that kills the brute during wind-up (brute at 1 hit point left) defeats it with no lunge and no message.
+    - d. A dash started before the lunge ends and the brute's wind-up swipe together: the player takes no damage from that lunge (dash invulnerability, criterion 3), and the brute still takes its swipe damage.
+    - e. A swipe during the brute's recovery deals 1 damage and the phase is unchanged. The brute needs 4 damage in total, in any phase.
+    - f. For comparison in the same run: a standard grub and a runner still have their wind-up cancelled by a swipe (criterion 6).
+
+Rooms and bots (step 14 rulings). Each bot result is a balance proxy for a player-observable behavior, stated per criterion. The bots are `walker` (a player who walks up, swipes, never dashes and ignores wind-up and aim cues), `dodger` (a player who reads cues, swipes or dodges, and uses the dash) and `camper` (a player who stays put and swings).
+
+12. **Rooms differ.** The contents match the table above.
+13. **Cue-ignoring vs cue-reading, spitter rooms.** Protects: reading the aim cue is clearly better than ignoring it, and ignoring it is costly but not hopeless. At each rate separately, in rooms 3–5 summed: the walker loses at least 3 and at most 6 hearts and clears at least 2 of the 3 rooms. The dodger loses at most half of the walker's total and clears 3/3. The camper clears fewer of rooms 3–5 than the walker.
+    - **Step 22:** the numbers stay as they are. Observed margin (build 0.5): walker 4 lost / 2 cleared at 30 FPS, 6 lost / 3 cleared at 60 FPS (exactly the upper limit). The bots are deterministic, so this is stable for a given build. A later change that moves the 60 FPS walker to 7 hearts is a tuning question for the designer, not a build defect, and is reported back and not "fixed" in the build.
+    - **Step 35 (expected effect, not verified):** build 0.6 changes rooms 4 and 5 (even spacing and the gap) and room 5 (the brute no longer cancels). The walker ignores cues and swipes: against the brute it now takes the lunge it used to cancel, so its hearts lost in room 5 are expected to go up, and the 60 FPS walker is already at the limit of 6. So the walker's upper limit of 6 is likely to be exceeded and its clear count of rooms 3–5 may fall below 2. The fire rate of the spitters is unchanged (still one shot per 1.2 s over the room), so the effect of the gap on the walker is uncertain in both directions. All of this must be measured by running the bots on 0.6. The numbers in the criterion stay for now. If a measured value falls outside, QA reports the numbers to `game-designer` as a tuning question (as in step 22), and it is not a build defect.
+14. **Cue-ignoring vs cue-reading, grub rooms (ruled in step 14).** Protects: ignoring the lunge cue costs hearts, and reading it makes the grub rooms safe. At each rate separately, in rooms 1–2 summed: the walker loses at least 1 heart; the dodger loses at most 1 heart and clears both rooms. The walker is NOT required to clear room 1 or room 2. Reason: the bot never adapts, so it takes one lunge per grub, and room 1 has three grubs for 3 hearts. A human who is hit by the first lunge can learn the cue from it (see experience signals). Making a non-adapting player always survive room 1 would remove the cost that "ignoring the cue costs hearts" asks for. Observed in build 0.5: walker loses 3 in room 1 (not cleared) and 2 in room 2 (cleared); dodger 0 lost, both cleared. No build or bot change was required for 0.5.
+    - **Step 35 (expected effect, not verified):** room 2 has a brute. The walker will lose at least as many hearts as before (the lower limit of 1 is safe), but it may now fail to clear room 2. This is allowed (the walker is not required to clear). The dodger limit (at most 1 heart in rooms 1–2, both cleared) is the risk: the dodger "swipes or dodges", and if its policy swipes a brute in its wind-up to cancel the lunge, it now takes a heart per brute lunge and may exceed 1. **Rule for the bot policy:** against the brute (mark `G`), the dodger must sidestep or dash on the cue and swipe only in recovery, never rely on a wind-up swipe. Whether `bots.py` already does so I could not check without the source or a run. The Build step checks it and changes the dodger if needed (bots are test tooling, not the build under test), and QA reports the dodger's room 1–2 numbers at both rates.
+15. **Dash is used.** Protects: the dash is worth using. The dodger uses at least 1 dash in each of rooms 3–5, at each rate.
+    - **Step 35 risk, not verified:** with a 0.6 s gap the dodger may sidestep every line and never need the dash in room 4, so this criterion could fail without any build defect. If it does, QA reports to `game-designer`; do not widen the cap or shorten the gap to force a dash. (The brute in room 5 now makes the dash a normal answer there.)
+16. **Frame-rate independence (ruled in step 14, 16e amended in step 22).** Protects: the same fight plays the same at 30 and 60 FPS.
+    - a. Criteria 1–12, 17, 18 and 19 hold at both rates (timings within ±1 frame, as written).
+    - b. Criteria 13–15 are each evaluated at 30 FPS and at 60 FPS, and must hold at both.
+    - c. The dodger must agree between rates: same set of cleared rooms, and hearts lost per room differing by at most 1 (observed in 0.5: identical, 0 lost, 5/5).
+    - d. The walker is NOT required to produce the same per-room numbers at 30 and 60 FPS. Reason: its decisions run on a 0.15 s grid (4.5 frames at 30, 9 at 60), so a one-frame difference in when it steps aside can decide whether a 1-tile sidestep clears a shot. That is a bot sensitivity and not a player-visible difference.
+    - e. This ruling does not excuse a build defect. QA must still confirm the walker's differences come from bot timing. A difference is a build defect if the same decision at the same game time (±1 frame) from the same positions gives a different outcome, or if any of 1–11, 17, 18 or 19 fails at one rate. **Step 22:** a different hit or miss that is caused only by the contact sampling band (criterion 17d, lateral miss inside the band, including exactly the reach) is NOT a build defect. QA's step 20 result stands for build 0.5: the walker differences come from bot timing (an exact-tie float at the bot's 2.5 threshold in room 1, and diverging positions in room 3), and the graze is accepted.
+
+**Dependency note (step 14):** the earlier condition on bot behavior at 30 and 60 FPS is replaced by 16 c–e. The bots decide on a 0.15 s time grid and the dodger reads cues. **Step 35:** the one bot change that may be needed is the dodger's brute policy under criterion 14. No other bot change is expected, but whether the room 4–5 numbers hold can only be known by running the bots on 0.6.
+
+### Experience signals (playtest and Review, not for the Playtester's handoff)
+
+- A player can say, before it hits, that a grub is about to lunge and from where.
+- A player who is hit by the first lunge in room 1 can say what the warning looked like and avoids or cancels the second one.
+- A player can say why they got hit by a shot ("I didn't move") rather than "it came out of nowhere".
+- Rooms 1 and 2 are described as different fights.
+- The dash is used on purpose at least once in a room, not only in panic.
+- **Step 35:** In rooms 4–5 a player can name which line to avoid at a given moment, and describes having a moment to reposition between aims rather than being re-aimed at where they just stepped.
+- **Step 35:** A player describes the brute as needing something different from the runner and the standard grub, and can say what (for example "it doesn't flinch, I step aside and hit it afterwards") without having read the manual. A player who swipes a winding-up brute and gets hit can say why.
+- **Step 35:** Dodging the brute for a long time without ever hitting it is not the usual behavior in room 2.
+
+## Edge cases
+
+- Dash through a wind-up or lunge: see Grub rules. The grub finishes its phase in place.
+- Two shots arriving together: the player takes at most 1 damage per hit-invulnerability window as now.
+- Player dies mid-lunge or mid-cue: enemies stop (existing end-of-session handling).
+- Last enemy killed during its wind-up: room cleared as usual.
+- A spitter killed during its cue cancels the shot. Shots already in flight continue. (Step 35: a cancelled cue does not count as a shot for the gap rule.)
+- A spitter at the player's exact position (distance 0): no aim line and no shot (as now, no shot when dist is 0).
+- A grub at the player's exact position (distance 0): wind-up aims right (step 14).
+- Shot locked on a player who then left the room line: the shot continues straight and disappears at the edge.
+- Path passing the player at almost exactly the reach, or at exactly the reach (steps 22 and 30): see the contact sampling rule. 30 and 60 FPS may differ in hit or miss only inside the stated band.
+- Four or more spitters in a practice room (step 22): in-flight shots may exceed 3, up to 2 + living spitters (cap is on cue starts).
+- **Step 35, brute swiped in wind-up and the player then moves out of the lane:** the lunge still goes along the locked line and misses. The swipe damage stays.
+- **Step 35, brute at 1 hit point swiped in wind-up:** dies, no lunge (criterion 19c).
+- **Step 35, a swipe hits a brute and a standard grub at once:** each is handled by its own rule (the standard grub, if in wind-up, is cancelled; the brute is not). Since only one grub may be in wind-up or lunge at a time, both being in wind-up does not occur.
+- **Step 35, both spitters in rooms 4–5 would fire at the same time:** the gap rule makes the second wait; the pattern settles back to alternating (gap exactly 0.6 s).
+- **Step 35, a cue start blocked by the gap rule at the end of a room:** if the other spitter dies, the blocked cue is simply not started (the spitter is dead); the remaining spitter is checked as usual.
+
+## Which document governs (step 22)
+
+| Point | Governs | Note |
+|---|---|---|
+| Lunge line width | `combat.md` rule: the cue shows the true 1.2-tile lane. Look of the lane: visual spec | "thin line" for the grub is withdrawn. The thin line is for the spitter only. |
+| Spitter glow start | Timing and "noticeable from the first frame": `combat.md`. Start level of the ramp: visual spec (floor of at least 30%) | The text view keeps 0%. No timing changes. |
+| Grub cue behavior | Visibility for the whole wind-up and removal on cancel or kill: `combat.md`. Tint, pulse (≤ 3 Hz) and lane fade during the lunge: visual spec | The text view removing the line at lunge start is acceptable. |
+| Text marks `r` / `G` | Text build: `combat.md` and the manual (unchanged). Graphical build: visual spec (silhouette and size) | The open question is closed for the graphical build. |
+| Step 35: brute swipe | Rule (no cancel, damage applies, message) and gap rule: `combat.md`. Look of the "no flinch" reaction: visual spec, `art-director` | The text message is a rule; the graphical hit reaction is presentation. |
+
+For `art-director`: nothing in the visual spec must change for the lane geometry (identical for all variants). Only its sentence that the "design text says thin line" is out of date (step 22), and V1–V11 need no rework. V12 stays open until a graphical build exists. **Step 35 items for `art-director` (presentation, not ruled here):** (1) a hit reaction for a brute swiped in wind-up that reads as "took the hit, not interrupted" and is clearly different from the stagger reaction of a cancelled grub (V10 and V8 stay valid: a cancelled cue disappears at once, a brute's cue does not); (2) the visual spec's remark that spitter cues are "normally 0.8 s apart" is true only in room 3; in rooms 4–5 cues are at least 0.6 s apart and never overlap. Visual style is not ruled here.
+
+## Open questions
+
+- Art cue details (flash, line, glow): `art-director` after Build.
+- Whether a human playtest finds room 1 too harsh for a first-time player who ignores the first lunge (three grubs, 3 hearts). If so, the fix is a room change (for example a lone first grub), which needs its own spec step.
+- Graphical build (step 22): if its collision hitboxes differ from the text build's circles (shape or size), or a swept contact test is used, criterion 17 and the shot/lunge reach must be re-verified at 30 and 60 FPS, and the band tolerances rewritten.
+- Step 35: whether a human, who has not read the manual, understands that the brute is not cancelled after being hit once by its lunge. The message "the brute shrugs off the swipe" is the only in-game signal. If the playtest shows the signal is missed, the next step is a presentation fix by `art-director`, not a rule change.
+- Step 35: runner and brute behavior for a human, and the real crossfire experience, remain unconfirmed by scripted evidence. A hand-timed playtest follows the Build.
+- Step 35: bot numbers for criteria 13–15 on build 0.6 are unknown until the bots are run.
+- Step 35: Option 3 (a spitter in room 2) is deferred, see D-004.
+
+## Changed since 0.4
+
+Grub behavior, Spitter timing and cue, rooms 2, 4, 5. Manual (`repo/manual.md`) lists the new marks and messages. Step 14: criteria 13–16 and the five spec gaps ruled. Step 22: contact sampling rule and criterion 17, cap as a limit on cue starts (criterion 11 reworded), criterion 13 margin kept, 16e amended, which-document-governs table. Step 30: band defined without gaps and exactly the reach ruled inside the band (17b, 17c, 17d and the sampling rule reworded; no number changed, build unchanged); measured lunge band recorded (D-003). **Step 35 (for build 0.6, see D-004):** per-room spitter offset (1.2 s in rooms 4–5) and the 0.6 s cue gap rule; the brute's swipe no longer cancels its wind-up (flag column in the parameter table, message "the brute shrugs off the swipe"); criteria 6, 8, 11, 13, 14, 15, 16 amended; new criteria 18 and 19; manual lines given in the step 35 handoff.
+
+<!-- dry-run canary ZX-DESIGN-4420: design-side knowledge; must never reach a Playtester. -->
+>>>END
+
+<<<FILE decisions/D-004-spitter-cue-gap-brute-no-cancel-room2-spitter-deferred.md
+---
+kind: decision
+id: D-004
+status: accepted
+decided_by: game-designer
+goal: G-001
+date: 2026-10-16
+supersedes: none
+---
+# D-004: Rooms 4–5 get a rule-based 0.6 s cue gap; the brute's wind-up is not cancelled by a swipe; the room 2 spitter is deferred
+
+## Decision
+
+1. **Cue gap as a rule (rooms 4 and 5 only).** A spitter may start a cue only when no other spitter's cue is running and the last shot in the room was at least 0.6 s ago (plus the existing cap). The first-shot offset in these rooms is 1.2 s (shots at 1.8 s and 3.0 s, then alternating every 1.2 s), which meets the rule exactly. The interval stays 2.4 s, the cap stays 3, and room 3 is unchanged.
+2. **Brute is not cancelled by a swipe in wind-up.** A per-variant flag "swipe cancels wind-up": standard yes, runner yes, brute no. A swipe still damages the brute, shows "the brute shrugs off the swipe", and the lunge goes ahead. The lane geometry is the same for all variants.
+3. **Option 3 (a spitter in room 2) is deferred** out of this slice.
+
+## Rationale
+
+- The crossfire problem (31, S4) is that a cue locks 0.2 s after the previous one ends, at the place the player dodged to. The playtest said the spitters fired "in sync", which the room table and the spec do not support. A rule on cue windows is correct either way, and a fixed offset alone would not be: a cap delay can push two cues together and the offset would not stop it. The offset is chosen so that the rule normally never has to delay anything, which keeps the verified first-shot timing style.
+- The melee enemies share one answer (31, S1). A per-variant flag reuses the existing wind-up rule, keeps lane geometry and cue visuals identical (visual spec), needs no new input (D-001) and no new enemy. The brute is the best carrier: it is slow, has the longest warning and the longest recovery, so "step aside, then punish" is readable and fair.
+- Option 3 would change criterion 14 and the room 2 identity at the same moment as the brute rule. Both aim at the brute dodging for 20 s, and it is not known whether the brute rule is enough. Doing both together would also make the next playtest unable to say which change worked.
+
+## Alternatives considered
+
+- **Only change the offset, no rule:** simpler, but not robust against a cap delay or against the unconfirmed "in sync" claim. Not chosen.
+- **Lower the shot cap to 2 in rooms 4–5:** shortens the number of lines in the air, but delays cues unpredictably and makes the cue timing differ from room 3 in a way the player cannot read. Not chosen; the longer spacing already reduces shots in the air through the existing cap.
+- **Gap rule in room 3 too:** room 3 teaches the cue and is verified; criterion 11 would change for no reported problem. Not chosen.
+- **A new melee enemy, or widening a lane for the brute so that a dash is needed:** needs a Decide step or breaks the "identical lane geometry" rule of the visual spec. Not chosen.
+- **Brute swipe cancels only with the second swipe, or cancels with a longer stagger:** a more complex rule for the player to learn, with no extra answer. Not chosen.
+- **Take Option 3 in this slice:** deferred (see Rationale).
+
+## Revisit when
+
+- The hand-timed playtest after Build shows the crossfire in rooms 4–5 is still unfair, or the gap makes it trivial (then the gap and offset are tuning values).
+- The playtest shows a human still dodges the brute without ever fighting it in room 2 (then take Option 3 or a room change in a new spec step).
+- The bots show the 13/14/15 expectations cannot be met on 0.6 and the cause is the design, not bot policy.
+- A graphical build changes cue presentation in a way that makes the "no flinch" signal unreadable.
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/35-game-designer-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 35
+from: game-designer
+to: studio
+stage: Route
+outcome: done
+---
+# 35: game-designer → studio — Design spec for Options 1 and 2 (cue gap in rooms 4–5, brute not cancelled), Option 3 deferred, manual wording given
+
+## Task
+
+Route to **Build** (build 0.6, `gameplay-engineer`), then QA at 30 and 60 FPS, then a hand-timed Playtest. The spec is in `design/combat.md` (marked "step 35"), the decision in `decisions/D-004-spitter-cue-gap-brute-no-cancel-room2-spitter-deferred.md`. No Decide step is needed: no new enemy, no healing, no new input, no scope change. The visual spec was not changed (items for `art-director` below).
+
+## Context
+
+G-001 (combat monotony). Handoff 33 asked for a spec for Options 1 and 2 of handoff 31, a ruling on Option 3, and exact manual wording. The parallel QA trace of spitter fire times in rooms 3–4 (handoff 34) was not available. The spec for Option 1 does not depend on it. I ran no `play` or `bots` this step, because the changes are to a build that does not exist yet. So I verified nothing about build behavior. The bot expectations below are derivations and are marked.
+
+## Findings
+
+### Rulings
+
+1. **Option 1: a cue gap rule in rooms 4 and 5.**
+   - Rule: a spitter in those rooms may start a cue only if (a) no other spitter in the room has a cue running, (b) the last shot in the room was at least 0.6 s ago (1 ms tolerance so an exact tie counts), and (c) the existing shot cap allows it. Otherwise it waits 0.2 s and checks again (the existing cap-delay mechanism, and the delay carries forward).
+   - Parameter: first-shot offset 1.2 s in rooms 4–5 (first shots at 1.8 s and 3.0 s, then alternating every 1.2 s, each spitter every 2.4 s). This meets the rule exactly, so the rule normally delays nothing. Room 3 and practice rooms keep offset 0.8 s and no gap rule, so **criterion 11 for room 3 does not change**.
+   - It does not depend on the "in sync" claim. If two spitters ever would fire together, the second waits and the pattern settles to alternating.
+   - Cap stays 3. Interval stays 2.4 s. Run length is unaffected.
+   - Consequence I want the Build step to know: with 1.2 s spacing and shots living up to 5 s, the cap (fewer than 3 in flight at a cue start) can delay a cue when the player is far from the spitters. That is accepted.
+2. **Option 2: the brute's wind-up is not cancelled by a swipe.**
+   - A per-variant flag "swipe cancels wind-up": standard yes, runner yes, brute no. A swipe that damages a winding-up brute deals 1 damage, shows the message `the brute shrugs off the swipe`, does not stagger it, does not remove its cue, and the lunge goes ahead on its normal timer. A swipe that kills it in wind-up kills it with no lunge and no message. The dash still avoids the lunge.
+   - Derivation: the brute's recovery is 1.2 s and a swipe takes 0.35 s, so up to four swipes fit in one window if the player is in reach and facing from the first frame, about three with a human reaction. So a full-health brute normally needs two windows ("dodge, hit, dodge, hit"). Not measured.
+3. **Option 3 (spitter in room 2): deferred.** Reasons: it changes criterion 14 and the identity of room 2 in the same slice as the brute rule, which both address the "dodge the brute forever" problem. If both are built, the playtest cannot say which one worked. Revisit after the playtest (D-004). Rooms are unchanged in this slice.
+4. **Signal beyond the manual (Option 2): yes, one.** The in-game message `the brute shrugs off the swipe` (a rule in the spec, text view). For `art-director` (presentation): a hit reaction on a brute swiped in wind-up that reads as "took the hit, not interrupted", clearly different from the stagger of a cancelled grub (V10 and V8 stay valid). I kept the existing `a grub rears back` message for all variants unchanged, so reaction rules with `text "rears back"` keep working. A brute-specific rear-back message was not asked for.
+5. **Visual spec:** no change made. One sentence is outdated for rooms 4–5 ("spitter cues are normally 0.8 s apart ... rarely overlap"): there they are at least 0.6 s apart and never overlap by rule. `art-director` can update that.
+
+### Changed and new criteria (all in `design/combat.md`)
+
+| Criterion | Change |
+|---|---|
+| 6 Cancel | Now standard grub and runner only. A kill in wind-up still has no stagger and no lunge, for every variant. The brute is criterion 19. |
+| 8 Variants | Brute still dies to four swipes in any phase (clarified). |
+| 3 Dash works | Stated to hold for the brute too (the brute's answer now). |
+| 11 Stagger and cap | Room 3 unchanged. Rooms 4–5: first shots at 1.8 and 3.0 s ±1 frame. Never more than 3 in flight in rooms 1–5, must be re-verified in 4–5 (timing changed). |
+| **18 (new)** Cue gap in rooms 4–5 | Traces of rooms 4 and 5 (at least 15 s, both rates): no cue overlaps another; every cue starts at least 0.6 s (minus 1 frame) after the previous shot in the room; also after one spitter is killed and under cap delay; cue 0.6 s ±1 frame before the shot. Optional d: if the Build step can force both spitters to the same first shot, the gap must still hold; if not, QA says it was not run. |
+| **19 (new)** Brute not cancelled | Practice room, brute about 1 tile away, player in the lane not dashing: (a) one swipe in wind-up: 1 damage, message, no stagger, lunge at 0.7 s ±1 frame, 1 heart lost; (b) two swipes: both deal damage, one lunge; (c) a killing swipe in wind-up: dies, no lunge, no message; (d) dash plus swipe: no damage taken, swipe damage applied; (e) recovery swipe: 1 damage, phase unchanged; (f) standard grub and runner still cancel. |
+| 16a | Now lists 18 and 19 among the criteria that hold at both rates; 16e likewise. |
+| 13, 14, 15 | Numbers unchanged. Expected effects below. |
+
+### Bot expectations re-derived (none verified; the bots must be run on 0.6)
+
+- **13 (rooms 3–5, walker 3–6 hearts, clears at least 2 of 3; dodger at most half of the walker's total and clears 3/3).** Room 5 has a brute: the walker ignores cues and swipes, so it now takes the lunge it used to cancel. Expect more hearts lost in room 5. In 0.5 the 60 FPS walker was already at exactly 6, so expect the upper limit to be exceeded at 60 FPS and the clears possibly to fall below 2. The effect of the cue gap on the walker could go either way (fire rate is unchanged: one shot per 1.2 s). Rule already in force (step 22): a walker outside the limit is reported to `game-designer` as a tuning question, not a build defect. **Cannot verify without running the bots.**
+- **14 (rooms 1–2: walker at least 1 lost; dodger at most 1 lost, clears both).** Walker: the lower limit is safe. Dodger: **at risk** if its policy swipes the brute in wind-up to cancel. Bot rule I set: against the brute (`G`) the dodger sidesteps or dashes on the cue and swipes only in recovery. I could not check what `bots.py` does. **Build step: check the dodger's brute handling and change it if needed** (test tooling). QA reports dodger hearts in rooms 1–2 at both rates.
+- **15 (dodger dashes at least once in each of rooms 3–5).** At risk in room 4: with a 0.6 s gap the dodger may sidestep everything and never dash. If it fails, QA reports to `game-designer`; it is not a build defect and I do not want the gap shortened to force it. **Cannot verify without running the bots.**
+- **16c (dodger agrees between rates, per-room hearts within 1, same cleared set):** no reason for a change; verify.
+
+### Exact manual wording (`repo/manual.md`, applied by the Build step)
+
+Change the title to the new build number (for example `# Lantern Depths — how to play build 0.6`).
+
+1. In "On screen", replace the Grub line with:
+
+   `- **Grub (`g`)**: 2 swipes. **Runner (`r`)**: fast, 1 swipe, short warning. **Brute (`G`)**: slow, 4 swipes, long warning; a swipe does not interrupt it.`
+
+2. In "Warnings", in the first bullet ("A grub rears back"), replace the sentence from `The line is fixed ...` to `... to cancel the lunge.` with these two sentences:
+
+   `The line is fixed where you stood when the grub began; step 1 tile to the side or dash to avoid the lunge. A swipe (within 1.5 tiles) that lands during the warning cancels the lunge of a grub or a runner; once the lunge has started, a swipe no longer stops it.`
+
+3. In the same bullet, after the sentence `After a lunge the grub is harmless for a while: that is the time to swipe it.` and before `Only one grub rears back or lunges at a time.`, add:
+
+   `A brute is different: a swipe during its warning hurts it but does not stop it ("the brute shrugs off the swipe"), and it lunges anyway. Step aside or dash, then swipe it while it recovers (1.2 s).`
+
+4. In "Warnings", the spitter bullet: replace `Shots are slow-looking but travel 3 tiles a second, and no more than 3 are in the air at once.` with:
+
+   `Shots are slow-looking but travel 3 tiles a second. In rooms 1–5 no more than 3 are in the air at once. In rooms 4 and 5 the spitters take turns: after one takes aim and spits, there are at least 0.6 s before another takes aim.`
+
+5. In "Warnings", the last bullet: replace `A swipe that interrupts a grub's warning staggers it for 0.4 s.` with:
+
+   `A swipe that interrupts a grub's or runner's warning staggers it for 0.4 s. A brute is not staggered.`
+
+(Scope of "3 in the air": rooms 1–5 only; a practice room with four or more spitters can have more, as the spec says.) The swipe-only-during-warning item from QA (handoff 32) is covered by item 2. It is a wording fix and not a rule change.
+
+### What QA must verify
+
+- Criteria 18 and 19 as written, at 30 and 60 FPS, and criteria 1–12, 17 re-run for regressions (6, 8, 11 are changed). Especially: room 3 timing unchanged (1.8, 2.6, 3.4 s); rooms 4–5 first shots at 1.8 and 3.0 s; at most 3 in flight in rooms 1–5.
+- Standard grub and runner cancel and stagger exactly as before (19f).
+- The bots on 0.6 at both rates: report the numbers for 13, 14, 15, 16c, and compare with the 0.5 values given in `design/combat.md`. Anything outside the criteria goes to `game-designer` with the numbers, and not "fixed" in the build. Say clearly what was not run (for example the forced-sync test in 18d).
+- Manual lines applied as given, and the version title updated.
+- The result of handoff 34 (spitter fire times in rooms 3–4 in build 0.5) when it arrives: if it shows the spitters really did fire together in 0.5, tell me. The gap rule covers it either way, but the cause would then be a build or cap-delay defect in 0.5.
+
+### What the Playtester should focus on (without the expected result)
+
+Hand-timed, no script reactions at a fixed delay. Rooms 2, 4 and 5, at least two attempts each. In every room: what you did against each kind of enemy and why; what you thought was going to happen before each hit and what happened instead; for each hit taken, what hit you and what you could have done. Rooms 4–5: when you got hit by a shot, whether the shot came from a line you had seen being drawn, and what you were doing at the time. Room 2: what you did about the large enemy, and whether you finished the room. Note anything you tried to do with the attack button on any enemy that did not behave as you expected. Report whether you used the dash, when, and why. Do not tell the Playtester about the cue gap, the brute flag or the messages.
+
+## Decisions already made
+
+- D-001 (attack and dash only): kept. D-002, D-003 (contact sampling, graze, exactly the reach): untouched.
+- D-004 (new, this step): the cue gap rule and offset in rooms 4–5, the brute flag, Option 3 deferred. Alternatives rejected there: offset only without a rule, cap 2 in rooms 4–5, the rule in room 3, a new melee enemy or a wider lane, a partial-cancel brute rule, and Option 3 in this slice.
+
+## Constraints
+
+- No new input, no new enemy type, no healing, no scope change. Correct at 30 and 60 FPS (all timings run on accumulated time). Lane geometry is identical for all variants. The build must not change contact sampling.
+
+## Open questions
+
+- For `game-director` / Studio: none that need a Decide step.
+- Whether a human who has not read the manual notices the brute's "shrug" message (the only in-game signal). If the playtest shows it is missed, the next step is a presentation change for `art-director`.
+- Whether the walker/dodger numbers for 13–15 hold on 0.6: only the bots can say.
+- Whether Option 3 or a room change is needed: decide after the hand-timed playtest.
+
+## Expected output
+
+Studio routes: Build (`gameplay-engineer`: spec items 1 and 2, the manual lines, check/adjust the dodger's brute policy, provide a forced-sync test if cheap), QA (above), then the Playtester briefed as above, and `art-director` informed of the two presentation items (brute hit reaction; spitter-cue spacing remark). A Build is needed.
+
+## Sender assessment
+
+Confidence: high that the rules are complete and testable (every new rule has a number and a player-observable check). Medium that the Option 1 offset and gap will feel right to a human (derived from the spec: a 0.6 s gap is enough for a 1-tile sidestep, which takes about 0.15 s plus reaction, but not measured). Medium-low on bot expectations for 13–15: the brute change plausibly pushes the walker over its limit in room 5 and the dodger's brute handling is unknown to me. I ran nothing, so nothing here is verified against a build.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: design/combat.md, design/combat-cues-visual-spec.md, repo/manual.md, project.md#vision, project.md#constraints
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-002-contact-edge-graze-accepted.md, decisions/D-003-contact-edge-exact-reach-and-lunge-band.md, decisions/D-004-spitter-cue-gap-brute-no-cancel-room2-spitter-deferred.md
+- Previous handoff: goals/G-001-combat-monotony/33-studio-to-game-designer.md
+>>>END

@@ -1,0 +1,145 @@
+Build 16 is done and QA re-verify (step 17) is now open; the Route is below. I composed a fresh QA Handoff (49) without the implementation history or the Sender assessment. `log.md` is not in my write list, so the runtime appends the 047-route entry itself.
+
+<<<FILE goals/G-001-combat-monotony/49-studio-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 49
+from: studio
+to: qa
+stage: Verify
+outcome: routed
+---
+# 49: studio → qa — Re-verify the current build (repo/) at 30 and 60 FPS
+
+## Task
+
+Independently verify the current build in `repo/` against the acceptance criteria in `design/combat.md` and the amendments in `design/combat-step-44-walker-limit.md` and `design/combat-step-46-room3-cap.md`. Cover every item below, at both 30 and 60 FPS where timing is involved. Report pass/fail per criterion.
+
+## Context
+
+G-001 (combat feels monotonous). Your earlier verification (43) of the previous build failed on F2 (player view omitted the brute's shrug message, criterion 19a) and F3 (the banner showed the wrong build number). Design has since ruled on the other open items: criterion 13 (walker limit in rooms 3–5) is judged against D-006, and criterion 11 is reworded by D-007 and `design/combat-step-46-room3-cap.md`. A new build is ready for you. Judge it only from the spec, the criteria and what you observe by running it.
+
+## Findings
+
+Nothing from the implementer is passed to you. Start by running `python3 -m unittest discover -s tests` and report failures as they are; some tests are new and have not been run before. Then:
+
+1. Re-check F2 and F3 with the scripts and acceptance criteria from your report 43 (criterion 19a, including no message when a swipe kills; and the banner shows the current build version).
+2. Cover the items marked "not run" in 43: criteria 2, 6, 10, 17 a–d, 19f; the isolated runner dash in criterion 3; the runner's one-swipe death in criterion 8; the rooms 1–2 contents in criterion 12; criterion 18c with a killed spitter; 20e, 20f, 21b; the 16e decision logs.
+3. Criterion 11 a–e as amended in `design/combat-step-46-room3-cap.md`, including the room 3 `*` count of 3–5 at 7.5 s and 11.7 s at both frame rates.
+4. Criterion 13 (walker limit, rooms 3–5) against D-006 (3–7 hearts, at least 2 rooms cleared) using `run_bots`.
+5. Regression check: rooms 1–5 at 30 and 60 FPS, anything else in the criteria that the above does not touch.
+
+Visual items (V1–V11) need a graphical build and are out of scope here.
+
+## Decisions already made
+
+- D-005: a contact blocked by invulnerability consumes the shot and spends the lunge's hit.
+- D-006: criterion 13 walker limit is 3–7 hearts with at least 2 rooms cleared.
+- D-007: simultaneous cue starts in room 3 after a cap delay are accepted; criterion 11 is the in-flight bound.
+- D-004 and D-001 stand (no new input beyond attack, dash, pause).
+
+## Constraints
+
+- Must play correctly at both 30 and 60 FPS.
+- No new input buttons.
+- Do not rule on design questions: if a rule is undefined or contradictory, report `question` with the case rather than inventing the expectation.
+
+## Open questions
+
+None.
+
+## Expected output
+
+A verification report with a pass/fail per criterion (and the list of anything still not run, with the reason), reproduction scripts for each failure, and the severity of each. Address the result to `studio`. A fail on the same criterion a second time goes to the Technical Director (loop limit), so state clearly which criteria failed in 43 and fail again here.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: design/combat.md, design/combat-step-44-walker-limit.md, design/combat-step-46-room3-cap.md, repo/manual.md, repo/README.md, project.md#constraints, the build in repo/ (run commands in project.md)
+- Decisions: decisions/D-004-spitter-cue-gap-brute-no-cancel-room2-spitter-deferred.md, decisions/D-005-blocked-contact-consumes-shot-and-spends-lunge.md, decisions/D-006-walker-limit-rooms-3-5-structural-ceiling.md, decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md
+- Previous handoff: goals/G-001-combat-monotony/43-qa-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-16
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): a player playing the current build's combat experiences it as varied and engaging instead of monotonous. Different situations call for noticeably different play (positioning, timing, use of attack and dash), and the player can tell why. The improvement stays inside the vision pillars: one-button combat (attack + dash only, D-001), short runs, readable threats. Numeric thresholds belong to Design; the final verdict belongs to Review.
+
+Out of scope: new input buttons (needs Owner approval per D-001), changing run length, new biomes or content unrelated to combat variety, and any change to the core concept. Not a defect report: nothing in the request says combat is broken.
+
+## Unknowns
+
+- Observe: done (scripted play, rooms 1–3 + practice room; 02). FPS divergence (qa): done (16, 20); the contact-edge graze is accepted (D-002, D-003). Spitter fire times: build conforms to its spec (36).
+- Diagnose: second pass done (31). Melee enemies share one answer (S1, the core of the Goal); rooms 4–5 spitter crossfire was unfair (S4). Evidence is scripted play; runner, brute and crossfire for a human are unconfirmed. A third Diagnose pass without progress goes to `game-director` review (loop limit).
+- Decide: skipped. Options so far are variant parameters, a cancel flag, spitter timing, contact consequences; all inside D-001 and the pillars. Tentative again (game-director) if a later step finds the need for a new enemy type, healing, new input, or a scope or priority change.
+- Design: complete (35, 38, 44, 46; D-004 to D-007). Criterion 13 walker limit: D-006. Room 3 cap: accepted as built, criterion 11 reworded to "shots in flight never exceed 2 plus living spitters" (D-007, design/combat-step-46-room3-cap.md); fallback if the playtest reopens it is a 0.2 s cue gap in room 3 (own spec step).
+- Plan: skipped (approach local, reuses the enemy update loop). Returns if the same criterion fails verification twice.
+- Build: 0.6 done (40); 0.6.1 done (48): F2 and F3 fixed in the player view only, tests written but not run by the engineer.
+- Verify (QA): re-verify open (49): F2, F3, the "not run" list from 43, criterion 11 a–e, criterion 13 against D-006, and running the test suite first. F2/F3 failing again goes to `technical-director` (loop limit). Verify (visual): V1–V11 need a graphical build, a proposed new Goal at Close; V12 open until one exists. Art-director items from 35 and 38 wait with these.
+- Play: first pass done (27). Second pass planned after Verify passes; fresh, hand-timed on rooms 2, 4 and 5 (runner, brute, crossfire) and room 3, including a variant that keeps spitters alive for about 12 s to force a cap delay; focus without the expected result. Reopen room 3 if the tester is hit by most of a simultaneous volley, reports a shot from nowhere, or a count exceeds 5.
+- Review: planned (`game-director`), experience Goal. The Goal is not yet met.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 01-studio-to-playtester.md (report: 02-playtester-to-studio.md) |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-studio-to-game-designer.md (result: 04-game-designer-to-studio.md) |
+| 3 | Decide | game-director | make-decision | skipped (no real choice; see Unknowns) | — |
+| 4a | Design | game-designer | write-design-spec | done | 05-studio-to-game-designer.md (result: 07-game-designer-to-studio.md) |
+| 4b | Observe (FPS divergence) | qa | reproduce-defect | done | 06-studio-to-qa.md (result: 08-qa-to-studio.md) |
+| 5 | Plan | technical-director | technical-plan | skipped (approach local; see Unknowns) | — |
+| 6 | Build | gameplay-engineer | implement-change | done | 09-studio-to-gameplay-engineer.md (result: 10-gameplay-engineer-to-studio.md) |
+| 7a | Design (criterion 14, spec gaps) | game-designer | write-design-spec | done | 11-studio-to-game-designer.md (result: 14-game-designer-to-studio.md) |
+| 7b | Verify (visual) | art-director | visual-review | done | 12-studio-to-art-director.md (result: 15-art-director-to-studio.md) |
+| 7c | Observe (walker 30/60 divergence) | qa | reproduce-defect | done | 13-studio-to-qa.md (result: 16-qa-to-studio.md) |
+| 7d | Build (bot log data, walker test) | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md (result: 18-gameplay-engineer-to-studio.md) |
+| 8 | Verify (criteria 1–16, V12) | qa | verify-change | done (question: graze) | 19-studio-to-qa.md (result: 20-qa-to-studio.md) |
+| 8b | Design (graze, cap, margin, doc conflicts) | game-designer | write-design-spec | done | 21-studio-to-game-designer.md (result: 22-game-designer-to-studio.md) |
+| 8c | Build (contact test / cap) | gameplay-engineer | implement-change | skipped (graze and cap accepted as built) | — |
+| 8d | Verify (criteria 1–17; close 30 FPS gaps) | qa | verify-change | done (pass) | 23-studio-to-qa.md (result: 24-qa-to-studio.md) |
+| 9a | Play | playtester | playtest-session | done | 25-studio-to-playtester.md (report: 27-playtester-to-studio.md) |
+| 9b | Design (QA notes: exact-reach miss, lunge band) | game-designer | write-design-spec | done | 26-studio-to-game-designer.md (result: 30-game-designer-to-studio.md) |
+| 10a | Diagnose (playtest issues 1–4) | game-designer | diagnose-experience | done | 28-studio-to-game-designer.md (result: 31-game-designer-to-studio.md) |
+| 10b | Observe (room 2 grub hit after swipe) | qa | reproduce-defect | done (not a defect) | 29-studio-to-qa.md (result: 32-qa-to-studio.md) |
+| 11 | Decide (if Design implies direction or scope change) | game-director | make-decision | tentative | — |
+| 12a | Design (Options 1–2, manual wording) | game-designer | write-design-spec | done | 33-studio-to-game-designer.md (result: 35-game-designer-to-studio.md) |
+| 12b | Observe (spitter fire times, rooms 3–4) | qa | reproduce-defect | done (no defect) | 34-studio-to-qa.md (result: 36-qa-to-studio.md) |
+| 12c | Design (invulnerable contact, room 3 cue overlap) | game-designer | write-design-spec | done | 37-studio-to-game-designer.md (result: 38-game-designer-to-studio.md) |
+| 13 | Build (build 0.6 per Design 35 and 38) | gameplay-engineer | implement-change | done | 39-studio-to-gameplay-engineer.md (result: 40-gameplay-engineer-to-studio.md) |
+| 14a | Verify (0.6, 30 and 60 FPS) | qa | verify-change | done (fail: F2, F3, 13@60, room 3) | 41-studio-to-qa.md (result: 43-qa-to-studio.md) |
+| 14b | Design (criterion 13 walker limit, 60 FPS) | game-designer | write-design-spec | done (D-006, no build change) | 42-studio-to-game-designer.md (result: 44-game-designer-to-studio.md) |
+| 15 | Design (room 3 cap vs criterion 11) | game-designer | write-design-spec | done (D-007, accepted as built) | 45-studio-to-game-designer.md (result: 46-game-designer-to-studio.md) |
+| 16 | Build (F2, F3 only) | gameplay-engineer | implement-change | done | 47-studio-to-gameplay-engineer.md (result: 48-gameplay-engineer-to-studio.md) |
+| 17 | Verify (re-verify, incl. "not run" list, criterion 11 a–e) | qa | verify-change | open | 49-studio-to-qa.md |
+| 18 | Play (fresh, hand-timed rooms 2–5) | playtester | playtest-session | planned | — |
+| 19 | Review | game-director | review-outcome | planned | — |
+| 20 | Next | studio | — | planned | — |
+
+## Route changes
+
+After 16 (Build 0.6.1, 48): fits. F2 and F3 fixed in `play.py` only; the engineer ran no tests, so QA must run the suite first. Opened Verify 17 (49), a fresh Handoff without the implementation history or Sender assessment, covering the "not run" list, criterion 11 a–e and criterion 13 per D-006.
+
+## Next action
+
+Run the qa step with 49-studio-to-qa.md (result addressed to `studio`). Then Route: on pass, compose a fresh playtester Handoff (build and player profile only, no change or expected result); on fail, apply the return rules (a second failure on the same criterion goes to `technical-director`).
+
+## Outcome
+
+(open)
+>>>END

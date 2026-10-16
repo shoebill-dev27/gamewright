@@ -1,0 +1,187 @@
+<<<FILE goals/G-001-combat-monotony/53-playtester-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 53
+from: playtester
+to: studio
+stage: Play
+outcome: done
+---
+# 53: playtester → studio — Observation report: combat of rooms 2–5
+
+## Task
+
+Report of what I experienced playing rooms 2–5 of the build with the player view, using two approaches per room.
+
+## Method (what I actually did)
+
+- I did not play live. I wrote reaction-rule scripts (`when ... then ...`) and ran them through `python3 play.py --view player {script}`. The rules react to what is on screen, with the 0.15 s reaction limit. I used no trace view, bots or tests, and I read no source.
+- This is automation, not a human hand. My "feelings" below are inferred from the screens and cues I saw, and are weaker than live play would give.
+- I ran 8 sessions, two per room.
+  - First round: room 2 aggressive, room 3 cautious, room 4 aggressive, room 5 aggressive. The output of these four was cut at about 20 s (rooms 2 and 5 at about 21–24 s), so I did not see how they ended.
+  - Second round: room 2 cautious, room 3 aggressive, room 4 cautious, room 5 cautious. All used `end 16`, except room 3, which ended at its own clear time.
+- Rule lines used. A reaction rule is a `when` line.
+  - Common to most sessions: `when see * coming within 1.5 then move aside`.
+  - In rooms 2, 4 and 5 (first round), `when text "rears back" then dash aside`; in the second-round cautious runs this rule was `move aside` instead.
+  - Rooms 4 and 5 also had `when text "takes aim" then move aside`, then attack rules at about 1.4 tiles for each enemy type.
+
+### Scripts played
+
+Room 2, aggressive:
+```text
+room 2
+when see * coming within 1.5 then move aside
+when text "rears back" then dash aside
+when see r within 1.4 then attack
+when see g within 1.4 then attack
+when see g within 4 then move toward
+```
+Room 3, cautious:
+```text
+room 3
+when see * coming within 1.5 then move aside
+when text "rears back" then dash aside
+when see r within 1.4 then attack
+when see G within 1.4 then attack
+when see g within 1.4 then attack
+when see G within 3 then move away
+when see g within 3 then face
+```
+Room 4, aggressive and room 5, aggressive (identical script, only the room line differs):
+```text
+room 4   (or room 5)
+when see * coming within 1.5 then move aside
+when text "rears back" then dash aside
+when text "takes aim" then move aside
+when see r within 1.4 then attack
+when see g within 1.4 then attack
+when see G within 1.4 then attack
+when see s within 1.4 then attack
+when nothing within 2 then move toward
+```
+Room 2, cautious:
+```text
+room 2
+end 16
+when see * coming within 1.5 then move aside
+when text "rears back" then move aside
+when see r within 1.4 then attack
+when see g within 1.4 then attack
+when see G within 1.4 then attack
+when see G within 3 then move away
+when see r within 3 then move away
+```
+Room 3, aggressive:
+```text
+room 3
+end 16
+when see * coming within 1.5 then move aside
+when text "takes aim" then move aside
+when see s within 1.4 then attack
+when see s within 12 then move toward
+```
+Room 4, cautious:
+```text
+room 4
+end 16
+when see * coming within 1.5 then move aside
+when text "rears back" then move aside
+when text "takes aim" then move aside
+when see r within 1.4 then attack
+when see g within 1.4 then attack
+when see s within 1.4 then attack
+when see g within 3 then move away
+when see r within 3 then move away
+```
+Room 5, cautious:
+```text
+room 5
+end 16
+when see * coming within 1.5 then move aside
+when text "rears back" then move aside
+when text "takes aim" then move aside
+when see r within 1.4 then attack
+when see g within 1.4 then attack
+when see G within 1.4 then attack
+when see G within 3 then move away
+when see g within 3 then move away
+```
+
+## Session summary
+
+| Room | Approach | Result I saw |
+|---|---|---|
+| 2 | aggressive | 3/3 hearts until 11.6 s, then hit once by the brute's lunge. About 24 s in, I was at 2/3 with enemies still alive (cut off). |
+| 2 | cautious | Hit at 4.25 s and 5.4 s by grubs and runners (1/3 hearts). Then I retreated to the left wall and the brute crept toward me for about 10 s. At 16 s I was still at 1/3 with the brute alive. |
+| 3 | cautious | Hit twice by shots by 4.7 s (1/3 hearts). Then I never killed anything. I drifted to edges and corners while three spitters kept firing for more than 20 s. |
+| 3 | aggressive | Charged the spitters. All three were dead and the room cleared at 9.4 s, with 2/3 hearts and one hit taken. |
+| 4 | aggressive | No hit through about 19 s. Few kills in what I saw. Shots filled the room the whole time. |
+| 4 | cautious | Hit by a shot at 4.8 s and by a grub at 14.7 s (1/3 hearts). One spitter and one runner killed, and I was still alive at 16 s. |
+| 5 | aggressive | One hit (a shot at 4.35 s), then 2/3 hearts for the rest of what I saw. Brute and grubs fought, one spitter killed at 12.4 s. Unfinished at about 21 s. |
+| 5 | cautious | Went down at 9.0 s (3 hearts lost in 9 s). |
+
+## Concrete moments
+
+- **Room 2, aggressive.**
+  - Every `rears back` was answered with the same dash. By about 24 s I had dashed 11 or more times and landed only a handful of swipes.
+  - Spacing against the two runners felt like one repeating loop: see the flash, dash sideways, swipe.
+  - The brute's warning is long (0.7 s) and easy to read, but I stood in its line at 11.5 s with 0.08 s left and ate the hit.
+- **Room 2, cautious.**
+  - Grub lunge at 4.0–4.25: I swiped the grub at 0.05 s before its lunge and was hit 0.1 s later anyway.
+  - At 5.0 s a runner warning showed 0.27 s left. I swiped something else, and was hit at 5.4 by a grub lunge.
+  - After that my "move away" rule pushed me to the left wall and the brute shuffled after me for 10 s with nothing happening. This was the most boring stretch of the session.
+- **Room 3, cautious.** At 1.2 s, two aim lines crossed the whole room diagonally, forming an X with me at the center. Once two or three spitters were aiming at once, the screen turned into a web of `~` lines. From 9.6 s on, three spitters aimed at the same moment and fired together (10.2, 14.4, 18.0, 20.4). Between volleys I did nothing useful. I ended 1/3 hearts and never reached a spitter. Passive play here felt like waiting in a corner, not like fighting.
+- **Room 3, aggressive.** This was the most engaging session. Rushing a spitter and swiping it down while the others took aim gave a real "go go go" rhythm. I took one hit at 2.1 s from a shot I had already seen spawn, and the room was clear in 9.4 s. The aggressive and cautious approaches felt very different here, and aggressive was much better.
+- **Room 4, aggressive.**
+  - Spitters fired one at a time, every 0.6–0.8 s, from opposite corners. The result was a constant stream of `*` crossing the room.
+  - I could dodge by walking, but I felt like I was moving through a hail of shots rather than reading individual threats.
+  - Grubs and runners lunged on top of that. I dashed more than I swiped. Few enemies died in what I saw, and nothing felt special.
+- **Room 4, cautious.**
+  - Shots hit me while I kept retreating (4.8 s), and a grub got me when I swiped it 0.1 s before its lunge landed (14.6–14.7 s).
+  - Standing in the right-hand column with a spitter shooting straight down my column at 7 s and at 9 s was frightening but fair.
+- **Room 5, aggressive.**
+  - The brute plus grubs plus spitters overlapped well. At 7.35 s a brute warning (0.7 s) arrived while I was already dashing away from a grub, and that felt like a real decision point.
+  - Killing the spitter (11.97–12.4 s) took one close run through the shot stream, and it felt good.
+- **Room 5, cautious.**
+  - I was hit by a shot at 4.27 s and again at 6.43 s while trying to swipe a grub, with grubs, the brute and spitter lines all on screen.
+  - At 8.93 s I swiped a rearing grub (within 1.5 tiles) and the message said `grub hit`, but I was hit by a grub 0.1 s later and went down at 9.03. The manual says a swipe that interrupts staggers it. I could not tell whether this was the same grub, another grub, or the brute, since the message says "a grub" for all of them.
+  - Death was quick and clear that I was swamped, but the last exchange was unclear.
+
+## Issues with impact
+
+1. **Cautious play in spitter rooms (3, and at times 4 and 5) is a stalemate.** Impact: high. I stood at an edge for ~15 s while volleys arrived, killed nothing, and could not tell what I should be doing. Aggressive play was much more fun than cautious play.
+2. **Rooms 2, 4 and 5 feel like the same loop.** Impact: medium to high. Each threat gets a flash and a cue, and each answer was "dash sideways", then swipe the stunned grub. The warnings are clear and fair, but the fights read as one situation repeated, with the brute and spitter variations mostly changing how long the loop lasts. I did not feel a different decision in room 4 versus room 2.
+3. **Room 4's spitter stream becomes background noise.** Impact: medium. With one spitter firing every 0.6–0.8 s, I stopped reacting to individual shots. They became a constant moving screen to walk through, not events.
+4. **Message text does not say which enemy is warning.** Impact: medium. "a grub rears back" appears for grubs, runners and the brute alike. I only learned who it was from the `cue:` line, which is easy to miss in a busy screen.
+5. **Swipe-cancel is unclear.** Impact: medium. In rooms 2, 4 and 5 I was hit within about 0.1 s of a swipe that landed on a rearing grub (room 2 at 4.15/4.25, room 4 at 14.6/14.7, room 5 at 8.93/9.03). I cannot tell whether the swipe was too late, hit a different grub, or failed to cancel.
+6. **Overlapping aims in room 3 are hard to read.** Impact: medium. Three simultaneous diagonal lines crossing the whole room made it hard to know which line was mine.
+
+## Positives
+
+- Warnings are readable and fair. Every hit I took had a visible warning, line or approaching shot beforehand. I saw nothing shot from nowhere and no stuck states.
+- The `cue:` lines with the seconds left are very clear.
+- Brute telegraph (0.7 s) is clearly different from grub (0.5 s) and runner (0.35 s). That is a good difference in timing.
+- Room 3 aggressive and room 5 aggressive felt intense and short, which suits this player profile.
+- Dashing through a lunge or shot with no damage felt dependable.
+
+## What I could not observe
+
+- Ends of the first four sessions (output cut at about 20 s), so I do not know how those rooms resolved.
+- Whether a human with a gamepad would feel the same. Reactions were scripted and not tuned per moment.
+- A full clear of rooms 2, 4 and 5. Only room 3 (aggressive) was cleared.
+
+## Open player questions
+
+- If a swipe lands on a rearing grub 0.1 s before the lunge, should it stop the lunge?
+- When several spitters aim at once in room 3, which line is mine?
+- Is there a reason to play cautiously in rooms with spitters at all?
+
+## Load
+
+- Role: studio/roles/playtester.md
+- Skills: studio/skills/playtest-session.md
+- Project: project.md#player-profile, repo/manual.md
+- Decisions: none
+- Previous handoff: goals/G-001-combat-monotony/51-studio-to-playtester.md
+>>>END

@@ -1,0 +1,218 @@
+Build 0.6 is routed: Verify (QA) and a Design ruling on the walker tuning question now run in parallel. I did not append the Route entry to `log.md`, since it is not among my writable paths. It still needs to be added as entry 040-route.
+
+<<<FILE goals/G-001-combat-monotony/41-studio-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 41
+from: studio
+to: qa
+stage: Verify
+outcome: routed
+---
+# 41: studio → qa — Verify build 0.6 against criteria 1–21 at 30 and 60 FPS
+
+## Task
+
+Verify build 0.6 (`repo/`, sha 5eb065e08fef) independently, with `verify-change`. Check every acceptance criterion in the Design handoffs (35, 38) at both 30 and 60 FPS, including regressions in criteria 1–17 that passed for 0.5. Pay particular attention to the new and changed criteria: 18–21 and changed 3, 6, 8, 11, 13–16.
+
+## Context
+
+G-001 (combat monotony). Build 0.5 passed criteria 1–17 (handoff 24). Playtesting (27) and Diagnose (31) found that melee enemies share one answer and that the spitter crossfire in rooms 4–5 is unfair. Design (35, 38; D-004, D-005) specified build 0.6 to address both. Visual criteria V1–V11 wait for a graphical build and are out of scope here.
+
+## Findings
+
+Behavior the build should now show (from the spec; verify against the criteria text, not this summary):
+
+- **Rooms 4–5, spitters.** The first spitter shots come at about 1.8 s and 3.0 s. A spitter cue never starts while another spitter's cue is running, or less than 0.6 s after the last shot in the room. Room 3 and practice rooms keep the 0.8 s offset and do not use the gap rule (room 3 first shots at 1.8, 2.6 and 3.4 s).
+- **Brute.** A swipe that damages but does not kill a brute in wind-up does not cancel the wind-up; the lunge still comes. The grub and the runner are still cancelled. A kill in wind-up produces no lunge. The text view should show a message that the brute shrugs off the swipe (the trace shows a `shrug` event). Check that the player view (`run_play`) prints it; if it does not, report that as a defect of the player view.
+- **Blocked contact (D-005).** A shot touching a player who is invulnerable (dashing, hit-stun or the hurt window) is consumed and does no damage, now or later. A lunge contact during invulnerability spends that lunge's hit: no damage for the rest of that lunge, the lunge is not shortened, and the next lunge damages normally.
+- **Manual.** `repo/manual.md` (version 0.6) should describe the above in player terms and match the build.
+
+How to exercise (project commands in `project.md`: `run_tests`, `run_play`, `run_trace`, `run_bots`):
+
+- Practice room with a brute near the player and two swipes during its wind-up, at both frame rates.
+- Rooms 4 and 5 for 15 s or more with a surviving player, at both rates: first shot times, gaps, overlaps.
+- Room 3 for 15 s or more with a surviving player, in a real room trace (requested in the Design handoff 38): check for cap delay and simultaneous cue starts.
+- A practice room with one spitter and a grub, for the hurt-window and dash scripts of criteria 20 and 21.
+- `run_bots` for criteria 13–16: report the measured figures per room and rate, and your own verdict against the criteria as written. A figure over a limit is reported as a fail of that criterion; the question of whether the limit itself is right is being routed to Design in parallel, so do not adjust a limit yourself.
+
+## Decisions already made
+
+- D-001: one-button combat; no new input.
+- D-002, D-003: per-frame contact sampling is kept; the contact-edge graze and the exact-reach rule are accepted.
+- D-004: rooms 4–5 get a 0.6 s cue gap; the brute's wind-up is not cancelled by a swipe; the room 2 spitter is deferred.
+- D-005: a contact blocked by invulnerability consumes the shot and spends the lunge's hit; simultaneous cue starts outside rooms 4–5 are accepted.
+
+## Constraints
+
+- Must play correctly at both 30 and 60 FPS.
+- Verify from the spec, the criteria and the build; do not rely on any explanation of why it should work.
+- Do not change files other than your report.
+
+## Open questions
+
+- Does the player view print the brute's shrug message?
+- What does a real-room trace of room 3 (15 s or more, surviving player) show for cap delay and simultaneous cue starts?
+
+## Expected output
+
+A verification report with a pass/fail verdict per criterion and per frame rate, the measured bot figures, reproduction steps for any failure, and answers to the open questions. Address it to `studio` (a fresh Play step follows and must be composed from permitted information only). Use `kind: handoff`, `from: qa`, `to: studio`, `outcome: pass | fail | question`.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: design/combat.md, repo/manual.md, repo/README.md, project.md#constraints, the build in repo/
+- Decisions: decisions/D-002-contact-edge-graze-accepted.md, decisions/D-003-contact-edge-exact-reach-and-lunge-band.md, decisions/D-004-spitter-cue-gap-brute-no-cancel-room2-spitter-deferred.md, decisions/D-005-blocked-contact-consumes-shot-and-spends-lunge.md
+- Previous handoff: goals/G-001-combat-monotony/38-game-designer-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/42-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-001
+seq: 42
+from: studio
+to: game-designer
+stage: Design
+outcome: routed
+---
+# 42: studio → game-designer — Tuning question on criterion 13 (walker bot, 60 FPS, rooms 3–5)
+
+## Task
+
+Rule on criterion 13 with `write-design-spec`: build 0.6's walker bot loses more hearts in rooms 3–5 at 60 FPS than the criterion allows. Decide whether the limit, the criterion's wording or a room or enemy parameter should change, and write the result as a spec amendment with player-observable acceptance criteria.
+
+## Context
+
+G-001 (combat monotony). The engineer finished build 0.6 per Design 35 and 38 (D-004, D-005) and found no spec gap. All criteria it checked hold except one bot figure: the walker bot (a deliberately naive player that walks toward enemies and swipes) loses 7 hearts in rooms 3–5 at 60 FPS (4 at 30 FPS), against criterion 13's limit of 6. Other criterion 13 limits hold: the walker clears 2 of 3 rooms at both rates, the dodger loses 0 and clears 3 of 3, the camper clears fewer rooms than the walker. Build 0.6 is going to QA for Verify in parallel (41); QA will report its own measured figures.
+
+## Findings
+
+Engineer's bot figures for 0.6 (hearts lost; `run_bots`, limit 60), for your reference. QA will re-measure.
+
+| | 30 FPS | 60 FPS |
+|---|---|---|
+| Walker room 3 | 0 lost, cleared | 2 lost (shots), cleared |
+| Walker room 4 | 1 lost (grub), cleared | 3 lost (grub 1, shot 2), not cleared |
+| Walker room 5 | 3 lost (grub 2, shot 1), not cleared | 2 lost (grub), cleared |
+| Walker rooms 3–5 | 4 lost, 2 of 3 cleared | 7 lost, 2 of 3 cleared |
+| Dodger rooms 1–5 | 0 lost, 5/5 cleared | 0 lost, 5/5 cleared |
+
+- The 0.5 values in the spec were: walker rooms 3–5 4 lost and 2 cleared at 30 FPS, 6 lost and 3 cleared at 60 FPS. So the 30 FPS figure is unchanged and the 60 FPS figure moved from 6 to 7 hearts with one fewer room cleared.
+- The engineer reports the walker is sensitive to its 0.15 s decision grid, and per-room totals moved in opposite directions between 0.5 and 0.6.
+- The 30/60 difference comes from bot timing, not from a rule difference; criterion 16 (rates agree for the dodger) holds.
+- Hearts lost by the walker in rooms 1–2 are 5 (criterion 14 wants at least 1), which is unchanged in intent.
+
+## Decisions already made
+
+- D-001: one-button combat; no new input.
+- D-004: rooms 4–5 cue gap 0.6 s; brute not cancelled; room 2 spitter deferred.
+- D-005: blocked contact consumes the shot and spends the lunge hit.
+- Design 35 and 38 are the approved spec for 0.6; the engineer built it as written.
+
+## Constraints
+
+- Must play correctly at both 30 and 60 FPS; the pillars apply (readable threats, short runs, one-button combat).
+- Prefer changes that reuse existing systems; no new enemy, healing, input or room content.
+- Do not undo D-004 or D-005. If the answer needs a change that contradicts them or a scope or priority change, hand back for Decide (`game-director`).
+- The purpose of criterion 13 is a gradient: the naive player is punished more than the dodger, but not walled out. Keep that purpose, state whether 7 at 60 FPS breaks it, and give the reason.
+
+## Open questions
+
+- Is 7 hearts for the walker at 60 FPS a breach of intent, or is the limit of 6 too tight for a grid-sensitive bot? If the limit changes, what should it be, and should it be expressed as a range across both rates?
+- If a parameter should change instead, which one, and what must QA re-verify afterwards?
+- Does the answer depend on QA's independent figures? If so, say which figure would change your ruling.
+
+## Expected output
+
+An amendment to the spec (in `design/combat.md` or a design note you name) and a handoff to `studio` (`kind: handoff`, `from: game-designer`, `to: studio`) stating the ruling, the changed criteria and, if a build change is needed, the exact change list. Record a Decision if the ruling constrains later work.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md, studio/skills/diagnose-experience.md
+- Project: design/combat.md, project.md#vision, project.md#constraints
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-004-spitter-cue-gap-brute-no-cancel-room2-spitter-deferred.md, decisions/D-005-blocked-contact-consumes-shot-and-spends-lunge.md
+- Previous handoff: goals/G-001-combat-monotony/40-gameplay-engineer-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-16
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): a player playing the current build's combat experiences it as varied and engaging instead of monotonous. Different situations call for noticeably different play (positioning, timing, use of attack and dash), and the player can tell why. The improvement stays inside the vision pillars: one-button combat (attack + dash only, D-001), short runs, readable threats. Numeric thresholds belong to Design; the final verdict belongs to Review.
+
+Out of scope: new input buttons (needs Owner approval per D-001), changing run length, new biomes or content unrelated to combat variety, and any change to the core concept. Not a defect report: nothing in the request says combat is broken.
+
+## Unknowns
+
+- Observe: done (scripted play, rooms 1–3 + practice room; 02). FPS divergence (qa): done (16, 20); the contact-edge graze is accepted (D-002, D-003). Spitter fire times (36): build 0.5 conforms to its spec; no real-room trace of room 3 past about 7 s yet (asked of Verify, 41).
+- Diagnose: second pass done (31). Melee enemies share one answer (S1, the core of the Goal); rooms 4–5 spitter crossfire was unfair (S4). Evidence is scripted play; runner, brute and crossfire for a human are unconfirmed. A third Diagnose pass without progress goes to `game-director` review (loop limit).
+- Decide: skipped. Options so far are variant parameters, a cancel flag, spitter timing, contact consequences; all inside D-001 and the pillars. Tentative again (game-director) if a later step finds the need for a new enemy type, healing, new input, or a scope or priority change.
+- Design: 35, 38 done (D-004, D-005). New question (42): walker bot loses 7 hearts in rooms 3–5 at 60 FPS in 0.6, over criterion 13's limit of 6 (30 FPS: 4); tuning or limit ruling.
+- Plan: skipped (approach local, reuses the enemy update loop). Returns if the same criterion fails verification twice.
+- Build: 0.6 done (40; tests pass, 54). Another Build only if Design 42 or Verify finds a change is needed.
+- Verify (QA): open (41), criteria 1–21 at 30 and 60 FPS, independent; bots 13–15, 16c re-measured; open items: `play.py` brute-shrug message, room 3 real-room trace. Verify (visual): V1–V11 need a graphical build, a proposed new Goal at Close; V12 open until one exists. Art-director items from 35 and 38 wait with these.
+- Play: first pass done (27). Second pass planned after Verify; fresh, hand-timed on rooms 2, 4 and 5 (runner, brute, crossfire), focus without the expected result.
+- Review: planned (`game-director`), experience Goal. The Goal is not yet met.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 01-studio-to-playtester.md (report: 02-playtester-to-studio.md) |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-studio-to-game-designer.md (result: 04-game-designer-to-studio.md) |
+| 3 | Decide | game-director | make-decision | skipped (no real choice; see Unknowns) | — |
+| 4a | Design | game-designer | write-design-spec | done | 05-studio-to-game-designer.md (result: 07-game-designer-to-studio.md) |
+| 4b | Observe (FPS divergence) | qa | reproduce-defect | done | 06-studio-to-qa.md (result: 08-qa-to-studio.md) |
+| 5 | Plan | technical-director | technical-plan | skipped (approach local; see Unknowns) | — |
+| 6 | Build | gameplay-engineer | implement-change | done | 09-studio-to-gameplay-engineer.md (result: 10-gameplay-engineer-to-studio.md) |
+| 7a | Design (criterion 14, spec gaps) | game-designer | write-design-spec | done | 11-studio-to-game-designer.md (result: 14-game-designer-to-studio.md) |
+| 7b | Verify (visual) | art-director | visual-review | done | 12-studio-to-art-director.md (result: 15-art-director-to-studio.md) |
+| 7c | Observe (walker 30/60 divergence) | qa | reproduce-defect | done | 13-studio-to-qa.md (result: 16-qa-to-studio.md) |
+| 7d | Build (bot log data, walker test) | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md (result: 18-gameplay-engineer-to-studio.md) |
+| 8 | Verify (criteria 1–16, V12) | qa | verify-change | done (question: graze) | 19-studio-to-qa.md (result: 20-qa-to-studio.md) |
+| 8b | Design (graze, cap, margin, doc conflicts) | game-designer | write-design-spec | done | 21-studio-to-game-designer.md (result: 22-game-designer-to-studio.md) |
+| 8c | Build (contact test / cap) | gameplay-engineer | implement-change | skipped (graze and cap accepted as built) | — |
+| 8d | Verify (criteria 1–17; close 30 FPS gaps) | qa | verify-change | done (pass) | 23-studio-to-qa.md (result: 24-qa-to-studio.md) |
+| 9a | Play | playtester | playtest-session | done | 25-studio-to-playtester.md (report: 27-playtester-to-studio.md) |
+| 9b | Design (QA notes: exact-reach miss, lunge band) | game-designer | write-design-spec | done | 26-studio-to-game-designer.md (result: 30-game-designer-to-studio.md) |
+| 10a | Diagnose (playtest issues 1–4) | game-designer | diagnose-experience | done | 28-studio-to-game-designer.md (result: 31-game-designer-to-studio.md) |
+| 10b | Observe (room 2 grub hit after swipe) | qa | reproduce-defect | done (not a defect) | 29-studio-to-qa.md (result: 32-qa-to-studio.md) |
+| 11 | Decide (if Design implies direction or scope change) | game-director | make-decision | tentative | — |
+| 12a | Design (Options 1–2, manual wording) | game-designer | write-design-spec | done | 33-studio-to-game-designer.md (result: 35-game-designer-to-studio.md) |
+| 12b | Observe (spitter fire times, rooms 3–4) | qa | reproduce-defect | done (no defect) | 34-studio-to-qa.md (result: 36-qa-to-studio.md) |
+| 12c | Design (invulnerable contact, room 3 cue overlap) | game-designer | write-design-spec | done | 37-studio-to-game-designer.md (result: 38-game-designer-to-studio.md) |
+| 13 | Build (build 0.6 per Design 35 and 38) | gameplay-engineer | implement-change | done | 39-studio-to-gameplay-engineer.md (result: 40-gameplay-engineer-to-studio.md) |
+| 14a | Verify (0.6, 30 and 60 FPS) | qa | verify-change | open | 41-studio-to-qa.md |
+| 14b | Design (criterion 13 walker limit, 60 FPS) | game-designer | write-design-spec | open | 42-studio-to-game-designer.md |
+| 15 | Play (fresh, hand-timed rooms 2, 4, 5) | playtester | playtest-session | planned | — |
+| 16 | Review | game-director | review-outcome | planned | — |
+| 17 | Next | studio | — | planned | — |
+
+## Route changes
+
+After 13 (Build 0.6, 40): fits; the engineer found no spec gap. One bot figure (walker, 60 FPS, rooms 3–5: 7 hearts vs limit 6) is a tuning question, so Design (42) runs in parallel with independent Verify (41). Build was not rerouted; the Sender assessment was not passed to QA.
+
+## Next action
+
+Run the qa step with 41-studio-to-qa.md and the game-designer step with 42-studio-to-game-designer.md (parallel). Then Route, waiting for both. If Verify fails a criterion, return to Build; if the Design ruling changes the build, open Build before Play. Otherwise compose a fresh Play handoff for the playtester from the build and player profile only.
+
+## Outcome
+
+(open)
+>>>END

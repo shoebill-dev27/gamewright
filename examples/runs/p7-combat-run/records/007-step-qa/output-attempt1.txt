@@ -1,0 +1,58 @@
+Round 1: run the tests, bots at both rates (with a repeat run to check determinism), and traces of a dash with a grub overlapping the player.
+
+<<<FILE @run/tests
+>>>END
+
+<<<FILE @run/bots/fps60
+bots camper,walker,dodger
+rooms 1-5
+fps 60
+>>>END
+
+<<<FILE @run/bots/fps60-repeat
+bots camper,walker,dodger
+rooms 1-5
+fps 60
+>>>END
+
+<<<FILE @run/bots/fps30
+bots camper,walker,dodger
+rooms 1-5
+fps 30
+>>>END
+
+<<<FILE @run/trace/dash-grub-60
+room empty
+fps 60
+player 0 4
+spawn grub 0.5 4
+0.0 dash left
+end 1.2
+>>>END
+
+<<<FILE @run/trace/dash-grub-30
+room empty
+fps 30
+player 0 4
+spawn grub 0.5 4
+0.0 dash left
+end 1.2
+>>>END
+
+<<<FILE @run/trace/dash-shot-60
+room empty
+fps 60
+player 8 4
+spawn spitter 4 4
+2.0 dash up
+end 3.5
+>>>END
+
+<<<FILE @run/trace/dash-shot-30
+room empty
+fps 30
+player 8 4
+spawn spitter 4 4
+2.0 dash up
+end 3.5
+>>>END

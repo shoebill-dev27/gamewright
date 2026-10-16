@@ -1,0 +1,43 @@
+<<<FILE @run/play/room2-aggressive
+room 2
+when see * coming within 1.5 then move aside
+when text "rears back" then dash aside
+when see r within 1.4 then attack
+when see g within 1.4 then attack
+when see g within 4 then move toward
+>>>END
+
+<<<FILE @run/play/room3-cautious
+room 3
+when see * coming within 1.5 then move aside
+when text "rears back" then dash aside
+when see r within 1.4 then attack
+when see G within 1.4 then attack
+when see g within 1.4 then attack
+when see G within 3 then move away
+when see g within 3 then face
+>>>END
+
+<<<FILE @run/play/room4-aggressive
+room 4
+when see * coming within 1.5 then move aside
+when text "rears back" then dash aside
+when text "takes aim" then move aside
+when see r within 1.4 then attack
+when see g within 1.4 then attack
+when see G within 1.4 then attack
+when see s within 1.4 then attack
+when nothing within 2 then move toward
+>>>END
+
+<<<FILE @run/play/room5-aggressive
+room 5
+when see * coming within 1.5 then move aside
+when text "rears back" then dash aside
+when text "takes aim" then move aside
+when see r within 1.4 then attack
+when see g within 1.4 then attack
+when see G within 1.4 then attack
+when see s within 1.4 then attack
+when nothing within 2 then move toward
+>>>END

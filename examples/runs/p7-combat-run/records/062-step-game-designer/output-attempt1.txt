@@ -1,0 +1,210 @@
+I answered both questions from the packet alone, so no `play` or `bots` runs were needed. The Studio can build from handoff 68; nothing is built yet.
+
+<<<FILE goals/G-001-combat-monotony/68-game-designer-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 68
+from: game-designer
+to: studio
+stage: Design
+outcome: done
+---
+# 68: game-designer → studio — Room 3 conflict already resolved by D-007; D-008 completed and accepted as D-011, ready to build after Review
+
+## Task
+
+Answer the two Design questions from 66. This handoff gives the answers, the spec files changed, and what is ready to build once the Studio opens a Build after Review 65.
+
+## Context
+
+Goal G-001. Build 0.6.1 is unchanged. QA (64) raised a room 3 shots-in-flight question. Playtest 63 raised a clarity issue with the variant message. No rule, timing, room or hearts change is made here.
+
+## Findings
+
+### 1. Room 3 shots in flight: already resolved by D-007
+
+- D-007 (accepted) and `design/combat-step-46-room3-cap.md` answer this.
+- That note's amended criterion 11 states the bound: "The number of shots in flight never exceeds 2 plus the number of living spitters." Room 3 up to 5 is accepted when the cap delays several cues together. Rooms 4–5 never exceed 3.
+- Where the note and `combat.md` differ on criterion 11 or the cap, the note governs.
+- Answers to QA:
+  - Simultaneous starts after a cap delay are still accepted (D-005 item 4, confirmed by D-007).
+  - The bound that applies in room 3 is 5, not 3. The sentence "never more than 3 in rooms 1–5" is withdrawn.
+  - QA's 4–5 `*` at 7.0–8.0 s is inside the bound. It is not a defect and not a reopen trigger.
+  - The player took no hit from the volleys and answered them with "move aside". This fits the derivation in D-007.
+- QA's first simultaneous start at 5.8 s follows a shot hit that freed a cap slot. That is a cap delay, so it does not trigger reopen item 3. If a later trace shows a simultaneous start in room 3 with no cap delay before it, that reopens D-007.
+- QA's count of "4 or 5" from pictures is not the agreed method. Criterion 11d counts visible `*` plus `a spitter spits` events in the 0.3 s up to the picture time, and a count of 3–5 in room 3 passes.
+
+**Leftover contradictions.** The spec files still contained two stale sentences, which is why QA read a conflict. They are now marked superseded in `design/combat-step68.md`, which lists them exactly:
+- The `combat.md` cap paragraph says "In every real room … the count stays at 3 or fewer".
+- The `repo/manual.md` spitter sentence says "no more than 3 are in the air at once".
+
+The fixed manual wording is in that file. It is a manual-only change.
+
+### 2. Other QA notes
+
+- **Late-swipe wording (59) stands.** It is still not applied to `repo/manual.md`. The exact text is in `design/combat-step68.md` and meets the 59 acceptance list. It is ready to build with D-011.
+- **Runner cancel vs kill.** No separate runner cancel rule is intended. A runner has 1 hp, so a swipe in reach kills it. That is recorded in the addendum. "Swipe cancels the wind-up" is only observable for the standard grub, and only the brute is the other flag value.
+
+### 3. D-008: it was not quite complete, now completed and accepted
+
+Gap found: D-008 named the wind-up messages but left the hit message `YOU ARE HIT by a grub` unchanged. That was the other half of playtest 63's confusion, since the tester was hit by a brute reported as "a grub".
+
+Decision recorded as D-011 (accepted, supersedes D-008). It stays inside the "readable threats" pillar and D-001: no new input, no timing change, no new information that is not already in the `cue:` line, and no change to graphical presentation.
+
+Strings (text build, wherever they are printed):
+
+| Variant | Wind-up message | Hit message |
+|---|---|---|
+| Standard grub `g` | `a grub rears back` | `YOU ARE HIT by a grub` |
+| Runner `r` | `a runner rears back` | `YOU ARE HIT by a runner` |
+| Brute `G` | `a brute rears back` | `YOU ARE HIT by a brute` |
+| Spitter shot | unchanged | `YOU ARE HIT by a shot` (unchanged) |
+
+- The hit message keeps its current suffix (for example `— hearts n/3`), and the swipe, kill, shrug and spitter messages stay unchanged.
+- The same strings apply in the player view and in any other text view that prints these messages. Nothing else is renamed.
+- Only the noun after "by" or "a" changes.
+- Compatibility: a rule `text "rears back"` still matches all three. A rule keyed on `a grub rears back` or `by a grub` now matches only standard grubs. Existing tests and bots that key on those strings are updated by the Build (test tooling).
+
+Acceptance criteria (player-observable, at 30 and 60 FPS, practice room, one case per variant):
+- **V-a.** A wind-up prints the variant's message once per wind-up, at the same moment as the current message (±1 frame).
+- **V-b.** A hit by a grub, runner or brute prints the matching hit message on the frame of contact, with the same hearts text as today.
+- **V-c.** In the same scripts, every other output line, including the `cue:` line, the `~` line, timings and hearts, is byte-identical to 0.6.1.
+- **V-d.** `text "rears back"` reacts to all three variants as before.
+- **V-e.** Criteria 1–11 and 17–21 of `combat.md` still hold, and the bot results do not change.
+
+Experience signal (Review and playtest only): a player can say from the message line alone which kind of grub is attacking or hit them, and the room 5 brute hit is not called unexplained.
+
+**Timing of the Build.** D-009 item 5 says a message change must not be mixed into a playtest pass without saying so. Open the Build only after Review 65. If Review requests another playtest of unchanged 0.6.1, hold the Build until after it. Otherwise state the new build number in the next playtest brief.
+
+## Decisions already made
+
+- D-005, D-007: unchanged. D-007 confirmed as the answer to question 1.
+- D-008: superseded by D-011 (adds the hit message, accepts the change).
+- D-009: unchanged.
+
+## Constraints
+
+- No new inputs, timings, room layouts or hearts.
+- D-004 to D-007 are not reopened. The spec text did not truly contradict itself. Only two stale sentences did, and they are now marked superseded.
+
+## Open questions
+
+For the Studio and later steps:
+1. Whether naming the variant helps or only moves a wasted dash elsewhere is for the next playtest (also open in D-008).
+2. A human check of whether a room 3 burst is answerable is still the open playtest item from D-007.
+
+## Expected output
+
+The Studio reads this alongside Review 65. If the Review leads to a Build:
+- Build D-011 (messages above, with V-a to V-e).
+- Apply the manual text from `design/combat-step68.md` (late swipes, in-flight count). It is wording only.
+- Verify at both frame rates.
+
+No Build is requested yet.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: design/combat-step68.md, design/combat-step59.md, design/combat-step-46-room3-cap.md, design/combat.md, repo/manual.md
+- Decisions: decisions/D-005-blocked-contact-consumes-shot-and-spends-lunge.md, decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md, decisions/D-009-review-next-pass-variant-aware-playtest.md, decisions/D-011-variant-named-messages-accepted.md
+- Previous handoff: goals/G-001-combat-monotony/66-studio-to-game-designer.md
+>>>END
+
+<<<FILE design/combat-step68.md
+# Combat design addendum, step 68 (stale sentences, manual wording, variant messages)
+
+Status: wording and message strings only. No rule, parameter, timing or room change. Where this file differs from `design/combat.md`, `design/combat-step59.md` or `repo/manual.md`, this file governs. Decisions: D-007 (unchanged), D-011 (accepts and completes D-008).
+
+## 1. Stale sentences, superseded (room 3 in-flight bound)
+
+`design/combat-step-46-room3-cap.md` (amended criterion 11, D-007) governs the cap. These sentences are superseded and must be folded out the next time the files are edited:
+
+- `combat.md`, Cap paragraph: "In every real room (at most 3 spitters, rooms 3–5) the count stays at 3 or fewer (QA: room 3 stays at 3 or fewer over 12 s). Only a practice room with four or more spitters can go above 3". Replacement: in rooms 4–5 the count stays at 3 or fewer; in room 3 up to 5 is accepted after a cap delay (2 plus the living spitters).
+- `combat.md`, criterion 11: "In rooms 1–5 never more than 3 shots in flight". Replacement: criterion 11 as amended in the step 46 note (a–e).
+- `repo/manual.md`, spitter paragraph: "and no more than 3 are in the air at once". Replacement (exact text): "A spitter will not start aiming while 3 shots are already in the air, but shots from aims already under way still fire, so in room 3 up to 5 can be in the air at once."
+
+## 2. Manual wording for late swipes (step 59, point 1, unchanged rules)
+
+Replace the sentence in the grub warning bullet "or swipe a grub or runner (within 1.5 tiles) to cancel it" with this exact text:
+
+"or swipe a grub or runner to cancel it. A swipe cancels only during the warning, and only if the enemy is within 1.5 tiles at that moment. A grub starts rearing back about 2 tiles away, beyond your reach, so step in to within 1.5 tiles during the warning. A swipe that lands after the lunge has begun does not cancel it. One swipe is enough to cancel a grub or a runner. A brute is never cancelled."
+
+This covers every point of the step 59 acceptance list.
+
+## 3. Runner cancel vs kill
+
+No separate runner cancel rule is intended. A runner has 1 hp, so a swipe in reach kills it. A late swipe on a runner in reach is therefore a kill, not a cancel, and QA cannot and need not distinguish them. Criterion 6 for the runner reads: an in-reach swipe during wind-up kills it with no lunge.
+
+## 4. Variant messages (D-011; supersedes the message table in step 59 point 2)
+
+| Variant | Mark | Wind-up message | Hit message |
+|---|---|---|---|
+| Standard grub | `g` | `a grub rears back` | `YOU ARE HIT by a grub` |
+| Runner grub | `r` | `a runner rears back` | `YOU ARE HIT by a runner` |
+| Brute grub | `G` | `a brute rears back` | `YOU ARE HIT by a brute` |
+| Spitter shot | n/a | unchanged | `YOU ARE HIT by a shot` (unchanged) |
+
+Rules:
+- All three wind-up messages contain `rears back`. Rules keyed on `text "rears back"` match all variants. Rules keyed on `a grub rears back` or `by a grub` match only the standard grub after the change.
+- The hit message keeps its current hearts suffix. Only the noun changes.
+- Applies in the player view and any other text view that prints these strings. The `cue:` line, `~` line, all timings, the swipe, kill and shrug messages, and spitter messages are unchanged.
+- Graphical presentation is not affected.
+- Tests and bots that match the old strings are updated by the Build.
+
+Acceptance (verification), at 30 and 60 FPS, practice room, one case per variant:
+- V-a. Each wind-up prints its message once, at the same moment as today (±1 frame).
+- V-b. A hit by each variant prints the matching hit message on the frame of contact, with unchanged hearts text.
+- V-c. All other output is byte-identical to 0.6.1 in the same scripts, apart from these words.
+- V-d. `text "rears back"` reacts to all three variants.
+- V-e. Criteria 1–11 and 17–21 of `combat.md` hold. No bot result changes.
+
+Experience signal (Review and playtest, not for the Playtester's handoff): a text-view player can say from the message line which kind of grub is attacking or hit them.
+
+## Open questions
+
+- Whether the variant name changes behaviour or only moves a wasted dash is for the next playtest.
+- Build timing: only after Review 65, stating the build number if a playtest follows (D-009 item 5).
+>>>END
+
+<<<FILE decisions/D-011-variant-named-messages-accepted.md
+---
+kind: decision
+id: D-011
+status: accepted
+decided_by: game-designer
+goal: G-001
+date: 2026-10-16
+supersedes: D-008
+---
+# D-011: Text-view wind-up and hit messages name the variant (accepted); swipe timing stays a wording matter
+
+## Decision
+
+1. The wind-up messages are `a grub rears back`, `a runner rears back` and `a brute rears back`. The hit messages are `YOU ARE HIT by a grub`, `by a runner` and `by a brute`. The shot message stays `by a shot`. The strings and acceptance criteria V-a to V-e are in `design/combat-step68.md`.
+2. This completes D-008, which left the hit message out. Playtest 63 showed the hit message was the other half of the confusion.
+3. No swipe-timing rule change. The late-swipe manual wording from step 59 is specified in `design/combat-step68.md` and is ready to build.
+4. The change is player-facing wording within the designer's authority. It adds no input (D-001), no timing change and no new information beyond the existing `cue:` line, so it stays inside the "readable threats" pillar.
+5. Build only after Review 65. It must not be mixed silently into a playtest pass of 0.6.1 (D-009 item 5): hold it until after any further 0.6.1 playtest, or state the new build number in that brief.
+
+## Rationale
+
+- A text-view player sees the message line first. A brute or runner reported as "a grub" hides which answer applies, and playtest 63 rated this medium impact on clarity.
+- Naming the variant gives the text view the early information the graphical build gets from silhouette and size. It changes no timing or hit points.
+- The shared words `rears back` keep existing reaction rules working.
+- Wording alone explains the two reported late-swipe hits (QA 56). A grace period or larger reach would let a swipe cancel a started lunge and weaken "step aside or dash".
+
+## Alternatives considered
+
+- Keep one message for all variants: leaves the playtest confusion, and reaction-script players must parse the `cue:` line.
+- Put distance and time left in the message: duplicates the `cue:` line and may make the text view easier than the graphical build.
+- Wind-up renames only: leaves a brute hit labelled "a grub".
+- A swipe grace period or a larger wind-up reach: needs a rule change with no defect behind it.
+
+## Revisit when
+
+- The next playtest still shows wasted dashes or "I could not tell what it was" after the rename.
+- A human still reports late swipes as unfair after the manual wording is in.
+- A graphical build makes the text messages irrelevant.
+>>>END

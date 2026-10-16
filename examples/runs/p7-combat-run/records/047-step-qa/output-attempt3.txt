@@ -1,0 +1,269 @@
+I need one more run round before I can write the report. The earlier rounds left several items open:
+
+- criterion 3 (runner dash)
+- 17a at 30 FPS and 17c (lunge)
+- 18c (killed spitter)
+- 20f
+- 21b
+- the isolated standard-grub recovery in criterion 5
+- the 16e decision logs for rooms 4 and 5
+
+<<<FILE @run/play/rdash_ctl_30
+# criterion 3 runner, control without dash: expect the lunge to hit near 0.43 s
+room empty
+fps 30
+spawn runner 9 4
+end 1.0
+>>>END
+
+<<<FILE @run/play/rdash_ctl_60
+# criterion 3 runner, control without dash: expect the lunge to hit near 0.43 s
+room empty
+fps 60
+spawn runner 9 4
+end 1.0
+>>>END
+
+<<<FILE @run/play/rdash2_30
+# criterion 3 runner: dash toward the lunge at 0.4 s (lunge starts 0.383); expect no damage
+room empty
+fps 30
+spawn runner 9 4
+0.4 dash right
+end 1.2
+>>>END
+
+<<<FILE @run/play/rdash2_60
+# criterion 3 runner: dash toward the lunge at 0.4 s (lunge starts 0.383); expect no damage
+room empty
+fps 60
+spawn runner 9 4
+0.4 dash right
+end 1.2
+>>>END
+
+<<<FILE @run/trace/t17a2_30
+# 17a: lateral miss of about 0.27 (30 FPS) / 0.20 (60 FPS) for the first shot; expect a hit at both rates
+room empty
+fps 30
+spawn spitter 15 4
+player 8 4
+1.3 move down
+1.34 stop
+end 4.6
+>>>END
+
+<<<FILE @run/trace/t17a2_60
+# 17a: lateral miss of about 0.27 (30 FPS) / 0.20 (60 FPS) for the first shot; expect a hit at both rates
+room empty
+fps 60
+spawn spitter 15 4
+player 8 4
+1.3 move down
+1.34 stop
+end 4.6
+>>>END
+
+<<<FILE @run/trace/l17hit_30
+# 17c: lunge lateral miss 0.533 (<= 0.57): expect a hit at both rates
+room empty
+fps 30
+spawn grub 9 4
+0.1 move down
+0.22 stop
+end 1.2
+>>>END
+
+<<<FILE @run/trace/l17hit_60
+# 17c: lunge lateral miss 0.533 (<= 0.57): expect a hit at both rates
+room empty
+fps 60
+spawn grub 9 4
+0.1 move down
+0.22 stop
+end 1.2
+>>>END
+
+<<<FILE @run/trace/l17miss_30
+# 17c: lunge lateral miss 0.667 (> 0.60): expect no hit at both rates
+room empty
+fps 30
+spawn grub 9 4
+0.1 move down
+0.26 stop
+end 1.2
+>>>END
+
+<<<FILE @run/trace/l17miss_60
+# 17c: lunge lateral miss 0.667 (> 0.60): expect no hit at both rates
+room empty
+fps 60
+spawn grub 9 4
+0.1 move down
+0.26 stop
+end 1.2
+>>>END
+
+<<<FILE @run/trace/h21b_259_30
+# 21b: shot hurts the player at about 3.83 (window to about 4.63); grub lunge contact should start inside the window and still be going at window end; expect no lunge damage, hearts stay 2
+room empty
+fps 30
+spawn spitter 15 4
+spawn grub 2.59 4
+player 8.45 4
+end 5.0
+>>>END
+
+<<<FILE @run/trace/h21b_259_60
+# 21b: shot hurts the player at about 3.83 (window to about 4.63); grub lunge contact should start inside the window and still be going at window end; expect no lunge damage, hearts stay 2
+room empty
+fps 60
+spawn spitter 15 4
+spawn grub 2.59 4
+player 8.45 4
+end 5.0
+>>>END
+
+<<<FILE @run/trace/h21b_260_30
+# 21b: same with grub at 2.60
+room empty
+fps 30
+spawn spitter 15 4
+spawn grub 2.60 4
+player 8.45 4
+end 5.0
+>>>END
+
+<<<FILE @run/trace/h21b_260_60
+# 21b: same with grub at 2.60
+room empty
+fps 60
+spawn spitter 15 4
+spawn grub 2.60 4
+player 8.45 4
+end 5.0
+>>>END
+
+<<<FILE @run/trace/h21b_261_30
+# 21b: same with grub at 2.61
+room empty
+fps 30
+spawn spitter 15 4
+spawn grub 2.61 4
+player 8.45 4
+end 5.0
+>>>END
+
+<<<FILE @run/trace/h21b_261_60
+# 21b: same with grub at 2.61
+room empty
+fps 60
+spawn spitter 15 4
+spawn grub 2.61 4
+player 8.45 4
+end 5.0
+>>>END
+
+<<<FILE @run/play/f20b_30
+# 20f: player at y=4.533 (lateral miss 0.533 > 0.40) dashes across the first shot's line at 3.9; expect the shot NOT consumed (the * still visible and moving left at 4.5 and 5.0), no damage
+room empty
+fps 30
+spawn spitter 15 4
+1.3 move down
+1.42 stop
+3.9 dash right
+end 5.0
+>>>END
+
+<<<FILE @run/play/f20b_60
+# 20f: player at y=4.533 (lateral miss 0.533 > 0.40) dashes across the first shot's line at 3.9; expect the shot NOT consumed (the * still visible and moving left at 4.5 and 5.0), no damage
+room empty
+fps 60
+spawn spitter 15 4
+1.3 move down
+1.42 stop
+3.9 dash right
+end 5.0
+>>>END
+
+<<<FILE @run/play/c5std_30
+# criterion 5, standard grub: sidestep the lunge, then stand within 0.6 of the recovering grub from about 1.4 to 1.6; expect hearts stay 3/3 and no damage
+room empty
+fps 30
+spawn grub 9 4
+0.1 move down
+0.35 stop
+1.0 move left
+1.3 stop
+1.35 move up
+1.5 stop
+end 1.6
+>>>END
+
+<<<FILE @run/play/c5std_60
+# criterion 5, standard grub: sidestep the lunge, then stand within 0.6 of the recovering grub from about 1.4 to 1.6; expect hearts stay 3/3 and no damage
+room empty
+fps 60
+spawn grub 9 4
+0.1 move down
+0.35 stop
+1.0 move left
+1.3 stop
+1.35 move up
+1.5 stop
+end 1.6
+>>>END
+
+<<<FILE @run/trace/k18c_30
+# 18c with a killed spitter in room 4: go to the spitter at (15,0), swipe it twice, then check cue gaps of the remaining spitter
+room 4
+fps 30
+0.0 dash up
+0.9 dash right
+1.15 move right
+1.55 stop
+1.6 attack
+2.0 attack
+end 15
+>>>END
+
+<<<FILE @run/trace/k18c_60
+# 18c with a killed spitter in room 4: go to the spitter at (15,0), swipe it twice, then check cue gaps of the remaining spitter
+room 4
+fps 60
+0.0 dash up
+0.9 dash right
+1.15 move right
+1.55 stop
+1.6 attack
+2.0 attack
+end 15
+>>>END
+
+<<<FILE @run/bots/g4_30
+bots walker
+rooms 4
+fps 30
+log on
+>>>END
+
+<<<FILE @run/bots/g4_60
+bots walker
+rooms 4
+fps 60
+log on
+>>>END
+
+<<<FILE @run/bots/g5_30
+bots walker
+rooms 5
+fps 30
+log on
+>>>END
+
+<<<FILE @run/bots/g5_60
+bots walker
+rooms 5
+fps 60
+log on
+>>>END

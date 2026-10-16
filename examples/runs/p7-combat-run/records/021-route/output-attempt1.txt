@@ -1,0 +1,142 @@
+Route after step 8b is done. The graze, cap, margin and governing documents are ruled with no build change, so 8c is skipped and 8d (QA) is opened. The Handoff to QA is composed fresh and omits the designer's Sender assessment. `log.md` is not among my writable paths, so I could not append the Route entry.
+
+<<<FILE goals/G-001-combat-monotony/23-studio-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 23
+from: studio
+to: qa
+stage: Verify
+outcome: routed
+---
+# 23: studio → qa — Close the open checks on build 0.5 against the final criteria 1–17 and give the verdict
+
+## Task
+
+Verify build 0.5 (`repo/`) against the current acceptance criteria in `design/combat.md` (criteria 1–17, plus V12 for the text build). Run the checks listed under Findings, which close the gaps from your previous report (handoff 20), and give a verdict. Check at both 30 and 60 FPS where stated.
+
+## Context
+
+G-001 (combat monotony). You verified criteria 1–16 earlier: 1–15 and 16a–d passed, and you raised spec questions (frame-rate graze, shot cap, walker margin, document conflicts). The game-designer ruled on them and updated `design/combat.md`. The build has not changed. Gaps from your last run: criteria 5, 6 and 8 were only run at 60 FPS, and the edge case "a defeated spitter does not renumber the others" was not run.
+
+## Findings
+
+Rulings now in `design/combat.md` (read the spec for the exact text; this is a summary):
+
+- **Contact sampling (D-002).** Contact is a distance check once per frame after that frame's movement; shot reach 0.4 tile, lunge reach 0.6 tile, no swept test. The accepted band is a lateral miss within 0.01 tile inside the reach for shots and within 0.03 tile inside the reach for lunges. Inside the band, 30 and 60 FPS may differ in hit or miss only (never timing or cue). Outside the band both rates must agree and follow the geometry: smaller than reach minus tolerance hits, reach or more never hits. Criterion 16e now says a difference caused only by this band is not a build defect.
+- **Shot cap (criterion 11, reworded).** In rooms 1–5 never more than 3 shots in flight. The cap is on cue starts, so in a practice room with four or more spitters the bound is 2 + the number of living spitters.
+- **Walker margin (criterion 13).** The numbers stay: walker 4 lost / 2 cleared at 30 FPS, 6 lost / 3 cleared at 60 FPS, upper limit 6; dodger 0; camper 0. A walker result of 7 would be reported as a tuning question, not a defect.
+- **Governing documents.** For text-build behavior, `design/combat.md` and `repo/manual.md` govern. The visual spec governs only the look in a graphical build, so V12 stays open until one exists.
+
+Checks to run:
+
+1. Criterion 5, the two-swipe kill (6) and the variant swipe counts (8) at `fps 30`, using the existing practice-room scripts.
+2. The edge case "a defeated spitter does not renumber the others".
+3. Criterion 17 (edge checks). Take your reproduction script from handoff 20 and choose spitter positions from the trace:
+   - shot lateral miss of 0.39 tile or less: a hit at both rates;
+   - shot lateral miss of 0.40 tile or more: no hit at both rates;
+   - one grub case on each side of the lunge band: 0.57 or less hits at both rates, 0.60 or more misses at both;
+   - measure and report the actual lunge band at 30 FPS. If it is wider than 0.03 tile, report that as an open spec question for the game-designer, not as a pass.
+4. Criterion 11 in its new wording: room 3 at most 3 in flight over your usual window; the four-spitter practice room within 2 + living spitters.
+5. Re-run the unit tests (`run_tests`) and confirm that nothing else regressed.
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no new input.
+- D-002: per-frame contact sampling is kept; the contact-edge graze is an accepted limitation of the text build.
+
+## Constraints
+
+- Must play correctly at 30 and 60 FPS.
+- Verify from the spec, the criteria and the build, not from explanations of why it should work.
+- Do not change the build or the spec. A failing criterion outside the accepted band goes to Build; a spec question goes to Design.
+
+## Open questions
+
+- Is the grub lunge band within 0.03 tile at 30 FPS (check 3)?
+- Optional wording note for the Studio: `repo/manual.md` says "no more than 3 are in the air at once", which holds in rooms 1–5 but not in practice rooms with four or more spitters. Report whether you consider that misleading to a player. Do not edit the manual.
+
+## Expected output
+
+A pass/fail report per criterion (1–17, V12 status) with the figures measured. Verdict `pass` if all hold, with V12 noted as open until a graphical build exists. Address the result to `studio` (the next step is a playtest that must be composed without implementation history).
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: design/combat.md, repo/manual.md, repo/game.py, repo/bots.py, repo/play.py, repo/tests/test_game.py
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-002-contact-edge-graze-accepted.md
+- Previous handoff: goals/G-001-combat-monotony/20-qa-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-16
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): a player playing the current build's combat experiences it as varied and engaging instead of monotonous. Different situations call for noticeably different play (positioning, timing, use of attack and dash), and the player can tell why. The improvement stays inside the vision pillars: one-button combat (attack + dash only, D-001), short runs, readable threats. Numeric thresholds belong to Design; the final verdict belongs to Review.
+
+Out of scope: new input buttons (needs Owner approval per D-001), changing run length, new biomes or content unrelated to combat variety, and any change to the core concept. Not a defect report: nothing in the request says combat is broken.
+
+## Unknowns
+
+- Observe: done (scripted play, rooms 1–3 + practice room). Rooms 4–5 and hand-timed play are unobserved by a human; the final Play step covers them.
+- Observe (FPS divergence, qa): done (16, 20). Walker 30/60 differences are bot timing, not the build. The contact-edge graze is accepted (D-002).
+- Diagnose: done (04).
+- Decide: skipped. No choice of direction or scope; all options stay within D-001 and the pillars. Returns here if the Build needs a new enemy type, a healing system or a new input, or if a ruling changes scope.
+- Design: done (14, 22). Graze accepted (D-002), shot cap is on cue starts, walker margin kept, governing documents named. Reopens only if QA finds the grub lunge band wider than 0.03 tile at 30 FPS.
+- Plan: skipped. The approach reuses the enemy update loop. Returns here if the same criterion fails verification twice.
+- Build: 0.5 implemented (10), tooling done (18). No further change needed (8c skipped); returns only if QA finds a failure outside the accepted band.
+- Verify (visual): done (15). V1–V11 need a graphical build and become a proposed new Goal at Close; V12 holds in the text build.
+- Verify (QA): criteria 1–16 mostly pass (20). Open (23): 30 FPS runs of 5, 6, 8; the defeated-spitter edge case; new criterion 17; the reworded criterion 11.
+- Manual wording ("no more than 3 in the air") is true in rooms 1–5 only. Optional fix, raise at Close.
+- Play: planned. A fresh playtester judges the result, including rooms 4–5 and hand-timed play. Its Handoff is composed by the Studio from the build and player profile only.
+- Review: planned (`game-director`), experience Goal. Graphical cue acceptance is still open at that point.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 01-studio-to-playtester.md (report: 02-playtester-to-studio.md) |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-studio-to-game-designer.md (result: 04-game-designer-to-studio.md) |
+| 3 | Decide | game-director | make-decision | skipped (no real choice; see Unknowns) | — |
+| 4a | Design | game-designer | write-design-spec | done | 05-studio-to-game-designer.md (result: 07-game-designer-to-studio.md) |
+| 4b | Observe (FPS divergence) | qa | reproduce-defect | done | 06-studio-to-qa.md (result: 08-qa-to-studio.md) |
+| 5 | Plan | technical-director | technical-plan | skipped (approach local; see Unknowns) | — |
+| 6 | Build | gameplay-engineer | implement-change | done | 09-studio-to-gameplay-engineer.md (result: 10-gameplay-engineer-to-studio.md) |
+| 7a | Design (criterion 14, spec gaps) | game-designer | write-design-spec | done | 11-studio-to-game-designer.md (result: 14-game-designer-to-studio.md) |
+| 7b | Verify (visual) | art-director | visual-review | done | 12-studio-to-art-director.md (result: 15-art-director-to-studio.md) |
+| 7c | Observe (walker 30/60 divergence) | qa | reproduce-defect | done | 13-studio-to-qa.md (result: 16-qa-to-studio.md) |
+| 7d | Build (bot log data, walker test) | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md (result: 18-gameplay-engineer-to-studio.md) |
+| 8 | Verify (criteria 1–16, V12) | qa | verify-change | done (question: graze) | 19-studio-to-qa.md (result: 20-qa-to-studio.md) |
+| 8b | Design (graze, cap, margin, doc conflicts) | game-designer | write-design-spec | done | 21-studio-to-game-designer.md (result: 22-game-designer-to-studio.md) |
+| 8c | Build (contact test / cap) | gameplay-engineer | implement-change | skipped (graze and cap accepted as built) | — |
+| 8d | Verify (criteria 1–17; close 30 FPS gaps) | qa | verify-change | open | 23-studio-to-qa.md |
+| 9 | Play | playtester | playtest-session | planned | — |
+| 10 | Review | game-director | review-outcome | planned | — |
+| 11 | Next | studio | — | planned | — |
+
+## Route changes
+
+After 8b (Design): fits. The designer accepted the graze (D-002), ruled the cap is on cue starts, kept the walker margin and named the governing documents; the build does not change. 8c is skipped. 8d (QA) is open (handoff 23, no designer assessment) to run the 30 FPS gaps and criterion 17.
+
+## Next action
+
+Run the qa step with 23-studio-to-qa.md (result addressed to `studio`). Then Route: on pass, compose a fresh Handoff for the playtester (9) from the build and player profile only; on a failure outside the accepted band, open Build; on a lunge band wider than 0.03 tile, return to the game-designer.
+
+## Outcome
+
+(open)
+>>>END

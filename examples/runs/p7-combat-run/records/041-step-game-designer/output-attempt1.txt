@@ -1,0 +1,202 @@
+I ruled without running the bots. The ruling rests on the engineer's figures and a structural argument that QA's re-measurement can only confirm or break. No build change is needed.
+
+<<<FILE design/combat-step-44-walker-limit.md
+# Combat design note: criterion 13 walker limit (step 44, build 0.6)
+
+Status: amends criterion 13 of `design/combat.md`. Where this note and `combat.md` differ on criterion 13, this note governs. No other criterion, rule or parameter changes. Fold this text into `combat.md` the next time that file is edited. Decision: D-006.
+
+## Question
+
+The walker bot on build 0.6 loses 7 hearts in rooms 3–5 at 60 FPS (4 at 30 FPS). Criterion 13 allowed at most 6. All other criterion 13 limits hold.
+
+## Ruling
+
+7 hearts is not a breach of intent. The limit of 6 was too tight, and it was never derived. Step 22 recorded 6 as "exactly the upper limit" of the 0.5 observation, so it was a snapshot of one bot result.
+
+The purpose of criterion 13 is a gradient: ignoring the aim cue is costly but not hopeless. The 0.6 evidence shows both halves:
+
+- **Costly.** The walker loses 4 (30 FPS) and 7 (60 FPS) hearts. The dodger loses 0 and clears 3/3, and uses 7 or more dashes per room. The camper clears 0 of 3. The gap between ignoring and reading the cue is larger than in 0.5.
+- **Not hopeless.** The walker still clears 2 of 3 rooms at both rates. It is not walled out.
+
+Why the hearts ceiling was the wrong tool:
+
+- Each room has 3 hearts. A room the walker clears must have been survived, so it costs at most 2 hearts.
+- A walker that clears 2 of 3 rooms therefore loses at most 3 + 2 + 2 = 7 hearts in rooms 3–5. The clear count is what carries "not hopeless". A hearts ceiling below 7 only forbids particular distributions of the same outcome. For example, 3+2+2 at 60 FPS is forbidden, while 3+2+1 is allowed. That says nothing about the gradient.
+- The walker decides on a 0.15 s grid. The engineer saw per-room totals move in opposite directions between 0.5 and 0.6. A one-frame difference in a sidestep decides whether a shot hits (criterion 16d). Tuning rooms to move a bot's total by one heart would fit the room to the bot's grid phase, not to any player-visible behavior.
+
+I did not change a room or enemy parameter, for these reasons:
+
+- Both D-004 and D-005 expected this movement. The brute no longer being cancelled raises the walker's losses; consumed shots lower them. The net is what the rules produce.
+- Any parameter change would force QA to re-verify criteria 11, 13, 14, 15, 18, 20 and 21 for no player-visible gain.
+- D-004 and D-005 stay as they are.
+
+## Amended criterion 13 (replaces the numbers in `combat.md`)
+
+**13. Cue-ignoring vs cue-reading, spitter rooms.** Protects: reading the aim cue is clearly better than ignoring it, and ignoring it is costly but not hopeless. At each rate (30 FPS and 60 FPS) separately, in rooms 3–5 summed:
+
+- a. The walker clears at least 2 of the 3 rooms. This is the "not walled out" gate.
+- b. The walker loses at least 3 and at most 7 hearts. The lower limit is the "costly" gate. 7 is the largest total consistent with 13a (3 hearts per room, at most 2 lost in a cleared room), so the upper limit is a consistency check and not an independent gate.
+- c. The dodger loses at most half of the walker's total and clears 3/3.
+- d. The camper clears fewer of rooms 3–5 than the walker.
+- e. Per-room walker figures are not criteria. The 30 and 60 FPS totals need not match (16d). The two rates are checked separately and not as a range.
+- f. Measured values: 0.6 walker 4 lost / 2 cleared at 30 FPS, 7 lost / 2 cleared at 60 FPS. Dodger 0 lost / 3 cleared at both. Camper 0 cleared at both (engineer's figures; QA re-measures).
+
+Reporting rule: QA reports to `game-designer` any measured value that fails 13a–13d. A walker total anywhere in 3–7 with at least 2 rooms cleared is a pass and needs no report, even if it differs from the figures above.
+
+Criteria 14, 15 and 16 are unchanged. Criterion 16c (dodger agrees between rates) and 16d (walker need not) still apply.
+
+## Which figures would change this ruling
+
+The ruling depends on the gradient, not on the exact engineer figures. These QA results would reopen it:
+
+1. The walker clears fewer than 2 of 3 rooms at either rate. That means walled out, and the response would be a room or enemy parameter change, or Director input if it touches D-004 or D-005.
+2. The walker loses fewer than 3 hearts at either rate. That means ignoring the cue is not punished enough. The 30 FPS margin is only 1 heart (4 against 3).
+3. The dodger loses more than half the walker's total, or fails to clear 3/3.
+4. The camper clears as many rooms as the walker or more.
+5. QA finds a difference between rates that comes from a rule and not from bot timing (16e). That is a build defect and not a tuning question.
+
+A QA 60 FPS walker figure of 6 or 7 with 2 rooms cleared changes nothing.
+
+## What QA re-verifies
+
+Only criterion 13 against the amended limits, using `run_bots` on the unchanged 0.6 build at both rates. QA also confirms that the walker's 30/60 FPS differences come from the 0.15 s decision grid (16e). Nothing else needs re-verification, because no rule or parameter changed.
+
+## Experience signal (playtest and Review)
+
+A player who ignores the aim cues in rooms 3–5 is hurt often and may fail a room. They can still finish the three rooms without being locked out, and a player who reads the cues does clearly better. If the hand-timed playtest finds that a cue-ignoring human cannot get through rooms 3–5, reopen this note and D-004/D-005 tuning values. Do not rely on the bot figure alone.
+>>>END
+
+<<<FILE decisions/D-006-walker-limit-rooms-3-5-structural-ceiling.md
+---
+kind: decision
+id: D-006
+status: accepted
+decided_by: game-designer
+goal: G-001
+date: 2026-10-16
+supersedes: none
+---
+# D-006: Criterion 13's walker limit in rooms 3–5 is 3–7 hearts, with at least 2 rooms cleared; no room or enemy parameter changes
+
+## Decision
+
+1. The walker's hearts-lost limit in rooms 3–5 (each rate separately) changes from 3–6 to 3–7. The "clears at least 2 of 3" gate is the primary check that the player is not walled out.
+2. The upper limit of 7 is the structural maximum for a walker that clears 2 rooms (3 hearts per room, at most 2 lost in a cleared room). It is kept as a consistency check, not an independent tuning target.
+3. Bot results are balance proxies. Per-room walker numbers, and a 30/60 FPS difference in the walker's totals, are not criteria.
+4. No room, enemy, cap, offset or interval parameter changes. D-004 and D-005 stand. Build 0.6 is unchanged.
+5. The full amended wording is in `design/combat-step-44-walker-limit.md`.
+
+## Rationale
+
+- The limit of 6 was the 0.5 observation recorded as a limit, not a derived bound. The purpose (costly but not hopeless) is met at 7: the dodger loses 0 and clears 3/3, the camper clears 0, and the walker still clears 2 of 3 at both rates.
+- A hearts ceiling below the structural maximum only forbids certain distributions of the same outcome. The walker's grid sensitivity moves single hearts between rooms without any player-visible cause. Tuning rooms against it would fit the bot, not the player.
+- D-004 and D-005 predicted opposite pressures on the walker (brute no longer cancelled: more losses; consumed shots: fewer). The net result is a consequence of those rulings and is accepted.
+- A parameter change would reopen verification of criteria 11, 13, 14, 15, 18, 20 and 21 with no player-visible gain.
+
+## Alternatives considered
+
+- **Keep 6 and change a parameter** (for example a longer brute recovery, or fewer shots in room 4): it fits the grid phase of one bot, forces a wide QA re-verify, and risks undoing D-004 or D-005. Not chosen.
+- **Change the walker bot's decision grid:** it changes test tooling to hit a number, hides the real sensitivity, and is not a design answer. Not chosen.
+- **Drop the hearts upper limit entirely:** equivalent in practice. Keeping 7 keeps the old criterion shape and a visible check that a walker that clears 2 rooms is within the structural bound. Not chosen, but acceptable if QA prefers.
+- **Express the limit as one range across both rates:** weaker, because a rate-specific failure could be hidden. The rates stay separate. Not chosen.
+
+## Revisit when
+
+- QA's independent figures show the walker clearing fewer than 2 of 3 rooms at either rate, a total below 3, the dodger over half the walker's total, or the camper clearing as many rooms as the walker.
+- The hand-timed playtest finds that a cue-ignoring human cannot get through rooms 3–5.
+- Any later change to rooms 3–5, the brute, the spitter schedule or the cap moves the bot figures. Re-measure; do not assume 7 still holds.
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/44-game-designer-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 44
+from: game-designer
+to: studio
+stage: Design
+outcome: done
+---
+# 44: game-designer → studio — Criterion 13 ruling: walker limit 3–7 at 60 FPS, no build change
+
+## Task
+
+Pass the ruling on criterion 13 to QA, who is verifying build 0.6 in parallel (41), so QA judges the walker figures against the amended limits. No build change is needed. No Director decision is needed.
+
+## Context
+
+G-001 (combat monotony). Build 0.6 (Design 35 and 38, D-004, D-005) puts the walker bot at 7 hearts lost in rooms 3–5 at 60 FPS (4 at 30 FPS), against criterion 13's limit of 6. Handoffs 40 and 42 contain the figures and the question.
+
+## Findings
+
+**Ruling: 7 hearts is not a breach of intent. The limit of 6 was too tight, and it was a snapshot of the 0.5 result, not a derived bound. The limit changes to 3–7. No room or enemy parameter changes.**
+
+The purpose of criterion 13 is a gradient, and it holds at 7:
+
+- Costly: walker 4 (30 FPS) and 7 (60 FPS) hearts lost, against dodger 0 lost, 3/3 cleared and 7 or more dashes per room, and camper 0 of 3 cleared.
+- Not hopeless: the walker clears 2 of 3 at both rates.
+
+Why a hearts ceiling below 7 is the wrong tool:
+
+- A room has 3 hearts, and a cleared room costs at most 2. A walker clearing 2 of 3 rooms therefore loses at most 3+2+2 = 7.
+- The clear count is what carries "not hopeless". A ceiling of 6 only forbids a particular distribution of hearts across rooms.
+- The walker's 0.15 s grid sensitivity moves single hearts between rooms with no player-visible cause (criterion 16d). The engineer saw the room totals move in opposite directions between 0.5 and 0.6.
+
+Why no parameter changes: the shift is the expected net of D-004 (brute not cancelled: more losses) and D-005 (consumed shots: fewer). A parameter change would fit one bot's grid phase and force re-verification of criteria 11, 13, 14, 15, 18, 20 and 21.
+
+Changed criteria:
+
+- **13:** the walker's upper limit is 7 (was 6), and the lower limit 3 stays. The clears-at-least-2 gate is now the primary one. The dodger, camper and per-rate rules are unchanged.
+- **13e/f:** per-room walker numbers are not criteria. The rates are checked separately.
+- **13 reporting rule:** QA reports only values that fail 13a–d.
+- Criteria 14, 15 and 16 are unchanged.
+
+Full amended text: `design/combat-step-44-walker-limit.md`, which governs where `combat.md` differs. `combat.md` itself was not rewritten, so it still shows the old numbers until the two are merged.
+
+**Build change list: none.** `bots.py` is unchanged. The engineer already removed the walker's upper bound of 6 from its own test. Its test should now assert 3 to 7 hearts lost and at least 2 rooms cleared, per rate. That is test tooling and not a build change.
+
+**Does the answer depend on QA's figures?** Yes, in a limited way. These results would reopen the ruling:
+
+1. The walker clears fewer than 2 of 3 rooms at either rate. That means walled out, and the response would be a parameter change.
+2. The walker loses fewer than 3 hearts at either rate. The 30 FPS margin is only 1 heart.
+3. The dodger loses more than half the walker's total, or fails 3/3.
+4. The camper clears as many rooms as the walker or more.
+5. A rate difference that comes from a rule and not from bot timing, which is a build defect (16e).
+
+A QA 60 FPS walker figure of 6 or 7 with 2 rooms cleared changes nothing.
+
+QA re-verifies only criterion 13 against the amended limits, at both rates, on the unchanged build. It also confirms the walker's rate differences come from the 0.15 s grid.
+
+## Decisions already made
+
+- D-001: one-button combat.
+- D-004 and D-005: unchanged and respected.
+- D-006 (new): the walker limit in rooms 3–5 is 3–7 hearts with at least 2 rooms cleared, and no parameter change.
+
+## Constraints
+
+- Nothing in the 30 and 60 FPS behavior changes.
+- No new enemy, healing, input or room content.
+- Hand-timed playtest of rooms 3–5 remains the real test of "costly but not hopeless" for a human. If a cue-ignoring human cannot get through, reopen D-006 and the D-004/D-005 tuning values.
+
+## Open questions
+
+- For QA: does `play.py` print "the brute shrugs off the swipe" for the `shrug` event? Handoff 40 could not check it, and this note does not change that.
+- For the Studio: fold `design/combat-step-44-walker-limit.md` into `design/combat.md` at the next edit of that file, so that criterion 13 is stated in one place.
+
+## Expected output
+
+The Studio forwards this ruling to QA to use when judging the criterion 13 figures. The ruling needs no further Design work unless one of the five listed results appears. If one does, route it back to `game-designer`, or to `game-director` if it touches D-004, D-005 or scope.
+
+## Sender assessment
+
+High confidence in the ruling. It is a derivation from the 3-hearts-per-room structure and from the stated purpose of the criterion, not a measurement. I did not run the bots, because the ruling depends on the structure and the engineer's figures. QA's independent figures can break it only through the five results above. The weakest margin is the lower limit at 30 FPS (4 against 3).
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: design/combat.md, design/combat-step-44-walker-limit.md
+- Decisions: decisions/D-004-spitter-cue-gap-brute-no-cancel-room2-spitter-deferred.md, decisions/D-005-blocked-contact-consumes-shot-and-spends-lunge.md, decisions/D-006-walker-limit-rooms-3-5-structural-ceiling.md
+- Previous handoff: goals/G-001-combat-monotony/42-studio-to-game-designer.md
+>>>END

@@ -1,0 +1,26 @@
+[
+ {
+  "run": "@run/tests",
+  "command": "python3 -m unittest discover -s tests",
+  "script": "\n",
+  "exit": 1,
+  "seconds": 0.1,
+  "output": "F..............................\n======================================================================\nFAIL: test_bots_agree_at_30_and_60_fps (test_game.BotsTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/work/tests/test_game.py\", line 269, in test_bots_agree_at_30_and_60_fps\n    self.assertLessEqual(abs(a[\"hearts_lost\"] - b[\"hearts_lost\"]), 1, (name, room, a, b))\nAssertionError: 2 not less than or equal to 1 : ('walker', '3', {'cleared': True, 'seconds': 9.63, 'hearts_lost': 0, 'hits_by': {}, 'attacks': 6, 'dashes': 0, 'log': []}, {'cleared': True, 'seconds': 9.47, 'hearts_lost': 2, 'hits_by': {'shot': 2}, 'attacks': 6, 'dashes': 0, 'log': []})\n\n----------------------------------------------------------------------\nRan 31 tests in 0.025s\n\nFAILED (failures=1)\n"
+ },
+ {
+  "run": "@run/bots/fps30",
+  "command": "python3 bots.py {script}",
+  "script": "bots camper,walker,dodger\nrooms 1-5\nfps 30\n",
+  "exit": 0,
+  "seconds": 0.0,
+  "output": "bots at 30 FPS, up to 60 s per room, 3 hearts each\ncamper  room 1: NOT cleared (5.7 s); hearts lost 3 (hit by: grub 3); attacks 5, dashes 0\ncamper  room 2: cleared in 10.2 s; hearts lost 2 (hit by: grub 2); attacks 8, dashes 0\ncamper  room 3: NOT cleared (5.5 s); hearts lost 3 (hit by: shot 3); attacks 0, dashes 0\ncamper  room 4: NOT cleared (6.7 s); hearts lost 3 (hit by: shot 3); attacks 1, dashes 0\ncamper  room 5: NOT cleared (6.2 s); hearts lost 3 (hit by: grub 1, shot 2); attacks 0, dashes 0\ncamper  total: cleared 1/5, hearts lost 14, dashes 0\nwalker  room 1: NOT cleared (4.9 s); hearts lost 3 (hit by: grub 3); attacks 5, dashes 0\nwalker  room 2: cleared in 8.4 s; hearts lost 2 (hit by: grub 2); attacks 8, dashes 0\nwalker  room 3: cleared in 9.6 s; hearts lost 0 (hit by: none); attacks 6, dashes 0\nwalker  room 4: cleared in 10.5 s; hearts lost 1 (hit by: grub 1); attacks 7, dashes 0\nwalker  room 5: NOT cleared (10.2 s); hearts lost 3 (hit by: grub 2, shot 1); attacks 9, dashes 0\nwalker  total: cleared 3/5, hearts lost 9, dashes 0\ndodger  room 1: cleared in 6.6 s; hearts lost 0 (hit by: none); attacks 6, dashes 3\ndodger  room 2: cleared in 13.2 s; hearts lost 0 (hit by: none); attacks 8, dashes 6\ndodger  room 3: cleared in 19.7 s; hearts lost 0 (hit by: none); attacks 6, dashes 8\ndodger  room 4: cleared in 19.1 s; hearts lost 0 (hit by: none); attacks 7, dashes 7\ndodger  room 5: cleared in 24.9 s; hearts lost 0 (hit by: none); attacks 12, dashes 11\ndodger  total: cleared 5/5, hearts lost 0, dashes 35\n"
+ },
+ {
+  "run": "@run/bots/fps60",
+  "command": "python3 bots.py {script}",
+  "script": "bots camper,walker,dodger\nrooms 1-5\nfps 60\n",
+  "exit": 0,
+  "seconds": 0.1,
+  "output": "bots at 60 FPS, up to 60 s per room, 3 hearts each\ncamper  room 1: NOT cleared (5.7 s); hearts lost 3 (hit by: grub 3); attacks 4, dashes 0\ncamper  room 2: NOT cleared (8.9 s); hearts lost 3 (hit by: grub 3); attacks 5, dashes 0\ncamper  room 3: NOT cleared (5.5 s); hearts lost 3 (hit by: shot 3); attacks 0, dashes 0\ncamper  room 4: NOT cleared (6.8 s); hearts lost 3 (hit by: shot 3); attacks 1, dashes 0\ncamper  room 5: NOT cleared (6.1 s); hearts lost 3 (hit by: grub 1, shot 2); attacks 0, dashes 0\ncamper  total: cleared 0/5, hearts lost 15, dashes 0\nwalker  room 1: NOT cleared (5.2 s); hearts lost 3 (hit by: grub 3); attacks 4, dashes 0\nwalker  room 2: cleared in 8.4 s; hearts lost 2 (hit by: grub 2); attacks 8, dashes 0\nwalker  room 3: cleared in 9.5 s; hearts lost 2 (hit by: shot 2); attacks 6, dashes 0\nwalker  room 4: cleared in 11.9 s; hearts lost 2 (hit by: grub 1, shot 1); attacks 7, dashes 0\nwalker  room 5: cleared in 12.9 s; hearts lost 2 (hit by: grub 2); attacks 12, dashes 0\nwalker  total: cleared 4/5, hearts lost 11, dashes 0\ndodger  room 1: cleared in 9.6 s; hearts lost 0 (hit by: none); attacks 6, dashes 5\ndodger  room 2: cleared in 19.5 s; hearts lost 0 (hit by: none); attacks 8, dashes 11\ndodger  room 3: cleared in 22.1 s; hearts lost 0 (hit by: none); attacks 6, dashes 10\ndodger  room 4: cleared in 17.0 s; hearts lost 0 (hit by: none); attacks 7, dashes 8\ndodger  room 5: cleared in 27.2 s; hearts lost 0 (hit by: none); attacks 12, dashes 14\ndodger  total: cleared 5/5, hearts lost 0, dashes 48\n"
+ }
+]

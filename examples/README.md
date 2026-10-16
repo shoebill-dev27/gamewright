@@ -60,3 +60,11 @@ Results and findings: `docs/phase5.md`.
 
 Results and findings: `docs/phase6.md`.
 
+## Phase 7: reactive play
+
+| Run | What it shows |
+|---|---|
+| `runs/p7-combat-run` | The combat Goal again, from the updated `fixtures/lantern-depths-combat` (reaction rules, manual in the build), stopped at build 0.6.1 after two Reviews judged a narrow gap (59 operations, 101 executors, no Owner questions). Playtesters reacted from the player view and reached every room; the held-out measurement in `measurement.json` meets S1–S3. |
+
+Results and findings: `docs/phase7.md`.
+

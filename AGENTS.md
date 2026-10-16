@@ -56,4 +56,4 @@ Step; the packet is the only input. The manual operations above remain valid.
 - Check: `python3 -m pytest tests/` (Phase 1 structure: `tests/test_studio.py`; isolation: `tests/test_phase2.py`;
   continuous runs: `tests/test_phase3.py`; Goal log and `goal.md` limits: `tests/test_phase4.py`;
   build runs and sandbox: `tests/test_phase5.py`; experience measurement: `tests/test_phase6.py`;
-  both need `bwrap`).
+  reactive play and Owner questions: `tests/test_phase7.py`; Phases 5-7 need `bwrap`).

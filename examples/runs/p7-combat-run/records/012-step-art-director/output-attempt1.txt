@@ -1,0 +1,152 @@
+<<<FILE design/combat-cues-visual-spec.md
+# Combat cue visual spec (build 0.5 cues, for the graphical build)
+
+Owner: art-director. Source: G-001 step 15. Basis: the text view and `design/combat.md`. I did not see a rendered build. Timings and rules are unchanged and belong to the game-designer.
+
+## Principles
+
+- Threat cues are saturated orange-red and **self-lit**. They do not depend on the lantern, so a cue reads in full darkness.
+- The lantern is warm, pale and low-saturation (amber to cream). Threat cues are more saturated and shifted toward red, and they are the brightest saturated thing on screen.
+- **Color is never the only signal.** Every cue also differs in shape or motion, so it holds up for color-blind players and under lantern tint.
+- Reuse existing assets: one orange-red palette entry, one additive glow sprite, one line/quad sprite. All variants are parameter changes (scale, rate), not new assets.
+
+## Grub lunge cue (Standard, Runner, Brute)
+
+1. **Lane, not a hairline.** The lunge path is drawn as a band along the locked direction, 2.4 tiles long. Its width equals the actual danger zone, 1.2 tiles (0.6 either side). It is a translucent orange-red fill with a brighter hazard edge.
+   - Reason: the design text says "thin line" but the danger is 1.2 tiles wide. A hairline makes a 1-tile sidestep look sufficient when it may not be.
+   - Players should be able to see that stepping 1 tile sideways takes them clear of the band.
+2. **Onset.** The grub flash and the lane appear at full contrast on the first frame of wind-up, with no fade-in. This matters for the Runner, whose wind-up is 0.35 s, about 10 frames at 30 FPS.
+3. **Duration visibility.** The lane fills from the grub outward, or its fill brightens, so that it is complete exactly when the lunge starts. The player can judge the time left without reading text.
+4. **Grub body.** The grub holds a steady orange-red tint with a slight pulse, and rears back by squashing away from the lunge direction. Do not strobe. Keep flashing at or below 3 Hz.
+5. **End of cue.** The lane stays at full strength until the lunge starts, then fades during the lunge. The flash and tint stop when recovery begins, and the grub returns to its neutral cool color. A grub that is neutral and not tinted means "safe to swipe".
+6. **Stagger.** A cancelled wind-up (swipe) removes the lane immediately and shows a hit reaction, so a cancelled lunge is not mistaken for a pending one.
+
+### Variants
+
+Differentiate by silhouette and size first, then by cue cadence. Do not use a different hue.
+
+| Variant | Body | Lane | Cue cadence |
+|---|---|---|---|
+| Runner `r` | smallest, lean | full 1.2 width | fast pulse, ends in 0.35 s |
+| Standard `g` | medium | full 1.2 width | medium pulse, 0.5 s |
+| Brute `G` | largest, heavy | full 1.2 width | slow pulse, 0.7 s |
+
+The lane geometry is identical, so lane width never depends on variant. All three share the lunge distance.
+
+## Spitter aim cue
+
+1. **Glow.** An orange-red additive glow on the spitter ramps from a **floor of at least 30% to 100%** over the 0.6 s. The text view shows 0% at the start. Do not render 0% as invisible. The cue must be noticeable on the first frame.
+2. **Aim line.** A **thin** orange-red line, visually narrower than the grub lane. It runs from the spitter along the locked direction to the room edge. It is visible from the first frame of the cue at full line brightness. Only the glow ramps.
+3. **End of cue.** At the shot the line disappears (it does not linger), the glow drops to neutral, and a projectile starts. The line must not be readable as a stationary shot.
+4. **Distance.** The spitter glow and the line are self-lit. They must be visible when the spitter is outside the lantern radius, including in the far corners of the 16-by-9 room.
+5. **Killed during cue.** The line and the glow disappear at once (the shot is cancelled).
+
+## Shot `*`
+
+- A compact **round** orange-red core with a short bright trail, brighter than the line, always moving.
+- It must differ from the aim line by shape (a round object vs a straight line) and by motion.
+- It must be readable against the lantern light and against a lane or line behind it. Give the core a light outline or a hot white center so it does not merge with a same-colored lane.
+
+## Telling cues apart on one screen
+
+| Thing | Shape | Motion/time signal |
+|---|---|---|
+| Grub lunge | wide band, short (2.4 tiles) | fills up, then the grub moves |
+| Spitter aim | thin line, long (to edge) | glow ramps, then the line vanishes |
+| Shot | round core with trail | moves at 3 tiles/s |
+| Lantern | soft round warm pool, low saturation | static around the player |
+
+At most one grub cue is active at once (rule). Spitter cues are normally 0.8 s apart and last 0.6 s, so they rarely overlap. They can overlap after a cap delay, and then the two aim lines must still be readable. They are identical in style, and the glow plus the line origin tell them apart.
+
+## Player-observable acceptance criteria
+
+V1. In a dark room with the player far from a grub, the player can see the cue (flash plus lane) without the lantern reaching it.
+V2. A first-time player can state where the lunge will go and how wide it is, and can tell a 1-tile sidestep clears it.
+V3. The cue is visible from the very first frame of the wind-up, including the Runner's 0.35 s, at both 30 and 60 FPS.
+V4. The player can tell, without text, how much time is left before the lunge or the shot.
+V5. A Runner, Standard grub and Brute are told apart by silhouette alone, in grayscale.
+V6. A grub lane and a spitter aim line are told apart in grayscale (wide band vs thin line).
+V7. The aim line, the shot and the lane never merge. A shot passing over a lane is still seen.
+V8. A recovering or staggered grub looks clearly neutral (no tint). A player can tell when it is safe to swipe.
+V9. No cue flashes faster than 3 Hz.
+V10. A cancelled or killed enemy's cue disappears at once.
+V11. The orange-red threat color is never confused with the warm lantern light. A threat inside the lantern radius is still clearly redder and more saturated than the lit floor.
+V12. Cue timing in the graphical build matches the text-view timings at 30 and 60 FPS, within one frame.
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/15-art-director-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 15
+from: art-director
+to: studio
+stage: Verify
+outcome: done
+---
+# 15: art-director → studio: Visual review of build 0.5 combat cues
+
+## Task
+
+Report on the readability and consistency of the build 0.5 threat cues, with player-observable requirements for the graphical build.
+
+## Context
+
+G-001 (combat monotony). Handoff 12 asked for a review of the grub wind-up and spitter aim cues against the art direction and pillar 3 (readable threats).
+
+## Findings
+
+**Basis and limits.** I reviewed the cue descriptions in handoff 12, `design/combat.md` and `repo/manual.md`. I did not run `play.py`. The build is text-only, so color, brightness and look are not verifiable yet. This is a design-level verdict for the cue forms, and graphical acceptance is still open.
+
+**Verdict by question**
+
+1. **Are the cue forms readable and consistent with the art direction?** Yes, with conditions.
+   - Saturated orange-red against a dark cave fits the art direction. The forms (flash, lane, aim line, glow ramp) are appropriate and reuse simple assets.
+   - The same hue is used for the grub cue, the aim line and the shot, so shape and motion must carry the differences (see problems 3 and 4).
+2. **What the graphical implementation must satisfy.** See `design/combat-cues-visual-spec.md`, criteria V1–V12.
+
+**Problems found, with where they occur**
+
+1. **The grub lane must show its true width.** The combat design calls it a "thin line" but also says the danger is 0.6 tiles either side (1.2 wide). A hairline would make the sidestep requirement unreadable. Requirement: draw the lane at 1.2 tiles wide. This is a visual fix, with no rule change.
+2. **The spitter glow starts at 0% brightness.** The text cue shows `brightness 0%` at the start, so the glow carries no information on the first frame. Requirement: a glow floor of at least 30%, and the aim line at full brightness from the first frame. The ramp then conveys time left.
+3. **Grub lane vs spitter aim line vs shot.** All three are orange-red and the text view draws the lane and aim line with the same `~`. In the text view the `cue:` line resolves this, but a graphical build needs different shapes: a wide short band for the grub, a thin long line for the spitter, and a round moving core for the shot. The line must disappear when the shot fires.
+4. **Threat color vs lantern.** The lantern is also warm. The threat cues must be self-lit, more saturated and redder than the lantern, and not dimmed by distance from the lantern. Spitters in the far corners of the room must still show their cue (rooms 3–5).
+5. **Short Runner cue (0.35 s).** About 10 frames at 30 FPS, with no room for a fade-in. The cue must appear at full contrast on the first frame. Variants must differ by silhouette and cadence, not by hue.
+6. **No "safe" state is specified.** The recovery and stagger windows are where the player is meant to swipe. The grub should clearly return to a neutral untinted look so the player knows it is safe.
+7. **Flash rate.** Keep pulses at or below 3 Hz. Do not strobe, including for the Runner.
+
+**Does any of this need a rule or timing change?** No. All seven points are visual. I do not ask the game-designer to change timings. The 0.35 s minimum wind-up remains workable if V3 is met. If playtesting shows Runner cues are still missed in graphics, the escalation is a wind-up change within the allowed 0.35–0.7 s range, which is the game-designer's call.
+
+**Also noted.** The open question in `design/combat.md` about whether the `r` / `G` text marks suit the graphical build is answered: the graphical build should use silhouette and size instead (spec table). The text marks stay for the text view.
+
+## Decisions already made
+
+- D-001: one attack button plus dash (not affected).
+- Art direction in project.md: warm lantern vs cold blue-black, with threats in saturated orange/red (applied above).
+
+## Constraints
+
+- No gameplay rules or parameters were changed. No new decision file was needed.
+- The graphical cue appearance is not testable until a graphical build exists.
+
+## Open questions
+
+1. Route the spec's V1–V12 to whichever step implements the graphical cues. A visual review against a rendered build is still needed to confirm them.
+2. QA can only verify timing (V12) in the text view. V1–V11 need screenshots or a rendered build.
+
+## Expected output
+
+The Studio keeps `design/combat-cues-visual-spec.md` as the visual acceptance basis for the cues. No change to `design/combat.md` is needed, except that its "Art cue details" open question can now point to this spec.
+
+## Sender assessment
+
+Confidence is medium-high on the form decisions and low on the final look until a rendered build exists. The largest risks are problem 1 (lane width) and problem 2 (glow floor), because both make the cue misleading rather than merely unattractive.
+
+## Load
+
+- Role: studio/roles/art-director.md
+- Skills: studio/skills/visual-review.md
+- Project: project.md#art-direction, project.md#constraints, design/combat.md, design/combat-cues-visual-spec.md
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-001-combat-monotony/12-studio-to-art-director.md
+>>>END
