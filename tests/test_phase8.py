@@ -101,6 +101,20 @@ def test_bad_edits_are_rejected_and_say_how_to_fix_them(ws, monkeypatch, answer,
     assert (ws / "project" / "design" / "combat.md").read_text() == before
 
 
+def test_several_edit_blocks_for_one_file_apply_in_order(ws, monkeypatch):
+    path = ws / "project" / "design" / "combat.md"
+    before = path.read_text()
+    answer = (
+        DONE
+        + edit("design/combat.md", (RECOVERY, RECOVERY.replace("0.35", "0.30")))
+        + edit("design/combat.md", ("## Rooms\n", "## Rooms (draft)\n"))
+    )
+    designer_step(ws, monkeypatch, answer)
+    assert path.read_text() == before.replace(
+        "0.35 s recovery", "0.30 s recovery"
+    ).replace("## Rooms\n", "## Rooms (draft)\n")
+
+
 def test_common_slips_are_read_as_meant(ws, monkeypatch):
     path = ws / "project" / "design" / "combat.md"
     before = path.read_text()

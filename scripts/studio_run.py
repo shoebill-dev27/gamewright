@@ -1295,8 +1295,15 @@ def parse_output(text):
             body.count("<<<<<<< SEARCH") == len(pairs) + 1
         ):  # a forgotten last REPLACE marker
             pairs = EDIT_PAIR.findall(body.rstrip("\n") + "\n>>>>>>> REPLACE\n")
+        earlier = files.get(m.group(1))
+        if isinstance(
+            earlier, Edits
+        ):  # several EDIT blocks for one file: one list, in order
+            earlier.extend(pairs)
+            earlier.malformed |= body.count("<<<<<<< SEARCH") != len(pairs)
+            continue
         edits = Edits(pairs)
-        edits.mixed = m.group(1) in files
+        edits.mixed = earlier is not None
         edits.malformed = body.count("<<<<<<< SEARCH") != len(edits)
         files[m.group(1)] = edits
     bare = text.strip().splitlines()
