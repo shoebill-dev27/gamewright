@@ -89,6 +89,10 @@ def test_edits_change_only_what_they_name(ws, monkeypatch):
             edit("design/combat.md", ("intro\n", "x\n"), ("middle", "y")),
             "on a line of its own",
         ),  # one good pair and one whose marker follows the text: nothing may be dropped silently
+        (
+            edit("design/combat.md", ("intro\n", "x\n>>>REPLACE\n")),
+            "looks like a marker",
+        ),  # a misspelt closing marker read as the forgotten one: it must not land in the file
     ],
 )
 def test_bad_edits_are_rejected_and_say_how_to_fix_them(ws, monkeypatch, answer, why):
@@ -128,6 +132,21 @@ def test_common_slips_are_read_as_meant(ws, monkeypatch):
     )
     designer_step(ws, monkeypatch, answer)
     assert path.read_text() == before.replace("a short swipe", "a quick swipe")
+
+
+def test_a_new_edit_block_ends_one_left_open(ws, monkeypatch):
+    path = ws / "project" / "design" / "combat.md"
+    write(ws, "design/notes.md", "alpha\n")
+    before = path.read_text()
+    first = edit("design/combat.md", ("## Rooms\n", "## Rooms (draft)\n"))
+    answer = (
+        DONE
+        + first.replace(">>>END\n", "")  # no >>>END before the next block
+        + edit("design/notes.md", ("alpha\n", "beta\n"))
+    )
+    designer_step(ws, monkeypatch, answer)
+    assert path.read_text() == before.replace("## Rooms\n", "## Rooms (draft)\n")
+    assert (ws / "project" / "design" / "notes.md").read_text() == "beta\n"
 
 
 def test_an_edit_is_checked_against_the_write_list(ws, monkeypatch):

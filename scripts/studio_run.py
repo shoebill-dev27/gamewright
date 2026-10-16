@@ -1277,10 +1277,15 @@ RUNTIMES = {"claude": run_claude, "codex": run_codex}
 # --- Execution ---------------------------------------------------------------------------------
 
 
-EDIT_BLOCK = re.compile(r"^<<<EDIT (\S+)[ \t]*\n(.*?)^>>>END[ \t]*$", re.M | re.S)
+EDIT_BLOCK = re.compile(  # a block left open ends where the next one starts
+    r"^<<<EDIT (\S+)[ \t]*\n(.*?)(?:^>>>END[ \t]*$|(?=^<<<EDIT ))", re.M | re.S
+)
 EDIT_PAIR = re.compile(
     r"^<<<<<<< SEARCH[ \t]*\n(.*?)^=======[ \t]*\n(.*?)^>>>>>>> REPLACE[ \t]*$",
     re.M | re.S,
+)
+MARKER_LIKE = re.compile(
+    r"^[ \t]*(?:<{3,}|>{3,})[ \t]*(?:SEARCH|REPLACE|EDIT|FILE|END).*$", re.M
 )
 
 
@@ -1354,6 +1359,14 @@ def resolve_edits(project, packet, files):
             )
             continue
         for number, (search, replace) in enumerate(edits, 1):
+            stray = [l for l in MARKER_LIKE.findall(replace) if l not in search]
+            if stray:
+                errors.append(
+                    f"{path}: EDIT pair {number}: the REPLACE text has a line that looks like a "
+                    f"marker ({stray[0].strip()}); end each pair with >>>>>>> REPLACE on a line of "
+                    "its own and keep markers out of the text"
+                )
+                break
             found = text.count(search) if search.strip() else 0
             if found == 0 and search.endswith("\n") and text.count(search[:-1]) == 1:
                 # SEARCH holds part of a line: match it without its line break

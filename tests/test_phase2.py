@@ -755,7 +755,7 @@ def test_recorded_isolation_canaries():
         ):  # only the step artifacts its header names; no records
             header = re.search(r"^step_artifacts?: (.+)$", packet, re.M).group(1)
             listed = {a.strip() for a in header.split(",")}
-            shown = set(re.findall(r"^<<<FILE (goals/\S+/\d\d-\S+)$", packet, re.M))
+            shown = set(re.findall(r"^<<<FILE (goals/\S+/\d{2,}-\S+)$", packet, re.M))
             assert shown == listed, rec
             assert "records/" not in packet, rec
 
