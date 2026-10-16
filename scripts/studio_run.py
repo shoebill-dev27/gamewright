@@ -960,6 +960,20 @@ def build_route(project, gdir, records=None, since=None):
             and parse(t)[0].get("status") == "open"
             for t in written
         )
+        already = [
+            p.name
+            for p, m in artifacts
+            if m.get("kind") == "escalation" and m.get("status") == "open"
+        ]
+        if already and any(
+            parse(t)[0].get("kind") == "escalation"
+            and parse(t)[0].get("status") == "open"
+            for t in written
+        ):
+            errors.append(
+                f"an Escalation is already open ({', '.join(already)}); do not open another, keep "
+                "waiting for the Owner's answer to it"
+            )
         if status == "blocked-on-owner" and not open_escalation:
             errors.append(
                 "blocked-on-owner needs an open Escalation; while a Role prepares the brief, keep the "
@@ -1635,6 +1649,14 @@ def no_progress(role, history, opened):
     return None
 
 
+def open_escalations(gdir):
+    return [
+        p
+        for p, m in goal_artifacts(gdir)
+        if m.get("kind") == "escalation" and m.get("status") == "open"
+    ]
+
+
 def unrouted(records, gdir):
     """Artifacts newer than the last Studio operation's view (e.g., a Route failed after a Step)."""
     return bool(unseen(gdir, seen_through(records, gdir.name[:5])))
@@ -1648,9 +1670,18 @@ def do_run(ws, args):
     used = lambda: len(
         {d.name for d in records.iterdir() if d.is_dir()} - before
     )  # noqa: E731
-    history, opened, reason, code = {}, Counter(), None, 0
+    history, opened, reason, code, announced = {}, Counter(), None, 0, set()
     try:
         while reason is None:
+            for esc in open_escalations(
+                gdir
+            ):  # an Owner question the Studio works around
+                if esc.name not in announced:
+                    announced.add(esc.name)
+                    print(
+                        f"[run] Owner question open: {esc.relative_to(project)} "
+                        "(the Studio continues with other steps meanwhile)"
+                    )
             status = parse((gdir / "goal.md").read_text(encoding="utf-8"))[0].get(
                 "status"
             )
@@ -1688,12 +1719,7 @@ def do_run(ws, args):
     text = (gdir / "goal.md").read_text(encoding="utf-8")
     status = parse(text)[0].get("status")
     escalation = next(
-        (
-            str(p.relative_to(project))
-            for p, m in reversed(goal_artifacts(gdir))
-            if m.get("kind") == "escalation" and m.get("status") == "open"
-        ),
-        None,
+        (str(p.relative_to(project)) for p in reversed(open_escalations(gdir))), None
     )
     wsr = os.path.relpath(ws, ROOT) if ws.is_relative_to(ROOT) else str(ws)
     summary = {
@@ -1706,18 +1732,18 @@ def do_run(ws, args):
         "status": status,
         "owner_reads": (
             escalation
-            if status == "blocked-on-owner"
+            if escalation and status in ("blocked-on-owner", "active")
             else (
                 str((gdir / "goal.md").relative_to(project)) + "#outcome"
                 if status == "done"
                 else None
             )
         ),
-        "next": {
-            "done": None,
-            "abandoned": None,
-            "blocked-on-owner": f'decide {wsr} "<answer>"',
-        }.get(status, f"run {wsr}"),
+        "next": (
+            f'decide {wsr} "<answer>"'
+            if escalation and status in ("blocked-on-owner", "active")
+            else {"done": None, "abandoned": None}.get(status, f"run {wsr}")
+        ),
     }
     save_record(record_dir(ws, "run"), summary)
     print(f"\n[run] {len(summary['operations'])} operations; stopped: {reason}")

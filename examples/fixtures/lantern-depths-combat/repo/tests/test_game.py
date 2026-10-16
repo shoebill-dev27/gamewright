@@ -93,5 +93,59 @@ class BotsTest(unittest.TestCase):
             self.assertIn("cleared", result, name)
 
 
+class ReactionTest(unittest.TestCase):
+    def session(self, script):
+        import contextlib
+        import io
+
+        import play
+
+        setup, inputs, rules = play.read_script(script)
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            play.play(setup, inputs, "player", rules)
+        return out.getvalue()
+
+    def test_rules_react_to_what_is_on_screen(self):
+        out = self.session(
+            "room empty\nspawn grub 12 4\nwhen see g within 1.4 then attack\nwhen see g within 6 then face\n"
+        )
+        self.assertIn("room cleared", out)
+        self.assertNotIn("YOU ARE HIT", out)
+
+    def test_a_rule_acts_at_most_every_reaction_time(self):
+        import play
+
+        rule = play.Rule("when see g within 20 then attack")
+        game = Game(room="empty")
+        game.spawn("grub", 15, 4)
+        fired = 0
+        for _ in range(60):  # one second at 60 FPS
+            before = rule.last
+            play.react(game, [rule], [], [])
+            fired += rule.last != before
+            game.step()
+        self.assertEqual(fired, 7)  # 0.0, 0.15, ... 0.9
+
+    def test_rules_ignore_what_is_not_drawn(self):
+        import play
+
+        game = Game(room="empty")  # nothing on screen
+        view = play.View(game, [])
+        self.assertIsNone(view.nearest())
+        self.assertTrue(play.Rule("when nothing within 3 then stop").matches(view))
+
+    def test_rules_and_timed_inputs_mix(self):
+        out = self.session("room empty\n0.1 dash right\nwhen see g within 1.4 then attack\nend 1\n")
+        self.assertIn("you dash right", out)
+
+    def test_a_bad_rule_says_how_rules_read(self):
+        import play
+
+        with self.assertRaises(ValueError) as caught:
+            play.Rule("when grub close then hit")
+        self.assertIn("conditions:", str(caught.exception))
+
+
 if __name__ == "__main__":
     unittest.main()

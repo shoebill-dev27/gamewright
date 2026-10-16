@@ -4,7 +4,7 @@ id: lantern-depths
 name: Lantern Depths (sample, playable)
 repository: repo/ (a small headless build; played through input scripts)
 owner_language: ja
-player_visible: manual.md
+player_visible: repo/manual.md
 build: repo
 run_tests: python3 -m unittest discover -s tests
 run_play: python3 play.py --view player {script}
@@ -32,7 +32,7 @@ memorizing combo lists. Mostly play with a gamepad.
 
 Vertical-slice prototype, build 0.4 in `repo/`: 5 rooms in one cave biome, 2 enemy types, player
 kit of attack and dash. Build 0.4 fixed damage during a dash. A play session is an input script
-(`manual.md`): `run_play` shows what a player sees, `run_trace` the simulation state, and
+(`repo/manual.md`): `run_play` shows what a player sees, `run_trace` the simulation state, and
 `run_tests` runs the build's tests. `run_bots` lets the team's balance bots play rooms and reports
 clear times, hearts lost and actions used (`repo/bots.py`).
 
@@ -51,4 +51,5 @@ orange/red so they read against the dark.
 ## Design index
 
 - `design/combat.md` — player kit, damage and invulnerability rules, enemies.
-- `manual.md` — controls and the play script format (player-facing).
+- `repo/manual.md` — controls, the play script format and reaction rules (player-facing; ships
+  with the build).

@@ -4,7 +4,7 @@ id: <project-id>
 name: <display name>
 repository: <path or URL of the game repository>
 owner_language: <language for Owner-facing text, e.g. en, ja>
-player_visible: <optional: files a Playtester may load, e.g. builds or captures>
+player_visible: <optional: files a Playtester may load, e.g. builds or captures; player-facing files that change with the build belong inside the build directory>
 build: <optional: the directory holding a build that commands can run>
 run_tests: <optional, with build: command that runs the build's tests>
 run_play: <optional, with build: command that plays a script ({script}) and shows the player view>

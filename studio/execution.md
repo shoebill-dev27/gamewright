@@ -81,7 +81,9 @@ A runtime may repeat Steps and Routes without a person starting each one. It run
 | Operation budget reached | A person decides whether to continue. The budget is checked between cycles, so a cycle (its Steps and Route) is never cut in half. |
 | No progress | A Role handed back `question` twice and would be opened again, or a Role would be opened a 4th time in one continuous run. A mechanical backstop for the loop limits in `orchestration.md`. |
 
-Every stop is recorded with its reason, what the Owner should read, and how to continue. A
+Every stop is recorded with its reason, what the Owner should read, and how to continue. An
+Escalation opened while independent steps go on is reported as soon as it opens, and every stop
+record names it while it is unanswered. A
 continuous run never decides anything a Route or Role would not decide one operation at a time.
 
 ## Independence policies

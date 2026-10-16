@@ -139,7 +139,11 @@ def read_script(text):
             else:
                 raise ValueError
         except (AssertionError, ValueError):
-            sys.exit(f"script line {number}: cannot read {raw.strip()!r}")
+            sys.exit(
+                f"script line {number}: cannot read {raw.strip()!r}\n"
+                "bots script lines (all optional): bots camper,walker,dodger | rooms 1-5 (or 1,3) | "
+                "fps 30|60 | limit <seconds per room>"
+            )
     return setup
 
 

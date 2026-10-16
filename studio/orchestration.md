@@ -150,6 +150,8 @@ pushes work back onto the Owner that the Studio exists to absorb.
    recommendation, reasoning, and what happens next under each option.
 3. The Studio sets the Goal to `blocked-on-owner`, pauses every step that depends on the answer
    (independent steps may continue), and returns the brief to the Owner.
+4. One question at a time: while an Escalation is open, do not open another. Later questions wait
+   for the answer, or go into the next Escalation once it is resolved.
 
 ## Decision authority
 
