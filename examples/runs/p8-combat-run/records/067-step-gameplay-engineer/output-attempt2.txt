@@ -1,0 +1,268 @@
+<<<FILE goals/G-001-combat-monotony/71-gameplay-engineer-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 71
+from: gameplay-engineer
+to: studio
+stage: Build
+outcome: done
+---
+# 71: gameplay-engineer → studio — D-011 variant-named messages and manual wording built
+
+## Task
+
+Route to Verify (QA) and then a fresh playtest. This is the D-011 message strings plus the manual wording from `design/combat-step68.md`. No rule, timing, room, hearts or enemy-parameter change.
+
+## Context
+
+Goal G-001. Handoff 69 asked for wording-only changes: the wind-up and hit messages name the variant, and the manual gets the late-swipe and in-flight wording. Build label: 0.6.1 plus D-011. There is no sha in this environment. The banner still prints `Lantern Depths 0.6`, as the existing banner test requires. Suggested label for the playtest brief: 0.6.2 (D-011), per D-009 item 5.
+
+## Findings
+
+What changed and where:
+
+- `repo/game.py`: `_hurt` takes an optional `enemy` name. A grub lunge hit passes the variant, so the `hurt` event carries `enemy` (grub, runner or brute). `source` stays `"grub"` or `"shot"`, so bots and all existing logic are untouched. Shot hits carry no `enemy`.
+- `repo/play.py` (player view only):
+  - The wind-up message is `a <enemy> rears back` (grub, runner or brute).
+  - The hit message is `YOU ARE HIT by a <enemy|source> — hearts n/3`. Shots still print `by a shot`.
+  - The trace view hides the new `enemy` field in `hurt` events, so trace output stays byte-identical to 0.6.1.
+  - The `cue:` line, `~` line, timings, and the swipe, kill, shrug and spitter messages are unchanged.
+- `repo/manual.md`:
+  - Warnings bullet names the three wind-up messages.
+  - Late-swipe text is the exact text from step 68 §2.
+  - The stale "no more than 3 are in the air at once" is replaced by the exact step 68 §1 sentence.
+  - The hit-message line lists all four hit messages.
+- `repo/tests/test_game.py`: new `VariantMessageTest` (see below). No existing test keyed on the old strings other than `a grub rears back` for a grub, which is still correct.
+- No bot needed changing. Bots key on event `source`, not on message text.
+
+How to exercise (practice room, 30 and 60 FPS, one case per variant):
+
+- `room empty`, `spawn <grub|runner|brute> 10 4`, `player 8 4`, `end 1.0`: one `a <variant> rears back` line at the wind-up moment.
+- Same with the spawn at 8.5 4: the hit line reads `YOU ARE HIT by a <variant> — hearts 2/3` at the frame of contact.
+- A script with `when text "rears back" then dash away` reacts to all three.
+- A script keyed on `text "a grub rears back"` reacts only to the standard grub.
+- `--view trace` hurt lines show only `{'source': 'grub', 'hearts': n}`.
+
+New tests (`VariantMessageTest`), all at 30 and 60 FPS:
+
+- each wind-up prints its message once and no other variant's message;
+- the wind-up message sits at the windup event time;
+- each hit prints the matching message on the contact frame with the unchanged hearts text;
+- the shot, aim, spit and shrug strings are unchanged;
+- the `rears back` rule reacts to all three;
+- the `a grub rears back` rule matches only the grub;
+- the trace shows no `enemy` field.
+
+Acceptance criteria addressed: V-a, V-b, V-c, V-d by those tests and by construction (only the string formatting changed; the simulation is untouched). V-e: the simulation, bots and rooms are untouched. The manual wording covers the step 59 acceptance list and the step 68 §1 replacement.
+
+Test and bot status:
+
+- Run 1 of `run_tests`: 65 of 66 passed. The one failure was a defect in my new test, not in the build. `test_each_wind_up_prints_its_own_message_once` ran 2.5 s, so the grub's second wind-up printed a second message at 30 FPS. I shortened that test to `end 1.0`, so only one wind-up occurs per variant.
+- I did not re-run the tests after that fix. The full suite should be run on the final files.
+- Bots (`run_bots`, run 1, all bots, all rooms):
+  - 60 FPS: walker 3/5 cleared, 12 lost, rooms 3–5 = 7 lost; dodger 5/5, 0 lost, 51 dashes.
+  - 30 FPS: walker 3/5, 9 lost, rooms 3–5 = 4 lost; dodger 5/5, 0 lost, 39 dashes.
+  - These match the 0.6.1 figures quoted in the existing test comment (walker 7 at 60 FPS). I had no saved 0.6.1 bot output to diff byte for byte, but no bot-visible code path changed.
+
+Known risks:
+
+- A rule written against `by a grub` or `a grub rears back` now matches only standard grubs (intended, D-011).
+- The `enemy` field in `hurt` events is new in the event stream, hidden in the trace. Any other consumer that prints all fields of the event would show it.
+
+## Decisions already made
+
+- D-001: no new input.
+- D-011 (accepted): variant-named messages, supersedes D-008.
+- D-004 to D-007 stand and are not reopened.
+
+## Constraints
+
+- Room 3 content untouched. No timing, damage, hearts, room or parameter change.
+
+## Open questions
+
+None.
+
+## Expected output
+
+Verify (QA) at 30 and 60 FPS on V-a to V-e, with a full `run_tests` run and a bots comparison against 0.6.1. Then a fresh playtest that states the new build label. Neither may receive implementation history.
+
+## Sender assessment
+
+- Root cause of the one test failure: the test script ran long enough for a second wind-up, so the count of 1 was wrong. This is a test bug, not a message duplication.
+- Confidence in the build is high because the change is only string formatting plus an extra event field. Confidence that the suite is fully green is moderate until it is re-run after the test fix.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: design/combat-step68.md, design/combat.md, design/combat-step-46-room3-cap.md, repo/manual.md, repo/play.py, repo/game.py, repo/bots.py, repo/tests/test_game.py
+- Decisions: decisions/D-011-variant-named-messages-accepted.md
+- Previous handoff: goals/G-001-combat-monotony/69-studio-to-gameplay-engineer.md
+>>>END
+
+<<<EDIT repo/game.py
+<<<<<<< SEARCH
+                    self._hurt("grub")
+=======
+                    self._hurt("grub", e.kind)
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    def _hurt(self, source):
+=======
+    def _hurt(self, source, enemy=None):
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        self.log("hurt", source=source, hearts=self.hearts)
+=======
+        # D-011: a grub hit also names the variant; "source" stays "grub" for the bots.
+        extra = {"enemy": enemy} if enemy else {}
+        self.log("hurt", source=source, hearts=self.hearts, **extra)
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/play.py
+<<<<<<< SEARCH
+            return f"YOU ARE HIT by a {details['source']} — hearts {details['hearts']}/{HEARTS}"
+=======
+            noun = details.get("enemy", details["source"])  # D-011: grub, runner, brute or shot
+            return f"YOU ARE HIT by a {noun} — hearts {details['hearts']}/{HEARTS}"
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+            return "a grub rears back"
+=======
+            return f"a {details['enemy']} rears back"  # D-011: grub, runner or brute
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        happened = "; ".join(
+            kind + (f" {details}" if details else "") for kind, details in events
+        )
+=======
+        def shown(kind, details):  # the trace stays byte-identical: hide the D-011 hit variant
+            if kind == "hurt":
+                return {k: v for k, v in details.items() if k != "enemy"}
+            return details
+
+        happened = "; ".join(
+            kind + (f" {shown(kind, details)}" if details else "") for kind, details in events
+        )
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/manual.md
+<<<<<<< SEARCH
+- **A grub rears back** (message `a grub rears back`): the grub stops and flashes orange-red, and a
+=======
+- **A grub rears back** (message `a grub rears back`, `a runner rears back` or
+  `a brute rears back`, naming the kind): the grub stops and flashes orange-red, and a
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+  lunge, or swipe a grub or runner (within 1.5 tiles) to cancel it. The warning lasts 0.5 s for a
+=======
+  lunge, or swipe a grub or runner to cancel it. A swipe cancels only during the warning, and only if the enemy is within 1.5 tiles at that moment. A grub starts rearing back about 2 tiles away, beyond your reach, so step in to within 1.5 tiles during the warning. A swipe that lands after the lunge has begun does not cancel it. One swipe is enough to cancel a grub or a runner. A brute is never cancelled. The warning lasts 0.5 s for a
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+  3 tiles a second, and no more than 3 are in the air at once. In rooms 4 and 5 the two spitters
+=======
+  3 tiles a second. A spitter will not start aiming while 3 shots are already in the air, but shots from aims already under way still fire, so in room 3 up to 5 can be in the air at once. In rooms 4 and 5 the two spitters
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+- Being hit shows `YOU ARE HIT by a grub` or `by a shot`. A swipe that interrupts the warning of a
+=======
+- Being hit shows `YOU ARE HIT by a grub`, `by a runner`, `by a brute` or `by a shot`. A swipe that interrupts the warning of a
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/tests/test_game.py
+<<<<<<< SEARCH
+if __name__ == "__main__":
+    unittest.main()
+=======
+class VariantMessageTest(unittest.TestCase):
+    """D-011: wind-up and hit messages name the variant; everything else is unchanged."""
+
+    KINDS = ("grub", "runner", "brute")
+
+    def session(self, script, view="player"):
+        import contextlib
+        import io
+
+        import play
+
+        setup, inputs, rules = play.read_script(script)
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            play.play(setup, inputs, view, rules)
+        return out.getvalue()
+
+    def script(self, kind, fps, x, extra="", end=2.5):
+        return f"room empty\nfps {fps}\nspawn {kind} {x} 4\nplayer 8 4\n{extra}end {end}\n"
+
+    def test_each_wind_up_prints_its_own_message_once(self):
+        for fps in (30, 60):
+            for kind in self.KINDS:
+                out = self.session(self.script(kind, fps, 10, end=1.0))
+                self.assertEqual(out.count(f"a {kind} rears back"), 1, (fps, kind))
+                for other in self.KINDS:
+                    if other != kind:
+                        self.assertNotIn(f"a {other} rears back", out, (fps, kind))
+
+    def test_wind_up_message_is_at_the_wind_up_moment(self):
+        for fps in (30, 60):
+            for kind in self.KINDS:
+                game = Game(fps=fps, room="empty")
+                game.spawn(kind, 10, 4)
+                self.assertTrue(step_until(game, has_event("windup")))
+                when = times(game, "windup")[0]
+                out = self.session(self.script(kind, fps, 10))
+                self.assertIn(f"{when:7.3f}  a {kind} rears back", out, (fps, kind))
+
+    def test_each_hit_prints_the_matching_message_on_the_frame_of_contact(self):
+        for fps in (30, 60):
+            for kind in self.KINDS:
+                game = Game(fps=fps, room="empty")
+                game.spawn(kind, 8.5, 4)
+                self.assertTrue(step_until(game, has_event("hurt"), 3.0))
+                when = times(game, "hurt")[0]
+                out = self.session(self.script(kind, fps, 8.5))
+                self.assertIn(
+                    f"{when:7.3f}  YOU ARE HIT by a {kind} — hearts 2/3", out, (fps, kind)
+                )
+
+    def test_shot_hit_and_other_messages_are_unchanged(self):
+        import play
+
+        d = play.Player.describe
+        self.assertEqual(d("hurt", {"source": "shot", "hearts": 2}), "YOU ARE HIT by a shot — hearts 2/3")
+        self.assertEqual(d("aim", {}), "a spitter takes aim")
+        self.assertEqual(d("spit", {}), "a spitter spits")
+        self.assertEqual(d("shrug", {"enemy": "brute"}), "the brute shrugs off the swipe")
+
+    def test_rears_back_rule_reacts_to_all_variants(self):
+        for fps in (30, 60):
+            for kind in self.KINDS:
+                out = self.session(
+                    self.script(kind, fps, 10, 'when text "rears back" then dash away\n')
+                )
+                self.assertIn("you dash", out, (fps, kind))
+
+    def test_old_keyed_rules_match_only_the_standard_grub(self):
+        for kind, expect in (("grub", True), ("runner", False), ("brute", False)):
+            out = self.session(
+                self.script(kind, 60, 10, 'when text "a grub rears back" then dash away\n')
+            )
+            self.assertEqual("you dash" in out, expect, kind)
+
+    def test_trace_view_hides_the_variant_field(self):
+        out = self.session(self.script("brute", 60, 8.5, end=1.5), view="trace")
+        hurt = [l for l in out.splitlines() if "hurt {" in l]
+        self.assertTrue(hurt)
+        for line in hurt:
+            self.assertIn("hurt {'source': 'grub', 'hearts': 2}", line)
+            self.assertNotIn("'enemy'", line)
+
+
+if __name__ == "__main__":
+    unittest.main()
+>>>END

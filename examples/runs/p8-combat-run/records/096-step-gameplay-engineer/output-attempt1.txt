@@ -1,0 +1,23 @@
+I need to see how `play.py` builds the hit and swipe messages before changing anything, so I'm first running a probe test that prints its source.
+
+@run/tests/probe
+<<<FILE repo/tests/test_probe.py
+import sys
+import unittest
+import inspect
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+
+class Probe(unittest.TestCase):
+    def test_probe(self):
+        import play
+        print("=====PLAYSRC=====")
+        print(inspect.getsource(play))
+        print("=====END=====")
+
+
+if __name__ == "__main__":
+    unittest.main()
+>>>END

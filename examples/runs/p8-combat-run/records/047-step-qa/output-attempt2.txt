@@ -1,0 +1,319 @@
+Round 1 settled the F3 banner (now 0.6), F2 (the shrug message prints at both rates) and criterion 13 against D-006. Several items from the "not run" list are still open, so I am requesting a second round of runs before I write the report.
+
+<<<FILE @run/play/s2_30
+room empty
+fps 30
+spawn grub 9 4
+0.1 move down
+0.35 stop
+end 1.3
+>>>END
+
+<<<FILE @run/play/s2_60
+room empty
+fps 60
+spawn grub 9 4
+0.1 move down
+0.35 stop
+end 1.3
+>>>END
+
+<<<FILE @run/play/c6_30
+room empty
+fps 30
+spawn grub 9 4
+0.1 attack
+0.6 attack
+end 2
+>>>END
+
+<<<FILE @run/play/c6_60
+room empty
+fps 60
+spawn grub 9 4
+0.1 attack
+0.6 attack
+end 2
+>>>END
+
+<<<FILE @run/play/rdash_30
+room empty
+fps 30
+spawn runner 9 4
+0.3 dash right
+end 1.2
+>>>END
+
+<<<FILE @run/play/rdash_60
+room empty
+fps 60
+spawn runner 9 4
+0.3 dash right
+end 1.2
+>>>END
+
+<<<FILE @run/play/rswipe_30
+room empty
+fps 30
+spawn runner 9 4
+0.1 attack
+end 1
+>>>END
+
+<<<FILE @run/play/rswipe_60
+room empty
+fps 60
+spawn runner 9 4
+0.1 attack
+end 1
+>>>END
+
+<<<FILE @run/play/d10_30
+room empty
+fps 30
+spawn spitter 15 4
+1.3 move down
+1.55 stop
+end 5
+>>>END
+
+<<<FILE @run/play/d10_60
+room empty
+fps 60
+spawn spitter 15 4
+1.3 move down
+1.55 stop
+end 5
+>>>END
+
+<<<FILE @run/play/k19_30
+room empty
+fps 30
+spawn brute 9 4
+player 8 4
+0.1 attack
+0.5 attack
+1.3 attack
+2.3 attack
+end 3.5
+>>>END
+
+<<<FILE @run/play/k19_60
+room empty
+fps 60
+spawn brute 9 4
+player 8 4
+0.1 attack
+0.5 attack
+1.3 attack
+2.3 attack
+end 3.5
+>>>END
+
+<<<FILE @run/play/room1
+room 1
+fps 30
+end 0.1
+>>>END
+
+<<<FILE @run/play/room2
+room 2
+fps 30
+end 0.1
+>>>END
+
+<<<FILE @run/play/e20_30
+room empty
+fps 30
+spawn spitter 15 4
+3.9 dash right
+end 4.05
+>>>END
+
+<<<FILE @run/play/e20_60
+room empty
+fps 60
+spawn spitter 15 4
+3.9 dash right
+end 4.05
+>>>END
+
+<<<FILE @run/play/f20_30
+room empty
+fps 30
+spawn spitter 15 4
+3.9 dash up
+end 4.5
+>>>END
+
+<<<FILE @run/play/f20_60
+room empty
+fps 60
+spawn spitter 15 4
+3.9 dash up
+end 4.5
+>>>END
+
+<<<FILE @run/play/b21a_30
+room empty
+fps 30
+spawn spitter 15 4
+spawn grub 2.53 4
+player 8.45 4
+end 5.5
+>>>END
+
+<<<FILE @run/play/b21a_60
+room empty
+fps 60
+spawn spitter 15 4
+spawn grub 2.53 4
+player 8.45 4
+end 5.5
+>>>END
+
+<<<FILE @run/play/b21c_30
+room empty
+fps 30
+spawn spitter 15 4
+spawn grub 2.40 4
+player 8.45 4
+end 5.5
+>>>END
+
+<<<FILE @run/play/b21c_60
+room empty
+fps 60
+spawn spitter 15 4
+spawn grub 2.40 4
+player 8.45 4
+end 5.5
+>>>END
+
+<<<FILE @run/play/n11a_30
+room 3
+fps 30
+when see * coming within 2 then dash aside
+end 7.5
+>>>END
+
+<<<FILE @run/play/n11a_60
+room 3
+fps 60
+when see * coming within 2 then dash aside
+end 7.5
+>>>END
+
+<<<FILE @run/play/n11b_30
+room 3
+fps 30
+when see * coming within 2 then dash aside
+end 11.7
+>>>END
+
+<<<FILE @run/play/n11b_60
+room 3
+fps 60
+when see * coming within 2 then dash aside
+end 11.7
+>>>END
+
+<<<FILE @run/trace/t18c_30
+room 4
+fps 30
+0.0 dash right
+0.9 dash right
+1.55 dash down
+1.85 attack
+2.25 attack
+2.5 move left
+3.0 stop
+end 15
+>>>END
+
+<<<FILE @run/trace/t18c_60
+room 4
+fps 60
+0.0 dash right
+0.9 dash right
+1.55 dash down
+1.85 attack
+2.25 attack
+2.5 move left
+3.0 stop
+end 15
+>>>END
+
+<<<FILE @run/trace/t17a_30
+room empty
+fps 30
+spawn spitter 15 4
+player 8 4
+1.3 move down
+1.37 stop
+end 4.6
+>>>END
+
+<<<FILE @run/trace/t17a_60
+room empty
+fps 60
+spawn spitter 15 4
+player 8 4
+1.3 move down
+1.37 stop
+end 4.6
+>>>END
+
+<<<FILE @run/trace/t17b_30
+room empty
+fps 30
+spawn spitter 15 4
+player 8 4
+1.3 move down
+1.40 stop
+end 4.6
+>>>END
+
+<<<FILE @run/trace/t17b_60
+room empty
+fps 60
+spawn spitter 15 4
+player 8 4
+1.3 move down
+1.40 stop
+end 4.6
+>>>END
+
+<<<FILE @run/trace/t17c_30
+room empty
+fps 30
+spawn spitter 15 4
+player 8 4
+1.3 move down
+1.44 stop
+end 4.6
+>>>END
+
+<<<FILE @run/trace/t17c_60
+room empty
+fps 60
+spawn spitter 15 4
+player 8 4
+1.3 move down
+1.44 stop
+end 4.6
+>>>END
+
+<<<FILE @run/bots/log30
+bots walker
+rooms 3-5
+fps 30
+log on
+>>>END
+
+<<<FILE @run/bots/log60
+bots walker
+rooms 3-5
+fps 60
+log on
+>>>END

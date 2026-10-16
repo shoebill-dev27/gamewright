@@ -1,0 +1,62 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/62-studio-to-qa.md",
+  "sha256": "984ae668e5d0f674081708f4c1a849564fccdb3f548da658af4831a8d72bed08",
+  "bytes": 2362
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "381742c8f2afe2e1a2a6af9d031dcc91f98f490ada7c90e2a990d6a1aaf27639",
+  "bytes": 1765
+ },
+ {
+  "path": "studio/skills/verify-change.md",
+  "sha256": "da40d2c0030e078ac6d085ea06b17bb9b452495f4e2f412a9e1bd723ac72ddf5",
+  "bytes": 1281
+ },
+ {
+  "path": "studio/skills/reproduce-defect.md",
+  "sha256": "aa7e161cc1fcb38fd92ede1719446f05eee1c7ac431a28a04d570ce451a2291d",
+  "bytes": 1407
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "8ee4bdbaeb36c69a4446cb6db9dac13f103c24b0b3e2ffc044b8088c805b0d3f",
+  "bytes": 47741
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "0714d607b828069bf90d552d952510c7f36804dec57f9597b426786442b3890c",
+  "bytes": 5175
+ },
+ {
+  "path": "decisions/D-003-contact-edge-exact-reach-and-lunge-band.md",
+  "sha256": "eabaf1e1bd3a216fe3cd402846ac57e001f2fe53c715dba6359cae5c80dd572a",
+  "bytes": 3250
+ },
+ {
+  "path": "decisions/D-004-spitter-cue-gap-brute-no-cancel-room2-spitter-deferred.md",
+  "sha256": "0c7087cd192c63c9e79457bea70d4a603e1e68468fe453b3ad2d5b78bea629c0",
+  "bytes": 3694
+ },
+ {
+  "path": "goals/G-001-combat-monotony/56-qa-to-studio.md",
+  "sha256": "5fd3823c74bde88ffd7b3fe7f3fd9848134bb9c9d31ea4fc0da35f2b6c8a8a5c",
+  "bytes": 12454
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "@run-results",
+  "sha256": "d9c1076472adcdaa6620ff906757472c91a9aebfa195c2cbd3d7b25dbdf5cda4",
+  "bytes": 77263
+ }
+]

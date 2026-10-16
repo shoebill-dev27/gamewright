@@ -1,0 +1,83 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "fe4fa137-6a56-443a-9201-cadf6b32d4b8",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 27707,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 7221,
+    "output_tokens_details": {
+     "thinking_tokens": 2835
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 27707,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 7221,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 27707,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 27707
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.18304199999999998,
+   "attempt": 1,
+   "started": "2026-10-17T03:37:31",
+   "seconds": 50.1,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-combat-monotony/83-studio-to-playtester.md": "bfc8fcbd17d015054210228dd8598a7a703dbb52587b4f1376386539e7266a8d",
+  "goals/G-001-combat-monotony/84-studio-to-qa.md": "bfc622f61edd2e650c058521e8daa36879db38954c4be6bc1ad9e723a52224ef",
+  "goals/G-001-combat-monotony/85-studio-to-game-designer.md": "a1d1ad1a39093cc3c155230b1101c19415380367eb25f58e9447082e4310f37a",
+  "goals/G-001-combat-monotony/goal.md": "30d069a61f6bed3dbda6c8b03401f8b1a0ce030438c06c707eb76227a2e43477"
+ },
+ "decision": {
+  "new": [
+   "game-designer",
+   "Design"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "qa",
+    "Verify (R3-8 timed run, R3-4 in room 3)"
+   ],
+   [
+    "game-designer",
+    "Design (doc wording, D-007 stray line)"
+   ],
+   [
+    "playtester",
+    "Play (fresh, new build, hand-timed)"
+   ]
+  ]
+ },
+ "seen_through_seq": 85
+}

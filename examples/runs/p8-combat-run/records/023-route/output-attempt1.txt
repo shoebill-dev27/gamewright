@@ -1,0 +1,191 @@
+Route for step 8d is done: QA passed criteria 1–17, so Play (9) opens. I composed that Handoff from the build and player profile only. QA's two non-blocking notes go to the designer in parallel as 9b. I did not edit `24-qa-to-studio.md`, and I did not append to `log.md` because it is not in my write list.
+
+<<<FILE goals/G-001-combat-monotony/25-studio-to-playtester.md
+---
+kind: handoff
+goal: G-001
+seq: 25
+from: studio
+to: playtester
+stage: Play
+outcome: routed
+---
+# 25: studio → playtester — Play the build as a player and report what you experience in combat
+
+## Task
+
+Play the build in `repo/` as a player would and report your observable experience of the combat: what you did, what you felt, what stood out. Address the report to `studio`.
+
+## Context
+
+This is a playable vertical-slice prototype of a short-session top-down action roguelite. The player descends through lantern-lit caves, one room at a time. Combat uses an attack and a dash. You have no other background, and none is needed.
+
+## Findings
+
+Nothing to report from the sender. This Handoff carries no information about the implementation.
+
+How to obtain and run the build:
+
+- The build is in `repo/`. Read `repo/manual.md` first. It is the player-facing manual: controls, the input-script format and the reaction rules.
+- A play session is an input script. Run it from `repo/` with `python3 play.py --view player {script}`. Use the player view only.
+- The build has 5 rooms. Play all of them, in order, and also try rooms again with different approaches.
+- Play by hand: write your own scripts and vary the timing of your moves (waiting, approaching, dashing, attacking at different moments). Do not rely only on scripts that ship with the repository.
+
+Player profile (the player you represent): action players who want short, intense runs. Comfortable with dodging and spacing; not interested in memorizing combo lists. Mostly play with a gamepad.
+
+Play focus: pay attention to combat across the whole build, including how the rooms and the enemies compare with each other.
+
+## Decisions already made
+
+None.
+
+## Constraints
+
+- Judge from what a player can observe only. Do not read source code, tests, design documents or bot output, and do not use the trace view.
+- Do not propose or assume specific numbers; describe experience.
+- No new input buttons exist: attack, dash and pause only.
+
+## Open questions
+
+None.
+
+## Expected output
+
+An observation report written for `studio`: what you played (rooms, approaches), what happened, what felt engaging or repetitive, whether different situations made you play differently, whether threats were readable before they could hurt you, and anything that looked broken (a defect, which would go to QA). Observations only; no implementation guesses.
+
+## Load
+
+- Role: studio/roles/playtester.md
+- Skills: studio/skills/playtest-session.md
+- Project: project.md#player-profile, repo/manual.md, the build in repo/
+- Decisions: none
+- Previous handoff: none
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/26-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-001
+seq: 26
+from: studio
+to: game-designer
+stage: Design
+outcome: routed
+---
+# 26: studio → game-designer — Two non-blocking spec rulings from QA's close-out verification
+
+## Task
+
+Rule on two small points QA raised, and record them where the governing documents say. Neither blocks the playtest, which runs in parallel.
+
+## Context
+
+G-001 (combat monotony). QA verified build 0.5 against criteria 1–17 at 30 and 60 FPS and passed it (handoff 24). The build is unchanged. Two notes concern the contact-edge graze accepted in D-002.
+
+## Findings
+
+From QA's handoff 24, section D:
+
+1. **Shot at exactly the reach (0.40).** A shot whose lateral miss is nominally exactly 0.400 hit at 30 FPS and missed at 60 FPS. At 30 FPS a frame lands exactly on the closest approach and the code treats `distance <= 0.4` as a hit. Criterion 17b says "0.40 or more: no hit at both rates", while the band definition ("reach − 0.01 to reach", 0.39 to 0.40) includes 0.40. QA did not count it as a failure because the spec is ambiguous at exactly the reach; the clean case at 0.407 misses at both rates. Question: is a miss of exactly the reach inside the band (either result accepted) or a guaranteed miss? A guaranteed miss would need `<=` changed to `<`, which is a Build change.
+2. **Lunge band width.** QA derived that a lunge hit is guaranteed up to a lateral miss of about 0.585 at 30 FPS, so the band is about 0.015 tile (about 0.004 at 60 FPS). Five probes only; 0.570 hit and 0.610 missed at both rates; the rates disagreed only at 0.590. This was not a full scan. There is no evidence of a band wider than 0.03 tile. QA suggests recording the measured figures in D-002 with the scan limitation stated.
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no new input.
+- D-002: per-frame contact sampling is kept; the graze is an accepted limitation.
+
+## Constraints
+
+- Prefer the ruling that leaves the build unchanged. If you conclude the build must change (`<` instead of `<=`), say so and hand back to `studio`; do not decide the Build route.
+- Stay within D-001 and the pillars. The numeric ranges in the other criteria are not reopened.
+- Keep the edit to wording clarifications, so criteria already verified remain valid.
+
+## Open questions
+
+The two questions above.
+
+## Expected output
+
+- Update `design/combat.md` criterion 17 (and the band definition) so it is unambiguous at exactly the reach; record the measured lunge band and its limits in D-002 (edit that Decision in place, or add a short follow-up Decision if you judge it warranted).
+- A handoff to `studio` with your rulings and whether a Build or re-Verify is needed (expected: neither).
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: design/combat.md
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-002-contact-edge-graze-accepted.md
+- Previous handoff: goals/G-001-combat-monotony/24-qa-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-16
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): a player playing the current build's combat experiences it as varied and engaging instead of monotonous. Different situations call for noticeably different play (positioning, timing, use of attack and dash), and the player can tell why. The improvement stays inside the vision pillars: one-button combat (attack + dash only, D-001), short runs, readable threats. Numeric thresholds belong to Design; the final verdict belongs to Review.
+
+Out of scope: new input buttons (needs Owner approval per D-001), changing run length, new biomes or content unrelated to combat variety, and any change to the core concept. Not a defect report: nothing in the request says combat is broken.
+
+## Unknowns
+
+- Observe: done (scripted play, rooms 1–3 + practice room). Rooms 4–5 and hand-timed play are unobserved by a human; the Play step covers them.
+- Observe (FPS divergence, qa): done (16, 20). Walker 30/60 differences are bot timing, not the build. The contact-edge graze is accepted (D-002).
+- Diagnose: done (04).
+- Decide: skipped. No choice of direction or scope; all options stay within D-001 and the pillars. Returns here if the Build needs a new enemy type, a healing system or a new input, or if a ruling changes scope.
+- Design: done (14, 22). Two small QA notes (24: shot at exactly 0.40, record lunge band in D-002) are with the designer (26), non-blocking. Reopens Build only if the designer rules `<` instead of `<=`.
+- Plan: skipped. The approach reuses the enemy update loop. Returns here if the same criterion fails verification twice.
+- Build: 0.5 implemented (10), tooling done (18). No change needed unless the 0.40 ruling requires one.
+- Verify (visual): done (15). V1–V11 need a graphical build and become a proposed new Goal at Close; V12 is open until a graphical build exists (text-build timings hold).
+- Verify (QA): done (24). Criteria 1–17 pass at 30 and 60 FPS.
+- Manual wording ("no more than 3 in the air") is true in rooms 1–5 only. Optional fix ("in the five rooms"), raise at Close.
+- Play: open (25). A fresh playtester judges the result, including rooms 4–5 and hand-timed play, from the build and player profile only.
+- Review: planned (`game-director`), experience Goal. Graphical cue acceptance is still open at that point.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 01-studio-to-playtester.md (report: 02-playtester-to-studio.md) |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-studio-to-game-designer.md (result: 04-game-designer-to-studio.md) |
+| 3 | Decide | game-director | make-decision | skipped (no real choice; see Unknowns) | — |
+| 4a | Design | game-designer | write-design-spec | done | 05-studio-to-game-designer.md (result: 07-game-designer-to-studio.md) |
+| 4b | Observe (FPS divergence) | qa | reproduce-defect | done | 06-studio-to-qa.md (result: 08-qa-to-studio.md) |
+| 5 | Plan | technical-director | technical-plan | skipped (approach local; see Unknowns) | — |
+| 6 | Build | gameplay-engineer | implement-change | done | 09-studio-to-gameplay-engineer.md (result: 10-gameplay-engineer-to-studio.md) |
+| 7a | Design (criterion 14, spec gaps) | game-designer | write-design-spec | done | 11-studio-to-game-designer.md (result: 14-game-designer-to-studio.md) |
+| 7b | Verify (visual) | art-director | visual-review | done | 12-studio-to-art-director.md (result: 15-art-director-to-studio.md) |
+| 7c | Observe (walker 30/60 divergence) | qa | reproduce-defect | done | 13-studio-to-qa.md (result: 16-qa-to-studio.md) |
+| 7d | Build (bot log data, walker test) | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md (result: 18-gameplay-engineer-to-studio.md) |
+| 8 | Verify (criteria 1–16, V12) | qa | verify-change | done (question: graze) | 19-studio-to-qa.md (result: 20-qa-to-studio.md) |
+| 8b | Design (graze, cap, margin, doc conflicts) | game-designer | write-design-spec | done | 21-studio-to-game-designer.md (result: 22-game-designer-to-studio.md) |
+| 8c | Build (contact test / cap) | gameplay-engineer | implement-change | skipped (graze and cap accepted as built) | — |
+| 8d | Verify (criteria 1–17; close 30 FPS gaps) | qa | verify-change | done (pass) | 23-studio-to-qa.md (result: 24-qa-to-studio.md) |
+| 9a | Play | playtester | playtest-session | open | 25-studio-to-playtester.md |
+| 9b | Design (QA notes: exact-reach miss, lunge band) | game-designer | write-design-spec | open | 26-studio-to-game-designer.md |
+| 10 | Review | game-director | review-outcome | planned | — |
+| 11 | Next | studio | — | planned | — |
+
+## Route changes
+
+After 8d (Verify): fits. QA passed criteria 1–17 at 30 and 60 FPS; only V12 stays open (no graphical build). Opened 9a Play (fresh playtester, build and player profile only) and, in parallel, 9b Design for two non-blocking QA notes on the contact edge (wording and D-002 record).
+
+## Next action
+
+Run the playtester step with 25-studio-to-playtester.md (report addressed to `studio`) and the game-designer step with 26-studio-to-game-designer.md; they are independent. Then Route: wait for both; on a design or experience issue from the playtest, return to Diagnose; on a defect, to QA; otherwise open Review (`game-director`). If 9b rules `<` instead of `<=`, open Build and re-Verify.
+
+## Outcome
+
+(open)
+>>>END

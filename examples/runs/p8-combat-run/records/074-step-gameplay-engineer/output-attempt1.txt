@@ -1,0 +1,96 @@
+I'm running the tests, a room 3 trace and the bots on the room 3 change before writing the build note. Each run carries the room data edit.
+
+<<<FILE @run/tests
+<<<EDIT repo/game.py
+<<<<<<< SEARCH
+    "3": [("spitter", 2, 1), ("spitter", 14, 7), ("spitter", 2, 7)],
+=======
+    "3": [("spitter", 2, 1), ("spitter", 10, 6), ("spitter", 2, 7), ("grub", 15, 0)],
+>>>>>>> REPLACE
+>>>END
+<<<EDIT repo/tests/test_game.py
+<<<<<<< SEARCH
+        self.assertEqual(ROOMS["5"][2], ("brute", 4, 8))
+=======
+        self.assertEqual(ROOMS["5"][2], ("brute", 4, 8))
+        self.assertEqual(
+            ROOMS["3"],
+            [("spitter", 2, 1), ("spitter", 10, 6), ("spitter", 2, 7), ("grub", 15, 0)],
+        )
+        self.assertEqual(ROOMS["1"], [("grub", 3, 4), ("grub", 15, 4), ("grub", 8, 0)])
+
+
+class Room3Test(unittest.TestCase):
+    """D-012 / R3-1, R3-6, R3-7, R3-8: room 3 has three spitters and one standard grub."""
+
+    def test_the_grub_changes_no_cue_time_for_a_still_player(self):
+        for fps in (30, 60):
+            with_grub = Game(fps=fps, room="3")
+            without = Game(fps=fps, room="3")
+            without.enemies = [e for e in without.enemies if e.kind == "spitter"]
+            for g in (with_grub, without):
+                g.hearts = 50
+                run(g, 6.0)  # before the grub can reach the player
+            self.assertEqual(times(with_grub, "aim"), times(without, "aim"), fps)
+            self.assertEqual(times(with_grub, "spit"), times(without, "spit"), fps)
+
+    def test_the_grub_does_not_wind_up_before_4_s_for_a_still_player(self):
+        for fps in (30, 60):
+            game = Game(fps=fps, room="3")
+            game.hearts = 50
+            run(game, 4.0)
+            self.assertEqual(times(game, "windup"), [], fps)
+
+    def test_the_room_clears_only_when_spitters_and_grub_are_all_dead(self):
+        for fps in (30, 60):
+            game = Game(fps=fps, room="3")
+            spitters = [e for e in game.enemies if e.kind == "spitter"]
+            grub = [e for e in game.enemies if e.is_grub]
+            self.assertEqual((len(spitters), len(grub)), (3, 1), fps)
+            for e in spitters:
+                e.hp = 0
+            run(game, 0.2)
+            self.assertFalse(game.cleared, fps)
+            grub[0].hp = 0
+            run(game, 0.1)
+            self.assertTrue(game.cleared, fps)
+            game = Game(fps=fps, room="3")
+            game.enemies[3].hp = 0
+            run(game, 0.2)
+            self.assertFalse(game.cleared, fps)
+
+    def test_no_two_spitters_are_more_than_9_5_tiles_apart(self):
+        import math
+
+        pos = [(x, y) for kind, x, y in ROOMS["3"] if kind == "spitter"]
+        for a in pos:
+            for b in pos:
+                self.assertLessEqual(math.hypot(a[0] - b[0], a[1] - b[1]), 9.5)
+>>>REPLACE
+>>>END
+>>>END
+
+<<<FILE @run/trace
+<<<EDIT repo/game.py
+<<<<<<< SEARCH
+    "3": [("spitter", 2, 1), ("spitter", 14, 7), ("spitter", 2, 7)],
+=======
+    "3": [("spitter", 2, 1), ("spitter", 10, 6), ("spitter", 2, 7), ("grub", 15, 0)],
+>>>>>>> REPLACE
+>>>END
+room 3
+fps 60
+end 9
+>>>END
+
+<<<FILE @run/bots
+<<<EDIT repo/game.py
+<<<<<<< SEARCH
+    "3": [("spitter", 2, 1), ("spitter", 14, 7), ("spitter", 2, 7)],
+=======
+    "3": [("spitter", 2, 1), ("spitter", 10, 6), ("spitter", 2, 7), ("grub", 15, 0)],
+>>>>>>> REPLACE
+>>>END
+rooms 3
+fps 60
+>>>END

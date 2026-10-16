@@ -68,3 +68,11 @@ Results and findings: `docs/phase6.md`.
 
 Results and findings: `docs/phase7.md`.
 
+
+## Phase 8: EDIT blocks
+
+| Run | What it shows |
+|---|---|
+| `runs/p8-combat-run` | A copy of `runs/p7-combat-run` continued with EDIT blocks (records from 065 on) until the Goal closed: Review pass 4 judged it met (97 operations, 167 executors in all, 66 of them in Phase 8, no Owner questions). Engineers wrote 52 EDIT blocks against 8 whole build files, and their output per attempt fell by about 80%. The held-out measurement in `measurement.json` meets S1–S3. The Outcome in `goal.md` still ends with a stray `>>>REPLACE` line, from the marker slip the runner now rejects. |
+
+Results and findings: `docs/phase8.md`.

@@ -1,0 +1,42 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "b7fb7a3d85a62bcd564a33ee20caf62b355a7ef99ce6d8cfb6df0d5adb83abc2",
+  "bytes": 1304
+ },
+ {
+  "path": "goals/G-001-combat-monotony/83-studio-to-playtester.md",
+  "sha256": "bfc8fcbd17d015054210228dd8598a7a703dbb52587b4f1376386539e7266a8d",
+  "bytes": 2046
+ },
+ {
+  "path": "studio/roles/playtester.md",
+  "sha256": "812d4a19b8900cf982bda78ad18b54cdc0cf6c5e3ab50a71b95e3f8569128945",
+  "bytes": 1715
+ },
+ {
+  "path": "studio/skills/playtest-session.md",
+  "sha256": "12e7a01c76b0b8645629e709f58ac4f93d1abd9045a6c397bfd0f64253268043",
+  "bytes": 1250
+ },
+ {
+  "path": "project.md#player-profile",
+  "sha256": "8ab7a2aeebd9deea8e5f25fb124acb3213563cbd9b926a869af8ed6dd2881a8f",
+  "bytes": 172
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "436989d7223f53ca69a0ce4d34a319b31b3a5be492d460d43a463a646dfb51d1",
+  "bytes": 5716
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "@run-results",
+  "sha256": "92eb3af072e55bf41ebd7aa6d32b0a44308a26093be7abdccb9c2afedfc5dca8",
+  "bytes": 48124
+ }
+]

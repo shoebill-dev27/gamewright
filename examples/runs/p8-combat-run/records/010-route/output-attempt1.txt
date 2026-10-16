@@ -1,0 +1,253 @@
+Route is done for G-001. Step 6 (Build) is marked done, and three parallel steps are open: a designer ruling, an art-director cue review and a QA divergence check. `log.md` is not in my write list, so no log entry was appended; the Route changes text in `goal.md` is what the entry should carry.
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-16
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): a player playing the current build's combat experiences it as varied and engaging instead of monotonous. Different situations call for noticeably different play (positioning, timing, use of attack and dash), and the player can tell why. The improvement stays inside the vision pillars: one-button combat (attack + dash only, D-001), short runs, readable threats. Numeric thresholds belong to Design; the final verdict belongs to Review.
+
+Out of scope: new input buttons (needs Owner approval per D-001), changing run length, new biomes or content unrelated to combat variety, and any change to the core concept. Not a defect report: nothing in the request says combat is broken.
+
+## Unknowns
+
+- Observe: done (scripted play, rooms 1–3 + practice room). Rooms 4–5 and hand-timed play are unobserved by a human; the final Play step covers them.
+- Observe (FPS divergence, qa): first pass done (08): simulation matches at 30/60 FPS in traced cases. After Build 0.5 the dodger agrees at both rates, but the walker bot differs in rooms 3–5. Open again: build defect or bot sensitivity (qa, handoff 13).
+- Diagnose: done (04).
+- Decide: skipped. No choice of direction or scope; all options stay within D-001 and the pillars. Returns here if the Build needs a new enemy type, a healing system or a new input, or if the designer's ruling changes scope.
+- Design: reopened in part (handoff 11). Build 0.5 missed criterion 14 (walker cannot clear room 1) and used defaults for five spec gaps. Designer rules on criterion 14, the gaps, and how criterion 16 treats the walker.
+- Plan: skipped. The approach reuses the enemy update loop. Returns here if the same criterion fails verification twice.
+- Build: 0.5 implemented (10). Further Build only if the designer's ruling or QA's divergence report requires a change.
+- Verify: visual review by art-director open now (handoff 12; the text view only describes cues). Full QA verification of criteria 1–16 is planned after the designer's ruling and QA's divergence report, so it runs against the final criteria and build.
+- Play: planned. A fresh playtester judges the result, including rooms 4–5 and hand-timed play.
+- Review: planned (`game-director`), experience Goal.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 01-studio-to-playtester.md (report: 02-playtester-to-studio.md) |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-studio-to-game-designer.md (result: 04-game-designer-to-studio.md) |
+| 3 | Decide | game-director | make-decision | skipped (no real choice; see Unknowns) | — |
+| 4a | Design | game-designer | write-design-spec | done | 05-studio-to-game-designer.md (result: 07-game-designer-to-studio.md) |
+| 4b | Observe (FPS divergence) | qa | reproduce-defect | done | 06-studio-to-qa.md (result: 08-qa-to-studio.md) |
+| 5 | Plan | technical-director | technical-plan | skipped (approach local; see Unknowns) | — |
+| 6 | Build | gameplay-engineer | implement-change | done | 09-studio-to-gameplay-engineer.md (result: 10-gameplay-engineer-to-studio.md) |
+| 7a | Design (criterion 14, spec gaps) | game-designer | write-design-spec | open | 11-studio-to-game-designer.md |
+| 7b | Verify (visual) | art-director | visual-review | open | 12-studio-to-art-director.md |
+| 7c | Observe (walker 30/60 divergence) | qa | reproduce-defect | open | 13-studio-to-qa.md |
+| 8 | Verify (criteria 1–16) | qa | verify-change | planned (after 7a, 7c; Build first if either needs it) | — |
+| 9 | Play | playtester | playtest-session | planned | — |
+| 10 | Review | game-director | review-outcome | planned | — |
+| 11 | Next | studio | — | planned | — |
+
+## Route changes
+
+After step 6 (Build): partly fits. Criteria 1–12 and 15 look met per the engineer; 14 missed, five spec gaps used defaults, walker 30/60 divergence open. Added 7a Design (designer), 7c QA divergence check, and 7b art-director cue review in parallel. Full QA Verify waits so it runs against final criteria.
+
+## Next action
+
+Run the three open steps (parallel, each addressing its result to `studio`): game-designer 11-studio-to-game-designer.md, art-director 12-studio-to-art-director.md, qa 13-studio-to-qa.md. Then Route: if the designer's ruling or QA's report requires a change, Build again; otherwise open Verify (qa, criteria 1–16).
+
+## Outcome
+
+(open)
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/11-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-001
+seq: 11
+from: studio
+to: game-designer
+stage: Design
+outcome: routed
+---
+# 11: studio → game-designer — Rule on criterion 14, five spec gaps and the walker in criterion 16 (build 0.5)
+
+## Task
+
+Build 0.5 implements `design/combat.md`. Update `design/combat.md` where needed so that criterion 14 (rooms 1–2) and criterion 16 are well defined, and confirm or change the five defaults the engineer used where the spec was silent. Say whether any of your changes require a change to the build.
+
+## Context
+
+G-001 (combat monotony). The engineer implemented the grub phases and cues, Runner and Brute, the spitter aim cue and staggered volleys, the room changes and bot updates. Bots now decide on a 0.15 s time grid and the dodger reads cues. The criteria 1–12 tests pass according to the engineer's report, and QA will verify independently later.
+
+## Findings
+
+Observed bot results (`bots camper,walker,dodger`, `rooms 1-5`), hearts lost per room 1/2/3/4/5, ✓ cleared, ✗ not cleared:
+
+| Bot | 30 FPS | 60 FPS |
+|---|---|---|
+| camper | 3✗ 2✓ 3✗ 3✗ 3✗ | 3✗ 3✗ 3✗ 3✗ 3✗ |
+| walker | 3✗ 2✓ 0✓ 1✓ 3✗ | 3✗ 2✓ 2✓ 2✓ 2✓ |
+| dodger | 0 lost, 5/5 cleared (35 dashes) | 0 lost, 5/5 cleared (48 dashes) |
+
+- Criterion 13 is met at both rates. At 60 FPS the walker loses 6 in rooms 3–5, the top of the range.
+- Criterion 15 is met at both rates.
+- **Criterion 14 is missed at both rates.** The walker loses 3 and does not clear room 1. The walker waits for grubs within 2.5 tiles and swipes at 1.1 tiles. It does not read the wind-up cue, so the lunges hit it.
+- **Criterion 16:** the dodger gives identical results at both rates. The walker differs in rooms 3 (0 vs 2 lost), 4 (1 vs 2) and 5 (not cleared vs cleared). Whether that is bot sensitivity or a build defect is being investigated by QA in parallel (handoff 13). Your ruling should say how criterion 16 treats the walker (e.g. whether it must agree between rates, or only the dodger and the qualitative ranges).
+
+Defaults the engineer used where the spec was silent:
+1. A grub exactly on the player: wind-up aims right.
+2. Spitter cap wait of 0.2 s is applied from the moment the cue would start.
+3. Spitter index counts only spitters, in spawn order (also in the practice room).
+4. A grub hit but not killed during lunge or recovery continues its phase.
+5. A stagger is not applied if the swipe kills the grub.
+
+Other build facts: lunge 8.0 tiles/s for 0.3 s; wind-up starts within 2.0 tiles when no other grub is in wind-up or lunge; spitter shot speed 3.0, interval 2.4 s, cue 0.6 s.
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no new input.
+- Studio: Decide and Plan skipped for this Goal.
+
+## Constraints
+
+- Stay within the vision pillars and D-001. Prefer changes that reuse existing systems.
+- Must play correctly at 30 and 60 FPS.
+- Bot thresholds are balance proxies for the player-observable intent. Say which player-observable behavior each criterion protects.
+- If your answer would change scope, add an enemy type, a healing system or an input, hand back to `studio` for a Decide step.
+
+## Open questions
+
+1. Criterion 14: change the criterion, define what the walker should do in rooms 1–2, or accept the result (with reasons)?
+2. Criterion 16: how should it treat the walker's 30/60 differences?
+3. Confirm or change each of the five defaults above.
+
+## Expected output
+
+An updated `design/combat.md` (criteria and any changed rules), and an outgoing Handoff addressed to `studio` stating: what you changed, whether the build or bots must change (and exactly what), and anything QA's final verification should check. Keep any spec change player-observable.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: design/combat.md, project.md#vision, project.md#constraints, repo/manual.md, repo/bots.py, repo/game.py, the build (repo/, run commands in project.md)
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-001-combat-monotony/10-gameplay-engineer-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/12-studio-to-art-director.md
+---
+kind: handoff
+goal: G-001
+seq: 12
+from: studio
+to: art-director
+stage: Verify
+outcome: routed
+---
+# 12: studio → art-director — Review the new combat cues for readability (build 0.5)
+
+## Task
+
+Review the threat cues added in build 0.5 against the art direction and the "readable threats" pillar. The build is a headless text view, so judge what the cues must look like in a graphical build, and report concrete requirements or problems.
+
+## Context
+
+G-001 (combat monotony). The combat redesign adds telegraphed attacks so the player can read a threat and respond (dash, sidestep, swipe). The cues are new visuals. QA verifies behavior separately; you judge readability and consistency.
+
+## Findings
+
+Cues as they appear in the player view (`run_play`):
+- **Grub wind-up (0.5 s before the lunge):** a line `a grub rears back`, plus a snapshot where the lunge path is a row of `~` marks (2.4 tiles) from the grub along the locked direction. Under the room: `cue: g at (x,y) flashes orange-red, lunge line toward (ux,uy), 2.4 tiles (0.50 s to the lunge)`. Variants: Runner (mark `r`) and Brute (mark `G`) have different wind-up lengths per `design/combat.md`.
+- **Spitter aim (0.6 s before the shot):** `a spitter takes aim`, `~` marks along the locked line to the room edge, and `cue: s at (x,y) glows orange-red, brightness NN%, aim line toward (ux,uy) (0.60 s to the shot)`. Brightness rises from 0% to 100%. Then `a spitter spits` and the shot `*` moves along the line.
+- The flash, glow and line are described only in text. Color and look are not rendered.
+
+## Decisions already made
+
+- D-001: one attack button plus dash.
+- Art direction (project.md): dark caves lit by the player's lantern, warm light against cold blue-black; threats use saturated orange/red so they read against the dark.
+
+## Constraints
+
+- Small team: prefer requirements that reuse existing assets and effects.
+- Threats must be visible before they can hurt the player (pillar 3). Multiple enemies can be on screen, so cues must stay distinguishable from each other, from shots, and from the lantern light.
+- Do not change timings or rules; those belong to the game-designer. If a readability problem needs a timing or rule change, say so in your report.
+
+## Open questions
+
+1. Are the cue forms (flash, lunge line, aim line, glow ramp) readable and consistent with the art direction? Any clash or ambiguity (e.g. lunge line vs aim line vs shot)?
+2. What must a graphical implementation satisfy (contrast, shape, duration visibility, differentiating Runner/Grub/Brute and spitter), stated player-observably?
+
+## Expected output
+
+A report with findings and player-observable visual requirements or acceptance criteria. Address the result to `studio`. Do not change the game design files unless your findings name them.
+
+## Load
+
+- Role: studio/roles/art-director.md
+- Skills: studio/skills/visual-review.md
+- Project: project.md#art-direction, project.md#constraints, design/combat.md, repo/manual.md, the build (repo/; `python3 play.py --view player {script}`, script format in repo/manual.md)
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: none
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/13-studio-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 13
+from: studio
+to: qa
+stage: Observe
+outcome: routed
+---
+# 13: studio → qa — Reproduce the walker bot's different results at 30 and 60 FPS in rooms 3–5
+
+## Task
+
+Determine whether the walker bot's differing results at 30 and 60 FPS in rooms 3–5 come from the build (the simulation behaves differently at the two rates) or from the bot's own behavior. Write a defect report with reproduction steps if it is a build defect.
+
+## Context
+
+G-001 (combat monotony). The project must play correctly at 30 and 60 FPS. A previous QA pass (`goals/G-001-combat-monotony/08-qa-to-studio.md`) found the simulation matching within one frame in traced cases. Since then the build was updated (0.5: new enemy behavior, bots decide on a 0.15 s accumulated-time grid).
+
+## Findings
+
+Reported observation (`python3 bots.py {script}`, bots `camper,walker,dodger`, `rooms 1-5`, `fps 30` and `fps 60`), walker hearts lost per room 1/2/3/4/5:
+
+- 30 FPS: 3✗ 2✓ 0✓ 1✓ 3✗ (✓ cleared, ✗ not cleared)
+- 60 FPS: 3✗ 2✓ 2✓ 2✓ 2✓
+
+The dodger bot agrees at both rates (0 hearts lost, all cleared). The `bots` option `log on` in a script prints each bot decision under the room line (see `repo/README.md`).
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no new input.
+
+## Constraints
+
+- Intended behavior is defined by `design/combat.md` and `repo/manual.md`. A difference caused only by a bot's decision timing is not a build defect, but say so with evidence.
+- Do not fix code. Report only.
+
+## Open questions
+
+1. Is the divergence reproducible and deterministic?
+2. Is it caused by the build simulation (enemy timers, movement, collision, damage at different frame rates) or by the walker's decisions? Identify the first point where the two runs differ, using `log on` and `run_trace`.
+
+## Expected output
+
+A report: reproduction commands, the first divergence point and its cause, severity, and, if it is a build defect, acceptance criteria for a fix. Address the result to `studio`. Full verification of criteria 1–16 follows in a later step.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/reproduce-defect.md
+- Project: design/combat.md, repo/manual.md, repo/README.md, repo/bots.py, repo/game.py, repo/play.py, repo/tests/test_game.py, project.md#constraints, the build (repo/; run_bots, run_trace and run_play in project.md)
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-001-combat-monotony/08-qa-to-studio.md
+>>>END

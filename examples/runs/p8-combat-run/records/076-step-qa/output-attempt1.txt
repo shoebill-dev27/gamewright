@@ -1,0 +1,30 @@
+Round 1 runs the whole test suite, the bots at both frame rates, and a still-player room 3 session at both frame rates, to measure the grub's first wind-up time.
+
+<<<FILE @run/tests
+>>>END
+
+<<<FILE @run/bots/fps30
+bots camper,walker,dodger
+rooms 1-5
+fps 30
+limit 60
+>>>END
+
+<<<FILE @run/bots/fps60
+bots camper,walker,dodger
+rooms 1-5
+fps 60
+limit 60
+>>>END
+
+<<<FILE @run/play/room3-still-30
+room 3
+fps 30
+end 14
+>>>END
+
+<<<FILE @run/play/room3-still-60
+room 3
+fps 60
+end 14
+>>>END

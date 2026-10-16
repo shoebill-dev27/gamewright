@@ -1,0 +1,197 @@
+I'm running the remaining checks now (criterion 17, the cap in criterion 11, and the room-3 timing). The report to `studio` follows once the results are in.
+
+<<<FILE @run/trace/a-hit-30
+room empty
+fps 30
+spawn spitter 1.0 2.4
+1.3 move up
+1.4 stop
+end 5
+>>>END
+
+<<<FILE @run/trace/a-hit-60
+room empty
+fps 60
+spawn spitter 1.0 2.4
+1.3 move up
+1.4 stop
+end 5
+>>>END
+
+<<<FILE @run/trace/b-miss-30
+room empty
+fps 30
+spawn spitter 5 6.5
+1.3 move up
+1.43333 stop
+end 5
+>>>END
+
+<<<FILE @run/trace/b-miss-60
+room empty
+fps 60
+spawn spitter 5 6.5
+1.3 move up
+1.43333 stop
+end 5
+>>>END
+
+<<<FILE @run/trace/probe-exact-30
+room empty
+fps 30
+spawn spitter 1 4
+1.3 move up
+1.4 stop
+end 5
+>>>END
+
+<<<FILE @run/trace/probe-exact-60
+room empty
+fps 60
+spawn spitter 1 4
+1.3 move up
+1.4 stop
+end 5
+>>>END
+
+<<<FILE @run/trace/band-30
+room empty
+fps 30
+spawn spitter 1.04 3.70
+1.3 move up
+1.4 stop
+end 5
+>>>END
+
+<<<FILE @run/trace/band-60
+room empty
+fps 60
+spawn spitter 1.04 3.70
+1.3 move up
+1.4 stop
+end 5
+>>>END
+
+<<<FILE @run/trace/l57-30
+room empty
+fps 30
+spawn grub 6.745 2.764
+0.1 move up
+0.3 stop
+end 1.2
+>>>END
+
+<<<FILE @run/trace/l57-60
+room empty
+fps 60
+spawn grub 6.745 2.764
+0.1 move up
+0.3 stop
+end 1.2
+>>>END
+
+<<<FILE @run/trace/l58-30
+room empty
+fps 30
+spawn grub 6.7305 2.794
+0.1 move up
+0.3 stop
+end 1.2
+>>>END
+
+<<<FILE @run/trace/l58-60
+room empty
+fps 60
+spawn grub 6.7305 2.794
+0.1 move up
+0.3 stop
+end 1.2
+>>>END
+
+<<<FILE @run/trace/l59-30
+room empty
+fps 30
+spawn grub 6.7165 2.8247
+0.1 move up
+0.3 stop
+end 1.2
+>>>END
+
+<<<FILE @run/trace/l59-60
+room empty
+fps 60
+spawn grub 6.7165 2.8247
+0.1 move up
+0.3 stop
+end 1.2
+>>>END
+
+<<<FILE @run/trace/l599-30
+room empty
+fps 30
+spawn grub 6.8043 2.9414
+0.1 move up
+0.3 stop
+end 1.2
+>>>END
+
+<<<FILE @run/trace/l599-60
+room empty
+fps 60
+spawn grub 6.8043 2.9414
+0.1 move up
+0.3 stop
+end 1.2
+>>>END
+
+<<<FILE @run/trace/l61-30
+room empty
+fps 30
+spawn grub 6.792 2.975
+0.1 move up
+0.3 stop
+end 1.2
+>>>END
+
+<<<FILE @run/trace/l61-60
+room empty
+fps 60
+spawn grub 6.792 2.975
+0.1 move up
+0.3 stop
+end 1.2
+>>>END
+
+<<<FILE @run/trace/room3-30
+room 3
+fps 30
+end 12
+>>>END
+
+<<<FILE @run/trace/room3-60
+room 3
+fps 60
+end 12
+>>>END
+
+<<<FILE @run/play/four-30
+room empty
+fps 30
+spawn spitter 0 0
+spawn spitter 0 3
+spawn spitter 0 5
+spawn spitter 0 8
+player 15 4
+end 9
+>>>END
+
+<<<FILE @run/play/four-60
+room empty
+fps 60
+spawn spitter 0 0
+spawn spitter 0 3
+spawn spitter 0 5
+spawn spitter 0 8
+player 15 4
+end 9
+>>>END

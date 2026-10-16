@@ -1,0 +1,177 @@
+I've written the design addendum, a decision (D-008) and the handoff. I could not update `repo/manual.md`: it is not under "You may write", so the exact replacement text is in the handoff for the Studio to apply. `design/combat.md` needs no change yet.
+
+<<<FILE design/combat-step59.md
+# Combat design addendum, step 59 (wording of late swipes; cue message per variant)
+
+Status: wording only for point 1 (no rule or parameter change, no build change). Point 2 is a proposed player-facing change, not built, see D-008. Where this file and `design/combat.md` differ, this file governs for the two points below. `combat.md` itself is unchanged in step 59 because its rules already say what the manual must say.
+
+## Intent
+
+A text-view player can tell, from what is printed, (a) when a swipe can still cancel a lunge and (b) which kind of grub is about to lunge. No new information that makes threats harder to read, and no dependence on graphics.
+
+## Point 1: swipe timing wording (no rule change)
+
+Rules already in `combat.md` (unchanged):
+- A swipe that damages a standard grub or runner in wind-up cancels it. Stagger 0.4 s. One non-lethal swipe is enough, even on a 2 HP grub.
+- A swipe during the lunge, recovery or stagger changes no phase. A lunge that reaches a hurtable player in its path still deals 1 damage.
+- The brute is never cancelled by a swipe (D-004).
+- Swipe reach 1.5 tiles. A grub starts its wind-up when the player is within 2.0 tiles, so at the start of a wind-up the target may be 1.5–2.0 tiles away and out of reach. A swipe cancels only if the grub is within 1.5 tiles at the moment the swipe lands, which the player can reach by stepping in during the warning (4 tiles/s).
+
+Conclusion: wording is enough. Playtest 53 and QA 56 show both "unfair" swipes landed 0.10 s after the lunge began with the grub out of reach during the whole warning. A swipe-timing rule change (a grace period after the lunge starts, or a larger reach) would make the lunge cancellable after its warning and weaken "step aside or dash" as the answer, and the evidence does not show a rule problem. No rule change is proposed.
+
+Manual wording (exact text, for `repo/manual.md`) is in handoff 59.
+
+Acceptance (verification): the manual says all of: swipe cancels only during the warning; a grub starts rearing back about 2 tiles away, beyond the 1.5-tile reach, so step in to within 1.5 tiles during the warning; a swipe landing after the lunge has begun does not cancel it; one swipe is enough to cancel a grub or runner; the brute is never cancelled.
+
+Experience signal (playtest and Review): a player who swipes a rearing grub from too far, or too late, and is hit can say why ("it was already lunging" or "it was too far") without calling the hit unexplained.
+
+## Point 2: cue message per variant (proposed build change, see D-008)
+
+Proposed text-view start-of-warning messages:
+
+| Variant | Mark | Message |
+|---|---|---|
+| Standard grub | `g` | `a grub rears back` (unchanged) |
+| Runner grub | `r` | `a runner rears back` |
+| Brute grub | `G` | `a brute rears back` |
+
+Rules:
+- All three contain the words `rears back`, so existing reaction rules `text "rears back"` still match all variants. A rule `text "a grub rears back"` matches only the standard grub after the change.
+- Only the message text changes. Timing, the `~` line, the `cue:` line, one-at-a-time, cancel flags and every parameter stay the same.
+- No distance, hit points or timing are added to the message. The `cue:` line stays the place for those.
+- The message is a text-build presentation. The graphical build keeps its silhouette, size and cadence (visual spec) and is unaffected.
+- The spitter and brute-swipe messages are unchanged.
+
+Acceptance criteria (verification, for QA if built), at 30 and 60 FPS, practice room:
+- V-a. A runner's wind-up prints `a runner rears back`, a standard grub's prints `a grub rears back`, a brute's prints `a brute rears back`, each at the same moment as the current message (±1 frame) and once per wind-up.
+- V-b. The `cue:` line, `~` line, wind-up time, lunge time and every other output line are byte-identical to the current build in the same scripts, apart from the message words.
+- V-c. A script with `when text "rears back" then ...` reacts to all three variants as before.
+- V-d. Criteria 1–11 and 17–21 of `combat.md` still hold. No bot result changes. If the bots key on the old message text, the Build step updates them (test tooling).
+
+Experience signal (not for the Playtester's handoff): a text-view player can say, from the message alone, that a runner is the fast, short-warning one and a brute the slow one, and does not report wasted dashes at a distant runner because it "said grub".
+
+Worth doing now: low cost and low risk, but not required by the Goal. Recommendation: build it with the next build that is opened anyway. Do not hold or reopen Review 57 for it. Any change to `play.py` and the tests is a Build step with Verify.
+
+## Open questions
+
+- Whether naming the variant helps the player or only moves the wasted dash to another cue is for the next playtest. Dashing at a distant threat is a reaction-script choice (a rule keyed on a message ignores distance), not a message defect.
+- Whether the brute's `a brute rears back` plus its shrug message is enough signal for a human is already open from step 35.
+>>>END
+
+<<<FILE decisions/D-008-cue-message-names-variant-proposed.md
+---
+kind: decision
+id: D-008
+status: proposed
+decided_by: game-designer
+goal: G-001
+date: 2026-10-16
+supersedes: none
+---
+# D-008: Text-view wind-up message names the variant (proposed build change); no swipe-timing rule change
+
+## Decision
+
+1. **Swipe timing stays a wording matter.** No rule or parameter change. The manual says that a swipe cancels a grub or runner only during its warning, that a grub starts rearing back about 2 tiles away (beyond the 1.5-tile reach), and that a swipe after the lunge began does not cancel it.
+2. **Name the variant in the message** (proposed, not built): `a grub rears back`, `a runner rears back`, `a brute rears back`. All keep the words `rears back`. Nothing else in the output changes. Details and acceptance criteria are in `design/combat-step59.md`.
+3. **Routing advice:** not urgent, not part of Review 57. Build it with the next opened build and Verify it. `game-director` need not weigh in unless they think the change moves the Goal.
+
+## Rationale
+
+- The graphical build already tells variants apart before the cue (silhouette, size, cadence). The text view has only the message and the `cue:` line. Naming the variant gives the text-view player the same early information and costs no new pillar-breaking information.
+- It does not conflict with the "one answer for melee enemies" diagnosis (S1, 04, 31). The answer to runner and standard grub is the same, and the variant name only says how long the warning is. The brute's different answer comes from the cancel flag (D-004), and its name makes that flag easier to learn.
+- Compatibility: the substring `rears back` keeps existing reaction scripts working.
+- Wording is enough for the swipe, because both reported hits were swipes after the lunge began with the target out of reach during the warning (QA 56). A grace window or larger reach would let a swipe cancel a started lunge, which weakens "step aside or dash" and is not backed by a defect.
+
+## Alternatives considered
+
+- **Keep one message for all variants** (current, `combat.md` step 35): the `cue:` line already names the variant. Not chosen because the playtester reacts to the message line, and a reaction-rule player has to parse the `cue:` line to tell the variant.
+- **Put distance and time left in the message** (for example "a runner rears back, 0.35 s"): the numbers make the message long, repeat the `cue:` line, and risk making the text view easier than the graphical build. Not chosen.
+- **A swipe grace period of about 0.1 s after the lunge starts, or a bigger reach during wind-up:** would turn the two "unfair" hits into cancels, but needs a rule change that QA did not find a defect for, and it weakens the sidestep/dash answer. Not chosen; reopen if a human playtest still reports unexplained late swipes after the manual is clear.
+
+## Revisit when
+
+- The next playtest still shows wasted dashes or "I could not tell what it was" after variant naming.
+- A human still reports late swipes as unfair after the manual wording is in.
+- A graphical build makes the text message irrelevant.
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/59-game-designer-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 59
+from: game-designer
+to: studio
+stage: Design
+outcome: done
+---
+# 59: game-designer → studio — Late-swipe wording specified (manual text enclosed); variant-named cue message proposed as a small optional build change
+
+## Task
+
+Report the result of the two small points from 58, and ask the Studio to apply the manual text below, because `repo/manual.md` was outside the paths I may write.
+
+## Context
+
+Goal G-001. QA (56) found no defect in the three "unfair" hit moments (53). The late swipes landed after the lunge began, with the grub out of reach (about 2 tiles) during the warning.
+
+## Findings
+
+### Point 1: wording is enough, no rule change
+
+- Both reported swipes landed 0.10 s after the lunge began. A swipe with 0.05 s of wind-up left, in reach, did cancel (QA practice-room check). The rules work as specified, and the manual does not make the limit clear.
+- A non-lethal swipe during wind-up cancels even a 2 HP grub. One swipe is enough.
+- I do not propose a swipe-timing rule change (grace window, bigger reach). It would let a swipe cancel a lunge already under way and weaken "step aside or dash". Reasons in D-008.
+- `design/combat.md` already has the rules, so I did not change it. The addendum is `design/combat-step59.md`.
+
+**Manual text to apply in `repo/manual.md`.**
+
+1. Replace the **A grub rears back** bullet in "Warnings" from "The line is fixed where you stood…" to its end with:
+
+> The line is fixed where you stood when the grub began; step 1 tile to the side or dash to avoid the lunge. You can also stop a grub or runner with a swipe, but **only during its warning**: one swipe that hits it while it rears back is enough (even a grub that takes 2 swipes to kill) and it is staggered for 0.4 s. A grub starts rearing back about 2 tiles away, which is beyond your 1.5-tile swipe reach, so a swipe cannot stop it until you have stepped to within 1.5 tiles during the warning. A swipe that lands after the lunge has begun does not stop it, and the lunge still hits if you are in its path. The warning lasts 0.5 s for a grub, 0.35 s for a runner, 0.7 s for a brute. After a lunge the grub is harmless for a while: that is the time to swipe it. Only one grub rears back or lunges at a time.
+
+2. In the "Being hit shows…" bullet, replace "A swipe that interrupts the warning of a grub or runner staggers it for 0.4 s; a brute is not interrupted." with:
+
+> A swipe that hits a grub or runner during its warning (not after the lunge has begun) staggers it for 0.4 s; a brute is never interrupted.
+
+No other manual line changes. Shown as written, the lines make no rule claim beyond `combat.md`.
+
+### Point 2: name the variant in the message (proposed build change, not built)
+
+- Proposal: `a grub rears back` (unchanged), `a runner rears back`, `a brute rears back`. All keep `rears back`, so existing `text "rears back"` rules still work. Nothing else in the output changes.
+- Reason: the graphical build already tells variants apart before the cue, and the text view has only the message and the `cue:` line. This does not conflict with the S1 "one answer" diagnosis: the answer to runner and standard grub stays the same, and the brute's different answer comes from its cancel flag (D-004).
+- It does not remove variety: the `cue:` line, the `~` line and all timing are untouched. It adds no distance or hit-point information.
+- Part of the wasted dashes was the reaction script reacting to the message regardless of distance. The variant name may not fix that, so I only expect a small gain.
+- **This is a build change** in `play.py` and tests. Acceptance criteria V-a to V-d are in `design/combat-step59.md`. Worth doing: low cost and low risk, but optional. I recommend bundling it into the next opened build and verifying it, and not opening a build or holding Review 57 for it. Routing (Build, Verify) is the Studio's call. The bots must not break (V-d).
+- Recorded as D-008 (status `proposed`, because the build change is not yet decided).
+
+## Decisions already made
+
+D-001, D-004, D-005, D-002/D-003 unchanged. D-008 is new and `proposed`.
+
+## Constraints
+
+No rule or parameter changes. `design/combat.md` still says the message is "a grub rears back" for all variants. If the build change is taken, `design/combat-step59.md` governs that point and `combat.md` should be updated in the Verify step.
+
+## Open questions
+
+- Does the Studio want the message change built now or with the next build? (Studio.)
+- For `game-director`, in Review 57: the playtester's complaints about these hits were explained by timing and reach, not by a missing rule. The lasting experience issue is still monotony (53, issue 1). Neither point here changes that. The brute's stall in room 2 and the rest of the S1/S4 follow-ups are not touched. If a human still reports late swipes as unfair after the manual change, reopen D-008 (the swipe grace period alternative).
+
+## Expected output
+
+Studio applies the manual text above to `repo/manual.md` (or routes it), decides whether to route the message change to Build and Verify, and passes the Review note to `game-director`.
+
+## Sender assessment
+
+Confidence is high on point 1 (documents and QA traces agree). On point 2 it is moderate: the change is cheap and consistent with the pillars, but its effect on the playtester's wasted dashes is unproven.
+
+## Load
+
+- Role: studio/roles/game-director.md
+- Skills: studio/skills/write-design-spec.md
+- Project: design/combat-step59.md, design/combat.md, repo/manual.md
+- Decisions: decisions/D-008-cue-message-names-variant-proposed.md, decisions/D-004-spitter-cue-gap-brute-no-cancel-room2-spitter-deferred.md
+- Previous handoff: goals/G-001-combat-monotony/58-studio-to-game-designer.md
+>>>END

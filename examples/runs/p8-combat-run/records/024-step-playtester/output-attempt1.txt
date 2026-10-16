@@ -1,0 +1,19 @@
+I'll start with room 1 and a hand-timed script. I'll wait for the grub to come to me, then swipe, so I can see how the warning plays out.
+
+<<<FILE @run/play/room1-wait-and-swipe
+room 1
+fps 60
+end 20
+0.5 move right
+1.5 stop
+2.5 attack
+3.5 dash left
+4.5 attack
+6 move up
+7 stop
+7.5 attack
+9 dash down
+10 attack
+12 attack
+14 attack
+>>>END

@@ -1,0 +1,11 @@
+{
+ "op": "Run",
+ "goal": "G-001",
+ "operations": [
+  "065-step-gameplay-engineer"
+ ],
+ "stop_reason": "rejected: 065-step-gameplay-engineer: output rejected after 2 attempts",
+ "status": "active",
+ "owner_reads": null,
+ "next": "run examples/runs/p8-combat-run"
+}

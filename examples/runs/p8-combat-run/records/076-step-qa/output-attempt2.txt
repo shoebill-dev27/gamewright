@@ -1,0 +1,105 @@
+<<<FILE @run/play/v-grub-30
+room empty
+fps 30
+spawn grub 9.5 4
+end 1.2
+>>>END
+
+<<<FILE @run/play/v-runner-30
+room empty
+fps 30
+spawn runner 9.5 4
+end 1.2
+>>>END
+
+<<<FILE @run/play/v-brute-30
+room empty
+fps 30
+spawn brute 9.5 4
+end 1.2
+>>>END
+
+<<<FILE @run/play/v-grub-60
+room empty
+fps 60
+spawn grub 9.5 4
+end 1.2
+>>>END
+
+<<<FILE @run/play/v-runner-60
+room empty
+fps 60
+spawn runner 9.5 4
+end 1.2
+>>>END
+
+<<<FILE @run/play/v-brute-60
+room empty
+fps 60
+spawn brute 9.5 4
+end 1.2
+>>>END
+
+<<<FILE @run/play/r3-nogrub-30
+room empty
+fps 30
+spawn spitter 2 1
+spawn spitter 10 6
+spawn spitter 2 7
+player 8 4
+end 6.5
+>>>END
+
+<<<FILE @run/play/r3-nogrub-60
+room empty
+fps 60
+spawn spitter 2 1
+spawn spitter 10 6
+spawn spitter 2 7
+player 8 4
+end 6.5
+>>>END
+
+<<<FILE @run/play/r3-lastspitter-30
+room empty
+fps 30
+spawn spitter 2 1
+player 9 6
+0 move left
+1.75 move up
+2.65 stop
+2.7 attack
+3.1 attack
+end 4
+>>>END
+
+<<<FILE @run/play/r3-lastspitter-60
+room empty
+fps 60
+spawn spitter 2 1
+player 9 6
+0 move left
+1.75 move up
+2.65 stop
+2.7 attack
+3.1 attack
+end 4
+>>>END
+
+<<<FILE @run/play/r3-reactive-30
+room 3
+fps 30
+when text "rears back" then dash aside
+when see * coming within 2 then dash aside
+when see g within 1.4 then attack
+end 20
+>>>END
+
+<<<FILE @run/play/r3-reactive-60
+room 3
+fps 60
+when text "rears back" then dash aside
+when see * coming within 2 then dash aside
+when see g within 1.4 then attack
+end 20
+>>>END

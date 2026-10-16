@@ -1,0 +1,50 @@
+Round 1 of the verification runs: the test suite, the bot results at both rates with `log` on and off, and the walker's `log on` runs for rooms 1 and 3.
+
+<<<FILE @run/tests/suite
+>>>END
+
+<<<FILE @run/bots/all30-off
+fps 30
+>>>END
+
+<<<FILE @run/bots/all60-off
+fps 60
+>>>END
+
+<<<FILE @run/bots/all30-log
+fps 30
+log on
+>>>END
+
+<<<FILE @run/bots/all60-log
+fps 60
+log on
+>>>END
+
+<<<FILE @run/bots/walker-r3-30
+bots walker
+rooms 3
+fps 30
+log on
+>>>END
+
+<<<FILE @run/bots/walker-r3-60
+bots walker
+rooms 3
+fps 60
+log on
+>>>END
+
+<<<FILE @run/bots/walker-r1-30
+bots walker
+rooms 1
+fps 30
+log on
+>>>END
+
+<<<FILE @run/bots/walker-r1-60
+bots walker
+rooms 1
+fps 60
+log on
+>>>END

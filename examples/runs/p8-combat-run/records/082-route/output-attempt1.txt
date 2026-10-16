@@ -1,0 +1,96 @@
+Both parallel steps are done, so I'm marking them in the route table, opening the QA re-verify with a fresh Handoff, and updating the goal record.
+
+<<<FILE goals/G-001-combat-monotony/81-studio-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 81
+from: studio
+to: qa
+stage: Verify
+outcome: routed
+---
+# 81: studio → qa — Re-verify the room 3 / variant-message build and the aligned design documents
+
+## Task
+
+Verify the current build (repo/, sha 1ac4d04d0e75) against the acceptance criteria below, at 30 and 60 FPS. Close the gaps your report 76 listed where they can be closed. Check that the design documents no longer contradict the specs.
+
+## Context
+
+Goal G-001 (combat feels monotonous). Your Verify 24 (report 76) found no build-behavior defect but one red test. Since then the test code was corrected (test file only; no game code, `bots.py` or `manual.md` change) and the design documents were aligned with D-007, D-011 and D-012. Verify from the specs, the criteria and the build, not from any explanation of why it should work.
+
+## Findings
+
+Nothing to carry over from the implementer. Items to cover:
+
+1. **Suite.** Run `run_tests` at the project's rates. Judge `VariantMessageTest.test_wind_up_and_hit_messages_name_the_variant` against V-a and V-b: the wind-up message names the variant, one message per wind-up, the hit message names the variant and keeps its hearts suffix, for grub, runner and brute at 30 and 60 FPS. Also judge whether the test actually checks that, and whether it relies on fragile timing.
+2. **Open gaps from report 76 section 6.**
+   - R3-8: timed run of room 3.
+   - R3-4: room 3 sidestep, late-dash and recovery scripts played directly in room 3.
+   - V-c, and the "no bot result changes" part of V-e: no baseline exists. Read them against the specs (`combat-step68.md`, `combat-step72.md`) and report what can and cannot be established.
+3. **Regression.** Re-run `run_bots` for rooms 1–5 at 30 and 60 FPS and compare with report 76 section 2.
+4. **Documents.** Check `design/combat.md` and `design/combat-cues-visual-spec.md` against `combat-step68.md`, `combat-step72.md`, `combat-step-46-room3-cap.md` and D-007, D-011, D-012 for the conflicts you listed in report 76 (room 3 layout, in-flight bound, cue spacing, variant-named messages). Report any remaining conflict.
+5. **Decision file D-007.** A formatting leftover (a stray `</parameter>` line) is reported at the end of `decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md`. Confirm whether it is there. Do not edit it; the Studio will route the removal.
+
+## Decisions already made
+
+- D-007: room 3 in-flight bound accepted (criterion 11 amended).
+- D-011: variant-named wind-up and hit messages accepted.
+- D-012: room 3 gets one standard grub at (15,0); its second spitter moves to (10,6); cap and cue rule unchanged.
+
+## Constraints
+
+- Both 30 and 60 FPS must play correctly.
+- Do not change code or documents; report only.
+- Visual criteria V1–V11 need a graphical build and stay out of scope; V12 only if already in your plan.
+
+## Open questions
+
+None.
+
+## Expected output
+
+A verification report with a pass/fail verdict per criterion and per item above, defects (with reproduction), and anything still unverifiable and why. Address the result to `studio`.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: project.md, repo/manual.md, repo/tests/test_game.py, repo/bots.py, design/combat.md, design/combat-step-46-room3-cap.md, design/combat-step68.md, design/combat-step72.md, design/combat-cues-visual-spec.md
+- Decisions: decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md, decisions/D-011-variant-named-messages-accepted.md, decisions/D-012-room3-standard-grub-and-closer-spitter.md
+- Previous handoff: goals/G-001-combat-monotony/76-qa-to-studio.md
+>>>END
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+one red test (test defect), bots criteria 13–16 pass.
+=======
+one red test (test defect), bots criteria 13–16 pass. Build 25a done (79): test-only fix, suite 64/64 OK, bots unchanged. Docs aligned in 25b (80).
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+| 25a | Build (fix test, test code only) | gameplay-engineer | implement-change | open | 77-studio-to-gameplay-engineer.md |
+| 25b | Design (doc conflicts, documents only) | game-designer | write-design-spec | open | 78-studio-to-game-designer.md |
+| 26 | Verify (re-verify; close R3-8, R3-4 gaps) | qa | verify-change | planned | — |
+=======
+| 25a | Build (fix test, test code only) | gameplay-engineer | implement-change | done | 77-studio-to-gameplay-engineer.md (result: 79-gameplay-engineer-to-studio.md) |
+| 25b | Design (doc conflicts, documents only) | game-designer | write-design-spec | done (D-007 stray line left) | 78-studio-to-game-designer.md (result: 80-game-designer-to-studio.md) |
+| 26 | Verify (re-verify; close R3-8, R3-4 gaps) | qa | verify-change | open | 81-studio-to-qa.md |
+>>>END
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+After Verify 24 (76): fail, but only a test defect (3 s still-player assertion); build behavior, bots and criteria pass. Return rule: Build (77, test only). Doc conflicts QA listed go to Design in parallel (78). Re-verify (26) waits for both. No baseline exists for V-c/V-e: re-verify reads them against the specs.
+=======
+After 25a/25b (79, 80): test fixed (suite 64/64), docs aligned with D-007/D-011/D-012. Re-verify (26) opened (81) in a fresh QA context, without the engineer's notes. One leftover: a stray last line in D-007, which no step could edit; QA confirms it, the Studio or Owner removes it.
+>>>END
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+Run `gameplay-engineer` with 77-studio-to-gameplay-engineer.md (result addressed to `studio`) and, in parallel, `game-designer` with 78-studio-to-game-designer.md. Then Route: open QA re-verify (26) in a fresh context with a Handoff composed without the engineer's notes, covering the R3-8 timed run and the R3-4 room 3 scripts. On pass, open a fresh playtest (27) stating the build, then Review pass 3 (28).
+=======
+Run `qa` with 81-studio-to-qa.md in a fresh context (result addressed to `studio`). Then Route: on pass, open a fresh playtest (27) stating the build, then Review pass 3 (28). Open item for Close: delete the stray last line (`</parameter>`) of decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md; a step that lists D-007 as writable, or the Owner, can do it.
+>>>END

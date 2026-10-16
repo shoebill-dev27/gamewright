@@ -1,0 +1,18 @@
+{
+ "op": "Run",
+ "goal": "G-001",
+ "operations": [
+  "101-route",
+  "102-step-gameplay-engineer",
+  "103-step-game-designer",
+  "104-route",
+  "105-step-qa",
+  "106-route",
+  "107-step-game-director",
+  "108-route"
+ ],
+ "stop_reason": "done",
+ "status": "done",
+ "owner_reads": "goals/G-001-combat-monotony/goal.md#outcome",
+ "next": null
+}

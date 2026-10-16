@@ -1,0 +1,12 @@
+I need command output for V4 and V5, so I'm requesting a test run and a player-view play run before writing the report.
+
+<<<FILE @run/tests
+>>>END
+
+<<<FILE @run/play/w1-south-east
+room empty
+fps 60
+spawn spitter 15 7
+player 8 4
+end 7
+>>>END

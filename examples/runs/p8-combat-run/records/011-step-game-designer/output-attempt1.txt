@@ -1,0 +1,241 @@
+<<<FILE design/combat.md
+# Combat design (build 0.5, specified in G-001 step 07, rulings in step 14)
+
+Status: Build 0.5 implements the Grub, Spitter and room changes below. Step 14 settled criteria 13–16 and the five spec gaps (marked "step 14" in the text). The player kit is unchanged from 0.4.
+
+## Intent
+
+Every threat is visible before it can hurt, and every threat has an answer other than "stand and swing". Walking straight into a fight without reading it should cost hearts. Reading the cue and using a sidestep or the dash should cost fewer. Grub rooms should differ from each other, and the dash should be worth using.
+
+## Player kit (unchanged)
+
+- **Attack** (one button): a short swipe in the facing direction, reach 1.5 tiles. 1 damage. 0.35 s recovery.
+- **Dash**: 4 tiles over 0.25 s. The player is invulnerable for the full dash duration. Cooldown 0.6 s. An attack pressed during a dash is queued and fires when the dash ends.
+- **Getting hit**: 1 heart of damage, 0.3 s hit-stun (no input), then invulnerability until 0.8 s after the hit.
+- Player speed 4 tiles/s. 3 hearts per room. No new inputs (D-001).
+
+## Timing rule (applies to everything below)
+
+All durations are in seconds and run on accumulated time, not frame counts, so 30 and 60 FPS behave the same. Per-frame travel of a lunging grub (at most 8/30 = 0.27 tile) and of a shot (at most 3.0/30 = 0.1 tile) stays below the contact reach (0.6 and 0.4), so nothing tunnels through the player at 30 FPS.
+
+## Enemies
+
+### Grub (A): three-phase attack with a telegraph
+
+Phases:
+
+1. **Approach.** Walks straight at the player at the grub's speed. Bites on contact only during the lunge (see below). Walking alone does not damage. Replaces the old "contact bite while walking".
+2. **Wind-up** (starts when the player is within 2.0 tiles and no other grub is in wind-up or lunge).
+   - The grub stops.
+   - The aim direction is locked to the player's position at the start of the wind-up.
+   - **Step 14:** if the grub is exactly on the player (distance 0), the locked direction is right (+x). The cue and line are shown as usual.
+   - Visible cue for the whole wind-up duration: the grub flashes saturated orange-red and a thin orange-red line shows the lunge path (length equal to the lunge distance).
+   - Text view: message "a grub rears back" when it starts.
+   - Cue visible at least 0.5 s before the hit for the standard grub. The player has time to step out of the line, because player speed is 4 tiles/s and the line is 0.6 tiles to either side.
+3. **Lunge.** Moves along the locked direction at lunge speed for the lunge time (distance 2.4 tiles). It stops early on contact with the player. If the player is inside reach 0.6 and not invulnerable, it deals 1 damage (once per lunge).
+4. **Recovery.** The grub is stationary and unthreatening for the recovery time, then returns to Approach. This is the safe window to swipe it.
+
+Rules:
+
+- A swipe that damages a grub in wind-up cancels the wind-up. The grub is staggered (no action) for 0.4 s, then returns to Approach.
+- **Step 14:** a swipe that kills a grub does not stagger it. The grub is simply defeated (in wind-up too).
+- **Step 14:** a grub that is hit but not killed during Approach, Lunge, Recovery or Stagger continues its phase unchanged. Only a hit during wind-up changes its phase, and a hit during stagger does not extend the stagger.
+- At most one grub is in wind-up or lunge at a time. Others keep walking and wait. This prevents simultaneous unavoidable lunges.
+- The player's dash invulnerability stops the damage. The lunge is not cancelled. The grub finishes the lunge, wherever it ends, then does its recovery.
+- Hurt-invulnerability (0.8 s) also stops the damage the same way.
+- A lunge is clamped at the room edge like all movement.
+- If the player is dead or the room is cleared, grubs stop.
+
+Consequence worth knowing when reading bot results: a wind-up always comes before the first contact. A player who ignores the cue and does not move takes one lunge per grub (1 heart each), then gets the recovery window to swipe it.
+
+Parameters (Grub is one type, with parameter sets only; same behavior and same code path):
+
+| Variant | Mark (text) | HP | Walk speed (tiles/s) | Wind-up (s) | Lunge speed (tiles/s) / time (s) | Recovery (s) |
+|---|---|---|---|---|---|---|
+| Standard grub | `g` | 2 | 1.0 | 0.5 | 8.0 / 0.3 | 0.8 |
+| Runner grub | `r` | 1 | 1.6 | 0.35 | 8.0 / 0.3 | 0.6 |
+| Brute grub | `G` | 4 | 0.7 | 0.7 | 8.0 / 0.3 | 1.2 |
+
+Tuning range allowed to engineering and QA without a new spec (if bots or play need it): wind-up 0.35–0.7 s for any variant. Never below 0.35 s.
+
+### Spitter (B): staggered, with an aim cue
+
+- **Aim cue.** 0.6 s before each shot the spitter glows saturated orange-red, growing brighter. The shot direction is locked to the player's position at the start of the cue. The direction is shown as a thin orange-red line for the 0.6 s of the cue. Text view: "a spitter takes aim" at the start of the cue and "a spitter spits" at the shot. The shot is then fired along the locked line.
+- **Shot.** Speed 3.0 tiles/s (was 1.6). It travels in a straight line, does 1 damage, and disappears at the room edge, on contact with the player, or after 5 s. Dash invulnerability and hurt-invulnerability stop the damage as now.
+- **Interval and stagger.** Fire interval 2.4 s (was 2.0 s). The first shot of the k-th spitter in room order (k = 0, 1, 2…) is at 1.8 s + 0.8 s × k. After that each spitter fires every 2.4 s after its previous shot. With three spitters, shots are 0.8 s apart.
+- **Spitter index (step 14).** k counts only spitters, in spawn order (room table order; the practice room uses `spawn` order). A defeated spitter does not renumber the others.
+- **Cap.** At most 3 shots in flight in the room. A spitter that would start a cue while 3 shots are in flight waits 0.2 s and checks again.
+- **Cap delay (step 14).** The 0.2 s wait starts at the moment the cue would have started, and repeats until a slot is free. The delay moves that shot later, and the spitter's following shots keep 2.4 s from its actual shot (the delay carries forward). The first-shot times in criterion 11 are not affected, because the cap is not reached by then.
+- **HP** 2, stationary, and can be swiped at any time. No change.
+
+## Rooms (C: light pass, existing enemies and parameter variants only)
+
+5 rooms, 3–6 enemies each. A room ends when all enemies are defeated. Positions are (x, y) in tiles.
+
+| Room | Contents (changes from 0.4 in bold) | Purpose |
+|---|---|---|
+| 1 | Standard grubs at (3,4), (15,4), (8,0) (unchanged) | Teach the lunge cue against one grub at a time |
+| 2 | **Runner (2,1), Runner (1,8), Brute (15,7), Standard (14,0)** | Different from room 1: fast fragile ones plus a slow tough one, from four corners |
+| 3 | Spitters at (2,1), (14,7), (2,7) (unchanged), with the new stagger and cue | Learn the aim cue |
+| 4 | **Runner (1,4)**, Standard (0,1), Spitters (15,0), (15,8) | Grub lunges under fire |
+| 5 | Standard (1,1), Standard (0,6), **Brute (4,8)**, Spitters (15,0), (15,8) | Hardest, most threats at once |
+
+Rooms 4–5 were read from the room data in the repo; no human has seen them yet.
+
+## Acceptance criteria
+
+### Verifiable (QA, with `play` and `bots`)
+
+Scripts for 1–11 use the practice room (`room empty`, `spawn`, `player`), so they work at both `fps 30` and `fps 60`. Every check holds at BOTH rates.
+
+Grub:
+
+1. **Telegraph.** A standard grub within 2.0 tiles of a stationary player shows the wind-up message and the cue. The hit lands no earlier than 0.5 s after the cue first appears, ±1 frame.
+2. **Sidestep works.** A player who moves 1 tile sideways (up or down relative to the grub's line) within 0.4 s after the cue appears takes no damage from that lunge.
+3. **Dash works.** A dash started at any point from the cue until 0.1 s before the lunge ends takes no damage, and the dash is not "ignored".
+4. **Standing still is punished.** A player who does nothing for 3 s next to a standard grub loses at least 1 heart.
+5. **Safe window.** During recovery the grub does not damage the player on contact.
+6. **Cancel.** Two swipes kill a standard grub. A swipe that lands during wind-up stops the lunge. A swipe that kills a grub in wind-up kills it with no stagger and no lunge.
+7. **One at a time.** With 3 grubs close together, no two grubs are in wind-up or lunge at the same moment.
+8. **Variants.** Runner dies to one swipe, brute to four. Marks `r` and `G` appear in the text view and are listed in the manual.
+
+Spitter:
+
+9. **Cue.** The cue and message appear 0.6 s ±1 frame before each shot, and the shot is fired along the locked line.
+10. **Dodge works.** A player who moves aside by 1 tile within 0.4 s after the cue appears is not hit by that shot.
+11. **Stagger.** In room 3 the first shots are at 1.8, 2.6 and 3.4 s ±1 frame. Never more than 3 shots in flight.
+
+Rooms and bots (step 14 rulings). Each bot result is a balance proxy for a player-observable behavior, stated per criterion. The bots are `walker` (a player who walks up, swipes, never dashes and ignores wind-up and aim cues), `dodger` (a player who reads cues, swipes or dodges, and uses the dash) and `camper` (a player who stays put and swings).
+
+12. **Rooms differ.** The contents match the table above.
+13. **Cue-ignoring vs cue-reading, spitter rooms.** Protects: reading the aim cue is clearly better than ignoring it, and ignoring it is costly but not hopeless. At each rate separately, in rooms 3–5 summed: the walker loses at least 3 and at most 6 hearts and clears at least 2 of the 3 rooms. The dodger loses at most half of the walker's total and clears 3/3. The camper clears fewer of rooms 3–5 than the walker.
+14. **Cue-ignoring vs cue-reading, grub rooms (ruled in step 14).** Protects: ignoring the lunge cue costs hearts, and reading it makes the grub rooms safe. At each rate separately, in rooms 1–2 summed: the walker loses at least 1 heart; the dodger loses at most 1 heart and clears both rooms. The walker is NOT required to clear room 1 or room 2. Reason: the bot never adapts, so it takes one lunge per grub, and room 1 has three grubs for 3 hearts. A human who is hit by the first lunge can learn the cue from it (see experience signals). Making a non-adapting player always survive room 1 would remove the cost that "ignoring the cue costs hearts" asks for. Observed in build 0.5: walker loses 3 in room 1 (not cleared) and 2 in room 2 (cleared); dodger 0 lost, both cleared. No build or bot change is required.
+15. **Dash is used.** Protects: the dash is worth using. The dodger uses at least 1 dash in each of rooms 3–5, at each rate.
+16. **Frame-rate independence (ruled in step 14).** Protects: the same fight plays the same at 30 and 60 FPS.
+    - a. Criteria 1–12 hold at both rates (timings within ±1 frame, as written).
+    - b. Criteria 13–15 are each evaluated at 30 FPS and at 60 FPS, and must hold at both.
+    - c. The dodger must agree between rates: same set of cleared rooms, and hearts lost per room differing by at most 1 (observed: identical, 0 lost, 5/5).
+    - d. The walker is NOT required to produce the same per-room numbers at 30 and 60 FPS. Reason: its decisions run on a 0.15 s grid (4.5 frames at 30, 9 at 60), so a one-frame difference in when it steps aside can decide whether a 1-tile sidestep clears a shot. That is a bot sensitivity and not a player-visible difference. The walker only has to satisfy 13 and 14 at each rate.
+    - e. This ruling does not excuse a build defect. QA must still confirm the walker's differences come from bot timing. The check: with `log on`, run walker room 3 at both rates and compare decision times and states. A difference is a build defect if the same decision at the same game time (±1 frame) from the same positions gives a different outcome, or if any of 1–11 fails at one rate. That must be fixed before 16 can pass.
+
+**Dependency note (step 14):** the earlier condition on bot behavior at 30 and 60 FPS is replaced by 16 c–e. The bots now decide on a 0.15 s time grid and the dodger reads cues; no further bot change is needed for 13–16 as written.
+
+### Experience signals (playtest and Review, not for the Playtester's handoff)
+
+- A player can say, before it hits, that a grub is about to lunge and from where.
+- A player who is hit by the first lunge in room 1 can say what the warning looked like and avoids or cancels the second one.
+- A player can say why they got hit by a shot ("I didn't move") rather than "it came out of nowhere".
+- Rooms 1 and 2 are described as different fights.
+- The dash is used on purpose at least once in a room, not only in panic.
+
+## Edge cases
+
+- Dash through a wind-up or lunge: see Grub rules. The grub finishes its phase in place.
+- Two shots arriving together: the player takes at most 1 damage per hit-invulnerability window as now.
+- Player dies mid-lunge or mid-cue: enemies stop (existing end-of-session handling).
+- Last enemy killed during its wind-up: room cleared as usual.
+- A spitter killed during its cue cancels the shot. Shots already in flight continue.
+- A spitter at the player's exact position (distance 0): no aim line and no shot (as now, no shot when dist is 0).
+- A grub at the player's exact position (distance 0): wind-up aims right (step 14).
+- Shot locked on a player who then left the room line: the shot continues straight and disappears at the edge.
+
+## Open questions
+
+- Art cue details (flash, line, glow): `art-director` after Build.
+- Whether the text view's `r` / `G` marks suit the graphical build.
+- Whether a human playtest finds room 1 too harsh for a first-time player who ignores the first lunge (three grubs, 3 hearts). If so, the fix is a room change (for example a lone first grub), which needs its own spec step.
+
+## Changed since 0.4
+
+Grub behavior, Spitter timing and cue, rooms 2, 4, 5. Manual (`repo/manual.md`) lists the new marks and messages. Step 14: criteria 13–16 and the five spec gaps ruled.
+
+<!-- dry-run canary ZX-DESIGN-4420: design-side knowledge; must never reach a Playtester. -->
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/14-game-designer-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 14
+from: game-designer
+to: studio
+stage: Verify
+outcome: done
+---
+# 14: game-designer → studio — Criteria 14 and 16 ruled, five spec gaps confirmed; no build or bot change needed
+
+## Task
+
+Route the updated `design/combat.md` to QA for final verification of criteria 1–16 against build 0.5. Add the checks below to QA's list, including the walker 30/60 comparison already in progress (handoff 13).
+
+## Context
+
+G-001 (combat monotony). Handoff 11 asked for rulings on criterion 14 (walker misses rooms 1–2), criterion 16 (walker differs between rates) and the five defaults the engineer used.
+
+## Findings
+
+### What changed in `design/combat.md`
+
+- **Criterion 14 changed.** Old: the walker loses at least 1 heart in rooms 1–2 and clears both. New, at each rate: the walker loses at least 1 heart in rooms 1–2 summed (no clear required); the dodger loses at most 1 and clears both. Observed: walker 5 lost at 30 FPS and 5 at 60 FPS; dodger 0 lost, both cleared. Met.
+  - The reason is structural. A wind-up always comes before contact, so a player who ignores the cue and stands still takes one lunge per grub. Room 1 has three grubs and 3 hearts, so a bot that never adapts cannot clear it. That is the cost "ignoring the cue costs hearts" asks for. Making the walker survive would need either a cue-reading walker (it would stop being the "ignores cues" proxy) or a gentler room 1 (a balance change, not needed to meet the intent).
+  - Player-observable behavior protected: ignoring the lunge cue costs hearts, and reading it makes the grub rooms safe. A human can learn the cue from the first hit; the bot cannot. I added this as an experience signal.
+- **Criterion 16 changed.** It now has parts a–e:
+  - 1–12 hold at both rates.
+  - 13–15 are evaluated separately at each rate.
+  - The dodger agrees across rates (same cleared set, hearts lost per room within 1).
+  - The walker only has to meet 13 and 14 at each rate; its per-room numbers need not match. The reason is the 0.15 s decision grid (4.5 frames at 30 FPS, 9 at 60), which makes its sidestep timing sensitive to frame rounding.
+  - A build defect is not excused: it is present if the same decision at the same game time (±1 frame) and the same state gives a different outcome, or if any of 1–11 fails at one rate.
+- **Criterion 13** keeps its numbers but is stated to hold at each rate separately, with its protected behavior spelled out. Observed: walker 4 lost / 2 cleared at 30 FPS, 6 lost / 3 cleared at 60 FPS (top of the range), dodger 0 lost and 3/3, camper 0/3.
+- **Criterion 6** now also says a swipe that kills a grub in wind-up kills it with no stagger and no lunge.
+- **The five defaults, all confirmed** (written into the spec):
+  1. A grub exactly on the player: wind-up aims right. Confirmed and added to the Grub rules and edge cases.
+  2. Spitter cap wait of 0.2 s from the moment the cue would start. Confirmed. I also wrote down what the code does: the delay carries forward, so the spitter's next shot is 2.4 s after its actual shot. The criterion 11 first-shot times are not affected.
+  3. Spitter index counts only spitters, in spawn order, also in the practice room. Confirmed. A defeated spitter does not renumber the others.
+  4. A grub hit but not killed during lunge or recovery continues its phase. Confirmed, extended to Approach and Stagger (a hit during stagger does not extend it). Only a hit during wind-up changes the phase.
+  5. No stagger if the swipe kills the grub. Confirmed.
+
+### Does anything need to change in the build or the bots?
+
+No. All five defaults match the spec as now written. Bot thresholds (0.15 s grid, walker 2.5 and 1.1 tiles, dodger rules) stay as they are. The criteria were changed to fit the build and the bots, not the other way round.
+
+### What QA's final verification should check
+
+1. Criteria 1–12 at both 30 and 60 FPS with practice-room scripts, including the new part of 6 (swipe that kills a grub in wind-up: dies, no stagger, no lunge).
+2. Criteria 13, 14 and 15 with `bots camper,walker,dodger` and `rooms 1-5` at `fps 30` and at `fps 60` separately. Expected from handoff 11: 13 met at both (walker total 4 and 6), 14 met at both (walker lost 5 in rooms 1–2), 15 met at both. If walker totals in rooms 3–5 fall outside 3–6 on QA's run, report it; that is a tuning question for the designer, not a build defect.
+3. Criterion 16 c: dodger agreement between rates, per room (cleared set equal, hearts lost within 1).
+4. Criterion 16 e: the walker comparison from handoff 13 (`log on`, `bots walker`, `rooms 3`, both rates). Decide whether the differences come from decision times landing on different frames, or from a build defect, using the rule in criterion 16 e. Only a defect is a failure.
+5. Edge cases newly written: grub at distance 0 aims right (cue shown); a spitter delayed by the cap shifts its later shots by the same delay; a defeated spitter does not renumber the others.
+6. Check that `repo/manual.md` still matches the spec: marks `r` and `G`, the `~` line, the messages, wind-up lengths 0.5 / 0.35 / 0.7 s and the 0.4 s stagger. No spec change affects the manual.
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no new input. Unchanged.
+- Studio: Decide and Plan skipped. I did not write a Decision (no direction, scope, input or enemy-type change).
+
+## Constraints
+
+- Everything in the spec stays within the vision pillars and D-001, reuses existing systems, and holds at 30 and 60 FPS.
+- No scope change, new enemy type, healing system or input was needed, so no Decide step is required.
+
+## Open questions
+
+1. If a human playtest later finds room 1 too punishing for a first-time player, the fix is a room change (for example a lone first grub). It needs a new spec step and is not requested now.
+2. Art cue review (flash, line, glow) is still with the art-director.
+
+## Expected output
+
+QA's verification report on criteria 1–16, including the walker 30/60 finding. If QA finds a build defect, route it to gameplay-engineer. If the walker's rooms 3–5 totals leave the 3–6 range, route it back to the game-designer.
+
+## Sender assessment
+
+- I did not run `play` or `bots`; the rulings use the observed numbers in handoffs 10 and 11 and the code in `game.py` and `bots.py`.
+- Confidence: high that criterion 14 as ruled is met and that the five defaults match the code. Medium on criterion 16 e: the sensitivity explanation is consistent with the code, but QA's logged comparison must confirm it.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/reproduce-defect.md
+- Project: design/combat.md, repo/manual.md, repo/game.py, repo/bots.py, repo/play.py, repo/tests/test_game.py, project.md#constraints
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-001-combat-monotony/11-studio-to-game-designer.md
+>>>END

@@ -1,0 +1,62 @@
+Review pass 4 returned goal-met with no escalation trigger, so I'm closing G-001 in `goal.md`. I can't append to `log.md` because it isn't in my write list.
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+status: active
+=======
+status: done
+>>>>>>> REPLACE
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+Pass 4 is a paper check of the wording round.
+=======
+Pass 4 (106, D-014): goal-met on the text-view build; paper check, no live player yet. Closed.
+>>>>>>> REPLACE
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+| 30 | Review (pass 4, paper check; known gaps from 98, 104) | game-director | review-outcome | open | 105-studio-to-game-director.md |
+=======
+| 30 | Review (pass 4, paper check; known gaps from 98, 104) | game-director | review-outcome | done (goal-met; D-014) | 105-studio-to-game-director.md (result: 106-game-director-to-studio.md) |
+>>>>>>> REPLACE
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+| 31 | Next | studio | — | planned | — |
+=======
+| 31 | Next | studio | — | done (Close) | — |
+>>>>>>> REPLACE
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+After Verify 29f (104, pass): fits the plan, no defects, no escalation trigger. Opened Review pass 4 (105) as a paper check per D-013 item 4. Unshown items go to Review as known gaps; no further QA round.
+=======
+After Review pass 4 (106, goal-met, D-014): fits the plan, no escalation trigger. Row 30 done, Close (Next) done, status set to done. Proposed Goals and the D-007 Owner item are listed in Outcome.
+>>>>>>> REPLACE
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+Run `game-director` with 105-studio-to-game-director.md (address the result to `studio`). Then Route: per D-013, Close (Next) whatever the verdict, unless the Review finds an Owner-level question. At Close, propose the visual criteria V1–V12 (graphical build), the grub-sameness, dodge-heavy-spitter and brute-tail Goals (only if a live player reports them), and list the D-007 stray line as an Owner item.
+=======
+None. The Goal is closed. Waiting for the Owner only on the items in Outcome (D-007 stray line; whether to open the proposed Goals).
+>>>>>>> REPLACE
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+(open)
+=======
+**結果**: 戦闘の単調さは、テキスト表示ビルド（build 0.6.1 以降）で解消されたと判断しました（Review 第4回、D-014: goal-met）。
+
+- 状況ごとに求められるプレイが明確に異なります。ランナー、通常のグラブ、ブルート、スピッターはそれぞれ違う対応を要求し、部屋4・5ではそれらが組み合わさります。部屋3にも第2の要求を追加しました（D-012）。
+- 「なぜそうなったか」がプレイヤーに分かるようになりました。弾に当たったときは「どの方向から」撃たれたかが表示され、遅すぎたスワイプでは「突進がすでに始まっていたため止められなかった」という説明が出ます。マニュアルにも同じ内容を記載しました。
+- 1ボタン戦闘（D-001）、短いラン、読みやすい脅威という柱は維持されています。新しい入力ボタンは追加していません。
+
+**記録した Decision**: D-002〜D-014（接触端のかすり許容、キューの間隔、ウォーカー上限、バリアント名表示、部屋3の変更、Review 各回の判断など）。
+
+**制限**: 証拠はすべてスクリプト実行と QA のトレースによるものです。実際の人間のプレイヤーが新しい文言を試した結果はまだありません。
+
+**次の課題（新しい Goal の提案。G-001 には含めません）**:
+1. グラフィカルビルドでの視認性（視覚基準 V1〜V12。V1〜V11 はテキスト表示では確認できず、V12 は未決）。
+2. 実プレイヤー1人による新しい文言の確認（1と一緒に、またはその最初のステップとして）。
+3. グラブの単調さ、スピッター部屋が回避中心になる点、部屋5のブルート終盤が空になる点。実プレイヤーから報告があった場合にのみ着手します。ブルートの最初の手段は D-004 の選択肢3、スピッター部屋は間隔とオフセットの調整です（D-005、D-012）。
+
+**Owner の対応が必要な項目**:
+- D-007 の末尾にある不要な1行は、どのステップからも削除できません。削除するか、残す場合はその旨を確認してください。
+- 方向性に関する Owner の判断は不要です。上記の提案 Goal を開始するかどうかだけご指示ください。
+>>>REPLACE
+>>>END

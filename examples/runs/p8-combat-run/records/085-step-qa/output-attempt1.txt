@@ -1,0 +1,13 @@
+I'm starting with a trace of room 3 with a still player, at both frame rates, to learn the grub's path and timings before I write the timed scripts.
+
+<<<FILE @run/trace/room3-still-60
+room 3
+fps 60
+end 14
+>>>END
+
+<<<FILE @run/trace/room3-still-30
+room 3
+fps 30
+end 14
+>>>END

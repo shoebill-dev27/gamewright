@@ -1,0 +1,77 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "b7fb7a3d85a62bcd564a33ee20caf62b355a7ef99ce6d8cfb6df0d5adb83abc2",
+  "bytes": 1304
+ },
+ {
+  "path": "goals/G-001-combat-monotony/78-studio-to-game-designer.md",
+  "sha256": "74d0a2300a23c9dc9cdfff5b27b8bfa0f1422bdcf29565d25c1305b30d0dd618",
+  "bytes": 3002
+ },
+ {
+  "path": "studio/roles/game-designer.md",
+  "sha256": "802be90dc84142d0a16436d842f1da18d7c7b34500089a91a617a10dde90e7fb",
+  "bytes": 1595
+ },
+ {
+  "path": "studio/skills/write-design-spec.md",
+  "sha256": "f60b4ce8c6e89c2dc27ff87184c54b91452c45db8422fc378ca9253b45a0efd2",
+  "bytes": 1367
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "8ee4bdbaeb36c69a4446cb6db9dac13f103c24b0b3e2ffc044b8088c805b0d3f",
+  "bytes": 47741
+ },
+ {
+  "path": "design/combat-step68.md",
+  "sha256": "2c52b20718d8c1f6cc68035b1151e3b1680f05dc39e26d735c99004014f792c9",
+  "bytes": 4304
+ },
+ {
+  "path": "design/combat-step72.md",
+  "sha256": "0e504d1ebcfb8dc391a82e725a11645a5670b9f52ceaff1152ead0130aa69215",
+  "bytes": 11550
+ },
+ {
+  "path": "design/combat-cues-visual-spec.md",
+  "sha256": "1e79aa291dfc0abe373f9ed1d46248d119216b444995e369ffdd9e52f96ab7f0",
+  "bytes": 6188
+ },
+ {
+  "path": "project.md",
+  "sha256": "8a32edee44b970d2c1a5a0a76e19b3235e61b1786bb24c06583400cfa0924712",
+  "bytes": 2102
+ },
+ {
+  "path": "decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md",
+  "sha256": "70283fc2cfe5f66068caf7216d4f43567af8e4e9f10dbb963c0368a6faf55ee5",
+  "bytes": 3083
+ },
+ {
+  "path": "decisions/D-011-variant-named-messages-accepted.md",
+  "sha256": "bf29d86bb781ad0221fb0e0f20906afb352af9441735a73b8867a2ed71d13605",
+  "bytes": 2498
+ },
+ {
+  "path": "decisions/D-012-room3-standard-grub-and-closer-spitter.md",
+  "sha256": "6d7804de297c7dc8c9ce8533ceb174c36ff613bc19915f65b1dfd4eb1d1c2897",
+  "bytes": 2626
+ },
+ {
+  "path": "goals/G-001-combat-monotony/76-qa-to-studio.md",
+  "sha256": "85778677f212c3c456e951e6513675bb49fc8eb476e6d6006b96bfcf1658c92f",
+  "bytes": 15585
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

@@ -1,0 +1,58 @@
+I can't run anything directly, so round 1 collects the test suite, the bot results for rooms 1–5 at both rates, and the per-variant message traces at 30 and 60 FPS.
+
+<<<FILE @run/tests
+>>>END
+
+<<<FILE @run/bots/fps30
+fps 30
+rooms 1-5
+limit 60
+>>>END
+
+<<<FILE @run/bots/fps60
+fps 60
+rooms 1-5
+limit 60
+>>>END
+
+<<<FILE @run/play/grub30
+room empty
+fps 30
+spawn grub 9.5 4
+end 1.0
+>>>END
+
+<<<FILE @run/play/grub60
+room empty
+fps 60
+spawn grub 9.5 4
+end 1.0
+>>>END
+
+<<<FILE @run/play/runner30
+room empty
+fps 30
+spawn runner 9.5 4
+end 1.0
+>>>END
+
+<<<FILE @run/play/runner60
+room empty
+fps 60
+spawn runner 9.5 4
+end 1.0
+>>>END
+
+<<<FILE @run/play/brute30
+room empty
+fps 30
+spawn brute 9.5 4
+end 1.0
+>>>END
+
+<<<FILE @run/play/brute60
+room empty
+fps 60
+spawn brute 9.5 4
+end 1.0
+>>>END

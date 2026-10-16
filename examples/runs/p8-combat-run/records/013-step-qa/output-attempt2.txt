@@ -1,0 +1,122 @@
+<<<FILE goals/G-001-combat-monotony/16-qa-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 16
+from: qa
+to: studio
+stage: Observe
+outcome: done
+---
+# 16: qa → studio — Walker 30/60 FPS divergence: reproduced and deterministic. No build defect found; the evidence points to bot decision timing, but the full 16e check is not closed.
+
+## Task
+
+Find out whether the walker's different results at 30 and 60 FPS in rooms 3–5 come from the build or from the bot. Report only; no code was changed.
+
+## Context
+
+G-001, build 0.5. design/combat.md criterion 16e requires QA to confirm that the walker's differences come from bot timing, and not from the same decision at the same game time and from the same positions giving a different outcome. I used `run_bots` with `log on`. `run_trace` and `run_play` cannot replay a bot's decisions, and `bots.py` logs actions only, not positions. That limits what could be shown (see "What is not proven").
+
+## Findings
+
+### 1. Reproduction
+
+Commands (script files, one per rate):
+
+```text
+bots walker
+rooms 1-5
+fps 30        # second script: fps 60
+log on
+```
+
+Command: `python3 bots.py {script}`. Results match the report exactly, hearts lost in rooms 1/2/3/4/5:
+
+| Rate | Walker per room | Cleared |
+|---|---|---|
+| 30 FPS | 3✗ 2✓ 0✓ 1✓ 3✗ | 3/5, 9 lost |
+| 60 FPS | 3✗ 2✓ 2✓ 2✓ 2✓ | 4/5, 11 lost |
+
+- **Deterministic:** the game is headless and fixed-step, and the bot output was identical across the separate runs with and without `log on`. The dodger agrees at both rates: 0 lost, 5/5 cleared (dashes 35 at 30 FPS, 48 at 60 FPS).
+- The camper also differs between rates (room 2: cleared at 30, not cleared at 60). 16c–e do not cover the camper. It shares the same decision grid, so the same explanation applies.
+
+### 2. Where the runs first differ
+
+**The decision grid is the same at both rates.** The bot's clock advances in exact 0.15 s steps (`Brain.due`), and a decision is made on the first frame at or after each grid time.
+- At 60 FPS decisions fall on 0.00, 0.15, 0.30…
+- At 30 FPS they fall on the next frame boundary: 0.00, 0.17, 0.30, 0.47, 0.60, 0.77…, a delay of 0 to 1 frame (0.033 s).
+- This is the "up to frame rounding" behaviour described in the README.
+
+**Room 1, the earliest and clearest divergence, at 0.30 s.**
+- At 0.30 s the 60 FPS walker logs "face and swing at grub". The 30 FPS walker logs "walk to grub" and does not swing until 0.47 s.
+- The walker picks "swing" when the nearest grub is closer than 2.5 tiles (`coming = distance < 2.5`).
+- By arithmetic: the nearest grub is the one at (8,0), 4 tiles away. At 0.30 s the player has closed 1.2 tiles and the grub 0.3 tiles, so the distance is 4 − 1.5 = 2.5 tiles. That is exactly the threshold.
+- **Hypothesis, not verified:** floating-point accumulation over 9 steps at 30 FPS versus 18 steps at 60 FPS lands on opposite sides of 2.5. If so, the cause is the bot's hard threshold at an exact tie, and not game behaviour.
+- Everything later in room 1 follows from that one decision: 4 attacks at 60 FPS versus 5 at 30 FPS, and 5.2 s versus 4.9 s. The final result, 3 hearts lost and not cleared, is the same at both rates.
+
+**Room 3 (spitters): the same action sequence, then different damage.**
+- Up to 2.10 s the two logs contain the same actions: 12× walk to spitter, sidestep shot at 1.80, sidestep shot at 1.95 (60) or 1.97 (30), walk at 2.10. The only differences are the grid rounding.
+- At 60 FPS there are no decisions at 2.25 and 2.40. The bot skips decisions while the player is stunned, so a shot hit the player between 2.10 and 2.25 s (stun 0.3 s; the next decision is at 2.57 s). Room 3 ends with 2 hearts lost, both from shots.
+- At 30 FPS the walker logs "sidestep shot in flight" at 2.27 s. It was not hit, and room 3 ends with 0 hearts lost.
+- From there the rooms play out differently. After a hit the player is stunned, so its position and timing are shifted for the rest of the room.
+
+**Rooms 4 and 5:** the divergence follows the same pattern, with different shot and grub hits at different moments.
+- Room 4: 30 FPS had 1 heart lost (grub); 60 FPS had 2 (grub, shot).
+- Room 5: 30 FPS had 3 lost (grub 2, shot 1) and was not cleared; 60 FPS had 2 lost (grub 2) and was cleared.
+- After the first difference, the shot-hit and grub-hit sequences are different. I did not trace the first difference in these rooms separately.
+
+### 3. Build checks (all consistent with a bot-timing cause so far)
+
+- `python3 -m unittest discover -s tests` is part of the existing suite. It includes timing, dash, sidestep and spitter-stagger tests at both rates, and the walker test is marked `expectedFailure`. I did not re-run it in this step (it was run in earlier steps); I rely on its existing assertions only as context.
+- The simulation advances all durations on accumulated time. In the code I read, the grub walk, wind-up, lunge, the spit timer and the shot motion all scale with `dt`.
+- No result in the logs shows a behaviour that cannot be explained by a one-frame shift in a decision or by a threshold.
+
+### 4. What is not proven
+
+- **Room 3 and the shot hit:** the logs give action names and times only. They do not give player positions or shot positions. I could not show the "same decision at the same game time (±1 frame) from the same positions gives a different outcome" test of 16e, either way.
+- **Hypothesis (labelled as such):** the 60 FPS hit and the 30 FPS miss can be a sampling effect. Contact is a distance check each frame (reach 0.4) against a shot moving 0.1 tile per frame at 30 FPS and 0.05 at 60 FPS, with the player moving 0.13 or 0.07 tile per frame. A pass that only grazes the 0.4 reach for a fraction of a frame can be caught at one rate and missed at the other. That would make the simulation not a fault in itself, but it does mean a graze result depends on the frame rate. I did not check whether this is what happened.
+- I did not check criteria 1–11 in this step, so 16a is untested here.
+
+### 5. Verdict on the question
+
+- Reproducible and deterministic: yes.
+- First divergence point: room 1, 0.30 s, a bot threshold at an exact tie (distance 2.5), the first differing decision; room 3, between 2.10 and 2.25 s, a shot hit at 60 FPS and not at 30 FPS.
+- Cause: bot decision timing is the best-supported cause (room 1 is concrete). **No build defect is demonstrated.** A build cause for room 3 cannot be excluded without positions.
+- Severity if the cause is the bot only: low. It affects the balance-proxy numbers and not a player. Frequency: always, with these scripts.
+
+## Preliminary read of criteria 13–16 from this data (not the full verification)
+
+Per rate, from the outputs above:
+- **13** (rooms 3–5 summed): 30 FPS walker lost 4 hearts and cleared 2/3 (rooms 3 and 4); 60 FPS walker lost 6 and cleared 3/3. Both are inside the limits (3–6 lost, ≥2 cleared). Dodger lost 0 and cleared 3/3 at both rates. Camper cleared 0/3 at both. 13 looks satisfied at both rates, with the 60 FPS walker at the upper limit of 6.
+- **14** (rooms 1–2): walker lost 5 at both rates; dodger lost 0 and cleared both. Satisfied.
+- **15:** dodger dashes in rooms 3/4/5 are 8/7/11 at 30 FPS and 10/8/14 at 60 FPS. Satisfied.
+- **16c:** dodger cleared 5/5 at both rates with 0 hearts lost per room (clear times and dash counts differ, which 16c does not constrain). Satisfied.
+- **16d and e:** walker per-room differences are allowed by 16d. 16e stays open as described in section 4.
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no new input. Not affected.
+
+## Constraints
+
+- No code was changed. Intended behaviour is defined by design/combat.md and repo/manual.md.
+
+## Open questions
+
+1. Do we accept the bot-timing explanation for 16e, or do we want it closed by evidence? To close it, `gameplay-engineer` would extend the `log on` output (a bot-tooling change, not a build change) with player position, the nearest enemy distance, and shot positions at each decision, plus the hit time. QA would then compare the room 3 decision at 2.10 s at both rates. Optionally also make the walker's `distance < 2.5` tie robust, for example with a small epsilon. That would remove the room 1 knife edge but would not by itself make the walker rate-independent.
+2. Should the existing `expectedFailure` walker test in `tests/test_game.py` be kept? It still describes the walker as "unexplained". Its comment can be updated to say "bot decision timing, see handoff 16", but whether to remove it is for `gameplay-engineer` and Studio.
+3. Is it acceptable that a graze of the shot reach at the contact edge can hit at one frame rate and miss at the other? Spec design/combat.md only claims that nothing tunnels. If a stricter rule is wanted, `game-designer` states it, then criteria for a swept contact test would be added. No acceptance criteria for a fix are written now, because no build defect is confirmed.
+
+## Expected output
+
+This report. Proposed routing: Studio decides on open question 1 (instrumented bot log plus QA re-check) before 16 can pass. Full verification of 1–16 follows in a later step; 16e is the only item known to be pending.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/reproduce-defect.md
+- Project: design/combat.md, repo/manual.md, repo/README.md, repo/bots.py, repo/game.py, repo/play.py, repo/tests/test_game.py, project.md#constraints
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-001-combat-monotony/13-studio-to-qa.md
+>>>END

@@ -1,0 +1,89 @@
+<<<FILE goals/G-001-combat-monotony/32-qa-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 32
+from: qa
+to: studio
+stage: Observe
+outcome: done
+---
+# 32: qa → studio — Room 2 "grub hit after swipe": not a defect, the swipe landed during the lunge, not the wind-up (one doc wording gap noted)
+
+## Task
+
+Decide whether the room 2 report (grub began rearing at about 5.37 s, "grub hit" at about 5.9 s, player hit at about 6.017 s) is a defect, a rules-conforming case, or not reproducible.
+
+## Verdict
+
+**Not a defect. Reproduced at 30 FPS as a rules-conforming case.** The same single grub dealt the hit. It was already in its lunge when the swipe landed, so there was nothing left to cancel. Severity: none. Reproducibility: the pattern reproduces at 30 FPS. It did not appear in my 60 FPS run, where play diverged (see below).
+
+## Evidence
+
+Tests: `python3 -m unittest discover -s tests` gave 34 tests, OK.
+
+Reaction-rule script (my reconstruction, since the original was not preserved):
+```text
+room 2
+fps 30
+end 12
+when text "rears back" then move aside
+when see r within 1.4 then attack
+when see g within 1.4 then attack
+when see G within 1.4 then attack
+when see r within 20 then move toward
+when see g within 20 then move toward
+when see G within 20 then move toward
+```
+The 60 FPS variant is identical except `fps 60`.
+
+**Trace, 30 FPS, the grub (room 2 has exactly one grub, `g`; the other large enemies are brutes `G`):**
+
+| t (s) | Event |
+|---|---|
+| 2.633 | Grub `windup:0.500`, at (12.39, 1.99). |
+| 3.133 | Grub `lunge`. This is exactly 0.5 s after the wind-up started, as the standard grub's parameters say. |
+| 3.300 | Player swipe, `grub hit`. The grub is at (11.95, 3.25) with hp 2→1 and is still in `lunge`. The player is at (11.60, 4.13), so the distance is about 0.95 tiles. That is well inside 1.5, so the swipe connected. |
+| 3.367 | Player hurt (`hurt {'source': 'grub'}`, hearts 3→2). The grub went to `recovery:0.800` at (11.77, 3.75). |
+
+This matches the playtester's sequence: the swipe landed 0.53 s after the cue, 0.03 s after the 0.5 s wind-up ended, so during the lunge's first moments. The hit followed about 0.07–0.12 s later. There is no second grub in room 2. The playtester's "second G" is a brute.
+
+Which enemy and which phase:
+- The 6.017 s hit came from the single grub, in lunge phase. The lunge was not cancelled, not staggered, and was in flight at swipe time.
+- Distance at swipe was about 0.95 tiles, inside 1.5. The 1.5 rule is satisfied. It applies to wind-up (see below).
+
+**Not the contact-edge graze (D-002):** the lunge was locked on the player's position at wind-up start, about (11.73, 3.87). The grub came from (12.39, 1.99), and the player ended at (11.60, 4.13). The lateral miss is roughly 0.1–0.2 tile, far below the 0.57 band start. The hit is geometric and would happen at either rate.
+
+**Trace, 60 FPS (same script):** the play diverged, so this exact sequence did not occur.
+- The grub winds up at 4.033 and lunges at 4.533. It hits the player at 4.650, while the player's swipe at 4.583 was `ignored (recovering)`, so no swipe landed.
+- The grub is later hit during recovery (5.033). After the next wind-up (5.467), a swipe at 5.500 kills it with no stagger and no lunge. This matches the "swipe kills in wind-up" rule.
+- Nothing contradicted the rules at 60 FPS. I did not run a controlled swipe-during-lunge case at 60 FPS. The rule is time-based and rate-independent, and the 60 FPS wind-up and lunge timings (0.5 s, then lunge) match the 30 FPS ones.
+
+## Expected vs actual (source of "expected")
+
+- `design/combat.md`, Grub rules: "A swipe that damages a grub in wind-up cancels the wind-up." And: "a grub that is hit but not killed during Approach, Lunge, Recovery or Stagger continues its phase unchanged." The lunge also "stops early on contact with the player" and deals 1 damage. Actual behavior matches. Only a wind-up hit cancels.
+- Criterion 6: "A swipe that lands during wind-up stops the lunge." Not violated.
+
+## Documentation gap (for game-designer, not ruled by QA)
+
+`repo/manual.md` says: "step 1 tile to the side, dash, or swipe it (within 1.5 tiles) to cancel the lunge." It sits inside the wind-up warning bullet, but does not say the swipe cancels only if it lands before the lunge starts (the warning lasts 0.5 s grub / 0.35 s runner / 0.7 s brute). The playtester read it as covering a swipe during the lunge itself. `combat.md` is clear, so this is not a build defect. Question for the game-designer: should the manual say explicitly that a swipe only cancels during the warning, and that once the grub lunges a swipe does not stop it? That is the player-facing wording; no change to rules is implied.
+
+A smaller observation: the hurt message and trace source say "grub" for runner and brute hits as well. The manual lists "YOU ARE HIT by a grub", so this is consistent.
+
+## Constraints and limits
+
+- Verified from design/combat.md, the manual, D-002, and traces. I did not change the build.
+- I used only trace-view runs. I did not rerun the player view, and I did not run a controlled practice-room swipe-in-lunge case at 60 FPS.
+
+## Open questions
+
+- Game-designer: the manual wording above.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/reproduce-defect.md
+- Project: design/combat.md, repo/manual.md, project.md#current-state, the build in repo/
+- Decisions: decisions/D-002-contact-edge-graze-accepted.md
+- Previous handoff: goals/G-001-combat-monotony/29-studio-to-qa.md
+>>>END

@@ -1,0 +1,158 @@
+Running the tests first, so the build notes can report real results.
+
+<<<FILE @run/tests/variant-messages
+>>>END
+
+<<<EDIT repo/game.py
+<<<<<<< SEARCH
+                    self._hurt("grub")
+=======
+                    self._hurt("grub", e.kind)
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    def _hurt(self, source):
+=======
+    def _hurt(self, source, enemy=None):
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        self.log("hurt", source=source, hearts=self.hearts)
+=======
+        extra = {"enemy": enemy} if enemy else {}  # variant name for the text view (D-011)
+        self.log("hurt", source=source, hearts=self.hearts, **extra)
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/play.py
+<<<<<<< SEARCH
+            return f"YOU ARE HIT by a {details['source']} — hearts {details['hearts']}/{HEARTS}"
+=======
+            name = details.get("enemy", details["source"])  # D-011: grub, runner, brute or shot
+            return f"YOU ARE HIT by a {name} — hearts {details['hearts']}/{HEARTS}"
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+            return "a grub rears back"
+=======
+            return f"a {details['enemy']} rears back"
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        happened = "; ".join(
+            kind + (f" {details}" if details else "") for kind, details in events
+        )
+=======
+        # The hurt event's variant name is for the player view only; the trace stays as in 0.6.1.
+        events = [
+            (kind, {k: v for k, v in details.items() if not (kind == "hurt" and k == "enemy")})
+            for kind, details in events
+        ]
+        happened = "; ".join(
+            kind + (f" {details}" if details else "") for kind, details in events
+        )
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/manual.md
+<<<<<<< SEARCH
+- **A grub rears back** (message `a grub rears back`): the grub stops
+=======
+- **A grub rears back** (message `a grub rears back`, `a runner rears back` or `a brute rears back`): the grub stops
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+  lunge, or swipe a grub or runner (within 1.5 tiles) to cancel it. The warning lasts 0.5 s for a
+=======
+  lunge, or swipe a grub or runner to cancel it. A swipe cancels only during the warning, and only
+  if the enemy is within 1.5 tiles at that moment. A grub starts rearing back about 2 tiles away,
+  beyond your reach, so step in to within 1.5 tiles during the warning. A swipe that lands after
+  the lunge has begun does not cancel it. One swipe is enough to cancel a grub or a runner. A
+  brute is never cancelled. The warning lasts 0.5 s for a
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+  3 tiles a second, and no more than 3 are in the air at once. In rooms 4 and 5 the two spitters
+=======
+  3 tiles a second. A spitter will not start aiming while 3 shots are already in the air, but
+  shots from aims already under way still fire, so in room 3 up to 5 can be in the air at once.
+  In rooms 4 and 5 the two spitters
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Being hit shows `YOU ARE HIT by a grub` or `by a shot`.
+=======
+Being hit shows `YOU ARE HIT by a grub`, `by a runner`, `by a brute` or `by a shot`.
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/tests/test_game.py
+<<<<<<< SEARCH
+if __name__ == "__main__":
+    unittest.main()
+=======
+class VariantMessageTest(unittest.TestCase):
+    """D-011: wind-up and hit messages name the variant; everything else is unchanged."""
+
+    def trace_session(self, script):
+        import contextlib
+        import io
+
+        import play
+
+        setup, inputs, rules = play.read_script(script)
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            play.play(setup, inputs, "trace", rules)
+        return out.getvalue()
+
+    def test_wind_up_message_names_the_variant_once(self):
+        import play
+
+        for fps in (30, 60):
+            for kind in ("grub", "runner", "brute"):
+                game = Game(fps=fps, room="empty")
+                game.spawn(kind, 10, 4)
+                run(game, 0.6)
+                texts = [play.Player.describe(k, d) for _, k, d in game.events if k == "windup"]
+                self.assertEqual(texts, [f"a {kind} rears back"], (fps, kind))
+
+    def test_hit_message_names_the_variant_and_keeps_the_hearts_text(self):
+        import play
+
+        for fps in (30, 60):
+            for kind in ("grub", "runner", "brute"):
+                game = Game(fps=fps, room="empty")
+                game.spawn(kind, 8.5, 4)
+                self.assertTrue(step_until(game, has_event("hurt")), (fps, kind))
+                texts = [play.Player.describe(k, d) for _, k, d in game.events if k == "hurt"]
+                self.assertEqual(texts, [f"YOU ARE HIT by a {kind} — hearts 2/3"], (fps, kind))
+
+    def test_shot_hit_message_is_unchanged(self):
+        import play
+
+        game = Game(room="empty")
+        game.shots.append([game.x + 0.2, game.y, 0.0, 0.0, 0.0])
+        game.step()
+        texts = [play.Player.describe(k, d) for _, k, d in game.events if k == "hurt"]
+        self.assertEqual(texts, ["YOU ARE HIT by a shot — hearts 2/3"])
+
+    def test_rears_back_rule_reacts_to_all_variants(self):
+        for kind in ("grub", "runner", "brute"):
+            out = ReactionTest.session(
+                self, f'room empty\nspawn {kind} 10 4\nwhen text "rears back" then dash up\nend 1.5\n'
+            )
+            self.assertIn("you dash up", out, kind)
+
+    def test_old_grub_rule_matches_only_the_standard_grub(self):
+        for kind, reacts in (("grub", True), ("runner", False), ("brute", False)):
+            out = ReactionTest.session(
+                self,
+                f'room empty\nspawn {kind} 10 4\nwhen text "a grub rears back" then dash up\nend 1.5\n',
+            )
+            self.assertEqual("you dash up" in out, reacts, kind)
+
+    def test_trace_hurt_events_are_unchanged(self):
+        out = self.trace_session("room empty\nspawn runner 8.5 4\nend 2\n")
+        hurt = [line for line in out.splitlines() if "hurt {" in line]
+        self.assertTrue(hurt)
+        for line in hurt:
+            self.assertNotIn("'enemy'", line)
+
+
+if __name__ == "__main__":
+    unittest.main()
+>>>END

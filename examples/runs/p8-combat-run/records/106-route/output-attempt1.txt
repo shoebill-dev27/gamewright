@@ -1,0 +1,116 @@
+<<<FILE goals/G-001-combat-monotony/105-studio-to-game-director.md
+---
+kind: handoff
+goal: G-001
+seq: 105
+from: studio
+to: game-director
+stage: Review (pass 4, paper check)
+outcome: routed
+---
+# 105: studio → game-director — Review pass 4: did the wording round close the gap?
+
+## Task
+
+Judge, on paper, whether Goal G-001 is now met after the wording-only round (Design 94/102, Build 96/101, Verify 98/104). Give the verdict goal-met or goal-not-met, with the remaining issues named. Do not order further full QA or playtest rounds. Per D-013 this is the last review before Close.
+
+## Context
+
+The Owner asked: 「戦闘が単調なので改善したい」. Review passes 1–3 found the goal not met. Pass 3 (D-013) narrowed the gap to one clause, "the player can tell why": a shot hit named no source, and no line explained a late swipe. One wording-only round followed.
+
+- Design: `design/combat-step94.md`, corrected in 102 (W1 spitter at (15,7) is south-east; W5 brute timing added).
+- Build: wording in game.py and the manual (96). A stray edit marker in `repo/manual.md` was removed (101).
+- Verify 29c (98): W1 and W5 passed; the manual marker failed; some items were unshown.
+- Verify 29f (104): pass. The manual is clean, with no stray markers anywhere in the files read. The hit-message and stagger bullets are separate and well-formed. The suite ran 69 tests, OK. The W1 doc check is consistent, and a live 60 FPS run showed "YOU ARE HIT by a shot from the south-east".
+
+## Findings
+
+QA 104 (pass), read it in full. Known gaps that remain unshown (from 98 and 104). They are for you to weigh, not to close by new rounds:
+
+- `run_bots` not re-run; `bots.py` was unchanged and the suite, which includes the bot tests, is green.
+- The shot-source wording was seen live at 60 FPS in one direction only (south-east). The other directions and 30 FPS are covered by `ShotSourceTest.test_direction_words_at_both_rates` in the suite.
+- W2–W4, W6 and W8 were not re-run in 29f.
+- R3-8 at 60 FPS, the room 3 pure 1-tile sidestep, and the 30 FPS cancel and recovery swipe in room 3 were not shown.
+- Visual criteria V1–V11 need a graphical build; V12 is open.
+- Open play observations that only a live player can settle: grub encounters feel the same across rooms; spitter rooms are mostly dodging; the brute tail in room 5 is empty.
+- The last line of D-007 is stray and no step can remove it. It is an Owner item at Close.
+
+## Decisions already made
+
+- D-001: one-button combat; no new buttons without Owner approval.
+- D-011: variant-named wind-up and hit messages accepted.
+- D-012: room 3 gets a standard grub and a closer spitter.
+- D-013: pass 3 verdict, one wording-only round, then Close, no Owner escalation. Item 4 makes pass 4 a paper check.
+
+## Constraints
+
+- Paper check: judge from the artifacts listed in Load. Do not request new playtests or QA rounds.
+- Stay inside the vision pillars and the Goal's scope. New issues become proposed Goals, not scope growth.
+- If you judge the goal not met, say whether the gap is within the wording round's scope or needs a direction change. A direction change, an Owner-taste question or a change to the core concept is an Owner escalation trigger. Say so in the handoff instead of deciding it.
+
+## Open questions
+
+Is the remaining gap (if any) small enough that Close with proposed follow-up Goals is right, or does it need a further step?
+
+## Expected output
+
+A Review verdict handoff, `outcome: goal-met` or `goal-not-met`, addressed to `studio`. Record a Decision (D-014) if the verdict constrains later work or rejects an alternative. List the next issues as proposed Goals, and list the Owner items. The Studio then routes to Close, or applies the return rules for goal-not-met.
+
+## Load
+
+- Role: studio/roles/game-director.md
+- Skills: studio/skills/review-outcome.md
+- Project: project.md (vision, player profile, constraints), goals/G-001-combat-monotony/goal.md, design/combat-step94.md, repo/manual.md
+- Decisions: decisions/D-013-review-pass-3-readability-wording-then-close.md, decisions/D-011-variant-named-messages-accepted.md, decisions/D-012-room3-standard-grub-and-closer-spitter.md, decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md
+- Previous handoff: goals/G-001-combat-monotony/104-qa-to-studio.md (also 98-qa-to-studio.md for the known gaps, and 92-game-director-to-studio.md for the pass 3 verdict)
+>>>END
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+| 29f | Verify (manual line, marker search, suite, W1 doc check) | qa | verify-change | open | 103-studio-to-qa.md |
+| 30 | Review (pass 4, paper check; known gaps from 98) | game-director | review-outcome | planned | — |
+=======
+| 29f | Verify (manual line, marker search, suite, W1 doc check) | qa | verify-change | done (pass) | 103-studio-to-qa.md (result: 104-qa-to-studio.md) |
+| 30 | Review (pass 4, paper check; known gaps from 98, 104) | game-director | review-outcome | open | 105-studio-to-game-director.md |
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+- Build: wording round done (96). Manual stray marker removed (101); the marker search of game.py and tests and the suite run were not done by the engineer.
+=======
+- Build: wording round done (96). Manual stray marker removed (101); QA 104 confirmed no markers in any file read and the suite green (69 tests).
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+- Verify: 29f open (103): manual line, marker search over all files, suite, W1 (15,7) doc check. Known gaps for Review (no further full QA round): room 3 sidestep and 30 FPS cancel/recovery swipe; W2 at 30 FPS, W3, W4, W6, W7 and bots only partly shown.
+=======
+- Verify: 29f passed (104): manual line, marker search, suite, W1 (15,7) doc check. Known gaps for Review (no further full QA round): room 3 sidestep and 30 FPS cancel/recovery swipe; R3-8 at 60 FPS; W2-W4, W6, W8 and bots not re-run; shot-source wording shown live in one direction at 60 FPS.
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+- Review: passes 1–3 goal-not-met; pass 3 narrowed the gap to "the player can tell why" for shot hits and late swipes. Pass 4 is a paper check of the wording round.
+=======
+- Review: passes 1–3 goal-not-met; pass 3 narrowed the gap to "the player can tell why" for shot hits and late swipes. Pass 4 (open, 105) is a paper check of the wording round.
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+After Build 29d (101) and Design 29e (102): both done and fit the plan. The engineer could not search game.py or the tests for markers or run the suite, so Verify 29f (103) is a fresh QA step covering the manual line, a marker search over all files, the suite and the W1 doc check. No full QA round; unshown items stay Review's known gaps.
+=======
+After Verify 29f (104, pass): fits the plan. The manual marker is gone, the suite is green and the W1 doc check is consistent. No escalation trigger. Opened Review pass 4 (105), a paper check per D-013. Unshown items go to Review as known gaps.
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+Run `qa` with 103-studio-to-qa.md (fresh context; address the result to `studio`). Then Route: if it passes, open Review pass 4 (game-director, paper check) with the QA 98 and 29f known gaps. At Close, propose
+=======
+Run `game-director` with 105-studio-to-game-director.md (paper check; address the result to `studio`). Then Route: if goal-met, or goal-not-met with only follow-up Goals, Close per D-013; otherwise apply the return rules. At Close, propose
+>>>>>>> REPLACE
+>>>END

@@ -1,0 +1,31 @@
+I'm fixing the test with a window that holds only the first wind-up, then running the suite and the bots to confirm.
+
+<<<EDIT repo/tests/test_game.py
+<<<<<<< SEARCH
+                out = self.session(f"room empty\nfps {fps}\nspawn {kind} 9.5 4\nend 3\n")
+                self.assertEqual(out.count(f"a {kind} rears back"), 1, (fps, kind))
+                self.assertIn(f"YOU ARE HIT by a {kind} — hearts 2/3", out, (fps, kind))
+=======
+                # Window of 1.0 s: it holds the first wind-up and its hit (grub 0.67 s, runner
+                # 0.53 s, brute 0.87 s) but ends before any variant can wind up a second time
+                # (earliest: the runner, about 1.15 s). So one wind-up means one message.
+                out = self.session(f"room empty\nfps {fps}\nspawn {kind} 9.5 4\nend 1.0\n")
+                self.assertEqual(out.count(f"a {kind} rears back"), 1, (fps, kind))
+                self.assertEqual(out.count(f"YOU ARE HIT by a {kind}"), 1, (fps, kind))
+                self.assertIn(f"YOU ARE HIT by a {kind} — hearts 2/3", out, (fps, kind))
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE @run/tests/after-fix
+
+>>>END
+
+<<<FILE @run/bots/rooms-1-5-fps30
+rooms 1-5
+fps 30
+>>>END
+
+<<<FILE @run/bots/rooms-1-5-fps60
+rooms 1-5
+fps 60
+>>>END

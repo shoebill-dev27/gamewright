@@ -1,0 +1,184 @@
+Routing 86, 87 and 88 into one new QA step (89). Review pass 3 waits for it.
+
+<<<FILE goals/G-001-combat-monotony/89-studio-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 89
+from: studio
+to: qa
+stage: Observe
+outcome: routed
+---
+# 89: studio → qa — Check the room 4 hits and the "swipe landed, still hit" cases from a player report; one last bounded try at the 60 FPS timed items
+
+## Task
+
+Find out whether two player-reported experiences hide a defect or a readability failure in build `1ac4d04d0e75` (items A and B). Then make one last bounded attempt at the open room 3 timed items (item C). Run everything at 30 and 60 FPS.
+
+## Context
+
+Goal G-001 (combat feels monotonous). A fresh player session played rooms 1–5 with reaction rules (react to what is on screen, 0.15 s delay) and read the printed `--view player` frames. The session report is `goals/G-001-combat-monotony/88-playtester-to-studio.md`. Your earlier report is `86-qa-to-studio.md` (no defect; R3-8 passes at 30 FPS only; the room 3 sidestep is not observed in room 3). Pillar 3 (readable threats: every threat is visible before it can hurt the player) is what the player-view items touch.
+
+## Findings
+
+What the player reported (observations only; treat them as claims to reproduce, not as conclusions):
+
+**A. Room 4 hits the player could not explain.** Room 4 starts with 2 spitters, a grub and a runner. The player went down at 8.55 s with three hits taken:
+- 3.45 s: the player had dashed left at 2.65 s and was still hit. The frame after the hit shows no shot near the player.
+- 5.38 s: the player was swiping the runner while standing in a spitter's glowing line at 97% brightness. The player could explain this one.
+- 8.55 s: the player had dashed down at 7.65 s and was hit about a second later. Again no shot was visible near the player.
+
+The player's rules in rooms 3–5 were: step aside on "takes aim", dash aside on "rears back", dash aside from nearby shots, swipe when close, otherwise walk toward the enemy. The exact script was not kept.
+
+**B. "I swiped it and still got hit."**
+- Room 2 grub: rears back about 2 tiles away. A swipe at 5.42 s missed (out of reach). A swipe at 5.92 s hit, and the player was hit at 5.95 s (2→1 hearts).
+- Room 3 grub: swipe at 8.12 s, hit at 8.25 s.
+- Room 5 brute: swiped during its wind-up ("shrugs off the swipe"), then hit at 7.05 s. The player understood this one.
+
+The player could not tell from the frames why a swipe sometimes does not stop the lunge.
+
+## Decisions already made
+
+- D-002 and D-003: contact-edge graze and exact-reach rules.
+- D-007: room 3 simultaneous cues accepted, in-flight bound.
+- D-011: variant-named wind-up and hit messages.
+- D-012: room 3 layout.
+
+None is reopened here.
+
+## Constraints
+
+- Verify from the design documents, the acceptance criteria and the build. Do not change code or documents.
+- Write reproducible scripts for every claim.
+- Judge each item as one of: defect, readability failure (the build matches the design, but the player view does not show the cause), or matches design and is readable.
+- A readability failure is not a defect; report it separately so the Studio can route it to Design or Review.
+
+## Open questions
+
+1. **Item A.** For each of the three room 4 hits, find what actually damaged the player.
+   - Name the source: which spitter's shot, the runner, or the grub, and at what time.
+   - Say whether `--view player` shows that threat (a cue, a shot or a lane) before the hit, and whether the post-hit frame or message identifies the source.
+   - Check that dash invulnerability matches the design (`design/combat.md`) in each case. A hit about 0.8 s after a dash is only a defect if the dash window is wrong.
+   - Reproduce with reaction rules like the player's. If you cannot reproduce them, say so and say what you tried.
+2. **Item B.** Check each case against the late-swipe boundary and lunge rules (your report 56 and 64 found the boundary matches the design).
+   - Does the swipe cancel only before the lunge starts, as designed?
+   - Do the message lines in the player view make the order, "swipe landed" then "lunge hit", look like a contradiction? If so, is there any line that says why the lunge was not cancelled?
+3. **Item C (bounded).** Build deterministic walk-and-swipe scripts from your report 86 traces.
+   - Show R3-8 at 60 FPS: time from the previous kill to the room clear, against the 6 s limit.
+   - Show a pure 1-tile sidestep within 0.4 s of the grub's cue in room 3, and the 30 FPS cancel and recovery swipe, if reachable.
+   - If an item cannot be shown after this round, record it as unverified. **No further QA round will be opened for it**; it goes to Review as a known gap.
+
+## Expected output
+
+A report to `studio` (not to `gameplay-engineer`) with a verdict per item (A, B, C) and the reproduction scripts. A real defect needs a defect report with acceptance criteria. Say separately what is a readability failure.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/reproduce-defect.md, studio/skills/verify-change.md
+- Project: project.md, repo/manual.md, design/combat.md, design/combat-step72.md, design/combat-cues-visual-spec.md, the build in repo/ (sha 1ac4d04d0e75), goals/G-001-combat-monotony/86-qa-to-studio.md
+- Decisions: decisions/D-002-contact-edge-graze-accepted.md, decisions/D-003-contact-edge-exact-reach-and-lunge-band.md, decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md, decisions/D-011-variant-named-messages-accepted.md, decisions/D-012-room3-standard-grub-and-closer-spitter.md
+- Previous handoff: goals/G-001-combat-monotony/88-playtester-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-16
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): a player playing the current build's combat experiences it as varied and engaging instead of monotonous. Different situations call for noticeably different play (positioning, timing, use of attack and dash), and the player can tell why. The improvement stays inside the vision pillars: one-button combat (attack + dash only, D-001), short runs, readable threats. Numeric thresholds belong to Design; the final verdict belongs to Review.
+
+Out of scope: new input buttons (needs Owner approval per D-001), changing run length, new biomes or content unrelated to combat variety, and any change to the core concept. Not a defect report: nothing in the request says combat is broken.
+
+## Unknowns
+
+- Observe: done (02; QA 16, 20, 32, 36, 56, 64). Contact-edge graze accepted (D-002, D-003). 30 FPS player view and late-swipe boundary match the design (64). Open: playtest 88 reports room 4 shot hits the player could not trace and "swipe landed, still hit"; QA round 27b (89) checks for a defect.
+- Diagnose: two passes done (04, 31); a third is barred by the loop limit. Review 67 found no new cause.
+- Decide: skipped. Review pass 2 (67, D-010) found the D-009 escalation condition not met. Row 11 (Owner escalation) stays tentative: only if Review pass 3 says the melee still reads as one fight.
+- Design: D-004 to D-007 stand. Room 3 in-flight question settled by D-007 (68); D-011 accepted (variant-named wind-up and hit messages, supersedes D-008). Room 3 variety specified by D-012 (72): one standard grub at (15,0), second spitter to (10,6); cap and cue rule unchanged. Open for the playtest: whether a long single-spitter standoff remains. Wording fixes done (87). The stray last line of D-007 could not be removed by any step (outside the designer's writable paths): an Owner item at Close.
+- Plan: skipped (approach local). Returns if the same criterion fails verification twice.
+- Build: 0.6.1 done (48). Build 22a done (71): D-011 messages and manual wording. Build 23 done (74): room 3 data change per D-012. Build 25a done (79): test-only fix, suite 64/64 OK, bots unchanged. Docs aligned in 25b (80, 87).
+- Verify (QA): pass on 0.6.1 at 30 and 60 FPS (50, 64). Re-verify 26 (82): suite 64/64, no defect. Round 26b (86): no defect; R3-8 passes at 30 FPS only; the room 3 sidestep, 30 FPS cancel and recovery cases are not shown. Round 27b (89) makes the last bounded try; whatever is still unshown goes to Review as a known gap. Visual V1–V11 need a graphical build, a proposed new Goal at Close; V12 open.
+- Play: four scripted passes done (27, 53, 63, 88). Rooms 4–5 varied and tense; runner and brute distinct. Pass 4 (88, reaction rules, not live): grub encounters identical in all rooms; two of three room 4 shot hits untraceable; swipe-and-still-hit unexplained; spitter rooms mostly dodging; brute tail in room 5 empty.
+- Review: pass 1 (60) and pass 2 (67) done, both goal-not-met; the gap is narrow. Pass 3 follows QA round 27b (89).
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 01-studio-to-playtester.md (report: 02-playtester-to-studio.md) |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-studio-to-game-designer.md (result: 04-game-designer-to-studio.md) |
+| 3 | Decide | game-director | make-decision | skipped (no real choice; see Unknowns) | — |
+| 4a | Design | game-designer | write-design-spec | done | 05-studio-to-game-designer.md (result: 07-game-designer-to-studio.md) |
+| 4b | Observe (FPS divergence) | qa | reproduce-defect | done | 06-studio-to-qa.md (result: 08-qa-to-studio.md) |
+| 5 | Plan | technical-director | technical-plan | skipped (approach local; see Unknowns) | — |
+| 6 | Build | gameplay-engineer | implement-change | done | 09-studio-to-gameplay-engineer.md (result: 10-gameplay-engineer-to-studio.md) |
+| 7a | Design (criterion 14, spec gaps) | game-designer | write-design-spec | done | 11-studio-to-game-designer.md (result: 14-game-designer-to-studio.md) |
+| 7b | Verify (visual) | art-director | visual-review | done | 12-studio-to-art-director.md (result: 15-art-director-to-studio.md) |
+| 7c | Observe (walker 30/60 divergence) | qa | reproduce-defect | done | 13-studio-to-qa.md (result: 16-qa-to-studio.md) |
+| 7d | Build (bot log data, walker test) | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md (result: 18-gameplay-engineer-to-studio.md) |
+| 8 | Verify (criteria 1–16, V12) | qa | verify-change | done (question: graze) | 19-studio-to-qa.md (result: 20-qa-to-studio.md) |
+| 8b | Design (graze, cap, margin, doc conflicts) | game-designer | write-design-spec | done | 21-studio-to-game-designer.md (result: 22-game-designer-to-studio.md) |
+| 8c | Build (contact test / cap) | gameplay-engineer | implement-change | skipped (graze and cap accepted as built) | — |
+| 8d | Verify (criteria 1–17; close 30 FPS gaps) | qa | verify-change | done (pass) | 23-studio-to-qa.md (result: 24-qa-to-studio.md) |
+| 9a | Play | playtester | playtest-session | done | 25-studio-to-playtester.md (report: 27-playtester-to-studio.md) |
+| 9b | Design (QA notes: exact-reach miss, lunge band) | game-designer | write-design-spec | done | 26-studio-to-game-designer.md (result: 30-game-designer-to-studio.md) |
+| 10a | Diagnose (playtest issues 1–4) | game-designer | diagnose-experience | done | 28-studio-to-game-designer.md (result: 31-game-designer-to-studio.md) |
+| 10b | Observe (room 2 grub hit after swipe) | qa | reproduce-defect | done (not a defect) | 29-studio-to-qa.md (result: 32-qa-to-studio.md) |
+| 11 | Decide (Owner escalation if the melee still reads as one fight, D-009) | game-director | prepare-owner-escalation | tentative (only if Review pass 3 says so) | — |
+| 12a | Design (Options 1–2, manual wording) | game-designer | write-design-spec | done | 33-studio-to-game-designer.md (result: 35-game-designer-to-studio.md) |
+| 12b | Observe (spitter fire times, rooms 3–4) | qa | reproduce-defect | done (no defect) | 34-studio-to-qa.md (result: 36-qa-to-studio.md) |
+| 12c | Design (invulnerable contact, room 3 cue overlap) | game-designer | write-design-spec | done | 37-studio-to-game-designer.md (result: 38-game-designer-to-studio.md) |
+| 13 | Build (build 0.6 per Design 35 and 38) | gameplay-engineer | implement-change | done | 39-studio-to-gameplay-engineer.md (result: 40-gameplay-engineer-to-studio.md) |
+| 14a | Verify (0.6, 30 and 60 FPS) | qa | verify-change | done (fail: F2, F3, 13@60, room 3) | 41-studio-to-qa.md (result: 43-qa-to-studio.md) |
+| 14b | Design (criterion 13 walker limit, 60 FPS) | game-designer | write-design-spec | done (D-006, no build change) | 42-studio-to-game-designer.md (result: 44-game-designer-to-studio.md) |
+| 15 | Design (room 3 cap vs criterion 11) | game-designer | write-design-spec | done (D-007, accepted as built) | 45-studio-to-game-designer.md (result: 46-game-designer-to-studio.md) |
+| 16 | Build (F2, F3 only) | gameplay-engineer | implement-change | done | 47-studio-to-gameplay-engineer.md (result: 48-gameplay-engineer-to-studio.md) |
+| 17 | Verify (re-verify, incl. "not run" list, criterion 11 a–e) | qa | verify-change | done (pass) | 49-studio-to-qa.md (result: 50-qa-to-studio.md) |
+| 18a | Play (fresh, hand-timed rooms 2–5) | playtester | playtest-session | done | 51-studio-to-playtester.md (report: 53-playtester-to-studio.md) |
+| 18b | Design (criterion 11d wording, non-blocking) | game-designer | write-design-spec | done (no build change) | 52-studio-to-game-designer.md (result: 54-game-designer-to-studio.md) |
+| 18c | Observe (late swipe vs lunge; hit with no cue; message wording) | qa | reproduce-defect | done (not a defect) | 55-studio-to-qa.md (result: 56-qa-to-studio.md) |
+| 18d | Design (manual wording on late swipes; variant cue message) | game-designer | write-design-spec | done (D-008 proposed, later D-011) | 58-studio-to-game-designer.md (result: 59-game-designer-to-studio.md) |
+| 19 | Review (pass 1) | game-director | review-outcome | done (goal-not-met; D-009) | 57-studio-to-game-director.md (result: 60-game-director-to-studio.md) |
+| 20a | Play (variant-aware, fresh, build 0.6.1 unchanged) | playtester | playtest-session | done | 61-studio-to-playtester.md (report: 63-playtester-to-studio.md) |
+| 20b | Observe (30 FPS player view, late-swipe boundary) | qa | verify-change | done (no defect) | 62-studio-to-qa.md (result: 64-qa-to-studio.md) |
+| 21a | Review (pass 2) | game-director | review-outcome | done (goal-not-met; D-010) | 65-studio-to-game-director.md (result: 67-game-director-to-studio.md) |
+| 21b | Design (room 3 in-flight vs D-007; D-008 readiness) | game-designer | write-design-spec | done (D-007 stands; D-011 accepted) | 66-studio-to-game-designer.md (result: 68-game-designer-to-studio.md) |
+| 22a | Build (D-011 messages, manual wording) | gameplay-engineer | implement-change | done | 69-studio-to-gameplay-engineer.md (result: 71-gameplay-engineer-to-studio.md) |
+| 22b | Design (room 3 variety, existing enemies) | game-designer | write-design-spec | done (D-012) | 70-studio-to-game-designer.md (result: 72-game-designer-to-studio.md) |
+| 23 | Build (room 3 change, D-012) | gameplay-engineer | implement-change | done | 73-studio-to-gameplay-engineer.md (result: 74-gameplay-engineer-to-studio.md) |
+| 24 | Verify (22a + 23; V-a..e, R3-1..10; 30 and 60 FPS) | qa | verify-change | done (fail: red test only) | 75-studio-to-qa.md (result: 76-qa-to-studio.md) |
+| 25a | Build (fix test, test code only) | gameplay-engineer | implement-change | done | 77-studio-to-gameplay-engineer.md (result: 79-gameplay-engineer-to-studio.md) |
+| 25b | Design (doc conflicts, documents only) | game-designer | write-design-spec | done (D-007 stray line left) | 78-studio-to-game-designer.md (result: 80-game-designer-to-studio.md) |
+| 26 | Verify (re-verify; close R3-8, R3-4 gaps) | qa | verify-change | done (no defect; 5 items unjudged) | 81-studio-to-qa.md (result: 82-qa-to-studio.md) |
+| 26b | Verify (R3-8 timed run, R3-4 in room 3) | qa | verify-change | done (no defect; 60 FPS items unshown) | 84-studio-to-qa.md (result: 86-qa-to-studio.md) |
+| 26c | Design (doc wording, D-007 stray line) | game-designer | write-design-spec | done (wording fixed; D-007 line is an Owner item) | 85-studio-to-game-designer.md (result: 87-game-designer-to-studio.md) |
+| 27 | Play (fresh, new build, reaction rules) | playtester | playtest-session | done | 83-studio-to-playtester.md (report: 88-playtester-to-studio.md) |
+| 27b | Observe (room 4 hits, swipe-and-still-hit; last bounded 60 FPS items) | qa | reproduce-defect | open | 89-studio-to-qa.md |
+| 28 | Review (pass 3) | game-director | review-outcome | planned | — |
+| 29 | Next | studio | — | planned | — |
+
+## Route changes
+
+After 26b/26c/27 (86, 87, 88): no defect; R3-8 passes at 30 FPS only. Doc wording fixed; the D-007 stray line is outside every Role step's paths, so it becomes an Owner item at Close. Playtest 88 reports untraceable room 4 hits and swipe-and-still-hit: opened QA round 27b (89), which also makes the last bounded try at the 60 FPS items. Review pass 3 follows.
+
+## Next action
+
+Run `qa` with 89-studio-to-qa.md in a fresh context (result addressed to `studio`). Then Route: a defect goes to Build; otherwise open Review pass 3 (28) with playtest 88 and QA 86 and 89, plus the items still unverified as known gaps. Escalate to the Owner only if Review pass 3 says the melee still reads as one fight (D-009). At Close, propose the visual criteria V1–V12 (graphical build) as a new Goal and list the D-007 stray line as an Owner item.
+
+## Outcome
+
+(open)
+>>>END

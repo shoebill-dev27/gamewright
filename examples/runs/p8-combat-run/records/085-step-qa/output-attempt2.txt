@@ -1,0 +1,40 @@
+I'm starting with a first set of trace runs. The packet gives no grub path under player movement, so I need these before I can write the timed scripts for R3-4. The still-player traces already show that the grub walks in a straight line at 1.0 tile/s and starts its first wind-up at about 6.1 s. That passes R3-3, and R3-3 is not part of this handoff.
+
+The set has two parts:
+
+- **R3-8:** a reaction-rule run of the kill sequence (grub first, then spitters, dodging shots) at 30 and 60 FPS, to read the kill times.
+- **R3-4:** an approach-only run of the grub in room 3, to read the wind-up, lunge and hit times, so the sidestep, late-dash and recovery-swipe scripts can be timed from them in the next round.
+
+<<<FILE @run/trace/approach-60
+room 3
+fps 60
+0 move right
+end 5
+>>>END
+
+<<<FILE @run/trace/approach-30
+room 3
+fps 30
+0 move right
+end 5
+>>>END
+
+<<<FILE @run/trace/r38-rules-60
+room 3
+fps 60
+when see * coming within 2 then dash aside
+when see g within 1.4 then attack
+when see g within 20 then move toward
+when see s within 1.4 then attack
+when see s within 20 then move toward
+>>>END
+
+<<<FILE @run/trace/r38-rules-30
+room 3
+fps 30
+when see * coming within 2 then dash aside
+when see g within 1.4 then attack
+when see g within 20 then move toward
+when see s within 1.4 then attack
+when see s within 20 then move toward
+>>>END

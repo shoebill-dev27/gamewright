@@ -1,0 +1,105 @@
+Build 23 is done, so I'm marking it done and opening Verify 24 for QA. The new handoff is composed fresh and leaves out the engineer's findings and assessment, which QA must not receive.
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+Build 23 open (73): room 3 data change per D-012, on top of 22a.
+=======
+Build 23 done (74): room 3 data change per D-012 on top of 22a; tests, bots and traces not yet run.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| 23 | Build (room 3 change, D-012) | gameplay-engineer | implement-change | open | 73-studio-to-gameplay-engineer.md |
+| 24 | Verify (22a + 23; V-a..e, R3-1..10; 30 and 60 FPS) | qa | verify-change | planned | — |
+=======
+| 23 | Build (room 3 change, D-012) | gameplay-engineer | implement-change | done | 73-studio-to-gameplay-engineer.md (result: 74-gameplay-engineer-to-studio.md) |
+| 24 | Verify (22a + 23; V-a..e, R3-1..10; 30 and 60 FPS) | qa | verify-change | open | 75-studio-to-qa.md |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+After 22a/22b (71, 72): D-011 messages built (tests not yet run). Design chose D-012: room 3 gets a standard grub at (15,0) and its second spitter moves to (10,6); cap and cue rule unchanged. Build 23 confirmed and opened (73) on top of the 22a build; one Verify then covers both.
+=======
+After 23 (74): room 3 data change built on top of 22a, as planned. Neither 22a nor 23 has any test, bot or trace result yet. Verify 24 opened (75) for both builds in one pass, composed for QA without the engineer's notes. Design docs: combat.md still shows the old room 3; combat-step72.md governs.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Run `gameplay-engineer` with 73-studio-to-gameplay-engineer.md (address the result to `studio`). Then Route: open Verify 24 (QA, Sender assessments of 71 and the Build 23 result stripped) against design/combat-step68.md V-a..V-e and design/combat-step72.md R3-1..R3-10 at 30 and 60 FPS, starting with run_tests and run_bots. Then a fresh playtest (25) stating the build number, with room 3 played live or hand-timed, and Review pass 3 (26). Escalate to the Owner only if Review pass 3 says the melee still reads as one fight (D-009).
+=======
+Run `qa` (fresh context) with 75-studio-to-qa.md (address the result to `studio`). Then Route: on pass, open a fresh playtest (25) stating the build, with room 3 played live or hand-timed, then Review pass 3 (26). A failure goes by the return rules; a tuning question about criterion 13 or 14 goes to `game-designer`. Escalate to the Owner only if Review pass 3 says the melee still reads as one fight (D-009).
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/75-studio-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 75
+from: studio
+to: qa
+stage: Verify
+outcome: routed
+---
+# 75: studio → qa — Verify the current build (D-011 messages and manual wording, plus the room 3 change from D-012) at 30 and 60 FPS
+
+## Task
+
+Verify the current build in `repo/` against the acceptance criteria below, at both 30 and 60 FPS. Check for regressions. Give a pass/fail verdict per criterion.
+
+## Context
+
+Goal G-001 (combat feels monotonous). Two changes were made to the build since the last verified state (0.6.1, pass in QA 50 and 64):
+
+1. The text-view wind-up and hit messages now name the enemy variant, and the manual wording was updated (D-011, `design/combat-step68.md`).
+2. Room 3's enemy layout was changed (D-012, `design/combat-step72.md`).
+
+No test, bot or trace result exists yet for the build in its current state. `design/combat.md` may still show the old room 3 layout. Where the two differ, `design/combat-step72.md` governs; note any such document conflict in your report.
+
+## Findings
+
+Nothing to pass on from the sender. This handoff carries only what you need to verify: the criteria, the way to run the build and the constraints.
+
+## Decisions already made
+
+- D-012: room 3 layout and its purpose (cap and cue rule unchanged).
+- D-011: variant-named wind-up and hit messages.
+- D-007: room 3 in-flight bound and simultaneous cues.
+- D-005: a contact blocked by invulnerability consumes the shot and spends the lunge's hit.
+- D-001: one-button combat.
+
+## Constraints
+
+- Must play correctly at both 30 and 60 FPS.
+- No new input buttons.
+- Verify from the specs, the acceptance criteria and the build, not from any explanation of why it should work.
+- You verify. If a criterion looks like a tuning problem rather than a build defect (for example, a bot-based limit in criterion 13 or 14 for room 3), report measured numbers and the criterion text, and do not propose values.
+
+## Open questions
+
+None.
+
+## Expected output
+
+A verification report, addressed to `studio`, containing:
+
+1. Results of `run_tests` (whole suite) and any failures with the numbers involved.
+2. `run_bots` results for room 3 and for the other rooms where relevant (clear time, hearts lost, actions), compared with the limits in the design documents, at 30 and 60 FPS.
+3. A per-criterion verdict, each with evidence, for:
+   - V-a to V-e in `design/combat-step68.md` (variant messages and manual text);
+   - R3-1 to R3-10 in `design/combat-step72.md` (room 3), including measured values for any timing or position criterion, such as the time of the first enemy wind-up in room 3 for a player who stays still.
+4. Regression checks: rooms 1, 2, 4 and 5, the earlier criteria 1–17 that touch room 3 or the messages, and the in-flight bound for room 3.
+5. Any defect, document conflict or undefined expected behavior, each marked as such. Undefined behavior goes to Design, a failed criterion to Build, and the same criterion failing twice to Plan (return rules).
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: design/combat-step72.md, design/combat-step68.md, design/combat.md, design/combat-step-46-room3-cap.md, design/combat-cues-visual-spec.md, repo/manual.md, repo/README.md, repo/game.py, repo/bots.py, repo/tests/test_game.py; run commands in project.md (`run_tests`, `run_play`, `run_trace`, `run_bots`)
+- Decisions: decisions/D-012-room3-standard-grub-and-closer-spitter.md, decisions/D-011-variant-named-messages-accepted.md, decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md, decisions/D-005-blocked-contact-consumes-shot-and-spends-lunge.md
+- Previous handoff: none (the previous handoff holds implementation history and is withheld from QA)
+>>>END
+
+Route is done for step 74. Build 23 is marked done and Verify 24 is open as handoff 75 for `qa`, in a fresh context.
+
+- **Fresh handoff:** I wrote 75 from scratch, so QA gets only the criteria (V-a to V-e, R3-1 to R3-10), the run commands and the constraints. The engineer's expectations and estimates are left out, and 74 is withheld from QA's Load list.
+- **No results yet:** 22a and 23 have no test, bot or trace results. QA runs `run_tests` first, then the bots and the traces at 30 and 60 FPS. The first wind-up time in room 3 for a still player has to be measured, because the engineer only estimated it.
+- **Document conflict:** `design/combat.md` still shows the old room 3 layout. 75 tells QA that `design/combat-step72.md` governs and asks them to report any conflict.
+- **Possible tuning failures:** a bot-based limit failing in room 3 (criteria 13 and 14) is reported to me as numbers, not as a build defect. If that happens I route it to `game-designer`.
+- **Log:** I did not append to `log.md` because it is outside my write list.
+
+**Next action:** run `qa` on 75-studio-to-qa.md and address the result to `studio`. After a pass, the next steps are a fresh playtest (25) and Review pass 3 (26).

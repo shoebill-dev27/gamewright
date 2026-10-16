@@ -4,6 +4,7 @@ Deterministic — a fake runtime stands in for executors. Run with `python3 -m p
 """
 
 import json
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -277,3 +278,42 @@ def test_an_edit_against_a_proposal_is_rejected_with_the_rule(tmp_path, monkeypa
     rec = next((workspace / "records").glob("*-step-gameplay-engineer"))
     errors = json.loads((rec / "record.json").read_text())["attempts"][1]["errors"]
     assert any("not from a run-round proposal" in e for e in errors), errors
+
+
+# --- Recorded live run ---------------------------------------------------------------------
+
+RUN = ROOT / "examples" / "runs" / "p8-combat-run"
+FIRST_P8_RECORD = 65  # the run continues a copy of the Phase 7 run
+
+
+@needs_sandbox
+@pytest.mark.skipif(
+    not (RUN / "measurement.json").is_file(), reason="no recorded Phase 8 run"
+)
+def test_recorded_measurement_reproduces(tmp_path):
+    import test_phase6 as t6
+
+    repo = RUN / "project" / "repo"
+    code, _, _ = t6.sandboxed_copy(
+        repo, tmp_path, "t", ["python3", "-m", "unittest", "discover", "-s", "tests"]
+    )
+    recorded = json.loads((RUN / "measurement.json").read_text())
+    m = t6.measure(repo, tmp_path)
+    assert m == recorded["measurement"] and code == recorded["tests_exit"]
+    assert (
+        t6.verdict(m, code == 0, RUN / "project" / "decisions") == recorded["verdict"]
+    )
+
+
+@pytest.mark.skipif(not RUN.is_dir(), reason="no recorded Phase 8 run")
+def test_recorded_run_closed_with_engineers_writing_edits():
+    goal_md = next((RUN / "project" / "goals").glob("G-001-*/goal.md")).read_text()
+    assert re.search(r"^status: done$", goal_md, re.M)
+    edits = whole = 0
+    for rec in (RUN / "records").glob("*-step-gameplay-engineer"):
+        if int(rec.name[:3]) >= FIRST_P8_RECORD:
+            for out in rec.glob("output*.txt"):
+                text = out.read_text()
+                edits += len(re.findall(r"^<<<EDIT repo/", text, re.M))
+                whole += len(re.findall(r"^<<<FILE repo/", text, re.M))
+    assert edits > 2 * whole, (edits, whole)

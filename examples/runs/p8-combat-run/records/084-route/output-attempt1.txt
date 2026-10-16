@@ -1,0 +1,207 @@
+Verify 26 found no failing criterion, so nothing goes back to Build. I'm opening three parallel steps: a fresh playtest, a QA round for the two unrun checks, and a documents-only Design step. Review pass 3 waits for all three.
+
+<<<FILE goals/G-001-combat-monotony/83-studio-to-playtester.md
+---
+kind: handoff
+goal: G-001
+seq: 83
+from: studio
+to: playtester
+stage: Play
+outcome: routed
+---
+# 83: studio → playtester — Play the current build as a player and report your experience of combat
+
+## Task
+
+Play rooms 1–5 of the build as a player and report what you experience, especially in combat.
+
+## Context
+
+Lantern Depths is a short-session top-down action roguelite prototype. This is a fresh session: you have no history of earlier sessions and need none.
+
+## Findings
+
+Build: `repo/`, sha 1ac4d04d0e75. A play session is an input script; `repo/manual.md` describes the controls, the script format and the reaction rules. Run a script with `python3 play.py --view player {script}` from `repo/` (the player view shows what a player sees). Do not use the trace view or read the source, tests or design documents: stay with what a player can observe.
+
+Player profile: action players who want short, intense runs. They are comfortable with dodging and spacing, are not interested in memorizing combo lists, and mostly play with a gamepad.
+
+Play focus: pay attention to combat. Play every room at least once. Time your inputs by hand from what the player view shows, rather than replaying one fixed script, and try more than one way of handling a room. Note which situations feel alike and which feel different, and whether you can tell why something hurt you.
+
+## Decisions already made
+
+None.
+
+## Constraints
+
+- Observable experience only: no causes, no design opinions presented as fact, no code or balance numbers.
+- No new input buttons exist: attack, dash and pause only.
+
+## Open questions
+
+None.
+
+## Expected output
+
+An observation report in the usual playtest format (what you did, what you saw and felt, moments of boredom or engagement, anything confusing, anything that looked broken). Address the result to `studio`.
+
+## Load
+
+- Role: studio/roles/playtester.md
+- Skills: studio/skills/playtest-session.md
+- Project: project.md#player-profile, repo/manual.md, the build in repo/
+- Decisions: none
+- Previous handoff: none
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/84-studio-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 84
+from: studio
+to: qa
+stage: Verify
+outcome: routed
+---
+# 84: studio → qa — Close the two unrun room 3 checks (R3-8, R3-4) on build 1ac4d04d0e75
+
+## Task
+
+Run the two room 3 checks that report 82 left unrun, at 30 and 60 FPS, and judge them against their criteria.
+
+## Context
+
+Re-verify 26 (report 82) found the suite green (64/64), bots unchanged since report 76, and no defect. Two items stayed unjudged: R3-8 and the room 3 part of R3-4. The Studio closes V-c and the baseline part of V-e as not establishable (no earlier output exists), and leaves the visual criteria V1–V12 for a graphical build.
+
+## Findings
+
+Items to judge, as defined in `design/combat-step72.md` (and `design/combat-step-46-room3-cap.md` for the cap):
+
+- **R3-8:** timed run of room 3. The kill order is the grub, then the spitters. The last spitter must be reachable within 6 s of the previous kill. Report 82 gives the geometry (largest spitter distance 9.43 tiles, within 9.5) and a derived time of about 3 s, but no timed run.
+- **R3-4, in room 3 itself:** a sidestep out of a cue, a late dash, and a recovery swipe. Report 76 already saw the cue (0.5 s), the cancel by swipe, the two-swipe kill and a dash on the cue with no hit. Report 82 saw the three remaining cases only in the practice room.
+
+Suggested method (QA's own to adjust): first run a trace of room 3 to learn the grub's path and times, then write deterministic scripts from those positions. Report 82 notes that the packet alone does not give the grub's path.
+
+## Decisions already made
+
+D-007, D-011 and D-012 apply as written.
+
+## Constraints
+
+- Check both 30 and 60 FPS.
+- Change no code or document.
+- Verify from the specs, criteria and build only.
+- Report a criterion you cannot judge as unverified, with the reason, instead of passing it.
+
+## Open questions
+
+None.
+
+## Expected output
+
+A verification report (pass/fail per item, with the scripts or commands you used so they can be rerun). Address the result to `studio`.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: project.md, repo/manual.md, repo/bots.py, repo/tests/test_game.py, design/combat-step72.md, design/combat-step-46-room3-cap.md, design/combat.md
+- Decisions: decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md, decisions/D-012-room3-standard-grub-and-closer-spitter.md
+- Previous handoff: goals/G-001-combat-monotony/82-qa-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/85-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-001
+seq: 85
+from: studio
+to: game-designer
+stage: Design
+outcome: routed
+---
+# 85: studio → game-designer — Fix stale wording in the combat documents and remove a stray line in D-007 (no rule changes)
+
+## Task
+
+Correct the stale or conflicting wording QA listed in the design documents, and remove the stray last line of D-007. Change no rule, parameter or Decision content.
+
+## Context
+
+QA report 82 (section 4) found that the documents now agree with `game.py` on room 3 layout, the in-flight bound and the variant messages, but some wording is stale. Section 5 found a stray `</parameter>` line at the end of `decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md`, right after the last bullet of "Revisit when". It is a leftover from an earlier edit.
+
+## Findings
+
+Items from report 82 section 4 (do items 1–4; item 5 optional):
+
+1. `design/combat.md`, cue gap rule: "Room 3 and practice rooms do not use this rule. Their gap stays at the old 0.2 s between consecutive cues in the room." After D-007, simultaneous cue starts after a cap delay are accepted in room 3. QA suggests: "...their first-shot schedule has 0.2 s between consecutive cues; after a cap delay simultaneous starts are accepted (D-007)."
+2. `design/combat.md`, open question "Step 38: a real-room trace of room 3 with a surviving player past 7 s…": answered by QA 43 and D-007. Mark it closed or remove it.
+3. `design/combat.md`, step 38 ruling "Reopen if a real-room trace in room 3 shows simultaneous starts that a player cannot answer": point it to D-007's reopen triggers.
+4. `design/combat-cues-visual-spec.md`, grub lane item 1 still says "the design text says 'thin line'"; `combat.md` says that sentence is out of date (the thin line applies to the spitter only).
+5. (Optional) `design/combat.md` title and header still refer to build 0.5 / "Until 0.6 exists".
+
+Last, delete only the stray `</parameter>` line at the end of D-007. If that line is not there, say so and change nothing.
+
+## Decisions already made
+
+D-007 (simultaneous room 3 cues accepted), D-011 (variant-named messages), D-012 (room 3 layout). Their content stays as is.
+
+## Constraints
+
+- Documents only; no code, no tests.
+- The edit to D-007 is limited to removing the stray line.
+- A wording fix that would actually change a rule must be reported instead of made.
+
+## Open questions
+
+None.
+
+## Expected output
+
+The edited documents and a short handoff to `studio` listing what changed and any item you left unchanged and why.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: design/combat.md, design/combat-cues-visual-spec.md, design/combat-step68.md, design/combat-step72.md
+- Decisions: decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md, decisions/D-011-variant-named-messages-accepted.md, decisions/D-012-room3-standard-grub-and-closer-spitter.md
+- Previous handoff: goals/G-001-combat-monotony/82-qa-to-studio.md
+>>>END
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+Verify 24 (76) failed only on a red test; gaps for re-verify: V-c/V-e baseline (none available), R3-8 timed run, R3-4 room 3 sidestep/late-dash/recovery scripts.
+=======
+Re-verify 26 (82): suite 64/64, bots unchanged, no defect; not a full pass. V-c and the V-e baseline are closed as not establishable (no earlier output). Still open: R3-8 timed run and R3-4 room 3 sidestep/late-dash/recovery (QA round 26b, 84).
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+| 26 | Verify (re-verify; close R3-8, R3-4 gaps) | qa | verify-change | open | 81-studio-to-qa.md |
+| 27 | Play (fresh, new build, live or hand-timed) | playtester | playtest-session | planned | — |
+=======
+| 26 | Verify (re-verify; close R3-8, R3-4 gaps) | qa | verify-change | done (no defect; 5 items unjudged) | 81-studio-to-qa.md (result: 82-qa-to-studio.md) |
+| 26b | Verify (R3-8 timed run, R3-4 in room 3) | qa | verify-change | open | 84-studio-to-qa.md |
+| 26c | Design (doc wording, D-007 stray line) | game-designer | write-design-spec | open | 85-studio-to-game-designer.md |
+| 27 | Play (fresh, new build, hand-timed) | playtester | playtest-session | open | 83-studio-to-playtester.md |
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+After 25a/25b (79, 80): test fixed (suite 64/64), docs aligned with D-007/D-011/D-012. Re-verify (26) opened (81) in a fresh QA context, without the engineer's notes. One leftover: a stray last line in D-007, which no step could edit; QA confirms it, the Studio or Owner removes it.
+=======
+After Verify 26 (82): no defect, five items unjudged. Opened three parallel steps: fresh playtest (83, build only, no change notes), QA round for R3-8 and R3-4 (84), doc wording and D-007 stray line (85, no rule change). V-c and the V-e baseline closed as not establishable. Review pass 3 waits for all three.
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+Run `qa` with 81-studio-to-qa.md in a fresh context (result addressed to `studio`). Then Route: on pass, open a fresh playtest (27) stating the build, then Review pass 3 (28). Open item for Close: delete the stray last line (`</parameter>`) of decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md; a step that lists D-007 as writable, or the Owner, can do it. Escalate to the Owner only if Review pass 3 says the melee still reads as one fight (D-009).
+=======
+Run in parallel, each in a fresh context: `playtester` with 83-studio-to-playtester.md, `qa` with 84-studio-to-qa.md, and `game-designer` with 85-studio-to-game-designer.md (results addressed to `studio`). Then Route: if there is no defect, open Review pass 3 (28) with the playtest report and QA results. A QA failure goes to Build. Escalate to the Owner only if Review pass 3 says the melee still reads as one fight (D-009). At Close, propose the visual criteria V1–V12 (graphical build) as a new Goal.
+>>>>>>> REPLACE
+>>>END

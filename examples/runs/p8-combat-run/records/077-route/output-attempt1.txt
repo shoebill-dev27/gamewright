@@ -1,0 +1,115 @@
+Verify 24 failed on one red test, and QA classifies it as a test defect, not a build defect. So I'm routing to Build for a test-only fix, then a re-verify that closes QA's open gaps.
+
+<<<FILE goals/G-001-combat-monotony/77-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-001
+seq: 77
+from: studio
+to: gameplay-engineer
+stage: Build
+outcome: routed
+---
+# 77: studio → gameplay-engineer — Fix the red test `test_wind_up_and_hit_messages_name_the_variant` (test only)
+
+## Task
+
+Fix the failing test so the whole suite (`run_tests`) is green, without changing the build's behavior. Run the whole suite afterwards and report the result.
+
+## Context
+
+Goal G-001 (combat monotony). Builds 22a (D-011 variant-named messages and manual text) and 23 (D-012 room 3 layout) were verified by QA in 76 at 30 and 60 FPS. QA found no build-behavior defect, but the suite is red: 63 of 64 tests pass and one fails. After the fix, QA re-verifies.
+
+## Findings
+
+From the QA report (76), section 1 and defect 1:
+
+- Failing test: `test_wind_up_and_hit_messages_name_the_variant` (`VariantMessageTest`, `repo/tests/test_game.py`, around line 763).
+- Failure: `AssertionError: 3 != 1 : (30, 'grub')` on `out.count("a grub rears back")`.
+- Cause (QA): the test runs 3 s with a still player and expects one wind-up message. A still player is hit, the enemy recovers, walks up and winds up again, so more than one wind-up message is correct behavior. QA's direct trace showed the runner rearing back at 0.033 s and again at 1.167 s at 30 FPS. For the grub at 30 FPS QA derived wind-ups at about 0.03, 1.5 and 2.8 s, which gives the 3 the test counted (derived, not separately traced).
+- The assertion stops at the first failure, so the runner and brute cases and the 60 FPS cases of this test never ran. They may fail for the same reason once the first assertion is fixed.
+- Expected source: design/combat-step68.md V-a says "each wind-up prints its message once". It does not say "once in 3 s".
+
+Acceptance criteria for the fix:
+
+1. The whole suite is green via `run_tests`.
+2. The test still checks, for every variant (grub, runner, brute) at both 30 and 60 FPS: exactly one wind-up message per wind-up (for example, a window that contains one wind-up, or a count tied to the number of wind-ups), and a hit message naming the matching variant. It must not be weakened to "at least one".
+3. No change to `repo/game.py` behavior, to `repo/bots.py`, or to other tests' meaning. If you think the fix needs a production change, stop and hand back with the reason.
+
+## Decisions already made
+
+- D-011: wind-up and hit messages name the variant (`a <variant> rears back`, `YOU ARE HIT by a <variant>`).
+- D-012: room 3 layout. Both are applied as built; do not change them.
+
+## Constraints
+
+- Test fix only. Keep the existing message wording and timing rules.
+- Both frame rates, 30 and 60 FPS, must be covered by the corrected test.
+- Do not edit design documents or Decisions. QA noted stale text in `design/combat.md` and a stray line at the end of `decisions/D-007`; both are outside this step.
+
+## Open questions
+
+1. If you can produce 0.6.1 play output or bot output (for example from a saved copy of the earlier build), say where it is. QA could not check "byte-identical to 0.6.1" (V-c) or "no bot result changes" (V-e) without it. If you cannot, say so; do not invent a baseline.
+
+## Expected output
+
+- The corrected test in `repo/tests/test_game.py`, and a handoff addressed to `studio` (QA verifies next; do not address it to QA) with: what was changed in the test and why, the full `run_tests` result, and the answer to the open question.
+
+## Sender assessment
+
+QA's classification (test defect, low severity) is accepted as the working view, but the engineer decides the root cause (Decision authority). The Studio did not read the test.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: repo/tests/test_game.py, repo/game.py, repo/manual.md, repo/README.md, design/combat-step68.md#v-a, project.md
+- Decisions: decisions/D-011-variant-named-messages-accepted.md, decisions/D-012-room3-standard-grub-and-closer-spitter.md
+- Previous handoff: goals/G-001-combat-monotony/76-qa-to-studio.md
+>>>END
+
+<<<FILE @edits-goal
+>>>END
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+- Build: 0.6.1 done (48). Build 22a done (71): D-011 messages and manual wording; tests and bots not yet run. Build 23 done (74): room 3 data change per D-012 on top of 22a; tests, bots and traces not yet run.
+=======
+- Build: 0.6.1 done (48). Builds 22a (71) and 23 (74) done. Verify 76 found one red test (test defect, 63 of 64 pass); Build 25 opened (77) to fix the test only.
+>>>END
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+- Verify (QA): pass on 0.6.1 at 30 and 60 FPS (50, 64). Any new build needs Verify. Visual V1–V11 need a graphical build, a proposed new Goal at Close; V12 open.
+=======
+- Verify (QA): pass on 0.6.1 (50, 64). Verify 24 (76) on 22a+23: fail only for the red test; bots within limits at 30 and 60 FPS (60 FPS walker at both limits of criterion 13). Gaps for re-verify: R3-8 timed run, R3-4 room 3 sidestep, late dash and recovery swipe; V-c and V-e need a 0.6.1 baseline (none known). Visual V1–V11 need a graphical build, a proposed new Goal at Close; V12 open.
+>>>END
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+| 24 | Verify (22a + 23; V-a..e, R3-1..10; 30 and 60 FPS) | qa | verify-change | open | 75-studio-to-qa.md |
+| 25 | Play (fresh, new build, live or hand-timed) | playtester | playtest-session | planned | — |
+| 26 | Review (pass 3) | game-director | review-outcome | planned | — |
+| 27 | Next | studio | — | planned | — |
+=======
+| 24 | Verify (22a + 23; V-a..e, R3-1..10; 30 and 60 FPS) | qa | verify-change | done (fail: red test only) | 75-studio-to-qa.md (result: 76-qa-to-studio.md) |
+| 25 | Build (fix test only) | gameplay-engineer | implement-change | open | 77-studio-to-gameplay-engineer.md |
+| 26 | Verify (re-verify; close R3-8, R3-4, V-c/V-e gaps) | qa | verify-change | planned | — |
+| 27 | Play (fresh, new build, live or hand-timed) | playtester | playtest-session | planned | — |
+| 28 | Review (pass 3) | game-director | review-outcome | planned | — |
+| 29 | Next | studio | — | planned | — |
+>>>END
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+After 23 (74): room 3 data change built on top of 22a, as planned. Neither 22a nor 23 has any test, bot or trace result yet. Verify 24 opened (75) for both builds in one pass, composed for QA without the engineer's notes. Design docs: combat.md still shows the old room 3; combat-step72.md governs.
+=======
+After 24 (76): fail, but only a red test (test defect); no build-behavior defect, bots within limits. First failure of this kind, so the Build return rule applies. Build 25 opened (77), test only. Then re-verify (26) with the gaps listed; playtest and Review move to 27–28.
+>>>END
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+Run `qa` (fresh context) with 75-studio-to-qa.md (address the result to `studio`). Then Route: on pass, open a fresh playtest (25) stating the build, with room 3 played live or hand-timed, then Review pass 3 (26). A failure goes by the return rules; a tuning question about criterion 13 or 14 goes to `game-designer`. Escalate to the Owner only if Review pass 3 says the melee still reads as one fight (D-009).
+=======
+Run `gameplay-engineer` with 77-studio-to-gameplay-engineer.md (address the result to `studio`). Then Route: open a fresh QA re-verify (26) composed without the engineer's notes, listing the open gaps; if no 0.6.1 baseline exists, the Studio records V-c and the V-e bot comparison as not verifiable rather than failing them. On pass, a fresh playtest (27) stating the build, then Review pass 3 (28). Stale `combat.md` text and the stray line in D-007 are noted for Close or a docs pass. Escalate to the Owner only if Review pass 3 says the melee still reads as one fight (D-009).
+>>>END

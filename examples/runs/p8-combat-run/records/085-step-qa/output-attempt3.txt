@@ -1,0 +1,118 @@
+<<<FILE goals/G-001-combat-monotony/86-qa-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 86
+from: qa
+to: studio
+stage: Verify
+outcome: done
+---
+# 86: qa → studio — Room 3 timed checks R3-8 and R3-4 on build 1ac4d04d0e75: no defect; R3-8 passes at 30 FPS only, so the verdict is not a full pass
+
+## Task
+
+Report the two room 3 checks left unrun by report 82 (R3-8, and the room 3 part of R3-4). Both were run at 30 and 60 FPS and judged against `design/combat-step72.md`.
+
+## Context
+
+Goal G-001. Report 82 found the suite green (64/64) and no defect. I used two trace rounds of the build, with no code or document changed. Round 1 was a still-player trace of room 3. Round 2 was an approach trace plus a reaction-rule playthrough that kills everything. Both rounds ran at 30 and 60 FPS. I used no further round.
+
+## Findings
+
+### Verdict
+
+- **No failing criterion and no build defect found.**
+- **Not a full pass.** R3-8 passes at 30 FPS but is not shown at 60 FPS. R3-4 is only partly observed in room 3 itself. Details are below, and the Studio decides how to close them.
+
+### Scripts (rerunnable; `python3 play.py --view trace {script}`)
+
+- **still** (`room 3`, `fps 30|60`, `end 14`): a player who does nothing.
+- **approach** (`room 3`, `fps 30|60`, `0 move right`, `end 5`): the player walks to the east wall (15,4).
+- **rules** (`room 3`, `fps 30|60`, no `end`), reaction rules in this order:
+  ```text
+  when see * coming within 2 then dash aside
+  when see g within 1.4 then attack
+  when see g within 20 then move toward
+  when see s within 1.4 then attack
+  when see s within 20 then move toward
+  ```
+
+### Measured geometry
+
+- The player starts at (8, 4).
+- Without moving, the grub walks in from (15,0). It is within 2 tiles of the player at 6.083 s at 60 FPS and 6.100 s at 30 FPS.
+
+### R3-8 (timed finish of the last spitter)
+
+- **Geometry:** the largest spitter distance is 9.43 tiles, within 9.5. This is unchanged from report 82. Pass.
+- **30 FPS timed run (rules script): pass.**
+  - Spitter (10,6) died at 1.067 s and the grub at 8.467 s.
+  - Spitter (2,1) died at 11.567 s.
+  - The last spitter, (2,7), died at 13.933 s, which cleared the room.
+  - From the previous kill to the clear: **2.37 s**, against the limit of 6 s. This is consistent with the derived ~3 s.
+  - The kill order differs from the handoff's grub-first order. The run killed the grub and two spitters before the last spitter, as R3-8 requires. A reaction script walks "toward" the nearest enemy, not in a straight line, so this is a looser walk than R3-8 describes.
+- **60 FPS timed run (rules script): not shown.**
+  - Kills were spitter (10,6) at 0.983 s, spitter (2,7) at 4.950 s, and the grub at 10.867 s.
+  - The last spitter, (2,1), was not reached. The rules kept dashing the player away ("dash aside" to the right, 4.9 to 8.6 tiles away from it), and shots killed the player at 15.683 s.
+  - That is 4.8 s after the previous kill, which is not a measurement against the 6 s limit. It is a limit of the reaction script, not of the layout, so I do not call it a failure.
+  - A deterministic walk-and-swipe script (timed from this trace) is still needed for 60 FPS.
+- **Result:** R3-8 passes at 30 FPS. At 60 FPS it is **unverified** (geometry only).
+
+### R3-4 (the grub's criteria in room 3)
+
+| Case | 30 FPS | 60 FPS |
+|---|---|---|
+| Cue ≥0.5 s before the hit | wind-up 2.567 s, lunge 3.067 s, hit 3.267 s (approach): pass | wind-up 2.550 s, lunge 3.050 s, hit 3.233 s: pass |
+| Swipe cancels the wind-up | not seen in this round (report 76 saw it) | wind-up 7.633 s, swipe 7.683 s: stagger, grub hp 2→1, no lunge: pass |
+| Dash during or around the cue and lunge | dash at 6.5 s, 0.1 s before the lunge (6.3–6.6 s) ends: hearts stayed 3, but I cannot say the lunge would have reached the player | dash at 10.283 s, 0.033 s before the lunge: hearts stayed 2 through the lunge: pass. Dash at 8.333 s during a wind-up, ending off the lane: hearts stayed 3 |
+| Recovery is safe, and a swipe in recovery works | not observed | grub in recovery after 10.617 s: no damage, swipe at 10.867 s killed the hp-1 grub: pass |
+| Sidestep within 0.4 s of the cue (a pure 1-tile sidestep) | **not observed** in room 3 | **not observed** in room 3 |
+| Two swipes kill it | report 76 saw it; not repeated here | the grub took one swipe at 7.683 s (hp 1) and another at 10.867 s (killed): pass |
+
+- **Blocked lunge (criterion 21), seen in room 3 at 60 FPS (approach).**
+  - Wind-up 4.050 s, shot hit at 4.250 s, lunge from 4.550 s while the player was in the hurt window (until 5.050 s).
+  - Hearts stayed 1, so the lunge did no damage.
+  - At 30 FPS the same pattern shows the shot hit at 4.233 s and hearts staying 1 through the lunge at 4.600 s.
+- **Result:** R3-4 holds wherever it was observed in room 3.
+  - The pure sidestep in room 3 and the 30 FPS cancel and recovery swipe are not observed here.
+  - Report 82 covers those cases in the practice room, where they pass at both rates (`GrubTest`, `LungeContactTest`).
+  - They stay **unverified in room 3 itself**.
+
+### Other room 3 criteria seen in the still-player traces (both rates)
+
+- **R3-2:** the first shots are at 1.800, 2.600 and 3.400 s. Each cue starts 0.6 s before (1.200, 2.000, 2.800 s). Pass.
+- **R3-3:** the first wind-up is at 6.083 s (60 FPS) and 6.100 s (30 FPS), at least 4.0 s. Pass.
+- **R3-6:** cue starts match the no-grub schedule above, and the grub's first lunge comes after them. The shots in flight never exceeded 3. A direct run without the grub was not made.
+- **R3-7:** the room cleared only after all four enemies were dead (30 FPS, 13.933 s).
+- **R3-9:** `a grub rears back` appears as the `windup` event (see the traces), so `text "rears back"` matches.
+
+### Design observation (not a defect)
+
+A player who stands still at the start (8,4) loses all 3 hearts to spitter shots at 3.4, 5.5 and 6.3 s, before the grub's first lunge at about 6.6 s. The grub only matters for a moving player. This is for the playtest (D-012 open question 3).
+
+## Decisions already made
+
+D-007, D-011 and D-012 applied as written. None changed.
+
+## Constraints
+
+Checked at 30 and 60 FPS. No code or document changed. Verified from the specs, criteria and traces. Criteria I could not judge are reported as unverified, not passed.
+
+## Open questions
+
+1. Close R3-8 at 60 FPS and the room 3 sidestep/cancel cases by accepting them as unverified, or route one more QA round? A further round needs deterministic timed scripts built from the traces above.
+2. The Studio must still route the stray `</parameter>` line at the end of D-007 and the four wording items from report 82 (section 4). Nothing in this round changes them.
+
+## Expected output
+
+The Studio decides routing. There is no failure, so nothing goes to `gameplay-engineer`.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: project.md, repo/manual.md, repo/bots.py, repo/tests/test_game.py, design/combat-step72.md, design/combat-step-46-room3-cap.md, design/combat.md
+- Decisions: decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md, decisions/D-012-room3-standard-grub-and-closer-spitter.md
+- Previous handoff: goals/G-001-combat-monotony/84-studio-to-qa.md
+>>>END

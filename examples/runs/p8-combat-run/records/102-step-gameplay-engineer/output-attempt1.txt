@@ -1,0 +1,71 @@
+<<<EDIT repo/manual.md
+<<<<<<< SEARCH
+>>>REPLACE_PLACEHOLDER A swipe that interrupts the warning of a
+  grub or runner staggers it for 0.4 s; a brute is not interrupted.
+=======
+- A swipe that interrupts the warning of a grub or runner staggers it for 0.4 s; a brute is not
+  interrupted.
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/101-gameplay-engineer-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 101
+from: gameplay-engineer
+to: studio
+stage: Verify (compose the QA step)
+outcome: done
+---
+# 101: gameplay-engineer → studio — Stray marker removed from repo/manual.md (text only)
+
+## Task
+
+Compose the verification step for QA on the manual-only fix. Decide how to cover the two checks I could not run (items 4 and 5 below).
+
+## Context
+
+Goal G-001, handoff 99, following QA's report 98 of a stray edit marker in the Warnings section.
+
+## Findings
+
+- **Marker confirmed in the file.** In `repo/manual.md`, Warnings section, the hit-message bullet (`Being hit shows … by a shot from the <direction> (…)`) was followed by `>>>REPLACE_PLACEHOLDER A swipe that interrupts the warning of a`, and the next line began `  grub or runner staggers it for 0.4 s; …`.
+- **Changed (one edit, manual only).** I removed the marker line and restored a separate bullet: "A swipe that interrupts the warning of a grub or runner staggers it for 0.4 s; a brute is not interrupted." The sentence wording is unchanged. I only re-wrapped the line.
+- **Not changed.** The hit-message bullet, with the step 94 direction wording, is untouched. The late-swipe sentence in the first Warnings bullet is untouched. No code, test or parameter was changed.
+- **Acceptance criteria:**
+  1. Marker lines in `repo/manual.md`: the only one in the packet's copy was the `>>>REPLACE_PLACEHOLDER` line, now removed. I saw no other `>>>`, `<<<`, `SEARCH` or `=======` lines in the file as given. A fresh grep of the edited file was not run.
+  2. Hit-message bullet and stagger bullet are now two separate bullets: done.
+  3. Step 94 wording unchanged: done.
+  4. **Not done.** `repo/game.py` and the tests are not in my packet, so I could not search them for markers. This is open.
+  5. **Not done.** I ran no commands in this step, so the suite result (`python3 -m unittest discover -s tests`) is not reported. QA 98 recorded 69 tests OK on the build before this edit. This edit touches only a markdown file, so I expect no change, but that is not a test result.
+
+## Decisions already made
+
+- D-011: variant names in messages (accepted).
+- D-013: wording-only round, then Close.
+
+## Constraints
+
+- Text only. No gameplay, timing or parameter changes.
+
+## Open questions
+
+1. To Studio: items 4 and 5 are open. Please have QA (or a further engineer step with runs) grep `repo/game.py`, the tests and `repo/manual.md` for `^>>>`, `^<<<`, `REPLACE_PLACEHOLDER`, `SEARCH` and `^=======`, and run the suite.
+
+## Expected output
+
+A QA verification of the manual line only, plus the marker grep and the suite run. Gameplay criteria W1 to W8 are not affected by this edit.
+
+## Sender assessment
+
+Root cause: a failed or partial edit left the replace marker in the file during build 29b. The marker replaced the start of the stagger bullet's dash. The fix is local. Confidence in the text fix is high. Confidence that no other file has the same marker is unknown, because I could not look.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: repo/manual.md, repo/game.py, tests/, design/combat-step94.md
+- Decisions: decisions/D-011-variant-named-messages-accepted.md, decisions/D-013-review-pass-3-readability-wording-then-close.md
+- Previous handoff: goals/G-001-combat-monotony/99-studio-to-gameplay-engineer.md
+>>>END

@@ -1,0 +1,145 @@
+---
+kind: handoff
+goal: G-001
+seq: 88
+from: playtester
+to: studio
+stage: Play
+outcome: done
+---
+# 88: playtester → studio — Observation report: rooms 1–5, combat experience
+
+## Task
+
+Report what I experienced playing rooms 1–5, with attention to combat. This is a player-view observation report only.
+
+## Context
+
+This answers handoff 83. The build was sha 1ac4d04d0e75, played with `python3 play.py --view player`. I did not read source, tests or design documents.
+
+## Findings
+
+### Method (what I actually did)
+
+- I did **not** play live with hand-timed inputs. The session is a script, and I could only play by writing **reaction rules** (react to what is on screen, with a 0.15 s reaction delay) and reading the printed frames afterwards.
+- I made one run per room, rooms 1–5, and revised the rules between rounds. I never replayed an identical script.
+- Rules I used:
+  - Room 1: dash aside on every "rears back", swipe when close.
+  - Room 2: dash aside only on a brute, swipe on other rear-backs.
+  - Rooms 3–5: step aside on "takes aim", dash aside on "rears back", dash aside from nearby shots, swipe when close, otherwise walk toward the enemy.
+- Different handling styles were tried only partly. Dash-everything was room 1. Swipe-to-cancel was tried on grubs and runners in room 2. Mixed handling was rooms 3–5.
+- **Not observed:**
+  - The middle of the room 5 session (roughly 10.5 s to 52 s) was cut from my output. I only saw its start and its last ~8 s.
+  - I did not use the practice room.
+  - I could not feel timing or controller feel. Everything below comes from printed frames and message lines.
+
+### Session summary
+
+| Room | Enemies at start | Result | Time | Hearts left |
+|---|---|---|---|---|
+| 1 | 3 grubs | cleared | 7.2 s | 3/3 |
+| 2 | 2 runners, grub, brute | cleared | 9.8 s | 1/3 |
+| 3 | 3 spitters, grub | cleared | 10.9 s | 2/3 |
+| 4 | 2 spitters, grub, runner | I went down | 8.55 s | 0/3 |
+| 5 | 2 spitters, 2 grubs, brute | not cleared | 60 s limit | 1/3 (brute left) |
+
+### Concrete moments
+
+**Room 1: very repetitive.**
+- Each of the three grubs did the same thing. It crept toward me, stopped about 2 tiles away and reared back with a `~` line and a `cue:` line. I dashed aside, then swiped twice and it died.
+- I was never touched, and I never needed to think after the first grub.
+- Beats 2 and 3 looked identical to beat 1 on screen. The only differences were the direction and the distance.
+- Reading the warning was easy, which is good. But three beats of "rears back → dash → two swipes" felt like one fight repeated.
+
+**Room 2: the first room that felt different.**
+- Runner:
+  - The warning (0.35 s) was much shorter. At 1.72 s I swiped when it reared back, but it was too far away and the swipe missed.
+  - The runner then lunged and hit me (3→2 hearts).
+  - The second runner died to a swipe at 3.0 s without hurting me.
+- Grub:
+  - At 5.42 s a grub reared back about 2 tiles away. My first swipe missed (out of reach).
+  - My second swipe at 5.92 s hit but did not stop the lunge, and I was hit at 5.95 s (2→1 hearts).
+  - The message order made it look like I "hit it and still got hit". It was not clear to me why the swipe didn't stop it.
+- Brute:
+  - It felt different. It was slow, with a long warning and a long fight (4 swipes).
+  - A swipe during its warning still said "shrugs off the swipe", which I understood, and dashing aside worked.
+  - I finished the room at 1/3.
+- This room had the most varied feel (runner, grub and brute each played differently).
+
+**Room 3: spitters.**
+- The aim cues were clear: a brightness percentage and seconds left, with a wide `~` band across the room. I mostly avoided them by stepping or dashing. Stepping aside worked about as well as dashing.
+- The combat became crowded. Around 4.5–6.5 s there were 4–5 shots drifting around the screen, and I spent that stretch only dodging, not attacking. That stretch felt busy but passive.
+- I was hurt only by a grub, once. I swiped a rearing grub at 8.12 s and was hit at 8.25 s anyway, the same "I hit it, it still hit me" confusion as in room 2.
+
+**Room 4: the one I lost.**
+- I was hit three times by shots and died at 8.55 s.
+- Hit at 3.45 s: I had dashed left at 2.65 s and was still hit. The picture after the hit shows a shot far from me, so I **couldn't tell which shot hurt me or why my dodge didn't work**.
+- Hit at 5.38 s: I was swiping a runner while standing inside the second spitter's glowing line at 97% brightness. That one I could explain: I stayed in the line.
+- Hit at 8.55 s: I had dashed down at 7.65 s and was hit about a second later. Again I couldn't tell where that shot came from.
+- Two spitters alternating across the room, plus a runner and a grub, kept me moving and left almost no time to attack. Frustrating, but it was the most tense room.
+
+**Room 5: partial.**
+- Early: the spitters alternated just like room 4. I took one shot hit (3→2), then a brute hit (2→1).
+- The brute hit: I swiped it while it was rearing back ("shrugs off the swipe") and I didn't leave the lunge line. It hit me at 7.05 s. I understood why, but I'd been drawn into swiping a thing the cue had told me not to.
+- At the end (about 52–60 s) only a brute was left. It rears back, I dash aside, it then stands a few tiles away and nothing happens for seconds. Nobody attacks. That was partly my rules (I only attacked within 1.5 tiles), but it was a long, empty tail.
+- The session ended at the 60 s cap with the brute still alive and 1/3 hearts.
+
+### Which situations felt alike, which different
+
+- **Alike:**
+  - Every grub encounter felt the same: warning, dodge, two swipes. This held in all five rooms.
+  - Spitter rooms (3, 4, 5) all felt like "step out of the line, step out of the line".
+- **Different:**
+  - The runner (short warning, hard to answer by swiping) and the brute (slow, long fight) each felt distinct.
+  - The spitter rooms felt different from the grub rooms. Inside them, though, the individual dodge felt repetitive.
+
+### Could I tell why something hurt me?
+
+- **Usually yes**, for grubs, runners and brutes. A hurt always followed a visible warning, and in most cases I could see I was standing in the line.
+- **Mixed** in the grub "I swiped and still got hit" cases: it was not obvious from the frames why the swipe didn't cancel.
+- **No**, for two of the three shot hits in room 4. I couldn't tell which shot hit me, because the frame showed none near me.
+
+## Issues with impact
+
+1. **Grub encounters feel identical (high impact in room 1, medium elsewhere).** Warning → dodge → swipes, over and over. Attention dropped after the first grub.
+2. **Shot hits in room 4 were unclear (high impact).** I died without being able to tell which shot hit me or why.
+3. **Swipe-and-still-hit (medium).** Swiping a rearing grub, and the brute once, then still being hit.
+4. **Spitter rooms are mostly dodging (medium).** I had little time to attack, and the screen got cluttered with shots.
+5. **Brute tail in room 5 (low–medium).** Long periods of standoff with little happening. Part of this is my script's limits.
+
+## Positives
+
+- Warnings were readable (`~` lines and `cue:` text), and nothing hurt me without one.
+- The brute and the runner each felt distinct from the grub.
+- Room 4 was the most tense.
+- Rooms 1–3 were quick (7–11 s), which fits short runs.
+
+## Open player questions
+
+- What exactly makes a swipe cancel a rear-back, and when does it not? I couldn't read it from play.
+- In room 4, which spitter's shot was I hit by each time?
+- Is there anything to do in a fight besides "dodge, then swipe"?
+
+## Decisions already made
+
+None.
+
+## Constraints
+
+Observations only. No design opinions or numbers are presented as fact.
+
+## Open questions
+
+None.
+
+## Expected output
+
+Routing is the Studio's decision. The experience issues above (repetition, unclear shot hits) are the kind that go to `game-designer`; the "swipe landed but I was still hit" cases may be worth `qa` if they look broken.
+
+## Load
+
+- Role: studio/roles/playtester.md
+- Skills: studio/skills/playtest-session.md
+- Project: project.md#player-profile, repo/manual.md, the build in repo/
+- Decisions: none
+- Previous handoff: goals/G-001-combat-monotony/83-studio-to-playtester.md

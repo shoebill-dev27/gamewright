@@ -1,0 +1,122 @@
+Both parallel steps are in, so I'm routing. 22a is built, and 22b specifies a room 3 change, so tentative Build 23 is confirmed. It goes to the engineer first, so QA verifies both changes in one pass.
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+- Design: D-004 to D-007 stand. Room 3 in-flight question settled by D-007 (68); D-011 accepted (variant-named wind-up and hit messages, supersedes D-008). Open: room 3 variety, a single ask and a long standoff against one cornered spitter (70).
+=======
+- Design: D-004 to D-007 stand. Room 3 in-flight question settled by D-007 (68); D-011 accepted (variant-named wind-up and hit messages, supersedes D-008). Room 3 variety specified by D-012 (72): one standard grub at (15,0), second spitter to (10,6); cap and cue rule unchanged. Open for the playtest: whether a long single-spitter standoff remains.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+- Build: 0.6.1 done (48). Build 22a open (69): D-011 messages and manual wording. A later Build only if 22b specifies a room 3 change.
+=======
+- Build: 0.6.1 done (48). Build 22a done (71): D-011 messages and manual wording; tests and bots not yet run. Build 23 open (73): room 3 data change per D-012, on top of 22a.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| 22a | Build (D-011 messages, manual wording) | gameplay-engineer | implement-change | open | 69-studio-to-gameplay-engineer.md |
+| 22b | Design (room 3 variety, existing enemies) | game-designer | write-design-spec | open | 70-studio-to-game-designer.md |
+| 23 | Build (room 3 change from 22b) | gameplay-engineer | implement-change | tentative (only if 22b specifies a room 3 change) | — |
+| 24 | Verify (22a, and 23 if built; 30 and 60 FPS) | qa | verify-change | planned | — |
+=======
+| 22a | Build (D-011 messages, manual wording) | gameplay-engineer | implement-change | done | 69-studio-to-gameplay-engineer.md (result: 71-gameplay-engineer-to-studio.md) |
+| 22b | Design (room 3 variety, existing enemies) | game-designer | write-design-spec | done (D-012) | 70-studio-to-game-designer.md (result: 72-game-designer-to-studio.md) |
+| 23 | Build (room 3 change, D-012) | gameplay-engineer | implement-change | open | 73-studio-to-gameplay-engineer.md |
+| 24 | Verify (22a + 23; V-a..e, R3-1..10; 30 and 60 FPS) | qa | verify-change | planned | — |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+After 21a/21b (67, 68): Review pass 2 is goal-not-met with a narrow gap and no Owner escalation (D-010). Design kept D-007 for room 3 in-flight and accepted D-011 (variant-named messages). Opened Build 22a (69: D-011, manual text) and, in parallel, Design 22b (70: room 3 variety). A room 3 Build follows only if 22b specifies one; then Verify, fresh playtest, Review pass 3.
+=======
+After 22a/22b (71, 72): D-011 messages built (tests not yet run). Design chose D-012: room 3 gets a standard grub at (15,0) and its second spitter moves to (10,6); cap and cue rule unchanged. Build 23 confirmed and opened (73) on top of the 22a build; one Verify then covers both.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Run in parallel: `gameplay-engineer` with 69-studio-to-gameplay-engineer.md and `game-designer` with 70-studio-to-game-designer.md (both address the result to `studio`). Then Route: if 22b specifies a room 3 change, open Build 23 (and Verify after both builds); otherwise open Verify 24 (QA, Sender assessment stripped) on the 22a build. Then a fresh playtest (25) stating the build number, and Review pass 3 (26). Escalate to the Owner only if Review pass 3 says the melee still reads as one fight (D-009).
+=======
+Run `gameplay-engineer` with 73-studio-to-gameplay-engineer.md (address the result to `studio`). Then Route: open Verify 24 (QA, Sender assessments of 71 and the Build 23 result stripped) against design/combat-step68.md V-a..V-e and design/combat-step72.md R3-1..R3-10 at 30 and 60 FPS, starting with run_tests and run_bots. Then a fresh playtest (25) stating the build number, with room 3 played live or hand-timed, and Review pass 3 (26). Escalate to the Owner only if Review pass 3 says the melee still reads as one fight (D-009).
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/73-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-001
+seq: 73
+from: studio
+to: gameplay-engineer
+stage: Build
+outcome: routed
+---
+# 73: studio → gameplay-engineer — Build the room 3 data change from D-012 (one grub added, one spitter moved)
+
+## Task
+
+Change room 3's contents as specified in `design/combat-step72.md` and D-012, add or update the tests and bot tooling that depend on room 3 contents, and run the test suite and the bots.
+
+## Context
+
+Goal G-001 (combat feels monotonous). Review pass 2 (D-010) found room 3 repetitive: a single ask and a long standoff against one cornered spitter. Design 22b answered with D-012. Build 22a (D-011 variant-named messages and manual wording, handoff 71) is already in `repo/`. It was written without running `run_tests` or `run_bots`, so its tests have not been run. This Build comes after it, on the same repo. One Verify will cover both.
+
+## Findings
+
+From the design (72, `design/combat-step72.md`):
+
+- Room 3 spitters are at (2,1), (10,6) and (2,7), in that order. The second spitter moves from (14,7) to (10,6).
+- One standard grub is added at (15,0).
+- Only room data changes. No enemy code, rule, timing, cap, cue-gap or hearts value changes. The room 3 cap (3 on cue starts), the 0.8 s offset, the schedule and the "2 plus living spitters" bound stay as built (D-005, D-007).
+- The grub is a standard grub and does not count as a shot. It must not delay any cue; the first shots stay at 1.8, 2.6 and 3.4 s ±1 frame.
+- The room clears only when all three spitters and the grub are dead.
+- Other rooms, including room 1, are unchanged.
+- Acceptance criteria are R3-1 to R3-10 in `design/combat-step72.md`; QA verifies them at 30 and 60 FPS.
+
+Also to do:
+
+- Update any test or bot script that depends on room 3 contents or positions (for example room 3 timing tests), so they describe the new room. Do not loosen existing assertions to make them pass. If one fails because of a real rule effect, report it.
+- Run `run_tests` and report the result for the whole suite, including the `VariantMessageTest` cases from 22a, which have not been run.
+- Run `run_bots` on room 3 and report clear time, hearts lost and actions used for each bot. The walker is expected to take about one more lunge. Its criterion 13 limits may be exceeded and its clear count may fall below 2. Report this as a number for `game-designer`, not as a build defect, and do not tune room or enemy parameters.
+- Check `repo/manual.md` and `design/combat.md` for text that lists room 3's contents. Update the manual if it states them (player-facing). Mention in the build note if `design/combat.md` needs an update; the game-designer owns it.
+- Report, as a measurement and not a pass/fail, the grub's first wind-up time for a still player (`run_trace`). The design wants at or after 4.0 s (R3-3). If it is earlier, report the measured time and the start position.
+- Leave the banner as `Lantern Depths 0.6` (an existing test asserts it). In the build note, state what to call this build for the playtest brief. The base is sha 8cce4bb4ffa1 plus 22a plus this change.
+
+## Decisions already made
+
+- D-012 (accepted): the room 3 content in this handoff.
+- D-007: the room 3 in-flight bound stays; D-005, D-010 and D-011 stand.
+- D-001: no new inputs.
+
+## Constraints
+
+- Room data change only; reuse existing systems (small team).
+- Must play correctly at 30 and 60 FPS.
+- If the position (15,0) or (10,6) is invalid in the room's layout (a wall, out of bounds, overlapping a spawn), stop and hand back as `question` to `game-designer`. Do not pick another position yourself.
+- If the spec is ambiguous or missing a case, hand back; do not decide the design.
+
+## Open questions
+
+None.
+
+## Expected output
+
+A handoff with `outcome: done`, addressed to `studio`, with:
+
+- a build note listing every file changed, how to exercise room 3, and the build name to use in the playtest brief;
+- the test and bot results above, stated as run (or, if you could not run something, say so plainly);
+- the measured R3-3 value and any decisions made inside the spec.
+
+The Studio then routes it to QA (Verify) without your Sender assessment.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: design/combat-step72.md, design/combat.md, design/combat-step-46-room3-cap.md, repo/game.py, repo/bots.py, repo/tests/test_game.py, repo/manual.md
+- Decisions: decisions/D-012-room3-standard-grub-and-closer-spitter.md, decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md
+- Previous handoff: goals/G-001-combat-monotony/72-game-designer-to-studio.md
+>>>END
+
+Route done. 22a and 22b are marked done in `goal.md`. Build 23 (room 3, D-012) is open as `73-studio-to-gameplay-engineer.md`.
+
+- **Why Build comes before Verify:** Design 22b specified a room 3 change, so the tentative Build 23 is confirmed. It runs after 22a on the same repo so one QA pass covers both. Handing 22a to QA now would force a second Verify.
+- **Not run yet:** The 22a tests and bots have not been run. Build 23 runs `run_tests` and `run_bots` and reports the results.
+- **Handback rule:** The engineer hands back to `game-designer` if (15,0) or (10,6) is invalid in the room layout.
+- **No escalation:** The change stays inside D-001 and uses existing enemies.
+- **Log entry:** I did not append the `log.md` entry because that file is not in my writable paths. The runtime has to add it.
+
+**Next action:** run `gameplay-engineer` on 73 and address the result to `studio`. Then Route opens Verify 24 (QA, Sender assessments stripped), a fresh playtest that states the build number, and Review pass 3.

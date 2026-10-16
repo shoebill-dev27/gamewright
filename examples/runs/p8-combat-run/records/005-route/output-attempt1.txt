@@ -1,0 +1,184 @@
+The Route is below. The diagnosis fits the plan, so Decide is skipped. Design and a QA check of the 30/60 FPS divergence open in parallel, and the rooms 4–5 playtester pass is deferred to the Play stage. I did not append the Goal log entry because `log.md` is not in my writable list.
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-16
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): a player playing the current build's combat experiences it as varied and engaging instead of monotonous. Different situations call for noticeably different play (positioning, timing, use of attack and dash), and the player can tell why. The improvement stays inside the vision pillars: one-button combat (attack + dash only, D-001), short runs, readable threats. Numeric thresholds belong to Design; the final verdict belongs to Review.
+
+Out of scope: new input buttons (needs Owner approval per D-001), changing run length, new biomes or content unrelated to combat variety, and any change to the core concept. Not a defect report: nothing in the request says combat is broken.
+
+## Unknowns
+
+- Observe: done (scripted play, rooms 1–3 + practice room). Rooms 4–5 and hand-timed play are unobserved by a human; the final Play step covers them.
+- Observe (defect, qa): open. Dodger bot results differ between 30 and 60 FPS in rooms 3–4; the project requires correct play at both. Also unverified: the build's dash invulnerability against `design/combat.md`.
+- Diagnose: done (04). Leads: grubs are trivial and unreadable, spitters unreadable and dodging is dominated by walking in, dash never needed. Spitter volley overlap is still a hypothesis.
+- Decide: skipped. The diagnosis offers no choice of direction or scope; all options stay within D-001 and the pillars. Returns here if Design needs a new enemy type, a healing system or a new input.
+- Design: open (`game-designer`), grub readability and variation, spitter readability, light room pass.
+- Plan: tentative. Only if the spec's approach is non-obvious, risky or cross-system. Constraints: 30 and 60 FPS, reuse of existing systems.
+- Build: planned (`gameplay-engineer`). Verify (`qa`) planned after Build, with `art-director` in parallel if the change affects visuals (telegraph cues likely).
+- Play: planned. A fresh playtester judges the result, including rooms 4–5 and hand-timed play.
+- Review: planned (`game-director`), experience Goal.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 01-studio-to-playtester.md (report: 02-playtester-to-studio.md) |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-studio-to-game-designer.md (result: 04-game-designer-to-studio.md) |
+| 3 | Decide | game-director | make-decision | skipped (no real choice; see Unknowns) | — |
+| 4a | Design | game-designer | write-design-spec | open | 05-studio-to-game-designer.md |
+| 4b | Observe (FPS divergence) | qa | reproduce-defect | open | 06-studio-to-qa.md |
+| 5 | Plan | technical-director | technical-plan | tentative (if approach non-obvious) | — |
+| 6 | Build | gameplay-engineer | implement-change | planned | — |
+| 7a | Verify | qa | verify-change | planned | — |
+| 7b | Verify (visual) | art-director | visual-review | tentative (if visuals change) | — |
+| 8 | Play | playtester | playtest-session | planned | — |
+| 9 | Review | game-director | review-outcome | planned | — |
+| 10 | Next | studio | — | planned | — |
+
+## Route changes
+
+After step 2 (Diagnose): fits the plan. Decide is skipped (no real choice, no trigger). Added a parallel QA Observe for the 30/60 FPS bot divergence, since Design's criteria depend on both rates. A separate rooms 4–5 playtest is not added; the final Play covers it.
+
+## Next action
+
+Start steps 4a and 4b in parallel: the game-designer runs `05-studio-to-game-designer.md` (Design) and qa runs `06-studio-to-qa.md` (FPS divergence check). Both address results to `studio`; the next Route waits for both.
+
+## Outcome
+
+(open)
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/05-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-001
+seq: 5
+from: studio
+to: game-designer
+stage: Design
+outcome: routed
+---
+# 05: studio → game-designer — Specify readable grub and spitter combat, plus a light room pass
+
+## Task
+
+Write a design spec for options A (readable, varied grubs) and B (readable, answerable spitters), with a light pass on C (room composition), as recommended in your diagnosis. Include player-observable acceptance criteria.
+
+## Context
+
+Goal G-001: the Owner finds combat monotonous. Your diagnosis (04) found that threats are either trivial (grubs) or unreadable (spitters), and that the dash is never needed. The Studio accepted your recommendation: no Decide step, because all options stay within D-001 and the pillars. A QA check of the 30/60 FPS divergence in the dodger bot's results runs in parallel; its result is not available to you.
+
+## Findings
+
+Taken from 04 (read it for details):
+
+- Bots (rooms 1–5): the walker (never dashes) clears 5/5 with 1 heart lost in total. The camper clears the grub rooms and loses rooms 3–5 to shots. The dodger does worse than the walker in the spitter rooms.
+- Causes: C1 (grub is one straight-line behavior, no telegraph) and C3 (stationary spitter on a fixed 2 s timer) are supported. C2 (rooms 1–2 differ only in grub count) and C4 (overlapping volleys) are hypotheses.
+- Proposed acceptance idea: in rooms 3–5, a walker that never dashes loses clearly more hearts than a dodger who uses the dash well, at both 30 and 60 FPS.
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no new input without Owner approval.
+- Studio routing decision: Decide is skipped on your recommendation that there is no real choice of direction or scope.
+
+## Constraints
+
+- Pillars: one-button combat, short runs (15–20 min), readable threats. Must play correctly at 30 and 60 FPS. Small team: reuse existing systems.
+- Stay with existing enemy types. A grub variant is acceptable only as a parameter variation of the Grub. A new enemy type, a healing or recovery system, or a new input is outside this step: hand back for Decide (`game-director`) with the reason.
+- Before specifying, check the hypotheses you rely on (C4, the dash invulnerability against the build) with `run_trace` and `run_tests`, or state which parts of the spec rest on unverified assumptions. You did not run them for 04.
+- The bot-based criterion in 04 depends on the dodger bot behaving the same at 30 and 60 FPS. QA is checking that now. Write criteria that state the expectation at both rates, and mark any dependency on the bots' FPS behavior so the next Route can reconcile it with QA's result.
+- Do not use the playtester's raw losses as balance data.
+- Telegraph cues are visual. Specify them as player-observable behavior (what is visible, how long before the hit, how it reads against the dark). Threats use saturated orange/red per the art direction. Visual review by `art-director` will follow Build if the change affects visuals.
+- Numeric thresholds belong to this spec.
+
+## Open questions
+
+- Does a grub variant need a new enemy type to be meaningful? If so, hand back for Decide.
+- What do rooms 4–5 contain? Read the room data in the repo. No human playtester has seen them yet.
+
+## Expected output
+
+A design spec in `design/combat.md` (or a new design document, named in Findings), covering rules, parameters, edge cases and player-observable acceptance criteria for A, B and the room pass. Write the outgoing Handoff addressed to `studio`, listing what remains unverified and any need for Plan (non-obvious or cross-system approach).
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: project.md#vision, project.md#constraints, project.md#art-direction, design/combat.md, repo/manual.md, repo/game.py, repo/bots.py, repo/play.py
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-001-combat-monotony/04-game-designer-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/06-studio-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 6
+from: studio
+to: qa
+stage: Observe
+outcome: routed
+---
+# 06: studio → qa — Reproduce the 30 vs 60 FPS difference in bot results and check dash invulnerability
+
+## Task
+
+Reproduce and report whether the build behaves differently at 30 and 60 FPS, using the balance bots, and check that the dash invulnerability in the build matches `design/combat.md`.
+
+## Context
+
+Goal G-001 is about improving combat variety. Before combat is changed, the team needs to know whether the current build plays correctly at both 30 and 60 FPS, which is a project constraint. A team member observed a discrepancy when running the bots. No change to the build is wanted in this step.
+
+## Findings
+
+Reported observation (not yet reproduced or explained), from `run_bots` over rooms 1–5 at both rates:
+
+- The dodger bot (uses dashes), room 3: at 60 FPS it failed (19.7 s, 13 dashes, 3 hearts lost). At 30 FPS it cleared (9.5 s, 0 hearts lost, 4 dashes).
+- The dodger bot, room 4: 21.8 s at 60 FPS and 17.8 s at 30 FPS.
+- The walker and camper bots gave the same results at both rates.
+
+It is not known whether the difference comes from the build or from how the bot works.
+
+## Decisions already made
+
+None.
+
+## Constraints
+
+- Must play correctly at both 30 and 60 FPS (project.md#constraints).
+- Do not change the build or the bots. Report only.
+- `run_bots` takes a script argument; see `repo/README.md`, `repo/manual.md` and `repo/bots.py` for the correct format and how to set the frame rate. Earlier attempts with a wrong script format produced no output.
+- Also use `run_trace` and `run_tests`. Report reproducibility, the conditions needed to reproduce it, and severity.
+
+## Open questions
+
+- Is the difference reproducible, and is it deterministic (same result on repeated runs)?
+- Does the simulation itself (enemy timing, shot timing, damage, dash duration, cooldown) differ between 30 and 60 FPS, or only the bot's decisions?
+- Does the dash make the player invulnerable for its full duration in the build, as `design/combat.md` says, at both rates?
+
+## Expected output
+
+A defect report (or a report that nothing reproduces) with reproduction steps, observed vs expected behavior and acceptance criteria if a defect is confirmed. If it cannot be determined whether the build or the bot is at fault, say so and state what was ruled out. Write the outgoing Handoff addressed to `studio`.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/reproduce-defect.md
+- Project: project.md#constraints, design/combat.md, repo/README.md, repo/manual.md, repo/bots.py, repo/play.py, repo/game.py, repo/tests/test_game.py
+- Decisions: none
+- Previous handoff: none
+>>>END

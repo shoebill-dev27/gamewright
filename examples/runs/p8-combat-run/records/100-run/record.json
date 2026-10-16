@@ -1,0 +1,16 @@
+{
+ "op": "Run",
+ "goal": "G-001",
+ "operations": [
+  "094-step-game-designer",
+  "095-route",
+  "096-step-gameplay-engineer",
+  "097-route",
+  "098-step-qa",
+  "099-route"
+ ],
+ "stop_reason": "rejected: 099-route: output rejected after 2 attempts",
+ "status": "active",
+ "owner_reads": null,
+ "next": "run examples/runs/p8-combat-run"
+}

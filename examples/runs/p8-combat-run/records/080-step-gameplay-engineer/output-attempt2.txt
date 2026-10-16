@@ -1,0 +1,96 @@
+<<<EDIT repo/tests/test_game.py
+<<<<<<< SEARCH
+                out = self.session(f"room empty\nfps {fps}\nspawn {kind} 9.5 4\nend 3\n")
+                self.assertEqual(out.count(f"a {kind} rears back"), 1, (fps, kind))
+                self.assertIn(f"YOU ARE HIT by a {kind} — hearts 2/3", out, (fps, kind))
+=======
+                # Window of 1.0 s: it holds the first wind-up and its hit (grub 0.67 s, runner
+                # 0.53 s, brute 0.87 s) but ends before any variant can wind up a second time
+                # (earliest: the runner, about 1.15 s). So one wind-up means one message.
+                out = self.session(f"room empty\nfps {fps}\nspawn {kind} 9.5 4\nend 1.0\n")
+                self.assertEqual(out.count(f"a {kind} rears back"), 1, (fps, kind))
+                self.assertEqual(out.count(f"YOU ARE HIT by a {kind}"), 1, (fps, kind))
+                self.assertIn(f"YOU ARE HIT by a {kind} — hearts 2/3", out, (fps, kind))
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/79-gameplay-engineer-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 79
+from: gameplay-engineer
+to: studio
+stage: Verify
+outcome: done
+---
+# 79: gameplay-engineer → studio — Test fix for `test_wind_up_and_hit_messages_name_the_variant`; suite green; ready for QA re-verify
+
+## Task
+
+Re-verify (QA, fresh context) that the whole suite is green at 30 and 60 FPS and that the corrected test still checks the D-011 messages (V-a, V-b) for every variant at both rates.
+
+## Context
+
+Goal G-001. Handoff 77 asked for a test-only fix of the red test QA found in report 76 (defect 1). The test ran 3 s with a still player, so a variant could wind up a second time and print a second message. No game code, `bots.py` or `manual.md` was changed.
+
+## Findings
+
+### What changed
+
+Only `repo/tests/test_game.py`, in `VariantMessageTest.test_wind_up_and_hit_messages_name_the_variant`:
+- The session window is now `end 1.0` instead of `end 3`.
+  - It holds the first wind-up and its hit. Hit times from QA 76: grub 0.667 / 0.633 s, runner 0.533 / 0.483 s, brute 0.867 / 0.833 s (30 / 60 FPS).
+  - It ends before any variant can wind up a second time. The earliest is the runner, about 1.15 s (QA 76 trace: 0.033 s, then 1.167 s at 30 FPS).
+  - A comment in the test records this reasoning.
+- New assertion: exactly one `YOU ARE HIT by a <kind>` per case. The existing `— hearts 2/3` assertion stays.
+- Kept as before: exactly one `a <kind> rears back`, and no message naming either other variant (wind-up or hit).
+- Loops are unchanged: grub, runner, brute at 30 and 60 FPS.
+
+### Acceptance criteria (handoff 77)
+
+1. Whole suite green: `python3 -m unittest discover -s tests` → `Ran 64 tests ... OK`, exit 0.
+2. (a) The wind-up message names the matching variant. (b) One message per wind-up, not per frame: the window holds one wind-up and exactly one message is expected. (c) The hit message names the variant and keeps the `— hearts 2/3` suffix. All hold for all three variants at 30 and 60 FPS.
+3. The 1.0 s window cannot contain a second wind-up, so no uncounted wind-up is relied on.
+
+### Bot check (`run_bots`, rooms 1–5, 30 and 60 FPS)
+
+Output is unchanged from QA 76, section 2, line by line:
+- Walker 30 FPS: room 1 not cleared, lost 3; room 2 cleared 8.4 s, lost 2; room 3 cleared 8.9 s, lost 1 (grub), 8 attacks; room 4 cleared 9.9 s, lost 1; room 5 not cleared, lost 3.
+- Walker 60 FPS: room 1 not cleared, lost 3; room 2 cleared 8.4 s, lost 2; room 3 cleared 9.2 s, lost 1, 8 attacks; room 4 not cleared, lost 3; room 5 cleared 12.9 s, lost 2.
+- Dodger: all rooms cleared, 0 hearts lost. 30 FPS: 6.6 / 20.7 / 15.6 / 18.3 / 24.2 s, dashes 3 / 10 / 6 / 7 / 11. 60 FPS: 9.6 / 25.1 / 15.0 / 17.0 / 28.8 s, dashes 5 / 14 / 6 / 8 / 14.
+- Camper: 1/5 cleared at 30 FPS (room 2 only), 0/5 at 60 FPS. Room 3: not cleared at 6.3 s, lost 3, 0 attacks.
+
+This is expected, since no game code changed.
+
+## Decisions already made
+
+- D-011 (variant-named messages) and D-012 (room 3 layout): applied as built, untouched.
+
+## Constraints
+
+- Test code only. No behavior difference from V-a or V-b was found, so nothing was escalated.
+- The build gaps from QA 76 (V-c, the "no bot result changes" part of V-e, R3-8 timed run, R3-4 direct room 3 scripts) are not addressed here. They are outside this fix.
+
+## Open questions
+
+None.
+
+## Expected output
+
+QA re-verify in a fresh context: run the suite at both rates and judge the corrected test against V-a and V-b. Close the gaps listed in QA 76 section 6 where possible.
+
+## Sender assessment
+
+- Root cause: the test's 3 s window let a second wind-up (and a second message) occur for a still player. The build behaves as V-a specifies.
+- Fix choice: shortening the window to the first wind-up satisfies criterion 2(b) and 3 more simply than counting wind-ups. The cost is that the test depends on the runner's second wind-up being after 1.0 s. If variant timings change, the test needs revisiting.
+- Own results: suite 64/64 OK; bot output identical to QA 76. Confidence high.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: repo/tests/test_game.py, design/combat-step68.md, design/combat-step72.md, project.md
+- Decisions: decisions/D-011-variant-named-messages-accepted.md
+- Previous handoff: goals/G-001-combat-monotony/77-studio-to-gameplay-engineer.md
+>>>END

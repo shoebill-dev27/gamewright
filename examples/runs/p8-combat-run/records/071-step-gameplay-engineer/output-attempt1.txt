@@ -1,0 +1,251 @@
+I made the D-011 change but did not run anything: neither `run_tests` nor `run_bots` was executed in this operation. I'm handing this over to Verify with the runs still owed.
+
+<<<FILE repo/game.py
+>>>END
+
+The block above is empty by mistake and must be ignored. The real edits follow.
+
+<<<EDIT repo/game.py
+<<<<<<< SEARCH
+                    self._hurt("grub")
+=======
+                    self._hurt("grub", e.kind)
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    def _hurt(self, source):
+=======
+    def _hurt(self, source, by=None):
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        self.log("hurt", source=source, hearts=self.hearts)
+=======
+        if by is None:
+            self.log("hurt", source=source, hearts=self.hearts)
+        else:  # `by` names the grub variant for the text view (D-011); `source` is unchanged
+            self.log("hurt", source=source, hearts=self.hearts, by=by)
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/play.py
+<<<<<<< SEARCH
+            return f"YOU ARE HIT by a {details['source']} — hearts {details['hearts']}/{HEARTS}"
+=======
+            noun = details.get("by") or details["source"]
+            return f"YOU ARE HIT by a {noun} — hearts {details['hearts']}/{HEARTS}"
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+            return "a grub rears back"
+=======
+            return f"a {details['enemy']} rears back"
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        happened = "; ".join(
+            kind + (f" {details}" if details else "") for kind, details in events
+        )
+=======
+        # "by" only feeds the player-view hit message; keep trace lines identical to 0.6.1.
+        shown = [(kind, {k: v for k, v in details.items() if k != "by"}) for kind, details in events]
+        happened = "; ".join(
+            kind + (f" {details}" if details else "") for kind, details in shown
+        )
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/manual.md
+<<<<<<< SEARCH
+- **A grub rears back** (message `a grub rears back`): the grub stops and flashes orange-red, and a
+=======
+- **A grub rears back** (message `a grub rears back`, `a runner rears back` or `a brute rears back`): the grub stops and flashes orange-red, and a
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+  lunge, or swipe a grub or runner (within 1.5 tiles) to cancel it. The warning lasts 0.5 s for a
+=======
+  lunge, or swipe a grub or runner to cancel it. A swipe cancels only during the warning, and only
+  if the enemy is within 1.5 tiles at that moment. A grub starts rearing back about 2 tiles away,
+  beyond your reach, so step in to within 1.5 tiles during the warning. A swipe that lands after
+  the lunge has begun does not cancel it. One swipe is enough to cancel a grub or a runner. A brute
+  is never cancelled. The warning lasts 0.5 s for a
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+  3 tiles a second, and no more than 3 are in the air at once. In rooms 4 and 5 the two spitters
+=======
+  3 tiles a second. A spitter will not start aiming while 3 shots are already in the air, but shots
+  from aims already under way still fire, so in room 3 up to 5 can be in the air at once. In rooms
+  4 and 5 the two spitters
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+- Being hit shows `YOU ARE HIT by a grub` or `by a shot`. A swipe that interrupts the warning of a
+=======
+- Being hit shows `YOU ARE HIT by a grub`, `by a runner`, `by a brute` or `by a shot`. A swipe that interrupts the warning of a
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/tests/test_game.py
+<<<<<<< SEARCH
+if __name__ == "__main__":
+    unittest.main()
+=======
+class VariantMessageTest(unittest.TestCase):
+    """D-011: wind-up and hit messages name the variant (V-a to V-d)."""
+
+    NOUNS = {"grub": "grub", "runner": "runner", "brute": "brute"}
+
+    def session(self, script, view="player"):
+        import contextlib
+        import io
+
+        import play
+
+        setup, inputs, rules = play.read_script(script)
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            play.play(setup, inputs, view, rules)
+        return out.getvalue()
+
+    def test_each_wind_up_prints_its_own_message_once(self):
+        for fps in (30, 60):
+            for kind, noun in self.NOUNS.items():
+                out = self.session(f"room empty\nfps {fps}\nspawn {kind} 10 4\nend 1.0\n")
+                self.assertEqual(out.count("rears back"), 1, (fps, kind))
+                self.assertEqual(out.count(f"a {noun} rears back"), 1, (fps, kind))
+
+    def test_each_hit_prints_the_matching_message_with_the_same_hearts_text(self):
+        for fps in (30, 60):
+            for kind, noun in self.NOUNS.items():
+                out = self.session(f"room empty\nfps {fps}\nspawn {kind} 8.5 4\nend 2\n")
+                self.assertEqual(out.count("YOU ARE HIT"), 1, (fps, kind))
+                self.assertIn(f"YOU ARE HIT by a {noun} — hearts 2/3", out, (fps, kind))
+
+    def test_a_shot_hit_still_says_shot(self):
+        out = self.session("room empty\nspawn spitter 1 4\nend 5\n")
+        self.assertIn("YOU ARE HIT by a shot — hearts 2/3", out)
+
+    def test_a_rears_back_rule_reacts_to_every_variant(self):
+        for kind in self.NOUNS:
+            out = self.session(
+                f'room empty\nspawn {kind} 10 4\nwhen text "rears back" then dash up\nend 1.5\n'
+            )
+            self.assertIn("you dash up", out, kind)
+            self.assertNotIn("YOU ARE HIT", out, kind)
+
+    def test_a_rule_keyed_on_a_grub_matches_only_the_standard_grub(self):
+        for kind, reacts in (("grub", True), ("runner", False), ("brute", False)):
+            out = self.session(
+                f'room empty\nspawn {kind} 10 4\nwhen text "a grub rears back" then dash up\nend 1.5\n'
+            )
+            self.assertEqual("you dash up" in out, reacts, kind)
+
+    def test_hit_details_name_the_variant_and_keep_the_source(self):
+        for kind in self.NOUNS:
+            game = Game(room="empty")
+            game.spawn(kind, 8.5, 4)
+            self.assertTrue(step_until(game, has_event("hurt")))
+            details = next(d for _, k, d in game.events if k == "hurt")
+            self.assertEqual(details["source"], "grub", kind)
+            self.assertEqual(details["by"], kind)
+
+    def test_the_trace_view_is_unchanged(self):
+        out = self.session("room empty\nspawn brute 8.5 4\nend 2\n", view="trace")
+        self.assertIn("hurt {'source': 'grub', 'hearts': 2}", out)
+        self.assertNotIn("'by'", out)
+
+
+if __name__ == "__main__":
+    unittest.main()
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/71-gameplay-engineer-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 71
+from: gameplay-engineer
+to: studio
+stage: Verify
+outcome: done
+---
+# 71: gameplay-engineer → studio — D-011 variant-named messages and manual wording built (tests and bots still to be run)
+
+## Task
+
+Verify the D-011 wording change (design/combat-step68.md sections 2, 1 and 4) at 30 and 60 FPS. Run `run_tests` and `run_bots` first: neither was run in this operation.
+
+## Context
+
+Goal G-001. Handoff 69 asked for wording-only changes: variant-named wind-up and hit messages, and the manual wording. No rule, timing, room, hearts or enemy parameter was touched. Room 3 content was not touched.
+
+## Findings
+
+What changed and where:
+
+- `repo/play.py`, `Player.describe`:
+  - Wind-up prints `a <grub|runner|brute> rears back`.
+  - A grub hit prints `YOU ARE HIT by a <grub|runner|brute> — hearts n/3`.
+  - A shot hit still prints `by a shot`.
+  - All other strings are unchanged.
+- `repo/game.py`: the grub-hit `hurt` event now also carries a `by` detail with the variant. The `source` value is still `"grub"`, so bot accounting (`hits_by`) is unchanged. No simulation logic changed.
+- `repo/play.py`, `Trace.line`: the `by` detail is filtered out, so trace lines stay identical to 0.6.1.
+- `repo/manual.md`:
+  - Warning bullet names the three wind-up messages.
+  - Late-swipe wording from the step 68 design file replaces "(within 1.5 tiles) to cancel it".
+  - The stale "no more than 3 are in the air at once" sentence is replaced by the exact step 68 text.
+  - The hit bullet lists all four hit messages.
+- `repo/tests/test_game.py`: new `VariantMessageTest`.
+  - One wind-up and one hit case per variant, at both frame rates.
+  - The shot message is unchanged.
+  - `text "rears back"` reacts to all three variants.
+  - A rule on `a grub rears back` matches only the standard grub.
+  - The `by` detail is present and `source` is unchanged.
+  - The trace view output is unchanged.
+- Existing tests and bots: no existing test or bot matches the old strings other than `a grub rears back` with a standard grub (still valid). The bots read the event `source` and their own log text, not these messages. No bot change was needed.
+- The banner stays "Lantern Depths 0.6" (an existing test asserts it). No sha is available in this packet.
+
+How to exercise (practice room, 30 and 60 FPS):
+
+- For each variant, `spawn <grub|runner|brute> 10 4` with `end 1`: one wind-up message.
+- For each variant, `spawn <kind> 8.5 4` with `end 2`: the hit message on the contact frame.
+- Compare the other output lines, the `cue:` line, `~` line, timings and hearts, against 0.6.1 for the same scripts.
+
+Criteria addressed: V-a, V-b, V-c, V-d. V-e needs the bot and test runs.
+
+Known risks:
+
+- No tests or bots have been run on this change.
+- The `by` key is stripped in the trace view by key name. Any other consumer that prints `hurt` details would show it.
+
+Required runs:
+
+- `python3 -m unittest discover -s tests`
+- `python3 bots.py {script}` at 30 and 60 FPS, compared with 0.6.1. The existing walker-upper-limit note in `test_game.py` is a known tuning item, not related to this change.
+
+## Decisions already made
+
+- D-001, D-004 to D-007 stand.
+- D-011 (accepted).
+
+## Constraints
+
+No timing, damage, room, hearts or enemy parameter changes, and no room 3 changes.
+
+## Open questions
+
+None.
+
+## Expected output
+
+Verify (QA) with fresh playtest to follow.
+
+## Sender assessment
+
+- I could not run the test suite or the bots in this operation, so there is no test or bot result to report. Confidence in the code is moderate and rests on reading the code.
+- The change adds only a log detail and string formatting. Simulation state and hit logic are untouched, so bot outcomes should not change.
+- The main risk is a typo in the tests or edits that only a run would catch.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: design/combat-step68.md, design/combat.md, design/combat-step-46-room3-cap.md, repo/manual.md, repo/game.py, repo/play.py, repo/bots.py, repo/tests/test_game.py
+- Decisions: decisions/D-011-variant-named-messages-accepted.md
+- Previous handoff: goals/G-001-combat-monotony/69-studio-to-gameplay-engineer.md
+>>>END

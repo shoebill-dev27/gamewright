@@ -1,0 +1,189 @@
+{
+ "op": "Step",
+ "role": "qa",
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "14c1ebcf-75a3-4f81-87cc-0b7a0fb9b1a5",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 46435,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 17400,
+    "output_tokens_details": {
+     "thinking_tokens": 16764
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 46435,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 17400,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 46435,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 46435
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.35974399999999995,
+   "attempt": 1,
+   "started": "2026-10-16T12:18:43",
+   "seconds": 140.4,
+   "errors": [],
+   "runs": [
+    "@run/tests",
+    "@run/bots/b30",
+    "@run/bots/b60",
+    "@run/trace/c5-30",
+    "@run/trace/c6-two-swipes-30",
+    "@run/trace/c6-cancel-30",
+    "@run/trace/c8-runner-30",
+    "@run/trace/c8-brute-30",
+    "@run/trace/renum-30",
+    "@run/trace/renum-60"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "6a4d1ab9-a7c4-49c6-93d9-88bfba5ae7b4",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 54198,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 28421,
+    "output_tokens_details": {
+     "thinking_tokens": 26957
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 54198,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 28421,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 54198,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 54198
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.501006,
+   "attempt": 2,
+   "started": "2026-10-16T12:21:04",
+   "seconds": 225.6,
+   "errors": [],
+   "runs": [
+    "@run/trace/a-hit-30",
+    "@run/trace/a-hit-60",
+    "@run/trace/b-miss-30",
+    "@run/trace/b-miss-60",
+    "@run/trace/probe-exact-30",
+    "@run/trace/probe-exact-60",
+    "@run/trace/band-30",
+    "@run/trace/band-60",
+    "@run/trace/l57-30",
+    "@run/trace/l57-60",
+    "@run/trace/l58-30",
+    "@run/trace/l58-60",
+    "@run/trace/l59-30",
+    "@run/trace/l59-60",
+    "@run/trace/l599-30",
+    "@run/trace/l599-60",
+    "@run/trace/l61-30",
+    "@run/trace/l61-60",
+    "@run/trace/room3-30",
+    "@run/trace/room3-60",
+    "@run/play/four-30",
+    "@run/play/four-60"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "220c91fc-7772-4015-b6cc-9f61b6cb6fc2",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 79950,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 20446,
+    "output_tokens_details": {
+     "thinking_tokens": 14818
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 79950,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 20446,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 79950,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 79950
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.524264,
+   "attempt": 3,
+   "started": "2026-10-16T12:24:50",
+   "seconds": 159.8,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-combat-monotony/24-qa-to-studio.md": "0814d0a1d22f98f895ca81089725ff54a8e91f3df8faed72ca9e9f01d19f8333"
+ },
+ "decision": {}
+}

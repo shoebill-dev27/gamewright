@@ -1,0 +1,103 @@
+Round 1 runs the test suite, the bots and the W1 direction placements at both frame rates. The later rounds will cover W2 to W8 once these results are back.
+
+<<<FILE @run/tests
+>>>END
+
+<<<FILE @run/bots
+>>>END
+
+<<<FILE @run/play/w1-east-30
+room empty
+fps 30
+spawn spitter 15 4
+player 8 4
+end 6
+>>>END
+
+<<<FILE @run/play/w1-east-60
+room empty
+fps 60
+spawn spitter 15 4
+player 8 4
+end 6
+>>>END
+
+<<<FILE @run/play/w1-north-30
+room empty
+fps 30
+spawn spitter 8 0
+player 8 4
+end 6
+>>>END
+
+<<<FILE @run/play/w1-north-60
+room empty
+fps 60
+spawn spitter 8 0
+player 8 4
+end 6
+>>>END
+
+<<<FILE @run/play/w1-west-30
+room empty
+fps 30
+spawn spitter 1 4
+player 8 4
+end 6
+>>>END
+
+<<<FILE @run/play/w1-west-60
+room empty
+fps 60
+spawn spitter 1 4
+player 8 4
+end 6
+>>>END
+
+<<<FILE @run/play/w1-south-30
+room empty
+fps 30
+spawn spitter 8 8
+player 8 4
+end 6
+>>>END
+
+<<<FILE @run/play/w1-south-60
+room empty
+fps 60
+spawn spitter 8 8
+player 8 4
+end 6
+>>>END
+
+<<<FILE @run/play/w1-ne-30
+room empty
+fps 30
+spawn spitter 15 0
+player 8 4
+end 6
+>>>END
+
+<<<FILE @run/play/w1-ne-60
+room empty
+fps 60
+spawn spitter 15 0
+player 8 4
+end 6
+>>>END
+
+<<<FILE @run/play/w1-se-30
+room empty
+fps 30
+spawn spitter 15 7
+player 8 4
+end 6
+>>>END
+
+<<<FILE @run/play/w1-se-60
+room empty
+fps 60
+spawn spitter 15 7
+player 8 4
+end 6
+>>>END
