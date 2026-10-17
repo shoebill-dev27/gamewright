@@ -569,6 +569,9 @@ class Packet:
         # Run requests (Steps of Roles that may run the build): see run_round().
         self.runs, self.build, self.write_patterns, self.rounds = [], None, [], 0
         self.proposed, self.run_log, self.base_inputs = {}, [], None
+        self.answer = (
+            ""  # the answer's shape, repeated after every input (see answer_shape)
+        )
 
     def add(self, label, content):
         self.inputs.append((label, content.rstrip() + "\n"))
@@ -606,8 +609,11 @@ class Packet:
             + "".join(f"- {w}\n" for w in self.writes)
             + "\n## Inputs\n\n"
         )
-        return head + "\n".join(
+        body = "\n".join(
             f"<<<FILE {label}\n{content}>>>END\n" for label, content in self.inputs
+        )
+        return (
+            head + body + (f"\n## Your answer\n\n{self.answer}" if self.answer else "")
         )
 
     def manifest(self):
@@ -615,6 +621,26 @@ class Packet:
             {"path": label, "sha256": sha(content), "bytes": len(content.encode())}
             for label, content in self.inputs
         ]
+
+
+def answer_shape(out, escalates):
+    """A short reminder at the very end of a Step packet, after long inputs and run results."""
+    lines = [
+        f"- Write the outgoing Handoff as {out.replace('*', '<recipient>')} with every section of "
+        f"studio/templates/handoff.md, in this order: {', '.join(REQUIRED['handoff'])}. Your own "
+        "report goes inside Findings."
+    ]
+    if escalates:
+        lines.append(
+            "- An Escalation instead keeps the sections of studio/templates/escalation.md: "
+            + ", ".join(REQUIRED["escalation"])
+            + "."
+        )
+    lines.append(
+        "- Wrap each file in a <<<FILE path … >>>END or <<<EDIT path … >>>END block (Output "
+        "protocol in studio/execution.md)."
+    )
+    return "\n".join(lines) + "\n"
 
 
 def executor_instructions():
@@ -722,6 +748,7 @@ def build_step(project, gdir, handoff):
         w.replace("*", "<path> (full file content)" if w == f"{build}/*" else "<name>")
         for w in extra
     ]
+    packet.answer = answer_shape(out, policy["escalates"])
     commands = run_commands(project)
     runs = [r for r in policy["runs"] if r in commands]
     if runs:
@@ -1284,8 +1311,11 @@ EDIT_PAIR = re.compile(
     r"^<<<<<<< SEARCH[ \t]*\n(.*?)^=======[ \t]*\n(.*?)^>>>>>>> REPLACE[ \t]*$",
     re.M | re.S,
 )
-MARKER_LIKE = re.compile(
-    r"^[ \t]*(?:<{3,}|>{3,})[ \t]*(?:SEARCH|REPLACE|EDIT|FILE|END).*$", re.M
+# Lines of the output format itself that leak into file text: block or edit markers, tool calls.
+STRAY_LINE = re.compile(
+    r"^[ \t]*(?:(?:<{3,}|>{3,})[ \t]*(?:SEARCH|REPLACE|EDIT|FILE|END).*"
+    r"|</?(?:[a-z_]+:)?(?:invoke|parameter|function_calls)\b[^>]*>[ \t]*)$",
+    re.M,
 )
 
 
@@ -1359,14 +1389,6 @@ def resolve_edits(project, packet, files):
             )
             continue
         for number, (search, replace) in enumerate(edits, 1):
-            stray = [l for l in MARKER_LIKE.findall(replace) if l not in search]
-            if stray:
-                errors.append(
-                    f"{path}: EDIT pair {number}: the REPLACE text has a line that looks like a "
-                    f"marker ({stray[0].strip()}); end each pair with >>>>>>> REPLACE on a line of "
-                    "its own and keep markers out of the text"
-                )
-                break
             found = text.count(search) if search.strip() else 0
             if found == 0 and search.endswith("\n") and text.count(search[:-1]) == 1:
                 # SEARCH holds part of a line: match it without its line break
@@ -1385,6 +1407,29 @@ def resolve_edits(project, packet, files):
             text = text.replace(search, replace, 1)
         else:
             files[path] = text if text.endswith("\n") else text + "\n"
+    return errors
+
+
+def stray_lines(project, files):
+    """Lines of the output format (markers, tool calls) new to a file: never file content."""
+    errors = []
+    for path, text in files.items():
+        if path.startswith("@") or not isinstance(text, str):
+            continue
+        old = project / path
+        known = (
+            set(old.read_text(encoding="utf-8").splitlines())
+            if old.is_file()
+            else set()
+        )
+        for line in STRAY_LINE.findall(text):
+            if line not in known:
+                errors.append(
+                    f"{path}: a line looks like a marker or tool-call syntax from the output "
+                    f"format, not file content ({line.strip()}); remove it (end each EDIT pair "
+                    "with >>>>>>> REPLACE on a line of its own)"
+                )
+                break
     return errors
 
 
@@ -1591,6 +1636,7 @@ def execute(ws, packet, validate, args, role=None):
         (rec / f"output-attempt{attempt}.txt").write_text(text, encoding="utf-8")
         files = parse_output(text)
         edit_errors = resolve_edits(ws / "project", packet, files)
+        edit_errors += stray_lines(ws / "project", files)
         need = None
         runs = [p for p in files if p.startswith("@run/")]
         if edit_errors:

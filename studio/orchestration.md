@@ -171,7 +171,9 @@ Final decisions belong to the responsible Role — never to a vote across execut
 | Anything matching an escalation trigger | `owner` |
 
 Record a Decision when it constrains work beyond the current step, when a real alternative was
-rejected, or when the Owner made it. Smaller choices are noted in the Handoff.
+rejected, or when the Owner made it. Smaller choices are noted in the Handoff. A Decision is never
+edited once written, not even for a typo or a stray line: a change is a new Decision that
+`supersedes:` it, so do not route an edit of one to a Role.
 
 ## Parallel work, workspaces and sub-executors
 

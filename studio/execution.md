@@ -37,7 +37,9 @@ file block. Its manifest lists every input with a content hash.
 | Resume | as Route, with the Escalation (the Owner's words appended verbatim) in place of the Step artifact, and template `decision.md` |
 
 A Step's packet is derived from its Handoff alone: **the Load list is the allowlist.** The project
-file list gives names only, never contents.
+file list gives names only, never contents. It ends, after every input and any build-run results,
+with a short reminder of the answer's shape: the outgoing Handoff's path, its required sections in
+order, and the block format.
 
 **Context request (Route only, once).** Instead of routing, a Route may answer with a single
 `@need` block listing up to 8 project or Studio files, one per line. The runtime adds exactly those
@@ -137,7 +139,8 @@ each answer carries every change it wants kept. One answer writes a file either 
 not both. The resulting file is checked like any other.
 
 The runtime rejects blocks outside the write list, artifacts that fail the Studio's structural
-rules, and Handoffs that break a recipient's policy. A rejected operation writes nothing and may be
+rules, Handoffs that break a recipient's policy, and lines new to a file that belong to the output
+format rather than to the file (block or edit markers, tool-call syntax). A rejected operation writes nothing and may be
 re-run with a fresh executor.
 
 ## Records
