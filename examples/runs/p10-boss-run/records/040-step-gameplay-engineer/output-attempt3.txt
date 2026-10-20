@@ -1,0 +1,486 @@
+<<<FILE repo/run_driver.py
+"""Plan16 public script driver. Driver time continues while game time is frozen."""
+
+import math
+import time
+
+from game import DIRECTIONS, EPS, Game
+from session import RunSession
+
+BUILD = "0.6-g002-driver-32"
+
+
+def read_script(text):
+    from play import Rule
+
+    setup = {
+        "mode": "room", "room": "1", "fps": 60, "end": None,
+        "spawns": [], "player": None, "limit": 1200.0,
+        "driver_limit": 1205.0, "controls": [], "trace_every": False,
+    }
+    inputs, rules = [], []
+    attempt = 1
+    diagnostic = False
+    for number, raw in enumerate(text.splitlines(), 1):
+        line = raw.split("#")[0].strip()
+        words = line.split()
+        if not words:
+            continue
+        try:
+            key = words[0]
+            if key == "when":
+                rules.append(Rule(line))
+            elif key == "mode":
+                assert len(words) == 2 and words[1] in ("run", "room")
+                setup["mode"] = words[1]
+            elif key == "room":
+                assert len(words) == 2
+                setup["room"] = words[1]
+                diagnostic = True
+            elif key == "fps":
+                assert len(words) == 2 and int(words[1]) in (30, 60)
+                setup["fps"] = int(words[1])
+            elif key in ("limit", "end", "driver-limit"):
+                assert len(words) == 2
+                value = float(words[1])
+                assert math.isfinite(value) and value >= 0
+                setup["driver_limit" if key == "driver-limit" else "limit"] = value
+            elif key == "trace-every":
+                assert words == ["trace-every", "frame"]
+                setup["trace_every"] = True
+            elif key == "attempt":
+                assert len(words) == 2 and int(words[1]) >= 1
+                attempt = int(words[1])
+            elif key == "control":
+                assert len(words) == 3 and words[2] in ("pause", "resume", "retry")
+                when = float(words[1])
+                assert math.isfinite(when) and when >= 0
+                setup["controls"].append((when, words[2]))
+            elif key == "spawn":
+                assert len(words) == 4
+                setup["spawns"].append((words[1], float(words[2]), float(words[3])))
+                diagnostic = True
+            elif key == "player":
+                assert len(words) == 3
+                setup["player"] = (float(words[1]), float(words[2]))
+                diagnostic = True
+            else:
+                assert 2 <= len(words) <= 3
+                when, action = float(words[0]), words[1]
+                direction = words[2] if len(words) == 3 else None
+                assert math.isfinite(when) and when >= 0
+                assert action in ("move", "stop", "attack", "dash")
+                assert direction is None or direction in DIRECTIONS
+                assert action != "move" or direction is not None
+                assert action not in ("stop", "attack") or direction is None
+                inputs.append((attempt, when, action, direction))
+        except (AssertionError, ValueError, IndexError) as error:
+            raise ValueError(f"script line {number}: invalid instruction {raw!r}") from error
+    if setup["mode"] == "run" and diagnostic:
+        raise ValueError("mode run cannot use room, spawn or player setup")
+    setup["controls"].sort(key=lambda item: item[0])
+    inputs.sort(key=lambda item: (item[0], item[1]))
+    return setup, inputs, rules
+
+
+class RoomSession(RunSession):
+    """Independent diagnosis; never a continuous-run checkpoint."""
+
+    def __init__(self, setup):
+        super().__init__(setup["fps"])
+        self.events.clear()
+        self.sequence = 0
+        self.game = Game(self.fps, setup["room"])
+        for kind, x, y in setup["spawns"]:
+            self.game.spawn(kind, x, y)
+        if setup["player"]:
+            self.game.place_player(*setup["player"])
+        self.game_seen = 0
+        self.log("entry", hearts=self.game.hearts)
+
+    def control(self, action):
+        if action == "retry":
+            self.log("control_rejected", action=action, reason="diagnostic mode")
+            return False
+        return super().control(action)
+
+    def step(self, limit=None):
+        if self.stop_reason or self.paused or self.state != "combat":
+            return
+        if limit is not None and self.t >= limit - EPS:
+            self.stop_reason = "time limit — run unfinished"
+            self.log("limit", outcome=self.state)
+            return
+        self.run_frame += 1
+        self.game.step()
+        self._collect()
+        if self.game.outcome:
+            self.state = self.game.outcome
+            self.log("diagnostic_result", outcome=self.state)
+        if limit is not None and self.t >= limit - EPS:
+            self.stop_reason = "time limit — run unfinished"
+            self.log("limit", outcome=self.state)
+
+
+def messages_for(event):
+    from play import Player
+
+    kind, details, room = event["kind"], event["details"], event["room"]
+    fixed = {
+        "entry": f"entered room {room}/5",
+        "run_won": "run won — boss defeated — retry: start from room 1",
+        "run_dead": "you went down — run lost — retry: start from room 1",
+        "retry": "new attempt — room 1/5",
+        "pause": "paused", "resume": "resumed",
+        "boss_swipe": "the boss takes the swipe; the warning continues",
+        "boss_recovery": "the boss is recovering — safe to approach and swipe",
+        "boss_pursuit": "the boss resumes pursuit",
+    }
+    if kind in fixed:
+        return fixed[kind]
+    if kind == "room_clear":
+        return f"room {room} cleared — next room {details['next_room']}"
+    if kind == "recovery":
+        return "recovered 1 heart" if details["gained"] else "hearts already full"
+    if kind == "boss_warning":
+        return ("the boss prepares a charge" if details["attack"] == "charge"
+                else "the boss aims a short shot")
+    if kind == "boss_active":
+        return ("the boss charges" if details["attack"] == "charge"
+                else "the boss fires a short shot")
+    if kind == "hurt" and details["source"] == "boss":
+        return f"YOU ARE HIT by the boss's charge — hearts {details['hearts']}/3"
+    return Player.describe(kind, details, details.get("name"))
+
+
+class Output:
+    def __init__(self, session, setup, view):
+        self.session, self.setup, self.view = session, setup, view
+        self.seen = 0
+        self.next_picture = 0.0
+
+    def emit(self, force=False):
+        from play import draw, cue_lines
+
+        session, game = self.session, self.session.game
+        events = session.events[self.seen:]
+        self.seen = len(session.events)
+        if self.view == "trace":
+            if events or force or self.setup["trace_every"]:
+                print({
+                    "build": BUILD, "mode": self.setup["mode"],
+                    "attempt": session.attempt, "room": game.room,
+                    "run_time": session.t, "room_time": game.t,
+                    "frame": game.frame, "state": session.state,
+                    "paused": session.paused, "stop_reason": session.stop_reason,
+                    "player": {key: getattr(game, key) for key in (
+                        "x", "y", "hearts", "heading", "facing", "recovery",
+                        "dash_left", "dash_cooldown", "hurt_left", "stun_left",
+                        "invulnerable", "queued_attack",
+                    )},
+                    "enemies": [dict(e.__dict__) for e in game.enemies],
+                    "shots": [list(shot) for shot in game.shots],
+                    "events": events,
+                })
+            return
+        immediate = force
+        for event in events:
+            message = messages_for(event)
+            if message:
+                print(f"[attempt {event['attempt']} run {event['run_time']:.3f} "
+                      f"room {event['room_time']:.3f}] {message}")
+                immediate = True
+        if not immediate and session.t < self.next_picture - EPS:
+            return
+        if force:
+            self.next_picture = session.t + 0.5
+        elif session.t >= self.next_picture - EPS:
+            self.next_picture = session.t + 0.5
+        print(f"{self.setup['mode']} — room {game.room}/5 — hearts {game.hearts}/3 "
+              f"— run {session.t:.3f} s — room {game.t:.3f} s "
+              f"— {session.state}{' — paused' if session.paused else ''}")
+        for row in draw(game):
+            print("|" + row + "|")
+        print(f"active shots: {len(game.shots)}")
+        for line in cue_lines(game):
+            print(line)
+        for boss in (e for e in game.enemies if e.kind == "boss"):
+            print(f"boss B — HP {max(0, boss.hp)}/12 — {boss.phase} — next: {boss.attack_name}")
+            if boss.hp > 0 and boss.phase == "warning":
+                print(f"cue: B {boss.attack_name} — locked {boss.aim} — {boss.phase_left:.3f} left")
+                print("danger: charge lane, radius 0.6 tile, rounded ends"
+                      if boss.attack_name == "charge" else
+                      "danger: one shot, contact radius 0.4 tile, range 3.0 tiles")
+            if boss.hp > 0 and boss.phase == "recovery":
+                print(f"recovery: {boss.phase_left:.3f} left")
+
+
+def drive(setup, inputs, rules=(), observe=None):
+    """Run public actions; observer is also usable for explicitly labelled test fixtures."""
+    from play import sprites, View, REACTION
+
+    session = RunSession(setup["fps"]) if setup["mode"] == "run" else RoomSession(setup)
+    pending, controls = list(inputs), list(setup["controls"])
+    before, messages = [], []
+    generation, seen = None, 0
+    started = time.perf_counter()
+    tick = 0
+
+    def collect_messages():
+        nonlocal seen
+        new = session.events[seen:]
+        seen = len(session.events)
+        return [message for event in new if (message := messages_for(event))]
+
+    if observe:
+        observe(session, True)
+    while tick / session.fps < setup["driver_limit"] - EPS:
+        driver_t = tick / session.fps
+        while controls and controls[0][0] <= driver_t + EPS:
+            _, action = controls.pop(0)
+            old_attempt = session.attempt
+            session.control(action)
+            if old_attempt != session.attempt:
+                pending = [item for item in pending if item[0] >= session.attempt]
+        entered = generation != session.generation
+        if entered:
+            generation = session.generation
+            before, messages = [], []
+            for rule in rules:
+                rule.last = -math.inf
+            if observe:
+                observe(session, True)
+        current_messages = collect_messages()
+        messages = current_messages if entered else messages + current_messages
+        due, remaining = [], []
+        for item in pending:
+            if item[0] == session.attempt and item[1] <= session.t + EPS:
+                due.append(item)
+            else:
+                remaining.append(item)
+        pending = remaining
+        for _, _, action, direction in due:
+            session.press(action, direction)
+        messages += collect_messages()
+        if not session.paused and session.state == "combat" and not session.stop_reason:
+            view = View(session.game, messages, before)
+            for rule in rules:
+                target = rule.matches(view)
+                if target and session.room_t - rule.last >= REACTION - EPS:
+                    rule.last = session.room_t
+
+                    class Actions:
+                        x, y = session.game.x, session.game.y
+                        press = session.press
+
+                    rule.act(Actions(), target)
+                    break
+            before = sprites(session.game)
+        session.step(limit=setup["limit"])
+        messages = collect_messages()
+        if observe:
+            observe(session, False)
+        tick += 1
+        terminal = session.state in ("won", "dead", "cleared")
+        if session.stop_reason or (terminal and not controls):
+            break
+    reason = session.stop_reason or (
+        "terminal" if session.state in ("won", "dead", "cleared") else "driver limit"
+    )
+    return session, {
+        "build": BUILD, "driver_seconds": tick / session.fps,
+        "processing_seconds": time.perf_counter() - started,
+        "execution_stop": reason,
+    }
+
+
+def play(setup, inputs, view, rules=()):
+    print(f"Lantern Depths {BUILD} — mode {setup['mode']} — {setup['fps']} FPS "
+          f"— timed inputs use {'run' if setup['mode'] == 'run' else 'room'} time")
+    output = None
+
+    def observe(session, force):
+        nonlocal output
+        if output is None:
+            output = Output(session, setup, view)
+        output.emit(force)
+
+    session, measurement = drive(setup, inputs, rules, observe)
+    print(f"end: attempt {session.attempt}, outcome {session.state}, "
+          f"run {session.t:.3f}, room {session.room_t:.3f}, {measurement}")
+    return session, measurement
+>>>END
+
+<<<EDIT repo/play.py
+<<<<<<< SEARCH
+def read_script(text):
+    setup = {"room": "1", "fps": 60, "end": None, "spawns": [], "player": None}
+=======
+def read_script(text):
+    directives = {"mode", "attempt", "control", "limit", "driver-limit", "trace-every"}
+    if any(line.split("#")[0].strip().split()[:1]
+           and line.split("#")[0].strip().split()[0] in directives
+           for line in text.splitlines()):
+        from run_driver import read_script as read_run_script
+        return read_run_script(text)
+    return read_legacy_script(text)
+
+
+def read_legacy_script(text):
+    setup = {"room": "1", "fps": 60, "end": None, "spawns": [], "player": None}
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+def play(setup, inputs, view, rules=()):
+    try:
+=======
+def play(setup, inputs, view, rules=()):
+    if "mode" in setup:
+        from run_driver import play as play_run
+        return play_run(setup, inputs, view, rules)
+    try:
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        elif e.kind == "spitter" and e.cueing:
+            length = ROOM_W + ROOM_H
+=======
+        elif e.kind == "spitter" and e.cueing:
+            length = ROOM_W + ROOM_H
+        elif e.kind == "boss" and e.phase == "warning":
+            length = 2.4 if e.attack_name == "charge" else 3.0
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/game.py
+<<<<<<< SEARCH
+        self.log("hurt", source=source, hearts=self.hearts)
+=======
+        self.log("hurt", source=source, hearts=self.hearts, name=name or source)
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE repo/tests/test_run_driver.py
+"""Public driver tests. Boundary fixtures do not establish normal-run reachability."""
+
+import unittest
+
+from run_driver import drive, read_script
+
+
+class DriverTest(unittest.TestCase):
+    def run_script(self, script, observe=None):
+        setup, inputs, rules = read_script(script)
+        return drive(setup, inputs, rules, observe)
+
+    def test_run_rejects_diagnostic_setup(self):
+        for setup in ("room 5", "player 8 4", "spawn boss 12 4"):
+            with self.assertRaises(ValueError):
+                read_script("mode run\n" + setup)
+
+    def test_same_time_inputs_keep_source_order(self):
+        session, _ = self.run_script(
+            "mode run\nlimit 0.02\n0 move left\n0 stop\n0 attack\n"
+        )
+        self.assertEqual(session.game.facing, (-1, 0))
+        self.assertEqual(session.game.heading, (0, 0))
+        actions = [e["details"]["action"] for e in session.events if e["kind"] == "input"]
+        self.assertEqual(actions, ["move", "stop", "attack"])
+
+    def test_driver_resume_works_while_game_clock_is_frozen(self):
+        for fps in (30, 60):
+            paused = []
+
+            def observe(session, force):
+                if session.paused:
+                    paused.append((session.t, session.game.dash_left))
+
+            session, result = self.run_script(
+                f"mode run\nfps {fps}\nlimit 0.5\ndriver-limit 4\n"
+                "0 dash right\ncontrol 0.1 pause\ncontrol 2.1 resume\n"
+                "0.1 attack\n", observe,
+            )
+            self.assertTrue(paused)
+            self.assertEqual(len(set(paused)), 1)
+            self.assertAlmostEqual(session.t, 0.5)
+            self.assertGreaterEqual(result["driver_seconds"], 2.5)
+            self.assertTrue(any(
+                e["kind"] == "input_rejected" and e["details"]["action"] == "attack"
+                for e in session.events
+            ))
+
+    def test_boundary_input_discard_and_entry_input(self):
+        for fps in (30, 60):
+            prepared = False
+
+            def fixture(session, force):
+                nonlocal prepared
+                if not prepared:
+                    prepared = True
+                    for enemy in session.game.enemies:
+                        enemy.hp = 0
+
+            entry = 1 + 1 / fps
+            session, _ = self.run_script(
+                f"mode run\nfps {fps}\nlimit {entry + 1 / fps}\n"
+                f"0.5 dash left\n{entry} move up\n", fixture,
+            )
+            self.assertEqual(session.game.room, "2")
+            self.assertEqual(session.game.heading, (0, -1))
+            self.assertEqual(session.game.dash_left, 0)
+            self.assertTrue(any(e["kind"] == "input_rejected" for e in session.events))
+
+    def test_retry_from_actual_death_discards_old_future_inputs(self):
+        for fps in (30, 60):
+            session, _ = self.run_script(
+                f"mode run\nfps {fps}\nlimit 100\ndriver-limit 30\n"
+                "attempt 1\n29 dash left\ncontrol 20 retry\n"
+                "attempt 2\n0 move up\n"
+            )
+            self.assertEqual(session.attempt, 2)
+            actions = [e for e in session.events
+                       if e["attempt"] == 2 and e["kind"] == "input"]
+            self.assertTrue(actions)
+            self.assertEqual(actions[0]["details"]["action"], "move")
+            self.assertFalse(any(e["details"].get("action") == "dash" for e in actions))
+
+    def test_long_limit_has_no_sixty_second_clamp(self):
+        session, result = self.run_script(
+            "mode room\nroom empty\nlimit 61\ndriver-limit 62\n"
+        )
+        self.assertAlmostEqual(session.room_t, 61)
+        self.assertEqual(result["execution_stop"], "time limit — run unfinished")
+
+    def test_public_play_parser_routes_new_syntax(self):
+        import play
+
+        setup, inputs, rules = play.read_script("mode run\nlimit 0\n")
+        self.assertEqual(setup["mode"], "run")
+        session, _ = drive(setup, inputs, rules)
+        self.assertEqual(session.t, 0)
+        self.assertIsNone(session.game.outcome)
+
+    def test_control_precedes_equal_time_combat_input(self):
+        session, _ = self.run_script(
+            "mode run\nlimit 0.1\ndriver-limit 1\n"
+            "control 0 pause\n0 attack\ncontrol 0.2 resume\n"
+        )
+        rejected = [e for e in session.events if e["kind"] == "input_rejected"]
+        self.assertEqual(len(rejected), 1)
+        self.assertEqual(rejected[0]["details"]["reason"], "paused")
+        self.assertFalse(any(e["kind"] == "attack" for e in session.events))
+
+    def test_new_driver_preserves_shot_direction_message(self):
+        from run_driver import messages_for
+
+        message = messages_for({
+            "kind": "hurt", "room": "4",
+            "details": {"source": "shot", "name": "shot from the east", "hearts": 2},
+        })
+        self.assertEqual(message, "YOU ARE HIT by a shot from the east — hearts 2/3")
+
+
+if __name__ == "__main__":
+    unittest.main()
+>>>END
+
+<<<FILE @run/tests
+>>>END

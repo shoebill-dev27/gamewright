@@ -88,3 +88,42 @@ def test_the_oracle_measures_new_rooms_and_only_them(tmp_path):
         assert m["fps"][fps]["simple"][4] == {**bots["simple"][0], "room": "5"}
     plain = t6.measure(COMBAT / "repo", tmp_path / "plain")
     assert "extra_rooms" not in plain  # older builds measure exactly as before
+
+
+def boss_verdict(m):
+    """B1-B2, fixed before the run: new rooms (or room 5) punish the simple bot, reward skill."""
+    targets = m.get("extra_rooms") or ["5"]
+    b2 = True
+    for fps, bots in m["fps"].items():
+        extra = m.get("extra", {}).get(fps, {"simple": [], "skilled": []})
+        simple = {r["room"]: r for r in bots["simple"] + extra["simple"]}
+        skilled = {r["room"]: r for r in bots["skilled"] + extra["skilled"]}
+        for room in targets:
+            s, k = simple[room], skilled[room]
+            b2 = b2 and (not s["cleared"] or s["lost"] >= 2) and k["cleared"]
+    return {"B1": bool(m.get("extra_rooms")) or "5" in m["rooms"], "B2": b2}
+
+
+# --- Recorded live run ---------------------------------------------------------------------
+
+RUN = ROOT / "examples" / "runs" / "p10-boss-run"
+
+
+@needs_sandbox
+@pytest.mark.skipif(
+    not (RUN / "measurement.json").is_file(), reason="no recorded Phase 10 run"
+)
+def test_recorded_measurement_reproduces(tmp_path):
+    import test_phase6 as t6
+
+    repo = RUN / "project" / "repo"
+    code, _, _ = t6.sandboxed_copy(
+        repo, tmp_path, "t", ["python3", "-m", "unittest", "discover", "-s", "tests"]
+    )
+    recorded = json.loads((RUN / "measurement.json").read_text())
+    m = t6.measure(repo, tmp_path)
+    assert m == recorded["measurement"] and code == recorded["tests_exit"]
+    assert (
+        t6.verdict(m, code == 0, RUN / "project" / "decisions") == recorded["verdict"]
+    )
+    assert boss_verdict(m) == recorded["boss_verdict"]

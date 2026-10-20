@@ -1,0 +1,25 @@
+<<<FILE @run/bots/rooms14-fps30
+bots camper,walker,dodger
+rooms 1-4
+fps 30
+>>>END
+
+<<<FILE @run/bots/rooms14-fps60
+bots camper,walker,dodger
+rooms 1-4
+fps 60
+>>>END
+
+<<<FILE @run/bots/run-fps30
+mode run
+bots camper,walker,dodger
+fps 30
+limit 1200
+>>>END
+
+<<<FILE @run/bots/run-fps60
+mode run
+bots camper,walker,dodger
+fps 60
+limit 1200
+>>>END

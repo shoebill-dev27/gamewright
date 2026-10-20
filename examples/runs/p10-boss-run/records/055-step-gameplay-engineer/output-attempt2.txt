@@ -1,0 +1,404 @@
+<<<FILE repo/tests/test_boss_contract_details.py
+"""Contract details B3, B6, B7, B9, B10, T1-T4, C2, C3 (G-002 split A).
+
+Controlled fixtures: they do not establish normal-run reachability. Internal names used here
+(phase, phase_left, aim, attack_name, struck, spent, hurt_left, invulnerable, events
+boss_contact / boss_recovery / boss_pursuit / shot_removed, session state / stop_reason) were
+read from game.py and session.py.
+"""
+
+import unittest
+
+from game import Game, Shot
+from session import RunSession
+
+FPS = (30, 60)
+
+
+def boss_fixture(fps, x, y, attack, phase, left, aim=(-1.0, 0.0), player=(8, 4)):
+    game = Game(fps=fps, room="5")
+    boss = game.enemies[0]
+    boss.x, boss.y = float(x), float(y)
+    boss.attack_name, boss.phase, boss.phase_left, boss.aim = attack, phase, left, aim
+    game.place_player(*player)
+    return game, boss
+
+
+def run(game, seconds):
+    for _ in range(round(seconds * game.fps)):
+        game.step()
+
+
+def kinds(events):
+    return [k for _, k, _ in events]
+
+
+def boss_session(fps, hearts):
+    s = RunSession(fps)
+    s._enter("5", hearts)
+    boss = s.game.enemies[0]
+    boss.x, boss.y = 9.0, 4.0
+    boss.hp, boss.phase, boss.phase_left, boss.aim = 1, "recovery", 1.0, None
+    s.game.place_player(8, 4)
+    return s, boss
+
+
+class B3ChargeMovementTest(unittest.TestCase):
+    def test_open_charge_moves_2_4_tiles_in_0_3_s(self):
+        for fps in FPS:
+            game, boss = boss_fixture(fps, 6, 4, "charge", "active", 0.3, (1.0, 0.0), (0, 8))
+            n = round(0.3 * fps)
+            for _ in range(n - 1):
+                game.step()
+            self.assertEqual(boss.phase, "active", fps)
+            game.step()
+            self.assertAlmostEqual(boss.x, 8.4, places=6)
+            self.assertEqual(boss.phase, "recovery", fps)
+
+    def test_wall_clamps_without_moving_recovery_start(self):
+        for fps in FPS:
+            game, boss = boss_fixture(fps, 14, 4, "charge", "active", 0.3, (1.0, 0.0), (0, 8))
+            n = round(0.3 * fps)
+            for _ in range(n - 1):
+                game.step()
+            self.assertEqual(boss.phase, "active", fps)
+            game.step()
+            self.assertEqual(boss.x, 15.0)
+            self.assertEqual(boss.phase, "recovery", fps)
+            self.assertAlmostEqual(boss.phase_left, 1.2)
+
+
+class B6DashContactTest(unittest.TestCase):
+    def test_dash_through_charge_is_spent_and_harmless_afterwards(self):
+        for fps in FPS:
+            game, boss = boss_fixture(fps, 9.5, 4, "charge", "active", 0.3)
+            game.press("dash", "right")
+            run(game, 1.0)
+            self.assertTrue(boss.spent, fps)
+            self.assertFalse(boss.struck, fps)
+            self.assertEqual(game.hearts, 3, fps)
+            contacts = [d for _, k, d in game.events if k == "boss_contact"]
+            self.assertEqual(len(contacts), 1, fps)
+            self.assertTrue(contacts[0]["blocked"], fps)
+
+    def test_dash_through_shot_consumes_it_and_no_later_damage(self):
+        for fps in FPS:
+            game = Game(fps=fps, room="empty")
+            game.shots.append(Shot(8.6, 4.0, -3.0, 0.0, "boss", 1.0))
+            game.press("dash", "right")
+            run(game, 0.1)
+            self.assertEqual(game.shots, [], fps)
+            run(game, 1.5)
+            self.assertEqual(game.hearts, 3, fps)
+
+
+class B7ProtectionExpiryTest(unittest.TestCase):
+    def test_charge_touched_in_protection_cannot_hit_when_it_ends(self):
+        for fps in FPS:
+            game, boss = boss_fixture(fps, 9.5, 4, "charge", "active", 0.3)
+            game.hurt_left, game.invulnerable = 0.2, True
+            run(game, 0.3)
+            self.assertTrue(boss.spent, fps)
+            self.assertFalse(game.invulnerable, fps)
+            self.assertEqual(game.hearts, 3, fps)
+            # The next charge is a fresh attack and hits normally.
+            boss.x, boss.y = 9.5, 4.0
+            boss.attack_name, boss.phase, boss.phase_left = "charge", "warning", game.dt
+            boss.aim = (-1.0, 0.0)
+            run(game, 0.5)
+            self.assertEqual(game.hearts, 2, fps)
+
+
+class B9RecoveryTest(unittest.TestCase):
+    def test_recovery_contact_is_harmless(self):
+        for fps in FPS:
+            for attack in ("charge", "short shot"):
+                game, boss = boss_fixture(fps, 8.3, 4, attack, "recovery", 1.2, None)
+                run(game, 1.0)
+                self.assertEqual(game.hearts, 3, (fps, attack))
+
+    def test_recovery_lengths(self):
+        for fps in FPS:
+            for attack, active, recovery in (("charge", 0.3, 1.2), ("short shot", 1.0, 1.4)):
+                game, boss = boss_fixture(fps, 10, 4, attack, "active", active, (-1.0, 0.0), (0, 8))
+                run(game, active + recovery + 0.1)
+                start = [t for t, k, _ in game.events if k == "boss_recovery"]
+                end = [t for t, k, _ in game.events if k == "boss_pursuit"]
+                self.assertEqual(len(start), 1, (fps, attack))
+                self.assertEqual(len(end), 1, (fps, attack))
+                self.assertAlmostEqual(end[0] - start[0], recovery, delta=1.0 / fps + 1e-9)
+
+
+class B10ContactBandTest(unittest.TestCase):
+    def charge_hearts(self, fps, offset):
+        game, boss = boss_fixture(fps, 10, 4, "charge", "active", 0.3, (-1.0, 0.0), (8, 4 + offset))
+        run(game, 0.4)
+        return game.hearts
+
+    def shot_hearts(self, fps, offset):
+        game = Game(fps=fps, room="empty")
+        game.place_player(8, 4)
+        game.shots.append(Shot(10.0, 4.0 + offset, -3.0, 0.0, "boss", 1.0))
+        run(game, 1.0)
+        return game.hearts
+
+    def test_charge_inside_and_outside_the_band(self):
+        for fps in FPS:
+            self.assertEqual(self.charge_hearts(fps, 0.5), 2, fps)
+            self.assertEqual(self.charge_hearts(fps, 0.57), 2, fps)
+            self.assertEqual(self.charge_hearts(fps, 0.61), 3, fps)
+            self.assertEqual(self.charge_hearts(fps, 0.8), 3, fps)
+            self.assertIn(self.charge_hearts(fps, 0.6), (2, 3))  # exactly the reach: either
+
+    def test_shot_inside_and_outside_the_band(self):
+        for fps in FPS:
+            self.assertEqual(self.shot_hearts(fps, 0.3), 2, fps)
+            self.assertEqual(self.shot_hearts(fps, 0.39), 2, fps)
+            self.assertEqual(self.shot_hearts(fps, 0.41), 3, fps)
+            self.assertEqual(self.shot_hearts(fps, 0.7), 3, fps)
+            self.assertIn(self.shot_hearts(fps, 0.4), (2, 3))
+
+
+class TerminalTest(unittest.TestCase):
+    def finish(self, fps, hearts, lethal_shot):
+        s, boss = boss_session(fps, hearts)
+        s.game.shots.append(Shot(8.2, 4.0, 0.0, 0.0, "boss", 1.0))
+        s.press("attack")
+        s.step()
+        return s
+
+    def test_t1_clear_removes_shots_and_refuses_chasing_damage(self):
+        for fps in FPS:
+            game, boss = boss_fixture(fps, 9, 4, "charge", "recovery", 1.0, None)
+            boss.hp = 1
+            game.shots.append(Shot(11.0, 4.0, -3.0, 0.0, "boss", 1.0))
+            game.press("attack")
+            game.step()
+            self.assertEqual(game.outcome, "cleared", fps)
+            self.assertEqual(game.shots, [], fps)
+            frame, hearts = game.frame, game.hearts
+            for _ in range(2 * fps):
+                game.step()
+            game.press("move", "left")
+            self.assertEqual((game.frame, game.hearts, game.heading), (frame, hearts, (0, 0)), fps)
+            self.assertEqual(kinds(game.events).count("cleared"), 1, fps)
+
+    def test_t2_same_frame_death_wins_over_victory(self):
+        for fps in FPS:
+            s = self.finish(fps, 1, True)
+            self.assertEqual(s.state, "dead", fps)
+            ks = kinds([(0, e["kind"], 0) for e in s.events])
+            self.assertEqual(ks.count("run_dead"), 1, fps)
+            self.assertEqual(ks.count("run_won"), 0, fps)
+            self.assertFalse(s.game.cleared, fps)
+
+    def test_t2_survivor_wins_only(self):
+        for fps in FPS:
+            s = self.finish(fps, 2, True)
+            self.assertEqual(s.state, "won", fps)
+            self.assertEqual(s.game.hearts, 1, fps)
+            ks = kinds([(0, e["kind"], 0) for e in s.events])
+            self.assertEqual(ks.count("run_won"), 1, fps)
+            self.assertEqual(ks.count("run_dead"), 0, fps)
+            self.assertEqual(ks.count("down"), 0, fps)
+
+    def test_t3_terminal_state_is_frozen(self):
+        for fps in FPS:
+            for hearts in (1, 2):
+                s = self.finish(fps, hearts, True)
+                before = (s.t, s.room_t, s.game.frame, s.game.hearts, s.state, len(s.events))
+                for _ in range(2 * fps):
+                    s.step()
+                self.assertFalse(s.press("attack"), (fps, hearts))
+                self.assertFalse(s.press("move", "left"), (fps, hearts))
+                after = (s.t, s.room_t, s.game.frame, s.game.hearts, s.state)
+                self.assertEqual(before[:5], after, (fps, hearts))
+
+    def test_t4_retry_from_win_and_death_equals_a_new_run(self):
+        for fps in FPS:
+            for hearts in (1, 2):
+                s = self.finish(fps, hearts, True)
+                s.game.queued_attack = True
+                self.assertTrue(s.control("retry"), (fps, hearts))
+                fresh = RunSession(fps)
+                self.assertEqual((s.attempt, s.t, s.room_t, s.state), (2, 0, 0, "combat"))
+                self.assertFalse(s.paused)
+                self.assertIsNone(s.stop_reason)
+                a, b = s.game.__dict__.copy(), fresh.game.__dict__.copy()
+                ea, eb = a.pop("enemies"), b.pop("enemies")
+                self.assertEqual(a, b)
+                self.assertEqual([e.__dict__ for e in ea], [e.__dict__ for e in eb])
+                self.assertEqual(s.game.room, "1")
+                self.assertEqual(s.game.hearts, 3)
+                mark = len(s.events)
+                for _ in range(fps):
+                    s.step()
+                self.assertFalse(any(
+                    e["kind"] in ("attack", "hurt") for e in s.events[mark:]
+                ), (fps, hearts))
+
+
+class C2PauseTest(unittest.TestCase):
+    def boss_session(self, fps):
+        s = RunSession(fps)
+        s._enter("5", 3)
+        boss = s.game.enemies[0]
+        boss.x, boss.y = 10.0, 4.0
+        boss.attack_name, boss.phase, boss.phase_left = "charge", "warning", 0.5
+        boss.aim = (-1.0, 0.0)
+        s.game.place_player(0, 8)
+        return s, boss
+
+    def test_pause_in_warning_freezes_and_resume_continues(self):
+        for fps in FPS:
+            s, boss = self.boss_session(fps)
+            for _ in range(3):
+                s.step()
+            self.assertTrue(s.control("pause"))
+            snap = (s.t, s.room_t, s.game.frame, boss.phase_left, boss.phase)
+            for _ in range(2 * fps):
+                s.step()
+            self.assertEqual(snap, (s.t, s.room_t, s.game.frame, boss.phase_left, boss.phase), fps)
+            self.assertTrue(s.control("resume"))
+            for _ in range(3):
+                s.step()
+            self.assertAlmostEqual(boss.phase_left, snap[3] - 3.0 / fps, places=6)
+            for _ in range(fps):
+                s.step()
+            self.assertIn(boss.phase, ("active", "recovery"), fps)
+
+    def test_pause_freezes_protection_timer(self):
+        for fps in FPS:
+            s, boss = self.boss_session(fps)
+            s.game.hurt_left, s.game.invulnerable = 0.5, True
+            s.step()
+            s.control("pause")
+            left = s.game.hurt_left
+            for _ in range(2 * fps):
+                s.step()
+            self.assertEqual(s.game.hurt_left, left, fps)
+            self.assertTrue(s.game.invulnerable, fps)
+            s.control("resume")
+            s.step()
+            self.assertLess(s.game.hurt_left, left, fps)
+
+
+class C3LimitTest(unittest.TestCase):
+    def test_limit_in_combat_is_unfinished_with_no_result(self):
+        for fps in FPS:
+            s, boss = boss_session(fps, 3)
+            s.step(limit=s.t + s.dt)
+            self.assertEqual(s.stop_reason, "time limit — run unfinished")
+            self.assertEqual(s.state, "combat")
+            self.assertIsNone(s.game.outcome)
+
+    def test_same_frame_death_or_victory_is_recorded_beside_the_limit(self):
+        for fps in FPS:
+            for hearts, state in ((1, "dead"), (2, "won")):
+                s, boss = boss_session(fps, hearts)
+                s.game.shots.append(Shot(8.2, 4.0, 0.0, 0.0, "boss", 1.0))
+                s.press("attack")
+                s.step(limit=s.t + s.dt)
+                self.assertEqual(s.state, state, (fps, hearts))
+                self.assertEqual(s.stop_reason, "time limit — run unfinished")
+
+
+if __name__ == "__main__":
+    unittest.main()
+>>>END
+
+<<<FILE goals/G-002-final-boss/44-gameplay-engineer-to-studio.md
+---
+kind: handoff
+goal: G-002
+seq: 44
+from: gameplay-engineer
+to: studio
+stage: Build
+outcome: done
+---
+# 44: gameplay-engineer → studio — Split A: contract detail tests added; 130 tests OK at source id 7670da50793b
+
+## Task
+
+Studio chooses the next Build or QA step. Split A (43) is done for the items listed below. B and C remain.
+
+## Context
+
+G-002 Build. 43 asked for a baseline check, then contract tests for B3, B6, B7, B9, B10, T1–T4, C2 and C3, written against the real internals of `game.py`, `session.py` and `play.py`. This step added one file, `repo/tests/test_boss_contract_details.py` (18 tests). No production code was changed. Because `source_id` hashes `tests/*.py`, adding the file changed the id from `5145454ab956` to `7670da50793b`.
+
+## Findings
+
+### Execution
+
+- Run 1, `tests` (`python3 -m unittest discover -s tests`), with the new file present: **Ran 130 tests, OK**, source id **7670da50793b**. The id came from a `bots` run in the same round, which executed the same file set.
+- 130 = 112 + 18. I did not run a separate baseline on the file set without the new file. "112 at `5145454ab956`" is therefore not re-confirmed in this step. It rests on the 40 report and on the count arithmetic.
+- No test failed, so no test or implementation was corrected. I found no implementation defect and no conflict with the spec.
+- Internal names were taken from the code: `phase`, `phase_left`, `aim`, `attack_name`, `struck`, `spent`, `hurt_left`, `invulnerable`, the events `boss_contact` (`blocked`), `boss_recovery`, `boss_pursuit`, `cleared`, `down`, and the session events `run_won`, `run_dead`, `retry`. Session state, `stop_reason` and `control("pause"|"resume"|"retry")` were also used. These are fixtures, so they do not show reachability in a normal run.
+
+### Per-item table (all executed at 7670da50793b, 30 and 60 FPS)
+
+| Item | Tests added | Result | Coverage notes |
+|---|---|---|---|
+| B3 | `B3ChargeMovementTest.test_open_charge_moves_2_4_tiles_in_0_3_s`, `…test_wall_clamps_without_moving_recovery_start` | OK | 2.4 tiles in 0.3 s. At the wall: x=15, recovery starts on the same frame, 1.2 s left. |
+| B6 | `B6DashContactTest.test_dash_through_charge_is_spent_and_harmless_afterwards`, `…test_dash_through_shot_consumes_it_and_no_later_damage` | OK | Charge: `spent`, not `struck`, one blocked `boss_contact`, 0 hearts lost. Shot: consumed, no damage afterwards. |
+| B7 | `B7ProtectionExpiryTest.test_charge_touched_in_protection_cannot_hit_when_it_ends` | OK | Charge spent while protected: no damage when protection ends. A fresh charge then hits (hearts 2). Shot consumption in protection is covered by the existing `test_boss.py` and `ShotContactTest`, not duplicated. |
+| B9 | `B9RecoveryTest.test_recovery_contact_is_harmless`, `…test_recovery_lengths` | OK | Harmless in both recoveries. 1.2 s and 1.4 s measured from `boss_recovery` to `boss_pursuit`. The "4 swipes" opportunity is covered by the existing `test_four_swipes_fit_in_recovery`. |
+| B10 | `B10ContactBandTest.test_charge_inside_and_outside_the_band`, `…test_shot_inside_and_outside_the_band` | OK | Charge: 0.5 and 0.57 hit, 0.61 and 0.8 miss, 0.6 hit or miss. Shot: 0.3 and 0.39 hit, 0.41 and 0.7 miss, 0.4 hit or miss. Both FPS tested separately. |
+| T1 | `TerminalTest.test_t1_clear_removes_shots_and_refuses_chasing_damage` | OK | At the clear, shots are empty. 2 s later frame and hearts are unchanged and input is refused. One `cleared` event. |
+| T2 | `test_t2_same_frame_death_wins_over_victory`, `test_t2_survivor_wins_only` | OK | A lethal swipe and a lethal shot in one frame give dead only (one `run_dead`, no `run_won`, not cleared). With one more heart: won only. |
+| T3 | `test_t3_terminal_state_is_frozen` | OK | After 2 s of steps and inputs, run time, room time, frame, hearts and state are unchanged, and `press` returns False. |
+| T4 | `test_t4_retry_from_win_and_death_equals_a_new_run` | OK | Attempt 2, times 0, room 1, 3 hearts. Game and enemy `__dict__`s equal a fresh `RunSession`. The queued attack does not reappear and there are no attack or hurt events in the first second. |
+| C2 | `C2PauseTest.test_pause_in_warning_freezes_and_resume_continues`, `…test_pause_freezes_protection_timer` | OK | Pause in a boss warning: clocks, frame and `phase_left` are unchanged after 2 s. After resume it continues. `hurt_left` and `invulnerable` are frozen. |
+| C3 | `C3LimitTest.test_limit_in_combat_is_unfinished_with_no_result`, `…test_same_frame_death_or_victory_is_recorded_beside_the_limit` | OK | The limit in combat gives the unfinished `stop_reason`, state combat, no outcome. Same-frame death or victory is recorded together with the limit. |
+| Shared combat regression | None added | Existing tests ran | Existing G-001 tests, including CueGap, ShotContact, LungeContact, Brute and the dodger agreement test, were in the 130 OK. I added nothing new for them. |
+
+### Not covered in A (stated plainly)
+
+- B5 (sidestep within 0.4 s) has the existing `test_one_tile_sidestep_during_each_warning`. B1, B2, B4 and B8 are covered by the existing `test_boss.py` and `test_boss_contract.py`. I did not re-audit them against §7.
+- C2 pause was tested only in a boss warning and with the protection timer. Dash, a queued attack and the room-clear display are covered by the existing `test_session.py`. I added no combined "pause during dash contact" fixture.
+- T4 was tested at session level. Discarding future-timed old inputs lives in the driver (`drive`) and is not newly tested here.
+- B6/B7 were tested from the charge side with a close-range fixture, not a full dash into a full short-shot cycle.
+- The README still says "112 tests". I did not edit it.
+
+## Decisions already made
+
+- D-017: two attacks, boundary recovery, death priority, terminal retry, clock and display contract.
+- D-019: old aggregates retired, shared regressions, boss-adapted bot comparison, Designer judgment after measurement.
+- D-021: Build on the current repo and Studio-internal text verification. No real device or sha check needed.
+
+## Constraints
+
+- Rooms 1–4, shared combat rules and the independent 1–4 bot policy are preserved. No new input, checkpoint, HP padding or tuning toward 15–20 minutes.
+- The 130 OK holds only for source id 7670da50793b. Any later code or test change needs a rerun and a new id.
+- A bot taking no hits is not evidence that the boss can be hit and avoided. The contact tests above (B6, B7, B10) serve that purpose, together with the existing B5.
+
+## Open questions
+
+None for the Designer. No spec gap or contradiction was found.
+
+## Expected output
+
+For Studio, remaining items:
+
+- **Split B:** V1 supplements (legacy route boss display, bullet IDs and removal reasons, long observation). Extend `bots.play_run` with pause and retry: `pause_at`, `pause_seconds`, `retries`, using `RunSession.control` and resetting reaction memory on a new generation. Add tests for it. `RunSession.control` returns True or False and logs `pause`, `resume`, `retry`, `control_rejected`, as now confirmed.
+- **Split C:** a normal-run measurement with pause and retry at both FPS. Add loose regression tests for the dodger in rooms 1–4: clear, 0 hearts lost, hearts lost differing by at most 1 across FPS, and dash ≥ 1 in rooms 3–4. The timings and dash counts from 40 are diagnostic reference values only.
+- Optional: update the README test count and source id once the file set is final. Run the baseline without the new file if Studio needs "112 at 5145454ab956" re-confirmed.
+- Next is Studio's choice between the remaining Build (B, C) and QA. Because of the unfinished items, this is still not a complete package for independent QA.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: design/final-boss-and-continuous-run.md
+- Project: repo/game.py
+- Project: repo/session.py
+- Project: repo/play.py
+- Project: repo/bots.py
+- Project: repo/run_driver.py
+- Project: repo/tests/test_boss_contract_details.py
+- Decisions: decisions/D-017-final-boss-and-run-contract.md
+- Decisions: decisions/D-019-g002-balance-criteria-applicability.md
+- Decisions: decisions/D-021-owner-authorizes-text-build.md
+- Previous handoff: goals/G-002-final-boss/43-studio-to-gameplay-engineer.md
+>>>END

@@ -1,0 +1,308 @@
+<<<EDIT repo/game.py
+<<<<<<< SEARCH
+    "5": [
+        ("grub", 1, 1),
+        ("grub", 0, 6),
+        ("brute", 4, 8),
+        ("spitter", 15, 0),
+        ("spitter", 15, 8),
+    ],
+=======
+    "5": [("boss", 12, 4)],
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+class Enemy:
+=======
+class Shot(list):
+    """Indexed combat coordinates, with explicit ownership and lifetime.
+
+    Plain five-element practice fixtures remain supported by the shared updater.
+    """
+
+    def __init__(self, x, y, vx, vy, source="spitter", lifetime=SHOT_LIFE):
+        super().__init__([x, y, vx, vy, 0.0])
+        self.source = source
+        self.lifetime = lifetime
+
+
+class Enemy:
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        if kind not in GRUBS and kind != "spitter":
+=======
+        if kind not in GRUBS and kind not in ("spitter", "boss"):
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        if kind == "spitter":
+            self.hp = SPITTER_HP
+=======
+        if kind == "boss":
+            self.hp = 12
+            self.phase = "approach"
+            self.phase_left = 0.0
+            self.attack_name = "charge"
+            self.struck = self.spent = False
+        elif kind == "spitter":
+            self.hp = SPITTER_HP
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        return GRUBS[self.kind]["mark"] if self.is_grub else "s"
+=======
+        if self.kind == "boss":
+            return "B"
+        return GRUBS[self.kind]["mark"] if self.is_grub else "s"
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        for enemy in hit:
+            if enemy.hp > 0 and enemy.is_grub and enemy.phase == "windup":
+=======
+        for enemy in hit:
+            if enemy.kind == "boss":
+                if enemy.hp <= 0:
+                    enemy.aim = None
+                elif enemy.phase == "warning":
+                    self.log("boss_swipe")
+            if enemy.hp > 0 and enemy.is_grub and enemy.phase == "windup":
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+            if enemy.is_grub:
+                busy = self._update_grub(enemy, dt, busy)
+            else:
+                self._update_spitter(enemy, dt)
+
+    def _update_grub(self, e, dt, busy):
+=======
+            if enemy.is_grub:
+                busy = self._update_grub(enemy, dt, busy)
+            elif enemy.kind == "boss":
+                self._update_boss(enemy, dt)
+            else:
+                self._update_spitter(enemy, dt)
+
+    def _update_boss(self, e, dt):
+        if e.phase == "approach":
+            dx, dy = self.x - e.x, self.y - e.y
+            distance = math.hypot(dx, dy)
+            if distance <= WINDUP_RANGE + EPS:
+                e.aim = (dx / distance, dy / distance) if distance else (1.0, 0.0)
+                e.phase = "warning"
+                e.phase_left = 0.7 if e.attack_name == "charge" else 0.8
+                self.log("boss_warning", attack=e.attack_name, aim=e.aim)
+            else:
+                span = min(dt, distance - WINDUP_RANGE)
+                e.x += dx / distance * span
+                e.y += dy / distance * span
+            return
+        if e.phase == "warning":
+            e.phase_left = max(0.0, e.phase_left - dt)
+            if e.phase_left <= EPS:
+                e.phase = "active"
+                e.phase_left = 0.3 if e.attack_name == "charge" else 1.0
+                e.struck = e.spent = False
+                self.log("boss_active", attack=e.attack_name)
+                if e.attack_name == "short shot":
+                    self.shots.append(Shot(
+                        e.x, e.y, e.aim[0] * SHOT_SPEED,
+                        e.aim[1] * SHOT_SPEED, "boss", 1.0,
+                    ))
+            return
+        if e.phase == "active":
+            span = min(dt, e.phase_left)
+            if e.attack_name == "charge":
+                e.x, e.y = self._clamp(
+                    e.x + e.aim[0] * LUNGE_SPEED * span,
+                    e.y + e.aim[1] * LUNGE_SPEED * span,
+                )
+                if (
+                    not e.struck and not e.spent
+                    and math.hypot(e.x - self.x, e.y - self.y) <= GRUB_REACH
+                ):
+                    if self.invulnerable:
+                        e.spent = True
+                    else:
+                        e.struck = True
+                        self._hurt("boss", "boss's charge")
+                    self.log("boss_contact", blocked=e.spent)
+            e.phase_left = max(0.0, e.phase_left - span)
+            if e.phase_left <= EPS:
+                e.phase = "recovery"
+                e.phase_left = 1.2 if e.attack_name == "charge" else 1.4
+                e.aim = None
+                self.log("boss_recovery", attack=e.attack_name)
+            return
+        e.phase_left = max(0.0, e.phase_left - dt)
+        if e.phase_left <= EPS:
+            e.phase = "approach"
+            e.attack_name = "short shot" if e.attack_name == "charge" else "charge"
+            self.log("boss_pursuit", attack=e.attack_name)
+
+    def _update_grub(self, e, dt, busy):
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+                    [e.x, e.y, e.aim[0] * SHOT_SPEED, e.aim[1] * SHOT_SPEED, 0.0]
+=======
+                    Shot(e.x, e.y, e.aim[0] * SHOT_SPEED, e.aim[1] * SHOT_SPEED)
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+            if shot[4] >= SHOT_LIFE - EPS:
+                continue
+            if not (-1 <= shot[0] <= ROOM_W and -1 <= shot[1] <= ROOM_H):
+                continue
+=======
+            if shot[4] >= getattr(shot, "lifetime", SHOT_LIFE) - EPS:
+                self.log("shot_removed", source=getattr(shot, "source", "spitter"), reason="lifetime")
+                continue
+            boss_shot = getattr(shot, "source", "spitter") == "boss"
+            bounds = (0, ROOM_W - 1, 0, ROOM_H - 1) if boss_shot else (-1, ROOM_W, -1, ROOM_H)
+            if not (bounds[0] <= shot[0] <= bounds[1] and bounds[2] <= shot[1] <= bounds[3]):
+                self.log("shot_removed", source=getattr(shot, "source", "spitter"), reason="edge")
+                continue
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+                if not self.invulnerable:
+                    # Step 94: the message names the side the shot came from.
+=======
+                self.log("shot_removed", source=getattr(shot, "source", "spitter"),
+                         reason="contact", blocked=self.invulnerable)
+                if not self.invulnerable:
+                    # Step 94: the message names the side the shot came from.
+>>>>>>> REPLACE
+>>>END
+<<<FILE repo/tests/test_boss.py
+"""Boss combat contracts; Session and presentation are separate integration work."""
+
+import unittest
+
+from game import Game, Shot
+
+
+class BossTest(unittest.TestCase):
+    def boss(self, fps, attack="charge", phase="warning", left=None):
+        game = Game(fps=fps, room="5")
+        boss = game.enemies[0]
+        boss.x, boss.y = 10.0, 4.0
+        boss.phase, boss.attack_name = phase, attack
+        boss.aim = (-1.0, 0.0)
+        boss.phase_left = left if left is not None else (0.7 if attack == "charge" else 0.8)
+        return game, boss
+
+    def advance(self, game, seconds):
+        for _ in range(round(seconds * game.fps)):
+            game.step()
+
+    def test_initial_single_boss(self):
+        for fps in (30, 60):
+            game = Game(fps=fps, room="5")
+            self.assertEqual(
+                [(e.kind, e.mark, e.x, e.y, e.hp) for e in game.enemies],
+                [("boss", "B", 12.0, 4.0, 12)],
+            )
+            self.assertEqual(game.enemies[0].attack_name, "charge")
+
+    def test_warning_duration_and_locked_aim(self):
+        for fps in (30, 60):
+            for attack, duration in (("charge", 0.7), ("short shot", 0.8)):
+                game, boss = self.boss(fps, attack)
+                game.press("move", "up")
+                self.advance(game, duration)
+                self.assertEqual(boss.phase, "active")
+                self.assertEqual(boss.aim, (-1.0, 0.0))
+                self.assertAlmostEqual(game.t, duration)
+                self.assertEqual(len(game.shots), int(attack == "short shot"))
+
+    def test_charge_contact_does_not_shorten_active(self):
+        for fps in (30, 60):
+            game, boss = self.boss(fps)
+            self.advance(game, 0.7)
+            self.advance(game, 0.3)
+            self.assertEqual(game.hearts, 2)
+            self.assertEqual(boss.phase, "recovery")
+            self.assertAlmostEqual(boss.x, 7.6)
+            self.assertAlmostEqual(boss.phase_left, 1.2)
+
+    def test_wall_and_blocked_contact_keep_full_charge(self):
+        for fps in (30, 60):
+            game, boss = self.boss(fps, phase="active", left=0.3)
+            boss.x = 1.0
+            game.place_player(0, 4)
+            game.hurt_left = 0.2
+            game.invulnerable = True
+            self.advance(game, 0.3)
+            self.assertEqual(boss.x, 0.0)
+            self.assertEqual(boss.phase, "recovery")
+            self.assertTrue(boss.spent)
+            self.assertEqual(game.hearts, 3)
+
+    def test_short_shot_early_contact_does_not_accelerate_recovery(self):
+        for fps in (30, 60):
+            for protected in (False, True):
+                game, boss = self.boss(fps, "short shot")
+                self.advance(game, 0.8)
+                game.place_player(9.7, 4)
+                if protected:
+                    game.hurt_left = 0.8
+                    game.invulnerable = True
+                game.step()
+                self.assertEqual(game.shots, [])
+                self.assertEqual(boss.phase, "active")
+                self.advance(game, 1.0 - game.dt)
+                self.assertEqual(boss.phase, "recovery")
+                self.assertAlmostEqual(boss.phase_left, 1.4)
+                self.assertEqual(game.hearts, 3 if protected else 2)
+
+    def test_lifetime_frame_precedes_contact(self):
+        for fps in (30, 60):
+            game = Game(fps=fps, room="empty")
+            shot = Shot(8, 4, 0, 0, "boss", 1.0)
+            shot[4] = 1.0 - game.dt
+            game.shots.append(shot)
+            game.step()
+            self.assertEqual(game.hearts, 3)
+            self.assertEqual(game.shots, [])
+
+    def test_nonlethal_swipe_keeps_warning_and_lethal_prevents_fire(self):
+        for fps in (30, 60):
+            game, boss = self.boss(fps, "short shot")
+            boss.x = 9
+            before = (boss.phase, boss.phase_left, boss.aim, boss.attack_name)
+            game.press("attack")
+            self.assertEqual(boss.hp, 11)
+            self.assertEqual(before, (boss.phase, boss.phase_left, boss.aim, boss.attack_name))
+            self.assertEqual(sum(k == "boss_swipe" for _, k, _ in game.events), 1)
+            game.recovery = 0
+            boss.hp = 1
+            game.press("attack")
+            game.step()
+            self.assertEqual(game.outcome, "cleared")
+            self.assertEqual(game.shots, [])
+
+    def test_boss_kill_and_existing_lethal_shot_is_death_only(self):
+        for fps in (30, 60):
+            game, boss = self.boss(fps)
+            boss.x, boss.hp = 9, 1
+            game.hearts = 1
+            game.shots.append(Shot(8.2, 4, 0, 0, "boss", 1))
+            game.press("attack")
+            game.step()
+            self.assertEqual(game.outcome, "dead")
+            self.assertFalse(game.cleared)
+
+    def test_four_swipes_fit_in_each_recovery(self):
+        for fps in (30, 60):
+            for attack, duration in (("charge", 1.2), ("short shot", 1.4)):
+                game, boss = self.boss(fps, attack, "recovery", duration)
+                boss.x = 9
+                for index in range(4):
+                    game.press("attack")
+                    if index < 3:
+                        self.advance(game, 0.35 if fps == 60 else 11 / 30)
+                self.assertEqual(boss.hp, 8)
+                self.assertEqual(game.hearts, 3)
+                self.assertEqual(boss.phase, "recovery")
+
+
+if __name__ == "__main__":
+    unittest.main()
+>>>END
+<<<FILE @run/tests
+>>>END

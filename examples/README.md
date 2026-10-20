@@ -84,3 +84,11 @@ Results and findings: `docs/phase8.md`.
 | `runs/p9-answer-shape-replay` | The three recorded QA packets whose final answers dropped the Handoff's sections, re-sent twice as they were and twice with the Phase 9 ending (12 executors). As they were, 3 of 6 answers dropped sections; with the ending, 0 of 6 (one-sided Fisher p ≈ 0.09). The ending used there predates the recipient sentence added afterwards. `replay.py` re-runs it. |
 
 Results and findings: `docs/phase9.md`.
+
+## Phase 10: a second Goal on the same project
+
+| Run | What it shows |
+|---|---|
+| `runs/p10-boss-run` | G-002 ("最後に手応えのあるボス戦がほしい") on the project as G-001 closed it, started on Codex and continued on Claude after the Codex engineer kept handing back unfinished work. Stopped inside Build at 78 executors (budget 100), before Close. Room 5 became a single boss; the held-out measurement in `measurement.json` meets S1–S3 and the pre-registered B1–B2. Shows the earlier Decisions carried into the new Goal, two Owner questions (one about scope, one about hardware the project never needed), and 25 operations of planning before Build. |
+
+Results and findings: `docs/phase10.md`.

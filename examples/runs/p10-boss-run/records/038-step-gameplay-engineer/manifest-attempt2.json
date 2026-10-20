@@ -1,0 +1,147 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "b7fb7a3d85a62bcd564a33ee20caf62b355a7ef99ce6d8cfb6df0d5adb83abc2",
+  "bytes": 1304
+ },
+ {
+  "path": "goals/G-002-final-boss/29-studio-to-gameplay-engineer.md",
+  "sha256": "d706d4e5c4730383de5b6fab3d5b5279e77de67c0d5c8914b396c96f449993de",
+  "bytes": 5638
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md",
+  "sha256": "18ecbace72fe54a14efe4897ffa4e7456facff677234c671d8841408747cb7d0",
+  "bytes": 1609
+ },
+ {
+  "path": "studio/skills/implement-change.md",
+  "sha256": "a9befd7f1d9e09eb94c51a066f030db88c5061ad1b522d9795e62bc2c242964a",
+  "bytes": 1823
+ },
+ {
+  "path": "project.md#vision",
+  "sha256": "d3086d29c74b4ce7bd4b6ef724e73f4f0f3dde2be7fda791c0154917fee0cf66",
+  "bytes": 408
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "05a33c6f8e50caa20ddf4f3844885137c4261ad4a3e5f3db3eb1b5312b129a9f",
+  "bytes": 237
+ },
+ {
+  "path": "repo/game.py",
+  "sha256": "8d0edf515b34a97bdd7457fffa67ef35a5720ac22865ddbd5ea2c0be4619bd7f",
+  "bytes": 19978
+ },
+ {
+  "path": "repo/play.py",
+  "sha256": "081d55cf6e78d929eb02a67aef598b70d14054a233056bf7d1cdc2aa71ce58f3",
+  "bytes": 16119
+ },
+ {
+  "path": "repo/bots.py",
+  "sha256": "54c95356419126aa71c18187ba4c7fb4dfaf1b9e0fae318453e2ef92fcd519f6",
+  "bytes": 15472
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "9b475785214db05d78537a8d2e3dcf6e6299987703a8c1c54174464a360332ef",
+  "bytes": 6038
+ },
+ {
+  "path": "repo/README.md",
+  "sha256": "0ac3ac2a75748a2fa1c0c1a270f14d37c226205b27217aa6ce6ff1c3bbd1f0cc",
+  "bytes": 1347
+ },
+ {
+  "path": "repo/tests/test_game.py",
+  "sha256": "9786d47023c421f88db0c8916accdfa211af79201e0fe46f1a11ac152e82e811",
+  "bytes": 36238
+ },
+ {
+  "path": "repo/tests/test_terminal.py",
+  "sha256": "69b092961cc3601f6a054b554072496fdf8822285feca24d79cc18fcb0b509a1",
+  "bytes": 2599
+ },
+ {
+  "path": "repo/tests/test_boss.py",
+  "sha256": "f510c18e9bf5246085f3b91f1355d60af09118042cc7cb78da1634885f4c9105",
+  "bytes": 5019
+ },
+ {
+  "path": "design/final-boss-and-continuous-run.md",
+  "sha256": "9dd4c93b558252c551190c9fdc396c86a4a929fd01f63be3bf99857f1eb920ad",
+  "bytes": 33673
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "a1afd9e6c44f4e467d38466e19af2a30f1c8c981ca7ad409da94ddf539bcbe97",
+  "bytes": 50393
+ },
+ {
+  "path": "design/combat-step-44-walker-limit.md",
+  "sha256": "9453c2c82c89988c9dad5e28e9d73be0243f0f3dda22403358ff7fe505dc8e4d",
+  "bytes": 6265
+ },
+ {
+  "path": "design/combat-step-46-room3-cap.md",
+  "sha256": "d52e775fca7b00b414604efa2f55b674cca06bd1b72b27f4e489e2b7fc8cd781",
+  "bytes": 8649
+ },
+ {
+  "path": "design/combat-step68.md",
+  "sha256": "2c52b20718d8c1f6cc68035b1151e3b1680f05dc39e26d735c99004014f792c9",
+  "bytes": 4304
+ },
+ {
+  "path": "design/combat-step72.md",
+  "sha256": "0e504d1ebcfb8dc391a82e725a11645a5670b9f52ceaff1152ead0130aa69215",
+  "bytes": 11550
+ },
+ {
+  "path": "design/combat-step94.md",
+  "sha256": "43cc96d0ed3560a009ac740f46d6f2098ac69c9e26a8c873accc11de9c431bbe",
+  "bytes": 8338
+ },
+ {
+  "path": "goals/G-002-final-boss/16-technical-director-to-studio.md",
+  "sha256": "07a2689af76252ce4656497e175e2532c416bc473c4349fb211c962b7e79de79",
+  "bytes": 20209
+ },
+ {
+  "path": "goals/G-002-final-boss/20-technical-director-to-studio.md",
+  "sha256": "b22d566c6d94a58d9fab88fc782d1c532b4e0da5fdd7bdd14d9037224272842a",
+  "bytes": 26099
+ },
+ {
+  "path": "decisions/D-017-final-boss-and-run-contract.md",
+  "sha256": "48adbb02a672e45434a1b0f61c77b8c1747c437124e183b1a849e34c705f4283",
+  "bytes": 3341
+ },
+ {
+  "path": "decisions/D-019-g002-balance-criteria-applicability.md",
+  "sha256": "db369f14df8125734146c8b7feb643e58a4ce8c2780fc211e23a9f59a85c62c7",
+  "bytes": 5895
+ },
+ {
+  "path": "decisions/D-021-owner-authorizes-text-build.md",
+  "sha256": "9df4329db4178c6d573c6121007e0dbe1109abca068e1c303386eb94cbbd3575",
+  "bytes": 3514
+ },
+ {
+  "path": "goals/G-002-final-boss/28-gameplay-engineer-to-studio.md",
+  "sha256": "724555ff40e5b0960f8e39c041d9a8b045205ba93f2835f375b416e4444c00df",
+  "bytes": 7291
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "@run-results",
+  "sha256": "b6309cdf8392e57e04aec58e151458781a8af943c1cfdd96360c872b6042fa77",
+  "bytes": 287
+ }
+]

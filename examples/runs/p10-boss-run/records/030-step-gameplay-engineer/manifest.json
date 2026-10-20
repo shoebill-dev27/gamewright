@@ -1,0 +1,182 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "b7fb7a3d85a62bcd564a33ee20caf62b355a7ef99ce6d8cfb6df0d5adb83abc2",
+  "bytes": 1304
+ },
+ {
+  "path": "goals/G-002-final-boss/23-studio-to-gameplay-engineer.md",
+  "sha256": "b1184f38fe68b6bdb9ad737c9dfdef024a0b425d5b76117dfefeec9d65f5e38c",
+  "bytes": 6313
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md",
+  "sha256": "18ecbace72fe54a14efe4897ffa4e7456facff677234c671d8841408747cb7d0",
+  "bytes": 1609
+ },
+ {
+  "path": "studio/skills/implement-change.md",
+  "sha256": "a9befd7f1d9e09eb94c51a066f030db88c5061ad1b522d9795e62bc2c242964a",
+  "bytes": 1823
+ },
+ {
+  "path": "project.md#vision",
+  "sha256": "d3086d29c74b4ce7bd4b6ef724e73f4f0f3dde2be7fda791c0154917fee0cf66",
+  "bytes": 408
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "05a33c6f8e50caa20ddf4f3844885137c4261ad4a3e5f3db3eb1b5312b129a9f",
+  "bytes": 237
+ },
+ {
+  "path": "project.md#art-direction",
+  "sha256": "8ef4190e8e145d993682898fbb7fe0ca8bd81e86b7a123e263644b95ce51119b",
+  "bytes": 158
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "9b475785214db05d78537a8d2e3dcf6e6299987703a8c1c54174464a360332ef",
+  "bytes": 6038
+ },
+ {
+  "path": "design/final-boss-and-continuous-run.md",
+  "sha256": "9dd4c93b558252c551190c9fdc396c86a4a929fd01f63be3bf99857f1eb920ad",
+  "bytes": 33673
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "a1afd9e6c44f4e467d38466e19af2a30f1c8c981ca7ad409da94ddf539bcbe97",
+  "bytes": 50393
+ },
+ {
+  "path": "design/combat-cues-visual-spec.md",
+  "sha256": "6d878e8fdcafbfa4d6df3b8a39f1522107c392f7f8f8e82a1ec4a02357d6147a",
+  "bytes": 6417
+ },
+ {
+  "path": "design/combat-step-44-walker-limit.md",
+  "sha256": "9453c2c82c89988c9dad5e28e9d73be0243f0f3dda22403358ff7fe505dc8e4d",
+  "bytes": 6265
+ },
+ {
+  "path": "design/combat-step-46-room3-cap.md",
+  "sha256": "d52e775fca7b00b414604efa2f55b674cca06bd1b72b27f4e489e2b7fc8cd781",
+  "bytes": 8649
+ },
+ {
+  "path": "design/combat-step59.md",
+  "sha256": "8d36ff97a42c222062e1a31b657bd4dca75f31a93af769cf76d5e0c25f340a25",
+  "bytes": 5067
+ },
+ {
+  "path": "design/combat-step68.md",
+  "sha256": "2c52b20718d8c1f6cc68035b1151e3b1680f05dc39e26d735c99004014f792c9",
+  "bytes": 4304
+ },
+ {
+  "path": "design/combat-step72.md",
+  "sha256": "0e504d1ebcfb8dc391a82e725a11645a5670b9f52ceaff1152ead0130aa69215",
+  "bytes": 11550
+ },
+ {
+  "path": "design/combat-step94.md",
+  "sha256": "43cc96d0ed3560a009ac740f46d6f2098ac69c9e26a8c873accc11de9c431bbe",
+  "bytes": 8338
+ },
+ {
+  "path": "goals/G-002-final-boss/16-technical-director-to-studio.md",
+  "sha256": "07a2689af76252ce4656497e175e2532c416bc473c4349fb211c962b7e79de79",
+  "bytes": 20209
+ },
+ {
+  "path": "goals/G-002-final-boss/20-technical-director-to-studio.md",
+  "sha256": "b22d566c6d94a58d9fab88fc782d1c532b4e0da5fdd7bdd14d9037224272842a",
+  "bytes": 26099
+ },
+ {
+  "path": "decisions/D-001-one-button-combat.md",
+  "sha256": "c7fe9ca23a369707a5ab439e44789a25a0a8544efce4703a676f8fd180f82ec1",
+  "bytes": 798
+ },
+ {
+  "path": "decisions/D-002-contact-edge-graze-accepted.md",
+  "sha256": "30c9505b88370f5b83562cd1d747a81d45eeefa1515933e9648defece0b2a4ed",
+  "bytes": 2199
+ },
+ {
+  "path": "decisions/D-003-contact-edge-exact-reach-and-lunge-band.md",
+  "sha256": "eabaf1e1bd3a216fe3cd402846ac57e001f2fe53c715dba6359cae5c80dd572a",
+  "bytes": 3250
+ },
+ {
+  "path": "decisions/D-004-spitter-cue-gap-brute-no-cancel-room2-spitter-deferred.md",
+  "sha256": "0c7087cd192c63c9e79457bea70d4a603e1e68468fe453b3ad2d5b78bea629c0",
+  "bytes": 3694
+ },
+ {
+  "path": "decisions/D-005-blocked-contact-consumes-shot-and-spends-lunge.md",
+  "sha256": "2a3a811f6f955e0b766d2b39edfacc96eabf732d6d3e422d5e02c42c57f5c5e8",
+  "bytes": 4726
+ },
+ {
+  "path": "decisions/D-006-walker-limit-rooms-3-5-structural-ceiling.md",
+  "sha256": "dfdc2e19f4d073a3ae313eef5a732c6aeb573f37cbf493ce688123f941a5c1f3",
+  "bytes": 3040
+ },
+ {
+  "path": "decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md",
+  "sha256": "70283fc2cfe5f66068caf7216d4f43567af8e4e9f10dbb963c0368a6faf55ee5",
+  "bytes": 3083
+ },
+ {
+  "path": "decisions/D-011-variant-named-messages-accepted.md",
+  "sha256": "bf29d86bb781ad0221fb0e0f20906afb352af9441735a73b8867a2ed71d13605",
+  "bytes": 2498
+ },
+ {
+  "path": "decisions/D-012-room3-standard-grub-and-closer-spitter.md",
+  "sha256": "6d7804de297c7dc8c9ce8533ceb174c36ff613bc19915f65b1dfd4eb1d1c2897",
+  "bytes": 2626
+ },
+ {
+  "path": "decisions/D-015-owner-approves-continuous-run-and-final-boss.md",
+  "sha256": "e0bd5b794a3b4e0e37edf8ca0324ebd38f3f062d2ecf5aedcd6896c55df3b1cb",
+  "bytes": 2110
+ },
+ {
+  "path": "decisions/D-016-final-boss-experience-direction.md",
+  "sha256": "03aa3e89898d2361f61fddea143d5e99eb4dafbae8f16d1717ac6e93e7ee4684",
+  "bytes": 4425
+ },
+ {
+  "path": "decisions/D-017-final-boss-and-run-contract.md",
+  "sha256": "48adbb02a672e45434a1b0f61c77b8c1747c437124e183b1a849e34c705f4283",
+  "bytes": 3341
+ },
+ {
+  "path": "decisions/D-018-legacy-balance-gate-transition-direction.md",
+  "sha256": "d2997ec3ebda829a18cfa18c0c08c19a6f0f446bcef975f3bd211fc81111088e",
+  "bytes": 3852
+ },
+ {
+  "path": "decisions/D-019-g002-balance-criteria-applicability.md",
+  "sha256": "db369f14df8125734146c8b7feb643e58a4ce8c2780fc211e23a9f59a85c62c7",
+  "bytes": 5895
+ },
+ {
+  "path": "decisions/D-021-owner-authorizes-text-build.md",
+  "sha256": "9df4329db4178c6d573c6121007e0dbe1109abca068e1c303386eb94cbbd3575",
+  "bytes": 3514
+ },
+ {
+  "path": "goals/G-002-final-boss/22-game-director-to-owner.md",
+  "sha256": "6dba531e80884be8b1d1b12b2448b1dfc3db6ef013e1179d955e0e30dce555ff",
+  "bytes": 10455
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ }
+]
