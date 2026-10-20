@@ -141,14 +141,28 @@ def probe_inputs():
     return accepted
 
 
+def bots(rooms, fps):
+    return {
+        name: [dict(room=r, **play(r, fps, name == "skilled")) for r in rooms]
+        for name in ("simple", "skilled")
+    }
+
+
 def main():
     rooms = [r for r in ("1", "2", "3", "4", "5") if r in game.ROOMS]
     report = {"rooms": rooms, "new_inputs": probe_inputs(), "fps": {}}
     for fps in (30, 60):
-        report["fps"][str(fps)] = {
-            name: [dict(room=r, **play(r, fps, name == "skilled")) for r in rooms]
-            for name in ("simple", "skilled")
-        }
+        report["fps"][str(fps)] = bots(rooms, fps)
+    # Rooms a build adds beyond 1-5 (Phase 10), apart from empty and practice rooms. Builds
+    # without them report exactly as before.
+    extra = [
+        r
+        for r in game.ROOMS
+        if r not in rooms and "empty" not in r and "practice" not in r
+    ]
+    if extra:
+        report["extra_rooms"] = extra
+        report["extra"] = {str(fps): bots(extra, fps) for fps in (30, 60)}
     print(json.dumps(report, sort_keys=True))
 
 

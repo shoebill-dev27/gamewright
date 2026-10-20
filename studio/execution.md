@@ -18,7 +18,8 @@ defines what an isolated runtime must guarantee when one is used.
    on the operation's write list are written. Everything else is discarded and never enters a
    later packet. Each operation sees earlier work only through artifacts.
 4. **Steps do not route; Route does not do the work.** A Step writes only its one outgoing Handoff
-   (or Escalation) and the project files its Role may write. Only Route and Resume write `goal.md`.
+   (or Escalation) and the project files its Role may write. Only Route and Resume write `goal.md`;
+   the Route that closes a Goal also refreshes `project.md`'s `## Current state` and nothing else.
    The executor of a Step never chooses which Role runs next: its `to` is a proposal that a
    separate Route executor confirms or changes, using artifacts only. Only the runtime appends to
    the Goal log (`orchestration.md`); it is on no write list.

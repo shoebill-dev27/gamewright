@@ -114,6 +114,9 @@ files you put in its Load list.
 
 Fill the Goal record's **Outcome** for the Owner: results, Decisions made, next issues (proposed
 new Goals), and items needing the Owner. Set `status: done` (or `abandoned`, with the reason).
+Then bring `project.md`'s `## Current state` up to date with what exists now (build, content,
+known problems, how to run it; 1,500 characters at most), so the next Goal starts from the facts.
+Nothing else in `project.md` changes: the rest belongs to the Owner.
 
 Owner-facing text — the Outcome, Escalation briefs, and the Studio's replies to the Owner — uses
 the project's `owner_language`. Other artifacts use whatever language the project's executors

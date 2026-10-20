@@ -469,6 +469,37 @@ def check_kept(before, after, names):
     ]
 
 
+CURRENT_STATE_MAX = 1_500
+
+
+def check_project_update(before, after, closing):
+    """At Close the Studio refreshes project.md's Current state; the rest belongs to the Owner."""
+    if not closing:
+        return [
+            "project.md: update ## Current state only at Close (the Route that sets the Goal "
+            "done or abandoned)"
+        ]
+    errors = []
+    if parse(before)[0] != parse(after)[0]:
+        errors.append("project.md: keep the frontmatter as it was")
+    names = sorted((headings(before) | headings(after)) - {"Current state"})
+    errors += [
+        f"project.md: keep ## {name} as it was; only ## Current state changes at Close"
+        for name in names
+        if section(before, name).split() != section(after, name).split()
+    ]
+    rest = lambda text: text.replace(section(text, "Current state"), "", 1).split()
+    if not errors and rest(before) != rest(after):
+        errors.append("project.md: change only the text of ## Current state")
+    size = len(section(after, "Current state").strip())
+    if size > CURRENT_STATE_MAX:
+        errors.append(
+            f"project.md: ## Current state has {size} characters (limit 1,500); say what exists "
+            "now (build, content, known problems, how to run it), not how it came about"
+        )
+    return errors
+
+
 def check_decision(name, text, decided_by=None):
     meta, body = parse(text)
     errors = (
@@ -924,6 +955,10 @@ def build_route(project, gdir, records=None, since=None):
             for rel in rels
         ]
         + [
+            "project.md: only in the Route that closes the Goal, and only its ## Current state "
+            "(at most 1,500 characters)"
+        ]
+        + [
             f"{grel}/NN-studio-to-<role or owner>.md: up to {MAX_NEW_HANDOFFS} new artifacts, "
             f"consecutive NN starting at {seq:02d}",
             f"@need: instead of all other files, once: a file block `<<<FILE @need` with one path per "
@@ -936,9 +971,21 @@ def build_route(project, gdir, records=None, since=None):
     before = (gdir / "goal.md").read_text(encoding="utf-8")
 
     def validate(files):
-        errors = check_writes(files, [f"{grel}/goal.md"] + rels + news, project)
+        errors = check_writes(
+            files, [f"{grel}/goal.md", "project.md"] + rels + news, project
+        )
         if f"{grel}/goal.md" not in files:
             return errors + ["goal.md must be written"]
+        if "project.md" in files:
+            closing = parse(files[f"{grel}/goal.md"])[0].get("status") in (
+                "done",
+                "abandoned",
+            )
+            errors += check_project_update(
+                (project / "project.md").read_text(encoding="utf-8"),
+                files["project.md"],
+                closing,
+            )
         errors += check_goal(files[f"{grel}/goal.md"])
         errors += check_goal_size(files[f"{grel}/goal.md"])
         errors += check_kept(
