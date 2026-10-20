@@ -1,0 +1,121 @@
+[
+ {
+  "case": "076-step-qa",
+  "variant": "old",
+  "sample": 1,
+  "verdict": "missing",
+  "missing": [
+   "Constraints",
+   "Context",
+   "Decisions already made",
+   "Expected output",
+   "Findings",
+   "Open questions"
+  ],
+  "output_tokens": null
+ },
+ {
+  "case": "076-step-qa",
+  "variant": "new",
+  "sample": 1,
+  "verdict": "complete",
+  "missing": [],
+  "output_tokens": null
+ },
+ {
+  "case": "076-step-qa",
+  "variant": "old",
+  "sample": 2,
+  "verdict": "complete",
+  "missing": [],
+  "output_tokens": null
+ },
+ {
+  "case": "076-step-qa",
+  "variant": "new",
+  "sample": 2,
+  "verdict": "complete",
+  "missing": [],
+  "output_tokens": 22554
+ },
+ {
+  "case": "098-step-qa",
+  "variant": "old",
+  "sample": 1,
+  "verdict": "complete",
+  "missing": [],
+  "output_tokens": 10120
+ },
+ {
+  "case": "098-step-qa",
+  "variant": "new",
+  "sample": 1,
+  "verdict": "complete",
+  "missing": [],
+  "output_tokens": 13117
+ },
+ {
+  "case": "098-step-qa",
+  "variant": "old",
+  "sample": 2,
+  "verdict": "missing",
+  "missing": [
+   "Constraints",
+   "Context",
+   "Decisions already made",
+   "Expected output",
+   "Findings",
+   "Open questions",
+   "Task"
+  ],
+  "output_tokens": 11115
+ },
+ {
+  "case": "098-step-qa",
+  "variant": "new",
+  "sample": 2,
+  "verdict": "complete",
+  "missing": [],
+  "output_tokens": 14318
+ },
+ {
+  "case": "105-step-qa",
+  "variant": "old",
+  "sample": 1,
+  "verdict": "missing",
+  "missing": [
+   "Constraints",
+   "Context",
+   "Decisions already made",
+   "Expected output",
+   "Findings",
+   "Load",
+   "Open questions"
+  ],
+  "output_tokens": 2245
+ },
+ {
+  "case": "105-step-qa",
+  "variant": "new",
+  "sample": 1,
+  "verdict": "complete",
+  "missing": [],
+  "output_tokens": 2736
+ },
+ {
+  "case": "105-step-qa",
+  "variant": "old",
+  "sample": 2,
+  "verdict": "complete",
+  "missing": [],
+  "output_tokens": 2569
+ },
+ {
+  "case": "105-step-qa",
+  "variant": "new",
+  "sample": 2,
+  "verdict": "complete",
+  "missing": [],
+  "output_tokens": 2721
+ }
+]

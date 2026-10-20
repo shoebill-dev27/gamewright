@@ -76,3 +76,11 @@ Results and findings: `docs/phase7.md`.
 | `runs/p8-combat-run` | A copy of `runs/p7-combat-run` continued with EDIT blocks (records from 065 on) until the Goal closed: Review pass 4 judged it met (97 operations, 167 executors in all, 66 of them in Phase 8, no Owner questions). Engineers wrote 52 EDIT blocks against 8 whole build files, and their output per attempt fell by about 80%. The held-out measurement in `measurement.json` meets S1–S3. The Outcome in `goal.md` still ends with a stray `>>>REPLACE` line, from the marker slip the runner now rejects. |
 
 Results and findings: `docs/phase8.md`.
+
+## Phase 9: the answer's shape at the end of a Step packet
+
+| Run | What it shows |
+|---|---|
+| `runs/p9-answer-shape-replay` | The three recorded QA packets whose final answers dropped the Handoff's sections, re-sent twice as they were and twice with the Phase 9 ending (12 executors). As they were, 3 of 6 answers dropped sections; with the ending, 0 of 6 (one-sided Fisher p ≈ 0.09). The ending used there predates the recipient sentence added afterwards. `replay.py` re-runs it. |
+
+Results and findings: `docs/phase9.md`.

@@ -41,6 +41,7 @@ def test_a_step_packet_ends_with_the_answer_shape(ws, monkeypatch):
     tail = answer_shape(sessions[0])
     assert f"{G}/02-game-designer-to-<recipient>.md" in tail
     assert ", ".join(sr.REQUIRED["handoff"]) in tail
+    assert "the recipient the incoming Handoff's Expected output names" in tail
     assert "<<<EDIT" in tail
 
 

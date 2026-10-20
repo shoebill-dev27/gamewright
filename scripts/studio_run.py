@@ -628,7 +628,8 @@ def answer_shape(out, escalates):
     lines = [
         f"- Write the outgoing Handoff as {out.replace('*', '<recipient>')} with every section of "
         f"studio/templates/handoff.md, in this order: {', '.join(REQUIRED['handoff'])}. Your own "
-        "report goes inside Findings."
+        "report goes inside Findings. Address it to the recipient the incoming Handoff's "
+        "Expected output names, if it names one."
     ]
     if escalates:
         lines.append(

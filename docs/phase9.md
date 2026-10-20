@@ -1,6 +1,6 @@
-# Phase 9 設計案：長い packet の末尾で書式を思い出させ、ファイルへの混入を防ぐ
+# Phase 9：長い packet の末尾で書式を思い出させ、ファイルへの混入を防ぐ
 
-状態: **設計案（承認待ち）**
+状態: **完了**（2026-10-17 承認・実装、2026-10-20 再送による比較）。設計は §1〜§7、結果は §8。
 
 ## 1. 課題（Phase 8 の実測。`runs/p8-combat-run`、`docs/phase8.md` §8.4〜§8.6）
 
@@ -35,10 +35,13 @@
   ```text
   ## Your answer
 
-  - The outgoing Handoff keeps every section of studio/templates/handoff.md, in order:
-    Task, Context, Findings, Decisions already made, Constraints, Open questions,
-    Expected output, Load. Put your own report inside Findings.
-  - Wrap every file in <<<FILE path … >>>END or <<<EDIT path … >>>END (studio/execution.md).
+  - Write the outgoing Handoff as goals/<goal>/<NN>-<role>-to-<recipient>.md with every
+    section of studio/templates/handoff.md, in this order: Task, Context, Findings,
+    Decisions already made, Constraints, Open questions, Expected output, Load. Your own
+    report goes inside Findings. Address it to the recipient the incoming Handoff's
+    Expected output names, if it names one.
+  - Wrap each file in a <<<FILE path … >>>END or <<<EDIT path … >>>END block (Output
+    protocol in studio/execution.md).
   ```
 
 - 節の名前は、ランナーが検証に使う必須の節の一覧から、テンプレートの順に作る。一覧が変われば一緒に変わる（任意の `## Sender assessment` は含めない）。
@@ -107,3 +110,57 @@
 - 答えの Handoff に、必須の節がすべてあるかを数える。
 - 確かめること: 末尾の節で、節の欠けがなくなるか、減るか。
   - 答えが最終回答ではなく、さらに実行を求めた場合は、判定から除いて数を報告する。
+
+## 8. 結果
+
+### 8.1 決定的テスト
+
+- 119 件すべて成功（Phase 5〜9 のテストの一部には bubblewrap が必要）。
+- `tests/test_phase9.py` の 9 件:
+  - **packet の末尾:**
+    - Step の packet の最後が「答えの形」の節である。そこには、出す Handoff の名前、必須の節（ランナーの一覧と同じ順）、宛先の決め方、ブロックの形式が書かれている。
+    - 実行要求の後の packet でも、実行結果より後に来る。
+  - **混入した行:**
+    - 次の 4 つの場合が拒否される: ファイル全体のブロック、EDIT ブロック、崩れた閉じ記号、新しいファイル。
+    - 実行要求の変更案も拒否され、サンドボックスには届かない。
+    - 元のファイルにある行は、残しても消してもよい。
+  - **記録の再生:** Phase 7 で D-007 に `</parameter>` が入った出力（`p7-combat-run` の 043）は、いまは拒否される。
+- ミューテーション確認: 末尾の節を外すと 2 件、混入の確認を外すと 6 件が失敗する（Phase 8 のテストを含む）。
+
+### 8.2 再送による比較：`runs/p9-answer-shape-replay`（Claude、Sonnet）
+
+QA が節を欠いた 3 つの packet を記録から取り出した。それぞれを、そのままと、末尾の節を足したもので 2 回ずつ送った（計 12 回）。
+
+| packet | そのまま | 末尾の節あり |
+|---|---|---|
+| 076 の 3 回目 | 欠け 6 節 / 完全 | 完全 / 完全 |
+| 098 の 4 回目 | 完全 / 欠け 7 節 | 完全 / 完全 |
+| 105 の 2 回目 | 欠け 7 節 / 完全 | 完全 / 完全 |
+| **計** | **6 回中 3 回欠けた** | **6 回中 0 回** |
+
+- 12 回とも最終回答で、さらに実行を求めた答えはなかった。
+- 末尾の節があると、6 回とも必須の節がそろった。報告は Findings の中に入っていた。
+- **ただし、確かなことは言えない。** そのままでも半分は完全で、欠けるかどうかは毎回の偶然に左右される。6 回対 6 回では、差が偶然である確率も 1 割ほど残る（片側のフィッシャーの正確検定で p ≈ 0.09）。それでも、3 つの packet のどれでも同じ向きに出た。
+- 末尾の節があると、出力は少し長くなった。必須の節の分である。
+  - 098: 約 10,600 → 13,700 トークン。
+  - 105: 約 2,400 → 2,700 トークン。
+- 実行の途中で、Claude の週の利用上限に達して一度止まった。上限が戻ってから、残りを送った。
+- **宛先の言葉を足した**（比較の後の変更）。
+  - 末尾の節ありの 1 回（076）が、`studio` 宛てという指示を守らず、エンジニア宛てに書いた。そのままの 6 回は、すべて `studio` 宛てだった。
+  - 末尾の `<recipient>` が、宛先を自由に選んでよいように見えたのかもしれない。
+  - そこで、「受け取った Handoff の Expected output が宛先を指定していれば、それに従う」の 1 文を足した。これは Step の規則（`orchestration.md`）と同じ内容である。
+  - 足した後の文で、再送はしていない。
+
+### 8.3 見つかったこと
+
+1. **長い packet の終わりで規則を忘れることは、本当に起きる。** そのままの packet でも、半分の回で起きた。拒否のメッセージを見たやり直しで直るので、害はやり直し 1 回分のコストである。
+2. **末尾の短い一言で防げそうだ。** 必須の節の名前と宛先だけなら、packet はほとんど長くならない（数行）。
+3. **ランナーは、宛先の指示を確かめていない。** Expected output に「`studio` 宛て」と書かれていても、別の宛先の Handoff を通してしまう。指示は自由な文章で、確実に読み取るのが難しいためである。
+
+### 8.4 次の候補
+
+| 優先 | 内容 |
+|---|---|
+| 1 | 宛先の指示を、Handoff の決まった欄（例: `reply_to: studio`）にして、ランナーが確かめられるようにする |
+| 2 | 次に長い Goal を動かすとき、末尾の節の効果を実地で数える（Phase 8 では、QA の 19 回中 3 回が節を欠いた） |
+| 3 | 人間のプレイヤーによる確認の手順（Phase 8 から見送り中） |
