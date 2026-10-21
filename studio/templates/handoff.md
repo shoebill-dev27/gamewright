@@ -5,15 +5,16 @@ seq: N
 from: <role-id | studio>
 to: <role-id | studio>
 stage: <stage the recipient performs>
-outcome: <sender's step result: routed | done | pass | fail | question | goal-met | goal-not-met>
+outcome: <sender's step result: routed | done | partial | pass | fail | question | goal-met | goal-not-met>
 ---
 # NN: <from> → <to> — <one-line task>
 
 <!-- Self-contained: the recipient (any executor, any session) starts from this file and its Load
 list alone. The sender fills Task through Open questions and drafts Expected output; the Studio
 checks it against the recipient's "Works from", settles Expected output and fills Load when routing.
-outcome: routed = written by the Studio; done = work finished, no verdict; pass/fail = verification
-verdict; question = handed back with an open question; goal-met/goal-not-met = Review verdict.
+outcome: routed = written by the Studio; done = work finished, no verdict; partial = work under way,
+nothing missing, to be continued by the same Role; pass/fail = verification verdict; question =
+handed back with an open question; goal-met/goal-not-met = Review verdict.
 Paths: studio/... is relative to the Studio root; everything else to the Project Context directory.
 file#section: the section heading's slug, lowercase with hyphens (project.md#current-state).
 Previous handoff = the Handoff the sender worked from (one step of history). -->

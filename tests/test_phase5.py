@@ -270,10 +270,16 @@ def test_run_rounds_are_limited(ws, monkeypatch):
             "not a file your Role may write",
         ),
         (
+            "art-director",
+            ["studio/roles/art-director.md"],
+            block("@run/play", ""),
+            "not available here",
+        ),
+        (
             "technical-director",
             ["studio/roles/technical-director.md"],
             block("@run/play", ""),
-            "not available here",
+            "you may run only tests, trace",
         ),
     ],
 )

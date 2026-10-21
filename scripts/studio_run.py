@@ -600,9 +600,9 @@ class Packet:
         # Run requests (Steps of Roles that may run the build): see run_round().
         self.runs, self.build, self.write_patterns, self.rounds = [], None, [], 0
         self.proposed, self.run_log, self.base_inputs = {}, [], None
-        self.answer = (
-            ""  # the answer's shape, repeated after every input (see answer_shape)
-        )
+        # The answer's shape, repeated after every input (answer_shape); a Step's outgoing
+        # Handoff pattern (build_check).
+        self.answer, self.out = "", None
 
     def add(self, label, content):
         self.inputs.append((label, content.rstrip() + "\n"))
@@ -654,7 +654,7 @@ class Packet:
         ]
 
 
-def answer_shape(out, escalates):
+def answer_shape(out, escalates, checked=False):
     """A short reminder at the very end of a Step packet, after long inputs and run results."""
     lines = [
         f"- Write the outgoing Handoff as {out.replace('*', '<recipient>')} with every section of "
@@ -667,6 +667,12 @@ def answer_shape(out, escalates):
             "- An Escalation instead keeps the sections of studio/templates/escalation.md: "
             + ", ".join(REQUIRED["escalation"])
             + "."
+        )
+    if checked:
+        lines.append(
+            "- The runtime tests the build as you write it and adds the result to your Handoff "
+            "(## Build check): you need not ask for another test run after your final answer. If "
+            "the work is not finished, say what remains and set outcome: partial."
         )
     lines.append(
         "- Wrap each file in a <<<FILE path … >>>END or <<<EDIT path … >>>END block (Output "
@@ -780,8 +786,13 @@ def build_step(project, gdir, handoff):
         w.replace("*", "<path> (full file content)" if w == f"{build}/*" else "<name>")
         for w in extra
     ]
-    packet.answer = answer_shape(out, policy["escalates"])
     commands = run_commands(project)
+    packet.out = out
+    packet.answer = answer_shape(
+        out,
+        policy["escalates"],
+        bool(build) and "@build" in policy["writes"] and "tests" in commands,
+    )
     runs = [r for r in policy["runs"] if r in commands]
     if runs:
         packet.runs, packet.build, packet.write_patterns = runs, build, [out] + extra
@@ -1481,6 +1492,50 @@ def stray_lines(project, files):
     return errors
 
 
+CHECK_TAIL = 2_000
+
+
+def build_check(project, packet, files):
+    """After a Step writes build files, run the project's tests on the build exactly as written and
+    add the result to the outgoing Handoff (## Build check). A failure is recorded, not rejected.
+    """
+    build, command = project_meta(project).get("build"), run_commands(project).get(
+        "tests"
+    )
+    written = {p: c for p, c in files.items() if build and p.startswith(f"{build}/")}
+    handoff = next(
+        (p for p in files if fnmatch.fnmatch(p, getattr(packet, "out", "") or "-")),
+        None,
+    )
+    if packet.op != "Step" or not command or not written or not handoff:
+        return None
+    if parse(files[handoff])[0].get("kind") != "handoff":
+        return None
+    with tempfile.TemporaryDirectory(prefix="check-") as tmp:
+        work = Path(tmp) / "build"
+        shutil.copytree(project / build, work)
+        for path, content in written.items():
+            target = work / Path(path).relative_to(build)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(content, encoding="utf-8")
+        (work / SCRIPT_NAME).write_text("", encoding="utf-8")
+        code, output, seconds = sandboxed(
+            work, shlex.split(command.replace("{script}", SCRIPT_NAME))
+        )
+    note = (
+        f"## Build check\n\nThe runtime ran `run_tests` (`{command}`) on the build exactly as this "
+        f"step wrote it: exit {code} ({seconds} s).\n\n```text\n{output.rstrip()[-CHECK_TAIL:]}\n```\n\n"
+    )
+    text = files[handoff]
+    load = re.search(r"^## Load[ \t]*$", text, re.M)
+    files[handoff] = (
+        text[: load.start()] + note + text[load.start() :]
+        if load
+        else text.rstrip() + "\n\n" + note
+    )
+    return {"command": command, "exit": code, "seconds": seconds, "output": output}
+
+
 # --- Build runs (sandboxed) -------------------------------------------------------------------
 
 MAX_RUNS, RUN_TIMEOUT, RUN_OUTPUT_MAX = 3, 30, 20_000
@@ -1749,6 +1804,17 @@ def execute(ws, packet, validate, args, role=None):
             )
             continue
         if not errors:
+            try:
+                check = build_check(ws / "project", packet, files)
+            except RuntimeError as error:
+                record.update(status="error", errors=[str(error)])
+                save_record(rec, record)
+                raise
+            if check:
+                (rec / "build-check.json").write_text(
+                    json.dumps(check, indent=1, ensure_ascii=False), encoding="utf-8"
+                )
+                print(f"[{rec.name}] build check: run_tests exit {check['exit']}")
             goal_file = next((p for p in files if p.endswith("/goal.md")), None)
             goal_path = ws / "project" / goal_file if goal_file else None
             before = (

@@ -2,6 +2,7 @@
 kind: role
 id: technical-director
 writes: decisions/*
+runs: tests, trace
 ---
 # Role: Technical Director
 

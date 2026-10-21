@@ -67,6 +67,12 @@ that final answer. Commands run in a sandbox: only the system's programs (read-o
 copy are visible, there is no network, and each command is stopped after 30 seconds. Without a
 sandbox, build commands are not run. Rounds, scripts and outputs are recorded.
 
+**Build check.** When a Step's final answer writes build files and the project declares
+`run_tests`, the runtime runs it in the sandbox on the build exactly as written, before writing,
+and adds the result (command, exit code, end of the output) to the outgoing Handoff under
+`## Build check`, before `## Load`. A failing check is recorded, not rejected: the next Route
+decides where the work goes. A Step therefore does not need a run after its final answer.
+
 Run output carries what the command prints. A Playtester's commands therefore print only what a
 player perceives; internal state belongs in commands that only other Roles may run.
 
@@ -82,7 +88,7 @@ A runtime may repeat Steps and Routes without a person starting each one. It run
 | Output rejected after its retry | A person looks at the record; nothing was written. |
 | Runtime error | The executor could not run (e.g., a usage limit); continue later. |
 | Operation budget reached | A person decides whether to continue. The budget is checked between cycles, so a cycle (its Steps and Route) is never cut in half. |
-| No progress | A Role handed back `question` twice and would be opened again, or a Role would be opened a 4th time in one continuous run. A mechanical backstop for the loop limits in `orchestration.md`. |
+| No progress | A Role handed back `question` twice and would be opened again, or a Role would be opened a 4th time in one continuous run (`partial` counts only toward the second). A mechanical backstop for the loop limits in `orchestration.md`. |
 
 Every stop is recorded with its reason, what the Owner should read, and how to continue. An
 Escalation opened while independent steps go on is reported as soon as it opens, and every stop

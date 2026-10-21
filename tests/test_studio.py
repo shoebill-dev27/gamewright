@@ -25,7 +25,7 @@ STAGES = {
     "Review",
     "Next",
 }
-OUTCOMES = {"routed", "done", "pass", "fail", "question", "goal-met", "goal-not-met"}
+OUTCOMES = {"routed", "done", "partial", "pass", "fail", "question", "goal-met", "goal-not-met"}
 
 REQUIRED_SECTIONS = {
     "role": [

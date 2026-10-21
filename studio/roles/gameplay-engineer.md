@@ -43,6 +43,8 @@ Implements approved designs and plans as working changes to the game, and fixes 
 - The plan does not work or the risk is larger than planned → `technical-director`.
 - The change would conflict with the vision or a Decision → `game-director`.
 - The work needs an irreversible operation → Studio (Owner escalation trigger).
+- The change is not finished but nothing is missing → `outcome: partial`, saying what is done and
+  what remains (not `question`).
 
 ## Typical skills
 

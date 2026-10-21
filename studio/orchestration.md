@@ -201,3 +201,6 @@ No unbounded loops (Phase 1 has no autonomous loop at all, but routes can cycle)
   become an escalation about scope or the Goal itself.
 - A step hands back `question` twice for the same missing input, with nothing new supplied in
   between → do not route it to a Role again; escalate to the Owner for that input.
+- `partial` is not a question: nothing is missing, so route the rest of the work back to the same
+  Role and never escalate for it. The same work handed back `partial` three times in a row →
+  route to `technical-director` to split or re-plan it.
