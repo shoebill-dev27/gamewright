@@ -123,3 +123,10 @@ def test_files_asked_for_after_a_run_round_stay_for_the_next(tmp_path, monkeypat
     monkeypatch.setitem(sr.RUNTIMES, "fake", runtime(outputs, sessions))
     sr.do_step(workspace, args(goal="G-001"))
     assert "<<<FILE design/combat.md\n" in sessions[3]
+
+
+def test_asking_for_a_directory_names_its_files(ws):
+    errors = sr.check_need(ws / "project", ["design/"])
+    assert any(
+        "is a directory" in e and "design/combat.md" in e for e in errors
+    ), errors

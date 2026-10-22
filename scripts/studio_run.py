@@ -986,7 +986,17 @@ def check_need(project, entries, role=None):
             errors.append(f"@need: {entry} is outside the project and Studio files")
             continue
         path, _ = resolve(project, entry)
-        if not path.is_file():
+        if path.is_dir():
+            inside = sorted(
+                f"{file.rstrip('/')}/{f.name}{'/' if f.is_dir() else ''}"
+                for f in path.iterdir()
+                if f.name != "__pycache__"
+            )
+            errors.append(
+                f"@need: {entry} is a directory; ask for its files one per line, e.g. "
+                + ", ".join(inside[:8])
+            )
+        elif not path.is_file():
             errors.append(f"@need: {entry} does not exist")
         elif anchor and slug(anchor) not in {
             slug(h) for h in headings(path.read_text(encoding="utf-8"))
