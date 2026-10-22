@@ -449,8 +449,9 @@ def goal_ops(records, gid):
 
 def budget_line(used, budget):
     return f"{used} of {budget} operations used" + (
-        " — over budget: add no stages; route the planned work the Owner request still needs, "
-        "skip the rest (game-director decides the scope), or escalate the cost to the Owner"
+        " — over budget: add no stages except a game-director step that cuts the remaining "
+        "work to what the Owner request needs, or an owner step that escalates the cost; planned "
+        "steps may still be opened"
         if used >= budget
         else ""
     )
@@ -1096,15 +1097,21 @@ def build_route(project, gdir, records=None, since=None):
             files, [f"{grel}/goal.md", "project.md"] + rels + news, project
         )
         new_goal = files.get(f"{grel}/goal.md", "")
-        if parse(new_goal)[0].get("budget") != parse(before)[0].get("budget"):
+        raw = parse(new_goal)[0].get("budget")
+        if (raw or parse(before)[0].get("budget")) and goal_budget(new_goal) != budget:
             errors.append(
                 "goal.md: keep budget as it was; only the Owner changes it (through Resume)"
             )
-        if used >= budget and len(route_rows(new_goal)) > len(route_rows(before)):
+        old_rows = {r["n"] for r in route_rows(before)}
+        added = [r for r in route_rows(new_goal) if r["n"] not in old_rows]
+        if used >= budget and any(
+            r["role"] not in ("game-director", "owner") for r in added
+        ):
             errors.append(
-                f"goal.md: the Goal has used {used} of its {budget} operations, so add no stages: "
-                "route the planned work the Owner request still needs, mark the rest skipped "
-                "(game-director decides the scope within the Goal), or escalate the cost to the Owner"
+                f"goal.md: the Goal has used {used} of its {budget} operations, so add no stages "
+                "but one: a game-director step to cut the remaining work to what the Owner request "
+                "needs (the rest is then skipped), or an owner step to escalate the cost. Planned "
+                "steps may still be opened"
             )
         if f"{grel}/goal.md" not in files:
             return errors + ["goal.md must be written"]

@@ -204,9 +204,10 @@ No unbounded loops (Phase 1 has no autonomous loop at all, but routes can cycle)
 - A step hands back `question` twice for the same missing input, with nothing new supplied in
   between → do not route it to a Role again; escalate to the Owner for that input.
 - **Budget.** The runtime counts a Goal's operations and shows them against `goal.md`'s budget.
-  Once the budget is used, a Route adds no stages: it routes the planned work the Owner request
-  still needs, marks the rest `skipped` (what the request needs is scope within the Goal, so
-  `game-director` decides it), or escalates the cost to the Owner. Only the Owner changes the
+  Once the budget is used, a Route adds no stages but one: a `game-director` step that cuts the
+  remaining work to what the Owner request needs (scope within the Goal; the rest is then
+  `skipped`), or an `owner` step that escalates the cost. Planned steps may still be opened, and
+  the loop limits' re-plan steps give way to the scope decision. Only the Owner changes the
   budget, in a Resume.
 - `partial` is not a question: nothing is missing, so route the rest of the work back to the same
   Role and never escalate for it. The same work handed back `partial` three times in a row →

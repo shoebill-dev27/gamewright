@@ -83,7 +83,7 @@ def test_the_route_sees_the_budget(ws, monkeypatch):
 def test_over_budget_a_route_adds_no_stages(ws, monkeypatch):
     with pytest.raises(sr.Rejected):
         route(ws, monkeypatch, [DONE_ROW, VERIFY, EXTRA], used=30)
-    assert any("add no stages" in e for e in route_errors(ws)), route_errors(ws)
+    assert any("add no stages but one" in e for e in route_errors(ws)), route_errors(ws)
 
 
 def test_over_budget_a_route_may_still_route_planned_work(ws, monkeypatch):
@@ -116,3 +116,20 @@ def test_operations_are_counted_per_goal(tmp_path):
         record = {"op": op, "goal": gid, "attempts": [{}] if op != "Run" else []}
         (records / name / "record.json").write_text(json.dumps(record))
     assert sr.goal_ops(records, "G-001") == 3
+
+
+def test_over_budget_a_route_may_add_a_scope_decision(ws, monkeypatch):
+    scope = (3, "Decide", "game-director", "make-decision", "planned", "—")
+    route(ws, monkeypatch, [DONE_ROW, VERIFY, scope], used=31)
+    assert "| Decide | game-director |" in (ws / "project" / G / "goal.md").read_text()
+
+
+def test_writing_the_budget_a_goal_already_has_is_no_change(ws, monkeypatch):
+    start(ws, QA_OPEN, [(*DONE_ROW[:4], "open", QA_OPEN[0])])
+    write(ws, f"{G}/goal.md", goal([(*DONE_ROW[:4], "open", QA_OPEN[0])], budget=None))
+    write(ws, f"{G}/02-qa-to-studio.md", handoff(2, "qa", "studio", "Observe", []))
+    answer = block(
+        f"{G}/goal.md", goal([DONE_ROW], status="done", budget=sr.DEFAULT_BUDGET)
+    )
+    monkeypatch.setitem(sr.RUNTIMES, "fake", runtime([answer], []))
+    sr.do_route(ws, args(goal="G-001", since=1))

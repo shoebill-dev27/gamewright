@@ -39,7 +39,8 @@ file block. Its manifest lists every input with a content hash.
 
 Route and Resume packets carry `goal_budget`: the operations the runtime has run on the Goal
 against `goal.md`'s budget (40 for a Goal without one). A Route past the budget that adds stages
-to the route table is rejected (`orchestration.md`, Loop limits).
+other than one `game-director` scope step or `owner` step is rejected (`orchestration.md`, Loop
+limits).
 
 A Step's packet is derived from its Handoff alone: **the Load list is the allowlist.** The project
 file list gives names only, never contents. It ends, after every input and any build-run results,
