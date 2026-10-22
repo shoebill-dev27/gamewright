@@ -1,0 +1,41 @@
+The test is the likely culprit, not the game code. I'm sending the corrected test plus the first runs now. This is not the final answer, and the handoff to qa comes after the results.
+
+My reasoning so far: at 30 FPS, `hurt_left` is 0.1 s when the dash starts, and the dash lasts 8 frames. The test adds a zero-velocity shot on the player before each frame that is still dash-active, and it never removes them. On the final frame (t=0.9667) the dash ends and the flag clears before `_update_shots` runs, so the shot left over from the previous frame hits. The skip in the test only stopped a new shot being added on that frame. The failure is therefore in the test setup, not in the fix. I'm keeping the assertions and clearing the shots before each frame.
+
+<<<EDIT repo/tests/test_game.py
+<<<<<<< SEARCH
+            while game.dash_left > 0:
+                if game.dash_left - game.dt > 1e-6:  # dash still active after this frame
+=======
+            while game.dash_left > 0:
+                game.shots.clear()  # shots from earlier frames must not carry into the final frame
+                if game.dash_left - game.dt > 1e-6:  # dash still active after this frame
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE @run/tests/suite
+>>>END
+
+<<<FILE @run/trace/scriptA-60
+room empty
+fps 60
+end 4
+player 8 4
+spawn grub 10 4
+spawn spitter 14 4
+0.2 dash right
+1.0 dash left
+2.0 dash right
+>>>END
+
+<<<FILE @run/trace/scriptA-30
+room empty
+fps 30
+end 4
+player 8 4
+spawn grub 10 4
+spawn spitter 14 4
+0.2 dash right
+1.0 dash left
+2.0 dash right
+>>>END

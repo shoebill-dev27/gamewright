@@ -711,7 +711,14 @@ def test_recorded_packets_match_their_manifests_and_load_lists():
             expected = {"studio/execution.md#executor-instructions", incoming, *loads}
             assert expected <= {m["path"] for m in manifest}, rec
             extra = {m["path"] for m in manifest} - expected
-            assert all(p.startswith("studio/templates/") for p in extra), (rec, extra)
+            load = sr.section(sr.parse((project / incoming).read_text())[1], "Load")
+            assert all(
+                p.startswith("studio/templates/")
+                or (
+                    p.startswith("@files/") and p[len("@files/") :] in load
+                )  # names only
+                for p in extra
+            ), (rec, extra)
 
 
 @pytest.mark.skipif(not run_records(), reason="no recorded runs")

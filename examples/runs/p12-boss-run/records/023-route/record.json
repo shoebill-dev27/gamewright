@@ -1,0 +1,78 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-002",
+ "attempts": [
+  {
+   "runtime": "codex",
+   "session_id": "01a1596c-cf36-76c0-93da-85a5d0f8f3f7",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 28249,
+    "cached_input_tokens": 7680,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 74,
+    "reasoning_output_tokens": 25
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 1,
+   "started": "2026-10-20T22:07:45",
+   "seconds": 5.7,
+   "errors": [],
+   "need": [
+    "goals/G-002-final-boss/16-technical-director-to-studio.md",
+    "decisions/D-020-g002-host-scope-and-plan-entry-conditions.md"
+   ]
+  },
+  {
+   "runtime": "codex",
+   "session_id": "01a1596c-e583-77e1-b788-f7606026d77a",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 35397,
+    "cached_input_tokens": 7680,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 3872,
+    "reasoning_output_tokens": 22
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 2,
+   "started": "2026-10-20T22:07:51",
+   "seconds": 71.4,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-002-final-boss/19-studio-to-technical-director.md": "a67efd95f7aa75c84f17f489f6c1b75dbe0f8c437953eaabc381684e87fabe7c",
+  "goals/G-002-final-boss/goal.md": "93befb13d9d6692bb1230d82684cad545f296a6028dc94ed4e318205f436429c"
+ },
+ "decision": {
+  "new": [
+   "technical-director",
+   "Plan"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "technical-director",
+    "Plan"
+   ]
+  ]
+ },
+ "seen_through_seq": 19
+}

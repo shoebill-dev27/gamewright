@@ -1,0 +1,13 @@
+Nothing has been run yet, so I'm starting with a trace run. It puts a grub next to the player and dashes through it at 60 FPS, to see whether contact during a dash does damage.
+
+<<<FILE @run/trace/grub-dash-60
+room empty
+fps 60
+end 4
+player 8 4
+spawn grub 10 4
+spawn spitter 14 4
+0.2 dash right
+1.0 dash left
+2.0 dash right
+>>>END

@@ -1,0 +1,52 @@
+{
+ "op": "Resume",
+ "role": null,
+ "goal": "G-002",
+ "attempts": [
+  {
+   "runtime": "codex",
+   "session_id": "01a1649a-4762-7cf0-97a6-da2a4165a727",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 29839,
+    "cached_input_tokens": 7552,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 4358,
+    "reasoning_output_tokens": 98
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 1,
+   "started": "2026-10-23T02:13:14",
+   "seconds": 75.6,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "decisions/D-023-owner-confirms-verification-supply.md": "c9bc2441d23c3b10e4fa7b4482d790329c94145a531b4a41fd4dd198958e25c0",
+  "goals/G-002-final-boss/64-studio-to-game-designer.md": "b213f2679707506f8c072194687193116c5d2139c2f6f17b9516ab408593f737",
+  "goals/G-002-final-boss/63-studio-to-owner.md": "b60f90a187cfd925d8a3cb2c55def4e9f9024a0406dd064b93c1872bddab036f",
+  "goals/G-002-final-boss/goal.md": "d678de932ab0f6485f788a0c8d142a5a3f87b1f07d78e3206ca3eccae5ce3cac"
+ },
+ "decision": {
+  "new": [
+   "owner",
+   null
+  ],
+  "status": "active",
+  "open": [
+   [
+    "game-designer",
+    "Design"
+   ]
+  ]
+ },
+ "seen_through_seq": 64
+}

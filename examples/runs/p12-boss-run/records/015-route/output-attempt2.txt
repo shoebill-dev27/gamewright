@@ -1,0 +1,125 @@
+<<<EDIT goals/G-002-final-boss/goal.md
+<<<<<<< SEARCH
+- Design：open。D-016に基づき、ボスの攻撃・予兆・対処・反撃機会、継承と回復、勝敗・残弾・終端・再挑戦、入力と時刻、player viewの表示、30/60 FPSの受け入れ基準を仕様化する。旧第5部屋依存の基準とDecisionの保持・置換・変更要否を対応表にし、表現確認の必要性を提案する。
+=======
+- Design：done。D-017とfinal-boss-and-continuous-run.mdで詳細契約、30/60 FPSの受け入れ基準、旧基準対応表を確定。未実装・未検証。
+- Decide（既存Decisionとの整合）：open。D-006の旧3〜5部屋集計は新構成に適用できず、廃止・改訂は未採択。Game DirectorがD-015／D-016との整合、適用変更の方向とDesignerへ戻す境界を判断する。Studioは基準を廃止しない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+- Verify：Build後の独立確認が必要。30/60 FPS、連続到達・勝敗・再挑戦、共有戦闘ルールの回帰を含む。Art Directorの表現確認は攻撃・表示仕様で必要性が確定するまで tentative。
+=======
+- Verify：Build後の独立QAが必要。30/60 FPS、連続到達・勝敗・再挑戦、共有戦闘ルールの回帰、実機入力経路を含む。Art Directorの限定表現確認をplannedに確定。player viewの二攻撃、予兆と実弾、回復、HP、終端・retryの識別を対象とする。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| 4 | Design | game-designer | write-design-spec | open | 09-studio-to-game-designer.md |
+| 5 | Plan | technical-director | technical-plan | planned | — |
+=======
+| 4 | Design | game-designer | write-design-spec | done | 09-studio-to-game-designer.md → 結果: 10-game-designer-to-studio.md |
+| 4a | Decide | game-director | make-decision, prepare-owner-escalation | open | 11-studio-to-game-director.md |
+| 4b | Design | game-designer | make-decision, write-design-spec | tentative | — |
+| 5 | Plan | technical-director | technical-plan | planned | — |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| 8 | Verify | art-director | visual-review | tentative | — |
+=======
+| 8 | Verify | art-director | visual-review | planned | — |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+逐次実行する。Ownerが選択した案Aの経路に従い、方向Decisionの後にDesign・Planへ進む。Art DirectorのVerifyは攻撃・表示仕様に応じて確定する。現時点で並列Stepは開かない。
+=======
+逐次実行する。D-006との整合をGame Directorへ戻し、Designer権限のDecision変更・仕様補足が必要なら4bを実行する。4bはDirectorの結果で確定または省略する。その後Planへ進み、必要なDecision変更が解決するまでBuildを開かない。Art Directorの限定Verifyを実施する。現時点で並列Stepは開かない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+08の方向確定をもってDecideを完了し、D-016に基づくDesignを09で開く。旧第5部屋依存の基準と既存Decisionの対応整理も設計成果に含める。Plan以降の順序を維持し、Art Director確認は設計結果待ちのtentativeとする。
+=======
+10で詳細Designを完了。D-006の旧集計との具体的な衝突が判明したため、D-016の再検討条件に従い11でGame DirectorのDecideを先に開く。必要なDesignerのDecision変更を条件付きで追加し、Plan以降を維持する。テキスト表示契約に基づきArt Directorの限定Verifyをplannedへ確定。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Game Designerが `09-studio-to-game-designer.md` を実行し、詳細仕様、観測可能な受け入れ基準、旧基準・Decisionの対応表、未解決の依存をStudioへ返す。その後にTechnical DirectorのPlanを行い、実装の前提を確認する。
+=======
+Game Directorが `11-studio-to-game-director.md` を実行し、D-006との整合について方向・適用境界を判断する。DesignerによるDecision変更が必要なら具体的な依頼をStudioへ返す。判断後に必要なDesign補足とTechnical DirectorのPlanをルーティングする。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+未完了・進行中。D-015で連続ランと最終ボスの範囲を承認済み。D-016で、危険を読み、位置を選び、回避から反撃へ戻る判断を問う方向を確定した。詳細仕様、実装計画、実装、独立検証・体験評価はこれから行う。指定shaとの一致や実行挙動は未確認であり、静的調査は実行成功やQA合格を示さない。現時点で新たなOwner判断事項はなく、Designへ進む。Goalは閉じず、project.mdのCurrent stateは変更しない。
+=======
+未完了・進行中。D-015で範囲、D-016で体験方向、D-017で二攻撃のボス・回復・継承・終端・時刻・表示の詳細契約を確定した。旧第5部屋を前提とするD-006の適用変更は未採択のため、Game Directorへ整合判断を戻す。実装計画、実装、独立QA・限定Art確認・独立Play・Reviewは未実施。指定shaとの一致、実行成功、所要時間は未確認。現時点でOwnerへの新たな質問は開かず、Goalとproject.mdのCurrent stateは維持する。
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-002-final-boss/11-studio-to-game-director.md
+---
+kind: handoff
+goal: G-002
+seq: 11
+from: studio
+to: game-director
+stage: Decide
+outcome: routed
+---
+# 11: studio → game-director — 旧難度基準と新構成の適用境界を判断する
+
+## Task
+
+D-006の旧3〜5部屋集計と、新しい第5部屋・連続ランとの整合について、方向と適用境界を判断する。Designer権限の基準変更は自ら詳細決定せず、必要なDecision変更と仕様補足をDesignerへ依頼できる形でStudioへ返す。
+
+## Context
+
+OwnerはD-015で連続ランと第5部屋の単体ボスを承認したが、既存Decisionを改訂していない。D-016も同じ境界を保持し、既存Decisionとの具体的な衝突がDesignで判明した場合を再検討条件としている。
+
+DesignはD-017と仕様を確定した。D-006の集計は旧独立3部屋と各3 hearts開始を前提とするため、新構成への適用が未解決である。実装と検証はまだ行っていない。
+
+## Findings
+
+正本は `design/final-boss-and-continuous-run.md` §8と、前Handoff 10。
+
+Designerの推奨は、旧第5部屋を含む集計を過去ビルドの記録として保存し、新構成の合否ゲートから外すこと。独立3・4の成績は個別に報告し、新たな合計下限などは実測後にDesignerが判断する。ボスは新仕様の攻撃・対処検証と独立Playで評価する。
+
+代案は旧第5部屋fixtureの維持。ただし新構成の難度評価にはならず、保守が増える。いずれも未採択。D-006は部屋変更時の再計測を求めており、旧数値を自動継承できない。
+
+仕様§8にはcombat.md15のdash使用数、16cのFPS比較など、関連する置換案もある。方向判断とDesignerの詳細基準決定を区別し、必要な後続作業を明示する。
+
+Planはこの判断の後に開く。指定sha・ビルド表記、長時間実行、pause／retry、実機入力、工数・リスクはTechnical Directorの未解決課題であり、本Stepで技術方式を決めない。
+
+## Decisions already made
+
+- D-006：旧独立3〜5部屋のwalker集計基準。現時点で存続。
+- D-015：連続ラン、第5部屋の単体ボス、ラン先頭からのretryをOwnerが承認。既存Decisionの変更は適切な権限で解決する。
+- D-016：読み取り・位置取り・回避後の反撃を重視。既存Decisionとの衝突は再検討する。
+- D-017：二攻撃、境界回復、終端・時刻・表示の詳細契約。D-006は改訂していない。
+
+## Constraints
+
+Owner requestとInterpretationを変更しない。第1〜4部屋と共有戦闘ルールを保持する。15〜20分のVisionを暗黙に緩和せず、時間合わせだけのHP増加は行わない。
+
+既存Decisionは編集しない。変更が必要なら担当Roleが新しいDecisionに変更対象と適用範囲を記録する。旧テストを削除するだけで整合済みとしない。
+
+本Stepは方向と判断権限の整理であり、詳細仕様、技術計画、QA合否、Goal達成の判定を代行しない。限定Art Verifyは経路に確定済み。
+
+## Open questions
+
+1. Designerの推奨する適用変更はD-015／D-016の範囲内で進められるか。方向上の制約は何か。
+2. D-006と関連する置換案について、Designerが確定すべきDecision変更・仕様補足は何か。
+3. Owner判断を必要とする具体的な衝突があるか。なければRole内で処理し、Ownerへ戻さない。
+
+## Expected output
+
+方向判断とその理由、Designerへ戻す作業の範囲、Plan開始までに残る依存を記したHandoffを `studio` 宛てに返す。担当権限の範囲で重要な判断をする場合は新しいDecisionを記録する。
+
+DesignerのDecision変更が必要なら、変更対象・維持事項・必要な成果を具体化する。Studioが次のDesignまたはPlanを開く。Owner escalation triggerが実際に成立する場合のみ、prepare-owner-escalationで選択肢と推薦を含むbriefを作成する。
+
+## Load
+
+- Role: studio/roles/game-director.md
+- Skills: studio/skills/make-decision.md
+- Skills: studio/skills/prepare-owner-escalation.md
+- Project: project.md#vision
+- Project: project.md#constraints
+- Project: project.md#current-state
+- Project: goals/G-002-final-boss/goal.md
+- Project: design/final-boss-and-continuous-run.md
+- Decisions: decisions/D-006-walker-limit-rooms-3-5-structural-ceiling.md
+- Decisions: decisions/D-015-owner-approves-continuous-run-and-final-boss.md
+- Decisions: decisions/D-016-final-boss-experience-direction.md
+- Decisions: decisions/D-017-final-boss-and-run-contract.md
+- Previous handoff: goals/G-002-final-boss/10-game-designer-to-studio.md
+>>>END

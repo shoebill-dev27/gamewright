@@ -1,0 +1,132 @@
+<<<EDIT goals/G-002-final-boss/goal.md
+<<<<<<< SEARCH
+- Build：open（6k-b継続、51）。50はpartialで、必要なrepo/play.py・repo/session.py・repo/source_id.pyが入力に欠け、変更・実行・source id報告なし。51のLoadに3ファイルを明記して同じRoleへ継続する。V1仕様はD-022で確定済み。44の契約試験18件追加時は130件OK（source id 7670da50793b）。46のpause・retry拡張と試験は未実行。残: D-022実装・受入試験・manual更新、全suite実行と最終source id記録、その後Split C（pause・retry込み通常ラン計測、dodger部屋1〜4の回帰固定）。40の通常ラン測定はdodger勝利、30fps 87.0 s／60fps 103.5 s。Owner承認待ちはない。
+=======
+- Build：open（53で継続）。52はpartial。旧第5部屋の注記、弾ID・発射・消滅イベント、retry時の番号リセット、関連試験とmanual更新を納品。runtimeの保存済みbuild試験は140件OK。残: D-022の観測間隔、全attemptの最終summary、L1・共有弾番号・O1〜O6の受入試験（両FPSの1200秒実行を含む）、文書更新、完成ソースでの全suite実行・source id記録。その後Split C（pause・retry込み通常ラン計測、dodger部屋1〜4の回帰固定）。40の通常ラン測定はdodger勝利、30fps 87.0 s／60fps 103.5 s。連続partialは50・52の2回であり、次も同じ作業がpartialならTechnical Directorへ分割・再計画を戻す。Owner承認待ちはない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| 6k-c | Build | gameplay-engineer | implement-change | open | 51-studio-to-gameplay-engineer.md |
+=======
+| 6k-c | Build | gameplay-engineer | implement-change | done | 51-studio-to-gameplay-engineer.md → 結果: 52-gameplay-engineer-to-studio.md（partial、140件OK） |
+| 6k-d2 | Build | gameplay-engineer | implement-change | open | 53-studio-to-gameplay-engineer.md |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+50はpartialで変更・実行なし。欠落していたplay.py・session.py・source_id.pyを51のLoadに明記し、同じEngineerへV1実装と全suite実行を継続する。仕様再検討やOwner判断は不要。完了後Split C、続いて独立QAの順序を維持する。
+=======
+52はpartialで弾ライフサイクルと旧経路注記を納品し、runtime試験は140件OK。53で同じEngineerへ観測間隔・全attempt summary・残る受入試験と最終検証を継続する。連続partialは2回。完成後Split C、独立QAの順序を維持し、次も同じ作業がpartialならTechnical Directorへ再計画を戻す。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Gameplay Engineerが51-studio-to-gameplay-engineer.mdから継続する。Load記載のplay.py・session.py・source_id.pyを含む現行ソースを入力として供給し、D-022実装、受入試験、manual更新、全suite実行・最終source id記録を行う。続いて6l（Split C）。完成資料を受けたRouteで独立QAを開く。
+=======
+Gameplay Engineerが53-studio-to-gameplay-engineer.mdからD-022の残作業を継続する。観測間隔、全attempt summary、残る受入試験と文書を完成させ、完成ソースで全suiteを実行してsource idを記録する。完了と全suite成功を確認後、6l（Split C）へ進む。独立QAはSplit Cの完成資料を受けて開く。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+未完了。40で保存版を実行し、対応botの新5番・通常ランでdodgerが勝利する測定を得た（通常ランは約1.5〜1.7分でVisionより大幅に短く、Designerの実測後判断に回す）。44では契約試験を追加し130件OK。50は入力不足によるpartialで、変更・実行なし。51で不足ソースを供給してV1補完と全suite実行を継続し、その後pause/retry計測・回帰固定を行う。独立QA以降と最終戦の体験評価は未実施。D-021の承認内で進め、追加金銭支出と実機調達は行わない。Goalはactiveのまま閉じず、project.mdは変更しない。
+=======
+未完了。40で対応botの新5番・通常ランにおけるdodger勝利を測定した（通常ランは約1.5〜1.7分でVisionより大幅に短く、Designerの実測後判断に回す）。52で弾ライフサイクルと旧経路注記を納品し、runtime試験は140件OK。53で観測間隔・全attempt summary・受入試験・文書・最終検証を継続し、その後pause/retry計測と回帰固定を行う。独立QA以降と最終戦の体験評価は未実施。D-021の承認内で進め、追加金銭支出と実機調達は行わない。Goalはactiveのまま閉じず、project.mdは変更しない。
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-002-final-boss/53-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-002
+seq: 53
+from: studio
+to: gameplay-engineer
+stage: Build
+outcome: routed
+---
+# 53: studio → gameplay-engineer — Complete D-022 observation and final validation
+
+## Task
+
+Complete the remaining D-022 observation implementation, acceptance coverage, and documentation. Execute the full suite against the completed saved sources and record their source id; return the Build report to Studio before Split C.
+
+## Context
+
+52 delivered partial implementation. Its runtime Build check ran `python3 -m unittest discover -s tests` successfully: 140 tests, exit 0. This verifies that saved intermediate build only; remaining D-022 work is not complete.
+
+50 and 52 are two consecutive partial returns for this continuation. Continue with the same Role because no input or design question remains. If the same work returns partial a third time, Studio will route to Technical Director for splitting or replanning.
+
+## Findings
+
+52 delivered:
+- One leading note for legacy room 5 player output.
+- Opt-in shot IDs, firing events, and removal events.
+- Shot numbering carried across room entry and reset on retry.
+- Diagnostic shot tracking and active-shot trace metadata.
+- Controlled shot and note probes, plus related manual documentation.
+
+Remaining work:
+1. Implement parser dispatch and validation for `view-every` and numeric `trace-every`.
+2. Implement bounded periodic output while preserving event output, simulation behavior, and default output.
+3. Reset observation scheduling on retry as specified.
+4. Implement one final summary covering every attempt and the D-022 fields: outcomes, clocks, room times, boss entry hearts, hits, attacks, pauses, driver elapsed time excluding pauses, and processing time.
+5. Complete L1 output/result equivalence coverage, public spitter/boss shared-sequence coverage, and O1–O6 coverage, including controlled 1200-second executions separately at 30 and 60 FPS.
+6. Update interval and summary documentation and stale integration-gap descriptions.
+7. Execute and inspect the full suite, including `tests/test_play_run_controls.py`, against the completed saved sources and record their source id.
+
+Use the approved spec and D-022 for exact behavior. Historical unpersisted proposals described in 52 are not the current baseline.
+
+## Decisions already made
+
+- D-017: boss combat, continuous run, clocks, terminal priority, retry, and presentation contract.
+- D-019: retained regressions and subsequent measurement and Designer judgment.
+- D-021: current text build and Studio verification authorized; no real-device supply or verification requirement for this Goal.
+- D-022: supplement behavior is settled; no pending design clarification.
+
+## Constraints
+
+Preserve rooms 1–4, shared combat rules, and legacy behavior except the approved note. Preserve existing tests. Exercise acceptance cases independently at 30 and 60 FPS.
+
+Do not start Split C until this implementation is complete and its full suite is green. Split C remains a later Build step for pause/retry normal-run measurement and dodger rooms 1–4 regression fixation. Independent QA follows the completed Build work.
+
+No purchases, outsourcing, or additional expenditure. Do not change approved scope or resolve new spec ambiguities through implementation.
+
+## Open questions
+
+None currently. If a new spec ambiguity or unworkable plan is discovered, identify it precisely and hand back under the Role contract.
+
+## Expected output
+
+Return a handoff addressed to `studio` with:
+- Delivered files and completed acceptance cases.
+- Documentation updates.
+- Actual full-suite command, result, and final executed source id.
+- Separate 30/60 FPS long-observation execution evidence.
+- Any remaining work or concrete blocker.
+
+Distinguish automated Build evidence from independent verification. Do not claim completion based solely on the intermediate 140-test result. Studio will route Split C after completion, then independent QA.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: project.md#constraints
+- Project: design/final-boss-and-continuous-run.md
+- Project: repo/README.md
+- Project: repo/manual.md
+- Project: repo/public-driver.md
+- Project: repo/play.py
+- Project: repo/session.py
+- Project: repo/source_id.py
+- Project: repo/run_driver.py
+- Project: repo/game.py
+- Project: repo/bots.py
+- Project: repo/tests/test_d022_shots_and_note.py
+- Project: repo/tests/test_play_run_controls.py
+- Project: repo/tests/test_run_driver.py
+- Project: repo/tests/test_session.py
+- Project: repo/tests/test_terminal.py
+- Project: repo/tests/test_game.py
+- Project: repo/tests/test_boss.py
+- Project: repo/tests/test_boss_contract.py
+- Project: repo/tests/test_boss_contract_details.py
+- Project: repo/tests/test_bots_boss.py
+- Decisions: decisions/D-017-final-boss-and-run-contract.md
+- Decisions: decisions/D-019-g002-balance-criteria-applicability.md
+- Decisions: decisions/D-021-owner-authorizes-text-build.md
+- Decisions: decisions/D-022-g002-v1-supplements.md
+- Previous handoff: goals/G-002-final-boss/52-gameplay-engineer-to-studio.md
+>>>END

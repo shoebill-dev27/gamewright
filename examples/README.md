@@ -100,3 +100,12 @@ Results and findings: `docs/phase10.md`.
 | `runs/p11-boss-run` | A copy of `runs/p10-boss-run` continued on Codex with the Phase 11 runner (records from 062 on). Engineers handed back `partial` twice and then `done`, so Build finished in 4 steps; every build-writing step got a passing `## Build check`. QA failed twice, partly on a real finding (the boss bot may use state the player cannot see) and partly because a Load entry named a directory and was silently dropped. Stopped at the third Owner question, 104 executors in all. The measurement in `measurement.json` meets S1–S3 and B1–B2. |
 
 Results and findings: `docs/phase11.md`.
+
+## Phase 12: Steps ask for files; Close refreshes the Current state
+
+| Run | What it shows |
+|---|---|
+| `runs/p12-boss-run` | A copy of `runs/p11-boss-run` continued on Codex after the third Owner question was answered with what exists (records from 077 on). Steps asked for files with `@need` four times, no new Owner question came, and every build check passed; stopped inside Build again for budget (131 executors in all). The measurement in `measurement.json` meets S1–S3 and B1–B2. |
+| `runs/p12-close-run` | The Phase 5 bug Goal run again from `fixtures/lantern-depths-real` on Claude to reach Close (9 operations, 16 executors): the closing Route rewrote only `project.md`'s Current state, a failing build check sent the fix back, and QA asked for a test source with `@need`. |
+
+Results and findings: `docs/phase12.md`.

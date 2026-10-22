@@ -1,0 +1,152 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "b7fb7a3d85a62bcd564a33ee20caf62b355a7ef99ce6d8cfb6df0d5adb83abc2",
+  "bytes": 1304
+ },
+ {
+  "path": "studio/README.md",
+  "sha256": "47846604f59124562b83f1a16c51b342f3a2e5088e49268840e108ef3faaff4e",
+  "bytes": 6379
+ },
+ {
+  "path": "studio/orchestration.md",
+  "sha256": "1f79802f981d0d7a91cc20841229bd5edf41a785db4c7d697c3902858e5c882f",
+  "bytes": 12864
+ },
+ {
+  "path": "studio/workflows/development-loop.md",
+  "sha256": "a7128fc40c3130fa05a137ca54e3cbf0322de2cb4806ed0dbf872f7cedb35c9c",
+  "bytes": 5047
+ },
+ {
+  "path": "studio/roles/art-director.md#works-from",
+  "sha256": "1a9b4ea463ac85d107625d79994080052da5b1d784f3692ad9a104f2424ad56d",
+  "bytes": 172
+ },
+ {
+  "path": "studio/roles/game-designer.md#works-from",
+  "sha256": "fe60f9d4900dea1514aa0fb524d2c69dad547e7cc71ff3139183e3d2d86aca3b",
+  "bytes": 171
+ },
+ {
+  "path": "studio/roles/game-director.md#works-from",
+  "sha256": "fde4d1b3c02d9abaf3a00f5287e4c8d23694df2027a9f960fedbc1f27c63ff31",
+  "bytes": 203
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md#works-from",
+  "sha256": "a0ebe4d4866fa859cecd40ffd4c98b6aaf79f44403a965e3376d00b52f50293a",
+  "bytes": 175
+ },
+ {
+  "path": "studio/roles/playtester.md#works-from",
+  "sha256": "6025c9d1ca754ba86f61996472c6d3a5e308f23d81479849e1e3a01b60eb4f2d",
+  "bytes": 371
+ },
+ {
+  "path": "studio/roles/playtester.md#independence",
+  "sha256": "29e2c5b25cb9b8b16d1b40109c2ecca745024349a2b4062a24545d4643ff3d25",
+  "bytes": 232
+ },
+ {
+  "path": "studio/roles/qa.md#works-from",
+  "sha256": "e4e9de4a0c4f5b40f4c41edc771780fe53f19c1573cee671f22dcdff410f2fa8",
+  "bytes": 355
+ },
+ {
+  "path": "studio/roles/qa.md#independence",
+  "sha256": "c8090d5136ea02384fb4e96585cf1be7935428e4dac0331a52709f305dcff2f3",
+  "bytes": 208
+ },
+ {
+  "path": "studio/roles/technical-director.md#works-from",
+  "sha256": "5571f0fcf5ac14950e226c1f713d5c058a27e2649fd7ac18df4e783978323621",
+  "bytes": 160
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "studio/templates/escalation.md",
+  "sha256": "6e505880bdef28223c7275a4bb19c8f245577964d14c28d48e04561e7a5c7b90",
+  "bytes": 975
+ },
+ {
+  "path": "studio/templates/goal.md",
+  "sha256": "2e908bbcc04020e6c1701e816f577c452c27e8ab6fdbb880c781c10f0b946212",
+  "bytes": 1635
+ },
+ {
+  "path": "project.md",
+  "sha256": "8a32edee44b970d2c1a5a0a76e19b3235e61b1786bb24c06583400cfa0924712",
+  "bytes": 2102
+ },
+ {
+  "path": "@project-files",
+  "sha256": "a95799af130e8d18bc9f93186fc2eeef76250a8fba1443963f559ec87e2d63a0",
+  "bytes": 8289
+ },
+ {
+  "path": "@decision-titles",
+  "sha256": "f2da179c80943b76cd97720ee26c9165aa87cd31e47107db154e03a56d7eedd4",
+  "bytes": 3258
+ },
+ {
+  "path": "goals/G-002-final-boss/goal.md",
+  "sha256": "6eb6bcb8ba6b4351eb0c7388f53c9b4ca1a09c96bca4af73e9718d4ae7827e97",
+  "bytes": 6949
+ },
+ {
+  "path": "@log-recent",
+  "sha256": "5e1225de651a149ed75653f9d784a0fb55fac8c32c54ecc2044de07be42c05d4",
+  "bytes": 2023
+ },
+ {
+  "path": "goals/G-002-final-boss/16-technical-director-to-studio.md",
+  "sha256": "07a2689af76252ce4656497e175e2532c416bc473c4349fb211c962b7e79de79",
+  "bytes": 20209
+ },
+ {
+  "path": "studio/roles/game-director.md",
+  "sha256": "2ff4f183ec488c462c8d757903c226121150048f4cc544310ac0191bb20dab12",
+  "bytes": 1652
+ },
+ {
+  "path": "studio/skills/make-decision.md",
+  "sha256": "68436360ad82bd660f2153934ae7305118489c26ad3255d10e5018773d9eb4b6",
+  "bytes": 1129
+ },
+ {
+  "path": "studio/skills/prepare-owner-escalation.md",
+  "sha256": "aa513b1d59e5e7f1caef545cb3a64bc1c45cfd1b2548c8d8ec4ab3a336e2e67e",
+  "bytes": 1207
+ },
+ {
+  "path": "decisions/D-015-owner-approves-continuous-run-and-final-boss.md",
+  "sha256": "e0bd5b794a3b4e0e37edf8ca0324ebd38f3f062d2ecf5aedcd6896c55df3b1cb",
+  "bytes": 2110
+ },
+ {
+  "path": "decisions/D-016-final-boss-experience-direction.md",
+  "sha256": "03aa3e89898d2361f61fddea143d5e99eb4dafbae8f16d1717ac6e93e7ee4684",
+  "bytes": 4425
+ },
+ {
+  "path": "decisions/D-017-final-boss-and-run-contract.md",
+  "sha256": "48adbb02a672e45434a1b0f61c77b8c1747c437124e183b1a849e34c705f4283",
+  "bytes": 3341
+ },
+ {
+  "path": "decisions/D-019-g002-balance-criteria-applicability.md",
+  "sha256": "db369f14df8125734146c8b7feb643e58a4ce8c2780fc211e23a9f59a85c62c7",
+  "bytes": 5895
+ },
+ {
+  "path": "design/final-boss-and-continuous-run.md",
+  "sha256": "9dd4c93b558252c551190c9fdc396c86a4a929fd01f63be3bf99857f1eb920ad",
+  "bytes": 33673
+ }
+]

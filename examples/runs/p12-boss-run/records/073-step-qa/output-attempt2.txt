@@ -1,0 +1,29 @@
+<<<FILE @run/trace/boss-zero-30
+mode room
+room empty
+spawn boss 8 4
+player 8 4
+fps 30
+limit 12
+driver-limit 14
+trace-every frame
+0.03333333333333333 move up
+0.28333333333333333 stop
+control 0.4 pause
+control 2.4 resume
+>>>END
+
+<<<FILE @run/trace/boss-zero-60
+mode room
+room empty
+spawn boss 8 4
+player 8 4
+fps 60
+limit 12
+driver-limit 14
+trace-every frame
+0.016666666666666666 move up
+0.26666666666666666 stop
+control 0.4 pause
+control 2.4 resume
+>>>END

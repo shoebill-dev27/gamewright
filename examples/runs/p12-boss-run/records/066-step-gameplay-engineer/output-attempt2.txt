@@ -1,0 +1,558 @@
+<<<EDIT repo/play.py
+<<<<<<< SEARCH
+    directives = {"mode", "attempt", "control", "limit", "driver-limit", "trace-every"}
+=======
+    directives = {"mode", "attempt", "control", "limit", "driver-limit", "trace-every", "view-every"}
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/run_driver.py
+<<<<<<< SEARCH
+        "controls": [], "trace_every": False,
+=======
+        "controls": [], "trace_every": False, "view_every": 0.5,
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+            elif key == "trace-every":
+                assert words == ["trace-every", "frame"]
+                setup["trace_every"] = True
+=======
+            elif key in ("view-every", "trace-every"):
+                assert len(words) == 2
+                if key == "trace-every" and words[1] == "frame":
+                    setup["trace_every"] = True
+                else:
+                    value = float(words[1])
+                    assert math.isfinite(value) and 0.5 <= value <= 60
+                    setup["view_every" if key == "view-every" else "trace_every"] = value
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+            raise ValueError(f"script line {number}: invalid instruction {raw!r}") from error
+=======
+            hint = ("; interval must be finite and between 0.5 and 60 seconds; "
+                    "trace-every also accepts frame"
+                    if key in ("view-every", "trace-every") else "")
+            raise ValueError(f"script line {number}: invalid instruction {raw!r}{hint}") from error
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        self.seen, self.next_picture = 0, 0.0
+=======
+        self.seen, self.next_picture = 0, 0.0
+        self.next_trace = 0.0
+        self.attempt = session.attempt
+        self.periodic_count = 0
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        if self.view == "trace":
+            if events or force or self.setup["trace_every"]:
+=======
+        if self.attempt != s.attempt:
+            self.attempt = s.attempt
+            self.next_picture = self.next_trace = 0.0
+            self.periodic_count = 0
+        if self.view == "trace":
+            interval = self.setup["trace_every"]
+            periodic = interval is True or (
+                interval is not False and s.t >= self.next_trace - EPS
+            )
+            if periodic:
+                self.periodic_count += 1
+                if interval is not True:
+                    self.next_trace = (math.floor((s.t + EPS) / interval) + 1) * interval
+            if events or force or periodic:
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        if not immediate and s.t < self.next_picture - EPS:
+            return
+        self.next_picture = s.t + 0.5
+=======
+        periodic = s.t >= self.next_picture - EPS
+        if not immediate and not periodic:
+            return
+        if periodic:
+            self.periodic_count += 1
+        interval = self.setup["view_every"]
+        if interval == 0.5:
+            # Retain the pre-supplement default cadence after event pictures.
+            self.next_picture = s.t + interval
+        elif periodic:
+            self.next_picture = (math.floor((s.t + EPS) / interval) + 1) * interval
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    tick, started = 0, time.perf_counter()
+
+    def collect():
+=======
+    tick, started = 0, time.perf_counter()
+    attempts = {}
+
+    def record(elapsed=0.0, paused=False):
+        item = attempts.setdefault(s.attempt, {
+            "attempt": s.attempt, "outcome": "unfinished",
+            "run_seconds": 0.0, "rooms": {}, "boss_entry_hearts": None,
+            "hits": 0, "attacks": 0, "pauses": 0,
+            "pause_seconds": 0.0, "driver_seconds": 0.0,
+            "elapsed_excluding_pauses": 0.0,
+        })
+        item["run_seconds"] = s.t
+        item["rooms"][s.game.room] = s.room_t
+        item["outcome"] = {
+            "won": "clear", "cleared": "clear", "dead": "death",
+        }.get(s.state, "unfinished")
+        item["driver_seconds"] += elapsed
+        item["pause_seconds"] += elapsed if paused else 0.0
+        item["elapsed_excluding_pauses"] = (
+            item["driver_seconds"] - item["pause_seconds"]
+        )
+
+    record()
+
+    def collect():
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        s.step(limit=setup["limit"])
+        messages = collect()
+=======
+        paused = s.paused
+        s.step(limit=setup["limit"])
+        record(1 / s.fps, paused)
+        messages = collect()
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    return s, {
+        "build": BUILD, "source_id": source_id(), "driver_seconds": tick / s.fps,
+=======
+    record()
+    for event in s.events:
+        item = attempts[event["attempt"]]
+        if event["kind"] == "entry" and event["room"] == "5":
+            if item["boss_entry_hearts"] is None:
+                item["boss_entry_hearts"] = event["details"]["hearts"]
+        if event["kind"] == "hurt":
+            item["hits"] += 1
+        elif event["kind"] == "attack":
+            item["attacks"] += 1
+        elif event["kind"] == "pause":
+            item["pauses"] += 1
+    return s, {
+        "attempt_count": len(attempts), "attempts": list(attempts.values()),
+        "outcome": attempts[s.attempt]["outcome"],
+        "build": BUILD, "source_id": source_id(), "driver_seconds": tick / s.fps,
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    print(f"end: attempt {session.attempt}, outcome {session.state}, "
+          f"run {session.t:.3f}, room {session.room_t:.3f}, {measurement}")
+=======
+    print(f"summary: {measurement}")
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE repo/tests/test_d022_observation.py
+"""D-022 observation acceptance; survival fixtures are not reachability evidence."""
+import contextlib
+import io
+import unittest
+from unittest import mock
+
+import play
+import run_driver
+from session import RunSession
+
+
+class ObservationTest(unittest.TestCase):
+    def execute(self, text, view="player", fixture=None):
+        setup, inputs, rules = play.read_script(text)
+        stream = io.StringIO()
+        output = None
+
+        def observe(s, force):
+            nonlocal output
+            if fixture:
+                fixture(s, force)
+            if output is None:
+                output = run_driver.Output(s, setup, view)
+            output.emit(force)
+
+        with contextlib.redirect_stdout(stream):
+            s, result = run_driver.drive(setup, inputs, rules, observe)
+        return s, result, stream.getvalue(), output
+
+    def test_dispatch_and_validation(self):
+        for key in ("view-every", "trace-every"):
+            for value in ("0.49", "60.01", "nan", "inf", "wrong", ""):
+                with self.subTest(key=key, value=value):
+                    with self.assertRaisesRegex(ValueError, "interval"):
+                        play.read_script(f"{key} {value}\n")
+            for value in ("0.5", "5", "60"):
+                self.assertIn("mode", play.read_script(f"{key} {value}\n")[0])
+        self.assertIs(play.read_script("trace-every frame\n")[0]["trace_every"], True)
+
+    def test_interval_preserves_events_and_result(self):
+        for fps in (30, 60):
+            results = []
+            for interval in (0.5, 10):
+                s, result, text, _ = self.execute(
+                    f"mode run\nfps {fps}\nlimit 20\nview-every {interval}\n")
+                results.append((
+                    s.events, s.t, s.state, s.game.hearts,
+                    [line for line in text.splitlines() if line.startswith("[attempt")],
+                    result["attempts"],
+                ))
+            self.assertEqual(*results)
+            traces = []
+            for interval in ("frame", "5"):
+                s, _, _, out = self.execute(
+                    f"mode run\nfps {fps}\nlimit 20\ntrace-every {interval}\n", "trace")
+                self.assertEqual(out.seen, len(s.events))
+                traces.append((s.events, s.t, s.state, s.game.hearts))
+            self.assertEqual(*traces)
+
+    def test_default_player_cadence_is_explicit_half_second(self):
+        for fps in (30, 60):
+            base = f"mode run\nfps {fps}\nlimit 8\n"
+            self.assertEqual(self.execute(base)[2],
+                             self.execute(base + "view-every 0.5\n")[2])
+
+    def test_controlled_twenty_minutes_at_each_rate(self):
+        for fps in (30, 60):
+            for view, bound in (("player", 121), ("trace", 241)):
+                with self.subTest(fps=fps, view=view):
+                    def survival(s, force):
+                        if force:
+                            s.game.hearts = 10000
+
+                    s, result, text, out = self.execute(
+                        f"mode run\nfps {fps}\nlimit 1200\n"
+                        "view-every 10\ntrace-every 5\n", view, survival)
+                    self.assertAlmostEqual(s.t, 1200)
+                    self.assertEqual(result["outcome"], "unfinished")
+                    self.assertLessEqual(out.periodic_count, bound)
+                    self.assertGreater(out.periodic_count, 1)
+                    self.assertTrue(text)
+                    self.assertEqual(out.seen, len(s.events))
+                    self.assertEqual(result["attempts"][0]["rooms"]["1"], 1200)
+                    print(f"D022 long observation fps={fps} view={view} "
+                          f"run={s.t} periodic={out.periodic_count}/{bound} "
+                          f"source={result['source_id']}")
+
+    def test_summary_clocks_counts_pause_and_retry(self):
+        for fps in (30, 60):
+            def die_first(s, force):
+                if force and s.attempt == 1:
+                    s.game.hearts = 0
+
+            s, result, _, _ = self.execute(
+                f"mode run\nfps {fps}\nlimit 1\ndriver-limit 5\n"
+                "control 0.5 retry\ncontrol 0.6 pause\ncontrol 1.6 resume\n"
+                "attempt 2\n0 attack\n", fixture=die_first)
+            self.assertEqual(result["attempt_count"], 2)
+            first, second = result["attempts"]
+            self.assertEqual(first["outcome"], "death")
+            self.assertEqual(second["outcome"], "unfinished")
+            self.assertAlmostEqual(second["run_seconds"], 1)
+            self.assertAlmostEqual(second["rooms"]["1"], 1)
+            self.assertEqual(second["attacks"], 1)
+            self.assertEqual(second["pauses"], 1)
+            self.assertAlmostEqual(second["pause_seconds"], 1)
+            self.assertAlmostEqual(
+                second["elapsed_excluding_pauses"],
+                second["driver_seconds"] - 1)
+            self.assertAlmostEqual(
+                sum(a["driver_seconds"] for a in result["attempts"]),
+                result["driver_seconds"])
+            self.assertGreaterEqual(result["processing_seconds"], 0)
+            self.assertEqual(second["hits"],
+                             sum(e["kind"] == "hurt" for e in s.events
+                                 if e["attempt"] == 2))
+
+    def test_summary_once_for_clear_death_and_limit(self):
+        for fps in (30, 60):
+            for case in ("clear", "death", "unfinished"):
+                setup, inputs, rules = play.read_script(
+                    f"mode room\nroom empty\nfps {fps}\nlimit 0.1\n"
+                    + ("spawn runner 9 4\n0 attack\n" if case == "clear" else ""))
+                real = run_driver.RoomSession
+
+                def session(config):
+                    s = real(config)
+                    if case == "death":
+                        s.game.hearts = 0
+                    return s
+
+                for view in ("player", "trace"):
+                    output = io.StringIO()
+                    with mock.patch.object(run_driver, "RoomSession", session), \
+                            contextlib.redirect_stdout(output):
+                        s, result = run_driver.play(setup, inputs, view, rules)
+                    self.assertEqual(output.getvalue().count("summary: "), 1)
+                    self.assertEqual(result["outcome"], case)
+                    self.assertEqual(result["attempts"][0]["run_seconds"], s.t)
+
+    def test_retry_resets_periodic_schedule(self):
+        setup, _, _ = play.read_script("mode run\nview-every 10\ntrace-every 5\n")
+        for view in ("player", "trace"):
+            s = RunSession()
+            out = run_driver.Output(s, setup, view)
+            with contextlib.redirect_stdout(io.StringIO()):
+                out.emit(True)
+                s.run_frame = 600
+                out.emit()
+                s.state = "dead"
+                s.control("retry")
+                out.emit(True)
+            self.assertEqual(out.attempt, 2)
+            self.assertEqual(out.periodic_count, 1)
+
+    def test_legacy_note_only_changes_leading_line(self):
+        note = ('note: legacy route — boss status and messages are incomplete; '
+                'add "mode room" for the full boss display')
+        for fps in (30, 60):
+            for duration in (2, 120):
+                setup, inputs, rules = play.read_script(
+                    f"room 5\nfps {fps}\nend {duration}\n")
+                captured = []
+                real_game = play.Game
+
+                def make_game(**kwargs):
+                    g = real_game(**kwargs)
+                    g.hurt_left, g.invulnerable = 1000, True
+                    captured.append(g)
+                    return g
+
+                outputs = []
+                for suppress in (False, True):
+                    stream = io.StringIO()
+                    original = print
+
+                    def filtered(*args, **kwargs):
+                        if args != (note,):
+                            original(*args, **kwargs)
+
+                    with mock.patch.object(play, "Game", make_game), \
+                            contextlib.redirect_stdout(stream):
+                        if suppress:
+                            with mock.patch("builtins.print", filtered):
+                                play.play(setup, inputs, "player", rules)
+                        else:
+                            play.play(setup, inputs, "player", rules)
+                    outputs.append(stream.getvalue())
+                self.assertEqual(outputs[0], note + "\n" + outputs[1])
+                a, b = captured
+                self.assertEqual((a.t, a.outcome, a.events), (b.t, b.outcome, b.events))
+                self.assertEqual(a.t, min(duration, 60))
+
+    def test_public_spitter_and_boss_share_sequence(self):
+        for fps in (30, 60):
+            def fixture(s, force):
+                if force:
+                    s.game.hurt_left, s.game.invulnerable = 100, True
+                    s.game.spawn("boss", 10, 4)
+                    boss = s.game.enemies[-1]
+                    boss.phase, boss.attack_name = "warning", "short shot"
+                    boss.phase_left, boss.aim = s.dt, (-1, 0)
+
+            s, _, _, _ = self.execute(
+                f"mode room\nroom empty\nfps {fps}\nlimit 4\n"
+                "spawn spitter 1 1\n", "trace", fixture)
+            fired = [e["details"] for e in s.events if e["kind"] == "shot_fired"]
+            self.assertIn("boss", [e["source"] for e in fired])
+            self.assertIn("spitter1", [e["source"] for e in fired])
+            self.assertEqual([e["id"] for e in fired],
+                             [f"S{i + 1}" for i in range(len(fired))])
+
+
+if __name__ == "__main__":
+    unittest.main()
+>>>END
+
+<<<EDIT repo/manual.md
+<<<<<<< SEARCH
+| `trace-every frame` | Emit developer state every driver tick. |
+=======
+| `view-every 10` | Player periodic pictures every 10 game seconds; default 0.5, permitted 0.5–60. Event pictures and messages remain immediate. |
+| `trace-every 5` | Trace periodic state every 5 game seconds; permitted 0.5–60. Event records are always emitted. Default trace is event-driven. |
+| `trace-every frame` | Emit developer state every driver tick, without an output bound. |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+`processing_seconds` measures headless processing time; it is not human play time.
+=======
+`processing_seconds` measures headless processing time; it is not human play time.
+
+Public player and trace executions end with exactly one `summary:` block. It records the
+execution stop separately from the final outcome (`clear`, `death`, `unfinished`), source id,
+attempt count, and every attempt's run time, visited room times, first boss-entry hearts
+(`None` if never entered), hurt count (`hits`), successful attack starts (`attacks`), pause
+count and duration, driver duration, and driver elapsed time excluding pauses.
+Driver duration includes terminal waiting; room and run clocks exclude terminal waiting.
+An unfinished pause contributes its elapsed driver ticks through execution stop.
+Retry resets periodic scheduling along with the attempt clocks. Numeric periodic output is
+bounded per attempt by `ceil(limit / interval) + 1`; event output remains proportional to
+events. Intervals do not change the simulation or event order. Invalid intervals are rejected
+before simulation. The summary is for the public driver; legacy output remains unchanged
+except for the room-5 note.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Integration verification remains incomplete: no saved-version execution results accompany this
+manual update. See `public-driver.md` for remaining observation and tooling gaps.
+=======
+D-022 observation controls, shot lifecycle logging and automated acceptance probes are implemented.
+See `public-driver.md` for the remaining measurement and independent verification work.
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/README.md
+<<<<<<< SEARCH
+- Integration is incomplete. Step 40 ran the saved version (source id 5145454ab956): 112 tests OK,
+  independent rooms 3,4 and room 5 (3 and 2 hearts) bot runs and one normal run per bot at 30 and
+  60 FPS; results are in goals/G-002-final-boss/40-gameplay-engineer-to-studio.md. Contract test
+  details, V1 supplements and retry/pause measurement remain outstanding.
+=======
+- D-022 observation controls and summaries are implemented. `view-every 10` and `trace-every 5`
+  reduce periodic output while preserving events; public executions print one summary covering
+  every attempt. Controlled 1200-second acceptance probes run separately at 30 and 60 FPS.
+  The final-source Build check is recorded in handoff 54. Split C normal-run pause/retry
+  measurements and independent QA, Art Verify and Play remain outstanding.
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/public-driver.md
+<<<<<<< SEARCH
+This integration is untested. The legacy script route remains available.
+=======
+D-022 observation and shot lifecycle support are implemented with automated Build probes.
+Independent verification remains outstanding. The legacy script route remains available.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| `trace-every frame` | Emit trace state every driver tick. |
+=======
+| `view-every 10` | Player periodic pictures every 10 game seconds; default 0.5, range 0.5–60. |
+| `trace-every 5` | Trace periodic state every 5 game seconds, range 0.5–60; default is events only. |
+| `trace-every frame` | Emit trace state every driver tick without a periodic output bound. |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Known incomplete work: shot IDs and complete removal reasons, boss-aware bots, complete
+acceptance coverage, normal-run measurements, and unifying boss observation across script routes.
+No real keyboard or gamepad verification is claimed.
+=======
+Periodic scheduling resets on retry. Numeric intervals bound periodic output per attempt to
+`ceil(limit / interval) + 1`; event messages and event-triggered pictures are preserved.
+Default player scheduling retains the existing half-second cadence after event pictures.
+
+Exactly one final `summary:` block reports execution stop, clear/death/unfinished outcome,
+source id, processing seconds, total driver seconds, and every attempt's run and room times,
+first boss-entry hearts, hurt and attack counts, pauses, paused seconds, driver seconds and
+elapsed driver seconds excluding pauses. Terminal waiting is included only in driver elapsed
+time. See manual.md for shot IDs, removal reasons and legacy-route limitations.
+
+Remaining work: Split C normal-run pause/retry measurements and retained dodger regression
+fixation, followed by independent QA, limited Art Verify, Play and Designer judgment.
+Legacy boss presentation remains intentionally limited under D-022; delegation to the public
+driver is not required. No real keyboard or gamepad verification is claimed under D-021.
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-002-final-boss/54-gameplay-engineer-to-studio.md
+---
+kind: handoff
+goal: G-002
+seq: 54
+from: gameplay-engineer
+to: studio
+stage: Build
+outcome: done
+---
+# 54: gameplay-engineer → studio — D-022 observation implementation delivered
+
+## Task
+
+Inspect the appended final-source Build check. Route Split C only if the full suite is green, then route independent verification.
+
+## Context
+
+53 requested completion of D-022 observation controls, summaries, acceptance coverage and documentation after the intermediate 140-test build. The packet supplied a successful run of an unpersisted proposal; that result is distinguished from this saved delivery.
+
+## Findings
+
+Delivered files:
+
+- `repo/play.py`: dispatches `view-every` to the public parser.
+- `repo/run_driver.py`: validates numeric observation intervals, retains `trace-every frame`, bounds periodic output without thinning events, resets schedules on retry, and prints one final summary for both views.
+- `repo/tests/test_d022_observation.py`: nine acceptance tests, independently exercised at 30 and 60 FPS where applicable.
+- `repo/manual.md`, `repo/README.md`, `repo/public-driver.md`: interval syntax, summary fields, output bounds and remaining integration work.
+
+Player-observable changes follow D-022: optional slower periodic pictures, unchanged immediate event messages, execution-time validation errors, and one final public summary. Default player cadence is retained. Default trace records retain their existing shape. Legacy output is unchanged beyond the previously delivered note.
+
+Summaries cover every attempt: clear/death/unfinished outcome, run time, visited room times, first boss-entry hearts, hurts, attacks, pause count and duration, driver time, driver elapsed excluding pauses, processing seconds and source id. Execution stop remains separate from combat result.
+
+Acceptance coverage includes L1 note/output/event/result/time equivalence and the unchanged 60-second cap, public boss/spitter shared shot numbering, O1 bounded periodic output, O2 event/result equivalence, O3 default/explicit half-second equivalence, O4 one summary at clear/death/limit with retry/pause accounting, O5 invalid intervals, and O6 controlled 1200-second executions.
+
+Historical evidence supplied in this packet:
+
+`python3 -m unittest discover -s tests`: 149 tests, exit 0, 2.299 seconds, proposal source `b337ca3e09cf`.
+
+Separate controlled long observations in that run:
+
+| FPS | View | Run seconds | Periodic output |
+|---|---|---|---|
+| 30 | player | 1200 | 121 / 121 |
+| 30 | trace | 1200 | 241 / 241 |
+| 60 | player | 1200 | 121 / 121 |
+| 60 | trace | 1200 | 241 / 241 |
+
+That source is not claimed as this delivery's source. This delivery strengthens numeric-trace equivalence and malformed-interval coverage and retains default trace record shape. The runtime's appended Build check is the authoritative full-suite result for these saved sources. The long-observation test prints the final executed source id separately for each FPS/view pair, along with actual time and periodic counts. The full discovery command includes `tests/test_play_run_controls.py`.
+
+These are automated Build probes, not independent verification or continuous reachability evidence. Long observations deliberately raise hearts to survive 1200 seconds in normal-run mode; they do not demonstrate normal survival, progression or completion. No new bot measurement is claimed.
+
+Implementation and documentation are complete for this continuation. Split C measurements and independent verification remain later work. Any failure in the appended final-source check must be resolved before Split C.
+
+## Decisions already made
+
+- D-017: combat, progression, clocks, pause, retry and presentation.
+- D-019: retained regressions, measurement and subsequent Designer judgment.
+- D-021: text/script Build and Studio verification authorized.
+- D-022: legacy note, developer shot lifecycle metadata and long observation controls.
+
+## Constraints
+
+Preserve rooms 1–4, shared combat rules and existing tests. Evaluate 30 and 60 FPS separately. Do not equate controlled survival with normal-run reachability. No purchases, outsourcing or additional expenditure. Independent QA, limited Art Verify and Play remain required.
+
+## Open questions
+
+None.
+
+## Expected output
+
+Studio inspects the appended full-suite result and final executed source id. If green, route Split C for normal-run pause/retry measurements and retained dodger rooms 1–4 regression fixation. Then route independent QA and subsequent verification and judgment steps. If the final-source suite fails, route the concrete failure for correction before Split C.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: project.md#constraints
+- Project: design/final-boss-and-continuous-run.md
+- Project: repo/README.md
+- Project: repo/manual.md
+- Project: repo/public-driver.md
+- Project: repo/play.py
+- Project: repo/run_driver.py
+- Project: repo/session.py
+- Project: repo/game.py
+- Project: repo/bots.py
+- Project: repo/source_id.py
+- Project: repo/tests/test_d022_observation.py
+- Project: repo/tests/test_d022_shots_and_note.py
+- Project: repo/tests/test_play_run_controls.py
+- Project: repo/tests/test_run_driver.py
+- Project: repo/tests/test_session.py
+- Project: repo/tests/test_terminal.py
+- Project: repo/tests/test_game.py
+- Project: repo/tests/test_boss.py
+- Project: repo/tests/test_boss_contract.py
+- Project: repo/tests/test_boss_contract_details.py
+- Project: repo/tests/test_bots_boss.py
+- Decisions: decisions/D-017-final-boss-and-run-contract.md
+- Decisions: decisions/D-019-g002-balance-criteria-applicability.md
+- Decisions: decisions/D-021-owner-authorizes-text-build.md
+- Decisions: decisions/D-022-g002-v1-supplements.md
+- Previous handoff: goals/G-002-final-boss/53-studio-to-gameplay-engineer.md
+>>>END

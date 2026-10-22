@@ -1,0 +1,10 @@
+<<<FILE @need
+studio/roles/technical-director.md
+studio/skills/technical-plan.md
+studio/skills/prepare-owner-escalation.md
+decisions/D-019-g002-balance-criteria-applicability.md
+decisions/D-021-owner-authorizes-text-build.md
+design/final-boss-and-continuous-run.md
+goals/G-002-final-boss/59-studio-to-qa.md
+goals/G-002-final-boss/58-qa-to-studio.md
+>>>END

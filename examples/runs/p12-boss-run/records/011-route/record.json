@@ -1,0 +1,50 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-002",
+ "attempts": [
+  {
+   "runtime": "codex",
+   "session_id": "01a1579b-2591-7820-91b6-49083f28136c",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 26871,
+    "cached_input_tokens": 7680,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 3587,
+    "reasoning_output_tokens": 55
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 1,
+   "started": "2026-10-20T13:39:07",
+   "seconds": 59.1,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-002-final-boss/09-studio-to-game-designer.md": "24f129b999eda357516cabfd3fe1938782910297063adbe0f4ba816d917465a1",
+  "goals/G-002-final-boss/goal.md": "7a60a3b3f06ce4ec5d735c8e1e43e62b29deddf3f0f4b9d364861151066aefe9"
+ },
+ "decision": {
+  "new": [
+   "game-designer",
+   "Design"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "game-designer",
+    "Design"
+   ]
+  ]
+ },
+ "seen_through_seq": 9
+}

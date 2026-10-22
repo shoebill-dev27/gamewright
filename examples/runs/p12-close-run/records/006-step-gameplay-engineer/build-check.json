@@ -1,0 +1,6 @@
+{
+ "command": "python3 -m unittest discover -s tests",
+ "exit": 1,
+ "seconds": 0.0,
+ "output": "....F.....\n======================================================================\nFAIL: test_dash_begun_late_in_hurt_window_is_invulnerable_throughout (test_game.DashInvulnerabilityTest)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/work/tests/test_game.py\", line 93, in test_dash_begun_late_in_hurt_window_is_invulnerable_throughout\n    self.assertEqual(game.hearts, hearts, f\"fps {fps} t={game.t}\")\nAssertionError: 1 != 2 : fps 30 t=0.9666666666666667\n\n----------------------------------------------------------------------\nRan 10 tests in 0.001s\n\nFAILED (failures=1)\n"
+}

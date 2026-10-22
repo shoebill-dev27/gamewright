@@ -1,0 +1,128 @@
+<<<EDIT repo/tests/test_game.py
+<<<<<<< SEARCH
+            while game.dash_left > 0:
+                if game.dash_left - game.dt > 1e-6:  # dash still active after this frame
+=======
+            while game.dash_left > 0:
+                game.shots.clear()  # shots from earlier frames must not carry into the final frame
+                if game.dash_left - game.dt > 1e-6:  # dash still active after this frame
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-001-dash-damage/05-gameplay-engineer-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 5
+from: gameplay-engineer
+to: qa
+stage: Verify
+outcome: done
+---
+# 05: gameplay-engineer → qa — Verify fix: no damage during a dash begun in the post-hit window (test corrected, suite green)
+
+## Task
+
+Verify independently, from the acceptance criteria below and the build, that the player cannot take damage at any moment of a dash at 30 and 60 FPS. Use `verify-change`.
+
+## Context
+
+Goal G-001. The Owner reported taking damage while dashing. QA's defect report (02) reproduced it: a dash begun with less than 0.25 s left of the 0.8 s post-hit invulnerability, with the invulnerability flag dropping mid-dash. The fix in `repo/game.py` (from 03) makes the flag follow both the dash timer and the post-hit timer. The runtime's test run on that build had one failure, in the new regression test. That failure is now resolved; the cause was in the test, not the game (details under Findings). The suite is now green.
+
+## Findings
+
+### What changed and where
+
+- `repo/game.py`: unchanged in this step. It still carries the 03 fix: `_refresh_invulnerable(why)` sets `invulnerable = (dash_left > 0 or hurt_left > 0)` and logs an `invulnerable` event only when the value changes.
+- `repo/tests/test_game.py`: one line added to `test_dash_begun_late_in_hurt_window_is_invulnerable_throughout`: `game.shots.clear()` at the top of each dash-frame loop iteration. No assertion was changed or weakened.
+- `design/combat.md`, inputs, dash and cooldown values: unchanged.
+
+### Why the test failed (behavior terms)
+
+The test places a stationary shot on the player every frame while the dash is active. These shots pass through the invulnerable player and stay in play. On the dash's last frame the dash ends, and the stationary shots left from earlier frames then hit the player (hearts 2→1 at t≈0.967 at 30 FPS). That is the test leaving its own props behind, not a vulnerable frame inside the dash. The test already skipped placing a new shot on that last frame; it now also removes the old ones.
+
+### Test and trace results (actual, from the runtime)
+
+- `python3 -m unittest discover -s tests` with the corrected test: exit 0, "Ran 10 tests ... OK" (this run was made on the proposed test file, identical to the file written now).
+- Script A at 60 FPS (trace): second dash at t=2.017 with `hurt_left=0.067`. No `invulnerable False ('hurt timer ended')` line mid-dash. Hearts stay 2 until the dash ends at 2.250. The next hit is the Grub at 3.483, after the dash, which is expected.
+- Script A at 30 FPS (trace): dash at t=2.033 with `hurt_left=0.033`; no flag drop mid-dash; hearts 2 through `dash_end` at 2.267. The next hit is at 3.500, which is expected.
+- Script B at 30 and 60 FPS: **not run by me** (I used the round on A). QA should run it.
+- Criterion 3 case (dash ends while `hurt_left` > 0) was not exercised by a trace script. It is covered by `test_invulnerable_until_hurt_window_ends_after_dash` (passes). QA should confirm it with its own script.
+
+### Criteria addressed
+
+1. Script A at 30 and 60 FPS: traces above show no hit during or at the dash, hearts stay 2/3.
+2. Dash starts anywhere in the window: the flag follows both timers; the regression test covers a start with about 0.1 s left.
+3. Invulnerability persists after dash end until the post-hit window ends: covered by the unit test; please verify with a script.
+4. Unchanged behaviors: hit damage, 0.3 s stun, 0.8 s window, 0.25 s plain-dash invulnerability, cooldown and inputs are untouched. `test_plain_dash_is_invulnerable_for_exactly_its_duration`, `test_grub_bite_costs_a_heart` and `test_dash_has_a_cooldown` pass.
+5. Suite passes, regression test present for both frame rates.
+
+### How to exercise
+
+Run `python3 play.py --view trace {script}` and `--view player` for these:
+
+- Script A at `fps 60` and `fps 30`, and Script B at both (scripts are in 02/03):
+```text
+room empty
+fps 60
+end 4
+player 8 4
+spawn grub 10 4
+spawn spitter 14 4
+0.2 dash right
+1.0 dash left
+2.0 dash right
+```
+```text
+room empty
+fps 60
+end 4
+player 8 4
+spawn grub 10 4
+0.2 dash right
+1.0 dash left
+1.9 dash left
+```
+- Try a Grub contact arriving during a dash begun late in the post-hit window; this was not tested to a hit.
+- Check that a hit outside any dash or window still costs 1 heart with 0.3 s stun.
+
+### Known risks
+
+- **Dash-end boundary.** At the frame where the dash timer reaches 0, the player is no longer invulnerable for that frame's contact and shot checks, as for any plain dash. A shot or contact already overlapping the player on that frame hurts them if no post-hit window remains. `design/combat.md` says "invulnerable for the full dash duration" and does not say how a hit exactly at the end instant counts. I found no hit before the end; this behavior is unchanged from before the fix. I did not decide it. If QA judges it a defect, it is a question for the game-designer.
+- Not tested to a hit: Grub contact during the dash in the late-window case (see above).
+- The post-hit window can now extend past dash end (criterion 3). This is intended per 02.
+
+## Decisions already made
+
+- D-001: one attack button plus dash. No inputs were added.
+
+## Constraints
+
+- Must play correctly at 30 and 60 FPS.
+- `design/combat.md` unchanged.
+- QA verifies independently from the criteria and the build, not from this report's explanations.
+
+## Open questions
+
+None blocking. The dash-end boundary above is flagged for QA's judgment.
+
+## Expected output
+
+A verification verdict (pass/fail) with evidence at 30 and 60 FPS for script A, script B, the criterion 3 case and the unchanged behaviors. On pass, the work goes to Review for G-001.
+
+## Sender assessment
+
+Root cause of the failing test: a test artifact, not a game defect. `_update_shots` keeps a shot that touches an invulnerable player (it neither hurts nor consumes it). The test's zero-velocity shots therefore accumulated on the player. In `step`, the dash-end refresh clears `invulnerable` before `_update_shots`, so on the final dash frame the accumulated shots hit. Failure reported at fps 30 t=0.9667: the frame where `dash_left` reaches 0. The assertion in question was `hearts == hearts_before` after that step. The earlier `if game.dash_left > 0: assertTrue(invulnerable)` check proves the flag was True on every earlier frame, so the fix held for every frame in which the dash was still active after the step.
+
+The skip of the final frame (no new shot placed there) is justified by the spec only partly: the spec's "full dash duration" is satisfied by the flag being True throughout the active dash, but it does not define a hit evaluated at the exact end instant. I treat the end frame as outside the dash (unchanged behavior), report it as a known risk rather than deciding it, and did not change the assertion.
+
+Confidence: high that the code fix is correct (suite green, traces A at both rates show no mid-dash drop). Moderate on the untested paths: script B and Grub contact in the late window were not run by me.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: project.md#constraints, design/combat.md, manual.md, repo/README.md, the build in `repo/` (run with `run_play` and `run_trace`)
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-001-dash-damage/02-qa-to-gameplay-engineer.md
+>>>END

@@ -1,0 +1,170 @@
+<<<EDIT repo/bots.py
+<<<<<<< SEARCH
+def dodger(game, note):
+=======
+def _legacy_dodger(game, note):
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    """Pure prototype, not installed in dodger.
+=======
+    """Pure public-observation decision used by the boss dodger.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        for direction in preferred:
+            dx, dy = DIRECTIONS[direction]
+            inside = (0 <= o.x + dx * 1.5 <= ROOM_W - 1
+                      and 0 <= o.y + dy * 1.5 <= ROOM_H - 1)
+            candidates.append(("move", direction, inside))
+            if inside:
+                return BossChoice(memory, provenance, tuple(candidates),
+                                  tuple(excluded), "escape",
+                                  (("move", direction),))
+            excluded.append((direction, "wall"))
+=======
+        selected_direction = None
+        for direction in preferred:
+            dx, dy = DIRECTIONS[direction]
+            inside = (0 <= o.x + dx * 1.5 <= ROOM_W - 1
+                      and 0 <= o.y + dy * 1.5 <= ROOM_H - 1)
+            candidates.append(("move", direction, inside))
+            if inside and selected_direction is None:
+                selected_direction = direction
+            if not inside:
+                excluded.append((direction, "wall"))
+            elif direction != selected_direction:
+                excluded.append((direction, "lower-priority"))
+        if selected_direction is not None:
+            return BossChoice(memory, provenance, tuple(candidates),
+                              tuple(excluded), "escape",
+                              (("move", selected_direction),))
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+BOTS = {"camper": camper, "walker": walker, "dodger": dodger}
+=======
+def dodger(game, note):
+    """Route boss decisions through the public boundary before any legacy helper.
+
+    Memory belongs to the current Game, so replacing a room or retrying
+    destroys it. _Proxy forwards this one owned context to its current Game.
+    Direct callers retain memory on their supplied Game as well.
+    """
+    observation = observe_boss(game)
+    if observation is None:
+        return _legacy_dodger(game, note)
+    memory = getattr(game, "_boss_memory", BossMemory())
+    choice = choose_boss(observation, memory)
+    game._boss_memory = choice.memory
+    issued = []
+    for action, direction in choice.buttons:
+        game.press(action, direction)
+        issued.append((action, direction))
+    # Logging happens after choosing and issuing; no logging state feeds back.
+    label = {
+        "approach": "walk to boss",
+        "swipe": "face and swing at boss",
+        "hold": "hold off the boss's locked " + observation.attack + " line",
+        "escape": "escape from " + observation.attack,
+    }[choice.selected]
+    note(label + " | public " + repr({
+        "input": observation,
+        "memory_before": memory,
+        "memory_after": choice.memory,
+        "provenance": choice.provenance,
+        "candidates": choice.candidates,
+        "excluded": choice.excluded,
+        "selected": choice.selected,
+        "issued": tuple(issued),
+    }))
+
+
+BOTS = {"camper": camper, "walker": walker, "dodger": dodger}
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    def press(self, action, direction=None):
+        return self._s.press(action, direction)
+
+    def __getattr__(self, name):
+=======
+    @property
+    def _boss_memory(self):
+        return getattr(self._s.game, "_boss_memory", BossMemory())
+
+    @_boss_memory.setter
+    def _boss_memory(self, value):
+        self._s.game._boss_memory = value
+
+    def press(self, action, direction=None):
+        return self._s.press(action, direction)
+
+    def __getattr__(self, name):
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/tests/test_bots_boss.py
+<<<<<<< SEARCH
+class OutcomeTest(unittest.TestCase):
+=======
+class PublicBoundaryConnectionTest(unittest.TestCase):
+    def test_actual_dodger_bypasses_legacy_helpers(self):
+        from unittest import mock
+        for fps in (30, 60):
+            for attack in ("charge", "short shot"):
+                game = boss_warning(attack, (8, 4))
+                game.fps = fps
+                notes = []
+                with mock.patch.object(bots, "_legacy_dodger",
+                                       side_effect=AssertionError("legacy read")), \
+                     mock.patch.object(bots, "_threat",
+                                       side_effect=AssertionError("threat read")), \
+                     mock.patch.object(bots, "_face_and_swing",
+                                       side_effect=AssertionError("swing read")):
+                    bots.dodger(game, notes.append)
+                    lane = game._boss_memory
+                    boss = game.enemies[0]
+                    boss.phase = "active"
+                    outputs = []
+                    for left, aim, struck in ((0.001, (1, 0), False),
+                                              (99, (0, 1), True)):
+                        boss.phase_left, boss.aim = left, aim
+                        boss.struck = boss.spent = struck
+                        game._boss_memory = lane
+                        game.events.clear()
+                        game.heading = (0, 0)
+                        bots.dodger(game, notes.append)
+                        outputs.append((game.heading, list(game.events),
+                                        game._boss_memory, notes[-1]))
+                    self.assertEqual(outputs[0], outputs[1])
+                    self.assertEqual(game._boss_memory, lane)
+                    boss.phase = "recovery"
+                    bots.dodger(game, notes.append)
+                    self.assertEqual(game._boss_memory, bots.BossMemory())
+
+    def test_proxy_memory_is_owned_by_current_room(self):
+        from run_driver import RunSession
+        session = RunSession()
+        proxy = bots._Proxy(session)
+        remembered = bots.BossMemory((10, 4, -1, 0, 2.4),
+                                     "charge", 0.0)
+        proxy._boss_memory = remembered
+        self.assertEqual(session.game._boss_memory, remembered)
+        session._enter("5", 3)
+        self.assertEqual(proxy._boss_memory, bots.BossMemory())
+        session.state = "dead"
+        proxy._boss_memory = remembered
+        self.assertTrue(session.control("retry"))
+        self.assertEqual(proxy._boss_memory, bots.BossMemory())
+
+    def test_all_escape_candidates_are_enumerated(self):
+        game = boss_warning("charge", (8, 4))
+        choice = bots.choose_boss(bots.observe_boss(game), bots.BossMemory())
+        self.assertEqual(choice.candidates,
+                         (("move", "down", True), ("move", "up", True)))
+        self.assertIn(("up", "lower-priority"), choice.excluded)
+
+
+class OutcomeTest(unittest.TestCase):
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE @run/tests/public-boundary-connection
+>>>END

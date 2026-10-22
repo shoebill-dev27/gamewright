@@ -130,3 +130,48 @@ def test_asking_for_a_directory_names_its_files(ws):
     assert any(
         "is a directory" in e and "design/combat.md" in e for e in errors
     ), errors
+
+
+# --- Recorded live runs --------------------------------------------------------------------
+
+RUNS = sr.ROOT / "examples" / "runs"
+BOSS, CLOSE = RUNS / "p12-boss-run", RUNS / "p12-close-run"
+
+
+@needs_sandbox
+@pytest.mark.skipif(
+    not (BOSS / "measurement.json").is_file(), reason="no recorded Phase 12 run"
+)
+def test_recorded_measurement_reproduces(tmp_path):
+    import test_phase6 as t6
+    import test_phase10 as t10
+
+    repo = BOSS / "project" / "repo"
+    code, _, _ = t6.sandboxed_copy(
+        repo, tmp_path, "t", ["python3", "-m", "unittest", "discover", "-s", "tests"]
+    )
+    recorded = json.loads((BOSS / "measurement.json").read_text())
+    m = t6.measure(repo, tmp_path)
+    assert m == recorded["measurement"] and code == recorded["tests_exit"]
+    assert t10.boss_verdict(m) == recorded["boss_verdict"]
+
+
+@pytest.mark.skipif(not CLOSE.is_dir(), reason="no recorded Phase 12 close run")
+def test_recorded_close_refreshed_only_the_current_state():
+    goal_md = next((CLOSE / "project" / "goals").glob("G-001-*/goal.md")).read_text()
+    assert sr.parse(goal_md)[0]["status"] == "done"
+    fixture = (
+        sr.ROOT / "examples" / "fixtures" / "lantern-depths-real" / "project.md"
+    ).read_text()
+    closed = (CLOSE / "project" / "project.md").read_text()
+    assert sr.section(closed, "Current state") != sr.section(fixture, "Current state")
+    assert sr.check_project_update(fixture, closed, closing=True) == []
+
+
+@pytest.mark.skipif(not CLOSE.is_dir(), reason="no recorded Phase 12 close run")
+def test_recorded_failing_build_check_was_sent_back():
+    checks = sorted(
+        (CLOSE / "records").glob("*-step-gameplay-engineer/build-check.json")
+    )
+    exits = [json.loads(c.read_text())["exit"] for c in checks]
+    assert exits[0] != 0 and exits[-1] == 0  # the failure went back and was fixed

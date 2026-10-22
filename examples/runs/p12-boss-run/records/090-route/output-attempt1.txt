@@ -1,0 +1,6 @@
+<<<FILE @need
+goals/G-002-final-boss/68-technical-director-to-studio.md
+goals/G-002-final-boss/70-gameplay-engineer-to-studio.md
+goals/G-002-final-boss/71-studio-to-gameplay-engineer.md
+goals/G-002-final-boss/73-studio-to-gameplay-engineer.md
+>>>END

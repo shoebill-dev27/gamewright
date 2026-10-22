@@ -59,4 +59,5 @@ Step; the packet is the only input. The manual operations above remain valid.
   reactive play and Owner questions: `tests/test_phase7.py`; EDIT blocks: `tests/test_phase8.py`;
   answer shape and output-format lines in files: `tests/test_phase9.py`; Current state at Close and
   new rooms in the measurement: `tests/test_phase10.py`; `partial` and the build check:
-  `tests/test_phase11.py`; Phases 5-11 need `bwrap`).
+  `tests/test_phase11.py`; Step context requests and directory listings: `tests/test_phase12.py`;
+  Phases 5-12 need `bwrap`).

@@ -1,0 +1,80 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-002",
+ "attempts": [
+  {
+   "runtime": "codex",
+   "session_id": "01a164b4-13b2-7322-9ccc-bdb0ccb9217b",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 32463,
+    "cached_input_tokens": 7552,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 227,
+    "reasoning_output_tokens": 86
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 1,
+   "started": "2026-10-23T02:41:25",
+   "seconds": 10.2,
+   "errors": [],
+   "need": [
+    "goals/G-002-final-boss/68-technical-director-to-studio.md",
+    "goals/G-002-final-boss/70-gameplay-engineer-to-studio.md",
+    "goals/G-002-final-boss/71-studio-to-gameplay-engineer.md",
+    "goals/G-002-final-boss/73-studio-to-gameplay-engineer.md"
+   ]
+  },
+  {
+   "runtime": "codex",
+   "session_id": "01a164b4-3baa-72b3-8000-1d3a384678ae",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 53575,
+    "cached_input_tokens": 7552,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 3329,
+    "reasoning_output_tokens": 31
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 2,
+   "started": "2026-10-23T02:41:35",
+   "seconds": 51.2,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-002-final-boss/75-studio-to-gameplay-engineer.md": "832cd7b7d4eab4079bd05d93daaef8fccd9821d1503b4faa18faaaaf11c02227",
+  "goals/G-002-final-boss/goal.md": "08322fa9c044fc752c436b19ba67218595010554af4becc93315609301b9f7b5"
+ },
+ "decision": {
+  "new": [
+   "gameplay-engineer",
+   "Build"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "gameplay-engineer",
+    "Build"
+   ]
+  ]
+ },
+ "seen_through_seq": 75
+}

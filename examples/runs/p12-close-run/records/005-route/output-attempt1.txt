@@ -1,0 +1,67 @@
+<<<FILE goals/G-001-dash-damage/02-qa-to-gameplay-engineer.md
+<<<EDIT goals/G-001-dash-damage/02-qa-to-gameplay-engineer.md
+<<<<<<< SEARCH
+- Skills: as chosen by the Studio when routing (none specified by QA)
+=======
+- Skills: studio/skills/implement-change.md
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-001-dash-damage/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-23
+---
+# G-001: Damage taken while dashing
+
+## Owner request
+
+> ダッシュ中なのにダメージを受けることがある。再現できるので直してほしい。
+
+## Interpretation
+
+The Owner reports a defect: the player sometimes takes damage while dashing. The Owner says it is reproducible but gave no steps.
+
+Success condition: in the situations where the Owner sees it, the player no longer takes damage during a dash, to whatever extent the design documents (`design/combat.md` invulnerability rules) say a dash protects the player. It must hold at both 30 and 60 FPS.
+
+Out of scope:
+- Changing the dash's design (duration, cooldown, distance, whether it is invulnerable) unless the design documents turn out not to define the case. That would be a Design question, not part of this fix.
+- New input buttons (D-001).
+- Other combat tuning.
+
+## Unknowns
+
+- Observe: settled. QA reproduced the defect at 30 and 60 FPS (a dash started with under 0.25 s of post-hit invulnerability left; the flag drops mid-dash and a shot hurts).
+- Diagnose: skipped. Root cause is the engineer's call.
+- Decide: skipped. No choice of direction, priority or scope is open.
+- Design: skipped. `design/combat.md` says the player is invulnerable for the full dash, so the intended behavior is defined. Becomes a step again only if the engineer finds the combination of the two invulnerability sources undefined for criterion 3 (invulnerable until 0.8 s after the hit, even after the dash ends).
+- Plan (`technical-director`, tentative): needed only if the fix is non-local or FPS-dependent, or if the same criterion fails verification twice.
+- Build (`gameplay-engineer`, open): fix and regression test per the defect report.
+- Verify (`qa`, planned): always after Build, at 30 and 60 FPS, with scripts A and B.
+- Play and Review: skipped. This is a defect, not an experience Goal.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | qa | reproduce-defect | done | 01-studio-to-qa.md |
+| 2 | Design | game-designer | write-design-spec | skipped (spec defines full-dash invulnerability) | — |
+| 3 | Plan | technical-director | technical-plan | tentative (if the fix is non-local or FPS-dependent) | — |
+| 4 | Build | gameplay-engineer | implement-change | open | 02-qa-to-gameplay-engineer.md |
+| 5 | Verify | qa | verify-change | planned | — |
+
+## Route changes
+
+After Observe: defect reproduced (deterministic, FPS-independent) and combat.md defines the intended behavior, so Design is skipped. Plan stays tentative. Build is open with the QA defect report.
+
+## Next action
+
+Run the Step for `02-qa-to-gameplay-engineer.md`: the `gameplay-engineer` implements the fix and a regression test, then hands to `qa` for Verify. Then run Route.
+
+## Outcome
+
+(Written at close, in Japanese.)
+>>>END

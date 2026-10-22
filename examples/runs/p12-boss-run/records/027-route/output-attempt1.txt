@@ -1,0 +1,40 @@
+<<<EDIT goals/G-002-final-boss/goal.md
+<<<<<<< SEARCH
+status: active
+=======
+status: blocked-on-owner
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+- Decide（供給・承認）：open。供給責任者・予算権限者と既存承認根拠が不明で、Roleが生成できない情報が残る。Game Directorが20のbriefから、必要物・回答者・継続条件を明記した一つのOwner Escalationを準備する。同じ不足だけでPlanを再発行しない。
+=======
+- Decide（供給・承認）：Owner回答待ち。22でGame DirectorのEscalation準備を完了。既存資源・承認根拠の確認責任者指定（A）、不足分の見積もり・調達条件取得（B）、条件整備まで停止（C）の一問をOwnerへ開いた。推奨はA。供給責任者・予算権限者と承認根拠は未確認で、同じ不足だけでPlanを再発行しない。選択のみを未確定費用やBuildの承認とは扱わない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| 5c | Decide | game-director | make-decision, prepare-owner-escalation | open | 21-studio-to-game-director.md |
+| 5d | Plan | technical-director | technical-plan | tentative | 新しい供給・承認資料の取得後、残条件を確認 |
+=======
+| 5c | Decide | game-director | make-decision, prepare-owner-escalation | done | 21-studio-to-game-director.md → 結果: 22-game-director-to-owner.md |
+| 5c-owner | Decide | owner | — | open | 22-game-director-to-owner.md |
+| 5d | Plan | technical-director | technical-plan | tentative | Owner回答と新しい供給・承認資料の取得後、残条件を確認 |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+逐次実行する。21でGame Directorが供給・費用承認に関するOwner Escalationを準備する。現時点のopenは準備Stepであり、Ownerへの質問はまだ開いていない。新しい供給・承認資料が得られた場合のみPlanの残条件確認を開き、必要なOwner判断とD-020の五条件が解決するまでBuildを保留する。独立QA、Art Directorの限定Verify、独立Play、Designerの実測後判断、Reviewの順序を維持する。初回基線やQAで明白な対処不能・到達不能が判明した場合はDesigner判断を前倒しする。並列Stepは開かない。
+=======
+逐次実行する。22のOwner Escalationのみをopenとし、回答に依存するRoleのStepは開かない。回答待ちに継続できる独立作業はない。Owner回答をResumeでDecisionに記録した後、選択条件と新しい供給・承認資料に応じて再計画する。同じ資料だけでPlanを繰り返さず、必要なOwner判断とD-020の五条件が解決するまでBuildを保留する。独立QA、Art Directorの限定Verify、独立Play、Designerの実測後判断、Reviewの順序を維持する。初回基線やQAで明白な対処不能・到達不能が判明した場合はDesigner判断を前倒しする。並列Stepは開かない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+20のPlan補完を完了し、回帰対応の充足と実行・供給・承認の不足を分離した。Roleで生成できない供給情報と承認根拠の不足が具体化したため、21でGame DirectorへOwner Escalation準備を戻す。同じPlan質問を繰り返さず、Build保留と後続の独立検証順序を維持する。
+=======
+22でEscalation準備を完了し、供給責任者・承認根拠の不足についてOwnerへA／B／Cの一問を開いた。Goalをblocked-on-ownerとし、依存StepとBuildを保留する。新しい供給・承認資料を得るまでPlanを再発行せず、後続の独立検証順序を維持する。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Game Directorが `21-studio-to-game-director.md` を実行し、供給・費用承認の一つのOwner Escalationを日本語で準備する。Buildは開始しない。
+=======
+Ownerが `22-game-director-to-owner.md` にA／B／Cと条件を回答する。推奨はA（既存資源と承認根拠の確認責任者指定）。A／Bでは供給・検証枠・予算の回答権限者を役割で指定し、Bでは調査対象・担当・既存配員枠・停止条件、Cでは再開条件を添える。回答後にStudioがResumeでDecisionを記録して再計画する。未確定費用の承認やBuild開始とは扱わない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+未完了・進行中。D-015〜D-020を維持し、回帰正本と試験対応の計画補完を完了した。実行基線、実機・独立検証の供給、費用承認は未解決。計画合計は暫定18〜33.5人日で、機器等の金銭費用・日程は未算定、承認済みではない。次はGame Directorによる供給・承認のOwner Escalation準備。実装、独立検証、Play、Designer実測後判断、Reviewは未実施。指定sha一致、実行成功、実機供給、難度、所要時間の新しい証拠はない。資源不存在や承認超過とは断定しない。Goalはactive、Buildは保留し、project.mdのCurrent stateは変更しない。
+=======
+未完了・Owner回答待ち。D-015〜D-020を維持し、回帰正本と試験対応の計画補完、および22の供給・費用条件に関するEscalation準備を完了した。OwnerにはA／B／Cの選択と条件を求め、既存資源と承認根拠の確認責任者を指定するAを推奨する。実行基線、実機・独立検証の供給、費用承認は未解決。計画合計は暫定18〜33.5人日で、金銭総額・日程は未算定、承認済みではない。実装、独立検証、Play、Designer実測後判断、Reviewは未実施。指定sha一致、実行成功、実機供給、難度、所要時間の新しい証拠はなく、資源不存在や承認超過とは断定しない。Goalはblocked-on-owner。回答待ちの独立作業はなく、Buildを含む依存作業を保留する。Goalは閉じず、project.mdのCurrent stateは変更しない。
+>>>>>>> REPLACE
+>>>END

@@ -1,0 +1,72 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-001-dash-damage/04-studio-to-gameplay-engineer.md",
+  "sha256": "932ba7d4b77bf5b7d92250d8906742b62f07b918487521fb481f3dabe26c5bb7",
+  "bytes": 3116
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md",
+  "sha256": "8a447e66877cd14dfff47ac1b8482ba77c850159c8fb43ec2780e91064869351",
+  "bytes": 1742
+ },
+ {
+  "path": "studio/skills/implement-change.md",
+  "sha256": "a9befd7f1d9e09eb94c51a066f030db88c5061ad1b522d9795e62bc2c242964a",
+  "bytes": 1823
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "b67a8b97eaf78370e06b07dd9143f1c92991e97db5d0326ebbdf7d4784a43cec",
+  "bytes": 854
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "05a33c6f8e50caa20ddf4f3844885137c4261ad4a3e5f3db3eb1b5312b129a9f",
+  "bytes": 237
+ },
+ {
+  "path": "repo/game.py",
+  "sha256": "1d5aec1653af9efb93e753429bea1f16fa9d6d4988334b3fc2b8dbc6aed7ba54",
+  "bytes": 9255
+ },
+ {
+  "path": "repo/tests/test_game.py",
+  "sha256": "170d1d55faa8c3603d4be0db14625e3cab51c8b82d71ddd6e5cf35781930c1d5",
+  "bytes": 4312
+ },
+ {
+  "path": "goals/G-001-dash-damage/02-qa-to-gameplay-engineer.md",
+  "sha256": "8d7f9588b2b724b6ff06f49d6ca5970e3f59b89531a4521dca1a36d546e8571a",
+  "bytes": 9143
+ },
+ {
+  "path": "decisions/D-001-one-button-combat.md",
+  "sha256": "c7fe9ca23a369707a5ab439e44789a25a0a8544efce4703a676f8fd180f82ec1",
+  "bytes": 798
+ },
+ {
+  "path": "goals/G-001-dash-damage/03-gameplay-engineer-to-qa.md",
+  "sha256": "358842c1104e3eab54b05cc3ab714093bf1440030bbcd09561c5f56dadcf8b50",
+  "bytes": 6289
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ },
+ {
+  "path": "repo/tests/test_game.py (proposed in a run round; not written)",
+  "sha256": "9013bc35f0fb54bac7bc41e1347c46bcc95ef3f95d94a67e13c3605090a2389c",
+  "bytes": 4412
+ },
+ {
+  "path": "@run-results",
+  "sha256": "4e3caff55240a46b1a18dae47f8daf54e195f1146cd64294727a4595e92e2636",
+  "bytes": 5278
+ }
+]

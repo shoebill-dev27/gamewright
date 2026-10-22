@@ -1,0 +1,150 @@
+<<<EDIT goals/G-002-final-boss/goal.md
+<<<<<<< SEARCH
+- Plan（供給条件への適合）：open。66でTechnical Directorが62をD-023・D-024へ適合させる。個別Load、最大3回の実行、出力上限内の証拠、直列分割、公開情報botの再測定、独立QAへの受渡しと後続工程条件を具体化する。存在しない保存機構や変更前ビルドを前提にしない。
+=======
+- Plan（供給条件への適合）：done。68が62の実行計画を置換する。E0棚卸し→E1公開情報bot→E2接触診断→E3ボス4条件→E4保持回帰→E5公開再生→独立Q1〜Q6を直列実行する。各Step最大3回・各出力2万字以内、欠落は未確認。存在しない保存機構や変更前ビルドを前提にしない。
+- Build（試験道具・再測定）：open。69でEngineerのE0のみ開始する。実在する全テストファイル・全テストID・基準対応と未対応を棚卸しし、対象別証拠出力を整える。E1以降はE0の結果を受けて個別に開く。
+- Decide（後続工程条件）：planned。歴史的確認不能を残して限定Art Verify以降へ進む条件をGame Directorに判断してもらう。Engineer・QAは先行可能。現行検証の完了を全基準passやGoal達成に読み替えない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| 7b-plan | Plan | technical-director | technical-plan | open | 66-studio-to-technical-director.md |
+| 7b-build | Build | gameplay-engineer | implement-change | planned | 適合計画に従う試験道具対応・再測定 |
+| 7c | Verify | qa | verify-change | planned | 基準整理・計画適合・試験道具対応後 |
+=======
+| 7b-plan | Plan | technical-director | technical-plan | done | 66-studio-to-technical-director.md → 結果: 68-technical-director-to-studio.md |
+| 7b-e0 | Build | gameplay-engineer | implement-change | open | 69-studio-to-gameplay-engineer.md |
+| 7b-build | Build | gameplay-engineer | implement-change | planned | 68のE1→E2→E3群→E4群→E5群を直列分割 |
+| 7c | Verify | qa | verify-change | planned | E0の全試験台帳を使い68のQ1〜Q6を直列分割 |
+| 7d | Decide | game-director | make-decision, prepare-owner-escalation | planned | 歴史的確認不能を保持した後続評価工程の条件判断 |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+逐次実行する。D-023を受け、Designerの変更前一致基準整理→Technical Directorの供給条件に適合した再計画→Engineerの試験道具対応・再測定→独立QA→限定Art Verify→独立Play→Designer実測後判断→Reviewとする。各StepのLoadは必要なファイルを個別指定する。全文保存先・別実行枠・変更前ビルドの供給を待たない。明白な対処不能・到達不能が判明した場合はDesigner判断を前倒しする。並列Stepは開かない。
+=======
+逐次実行する。68に従いE0→E1→E2→E3群→E4群→E5群→独立Q1〜Q6を進める。E0の全試験台帳からQAの個別Loadを割り当て、追加試験も含め未配布を残さない。現行必須検証、公開情報条件、再測定、記録差へのDesigner回答が揃い、歴史比較以外の不足を解消した後、Game Directorが歴史的確認不能を保持した評価継続の条件を判断する。認められた場合、限定Art Verify→独立Play→Designer実測後判断→Reviewへ進む。各StepのLoadは個別ファイル指定。全文保存先・別実行枠・変更前ビルドを待たない。明白な対処不能・到達不能や規定外の比較差はDesignerへ戻す。並列Stepは開かない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+65のDesignを完了とし、D-024の記録比較・確認不能・現行検証の区分を採用する。66でTechnical Directorへ62のD-023・D-024適合再計画を開く。歴史的一致の未確認を保持した後続工程条件を整理し、同じ不足のまま第三のQA依頼は出さない。
+=======
+68で再計画を完了し、62の実行計画を置換する。69でEngineerのE0棚卸し・対象別出力整備を開き、以降の対応・測定・独立QAは直列分割する。歴史的確認不能を保持した後続評価の条件判断をGame Directorに残し、同じ不足のまま第三のQA依頼は出さない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Technical Directorが66-studio-to-technical-director.mdを開始する。62を実際の供給上限とD-024へ適合させ、試験道具対応・再測定・独立QAの直列分割と、確認不能を保持した後続工程条件をStudioへ返す。
+=======
+Gameplay Engineerが69-studio-to-gameplay-engineer.mdでE0を開始する。全テストの実在名・IDと基準対応を棚卸しし、対象別証拠出力を整えてStudioへ返す。Studioは結果からE1の個別Loadと、後続QAへの全試験配布台帳を具体化する。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+未完了。D-023の供給条件とD-024の証拠区分を受け、Technical Directorの再計画へ進む。変更前の厳密な同一性は確認不能として保持し、独立1〜4 dodgerは記録精度に限定して比較する。全文保存先や変更前ビルドの供給は待たない。試験道具対応・再測定、独立QA・限定Art Verify・独立Play・実測後Designer判断・Reviewは未完了。確認不能を合格やGoal達成とは扱わず、戦闘本体の不具合・難度・通常ラン時間とVisionとの差の判断を残す。project.mdは変更しない。
+=======
+未完了。供給上限に適合した68の計画を受け、Engineerの試験棚卸しから開始する。変更前の厳密な同一性は確認不能として保持し、独立1〜4 dodgerは記録精度に限定して比較する。全文保存先や変更前ビルドの供給は待たない。試験道具対応・再測定、独立QA、後続評価の工程条件判断、限定Art Verify・独立Play・実測後Designer判断・Reviewは未完了。確認不能を合格やGoal達成とは扱わず、戦闘本体の不具合・難度・通常ラン時間とVisionとの差の判断を残す。project.mdは変更しない。
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-002-final-boss/69-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-002
+seq: 69
+from: studio
+to: gameplay-engineer
+stage: Build
+outcome: routed
+---
+# 69: studio → gameplay-engineer — E0試験棚卸しと証拠出力整備
+
+## Task
+
+68のE0のみを実施する。全テストの実在ファイル名・discoverされた全テストID・基準との対応と未対応を棚卸しし、供給上限内で対象別の証拠を出せる試験道具を整える。
+
+## Context
+
+Goalは連続ランの最後に手応えのあるボス戦を成立させること。60のQAは証拠・供給不足等でfailであり、第三の同条件QAを開く前に試験道具と証拠を整える。
+
+68が62の実行計画を置換した。今回はE0だけを行い、公開情報botの変更、接触診断の対応、成績再測定、通常ラン入力再生成は後続Stepへ残す。
+
+## Findings
+
+68の§2・3が今回の出力契約と作業計画である。§4〜10は後続作業の依存関係を示す。
+
+プロジェクト一覧には次のテストファイルがある。実行時の棚卸しで実在性と追加・欠落を確認すること。この一覧だけで網羅済みとしない。
+
+- repo/tests/test_boss.py
+- repo/tests/test_boss_contract.py
+- repo/tests/test_boss_contract_details.py
+- repo/tests/test_bots_boss.py
+- repo/tests/test_d022_observation.py
+- repo/tests/test_d022_shots_and_note.py
+- repo/tests/test_game.py
+- repo/tests/test_play_run_controls.py
+- repo/tests/test_run_driver.py
+- repo/tests/test_session.py
+- repo/tests/test_split_c.py
+- repo/tests/test_terminal.py
+
+新規証拠出力ファイルの提案はrepo/tests/test_g002_evidence.py。まだ存在するとは扱わない。
+
+## Decisions already made
+
+- D-019：保持回帰、公開情報限定ボス比較、開始3/2 hearts別FPS比較、実測後Designer判断を維持。
+- D-021：repo/のテキスト・スクリプトとStudio内独立検証で進める。
+- D-022：旧経路注記、弾ライフサイクル、長時間観測の契約。
+- D-023：個別Load、@needは一度最大8件、@runは最大3回、各出力最大2万字。全文保存先・変更前ビルドは存在しない。
+- D-024：現行検証、現行内対照、記録比較、歴史的確認不能を分離。確認不能をpassや免除にしない。
+- 技術計画は68を使用する。今回は新しい仕様・方向の判断を行わない。
+
+## Constraints
+
+製品仕様・戦闘パラメータ・難度・秒数ゲート・Goal範囲を変更しない。E0では製品ソースと既存bot方針を変更しない。
+
+書込対象はrepo/tests/test_g002_evidence.py。棚卸し・対象別証拠出力に必要な試験道具をここへまとめる。他ファイルの変更が不可欠なら理由と具体的な対象をStudioへ返す。
+
+固定実行コマンドはrepo/での `python3 -m unittest discover -s tests`。trace枠で任意Pythonを動かす前提を置かない。最大3回で、棚卸し・通常suite・道具の確認を配分する。
+
+出力は対象開始・終了、列定義、連番、総件数・表示件数・除外対象を明示し、概ね1万2千字以内を目指す。切断・未表示を確認済みにしない。成功件数やsource_idだけで必要本文を置き換えない。
+
+未供給のテスト本文を読んだものとして対応付けない。必要なら個別パスで@needを使い、それでも残る既知の範囲はpartialとして直列継続する。ディレクトリを@needへ指定しない。
+
+## Open questions
+
+- 実在する全テストファイルとdiscoverされた全IDは何か。
+- 各基準をどの試験がどのassert・観測で扱い、どこが未対応または本文未確認か。
+- 旧第5部屋依存試験の保持部分とD-019による置換先は何か。
+- 後続E1〜E5・Q1〜Q6に必要な対象別出力をどう選び、欠落を検知するか。
+
+## Expected output
+
+結果を`studio`宛Handoffとして返す。次を含める。
+
+1. 実在する全テストファイル・全テストIDの連番付き棚卸し、総件数と未表示範囲。
+2. 基準ID→試験ID→assert・観測対象の暫定対応表。本文未確認・未対応、旧5番依存と置換先を分ける。
+3. 変更ファイル、証拠出力の選択方法と再現手順、実行コマンド、実行時source_idと識別対象ファイル一覧。
+4. 通常suite結果と道具の確認証拠。実装者の確認であり独立QAではないと明記する。
+5. E1に必要な個別Load候補と、QA全試験配布台帳に使えるQ1〜Q6別の割当案。未割当・追加試験を明示する。
+6. 残作業と不足。既知の作業が残るだけならpartialとし、何も新たに不足していない作業をOwnerへ戻さない。
+
+E0完了後の次工程はE1。今回は着手しない。Studioが棚卸しを確認し、次のHandoffと後続QAの個別Loadを確定する。
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: project.md#constraints
+- Project: design/final-boss-and-continuous-run.md
+- Project: design/g002-historical-comparison-evidence.md
+- Project: repo/source_id.py
+- Project: repo/game.py
+- Project: repo/session.py
+- Project: repo/bots.py
+- Project: repo/play.py
+- Project: repo/run_driver.py
+- Project: repo/tests/test_bots_boss.py
+- Project: repo/tests/test_split_c.py
+- Project: repo/tests/test_d022_observation.py
+- Project: repo/tests/test_d022_shots_and_note.py
+- Supporting report: goals/G-002-final-boss/60-qa-to-studio.md
+- Decisions: decisions/D-019-g002-balance-criteria-applicability.md
+- Decisions: decisions/D-021-owner-authorizes-text-build.md
+- Decisions: decisions/D-022-g002-v1-supplements.md
+- Decisions: decisions/D-023-owner-confirms-verification-supply.md
+- Decisions: decisions/D-024-g002-historical-comparison-evidence.md
+- Previous handoff: goals/G-002-final-boss/68-technical-director-to-studio.md
+>>>END
