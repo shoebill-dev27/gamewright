@@ -1,0 +1,32 @@
+<<<FILE @run/bots/retained-and-boss-30
+bots camper,walker,dodger
+rooms 1-5
+fps 30
+limit 120
+hearts 3,2
+log on
+>>>END
+
+<<<FILE @run/bots/retained-and-boss-60
+bots camper,walker,dodger
+rooms 1-5
+fps 60
+limit 120
+hearts 3,2
+log on
+>>>END
+
+<<<FILE @run/play/boss-zero-player-60
+mode room
+room empty
+spawn boss 8 4
+player 8 4
+fps 60
+limit 12
+driver-limit 14
+view-every 10
+0.016666666666666666 move up
+0.26666666666666666 stop
+control 0.4 pause
+control 2.4 resume
+>>>END

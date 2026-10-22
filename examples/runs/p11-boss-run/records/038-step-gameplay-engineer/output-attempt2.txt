@@ -1,0 +1,295 @@
+<<<FILE repo/session.py
+"""Continuous-run progression; Game remains the authority for room combat."""
+
+from game import EPS, HEARTS, Game
+
+
+class RunSession:
+    """One run with a frozen combat clock and an independent progression clock.
+
+    Drivers process controls before inputs and call step once per driver tick.
+    Reaction definitions belong to the driver; generation changes invalidate
+    its previous board, messages, and rule reaction timestamps.
+    """
+
+    def __init__(self, fps=60):
+        self.fps = fps
+        self.dt = 1.0 / fps
+        self.attempt = 1
+        self.generation = 0
+        self.events = []
+        self.sequence = 0
+        self.paused = False
+        self.run_frame = 0
+        self.state = "combat"
+        self.clear_frames = 0
+        self.stop_reason = None
+        self._enter("1", HEARTS)
+
+    @property
+    def t(self):
+        return self.run_frame / self.fps
+
+    @property
+    def room_t(self):
+        return self.game.t
+
+    def log(self, kind, **details):
+        self.sequence += 1
+        self.events.append({
+            "sequence": self.sequence,
+            "attempt": self.attempt,
+            "room": self.game.room,
+            "run_time": self.t,
+            "room_time": self.room_t,
+            "frame": self.game.frame,
+            "kind": kind,
+            "details": details,
+        })
+
+    def _enter(self, room, hearts):
+        self.game = Game(fps=self.fps, room=room)
+        self.game.hearts = hearts
+        self.generation += 1
+        self.game_seen = 0
+        self.state = "combat"
+        self.clear_frames = 0
+        self.log("entry", hearts=hearts)
+
+    def press(self, action, direction=None):
+        if self.paused or self.state != "combat" or self.stop_reason:
+            self.log("input_rejected", action=action,
+                     reason="paused" if self.paused else self.state)
+            return False
+        first = len(self.game.events)
+        self.game.press(action, direction)
+        self._collect()
+        accepted = not any(
+            kind == "ignored" for _, kind, _ in self.game.events[first:]
+        )
+        self.log("input", action=action, direction=direction, accepted=accepted)
+        return accepted
+
+    def control(self, action):
+        if action == "pause":
+            if not self.paused and self.state in ("combat", "room_clear"):
+                self.paused = True
+                self.game.heading = (0, 0)
+                self.log("pause")
+                return True
+        elif action == "resume":
+            if self.paused:
+                self.paused = False
+                self.log("resume")
+                return True
+        elif action == "retry":
+            if self.state in ("won", "dead"):
+                self.attempt += 1
+                self.run_frame = 0
+                self.paused = False
+                self.stop_reason = None
+                self._enter("1", HEARTS)
+                self.log("retry")
+                return True
+        else:
+            raise ValueError(f"unknown control {action}")
+        self.log("control_rejected", action=action, state=self.state)
+        return False
+
+    def _collect(self):
+        for _, kind, details in self.game.events[self.game_seen:]:
+            self.log(kind, **details)
+        self.game_seen = len(self.game.events)
+
+    def step(self, limit=None):
+        if self.stop_reason or self.paused or self.state in ("won", "dead"):
+            return
+        if limit is not None and self.t >= limit - EPS:
+            self.stop_reason = "time limit — run unfinished"
+            self.log("limit", outcome=self.state)
+            return
+        self.run_frame += 1
+        if self.state == "room_clear":
+            self.clear_frames += 1
+            if self.clear_frames >= self.fps:
+                old_hearts = self.game.hearts
+                room = str(int(self.game.room) + 1)
+                self._enter(room, min(HEARTS, old_hearts + 1))
+                self.log("recovery", gained=self.game.hearts - old_hearts)
+        else:
+            self.game.step()
+            self._collect()
+            if self.game.outcome == "dead":
+                self.state = "dead"
+                self.log("run_dead")
+            elif self.game.outcome == "cleared":
+                if self.game.room == "5":
+                    self.state = "won"
+                    self.log("run_won")
+                else:
+                    self.state = "room_clear"
+                    self.clear_frames = 0
+                    self.log("room_clear", next_room=int(self.game.room) + 1)
+        # Resolve the final combat frame before recording the driver stop.
+        if limit is not None and self.t >= limit - EPS:
+            self.stop_reason = "time limit — run unfinished"
+            self.log("limit", outcome=self.state)
+>>>END
+
+<<<FILE repo/tests/test_session.py
+"""Boundary fixtures are not evidence of normal-run continuous reachability."""
+
+import copy
+import unittest
+
+from session import RunSession
+
+
+class SessionTest(unittest.TestCase):
+    def clear(self, session):
+        for enemy in session.game.enemies:
+            enemy.hp = 0
+        session.step()
+
+    def test_boundary_healing_and_clocks(self):
+        for fps in (30, 60):
+            for hearts, expected in ((1, 2), (2, 3), (3, 3)):
+                with self.subTest(fps=fps, hearts=hearts):
+                    session = RunSession(fps)
+                    session.game.hearts = hearts
+                    self.clear(session)
+                    old = session.game
+                    room_time = old.t
+                    start = session.t
+                    for _ in range(fps - 1):
+                        session.step()
+                        self.assertIs(session.game, old)
+                        self.assertEqual(old.t, room_time)
+                        self.assertEqual(old.hearts, hearts)
+                    session.step()
+                    self.assertEqual(session.game.room, "2")
+                    self.assertEqual(session.game.hearts, expected)
+                    self.assertEqual(session.room_t, 0)
+                    self.assertAlmostEqual(session.t - start, 1)
+                    self.assertEqual(len([
+                        e for e in session.events if e["kind"] == "recovery"
+                    ]), 1)
+
+    def test_boundary_replaces_all_combat_state(self):
+        for fps in (30, 60):
+            session = RunSession(fps)
+            game = session.game
+            game.heading = (-1, 0)
+            game.dash_left = 0.2
+            game.dash_cooldown = 0.4
+            game.hurt_left = 0.7
+            game.invulnerable = True
+            game.queued_attack = True
+            game.recovery = 0.2
+            generation = session.generation
+            self.clear(session)
+            for _ in range(fps):
+                self.assertFalse(session.press("move", "left"))
+                session.step()
+            fresh = RunSession(fps).game
+            current = session.game
+            for field in ("x", "y", "facing", "heading", "dash_left",
+                          "dash_cooldown", "hurt_left", "stun_left",
+                          "invulnerable", "queued_attack", "recovery", "shots"):
+                self.assertEqual(getattr(current, field), getattr(fresh, field))
+            self.assertEqual(session.generation, generation + 1)
+
+    def test_zero_hearts_never_recovers_or_enters(self):
+        for fps in (30, 60):
+            session = RunSession(fps)
+            session.game.hearts = 0
+            self.clear(session)
+            self.assertEqual(session.state, "dead")
+            for _ in range(2 * fps):
+                session.step()
+            self.assertEqual(session.game.room, "1")
+            self.assertEqual(session.game.hearts, 0)
+
+    def test_pause_freezes_dash_and_queued_attack(self):
+        for fps in (30, 60):
+            session = RunSession(fps)
+            session.press("dash", "right")
+            session.press("attack")
+            session.control("pause")
+            before = copy.deepcopy(session.game.__dict__)
+            start = session.t
+            for _ in range(2 * fps):
+                session.step()
+            self.assertEqual(session.t, start)
+            self.assertEqual(session.game.dash_left, before["dash_left"])
+            self.assertEqual(session.game.recovery, before["recovery"])
+            self.assertTrue(session.game.queued_attack)
+            self.assertFalse(session.press("attack"))
+            session.control("resume")
+            for _ in range(fps):
+                session.step()
+            self.assertFalse(session.game.queued_attack)
+            self.assertTrue(any(e["kind"] == "attack" for e in session.events))
+
+    def test_pause_freezes_boundary(self):
+        for fps in (30, 60):
+            session = RunSession(fps)
+            self.clear(session)
+            session.step()
+            session.control("pause")
+            start = (session.t, session.room_t, session.clear_frames)
+            for _ in range(2 * fps):
+                session.step()
+            self.assertEqual((session.t, session.room_t, session.clear_frames), start)
+            session.control("resume")
+            for _ in range(fps - 1):
+                session.step()
+            self.assertEqual(session.game.room, "2")
+
+    def test_terminal_retry_matches_new_run(self):
+        for fps in (30, 60):
+            for outcome in ("won", "dead"):
+                session = RunSession(fps)
+                session.state = outcome
+                session.game.queued_attack = True
+                session.game.hearts = 0
+                session.run_frame = 100
+                self.assertTrue(session.control("retry"))
+                fresh = RunSession(fps)
+                self.assertEqual(session.attempt, 2)
+                self.assertEqual(session.t, 0)
+                self.assertEqual(session.state, "combat")
+                a = session.game.__dict__.copy()
+                b = fresh.game.__dict__.copy()
+                a_enemies, b_enemies = a.pop("enemies"), b.pop("enemies")
+                self.assertEqual(a, b)
+                self.assertEqual([e.__dict__ for e in a_enemies],
+                                 [e.__dict__ for e in b_enemies])
+
+    def test_limit_records_result_separately(self):
+        for fps in (30, 60):
+            session = RunSession(fps)
+            for enemy in session.game.enemies:
+                enemy.hp = 0
+            session.step(limit=session.dt)
+            self.assertEqual(session.state, "room_clear")
+            self.assertEqual(session.stop_reason, "time limit — run unfinished")
+            session = RunSession(fps)
+            session.step(limit=session.dt)
+            self.assertEqual(session.state, "combat")
+            self.assertIsNone(session.game.outcome)
+            self.assertEqual(session.stop_reason, "time limit — run unfinished")
+
+    def test_retry_rejected_outside_terminal(self):
+        session = RunSession()
+        self.assertFalse(session.control("retry"))
+        self.clear(session)
+        self.assertFalse(session.control("retry"))
+
+
+if __name__ == "__main__":
+    unittest.main()
+>>>END
+
+<<<FILE @run/tests
+>>>END

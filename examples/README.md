@@ -92,3 +92,11 @@ Results and findings: `docs/phase9.md`.
 | `runs/p10-boss-run` | G-002 ("最後に手応えのあるボス戦がほしい") on the project as G-001 closed it, started on Codex and continued on Claude after the Codex engineer kept handing back unfinished work. Stopped inside Build at 78 executors (budget 100), before Close. Room 5 became a single boss; the held-out measurement in `measurement.json` meets S1–S3 and the pre-registered B1–B2. Shows the earlier Decisions carried into the new Goal, two Owner questions (one about scope, one about hardware the project never needed), and 25 operations of planning before Build. |
 
 Results and findings: `docs/phase10.md`.
+
+## Phase 11: `partial` and the build check
+
+| Run | What it shows |
+|---|---|
+| `runs/p11-boss-run` | A copy of `runs/p10-boss-run` continued on Codex with the Phase 11 runner (records from 062 on). Engineers handed back `partial` twice and then `done`, so Build finished in 4 steps; every build-writing step got a passing `## Build check`. QA failed twice, partly on a real finding (the boss bot may use state the player cannot see) and partly because a Load entry named a directory and was silently dropped. Stopped at the third Owner question, 104 executors in all. The measurement in `measurement.json` meets S1–S3 and B1–B2. |
+
+Results and findings: `docs/phase11.md`.

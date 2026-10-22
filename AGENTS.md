@@ -58,4 +58,5 @@ Step; the packet is the only input. The manual operations above remain valid.
   build runs and sandbox: `tests/test_phase5.py`; experience measurement: `tests/test_phase6.py`;
   reactive play and Owner questions: `tests/test_phase7.py`; EDIT blocks: `tests/test_phase8.py`;
   answer shape and output-format lines in files: `tests/test_phase9.py`; Current state at Close and
-  new rooms in the measurement: `tests/test_phase10.py`; Phases 5-10 need `bwrap`).
+  new rooms in the measurement: `tests/test_phase10.py`; `partial` and the build check:
+  `tests/test_phase11.py`; Phases 5-11 need `bwrap`).

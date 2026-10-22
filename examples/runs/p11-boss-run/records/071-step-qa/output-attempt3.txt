@@ -1,0 +1,23 @@
+<<<FILE @run/play/retry-30
+mode run
+fps 30
+limit 20
+driver-limit 14
+view-every 10
+control 6 retry
+7 attack
+7 dash right
+attempt 2
+>>>END
+
+<<<FILE @run/trace/retry-60
+mode run
+fps 60
+limit 20
+driver-limit 14
+trace-every 5
+control 6 retry
+7 attack
+7 dash right
+attempt 2
+>>>END

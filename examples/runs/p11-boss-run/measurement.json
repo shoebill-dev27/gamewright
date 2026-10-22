@@ -1,0 +1,176 @@
+{
+ "measurement": {
+  "fps": {
+   "30": {
+    "simple": [
+     {
+      "cleared": false,
+      "dashes": 0,
+      "lost": 3,
+      "room": "1",
+      "seconds": 5.8
+     },
+     {
+      "cleared": true,
+      "dashes": 0,
+      "lost": 2,
+      "room": "2",
+      "seconds": 8.9
+     },
+     {
+      "cleared": true,
+      "dashes": 0,
+      "lost": 1,
+      "room": "3",
+      "seconds": 8.633
+     },
+     {
+      "cleared": true,
+      "dashes": 0,
+      "lost": 2,
+      "room": "4",
+      "seconds": 10.533
+     },
+     {
+      "cleared": true,
+      "dashes": 0,
+      "lost": 2,
+      "room": "5",
+      "seconds": 5.933
+     }
+    ],
+    "skilled": [
+     {
+      "cleared": true,
+      "dashes": 4,
+      "lost": 0,
+      "room": "1",
+      "seconds": 7.833
+     },
+     {
+      "cleared": true,
+      "dashes": 5,
+      "lost": 0,
+      "room": "2",
+      "seconds": 17.4
+     },
+     {
+      "cleared": true,
+      "dashes": 4,
+      "lost": 1,
+      "room": "3",
+      "seconds": 12.533
+     },
+     {
+      "cleared": true,
+      "dashes": 5,
+      "lost": 1,
+      "room": "4",
+      "seconds": 15.167
+     },
+     {
+      "cleared": true,
+      "dashes": 2,
+      "lost": 0,
+      "room": "5",
+      "seconds": 6.8
+     }
+    ]
+   },
+   "60": {
+    "simple": [
+     {
+      "cleared": false,
+      "dashes": 0,
+      "lost": 3,
+      "room": "1",
+      "seconds": 5.75
+     },
+     {
+      "cleared": true,
+      "dashes": 0,
+      "lost": 2,
+      "room": "2",
+      "seconds": 8.767
+     },
+     {
+      "cleared": true,
+      "dashes": 0,
+      "lost": 1,
+      "room": "3",
+      "seconds": 8.433
+     },
+     {
+      "cleared": true,
+      "dashes": 0,
+      "lost": 2,
+      "room": "4",
+      "seconds": 10.433
+     },
+     {
+      "cleared": true,
+      "dashes": 0,
+      "lost": 2,
+      "room": "5",
+      "seconds": 5.883
+     }
+    ],
+    "skilled": [
+     {
+      "cleared": true,
+      "dashes": 13,
+      "lost": 2,
+      "room": "1",
+      "seconds": 28.55
+     },
+     {
+      "cleared": true,
+      "dashes": 4,
+      "lost": 0,
+      "room": "2",
+      "seconds": 15.383
+     },
+     {
+      "cleared": true,
+      "dashes": 4,
+      "lost": 1,
+      "room": "3",
+      "seconds": 12.367
+     },
+     {
+      "cleared": true,
+      "dashes": 3,
+      "lost": 1,
+      "room": "4",
+      "seconds": 12.5
+     },
+     {
+      "cleared": true,
+      "dashes": 2,
+      "lost": 0,
+      "room": "5",
+      "seconds": 6.767
+     }
+    ]
+   }
+  },
+  "new_inputs": [],
+  "rooms": [
+   "1",
+   "2",
+   "3",
+   "4",
+   "5"
+  ]
+ },
+ "tests_exit": 0,
+ "verdict": {
+  "S1": true,
+  "S2": true,
+  "S3": true
+ },
+ "boss_verdict": {
+  "B1": true,
+  "B2": true
+ }
+}

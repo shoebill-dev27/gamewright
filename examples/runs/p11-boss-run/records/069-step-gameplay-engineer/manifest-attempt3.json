@@ -1,0 +1,187 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "b7fb7a3d85a62bcd564a33ee20caf62b355a7ef99ce6d8cfb6df0d5adb83abc2",
+  "bytes": 1304
+ },
+ {
+  "path": "goals/G-002-final-boss/55-studio-to-gameplay-engineer.md",
+  "sha256": "4887cfd39b778b8270a505f760011770472bd05c2de73d326e818bcfbc8e3322",
+  "bytes": 6708
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md",
+  "sha256": "8a447e66877cd14dfff47ac1b8482ba77c850159c8fb43ec2780e91064869351",
+  "bytes": 1742
+ },
+ {
+  "path": "studio/skills/implement-change.md",
+  "sha256": "a9befd7f1d9e09eb94c51a066f030db88c5061ad1b522d9795e62bc2c242964a",
+  "bytes": 1823
+ },
+ {
+  "path": "project.md#vision",
+  "sha256": "d3086d29c74b4ce7bd4b6ef724e73f4f0f3dde2be7fda791c0154917fee0cf66",
+  "bytes": 408
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "05a33c6f8e50caa20ddf4f3844885137c4261ad4a3e5f3db3eb1b5312b129a9f",
+  "bytes": 237
+ },
+ {
+  "path": "design/final-boss-and-continuous-run.md",
+  "sha256": "71c26a7d706bc6e7d532026d605475bb738b84d741222ca656be7ec1d500ff28",
+  "bytes": 39605
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "a1afd9e6c44f4e467d38466e19af2a30f1c8c981ca7ad409da94ddf539bcbe97",
+  "bytes": 50393
+ },
+ {
+  "path": "repo/README.md",
+  "sha256": "43d50cc01d3a5c6bb480439c29dd529b16fb1d23c082ac6ee98134117d106a5c",
+  "bytes": 2897
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "c4ca7a42de90eb6a46e5df67c118442887cb6a1a0d2a35c0f0f9d824a0bdc749",
+  "bytes": 12081
+ },
+ {
+  "path": "repo/public-driver.md",
+  "sha256": "7668c46943733216a137cc6168b7f9be90b0705f03cd44f96ad91d1609c59dd7",
+  "bytes": 3739
+ },
+ {
+  "path": "repo/play.py",
+  "sha256": "b7bd9637300a58d22bb0ccf5f1d50367f7f9a30c5b2e8e5898dc09afb6275772",
+  "bytes": 16944
+ },
+ {
+  "path": "repo/run_driver.py",
+  "sha256": "ffc879bd3b324dd1420954a0fe1e32ff43eff1e0e143d393cd797b1d896475d1",
+  "bytes": 15526
+ },
+ {
+  "path": "repo/session.py",
+  "sha256": "2ab7d96e541a5c6ba02d865a480140ef950d49ed58af0825062143f866ea7db8",
+  "bytes": 5013
+ },
+ {
+  "path": "repo/game.py",
+  "sha256": "fb96333674d709e400f66c163a266b2d4e6c2b95b4abc5314c160b59cde28b90",
+  "bytes": 21537
+ },
+ {
+  "path": "repo/bots.py",
+  "sha256": "712ccb8f80cebf224c67460de877dc92ac573aac13e4e2afc94502b8f8d58c78",
+  "bytes": 24944
+ },
+ {
+  "path": "repo/source_id.py",
+  "sha256": "9923feba4aef0281e4dd952dbdc5595dfee118d00d8dee61cdd70257472aedfa",
+  "bytes": 873
+ },
+ {
+  "path": "repo/tests/test_game.py",
+  "sha256": "9786d47023c421f88db0c8916accdfa211af79201e0fe46f1a11ac152e82e811",
+  "bytes": 36238
+ },
+ {
+  "path": "repo/tests/test_bots_boss.py",
+  "sha256": "1504a5d9c879e71aea10cd5a553886e2f9d3cee30322317f1656e7c906ffaec0",
+  "bytes": 3941
+ },
+ {
+  "path": "repo/tests/test_play_run_controls.py",
+  "sha256": "b8db7f5a79462b9a299bfaa1f01eb1bb9274c47cb1b921a25aabb156d8c1cbc9",
+  "bytes": 3901
+ },
+ {
+  "path": "repo/tests/test_run_driver.py",
+  "sha256": "c3d003b6f94022b3eac118cd8413245e2931be14383d60d8b18b200177d3ade1",
+  "bytes": 3429
+ },
+ {
+  "path": "repo/tests/test_session.py",
+  "sha256": "9b11f856e05a6124b0eb01e117862be9c52f147fe30181b9b54eedc78df8052b",
+  "bytes": 6320
+ },
+ {
+  "path": "repo/tests/test_terminal.py",
+  "sha256": "69b092961cc3601f6a054b554072496fdf8822285feca24d79cc18fcb0b509a1",
+  "bytes": 2599
+ },
+ {
+  "path": "repo/tests/test_boss.py",
+  "sha256": "f510c18e9bf5246085f3b91f1355d60af09118042cc7cb78da1634885f4c9105",
+  "bytes": 5019
+ },
+ {
+  "path": "repo/tests/test_boss_contract.py",
+  "sha256": "55f07b9ed4e597b621187f979c99dd2d1c7830cb880695bb2e0ee97b1b696683",
+  "bytes": 8073
+ },
+ {
+  "path": "repo/tests/test_boss_contract_details.py",
+  "sha256": "d28f68cd58edc7334d7a947496ee9730e986eba80032cde811723bef305d650c",
+  "bytes": 12647
+ },
+ {
+  "path": "repo/tests/test_d022_observation.py",
+  "sha256": "e7d345c3b38cc34245f22021a1adcf2416c05b0d3934bf18d41df1f4a89c45a1",
+  "bytes": 9709
+ },
+ {
+  "path": "repo/tests/test_d022_shots_and_note.py",
+  "sha256": "2a61af0531390fdc3bd0be84d2bad4855b5cc61aec5ce8c838f9f68578281486",
+  "bytes": 5158
+ },
+ {
+  "path": "goals/G-002-final-boss/40-gameplay-engineer-to-studio.md",
+  "sha256": "8ec4be5ca92aef49aa624decf047b816996059cf8f7393e2d7124e27595ea07a",
+  "bytes": 11720
+ },
+ {
+  "path": "decisions/D-017-final-boss-and-run-contract.md",
+  "sha256": "48adbb02a672e45434a1b0f61c77b8c1747c437124e183b1a849e34c705f4283",
+  "bytes": 3341
+ },
+ {
+  "path": "decisions/D-019-g002-balance-criteria-applicability.md",
+  "sha256": "db369f14df8125734146c8b7feb643e58a4ce8c2780fc211e23a9f59a85c62c7",
+  "bytes": 5895
+ },
+ {
+  "path": "decisions/D-021-owner-authorizes-text-build.md",
+  "sha256": "9df4329db4178c6d573c6121007e0dbe1109abca068e1c303386eb94cbbd3575",
+  "bytes": 3514
+ },
+ {
+  "path": "decisions/D-022-g002-v1-supplements.md",
+  "sha256": "8a721e0d0eb480ad361b9c9e0d80bb07362e455d9f71a553cacc0946e774682e",
+  "bytes": 2306
+ },
+ {
+  "path": "goals/G-002-final-boss/54-gameplay-engineer-to-studio.md",
+  "sha256": "fac46f635bb25f23b38beaafb1405181f8f3b5641d5c1bcfde71b554900fd13f",
+  "bytes": 6587
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ },
+ {
+  "path": "repo/tests/test_split_c.py (proposed in a run round; not written)",
+  "sha256": "553848c3dd11e7c70bfed600c76eb797b85be4eafe81f39b2b27536efc4785b3",
+  "bytes": 8039
+ },
+ {
+  "path": "@run-results",
+  "sha256": "998256599859318153cc9a69753c77a1f3e880066f735d24e029c0c840ef635b",
+  "bytes": 33802
+ }
+]

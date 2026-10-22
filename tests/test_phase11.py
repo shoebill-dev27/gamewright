@@ -123,3 +123,43 @@ def test_the_answer_shape_says_the_runtime_tests_what_is_written():
     assert "tests the build" not in sr.answer_shape(
         "goals/G/02-x-to-*.md", False, False
     )
+
+
+# --- Recorded live run ---------------------------------------------------------------------
+
+RUN = sr.ROOT / "examples" / "runs" / "p11-boss-run"
+FIRST_P11_RECORD = 62  # the run continues a copy of the Phase 10 run
+
+
+@needs_sandbox
+@pytest.mark.skipif(
+    not (RUN / "measurement.json").is_file(), reason="no recorded Phase 11 run"
+)
+def test_recorded_measurement_reproduces(tmp_path):
+    import test_phase6 as t6
+    import test_phase10 as t10
+
+    repo = RUN / "project" / "repo"
+    code, _, _ = t6.sandboxed_copy(
+        repo, tmp_path, "t", ["python3", "-m", "unittest", "discover", "-s", "tests"]
+    )
+    recorded = json.loads((RUN / "measurement.json").read_text())
+    m = t6.measure(repo, tmp_path)
+    assert m == recorded["measurement"] and code == recorded["tests_exit"]
+    assert t10.boss_verdict(m) == recorded["boss_verdict"]
+
+
+@pytest.mark.skipif(not RUN.is_dir(), reason="no recorded Phase 11 run")
+def test_recorded_engineers_used_partial_and_got_build_checks():
+    outcomes, checks = [], 0
+    for rec in sorted((RUN / "records").glob("*-step-gameplay-engineer")):
+        if int(rec.name[:3]) < FIRST_P11_RECORD:
+            continue
+        checks += (rec / "build-check.json").is_file()
+        for path in json.loads((rec / "record.json").read_text())["written"]:
+            if path.endswith("-to-studio.md"):
+                text = (RUN / "project" / path).read_text()
+                outcomes.append(sr.parse(text)[0]["outcome"])
+                if (rec / "build-check.json").is_file():
+                    assert "## Build check" in text
+    assert "partial" in outcomes and "question" not in outcomes and checks >= 1

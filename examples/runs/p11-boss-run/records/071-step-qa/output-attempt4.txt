@@ -1,0 +1,213 @@
+<<<FILE goals/G-002-final-boss/58-qa-to-studio.md
+---
+kind: handoff
+goal: G-002
+seq: 58
+from: qa
+to: studio
+stage: Verify
+outcome: fail
+---
+# 58: qa → studio — 実行証拠の独立確認と検証不足の差し戻し
+
+## Task
+
+不足している独立検証を追加でルートする。現時点では全受入基準の合格を確認できないため、限定Art Verify以降への合格ルートには進めない。
+
+## Context
+
+57の依頼に従い、仕様・Decisionと、packetに収録された実行結果を照合した。対象はテキスト・スクリプト方式であり、実機供給は要求しない。
+
+実行枠は残り0回。今回の判定は収録結果の独立評価であり、追加実行、保存ソースやテスト本文の閲覧、コード変更は行っていない。実装者の自己評価・履歴は根拠にしていない。
+
+## Findings
+
+### 判定
+
+**fail：必要な独立検証が未完了。再現済みの製品不具合を断定するものではない。**
+
+152 testsの成功は確認したが、各テストの条件・assert・基準対応はpacketにない。suiteのgreenだけではB1〜B10、境界、共有回帰、表示契約全体を合格にできない。以下では観測できた事実と未確認を分離する。
+
+### 保存ビルド・実行条件
+
+全収録出力の識別は以下で一致する。
+
+- build：`0.6-g002-public-32`
+- source_id：`04fa2b1c168a`
+
+これは出力上の識別一致であり、保存ファイルからの独立再算出は未実施。D-021により旧指定shaとの照合は不要。
+
+実行済みコマンド：
+
+| 実行 | 入力・条件 | 件数 |
+|---|---|---:|
+| `python3 -m unittest discover -s tests` | 152 tests、Exit 0、2.855秒 | suite 1回 |
+| `python3 play.py --view trace SCRIPT` | Round 2 boss-30、room 5、30 FPS、limit 12、driver-limit 14、2.2 pause／4.2 resume | 1試行 |
+| `python3 play.py --view player SCRIPT` | Round 2 boss-60、上記の60 FPS版 | 1試行 |
+| `python3 play.py --view player SCRIPT` | Round 3 retry-30、mode run、limit 20、driver-limit 14、control 6 retry | 2 attempts |
+| `python3 play.py --view trace SCRIPT` | Round 3 retry-60、上記の60 FPS版 | 2 attempts |
+
+suiteには公開入力再生、独立部屋dodger、ボスdodgerの構造化結果も含まれる。ただし公開連続スクリプトを両FPS・両viewで個別実行した完全出力、`bots.py`の独立実行結果は収録されていない。
+
+### 通常連続ラン：同一試行の測定
+
+`SPLIT_C_PUBLIC`は各FPSにつき公開入力再生1セッション、3 attempts。`state_injection: false`と記録されている。生成済み入力の再生であり、人間のプレイやcontrolled fixtureの連続到達とは扱わない。
+
+| 項目 | 30 FPS attempt 1 | 60 FPS attempt 1 |
+|---|---:|---:|
+| 結果 | clear | clear |
+| ラン時刻 | 86.966667秒 | 103.533333秒 |
+| 部屋1 | 6.633333秒 | 9.616667秒 |
+| 部屋2 | 20.733333秒 | 25.066667秒 |
+| 部屋3 | 15.633333秒 | 15.016667秒 |
+| 部屋4 | 18.333333秒 | 16.966667秒 |
+| 部屋5 | 21.633333秒 | 32.866667秒 |
+| 遷移4回 | 各1.0秒 | 各1.0秒 |
+| ボス初入場hearts | 3 | 3 |
+| 攻撃／ボス命中／dash | 41／12／34 | 41／12／45 |
+| hurt | 0 | 0 |
+| pause | 1回、2秒 | 1回、2秒 |
+| attemptのdriver経過 | 120秒 | 120秒 |
+| pauseを除くdriver経過 | 118秒 | 118秒 |
+| 終端待機 | 31.033333秒 | 14.466667秒 |
+
+部屋時間合計＋遷移4秒はラン時刻と一致する。driver経過はラン時刻＋pause＋終端待機と一致する。これは同一attempt内の照合であり、独立部屋時間の合算ではない。
+
+両FPSともattempt 2は第1部屋で自然死亡。30 FPSは5.1秒、60 FPSは5.033333秒、hurtは各3、攻撃・dashは0。driver経過は各20秒で、終端待機は14.9／14.966667秒。
+
+attempt 3は各1秒、攻撃1、hurt・dash各0、unfinished。セッションはdriver 141秒で停止し、retryは勝利後と死亡後の計2回。最終outcome unfinishedと、過去attemptのclear／deathが区別されている。
+
+summaryとの数値一致はこの構造化証拠の範囲で確認できる。processing_secondsは30 FPSが0.127572、60 FPSが0.328531。headless処理時間であり、人間の所要時間ではない。
+
+### 基準別の確認状況
+
+「部分確認」は基準全体のpassを意味しない。
+
+| 基準 | 30／60 FPSの判定と根拠 |
+|---|---|
+| R1 | 部分確認。構造化記録は通常連続到達・勝利を支持する。ただし正規敵の全撃破・入場列と両viewの対照が未収録で、B単体を含む全条件の独立確認は未完了。 |
+| R2 | 未確認。部屋データ、配置、パラメータを閲覧していない。 |
+| R3 | 未確認。通常再生は無傷であり、hearts 1/2/3/0の境界試験の代用にならない。 |
+| R4 | 未確認。境界前後の残存状態と反応記憶の全比較がない。 |
+| R5 | 部分確認。遷移時間は両FPSとも各1秒。表示中・入場同時刻入力の処理列は不足。 |
+| B1 | 部分確認。30 FPS traceの初期Bは(12,4)、HP12、単体。60 FPS playerもHP12・charge開始。各攻撃3回、低HPでの順序維持は未確認。 |
+| B2 | 部分確認。30 FPSはcharge 2.033333→2.733333、short shot予兆開始4.266667。60 FPSはcharge 2.016667→2.716667、short shot 4.233333→5.033333。移動後の照準不変・距離0は未確認。 |
+| B3 | 部分確認。30 FPSの突進は2.733333→3.033333の0.3秒、x=10.0→7.6の2.4 tilesで、接触後も移動継続。壁試験と60 FPSの位置比較は不足。 |
+| B4 | 部分確認。60 FPSは発射5.033333、命中5.05、回復6.033333で、早期消費でも1秒を維持。速度・寿命・未接触・吸収の全条件は未確認。 |
+| B5 | 未確認。指定した直交1 tile移動の操作列と両攻撃の無傷証拠がない。 |
+| B6 | 未確認。dash回数だけでは実接触・消費・終了後無傷を証明できない。 |
+| B7 | 未確認。保護終了を攻撃途中に置く状態・接触証拠がない。 |
+| B8 | 未確認。全フェーズの非致死swipe前後と致死時の新発動禁止の証拠がない。 |
+| B9 | 部分確認。収録観測の回復はcharge 1.2秒、short shot 1.4秒。開始時から4回の攻撃成立は未確認。 |
+| B10 | 未確認。横ずれ・接触距離の帯内外・上端試験がない。 |
+| T1 | 未確認。残弾を持つ終端と、その後2秒の状態比較がない。 |
+| T2 | 未確認。同フレームの致死swipeと既発射弾による致死接触の証拠がない。 |
+| T3 | 部分確認。通常再生には終端待機があり時刻集計は整合。戦闘入力を与えた全状態不変の比較は不足。 |
+| T4 | 部分確認。勝利・自然死亡からのretry記録と、初期盤面への復帰がある。完全初期状態比較と旧未来入力破棄の決定的証拠は不足。 |
+| C1 | 部分確認。部屋時間＋4遷移がラン時刻と整合。全入場時刻0の列は未収録。 |
+| C2 | 部分確認。30 FPS traceでpause／resumeイベントはともにrun 2.2、frame 66。60 FPS playerでも両イベントのrun時刻2.2。2秒pauseを記録。dash・保護・clear表示の全状態比較は不足。 |
+| C3 | 部分確認。driver-limitとattempt結果は区別される。game-time limitと勝敗同フレームの優先は未確認。 |
+| V1 | 部分確認。60 FPS playerでHP、phase、next、両時刻、予兆方向・危険範囲、発動時の線除去、回復、重なった実弾のactive shots 1を確認。通常ラン勝利・retryを含む両FPS全表示の対照は不足。 |
+| V2 | 今回の検証対象外。D-021に従う。実機対応済みとは判定しない。 |
+
+Round 2の診断部屋死亡表示は`you went down`である。通常ラン用retry表示の不具合とは断定しない。診断経路ではretryを拒否する契約があるためである。
+
+Round 3の旧入力はrun時刻7秒にattack／dashを予約するが、新attemptは5.1／5.033333秒で自然死亡する。そのため、入力が現れないことは**旧入力破棄の証明にならない**。該当時刻を越えて生存させるか、破棄された入力列を直接観測する必要がある。
+
+### D-019：bot結果と保持回帰
+
+独立dodgerは各部屋・各FPSにつき1試行、開始3 hearts、limit 60秒。全てclear、終了3 hearts、損失0、被弾源なし。
+
+| 部屋 | 30 FPS：秒／攻撃／dash | 60 FPS：秒／攻撃／dash |
+|---|---|---|
+| 1 | 6.63／6／3 | 9.62／6／5 |
+| 2 | 20.73／8／10 | 25.07／8／14 |
+| 3 | 15.63／8／6 | 15.02／8／6 |
+| 4 | 18.33／7／7 | 16.97／7／8 |
+
+この結果では16cの独立1〜4比較と15の独立3・4 dash使用を満たす。14のdodger側も満たす。ただしwalker側の独立1〜2損失が未収録なので14全体は未確認。
+
+独立3・4のwalker／camperの結果、被弾源、判断ログが不足する。旧3〜5合計ゲートは適用していない。
+
+ボス対応dodgerは各FPS・開始heartsごと1試行、limit 120秒：
+
+| FPS | 開始→終了hearts | 結果／損失 | 秒 | 攻撃／dash |
+|---|---|---|---:|---|
+| 30 | 3→3 | clear／0 | 21.63 | 12／8 |
+| 60 | 3→3 | clear／0 | 32.87 | 12／12 |
+| 30 | 2→2 | clear／0 | 21.63 | 12／8 |
+| 60 | 2→2 | clear／0 | 32.87 | 12／12 |
+
+数値上は両hearts対とも同じclear結果・損失差0。ただしD-019の条件付き合格には、同一方針・同一初期状態・観測可能情報のみを使うことの確認が必要。
+
+収録サンプルは「walk to boss」「dash up/down from charge/short shot」「hold off locked charge line」「face and swing」を示す。playerに見える状態に対応する行動は確認できるが、`hit in 0.39 s`等の算出元や全判断経路は未確認。サンプルだけで未表示の将来状態を使用しないと断定できない。判断件数は30 FPS各145、60 FPS各220だが、全文はない。
+
+共有combat基準1〜11、17〜21、step68、step72、step94の保持部分は、suite成功のみでは個別passにしない。特にcap遅延の一般上限と、旧第5部屋からの置換範囲を追跡できる試験証拠が必要。
+
+### D-022
+
+| 基準 | 判定 |
+|---|---|
+| L1〜L3 | 未確認。旧経路各部屋の実出力・変更前比較がない。 |
+| L4 | 文書整合を確認。manualは旧room 5 playerだけの注記と公開経路を明記する。 |
+| S1〜S4 | 未確認。Round 2 trace中段は省略され、発射・消滅の全ライフサイクルを追跡できない。 |
+| S5 | 60 FPSの収録player出力にshot IDは見られない。全条件・両FPSの確認は未完了。 |
+| O1 | suiteの構造化出力では両FPSともplayer 121/121、trace 241/241。行数上限を満たす記録。 |
+| O2・O3 | 未確認。間隔変更前後・既定出力の比較列がない。 |
+| O4 | 部分確認。収録公開実行のsummaryは各1ブロックで、連続再生の数値も整合。全終了条件と状態の独立対照は不足。 |
+| O5 | 未確認。範囲外入力の拒否出力がない。 |
+| O6 | suiteは両FPS・両viewでrun 1200.0を記録。ただし長時間出力全体は未収録で、途中切断がないことの独立確認は未完了。 |
+
+### 時間差と後続判断
+
+通常再生の完走は約1.45分／1.73分で、15〜20分Visionより大幅に短い。これはスクリプト再生の1試行ずつの測定であり、人間の体験時間ではない。FPS間の完走差は16.566667秒、独立ボス差は11.24秒。秒数差の追加閾値は置かず、規則違反とも難度合格とも判定しない。
+
+Designerへは入力判断・反撃位置・部屋別時間とともに渡し、独立Play後に追加ゲートや調整の要否を判断してもらう。HPや待機時間を増やす提案は本QAでは行わない。
+
+## Decisions already made
+
+- D-017：二攻撃、境界回復、終端優先、pause・retry・時計の契約。
+- D-019：旧集計の適用終了。保持回帰、条件付きbot比較、実測後Designer判断。
+- D-021：テキスト・スクリプト方式を承認。実機供給・旧指定sha照合は不要。
+- D-022：旧経路注記、弾ライフサイクル、長時間観測の追加契約。
+
+## Constraints
+
+- 製品コード・仕様を変更しない。
+- 未確認をpassにしない。suite成功と基準ごとの独立証拠を区別する。
+- controlled fixture、生成入力再生、bot、人間の独立Playを区別する。
+- 新しい難度・秒数ゲートをQAが設定しない。
+- 今回の実行不足を実機供給要求へ戻さない。
+- 本報告のReview用時間・期待結果をPlaytester資料へそのまま転記しない。
+
+## Open questions
+
+1. 全基準の追加独立検証に必要な実行枠と、保存ソース・テスト本文・完全ログを次のQA Stepへ供給できるか。
+2. R3〜R5、B1〜B10、T1〜T4、C2〜C3、D-022の未確認条件について、両FPSの操作列・状態・イベントを追跡できるか。
+3. 公開連続スクリプトを両FPS・両viewで再生し、正規撃破・全入場・終端・retryを状態と対照できるか。
+4. 新attemptが旧入力時刻を越える条件で、旧未来入力破棄を確認できるか。
+5. walker／camperを含む独立部屋成績と、ボスbotの全判断根拠を確認できるか。
+
+仕様の意図が未定義であることを示す確定所見はなく、今回の主要な障害は証拠不足である。
+
+## Expected output
+
+Studioは未確認項目を独立QAへ再ルートし、両FPSの基準別pass/failと再現可能な証拠を揃える。既知の失敗を修正依頼する段階ではなく、まず検証不足を解消する。
+
+合格後に、限定Art Verify、独立Play、Designerの実測後判断、Game Director Reviewへ進める。時間のVisionとの差とFPS別測定値はDesignerへ引き継ぎ、追加不要の場合も理由を記録する。
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: project.md#constraints
+- Project: design/final-boss-and-continuous-run.md
+- Project: design/combat.md
+- Project: repo/（保存ソース、tests、manual.md、public-driver.md）
+- Project: 今回の@run-resultsと、追加実行の完全ログ・入力列
+- Decisions: decisions/D-017-final-boss-and-run-contract.md
+- Decisions: decisions/D-019-g002-balance-criteria-applicability.md
+- Decisions: decisions/D-021-owner-authorizes-text-build.md
+- Decisions: decisions/D-022-g002-v1-supplements.md
+- Previous handoff: goals/G-002-final-boss/57-studio-to-qa.md
+>>>END

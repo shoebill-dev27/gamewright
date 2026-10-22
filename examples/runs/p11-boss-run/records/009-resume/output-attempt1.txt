@@ -1,0 +1,191 @@
+<<<FILE decisions/D-015-owner-approves-continuous-run-and-final-boss.md
+---
+kind: decision
+id: D-015
+status: accepted
+decided_by: owner
+goal: G-002
+date: 2026-10-20
+supersedes: none
+---
+# D-015: Owner approves Option A — continuous run and final boss
+
+## Decision
+
+Owner response, verbatim:
+
+> 案Aで進めてください（Studio の推奨どおり、連続ランと第5部屋の単体ボス、ランの最初から再挑戦）。
+
+Proceed with Option A in `goals/G-002-final-boss/06-game-director-to-owner.md`: connect rooms 1–4 to a standalone boss replacing room 5, include final victory and death, and allow retry from the beginning of the run. Do not add a boss checkpoint or combat inputs.
+
+Preserve rooms 1–4 and shared attack, dash and enemy rules. The old room-5 composition and room-specific criteria dependent on it are replacement targets; this approval does not amend existing Decisions. Any conflict with those Decisions must be identified and resolved through the proper authority.
+
+Do not expand the work into wholesale changes to existing rooms or enemy-HP inflation solely to meet the 15–20 minute vision target. If technical planning reveals scope beyond the approved option, return to the Owner before implementation.
+
+This approves scope, not detailed combat design, tuning, state inheritance, terminal-state rules or technical architecture. The Game Director records the direction within this authorization; Design and Plan follow.
+
+## Rationale
+
+Option A preserves the requested experience of reaching a challenging boss at the end of a run. The Owner explicitly accepted the additional progression, ending and retry work described in the escalation.
+
+## Alternatives considered
+
+Option B would deliver a selectable standalone boss room without continuous progression. It limits immediate work but changes this Goal's success condition and cannot evaluate reaching the final encounter through a run. The Owner chose Option A.
+
+## Revisit when
+
+Planning reveals materially greater scope, cost or risk than Option A describes; implementation would require changing an existing Owner Decision or vision pillar; or the Owner changes the approved scope.
+>>>END
+
+<<<EDIT goals/G-002-final-boss/06-game-director-to-owner.md
+<<<<<<< SEARCH
+status: open
+decision: none
+=======
+status: resolved
+decision: D-015
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-002-final-boss/goal.md
+---
+kind: goal
+id: G-002
+project: lantern-depths
+status: active
+created: 2026-10-20
+---
+# G-002: 最後に手応えのあるボス戦
+
+## Owner request
+
+> 最後に手応えのあるボス戦がほしい
+
+## Interpretation
+
+既存の第1〜4部屋を連続して進み、第5部屋を置き換えた単体ボスへ到達する。プレイヤーが位置取り、攻撃とダッシュのタイミング、敵の挙動への対応を通じて手応えを感じられる最終戦とし、最終勝利・死亡・ランの最初からの再挑戦まで成立する。短いランと、被害を受ける前に脅威を読み取れる体験を維持する。
+
+D-015により、連続ラン・部屋間継承・終端・再挑戦の新設を今回の範囲に含める。具体的なボスの仕組み、難度、数値基準、継承・終端の詳細は担当Roleが定める。第1〜4部屋の構成と既存の共有戦闘ルールを維持し、新しい戦闘入力、ボス専用チェックポイント、既存部屋の全面改修は対象外。15〜20分を満たすためだけの敵HP増加は含めない。承認範囲を超える規模・費用・リスクや既存Decisionとの衝突が判明した場合は、実装前にOwnerへ戻す。
+
+## Unknowns
+
+- Observe：既存の不具合報告ではないため skipped。実行による現状確認は未実施。
+- Diagnose：done。静的調査では連続ラン・部屋間継承・最終勝利・専用リトライがない。指定shaとの一致、実行時の終端挙動、戦闘時間は未確認。調査の制限は04に記録。
+- Decide：D-015でOwnerが案Aを承認。第5部屋の単体ボスへの置換と連続ランを前提に、Game Directorが権限内の方向Decisionと設計への境界を確定する。
+- Design：ボスの攻撃構成、予兆と対処、時間配分、部屋間継承、勝敗・残弾・終端後操作・再挑戦、受け入れ基準の仕様化が必要。
+- Plan：確定仕様に基づき、進行・攻撃切替・表示・終端・時刻と入力の契約、共有コードへの影響、工数と依存を確認する必要がある。承認を超える規模なら実装前にOwnerへ戻す。
+- Build：仕様と計画の確定後にゲーム変更が必要。
+- Verify：Build後の独立確認が必要。30/60 FPS、連続到達・勝敗・再挑戦、共有戦闘ルールの回帰を含む。Art Directorの表現確認は攻撃・表示仕様で必要性が確定するまで tentative。
+- Play：最終戦と到達体験の手応え、連続ランの所要時間を独立したプレイヤー観察で評価する。実装内容や期待結果は渡さない。
+- Review：体験Goalの達成判断が必要。
+- Next：結果と残課題をOwnerへ返す。
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Design | game-designer | write-design-spec | done | 01-studio-to-game-designer.md → 結果: 02-game-designer-to-studio.md |
+| 2 | Diagnose | technical-director | technical-plan | done | 03-studio-to-technical-director.md → 結果: 04-technical-director-to-studio.md |
+| 3 | Decide | game-director | make-decision, prepare-owner-escalation | done | 05-studio-to-game-director.md → 結果: 06-game-director-to-owner.md |
+| 3a | Decide | owner | — | done | 06-game-director-to-owner.md → D-015 |
+| 3b | Decide | game-director | make-decision, prepare-owner-escalation | open | 07-studio-to-game-director.md |
+| 4 | Design | game-designer | write-design-spec | planned | — |
+| 5 | Plan | technical-director | technical-plan | planned | — |
+| 6 | Build | gameplay-engineer | implement-change | planned | — |
+| 7 | Verify | qa | verify-change | planned | — |
+| 8 | Verify | art-director | visual-review | tentative | — |
+| 9 | Play | playtester | playtest-session | planned | — |
+| 10 | Review | game-director | review-outcome | planned | — |
+| 11 | Next | studio | — | planned | — |
+
+逐次実行する。Ownerが選択した案Aの経路に従い、方向Decisionの後にDesign・Planへ進む。Art DirectorのVerifyは攻撃・表示仕様に応じて確定する。現時点で並列Stepは開かない。
+
+## Route changes
+
+Ownerの案A承認をD-015に記録し、06をresolved、Goalをactiveへ変更。連続ラン・第5部屋の単体ボス・ラン先頭からの再挑戦をInterpretationに明記し、07でGame Directorの方向Decisionを開く。その後はDesign→Plan→Build→Verify→Play→Reviewと進める。
+
+## Next action
+
+Game Directorが `07-studio-to-game-director.md` を実行し、D-015の承認範囲内で方向Decisionを記録して、設計への指示とともにStudioへ返す。Studioが次のDesignを開く。現時点では実装を開始しない。
+
+## Outcome
+
+未完了・進行中。Ownerは案Aを承認し、D-015として記録した。連続ラン、第5部屋の単体ボス、最終勝利・死亡、ラン先頭からの再挑戦を今回の範囲に含める。方向Decision、仕様確定、実装計画、実装、検証、体験評価はこれから行う。指定shaとの一致や実行挙動は未確認であり、静的調査は実行成功やQA合格を示さない。Goalは閉じず、project.mdのCurrent stateは変更しない。
+>>>END
+
+<<<FILE goals/G-002-final-boss/07-studio-to-game-director.md
+---
+kind: handoff
+goal: G-002
+seq: 7
+from: studio
+to: game-director
+stage: Decide
+outcome: routed
+---
+# 07: studio → game-director — Confirm direction within Owner-approved Option A
+
+## Task
+
+Record the direction Decision for G-002 within the scope approved by D-015. Give the Game Designer clear experience priorities and scope boundaries for the final boss and continuous run, leaving detailed rules and technical architecture to their responsible Roles.
+
+## Context
+
+Owner request:
+
+> 最後に手応えのあるボス戦がほしい
+
+The initial Design step returned a scope question. Technical Director's static investigation found that the supplied build supports individual room sessions rather than a continuous run, state inheritance, final victory or a dedicated retry flow.
+
+The previous Game Director step escalated the choice between adding continuous progression and narrowing the Goal to a selectable boss encounter. The Owner selected Option A:
+
+> 案Aで進めてください（Studio の推奨どおり、連続ランと第5部屋の単体ボス、ランの最初から再挑戦）。
+
+Studio recorded D-015, resolved escalation 06 and resumed the Goal. This step follows the selected option's requirement for a direction Decision before Design.
+
+## Findings
+
+- Approved scope connects existing rooms 1–4 to a standalone boss replacing room 5, with final victory, death and retry from the beginning of the run.
+- No boss checkpoint or additional combat input is approved.
+- Existing rooms 1–4 and shared combat rules remain constraints. Old room-5 composition and dependent room-specific criteria are replacement targets; existing Decisions are not automatically amended.
+- Boss attacks, tuning, inheritance and recovery rules, simultaneous victory/death precedence, remaining projectiles, terminal-state behavior, timing and input contracts remain unspecified.
+- The technical findings are static only. The stated build SHA, tests, player/trace behavior and bots have not been verified. The reported build-version discrepancy also remains unresolved.
+- The 15–20 minute vision target is not a measured current run duration. Independent room-bot times must not substitute for a continuous-run measurement.
+
+## Decisions already made
+
+- `decisions/D-015-owner-approves-continuous-run-and-final-boss.md`: Owner approves Option A, including continuous progression, a standalone room-5 boss and retry from the run's beginning.
+- D-001: attack and dash are the combat kit; additional combat inputs require Owner approval.
+- Other existing Decisions remain in force. Identify specific conflicts rather than treating D-015 as blanket authorization to change them.
+
+## Constraints
+
+- Preserve the vision: positioning and timing rather than input complexity; short runs; threats visible before damage.
+- Prefer reuse of existing systems; support desktop keyboard/gamepad and 30/60 FPS.
+- Do not expand into wholesale room redesign or HP increases solely to meet the duration target.
+- Do not decide detailed mechanics or technical architecture on behalf of Design or Technical Director.
+- A material increase beyond the approved scope, or a required change to an Owner Decision or vision pillar, must return to the Owner.
+- This is a direction step, not implementation or verification.
+
+## Open questions
+
+- What experience priorities and boundaries should guide the approved final encounter and its connection to the run?
+- Which existing room-5 criteria become inapplicable through replacement, and do any relevant Decisions require a separately authorized change?
+- What must Design specify and Technical Director assess before implementation can proceed?
+
+## Expected output
+
+A direction Decision within D-015's authorization, plus a handoff addressed to `studio` summarizing the Decision, Design requirements, unresolved questions and escalation conditions.
+
+The intended remaining route is Design → Plan, including scope/cost/dependency assessment → Build → independent QA → independent Play → Review. Art Director verification remains tentative until visual requirements are known. If planning reveals scope beyond Option A, return to the Owner before Build.
+
+Do not write the detailed design or open implementation work in this step.
+
+## Load
+
+- Role: studio/roles/game-director.md
+- Skills: studio/skills/make-decision.md; studio/skills/prepare-owner-escalation.md
+- Project: project.md; goals/G-002-final-boss/goal.md; goals/G-002-final-boss/02-game-designer-to-studio.md; goals/G-002-final-boss/04-technical-director-to-studio.md
+- Decisions: decisions/D-015-owner-approves-continuous-run-and-final-boss.md; decisions/D-001-one-button-combat.md; decisions/D-004-spitter-cue-gap-brute-no-cancel-room2-spitter-deferred.md; decisions/D-005-blocked-contact-consumes-shot-and-spends-lunge.md; decisions/D-006-walker-limit-rooms-3-5-structural-ceiling.md
+- Previous handoff: goals/G-002-final-boss/05-studio-to-game-director.md; goals/G-002-final-boss/06-game-director-to-owner.md
+>>>END

@@ -1,0 +1,291 @@
+<<<FILE decisions/D-019-g002-balance-criteria-applicability.md
+---
+kind: decision
+id: D-019
+status: accepted
+decided_by: game-designer
+goal: G-002
+date: 2026-10-20
+supersedes: none
+---
+# D-019: G-002新構成における旧集計の適用終了と代替評価
+
+## Decision
+
+D-018の方向に基づき、D-006、正本step44、combat.mdの関連基準の適用を次のとおり変更する。本DecisionはG-002の新第5部屋と連続ランに限定した適用変更であり、D-006本文、過去G-001の判断・結果、旧構成に対する基準は変更しない。
+
+1. 新構成には、step44基準13a〜dのwalker独立3〜5合計3〜7 hearts・2/3 clear、dodgerのwalker比1/2以下・3/3 clear、camperのwalker未満clearを適用しない。13eの旧集計に関するFPS別判定と、13fの過去実測値も新構成の合否根拠にしない。旧集計の逸脱に関する再判断条件は新構成へ移植しない。
+2. 第1〜4部屋の構成、共有戦闘ルール、独立部屋の3 hearts開始を保持する。combat.md14の独立1〜2比較は30/60 FPSそれぞれで保持する。独立3・4はwalker／dodger／camperの部屋別・FPS別成績を報告し、新たな合計下限・上限・clear数・bot間比率を旧値から算出しない。
+3. combat.md15は独立3・4で保持する。各FPSでdodgerのdash1回以上を確認し、0回ならDesignerへ報告する既存規則も保持する。使用を強制するためcapやgapを変更しない。新5番は使用回数条件を終了し、仕様B6の実接触による無傷・攻撃消費・終了後の追加被害なしを、突進と短射それぞれ、両FPSで検証する。B5の横移動も保持し、dash必須戦にはしない。
+4. combat.md16cと対応BotsTestの独立1〜4のdodger比較は保持する。新5番にも「同じclear結果、hearts lost差1以下」を採択する。ただし下記の対応条件を満たすボス対応dodgerによる独立試験に限る。これはFPS比較であり、ボスの難度や到達可能性の合格基準ではない。
+5. 新5番比較は、同一ビルド・同一bot方針・同一初期状態・同一ゲーム時間limitを使う。独立標準開始は3 heartsとし、連続ランで生じる2 hearts開始も別対として試験する。開始heartsを混ぜて比較しない。両FPSで終了理由をclear／death／unfinishedとして区別し、一方のみunfinishedの場合は比較を未完了として再調査する。両方unfinishedでも攻略の証拠にはならない。
+6. ボス対応dodgerはplayer viewで読めるB、攻撃名、予兆の固定方向・範囲、回復、実弾を根拠に行動する。未表示の将来状態を使わず、非致死スワイプによる中断を前提にせず、回避後の反撃へ戻る。反応間隔0.15秒と方針を両FPSで共通にする。対応確認前の数値は診断資料に留め、比較をpassにしない。独立1〜4の既存方針は保持し、変更が必要なら影響と回帰を明示する。
+7. FPS比較の不一致はログと制御入力で原因を分ける。帯内接触だけによる命中差にはD-017の許容を適用するが、bot比較の閾値を自動的に緩和しない。閾値超過はDesignerへ戻す。帯外の同条件差、フェーズ・表示・時間の不一致はQAが規則違反として扱う。walker／camperに新たな成績一致条件は設けず、bot時刻感度を共有規則の違反の免責にしない。
+8. 旧第5部屋fixtureは必須にしない。残す場合は共有回帰専用と明示する。新評価は仕様B1〜B10・V1、通常ランR1〜R5・T1〜T4・C1〜C3・V2、独立Play、同一試行の連続ラン時間計測へ接続する。
+
+追加の難度数値ゲートの要否は、対応botの両FPS成績とログ、独立QA、独立Play、連続到達・終端・時間の実測後にDesignerが判断する。StudioはReview前にその再判断を必ずルーティングする。追加不要の場合も理由を記録し、未判断のままGoal達成へ進めない。詳細は仕様§8による。
+
+## Rationale
+
+旧基準は旧第5部屋を含む独立3部屋と各3 hearts開始に依存する。単体ボスと回復付き連続ランでは、集計の母集団と開始条件が変わり、旧数値から難度を推定できない。
+
+dashの価値は実接触に対する有効性と独立Playで評価できる。使用回数を強制すると、有効な横移動を不当に罰する。
+
+ボス対応dodgerの数値比較はFPSによる大きな挙動差を検出する補助ゲートとして採る。両FPSで死亡する同一結果も通り得るため、攻略可能性や体験の代用にはしない。
+
+## Alternatives considered
+
+- 旧集計を新5番または連続ランへ継承する：開始条件と敵構成が異なるため不採択。
+- 独立3・4へ比例配分した新数値を置く：実測上の根拠がないため不採択。
+- 新5番でもdash1回以上を強制する：対処の有効性と使用頻度を混同するため不採択。
+- ボスのFPS比較を設けない：共有規則試験だけでは対応botの戦闘全体の差を見落とすため不採択。
+- 旧fixtureを必須維持する：新構成の難度証拠にならず、必須成果にはしない。
+
+## Revisit when
+
+対応botのFPS比較が閾値を超える、対処が有効でも反撃へ戻れない、道中で到達が妨げられる、回復やretryが学習を妨げる場合。
+
+追加数値ゲートの判断に必要な実測が揃った場合。15〜20分との不整合を承認範囲内で解消できない場合、または承認を超える費用・リスクが判明した場合は、StudioからGame Directorへ戻す。
+
+本Decisionは適用整理の完了を示す。実行成功、指定sha一致、難度、体験、所要時間の検証済みを示さない。
+>>>END
+
+<<<EDIT design/final-boss-and-continuous-run.md
+<<<<<<< SEARCH
+Status: Design確定。未実装・未検証。D-015／D-016に基づく担当Role内の選択をD-017に記録する。既存Decisionの改訂提案は本仕様の確定事項と区別する。
+
+本書は新しい連続ラン、第5部屋、ラン境界・終端についての追加仕様。第1〜4部屋の構成、部屋内の既存敵・プレイヤー戦闘規則は既存仕様が正本である。D-006の評価基準変更は未確定であり、本書で暗黙に上書きしない。
+=======
+Status: Designと基準適用整理を確定。未実装・未検証。詳細契約はD-017、D-018に基づく旧基準の適用変更はD-019に記録する。
+
+本書は新しい連続ラン、第5部屋、ラン境界・終端についての追加仕様。第1〜4部屋の構成、部屋内の既存敵・プレイヤー戦闘規則は既存仕様が正本である。G-002新構成への基準適用はD-019と本書§8が正本。過去G-001の判断・結果と既存Decision本文は変更しない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+## 8. 旧基準とDecisionの対応
+
+「保持」は該当する独立部屋／共有挙動で保持する意味。通常ラン全体のhearts合計へ置き換えない。
+
+| 出典・対象 | 扱い | 今後の基準・権限 |
+|---|---|---|
+| combat.md Rooms、第12基準、test_rooms_match_the_specの旧5番ブルート位置 | 置換 | 第5部屋のみB(12,4)、HP12、1体。D-015の承認範囲、詳細はDesigner。第1〜4部屋は保持 |
+| step72 R3-1の「rooms 1,2,4,5 unchanged」 | 置換 | G-002では第5部屋のみ変更。R3の他の内容と既存部屋の構成は保持 |
+| combat.md 1〜10、19〜21、D-001／D-004／D-005 | 保持 | 既存敵とプレイヤーの部屋内ルールを保持。ボスへの適用は本書§3の明示事項のみ |
+| combat.md 11、18、step46、D-004／D-007の第4部屋 | 保持 | 初射1.8/3.0秒、gap0.6秒、capと遅延。既存テストを保持 |
+| 同基準の旧第5部屋スピッター | 置換 | 正規5番にスピッターはいない。ボスにはB2/B4を用いる。D-004の既存敵ルール自体は撤回しない |
+| CueGapTestの4/5両方の実部屋・強制同時射撃試験 | 置換 | 4番で保持。5番の旧構成依存はボス試験へ置換。旧5番を使うなら明示的な旧構成fixtureとし新5番合格と呼ばない |
+| D-002／D-003、combat.md17／16e | 保持＋明示適用 | 既存帯は保持。ボスの同速度・同半径の2攻撃だけ§3で同じ帯を採択。新形状への一般化なし。Designer権限 |
+| combat.md13、step44、D-006の3〜5合計3〜7 hearts／2部屋クリア等 | 要Decision変更 | 旧3部屋の独立試験と3 hearts開始に依存。新ボス／継承ランには適用不能。下記提案をStudio経由で解決するまで存続 |
+| combat.md14、D-006注記の既存1〜2比較 | 保持 | 独立1〜2でwalker合計1以上、dodger合計1以下・両方clear。通常ランとは分離 |
+| combat.md15のdodger各3〜5でdash1以上 | 置換案 | 3・4は既存の報告規則込みで保持。5はB6でdashの有効性を検証し、botの使用回数を難度強制の根拠にしない。Designer案、Studioで適用を確認 |
+| combat.md16c、BotsTestの1〜5 dodger比較 | 一部置換 | 独立1〜4は保持。旧5番の成績は廃止対象。ボス対応botの独立5番比較は同じclear結果・hearts差1以下を新規提案。連続ラン比較の代用にしない |
+| BotsTestの3〜5 walker集計・dodger3/3・camper比較 | 要Decision変更 | D-006解決後に改訂。テストだけ削って解決済みとしない |
+| D-007、step46のroom3 cap／観測法 | 保持 | room3は最大5。playerの印＋直近spit由来の算定法も保持 |
+| step59→step68／D-011 | 保持 | step68が正本。runnerの通常HPではcancelではなくkill |
+| step94、D-013／D-014 | 保持 | 既存文字列・方向規則・prefixを保持。W2の5番実spitter経路は4番とpracticeで回帰し、新5番はボス短射で確認 |
+| D-013／D-014のG-001既知ギャップ・合格判断 | 保持 | 過去Goalの判断は改訂しない。新ボスと連続ランへ過去の検証免除を拡張しない |
+| combat.md「終端で敵・弾停止」、manual「終了」と04の静的所見 | 新契約を指定 | 現行実装の一致は未確認。本書§4を新ランの基準とし、既存実装が既に満たすとは記載しない |
+
+### D-006改訂提案：未採択
+
+推奨は、旧第5部屋を含む集計基準を過去ビルドの記録として保存し、新構成に対する合否ゲートから外すこと。独立3・4のwalker／dodger／camper成績は引き続き別々に報告し、新しい合計下限やクリア数は実測後のDesigner判断にする。ボスは本書の攻撃・対処の検証と独立Playで評価する。
+
+代案は旧第5部屋fixtureを保持してD-006を回帰すること。ただし新構成の難度を評価できず、保守費用が増える。旧fixtureに合格しても新ランの合格にはしない。
+
+D-006はDesigner Decisionだが、今回の方向Decisionが既存Decisionを改訂しないと指定しているため、本Stepでは廃止・改訂を確定しない。Studioから適切なDecision変更をルーティングする。解決前に関連テストの削除を実装へ渡さない。
+=======
+## 8. 旧基準とDecisionの対応
+
+D-019で以下を確定する。「保持」は該当する独立部屋／共有挙動で保持する意味であり、通常ランのhearts合計へ置き換えない。「適用終了」はG-002新構成に限る。旧Decision本文と過去G-001の判断・結果は保存する。
+
+| 出典・対象 | 扱い | 置換先・理由 |
+|---|---|---|
+| combat.md Rooms、12、test_rooms_match_the_spec | 第1〜4部屋保持、第5部屋置換 | 旧5番ブルート位置のassertをB(12,4)、HP12、1体の確認へ置換。R2／B1。単体ボスへの構成変更による |
+| step72 R3-1の「rooms 1,2,4,5 unchanged」 | 第5部屋だけ適用終了 | 新5番はB1。他のR3-1〜R3-10と第1〜4部屋は保持 |
+| combat.md1〜10、19〜21、D-001／D-004／D-005 | 保持 | 既存敵・プレイヤーの共有回帰。ボスの明示適用は§3、B5〜B9 |
+| combat.md11／18、step46、CueGapTest | 第4部屋と共有試験保持、旧5番依存を置換 | 4番の初射・実部屋gap・強制同時射撃・cap遅延等を保持。5番の旧spitter試験はB2／B4へ。ボスはspitter gap調停に参加しない |
+| D-002／D-003、combat.md17／16e | 保持＋ボスへ明示適用 | §3／B10。帯内の命中差だけを許容し、時刻・表示・フェーズは免責しない |
+| D-006、step44の13a／13b | 新構成への適用終了 | walker独立3〜5合計3〜7 hearts、2/3 clear、構造上限7を新ボス・連続ランへ移さない。独立3・4の部屋別報告、ボス対処試験、独立Playへ接続 |
+| step44の13c | 新構成への適用終了 | dodgerのwalker比1/2以下・3/3 clearを終了。母集団変更のため。新しい比率・clear数は未設定 |
+| step44の13d | 新構成への適用終了 | camperのclear数がwalker未満という旧比較を終了。独立3・4の両者成績は引き続き報告 |
+| step44の13e／13f、Reporting rule、Revisit、What QA re-verifies | 旧集計部分の適用終了 | 旧FPS別集計、旧逸脱報告・再計測手順、過去実測値を新構成のゲートにしない。両FPS別の新報告と下記再判断へ。過去記録は保持 |
+| combat.md14、step44の14保持注記 | 保持 | 独立1〜2、各FPS別にwalker合計1以上、dodger合計1以下・両方clear。walkerのclear義務なし。brute対応方針も保持 |
+| combat.md15、step44の15保持注記 | 独立3・4保持、5番置換 | 3・4は各FPSでdodger dash1回以上。0ならDesigner報告、使用を強制する変更はしない。5番は両攻撃の実接触を伴うB6で有効性を確認。B5と独立Playも保持 |
+| combat.md16a／16b | 適用対象を更新 | 保持した共有基準と14／15を両FPSで確認。終了した13の旧集計を16b経由で復活させない。新仕様§7も両FPSで確認 |
+| combat.md16c、BotsTest.test_dodger_agrees_at_30_and_60_fps | 独立1〜4保持、5番置換 | 新5番はボス対応dodgerで同じclear結果・hearts lost差1以下を採択。下記条件を必須とし、難度評価の代用にしない |
+| combat.md16d／16e | 保持 | walker成績の一致は要求しない。bot時刻感度と規則違反を区別し、共有ルールの差は免責しない |
+| BotsTest.test_walker_meets_criteria_13_and_14_at_each_rate | 一部保持・置換 | 旧13のwalker下限・clear数・dodger比率と3/3・camper比較を新構成から外す。14の1〜2 assert、15の3・4確認を保持。独立3・4報告と新5番比較・対処試験を追加する |
+| その他BotsTest | 保持＋対応確認 | bot終了、ログ有無の結果一致、ログ観測、walker比較距離、brute wind-upへswipeしない試験を保持。新ボス対応とログの観測範囲を確認 |
+| D-007、step46、SpitterTestのroom3 | 保持 | 一般上限は最大5。静止12秒最大3の試験だけでcap遅延の一般境界を合格にしない。player印＋直近spitによる観測法も保持 |
+| step59→step68／D-011 | 保持 | step68が正本。runner通常HPはcancelではなくkill。variant文字列も保持 |
+| step94、D-013／D-014 | 保持、一部経路置換 | 既存文字列・方向・prefixとW1〜W8を保持。W2の旧5番実spitter経路は4番とpracticeへ、新5番はボス短射の表示確認へ |
+| D-013／D-014のG-001既知ギャップ・合格判断 | 保持 | 過去判断を変更せず、新機能への検証免除に拡張しない |
+| 旧終端記述、manual、04の静的所見 | 新契約へ接続 | §4、T1〜T4。現行実装が満たすとの証拠ではない |
+
+旧第5部屋fixtureの維持は必須ではない。使用するなら旧構成と明示した共有回帰に限り、新5番・連続ランの難度や合格を示すものにしない。テストの削除だけで完了とせず、上表の保持部分と置換先を追跡可能にする。具体的な試験構造はPlanに残す。
+
+### ボスのFPS比較条件
+
+同一ビルド、同一方針のボス対応dodger、同一初期位置・向き・戦闘状態、同一ゲーム時間limitで独立5番を30/60 FPS比較する。3 hearts開始と、連続ランで可能な2 hearts開始を別々に比較し、各対で同じclear結果・hearts lost差1以下を要求する。
+
+対応botはplayer viewのB、攻撃名、固定方向・危険範囲、予兆、回復、実弾に基づき、反応間隔0.15秒で回避と反撃を選ぶ。未表示の将来状態を利用せず、非致死swipeで予兆を止める方針を使わない。両FPSで同一方針を使い、対応根拠と実際の判断ログをQAが確認する。独立1〜4の方針を変更する場合は影響を明示して回帰する。対応前の旧bot成績は比較の合格根拠にしない。
+
+clear／death／unfinishedを区別する。一方のみunfinishedなら比較未完了として原因とlimitを再評価する。両方死亡またはunfinishedで数値が一致しても、攻略可能性の証拠にはしない。秒数差の追加閾値は設けず、各フェーズ時間はB1〜B10で検証する。
+
+数値差は判断時刻・位置・照準・接触距離・消費・被弾のログで診断する。帯内接触差はB10の許容対象だが、比較閾値超過を自動免除しない。Designerへ戻して比較条件または基準の再判断を記録する。帯外の同条件差、時間・表示・フェーズの規則違反はQAの不合格対象とする。walker／camperには新たなFPS成績一致条件を置かない。
+
+### 新評価への接続と実測後の判断
+
+難度評価を未実施のまま基準整理だけで合格にしない。
+
+- 独立3・4：各bot・各FPSで開始hearts、clear／death／unfinished、終了時heartsと損失、秒数、被弾源、攻撃・dash回数、limit、方針・ビルド識別を報告する。失敗や差があれば判断ログを添える。新しい合計数値ゲートは現時点で設けない。
+- 独立5番：上記の3／2 hearts別FPS比較と、B1〜B10・V1で二攻撃の読み取り、横移動、dash、消費、反撃機会を確認する。独立Playで最終戦の体験を観察する。bot成績だけで手応えを合格にしない。
+- 通常ラン：R1〜R5で正規敵を倒した連続到達、T1〜T4で終端とretry、C1〜C3で時刻・pause・limit、V2で実機入力を確認する。状態設定した境界試験は連続到達の代用にしない。
+- 時間・到達体験：§9に従い同一試行のラン時刻、pauseを分けた実経過、部屋別時間、遷移、ボス入場hearts、被弾・反撃・再挑戦回数を記録する。完走と死亡・未完了を分け、試行数を明記する。独立部屋時間の合算は禁止する。
+
+Planは、対応botと観測経路の整備後に両FPSの基線を測り、独立QA・独立Play後、Review前にDesignerへ返す経路を含める。初回基線で明白な対処不能や到達不能が見つかればPlay前にも返す。
+
+Designerが実測後に判断する項目は、独立3・4のbot間比較に数値ゲートが必要か、新5番のhearts別clear・被害・反撃機会に追加ゲートが必要か、連続到達と回復・retry負担に調整が必要かである。報告された試行条件・件数と独立Playを根拠に、新Decisionと仕様更新、または追加不要の理由を記録する。今ここで成功率や秒数の閾値を推定しない。
+
+Studioは未判断項目をReview前に再ルーティングし、適用整理完了と難度・体験の検証済みを区別する。15〜20分と整合しない場合は差と原因を報告し、HPや待機だけで合わせない。承認範囲内で解消できないVision不整合、承認超過の費用・リスク、Owner Decision変更はGame Directorへ戻す。独立QA、限定Art Verify、独立Play、Reviewは省略しない。Playtester資料に本節の期待結果や§9のReview用体験信号を転記しない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+- BotsTestのコメントは旧上限6を説明し、上限assertを持たない。正本はstep44／D-006の3〜7である。テスト本文の下限・clear数が旧5番に依存する点は別途未解決。
+=======
+- BotsTestのコメントは旧上限6を説明し、上限assertを持たない。過去構成の正本はstep44／D-006の3〜7である。新構成での下限・clear数・関連比較の適用終了と置換先はD-019および上表で確定した。テスト実装の改訂は未実施。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+2. D-006改訂の扱いをStudioで解決する。未解決のまま旧集計を新ボスへ適用しない。
+=======
+2. D-019と§8の確定した基準対応を試験計画へ反映する。旧集計の新構成への適用は終了した。独立3・4の両FPS別報告、ボス対応dodgerの条件確認・比較、実測後のDesigner再判断を計画へ含める。適用整理を難度検証済みと扱わない。
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT design/combat.md
+<<<<<<< SEARCH
+## Intent
+
+Every threat is visible before it can hurt, and every threat has an answer other than "stand and swing".
+=======
+## G-002 applicability
+
+D-019 and `design/final-boss-and-continuous-run.md` §8 govern application to the new room 5 and continuous run. Historical G-001 rulings and results below remain records of that configuration. Rooms 1–4 and shared combat rules remain in force. Independent room tests start with 3 hearts; continuous-run inheritance follows the G-002 specification.
+
+For the new configuration, criterion 13's old rooms 3–5 aggregates and walker/dodger/camper comparisons cease to apply. Criterion 14 remains. Criterion 15 remains for independent rooms 3–4, including reporting zero dash use to the designer; new room 5 uses actual dash-contact checks for both boss attacks. Criterion 16c remains for independent rooms 1–4; boss-adapted dodger comparisons use the conditions in §8. Criterion 16b does not restore retired criterion 13 aggregates. The old room-5 contents and spitter-specific checks are replaced as mapped in §8. These changes establish applicability, not verified difficulty or experience.
+
+## Intent
+
+Every threat is visible before it can hurt, and every threat has an answer other than "stand and swing".
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT design/combat-step-44-walker-limit.md
+<<<<<<< SEARCH
+## Question
+
+The walker bot on build 0.6 loses 7 hearts in rooms 3–5 at 60 FPS (4 at 30 FPS).
+=======
+## G-002 applicability annotation
+
+D-019 ends application of this note's old rooms 3–5 aggregate gates to the G-002 boss configuration and continuous run. This includes 13a–d, the old aggregate FPS checks and historical figures in 13e–f, and their aggregate reporting/revisit/re-verification requirements. The historical G-001 ruling and results remain unchanged below.
+
+Independent rooms 1–2 comparisons, independent rooms 3–4 dash rules, shared combat regression and independent-room 3-heart starts remain. Independent rooms 3–4 bot results are reported separately at 30 and 60 FPS. No new aggregate gate is derived from 3–7 or 2/3. The complete replacement and measurement route is `design/final-boss-and-continuous-run.md` §8; it governs G-002 application over this note's historical “unchanged” references to criteria 15–16.
+
+## Question
+
+The walker bot on build 0.6 loses 7 hearts in rooms 3–5 at 60 FPS (4 at 30 FPS).
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-002-final-boss/14-game-designer-to-studio.md
+---
+kind: handoff
+goal: G-002
+seq: 14
+from: game-designer
+to: studio
+stage: Plan
+outcome: done
+---
+# 14: game-designer → studio — 基準適用を確定し、実測と再判断を含むPlanへ渡す
+
+## Task
+
+D-019と仕様補足の適用関係を確認し、Technical DirectorのPlanを開く。実測後のDesigner再判断をReview前の経路に含める。
+
+## Context
+
+D-018が採択した方向に基づき、Designer権限でD-006・step44と関連基準のG-002新構成への適用変更を確定した。過去G-001の判断・結果と既存Decision本文は変更していない。
+
+## Findings
+
+make-decisionとwrite-design-specに従い、以下を作成・補足した。
+
+- `decisions/D-019-g002-balance-criteria-applicability.md`：限定的な適用変更と関連基準の採否。
+- `design/final-boss-and-continuous-run.md`：冒頭、§8、§10を更新。保持・適用終了・置換先、対応bot条件、実測後の再判断経路を確定。
+- `design/combat.md`、`design/combat-step-44-walker-limit.md`：G-002の適用注記を追加し、旧記載から新構成の誤判定を防ぐ。
+
+旧独立3〜5のwalker3〜7 hearts・2/3 clear、dodgerのwalker比1/2以下・3/3 clear、camperのwalker未満clearを新構成のゲートから外した。FPS別旧集計、過去数値、旧逸脱報告・再判断条件も新構成へ移さない。
+
+第1〜4部屋、共有ルール、独立3 hearts開始、独立1〜2比較、独立1〜4のdodger FPS比較を保持する。独立3・4は各botを部屋別・30/60 FPS別に報告する。新合計下限・上限・clear数は導出しない。
+
+基準15は独立3・4の既存規則とゼロdash時のDesigner報告を保持する。新5番は使用回数条件を終了し、B6で各攻撃への実接触、無傷、消費、dash終了後の追加被害なしを確認する。横移動の有効性と独立Playも保持する。
+
+ボス対応dodgerの新5番FPS比較は「同じclear結果・hearts lost差1以下」を採択した。同一方針・ビルド・初期状態・limit、playerに見える情報、0.15秒反応を条件とする。独立3 hearts開始と連続ランで可能な2 hearts開始を別比較する。対応確認前の成績は合格根拠にしない。death／unfinishedを区別し、両FPSの失敗一致を攻略可能性の証拠にしない。帯内接触による差でも数値閾値超過は自動免除せずDesignerへ戻す。
+
+§8は関連BotsTestの各assert群、CueGapTest、構成試験、共有回帰を対応付けた。旧fixtureは必須にせず、必要なら共有回帰に限定する。削除だけで完了にせず、B1〜B10・V1、R1〜R5、T1〜T4、C1〜C3、V2、独立Playと同一試行の時間計測へ接続する。
+
+追加数値ゲートは未設定。対応botの両FPS基線、独立QA、独立Play、通常ランの到達・終端・時間実測を受け、Review前にDesignerが必要性を判断する。追加不要の場合も理由を記録する。明白な対処不能・到達不能ならPlay前にも戻す。
+
+本Stepは文書上の適用整理であり、play／botsは実行していない。実行成功、指定sha一致、難度、体験、所要時間の新しい証拠はない。コードとテストの実装改訂も行っていない。
+
+## Decisions already made
+
+- D-006：過去構成の正本として保持。G-002新構成への適用はD-019で限定変更。
+- D-015／D-016：承認された連続ラン、単体ボス、体験方向と範囲を保持。
+- D-017：ボス・回復・境界・終端・時刻・表示の詳細契約を保持。
+- D-018：旧集計を新構成評価から分離する方向。
+- D-019：その適用変更、dash検証、対応bot FPS比較、実測後の再判断を確定。
+
+## Constraints
+
+Owner request、Interpretation、第1〜4部屋と共有ルールを維持する。新戦闘入力、ボスチェックポイント、既存部屋全面改修は追加しない。
+
+15〜20分のVisionを維持し、時間合わせだけのHP増加・待機水増しをしない。独立部屋時間を合算して連続ラン実測と扱わない。
+
+技術方式、実装順序、工数、実機入力経路はTechnical Directorに残す。Plan完了前にBuildを開かない。独立QA、限定Art Verify、独立Play、Reviewを維持する。Playtester資料はStudioが作成し、設計上の期待結果・Review用体験信号を渡さない。
+
+## Open questions
+
+1. Technical Director：指定sha `27fe16268ac8`、対象ビルド、0.4／0.6表記差と既存試験の実行基線を同定できるか。
+2. Technical Director：長時間player／状態観測、pause／resume、retry、両時刻・入力、実機操作、表示と境界試験を実現・観測する方式、工数とリスクは何か。
+3. Designerへの後続再判断：実測に基づき独立3・4、新5番、連続到達・回復・retryへ追加数値ゲートや調整が必要か。現時点では未判断であり、Plan開始の権限上の衝突ではない。
+
+## Expected output
+
+Studioは適用整理の完了を確認し、Technical Directorへ§10の依存と§8の試験対応を含むPlanを渡す。Planは対応botの確認、両FPS計測、通常ランの同一試行計測、実測後のDesigner再判断を明示する。
+
+Planと必要判断の後、Build→独立QA→限定Art Verify→独立Play→Designerの実測後判断→Reviewへ進む。QAまたは初回基線で問題が判明した場合は前倒しで再判断する。承認超過、Owner Decision変更、範囲内で解消不能なVision不整合はStudioからGame Directorへ返す。G-002は進行中とする。
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/make-decision.md
+- Skills: studio/skills/write-design-spec.md
+- Project: design/final-boss-and-continuous-run.md
+- Project: design/combat.md
+- Project: design/combat-step-44-walker-limit.md
+- Project: repo/tests/test_game.py
+- Project: repo/bots.py
+- Project: repo/manual.md
+- Project: project.md#vision
+- Project: project.md#constraints
+- Project: project.md#current-state
+- Project: goals/G-002-final-boss/goal.md
+- Decisions: decisions/D-006-walker-limit-rooms-3-5-structural-ceiling.md
+- Decisions: decisions/D-015-owner-approves-continuous-run-and-final-boss.md
+- Decisions: decisions/D-016-final-boss-experience-direction.md
+- Decisions: decisions/D-017-final-boss-and-run-contract.md
+- Decisions: decisions/D-018-legacy-balance-gate-transition-direction.md
+- Decisions: decisions/D-019-g002-balance-criteria-applicability.md
+- Previous handoff: goals/G-002-final-boss/13-studio-to-game-designer.md
+>>>END

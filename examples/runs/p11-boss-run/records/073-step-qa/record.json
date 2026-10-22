@@ -1,0 +1,120 @@
+{
+ "op": "Step",
+ "role": "qa",
+ "goal": "G-002",
+ "attempts": [
+  {
+   "runtime": "codex",
+   "session_id": "01a15e78-cf14-72c3-9ba9-c90b14fc9200",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 165182,
+    "cached_input_tokens": 89856,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 186,
+    "reasoning_output_tokens": 98
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 1,
+   "started": "2026-10-21T21:38:57",
+   "seconds": 14.2,
+   "errors": [],
+   "runs": [
+    "@run/tests"
+   ]
+  },
+  {
+   "runtime": "codex",
+   "session_id": "01a15e79-1239-7b23-b946-432800fbde9a",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 175764,
+    "cached_input_tokens": 95232,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 563,
+    "reasoning_output_tokens": 267
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 2,
+   "started": "2026-10-21T21:39:15",
+   "seconds": 28.8,
+   "errors": [],
+   "runs": [
+    "@run/trace/boss-zero-30",
+    "@run/trace/boss-zero-60"
+   ]
+  },
+  {
+   "runtime": "codex",
+   "session_id": "01a15e79-833b-7eb1-97e9-31237e90a47a",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 209683,
+    "cached_input_tokens": 112128,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 587,
+    "reasoning_output_tokens": 276
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 3,
+   "started": "2026-10-21T21:39:44",
+   "seconds": 27.7,
+   "errors": [],
+   "runs": [
+    "@run/bots/retained-and-boss-30",
+    "@run/bots/retained-and-boss-60",
+    "@run/play/boss-zero-player-60"
+   ]
+  },
+  {
+   "runtime": "codex",
+   "session_id": "01a15e79-f087-7170-887f-4e2195247c62",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 122244,
+    "cached_input_tokens": 7552,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 5227,
+    "reasoning_output_tokens": 82
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 4,
+   "started": "2026-10-21T21:40:12",
+   "seconds": 100.9,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-002-final-boss/60-qa-to-studio.md": "8d95b9209b2c4a745f16d01b5d0fdc5b735fd29e9c938c03bb62113a124afbe3"
+ },
+ "decision": {}
+}

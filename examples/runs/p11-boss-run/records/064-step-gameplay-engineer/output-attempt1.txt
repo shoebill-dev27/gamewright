@@ -1,0 +1,453 @@
+<<<EDIT repo/play.py
+<<<<<<< SEARCH
+    directives = {"mode", "attempt", "control", "limit", "driver-limit", "trace-every"}
+=======
+    directives = {"mode", "attempt", "control", "limit", "driver-limit", "trace-every", "view-every"}
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    out = Player(game) if view == "player" else Trace(game)
+    out.start()
+=======
+    out = Player(game) if view == "player" else Trace(game)
+    if view == "player" and game.room == "5":
+        print('note: legacy route — boss status and messages are incomplete; add "mode room" for the full boss display')
+    out.start()
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/game.py
+<<<<<<< SEARCH
+        self.shots = []  # [x, y, vx, vy, age]
+=======
+        self.shots = []  # [x, y, vx, vy, age]
+        self.shot_allocator = None  # Public sessions opt in; legacy event output stays unchanged.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        self.shots.clear()
+        for enemy in self.enemies:
+=======
+        for shot in self.shots:
+            self._shot_removed(shot, "cleared")
+        self.shots.clear()
+        for enemy in self.enemies:
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+                    self.shots.append(shot)
+            return
+=======
+                    self._emit_shot(shot, "boss")
+            return
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+                self.shots.append(
+                    [e.x, e.y, e.aim[0] * SHOT_SPEED, e.aim[1] * SHOT_SPEED, 0.0]
+                )
+                self.last_shot = self.t
+                self.log("spit")
+=======
+                source = "spitter" + str(
+                    [enemy for enemy in self.enemies if enemy.kind == "spitter"].index(e) + 1
+                )
+                shot = Shot(e.x, e.y, e.aim[0] * SHOT_SPEED, e.aim[1] * SHOT_SPEED)
+                self._emit_shot(shot, source)
+                self.last_shot = self.t
+                self.log("spit")
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    def _update_shots(self, dt):
+=======
+    def _emit_shot(self, shot, source):
+        if self.shot_allocator is not None:
+            shot.id = self.shot_allocator()
+            shot.event_source = source
+            self.log("shot_fired", id=shot.id, source=source)
+        self.shots.append(shot)
+
+    def _shot_removed(self, shot, reason):
+        if self.shot_allocator is not None:
+            # Raw lists are supported for controlled fixtures; emitted shots always have IDs.
+            if hasattr(shot, "id"):
+                self.log("shot_removed", id=shot.id, source=shot.event_source, reason=reason)
+        elif reason in ("lifetime", "edge"):
+            self.log("shot_removed", source=getattr(shot, "source", "spitter"), reason=reason)
+
+    def _update_shots(self, dt):
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+                self.log("shot_removed", source=source, reason="lifetime")
+=======
+                self._shot_removed(shot, "lifetime")
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+                self.log("shot_removed", source=source, reason="edge")
+=======
+                self._shot_removed(shot, "edge")
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+                if not self.invulnerable:
+                    # Step 94: the message names the side the shot came from.
+                    self._hurt("shot", "shot from the " + shot_source(shot[2], shot[3]))
+                continue
+=======
+                blocked = self.invulnerable
+                if not blocked:
+                    # Step 94: the message names the side the shot came from.
+                    self._hurt("shot", "shot from the " + shot_source(shot[2], shot[3]))
+                self._shot_removed(shot, "absorbed" if blocked else "hit")
+                continue
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/session.py
+<<<<<<< SEARCH
+        self.attempt = 1
+=======
+        self.attempt = 1
+        self.shot_sequence = 0
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    def _enter(self, room, hearts):
+        self.game = Game(fps=self.fps, room=room)
+=======
+    def allocate_shot(self):
+        self.shot_sequence += 1
+        return f"S{self.shot_sequence}"
+
+    def _enter(self, room, hearts):
+        self.game = Game(fps=self.fps, room=room)
+        self.game.shot_allocator = self.allocate_shot
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+                self.attempt += 1
+                self.run_frame = 0
+=======
+                self.attempt += 1
+                self.shot_sequence = 0
+                self.run_frame = 0
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/run_driver.py
+<<<<<<< SEARCH
+        "controls": [], "trace_every": False,
+=======
+        "controls": [], "trace_every": False, "view_every": 0.5,
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+            elif key == "trace-every":
+                assert words == ["trace-every", "frame"]
+                setup["trace_every"] = True
+=======
+            elif key in ("trace-every", "view-every"):
+                assert len(words) == 2
+                if key == "trace-every" and words[1] == "frame":
+                    setup["trace_every"] = True
+                else:
+                    value = float(words[1])
+                    if not math.isfinite(value) or not 0.5 <= value <= 60:
+                        raise ValueError("observation interval must be between 0.5 and 60 seconds")
+                    setup["trace_every" if key == "trace-every" else "view_every"] = value
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+            raise ValueError(f"script line {number}: invalid instruction {raw!r}") from error
+=======
+            raise ValueError(
+                f"script line {number}: invalid instruction {raw!r}"
+                + ("; observation interval must be 0.5–60 seconds"
+                   + (" or frame" if key == "trace-every" else "")
+                   if key in ("trace-every", "view-every") else "")
+            ) from error
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        self.game = Game(self.fps, setup["room"])
+=======
+        self.game = Game(self.fps, setup["room"])
+        self.game.shot_allocator = self.allocate_shot
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        self.seen, self.next_picture = 0, 0.0
+=======
+        self.seen, self.next_picture = 0, 0.0
+        self.next_trace = 0.0
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        if self.view == "trace":
+            if events or force or self.setup["trace_every"]:
+=======
+        if self.view == "trace":
+            interval = self.setup["trace_every"]
+            periodic = interval is True or (
+                interval is not False and s.t >= self.next_trace - EPS
+            )
+            if periodic and interval is not True:
+                self.next_trace = s.t + interval
+            if events or force or periodic:
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+                    "shots": [list(shot) for shot in g.shots],
+=======
+                    "shots": [
+                        {"id": getattr(shot, "id", None),
+                         "source": getattr(shot, "event_source", None),
+                         "state": list(shot)}
+                        for shot in g.shots
+                    ],
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        self.next_picture = s.t + 0.5
+=======
+        if s.t >= self.next_picture - EPS:
+            self.next_picture += self.setup.get("view_every", 0.5)
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    tick, started = 0, time.perf_counter()
+=======
+    tick, started = 0, time.perf_counter()
+    attempts = {}
+
+    def record():
+        row = attempts.setdefault(s.attempt, {
+            "attempt": s.attempt, "outcome": "unfinished", "run_seconds": 0.0,
+            "rooms": {}, "boss_entry_hearts": None, "hits": 0, "attacks": 0,
+            "pause_seconds": 0.0, "driver_seconds": 0.0,
+            "elapsed_without_pause": 0.0,
+        })
+        row["run_seconds"] = s.t
+        row["rooms"][s.game.room] = s.room_t
+        if s.game.room == "5" and row["boss_entry_hearts"] is None:
+            row["boss_entry_hearts"] = s.game.hearts
+        row["outcome"] = {
+            "won": "clear", "cleared": "clear", "dead": "death"
+        }.get(s.state, "unfinished")
+        return row
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        entered = generation != s.generation
+=======
+        row = record()
+        entered = generation != s.generation
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        s.step(limit=setup["limit"])
+        messages = collect()
+=======
+        row["driver_seconds"] += s.dt
+        row["pause_seconds"] += s.dt if s.paused else 0.0
+        row["elapsed_without_pause"] += 0.0 if s.paused else s.dt
+        s.step(limit=setup["limit"])
+        record()
+        messages = collect()
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    return s, {
+        "build": BUILD, "source_id": source_id(), "driver_seconds": tick / s.fps,
+=======
+    record()
+    for event in s.events:
+        row = attempts.get(event["attempt"])
+        if row is not None:
+            row["hits"] += event["kind"] == "hurt"
+            row["attacks"] += event["kind"] == "attack"
+            if event["kind"] == "entry" and event["room"] == "5":
+                row["boss_entry_hearts"] = event["details"]["hearts"]
+    return s, {
+        "attempt_count": len(attempts), "attempts": list(attempts.values()),
+        "build": BUILD, "source_id": source_id(), "driver_seconds": tick / s.fps,
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    print(f"end: attempt {session.attempt}, outcome {session.state}, "
+          f"run {session.t:.3f}, room {session.room_t:.3f}, {measurement}")
+=======
+    print(f"summary: {measurement}")
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/manual.md
+<<<<<<< SEARCH
+| `trace-every frame` | Emit developer state every driver tick. |
+=======
+| `view-every 10` | Player periodic pictures every 10 game seconds; default 0.5, permitted range 0.5–60. Event pictures are always shown. |
+| `trace-every 5` | Developer periodic state every 5 game seconds; permitted range 0.5–60. Events are always shown. |
+| `trace-every frame` | Emit developer state every driver tick, without an output cap. |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+messages and status display; use explicit `mode room` for boss observation.
+=======
+messages and status display; use explicit `mode room` for boss observation.
+Legacy room 5 player output begins with:
+`note: legacy route — boss status and messages are incomplete; add "mode room" for the full boss display`.
+Other legacy rooms and legacy trace output omit this note.
+
+Public trace and event logs identify emitted shots as `S1`, `S2`, and so on across rooms in
+each attempt. Retry restarts numbering at `S1`. Each emitted shot has one `shot_fired` and one
+`shot_removed` event when removed, with source and reason: `lifetime`, `edge`, `hit`, `absorbed`,
+or terminal `cleared`. Player messages do not expose these IDs.
+
+Public player and trace runs end with one `summary:` block. It includes source identity,
+execution stop, processing seconds, attempt count, and each attempt's clear/death/unfinished
+outcome, run time, room times, first boss-entry hearts, hits, attacks, pause time, driver time,
+and elapsed driver time excluding pauses. Terminal waiting is driver time, not combat time.
+Interval directives select the public driver; they do not change inputs or combat results.
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE repo/tests/test_v1_supplements.py
+"""D-022 probes at both rates; controlled fixtures are not reachability evidence."""
+
+import contextlib
+import io
+import re
+import unittest
+
+import play
+from game import Shot
+from run_driver import drive, read_script
+from session import RunSession
+
+
+class SupplementsTest(unittest.TestCase):
+    def output(self, script, view="player"):
+        setup, inputs, rules = play.read_script(script)
+        stream = io.StringIO()
+        with contextlib.redirect_stdout(stream):
+            result = play.play(setup, inputs, view, rules)
+        return stream.getvalue(), result
+
+    def test_legacy_note_scope(self):
+        note = 'note: legacy route — boss status and messages are incomplete; add "mode room" for the full boss display'
+        for fps in (30, 60):
+            for room in ("1", "2", "3", "4", "5", "empty"):
+                for view in ("player", "trace"):
+                    text, _ = self.output(f"room {room}\nfps {fps}\nend 0.1\n", view)
+                    self.assertEqual(text.count(note), int(room == "5" and view == "player"))
+                    if room == "5" and view == "player":
+                        self.assertEqual(text.splitlines()[0], note)
+
+    def test_public_boss_display_and_no_ids(self):
+        for fps in (30, 60):
+            text, _ = self.output(f"mode room\nroom 5\nfps {fps}\nlimit 8\n")
+            for fragment in ("boss B — HP", "next: charge", "the boss prepares a charge"):
+                self.assertIn(fragment, text)
+            self.assertIsNone(re.search(r"\bS\d+\b", text))
+            self.assertEqual(text.count("summary:"), 1)
+
+    def test_shot_reasons_and_recovery(self):
+        for fps in (30, 60):
+            for reason in ("lifetime", "edge", "hit", "dash", "protection"):
+                with self.subTest(fps=fps, reason=reason):
+                    s = RunSession(fps)
+                    s._enter("5", 3)
+                    g, boss = s.game, s.game.enemies[0]
+                    boss.x, boss.y = (0.05 if reason == "edge" else 10), 4
+                    boss.phase, boss.attack_name = "warning", "short shot"
+                    boss.phase_left, boss.aim = g.dt, (-1, 0)
+                    g.place_player(0, 0)
+                    s.step()
+                    fired = s.t
+                    if reason in ("hit", "dash", "protection"):
+                        g.place_player(9.7, 4)
+                    if reason == "dash":
+                        s.press("dash", "left")
+                    elif reason == "protection":
+                        g.hurt_left, g.invulnerable = 0.8, True
+                    for _ in range(fps):
+                        s.step()
+                    emitted = [e for e in s.events if e["kind"] == "shot_fired"]
+                    removed = [e for e in s.events if e["kind"] == "shot_removed"]
+                    self.assertEqual(len(emitted), 1)
+                    self.assertEqual(len(removed), 1)
+                    self.assertEqual(emitted[0]["details"], {"id": "S1", "source": "boss"})
+                    expected = "absorbed" if reason in ("dash", "protection") else reason
+                    self.assertEqual(removed[0]["details"]["reason"], expected)
+                    self.assertEqual(removed[0]["details"]["id"], "S1")
+                    self.assertEqual(g.shots, [])
+                    recovery = [e for e in s.events if e["kind"] == "boss_recovery"]
+                    self.assertEqual(len(recovery), 1)
+                    self.assertAlmostEqual(recovery[0]["run_time"] - fired, 1)
+
+    def test_clear_and_retry_ids(self):
+        for fps in (30, 60):
+            s = RunSession(fps)
+            g = s.game
+            shot = Shot(0, 0, 0, 0)
+            g._emit_shot(shot, "spitter1")
+            for enemy in g.enemies:
+                enemy.hp = 0
+            s.step()
+            removed = [e for e in s.events if e["kind"] == "shot_removed"]
+            self.assertEqual([e["details"]["reason"] for e in removed], ["cleared"])
+            for _ in range(fps):
+                s.step()
+            s.game._emit_shot(Shot(0, 0, 0, 0), "spitter1")
+            self.assertEqual(s.game.shots[0].id, "S2")
+            s.game.hearts = 0
+            s.step()
+            self.assertTrue(s.control("retry"))
+            s.game._emit_shot(Shot(0, 0, 0, 0), "spitter1")
+            self.assertEqual(s.game.shots[0].id, "S1")
+
+    def test_interval_validation(self):
+        for key in ("view-every", "trace-every"):
+            for value in ("0.49", "60.1", "nan", "inf", "no"):
+                with self.assertRaisesRegex(ValueError, "interval"):
+                    read_script(f"mode run\n{key} {value}\n")
+        self.assertTrue(read_script("trace-every frame\n")[0]["trace_every"])
+
+    def test_intervals_preserve_events_and_results(self):
+        for fps in (30, 60):
+            results = []
+            messages = []
+            for interval in (0.5, 10):
+                text, (s, measurement) = self.output(
+                    f"mode run\nfps {fps}\nlimit 10\nview-every {interval}\n")
+                results.append((s.state, s.t, s.game.hearts, s.events))
+                messages.append([line for line in text.splitlines() if line.startswith("[attempt")])
+                self.assertEqual(measurement["attempt_count"], 1)
+                row = measurement["attempts"][0]
+                self.assertEqual(row["run_seconds"], s.t)
+                self.assertEqual(row["hits"], sum(e["kind"] == "hurt" for e in s.events))
+                self.assertEqual(row["attacks"], sum(e["kind"] == "attack" for e in s.events))
+            self.assertEqual(results[0], results[1])
+            self.assertEqual(messages[0], messages[1])
+
+    def test_twenty_minute_periodic_bounds(self):
+        # Normal-run fixture: freeze threats without clearing rooms, to exercise the full limit.
+        from run_driver import Output
+        for fps in (30, 60):
+            for view, interval, maximum in (("player", 10, 121), ("trace", 5, 241)):
+                setup, inputs, rules = read_script(
+                    f"mode run\nfps {fps}\nlimit 1200\ndriver-limit 1201\n"
+                    "view-every 10\ntrace-every 5\n")
+                output = None
+
+                def observe(s, force):
+                    nonlocal output
+                    if output is None:
+                        for enemy in s.game.enemies:
+                            enemy.x, enemy.y = 0, 0
+                            enemy.phase, enemy.phase_left = "recovery", 2000
+                        output = Output(s, setup, view)
+                    output.emit(force)
+
+                stream = io.StringIO()
+                with contextlib.redirect_stdout(stream):
+                    s, measurement = drive(setup, inputs, rules, observe)
+                self.assertEqual(s.t, 1200)
+                self.assertEqual(measurement["attempts"][0]["outcome"], "unfinished")
+                lines = stream.getvalue().splitlines()
+                if view == "player":
+                    # Initial and periodic pictures; the final limit has no player message.
+                    count = sum(line.startswith("run — room") for line in lines)
+                else:
+                    import ast
+                    states = [ast.literal_eval(line) for line in lines]
+                    count = sum(not state["events"] for state in states) + 1
+                self.assertLessEqual(count, maximum)
+
+
+if __name__ == "__main__":
+    unittest.main()
+>>>END
+
+<<<FILE @run/tests
+>>>END

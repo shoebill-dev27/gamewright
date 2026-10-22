@@ -1,0 +1,50 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-002",
+ "attempts": [
+  {
+   "runtime": "codex",
+   "session_id": "01a159bc-8fad-7382-811b-c9592330749b",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 29462,
+    "cached_input_tokens": 7680,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 2980,
+    "reasoning_output_tokens": 43
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 1,
+   "started": "2026-10-20T23:34:52",
+   "seconds": 63.8,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-002-final-boss/35-studio-to-gameplay-engineer.md": "7ab83abefddee2cfb9fe1cb250ba6f0d7c7c4b5022ec0015640a6b1a680fe818",
+  "goals/G-002-final-boss/goal.md": "74522bf1e4da2a2ca960f7591b659d79eb7ab872a3376c52d1ac50be79bf06da"
+ },
+ "decision": {
+  "new": [
+   "gameplay-engineer",
+   "Build"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "gameplay-engineer",
+    "Build"
+   ]
+  ]
+ },
+ "seen_through_seq": 35
+}
