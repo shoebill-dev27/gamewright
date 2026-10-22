@@ -603,6 +603,7 @@ class Packet:
         # The answer's shape, repeated after every input (answer_shape); a Step's outgoing
         # Handoff pattern (build_check).
         self.answer, self.out = "", None
+        self.strip_names = ()  # sections removed from Handoffs added by @need (Steps)
 
     def add(self, label, content):
         self.inputs.append((label, content.rstrip() + "\n"))
@@ -767,6 +768,8 @@ def build_step(project, gdir, handoff):
     for entry in load_entries(text):
         if entry != rel:
             packet.add_entry(project, entry, policy["strip_sections"])
+    for label, listing in directory_listings(project, text, role):
+        packet.add(label, listing)
     templates = (
         ["handoff"]
         + (["escalation"] if policy["escalates"] else [])
@@ -806,6 +809,13 @@ def build_step(project, gdir, handoff):
             "executor gets the results and must write every file to keep in its final answer "
             "(EDIT blocks always apply to the project files as written, never to a proposal)"
         )
+    packet.allow_need, packet.strip_names = True, policy["strip_sections"]
+    packet.header["context_request"] = f"allowed once (@need, up to {MAX_NEED} paths)"
+    packet.writes.append(
+        f"@need: instead of your files, once: a file block `<<<FILE @need` with one path per line "
+        f"(up to {MAX_NEED} project or Studio files your Role may load), then `>>>END`, to add "
+        "them to this packet"
+    )
 
     def validate(files):
         errors = check_writes(
@@ -916,9 +926,58 @@ def unseen(gdir, seen):
     return [(p, m) for p, m in artifacts if seq_of(p) > seen]
 
 
-def check_need(project, entries):
-    """A Route's one-time request for more context: project or Studio files only."""
+LISTING_MAX = 80
+
+
+def directory_listings(project, text, role):
+    """A Load entry that names a directory (e.g. "the build in repo/") brings no file. List the
+    names of the files in it that the Role may load, so the Step can ask for them with @need.
+    """
+    policy, pmeta, listings = role_policy(role), project_meta(project), []
+    for token in dict.fromkeys(
+        re.findall(r"[\w.-]+(?:/[\w.-]*)+", section(parse(text)[1], "Load"))
+    ):
+        folder, _ = resolve(project, token.rstrip("/"))
+        if not folder.is_dir():
+            continue
+        base = ROOT if token.startswith("studio/") else project
+        names = [
+            str(f.relative_to(base))
+            for f in sorted(folder.rglob("*"))
+            if f.is_file() and "__pycache__" not in f.parts
+        ]
+        names = [
+            n
+            for n in names
+            if not (policy["load_only"] and not matches(n, policy["load_only"], pmeta))
+            and not (policy["load_forbid"] and matches(n, policy["load_forbid"], pmeta))
+        ]
+        if names:
+            more = len(names) - LISTING_MAX
+            listings.append(
+                (
+                    f"@files/{token.rstrip('/')}",
+                    "Files in this directory (names only, not their contents; ask for the ones "
+                    "you need with @need):\n\n"
+                    + "".join(f"- {n}\n" for n in names[:LISTING_MAX])
+                    + (f"- … and {more} more\n" if more > 0 else ""),
+                )
+            )
+    return listings
+
+
+def check_need(project, entries, role=None):
+    """A one-time request for more context: project or Studio files only, and for a Step only what
+    its Role may load."""
     errors = [] if entries else ["@need lists no paths"]
+    if role:
+        policy, pmeta = role_policy(role), project_meta(project)
+        errors += [
+            f"@need: {role} may not load {entry}"
+            for entry in entries
+            if (policy["load_only"] and not matches(entry, policy["load_only"], pmeta))
+            or (policy["load_forbid"] and matches(entry, policy["load_forbid"], pmeta))
+        ]
     if len(entries) > MAX_NEED:
         errors.append(f"@need may list at most {MAX_NEED} paths")
     for entry in entries:
@@ -1753,11 +1812,13 @@ def execute(ws, packet, validate, args, role=None):
                     for l in files["@need"].splitlines()
                     if l.strip()
                 ]
-                errors = check_need(ws / "project", need)
+                errors = check_need(
+                    ws / "project",
+                    need,
+                    packet.header.get("role") if packet.op == "Step" else None,
+                )
             else:
-                errors = [
-                    "@need is not available here (only once, and only for a Route)"
-                ]
+                errors = ["@need is not available here (only once per operation)"]
         else:
             errors = list(dict.fromkeys(validate(files)))
         record["attempts"].append(
@@ -1775,7 +1836,9 @@ def execute(ws, packet, validate, args, role=None):
         )
         if need is not None and not errors:
             for entry in need:
-                packet.add_entry(ws / "project", entry)
+                packet.add_entry(ws / "project", entry, packet.strip_names)
+                if packet.base_inputs is not None:  # keep it through later run rounds
+                    packet.base_inputs.append(packet.inputs[-1])
             packet.allow_need = False
             packet.writes = [w for w in packet.writes if not w.startswith("@need")]
             packet.header["context_request"] = (

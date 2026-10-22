@@ -42,10 +42,16 @@ file list gives names only, never contents. It ends, after every input and any b
 with a short reminder of the answer's shape: the outgoing Handoff's path, its required sections in
 order, and the block format.
 
-**Context request (Route only, once).** Instead of routing, a Route may answer with a single
-`@need` block listing up to 8 project or Studio files, one per line. The runtime adds exactly those
-files to the packet and runs a new executor once more; a second request is rejected. The request
-and the enlarged packet are recorded.
+**Context request (once per operation).** Instead of its files, a Route or a Step may answer with
+a single `@need` block listing up to 8 project or Studio files, one per line. The runtime adds
+exactly those files to the packet and runs a new executor once more; a second request is rejected.
+A Step may ask only for files its Role may load, and a Handoff it asks for loses the sections its
+Role's policy strips. Files a Step asks for after a build run stay in the packet for later runs.
+The request and the enlarged packet are recorded.
+
+A Load entry that names a directory (e.g., "the build in `repo/`") brings no file contents: the
+Step's packet lists the names of the files in it that the Role may load, so the Step can ask for
+the ones it needs.
 
 ## Build runs
 
@@ -193,3 +199,6 @@ You are executing exactly one Studio operation, in isolation.
   step, so put everything the next operation needs into the files.
 - If the packet is not enough to do the operation, write the artifact that hands the work back or
   reports the blocker instead of guessing.
+- Nothing exists beyond this packet and what it offers: build runs (`@run`), one request for more
+  files (`@need`), and the operations that follow. There is no other environment, staff, device,
+  budget or log store, so never ask the Owner for them; say plainly what your means cannot show.
