@@ -23,13 +23,15 @@ REQUEST = "ダッシュ中なのにダメージを受けることがある。再
 G = "goals/G-001-test"
 
 
-def goal(rows, status="active"):
+def goal(rows, status="active", budget=30):
     table = "".join(
         f"| {n} | {stage} | {role} | {skills} | {st} | {h} |\n"
         for n, stage, role, skills, st, h in rows
     )
     return (
-        f"---\nkind: goal\nid: G-001\nproject: lantern-depths\nstatus: {status}\ncreated: 2026-10-10\n---\n"
+        f"---\nkind: goal\nid: G-001\nproject: lantern-depths\nstatus: {status}\ncreated: 2026-10-10\n"
+        + (f"budget: {budget}\n" if budget is not None else "")
+        + "---\n"
         f"# G-001: test\n\n## Owner request\n\n> {REQUEST}\n\n## Interpretation\n\nx\n\n## Unknowns\n\nx\n\n"
         f"## Route\n\n| # | Stage | Role | Skills | Status | Handoff |\n|---|---|---|---|---|---|\n{table}\n"
         "## Route changes\n\nNone.\n\n## Next action\n\nx\n\n## Outcome\n\n—\n"

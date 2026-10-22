@@ -37,6 +37,10 @@ file block. Its manifest lists every input with a content hash.
 | Route | executor instructions; `orchestration.md`, `workflows/development-loop.md`, `studio/README.md`; each Role's `#works-from` and `#independence` sections; templates `handoff.md`, `escalation.md`, `goal.md`; `goal.md`; the last 5 entries of the Goal log; every artifact produced since the previous Studio operation on this Goal (all parallel Steps' results); `project.md`; the project file list; Decision titles |
 | Resume | as Route, with the Escalation (the Owner's words appended verbatim) in place of the Step artifact, and template `decision.md` |
 
+Route and Resume packets carry `goal_budget`: the operations the runtime has run on the Goal
+against `goal.md`'s budget (40 for a Goal without one). A Route past the budget that adds stages
+to the route table is rejected (`orchestration.md`, Loop limits).
+
 A Step's packet is derived from its Handoff alone: **the Load list is the allowlist.** The project
 file list gives names only, never contents. It ends, after every input and any build-run results,
 with a short reminder of the answer's shape: the outgoing Handoff's path, its required sections in

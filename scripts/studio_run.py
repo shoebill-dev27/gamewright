@@ -410,6 +410,10 @@ def check_goal(text):
     missing = set(REQUIRED["goal"]) - headings(body)
     if missing:
         errors.append(f"goal.md: missing sections {sorted(missing)}")
+    if "budget" in meta and not (meta["budget"].isdigit() and int(meta["budget"]) > 0):
+        errors.append(
+            "goal.md: budget must be a whole number of operations (e.g. budget: 30)"
+        )
     for row in route_rows(body):
         if row["role"] not in PARTICIPANTS:
             errors.append(
@@ -420,6 +424,36 @@ def check_goal(text):
 
 
 ROUTE_CHANGES_MAX, UNKNOWNS_MAX, CELL_MAX, GOAL_MAX_BYTES = 600, 3000, 80, 20_000
+DEFAULT_BUDGET = 40  # for Goals written before budgets existed
+
+
+def goal_budget(text):
+    raw = parse(text)[0].get("budget", "")
+    return int(raw) if raw.isdigit() and int(raw) > 0 else DEFAULT_BUDGET
+
+
+def goal_ops(records, gid):
+    """Operations (Intake, Steps, Routes, Resumes) the runtime has run on this Goal."""
+    if not records or not records.is_dir():
+        return 0
+    count = 0
+    for path in records.glob("*/record.json"):
+        record = json.loads(path.read_text(encoding="utf-8"))
+        count += bool(
+            record.get("op") in ("Intake", "Step", "Route", "Resume")
+            and str(record.get("goal", "")).startswith(gid)
+            and record.get("attempts")
+        )
+    return count
+
+
+def budget_line(used, budget):
+    return f"{used} of {budget} operations used" + (
+        " — over budget: add no stages; route the planned work the Owner request still needs, "
+        "skip the rest (game-director decides the scope), or escalate the cost to the Owner"
+        if used >= budget
+        else ""
+    )
 
 
 def check_goal_size(text):
@@ -746,6 +780,11 @@ def build_intake(project, request):
             return errors + ["goal.md missing"]
         errors += check_goal(files[f"{gdir}/goal.md"])
         errors += check_goal_size(files[f"{gdir}/goal.md"])
+        if "budget" not in parse(files[f"{gdir}/goal.md"])[0]:
+            errors.append(
+                "goal.md: set budget: <operations> in the frontmatter, the Steps and Routes this "
+                "Goal should need (orchestration.md, Intake step 7)"
+            )
         if request.strip() not in files[f"{gdir}/goal.md"]:
             errors.append("goal.md must quote the Owner request verbatim")
         return errors + check_open_steps(project, gdir, files, request)
@@ -1049,11 +1088,24 @@ def build_route(project, gdir, records=None, since=None):
     packet.allow_need = True
     request = owner_request(gdir)
     before = (gdir / "goal.md").read_text(encoding="utf-8")
+    used, budget = goal_ops(records, gid), goal_budget(before)
+    packet.header["goal_budget"] = budget_line(used, budget)
 
     def validate(files):
         errors = check_writes(
             files, [f"{grel}/goal.md", "project.md"] + rels + news, project
         )
+        new_goal = files.get(f"{grel}/goal.md", "")
+        if parse(new_goal)[0].get("budget") != parse(before)[0].get("budget"):
+            errors.append(
+                "goal.md: keep budget as it was; only the Owner changes it (through Resume)"
+            )
+        if used >= budget and len(route_rows(new_goal)) > len(route_rows(before)):
+            errors.append(
+                f"goal.md: the Goal has used {used} of its {budget} operations, so add no stages: "
+                "route the planned work the Owner request still needs, mark the rest skipped "
+                "(game-director decides the scope within the Goal), or escalate the cost to the Owner"
+            )
         if f"{grel}/goal.md" not in files:
             return errors + ["goal.md must be written"]
         if "project.md" in files:
@@ -1149,7 +1201,7 @@ def build_route(project, gdir, records=None, since=None):
     return packet, validate
 
 
-def build_resume(project, gdir):
+def build_resume(project, gdir, records=None):
     esc = next(
         (
             p
@@ -1169,6 +1221,13 @@ def build_resume(project, gdir):
     decision = next_decision(project)
     packet = new_packet(
         "Resume", goal=gid, escalation=erel, next_seq=seq, next_decision=decision
+    )
+    packet.header["goal_budget"] = (
+        budget_line(
+            goal_ops(records, gid),
+            goal_budget((gdir / "goal.md").read_text(encoding="utf-8")),
+        )
+        + " (the Owner may change the budget in this decision)"
     )
     if current_build(project):
         packet.header["current_build"] = current_build(project)
@@ -2122,7 +2181,7 @@ def do_decide(ws, args):
             f.write(
                 f"\n---\n\n**Owner response ({datetime.date.today()}):** {args.text}\n"
             )
-    packet, validate = build_resume(project, gdir)
+    packet, validate = build_resume(project, gdir, ws / "records")
     execute(ws, packet, validate, args)
     do_status(ws, args)
 

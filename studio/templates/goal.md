@@ -4,6 +4,7 @@ id: G-NNN
 project: <project-id>
 status: active          # active | blocked-on-owner | done | abandoned
 created: YYYY-MM-DD
+budget: <N>             # operations (Steps, Routes, Resumes) this Goal should need; set at Intake, changed only by the Owner
 ---
 # G-NNN: <short title>
 

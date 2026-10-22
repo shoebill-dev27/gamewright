@@ -45,7 +45,9 @@ touches it.
 6. **Order and parallelize.** Default is sequential. Parallel only for independent steps (see
    Parallel work).
 7. **Write** `goals/G-NNN-<slug>/goal.md` (templates/goal.md; next free number in the project,
-   short kebab-case slug, ISO dates) and the first Handoff `01-studio-to-<role>.md`; mark that
+   short kebab-case slug, ISO dates) with its **budget**: the operations the Goal should need,
+   about two per planned stage (its Step and the Route after it) plus room for one return. Then
+   write the first Handoff `01-studio-to-<role>.md`; mark that
    first step `open` in the route table. Apply Route
    steps 4–5 to that Handoff: read the recipient's Role contract ("Works from", "Independence")
    before writing it.
@@ -201,6 +203,11 @@ No unbounded loops (Phase 1 has no autonomous loop at all, but routes can cycle)
   become an escalation about scope or the Goal itself.
 - A step hands back `question` twice for the same missing input, with nothing new supplied in
   between → do not route it to a Role again; escalate to the Owner for that input.
+- **Budget.** The runtime counts a Goal's operations and shows them against `goal.md`'s budget.
+  Once the budget is used, a Route adds no stages: it routes the planned work the Owner request
+  still needs, marks the rest `skipped` (what the request needs is scope within the Goal, so
+  `game-director` decides it), or escalates the cost to the Owner. Only the Owner changes the
+  budget, in a Resume.
 - `partial` is not a question: nothing is missing, so route the rest of the work back to the same
   Role and never escalate for it. The same work handed back `partial` three times in a row →
   route to `technical-director` to split or re-plan it.
