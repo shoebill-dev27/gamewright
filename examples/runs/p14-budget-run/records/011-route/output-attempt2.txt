@@ -1,0 +1,96 @@
+Step 5 (Verify) is closed and Play is open with a new Handoff, 09. Nothing was run in this operation; the routing rests on the QA report in 08.
+
+- **Verify:** no criterion failed. DR8 and DR9 (a)/(c) could not be run, because the original probe scripts and old-build output are not in any packet. Another QA pass could not supply them, and the budget is already exceeded, so I accepted the report and recorded those gaps for the Review or Close.
+- **Stun-end frame at 30 FPS:** QA's observation 1 stays inside DR14's one-frame allowance. I did not route it to the designer.
+- **Play Handoff:** it contains no implementation history, no QA findings, no expected result and no mention of `repo/public-driver.md`. It loads only the playtester role and skill, the player profile and `repo/manual.md`. It also restates the run command so the playtester does not need the driver doc.
+- **Review:** it stays tentative and no new stage was added.
+
+<<<EDIT goals/G-003-dash-readiness/goal.md
+<<<<<<< SEARCH
+- Verify: open (Handoff 07), at 30 and 60 FPS.
+=======
+- Verify: done (Handoff 08), no criterion failed at 30 and 60 FPS. Not verified for lack of old-build output or original probe scripts: DR8 and DR9 (a)/(c). A 30 FPS stun-end header showing `recharging 0.01 s` is read as inside DR14's one-frame allowance. Carry these into Review or Close.
+>>>END
+<<<EDIT goals/G-003-dash-readiness/goal.md
+<<<<<<< SEARCH
+| 5 | Verify | qa | verify-change | open | 07-studio-to-qa.md |
+=======
+| 5 | Verify | qa | verify-change | done | 07-studio-to-qa.md (result: 08-qa-to-studio.md; partial, no failure) |
+>>>END
+<<<EDIT goals/G-003-dash-readiness/goal.md
+<<<<<<< SEARCH
+| 6 | Play | playtester | playtest-session | planned | — |
+=======
+| 6 | Play | playtester | playtest-session | open | 09-studio-to-playtester.md |
+>>>END
+<<<EDIT goals/G-003-dash-readiness/goal.md
+<<<<<<< SEARCH
+After step 4: the fix list is applied and the Build check passed, so the plan holds. Verify (5) opens with a clean Handoff 07 that carries no implementer assessment. The budget is now used: add no stage beyond Verify, Play and the tentative Review.
+=======
+After step 5: QA found no failure (partial: DR8, DR9 a/c unrunnable without old-build output; another Verify cannot supply it). Accepted with the gaps recorded; no designer ruling needed. Play (6) opens with a fresh Handoff 09 from the player profile and manual only. Over budget: add nothing beyond Play and the tentative Review.
+>>>END
+<<<EDIT goals/G-003-dash-readiness/goal.md
+<<<<<<< SEARCH
+Start step 5 with `07-studio-to-qa.md` (qa, verify-change). Its result is addressed to `studio`, which then routes Play (playtester) with a fresh Handoff built from the build and player profile only.
+=======
+Start step 6 with `09-studio-to-playtester.md` (playtester, playtest-session). Its result is addressed to `studio`, which then decides between Close and the tentative Review.
+>>>END
+
+<<<FILE goals/G-003-dash-readiness/09-studio-to-playtester.md
+---
+kind: handoff
+goal: G-003
+seq: 9
+from: studio
+to: playtester
+stage: Play
+outcome: routed
+---
+# 09: studio → playtester — play the build and report what you can observe
+
+## Task
+
+Play the current build as a player would and report what you observe, from the game's own display and the player manual only. Pay particular attention to dash: whether you can tell when you may use it, and what the game shows you when you try.
+
+## Context
+
+You are evaluating the game as a player of the project's target profile. You are given no information about the build's history and no expected result. Report only what you experience.
+
+## Findings
+
+Not applicable (no implementation information is passed to a Playtester).
+
+How to obtain and run the build:
+
+- The build is in `repo/` (read `repo/manual.md` for controls, the play script format and reaction rules).
+- Run from `repo/`: `python3 play.py --view player {script}`, where `{script}` is an input script you write in the format the manual describes.
+- Play at least two different runs or sessions, including some fighting in the early rooms. If the manual offers a frame-rate option, play at both 30 and 60 FPS.
+- Player profile: action players who want short, intense runs; comfortable with dodging and spacing; not interested in memorizing combo lists; mostly play with a gamepad. Input is attack and dash only.
+
+## Decisions already made
+
+None.
+
+## Constraints
+
+- Use only what a player sees: the player view and `repo/manual.md`. Do not read source code, tests, design documents or other handoffs.
+- Do not use the trace view.
+- Report observations, not fixes or design opinions beyond how it felt to play.
+- Say plainly what your means cannot show (for example gamepad feel, since the build is played through scripts).
+
+## Open questions
+
+None.
+
+## Expected output
+
+An observation report: what you did, what the game showed you, where you were unsure or had to guess, and any problem you noticed, with the script or the moments where it happened so someone can reproduce it. Address the result to `studio`.
+
+## Load
+
+- Role: studio/roles/playtester.md
+- Skills: studio/skills/playtest-session.md
+- Project: project.md#player-profile, repo/manual.md
+- Decisions: none
+- Previous handoff: none
+>>>END

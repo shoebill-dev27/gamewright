@@ -46,7 +46,8 @@ touches it.
    Parallel work).
 7. **Write** `goals/G-NNN-<slug>/goal.md` (templates/goal.md; next free number in the project,
    short kebab-case slug, ISO dates) with its **budget**: the operations the Goal should need,
-   about two per planned stage (its Step and the Route after it) plus room for one return. Then
+   two per planned stage (its Step and the Route after it), plus four for one return through
+   two stages (e.g., back to Design and Build), plus one for Intake. Then
    write the first Handoff `01-studio-to-<role>.md`; mark that
    first step `open` in the route table. Apply Route
    steps 4–5 to that Handoff: read the recipient's Role contract ("Works from", "Independence")

@@ -1,0 +1,87 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-003-dash-readiness/05-game-designer-to-gameplay-engineer.md",
+  "sha256": "8d8d070b55898c10d195f811a7af6ddbb0d392d631ab121636ce6e8a26c9c5db",
+  "bytes": 4618
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md",
+  "sha256": "8a447e66877cd14dfff47ac1b8482ba77c850159c8fb43ec2780e91064869351",
+  "bytes": 1742
+ },
+ {
+  "path": "studio/skills/implement-change.md",
+  "sha256": "a9befd7f1d9e09eb94c51a066f030db88c5061ad1b522d9795e62bc2c242964a",
+  "bytes": 1823
+ },
+ {
+  "path": "design/dash-readiness.md",
+  "sha256": "d46d7ad8b87c1287e582add76a8208d1f00b8aec685f1b5263c5cd6b0c428665",
+  "bytes": 16742
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "63a5eda9f9170e717a9a5055728b3cca734ab8a85669809966faf6134cd6b58a",
+  "bytes": 50654
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "4a1240ccd177dcf07ea5b9bb5d58d5fa5975c406666be0422f46b46d86ea8656",
+  "bytes": 12815
+ },
+ {
+  "path": "repo/tests/test_dash_readiness.py",
+  "sha256": "b25b4dd2163c0fb48c1ff53b9f589e182c36594b954952246f4af833e70f16dc",
+  "bytes": 2563
+ },
+ {
+  "path": "decisions/D-001-one-button-combat.md",
+  "sha256": "c7fe9ca23a369707a5ab439e44789a25a0a8544efce4703a676f8fd180f82ec1",
+  "bytes": 798
+ },
+ {
+  "path": "decisions/D-028-dash-readiness-rulings.md",
+  "sha256": "d42fb571e115572b574c186faed79d91f39d97e9c524324e9f6f0d47881ef5b1",
+  "bytes": 1806
+ },
+ {
+  "path": "goals/G-003-dash-readiness/04-studio-to-game-designer.md",
+  "sha256": "99970308429931a5e36518804648caa748d21267726fcded78bc52cd3d002f1f",
+  "bytes": 4784
+ },
+ {
+  "path": "@files/repo",
+  "sha256": "88e719aa511ac43cccd282f9f7744cbf9730716c5fb5223669c60950a0fde1c0",
+  "bytes": 729
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ },
+ {
+  "path": "repo/game.py",
+  "sha256": "f083a3f70ea12c03f051c7adc00566efaae8b978ce9685702e84765cef3f8d34",
+  "bytes": 22816
+ },
+ {
+  "path": "repo/play.py",
+  "sha256": "d73d1565429e79b76e3bfb5ee2c76a38a5a3442bc2de516db2604494b9d2a387",
+  "bytes": 17326
+ },
+ {
+  "path": "repo/run_driver.py",
+  "sha256": "598c91d91ecb4de0b7d2839af58698f93e0a2a871a60be126602e6baac48b441",
+  "bytes": 15924
+ },
+ {
+  "path": "repo/tests/test_game.py",
+  "sha256": "9786d47023c421f88db0c8916accdfa211af79201e0fe46f1a11ac152e82e811",
+  "bytes": 36238
+ }
+]

@@ -1,0 +1,42 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-003-dash-readiness/09-studio-to-playtester.md",
+  "sha256": "f6116c5cf376344fbb38b5120e94fe695c7ef63639a1aaefb5c74178eb95e9fc",
+  "bytes": 2249
+ },
+ {
+  "path": "studio/roles/playtester.md",
+  "sha256": "812d4a19b8900cf982bda78ad18b54cdc0cf6c5e3ab50a71b95e3f8569128945",
+  "bytes": 1715
+ },
+ {
+  "path": "studio/skills/playtest-session.md",
+  "sha256": "12e7a01c76b0b8645629e709f58ac4f93d1abd9045a6c397bfd0f64253268043",
+  "bytes": 1250
+ },
+ {
+  "path": "project.md#player-profile",
+  "sha256": "8ab7a2aeebd9deea8e5f25fb124acb3213563cbd9b926a869af8ed6dd2881a8f",
+  "bytes": 172
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "42c5199814ad4e3e76636517fc3293026bcc7da96d5af0827905b44c8a19469d",
+  "bytes": 12946
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ },
+ {
+  "path": "@run-results",
+  "sha256": "40c57ca46b9008961019904f93deb6979bd6bd658c5b9bef58c297f3989e83cb",
+  "bytes": 6940
+ }
+]

@@ -1,0 +1,306 @@
+"""Contract details B3, B6, B7, B9, B10, T1-T4, C2, C3 (G-002 split A).
+
+Controlled fixtures: they do not establish normal-run reachability. Internal names used here
+(phase, phase_left, aim, attack_name, struck, spent, hurt_left, invulnerable, events
+boss_contact / boss_recovery / boss_pursuit / shot_removed, session state / stop_reason) were
+read from game.py and session.py.
+"""
+
+import unittest
+
+from game import Game, Shot
+from session import RunSession
+
+FPS = (30, 60)
+
+
+def boss_fixture(fps, x, y, attack, phase, left, aim=(-1.0, 0.0), player=(8, 4)):
+    game = Game(fps=fps, room="5")
+    boss = game.enemies[0]
+    boss.x, boss.y = float(x), float(y)
+    boss.attack_name, boss.phase, boss.phase_left, boss.aim = attack, phase, left, aim
+    game.place_player(*player)
+    return game, boss
+
+
+def run(game, seconds):
+    for _ in range(round(seconds * game.fps)):
+        game.step()
+
+
+def kinds(events):
+    return [k for _, k, _ in events]
+
+
+def boss_session(fps, hearts):
+    s = RunSession(fps)
+    s._enter("5", hearts)
+    boss = s.game.enemies[0]
+    boss.x, boss.y = 9.0, 4.0
+    boss.hp, boss.phase, boss.phase_left, boss.aim = 1, "recovery", 1.0, None
+    s.game.place_player(8, 4)
+    return s, boss
+
+
+class B3ChargeMovementTest(unittest.TestCase):
+    def test_open_charge_moves_2_4_tiles_in_0_3_s(self):
+        for fps in FPS:
+            game, boss = boss_fixture(fps, 6, 4, "charge", "active", 0.3, (1.0, 0.0), (0, 8))
+            n = round(0.3 * fps)
+            for _ in range(n - 1):
+                game.step()
+            self.assertEqual(boss.phase, "active", fps)
+            game.step()
+            self.assertAlmostEqual(boss.x, 8.4, places=6)
+            self.assertEqual(boss.phase, "recovery", fps)
+
+    def test_wall_clamps_without_moving_recovery_start(self):
+        for fps in FPS:
+            game, boss = boss_fixture(fps, 14, 4, "charge", "active", 0.3, (1.0, 0.0), (0, 8))
+            n = round(0.3 * fps)
+            for _ in range(n - 1):
+                game.step()
+            self.assertEqual(boss.phase, "active", fps)
+            game.step()
+            self.assertEqual(boss.x, 15.0)
+            self.assertEqual(boss.phase, "recovery", fps)
+            self.assertAlmostEqual(boss.phase_left, 1.2)
+
+
+class B6DashContactTest(unittest.TestCase):
+    def test_dash_through_charge_is_spent_and_harmless_afterwards(self):
+        for fps in FPS:
+            game, boss = boss_fixture(fps, 9.5, 4, "charge", "active", 0.3)
+            game.press("dash", "right")
+            run(game, 1.0)
+            self.assertTrue(boss.spent, fps)
+            self.assertFalse(boss.struck, fps)
+            self.assertEqual(game.hearts, 3, fps)
+            contacts = [d for _, k, d in game.events if k == "boss_contact"]
+            self.assertEqual(len(contacts), 1, fps)
+            self.assertTrue(contacts[0]["blocked"], fps)
+
+    def test_dash_through_shot_consumes_it_and_no_later_damage(self):
+        for fps in FPS:
+            game = Game(fps=fps, room="empty")
+            game.shots.append(Shot(8.6, 4.0, -3.0, 0.0, "boss", 1.0))
+            game.press("dash", "right")
+            run(game, 0.1)
+            self.assertEqual(game.shots, [], fps)
+            run(game, 1.5)
+            self.assertEqual(game.hearts, 3, fps)
+
+
+class B7ProtectionExpiryTest(unittest.TestCase):
+    def test_charge_touched_in_protection_cannot_hit_when_it_ends(self):
+        for fps in FPS:
+            game, boss = boss_fixture(fps, 9.5, 4, "charge", "active", 0.3)
+            game.hurt_left, game.invulnerable = 0.2, True
+            run(game, 0.3)
+            self.assertTrue(boss.spent, fps)
+            self.assertFalse(game.invulnerable, fps)
+            self.assertEqual(game.hearts, 3, fps)
+            # The next charge is a fresh attack and hits normally.
+            boss.x, boss.y = 9.5, 4.0
+            boss.attack_name, boss.phase, boss.phase_left = "charge", "warning", game.dt
+            boss.aim = (-1.0, 0.0)
+            run(game, 0.5)
+            self.assertEqual(game.hearts, 2, fps)
+
+
+class B9RecoveryTest(unittest.TestCase):
+    def test_recovery_contact_is_harmless(self):
+        for fps in FPS:
+            for attack in ("charge", "short shot"):
+                game, boss = boss_fixture(fps, 8.3, 4, attack, "recovery", 1.2, None)
+                run(game, 1.0)
+                self.assertEqual(game.hearts, 3, (fps, attack))
+
+    def test_recovery_lengths(self):
+        for fps in FPS:
+            for attack, active, recovery in (("charge", 0.3, 1.2), ("short shot", 1.0, 1.4)):
+                game, boss = boss_fixture(fps, 10, 4, attack, "active", active, (-1.0, 0.0), (0, 8))
+                run(game, active + recovery + 0.1)
+                start = [t for t, k, _ in game.events if k == "boss_recovery"]
+                end = [t for t, k, _ in game.events if k == "boss_pursuit"]
+                self.assertEqual(len(start), 1, (fps, attack))
+                self.assertEqual(len(end), 1, (fps, attack))
+                self.assertAlmostEqual(end[0] - start[0], recovery, delta=1.0 / fps + 1e-9)
+
+
+class B10ContactBandTest(unittest.TestCase):
+    def charge_hearts(self, fps, offset):
+        game, boss = boss_fixture(fps, 10, 4, "charge", "active", 0.3, (-1.0, 0.0), (8, 4 + offset))
+        run(game, 0.4)
+        return game.hearts
+
+    def shot_hearts(self, fps, offset):
+        game = Game(fps=fps, room="empty")
+        game.place_player(8, 4)
+        game.shots.append(Shot(10.0, 4.0 + offset, -3.0, 0.0, "boss", 1.0))
+        run(game, 1.0)
+        return game.hearts
+
+    def test_charge_inside_and_outside_the_band(self):
+        for fps in FPS:
+            self.assertEqual(self.charge_hearts(fps, 0.5), 2, fps)
+            self.assertEqual(self.charge_hearts(fps, 0.57), 2, fps)
+            self.assertEqual(self.charge_hearts(fps, 0.61), 3, fps)
+            self.assertEqual(self.charge_hearts(fps, 0.8), 3, fps)
+            self.assertIn(self.charge_hearts(fps, 0.6), (2, 3))  # exactly the reach: either
+
+    def test_shot_inside_and_outside_the_band(self):
+        for fps in FPS:
+            self.assertEqual(self.shot_hearts(fps, 0.3), 2, fps)
+            self.assertEqual(self.shot_hearts(fps, 0.39), 2, fps)
+            self.assertEqual(self.shot_hearts(fps, 0.41), 3, fps)
+            self.assertEqual(self.shot_hearts(fps, 0.7), 3, fps)
+            self.assertIn(self.shot_hearts(fps, 0.4), (2, 3))
+
+
+class TerminalTest(unittest.TestCase):
+    def finish(self, fps, hearts, lethal_shot):
+        s, boss = boss_session(fps, hearts)
+        s.game.shots.append(Shot(8.2, 4.0, 0.0, 0.0, "boss", 1.0))
+        s.press("attack")
+        s.step()
+        return s
+
+    def test_t1_clear_removes_shots_and_refuses_chasing_damage(self):
+        for fps in FPS:
+            game, boss = boss_fixture(fps, 9, 4, "charge", "recovery", 1.0, None)
+            boss.hp = 1
+            game.shots.append(Shot(11.0, 4.0, -3.0, 0.0, "boss", 1.0))
+            game.press("attack")
+            game.step()
+            self.assertEqual(game.outcome, "cleared", fps)
+            self.assertEqual(game.shots, [], fps)
+            frame, hearts = game.frame, game.hearts
+            for _ in range(2 * fps):
+                game.step()
+            game.press("move", "left")
+            self.assertEqual((game.frame, game.hearts, game.heading), (frame, hearts, (0, 0)), fps)
+            self.assertEqual(kinds(game.events).count("cleared"), 1, fps)
+
+    def test_t2_same_frame_death_wins_over_victory(self):
+        for fps in FPS:
+            s = self.finish(fps, 1, True)
+            self.assertEqual(s.state, "dead", fps)
+            ks = kinds([(0, e["kind"], 0) for e in s.events])
+            self.assertEqual(ks.count("run_dead"), 1, fps)
+            self.assertEqual(ks.count("run_won"), 0, fps)
+            self.assertFalse(s.game.cleared, fps)
+
+    def test_t2_survivor_wins_only(self):
+        for fps in FPS:
+            s = self.finish(fps, 2, True)
+            self.assertEqual(s.state, "won", fps)
+            self.assertEqual(s.game.hearts, 1, fps)
+            ks = kinds([(0, e["kind"], 0) for e in s.events])
+            self.assertEqual(ks.count("run_won"), 1, fps)
+            self.assertEqual(ks.count("run_dead"), 0, fps)
+            self.assertEqual(ks.count("down"), 0, fps)
+
+    def test_t3_terminal_state_is_frozen(self):
+        for fps in FPS:
+            for hearts in (1, 2):
+                s = self.finish(fps, hearts, True)
+                before = (s.t, s.room_t, s.game.frame, s.game.hearts, s.state, len(s.events))
+                for _ in range(2 * fps):
+                    s.step()
+                self.assertFalse(s.press("attack"), (fps, hearts))
+                self.assertFalse(s.press("move", "left"), (fps, hearts))
+                after = (s.t, s.room_t, s.game.frame, s.game.hearts, s.state)
+                self.assertEqual(before[:5], after, (fps, hearts))
+
+    def test_t4_retry_from_win_and_death_equals_a_new_run(self):
+        for fps in FPS:
+            for hearts in (1, 2):
+                s = self.finish(fps, hearts, True)
+                s.game.queued_attack = True
+                self.assertTrue(s.control("retry"), (fps, hearts))
+                fresh = RunSession(fps)
+                self.assertEqual((s.attempt, s.t, s.room_t, s.state), (2, 0, 0, "combat"))
+                self.assertFalse(s.paused)
+                self.assertIsNone(s.stop_reason)
+                a, b = s.game.__dict__.copy(), fresh.game.__dict__.copy()
+                ea, eb = a.pop("enemies"), b.pop("enemies")
+                self.assertEqual(a, b)
+                self.assertEqual([e.__dict__ for e in ea], [e.__dict__ for e in eb])
+                self.assertEqual(s.game.room, "1")
+                self.assertEqual(s.game.hearts, 3)
+                mark = len(s.events)
+                for _ in range(fps):
+                    s.step()
+                self.assertFalse(any(
+                    e["kind"] in ("attack", "hurt") for e in s.events[mark:]
+                ), (fps, hearts))
+
+
+class C2PauseTest(unittest.TestCase):
+    def boss_session(self, fps):
+        s = RunSession(fps)
+        s._enter("5", 3)
+        boss = s.game.enemies[0]
+        boss.x, boss.y = 10.0, 4.0
+        boss.attack_name, boss.phase, boss.phase_left = "charge", "warning", 0.5
+        boss.aim = (-1.0, 0.0)
+        s.game.place_player(0, 8)
+        return s, boss
+
+    def test_pause_in_warning_freezes_and_resume_continues(self):
+        for fps in FPS:
+            s, boss = self.boss_session(fps)
+            for _ in range(3):
+                s.step()
+            self.assertTrue(s.control("pause"))
+            snap = (s.t, s.room_t, s.game.frame, boss.phase_left, boss.phase)
+            for _ in range(2 * fps):
+                s.step()
+            self.assertEqual(snap, (s.t, s.room_t, s.game.frame, boss.phase_left, boss.phase), fps)
+            self.assertTrue(s.control("resume"))
+            for _ in range(3):
+                s.step()
+            self.assertAlmostEqual(boss.phase_left, snap[3] - 3.0 / fps, places=6)
+            for _ in range(fps):
+                s.step()
+            self.assertIn(boss.phase, ("active", "recovery"), fps)
+
+    def test_pause_freezes_protection_timer(self):
+        for fps in FPS:
+            s, boss = self.boss_session(fps)
+            s.game.hurt_left, s.game.invulnerable = 0.5, True
+            s.step()
+            s.control("pause")
+            left = s.game.hurt_left
+            for _ in range(2 * fps):
+                s.step()
+            self.assertEqual(s.game.hurt_left, left, fps)
+            self.assertTrue(s.game.invulnerable, fps)
+            s.control("resume")
+            s.step()
+            self.assertLess(s.game.hurt_left, left, fps)
+
+
+class C3LimitTest(unittest.TestCase):
+    def test_limit_in_combat_is_unfinished_with_no_result(self):
+        for fps in FPS:
+            s, boss = boss_session(fps, 3)
+            s.step(limit=s.t + s.dt)
+            self.assertEqual(s.stop_reason, "time limit — run unfinished")
+            self.assertEqual(s.state, "combat")
+            self.assertIsNone(s.game.outcome)
+
+    def test_same_frame_death_or_victory_is_recorded_beside_the_limit(self):
+        for fps in FPS:
+            for hearts, state in ((1, "dead"), (2, "won")):
+                s, boss = boss_session(fps, hearts)
+                s.game.shots.append(Shot(8.2, 4.0, 0.0, 0.0, "boss", 1.0))
+                s.press("attack")
+                s.step(limit=s.t + s.dt)
+                self.assertEqual(s.state, state, (fps, hearts))
+                self.assertEqual(s.stop_reason, "time limit — run unfinished")
+
+
+if __name__ == "__main__":
+    unittest.main()

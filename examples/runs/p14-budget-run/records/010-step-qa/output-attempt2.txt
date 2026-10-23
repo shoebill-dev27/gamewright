@@ -1,0 +1,163 @@
+<<<FILE @run/play/react60
+room empty
+fps 60
+end 3
+0 dash right
+0.3 dash right
+when text "dash ready" then dash left
+>>>END
+
+<<<FILE @run/play/react30
+room empty
+fps 30
+end 3
+0 dash right
+0.3 dash right
+when text "dash ready" then dash left
+>>>END
+
+<<<FILE @run/play/stun60
+room empty
+fps 60
+end 1.2
+spawn runner 8.5 4
+0.45 dash right
+0.55 dash right
+0.65 dash right
+>>>END
+
+<<<FILE @run/play/stun30
+room empty
+fps 30
+end 1.2
+spawn runner 8.5 4
+0.45 dash right
+0.55 dash right
+0.65 dash right
+>>>END
+
+<<<FILE @run/trace/stun60
+room empty
+fps 60
+end 1.2
+spawn runner 8.5 4
+0.45 dash right
+0.55 dash right
+0.65 dash right
+>>>END
+
+<<<FILE @run/trace/stun30
+room empty
+fps 30
+end 1.2
+spawn runner 8.5 4
+0.45 dash right
+0.55 dash right
+0.65 dash right
+>>>END
+
+<<<FILE @run/play/spit60
+room empty
+fps 60
+end 2.5
+spawn spitter 15 4
+0.35 dash up
+>>>END
+
+<<<FILE @run/play/spit30
+room empty
+fps 30
+end 2.5
+spawn spitter 15 4
+0.3 dash up
+>>>END
+
+<<<FILE @run/play/per60
+mode room
+room empty
+fps 60
+limit 2
+driver-limit 3
+trace-every 0.5
+0 dash right
+0.6 dash left
+>>>END
+
+<<<FILE @run/play/per30
+mode room
+room empty
+fps 30
+limit 2
+driver-limit 3
+trace-every 0.5
+0 dash right
+0.6 dash left
+>>>END
+
+<<<FILE @run/trace/per60
+mode room
+room empty
+fps 60
+limit 2
+driver-limit 3
+trace-every 0.5
+0 dash right
+0.6 dash left
+>>>END
+
+<<<FILE @run/trace/per30
+mode room
+room empty
+fps 30
+limit 2
+driver-limit 3
+trace-every 0.5
+0 dash right
+0.6 dash left
+>>>END
+
+<<<FILE @run/play/pause60
+mode room
+room empty
+fps 60
+limit 3
+driver-limit 6
+0 dash right
+0.2 dash left
+control 0.3 pause
+control 1.3 resume
+0.6 dash left
+0.9 dash left
+>>>END
+
+<<<FILE @run/play/pause30
+mode room
+room empty
+fps 30
+limit 3
+driver-limit 6
+0 dash right
+0.2 dash left
+control 0.3 pause
+control 1.3 resume
+0.6 dash left
+0.9 dash left
+>>>END
+
+<<<FILE @run/play/retry60
+mode run
+fps 60
+limit 30
+driver-limit 24
+4.6 dash left
+control 20 retry
+>>>END
+
+<<<FILE @run/play/retry30
+mode run
+fps 30
+limit 30
+driver-limit 24
+4.6 dash left
+control 20 retry
+>>>END

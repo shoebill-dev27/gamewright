@@ -1,0 +1,139 @@
+---
+kind: handoff
+goal: G-001
+seq: 56
+from: qa
+to: studio
+stage: Triage
+outcome: done
+---
+# 56: qa → studio — Three "unfair" hits (rooms 2 and 5) and the wording point: no build defect; one manual wording gap for Design
+
+## Task
+
+Reproduce the playtester's three hit moments (handoff 53) and check the "A grub rears back" wording. Verdict: **items 1–3 reproduce and match the design documents and the build. Item 4 matches the documents. No defect and no "expected behavior undefined" case.** One low-severity manual wording gap goes to Design, and there is one player-experience observation (item 4).
+
+`python3 -m unittest discover -s tests`: **59 tests, OK** (build 0.6).
+
+## Context
+
+Goal G-001. The scripts from handoff 55 were run through the player view and trace at 60 FPS (room 2) and the trace at 30 FPS (rooms 2 and 5). The room 5 trace at 60 FPS was also run. I also ran a practice-room script for the late-swipe boundary. As in step 32, the swipes landed after the wind-up ended. The cases differ from step 32 in two ways:
+
+- Item 1 and item 2: the swipe was out of reach during the whole wind-up (see below).
+- Item 3 is not a swipe case at all.
+
+## Findings
+
+### Item 1: room 2, late swipe at a rearing grub. Reproduced at 60 FPS. Matches (not a defect).
+
+60 FPS trace and player view:
+
+| Time (s) | Event |
+|---|---|
+| 3.550 | grub `windup:0.500`; player (10.47,4.00), grub (11.34,2.23) |
+| 4.00 | last printed cue line: "0.05 s to the lunge" |
+| 4.050 | grub `lunge` begins |
+| 4.150 | player view: "you swipe: grub hit" (trace row 4.167): grub hp 2→1, phase still `lunge` |
+| 4.250 | `hurt` by the grub, hearts 3→2; grub goes to `recovery` |
+
+- **Where the "0.05 s" came from.** The player view prints a picture at every half second and at events. The last cue line before the hit was at 4.00 s, with 0.05 s left. The swipe was at 4.15 s, which is **0.10 s after the lunge began** (4.05 s). It was not in the last 0.05 s of the wind-up.
+- **Reach.** During the wind-up the grub was about 1.97 tiles from the player (10.47,4.00 to 11.34,2.23). The swipe reach is 1.5 tiles, and the rule `see g within 1.4 then attack` could not fire. The swipe became possible only once the lunge had brought the grub within reach.
+- **Governing lines.** `design/combat.md` says a swipe that damages a grub in wind-up cancels it. A grub hit but not killed during Lunge continues its phase unchanged. A lunge that reaches a hurtable player deals 1 damage.
+- **Is "in range, landed, needs more than one swipe" the explanation?** Partly. The swipe did land, and the grub had 2 HP (2→1). But the number of swipes is not the reason. A single non-lethal swipe during the wind-up cancels a 2 HP grub. The reason is timing: the swipe came after the wind-up ended.
+- **Boundary check (practice room, 60 FPS).** Script: `room empty`, `spawn grub 9.3 4`, `player 8 4`, `0.45 attack`.
+  - The wind-up started at 0.017 and the swipe landed at 0.467 with about 0.05 s of wind-up left.
+  - The result was `stagger:0.383`, grub hp 1, no lunge, and a new wind-up at 0.867.
+  - So a swipe with 0.05 s left does cancel a standard grub, when the grub is in reach.
+- **Contact.** The hit was a centre-lane contact: grub (10.63,3.67) against player (10.20,4.00), distance about 0.54. It is not in the D-002/D-003 band (0.57–0.60).
+- **30 FPS room 2.** The same script gave a different course. The grub's wind-up started at 3.567, the lunge at 4.067 and the swipe at 4.233 (hp 2→1, lunge continues). The lunge ended in `recovery` at 4.367 with hearts still 3, so there was no hit. The player stood at (9.87,4.00) at 4.233, against (10.13,4.00) at 4.067, and the grub ended its lunge at (10.34,4.42), which is about 0.7 tile from the player.
+- **Likely cause of the 60/30 difference (hypothesis, not confirmed in code).** The reaction rules act on a 0.15 s grid, so the player's position differs between rates. The documents say bot or script timing differences are not a build defect (criterion 16d/16e). I did not test that the same decision from the same position gives the same outcome at both rates.
+
+**Verdict: matches. Not the same as step 32 in detail, but the same class: the swipe landed in the lunge, not the wind-up.** Neither case is the D-002 graze.
+
+### Item 2: room 5, swipe at a rearing grub. Reproduced at 60 FPS (8.35 / 8.95 / 9.03 s). Matches.
+
+| Time (s) | Event |
+|---|---|
+| 8.350 | grub `windup:0.500`; player (7.33,0.00), grub (6.57,1.85) |
+| 8.850 | `lunge` begins |
+| 8.950 | `attack` hit: grub hp 2→1, phase `lunge` |
+| 9.033 | `hurt` by the grub, hearts 1→0, `down`; grub goes to `recovery:0.800` |
+
+- **Timing and reach.** The playtester's 8.93 s swipe is 0.10 s after the lunge began (8.85 s). The grub was 2.0 tiles away during the wind-up, outside the 1.5 reach, and the player was against the top wall (y=0), where "move aside" had no room. The grub had 2 HP, so one swipe could not kill it.
+- **The "two swipes" thought.** The player thought the grub needed two swipes. A swipe in wind-up would have cancelled it, but the swipe landed in the lunge.
+- **Blocked-contact rule (D-005).** At 8.95 s the player's last hit was at 6.433 s, so the hurt window had ended at 7.233 s. The player was hurtable and the lunge was not blocked. D-005 does not apply to the 9.03 s hit.
+- **Contact.** The lunge reached the player at distance about 0.56 and a small lateral miss. It is a centre hit, not in the band.
+- **D-005 evidence from the same trace (60 FPS, 7.0–7.4 s).**
+  - A grub lunged at 7.000 while the player was inside a hurt window (`hurt_left` 0.233, hurt at 6.433).
+  - At 7.200 (`hurt_left` 0.033) the grub was at (7.66,0.33), about 0.39 from the player, so contact was made while the player was protected.
+  - The window ended at 7.233 with the grub still in `lunge` and within 0.6 of the player (7.80,0.10 then 7.87,0.00 on the player). No damage followed. Hearts stayed at 1 through 7.4, and the grub went to `recovery`.
+  - This matches "a blocked contact spends the lunge's hit; the lunge is not cancelled" (criterion 21b).
+  - Another case at 30 FPS (13.6–13.9 s, grub in recovery at 13.900 with the player at about 0.5 tile and `hurt_left` 0.100, then no hit when the window ended) is consistent but less conclusive.
+- **30 FPS room 5.** The exact moment did not recur at the same time, but the same pattern did. The grub's wind-up started at 14.300 and its lunge at 14.800. A swipe at 14.933 hit it (hp 2→1) in the lunge, and the hit followed at 15.000 (hearts 1→0).
+
+**Verdict: matches. Not a defect.**
+
+### Item 3: room 2, hit at about 5.4 s with no cue seen. Reproduced at 60 FPS. A cue was printed, so the design requirement is met.
+
+| Time (s) | Event |
+|---|---|
+| 4.267 | first runner `windup` |
+| 4.617 | that runner's lunge |
+| 4.917 | **second runner** `windup:0.350` at (8.09,4.73); the first runner is in `recovery` |
+| 5.000 | the swipe that killed "a runner" killed the **first** runner (the recovering one at (10.61,4.10)), not the winding-up one |
+| 5.267 | second runner's `lunge` |
+| 5.400 | `hurt` by the second runner (shown as "by a grub"), hearts 2→1 |
+
+- **The printed cue.** The player view printed `4.917 a grub rears back`, a picture with `~`, and `cue: r at (8.1,4.7) flashes orange-red, lunge line toward (+0.93,-0.37), 2.4 tiles (0.35 s to the lunge)`. It printed the cue again at 5.00 with "0.27 s to the lunge", and the same picture shows "you swipe: runner defeated".
+- **Why it looked like no cue.** The cue came **before** the swipe at 5.000, not after it. The swipe killed the other runner. The next lunge, from the second runner, was the one that hit at 5.400. The text view removes the line when the lunge starts, so the 5.40 picture has no `~`, which is the documented behavior.
+- **Warning duration.** The cue was visible 0.48 s before the hit, from 4.917 to 5.400. The runner's wind-up is 0.35 s, which is the documented minimum.
+- **Why the player was hit.** The player was hurt-stunned until 4.617 and had moved only about 0.2 tile across the lane (y 4.0→3.8) by 5.017. Lateral miss at the hit was about 0.41 tile, which is a true hit and not in the band. I did not investigate why the reaction script moved so little (hypothesis only: an attack rule acted at 5.0).
+- **One-at-a-time.** The second runner began its wind-up only when the first was in recovery, so the "one at a time" rule held.
+- **30 FPS.** The sequence differed because of the earlier divergence. A runner's `windup` is logged at 4.400, its lunge at 4.767 and the hit at 4.900. A second runner's `windup` at 4.900 led to a lunge at 5.267, but the player had killed that runner (5.300) before it hit. Every hit in the 30 FPS trace is preceded by a `windup` event for the same enemy. I did not run the player view at 30 FPS, so the printed lines are confirmed at 60 FPS only.
+
+**Verdict: matches. There was a cue and it was printed. Not a defect.**
+
+### Item 4: wording "A grub rears back" for all variants. Matches the documents.
+
+- `design/combat.md` says: "Text view: message 'a grub rears back' when it starts (all variants, unchanged in step 35)."
+- `repo/manual.md` says: "**A grub rears back** (message `a grub rears back`)", followed by the `cue:` line that "names the grub". It gives warning times per variant but does not give a per-variant message.
+- The build matches. The runner's cue at 4.267 s printed `a grub rears back` and `cue: r ...`. The brute's message differs only for the swipe ("the brute shrugs off the swipe").
+- The variant-specific look is a graphical build matter (visual spec: silhouette, size, cadence). The text view relies on `cue: r|g|G`.
+
+**Verdict: matches. No mismatch.** The playtester wasted dashes by reacting to the message alone (handoff 53, "Same message for every lunger"). That is an experience point for `game-designer`, not a defect. I do not decide whether the message should name the variant.
+
+## Decisions already made
+
+D-005 (blocked contact consumes the shot and spends the lunge's hit) applies only as stated for item 2 (consistent). D-002/D-003 (contact band): none of the contacts above lie in the band.
+
+## Constraints
+
+- The build was not changed. All results come from the run results in this step: tests, player view and trace at 60 FPS, trace at 30 FPS, and one practice-room script.
+- Experience judgments (monotony, fun) are not assessed here.
+
+## Open questions
+
+For `game-designer` (low priority, wording only, no rule change needed):
+
+1. Does the manual say clearly enough that a swipe cancels a lunge **only during the warning**, and not once the lunge has started? Current text: "step 1 tile to the side or dash to avoid the lunge, or swipe a grub or runner (within 1.5 tiles) to cancel it". It does not say "during the warning" there. The line "A swipe that interrupts the warning of a grub or runner staggers it for 0.4 s" is the only place the limit appears. It also does not say that a swipe out of reach during the warning (a grub starts winding up at about 2 tiles, beyond the 1.5 reach) can't cancel anything, which is how both of this playtester's late swipes happened. Same gap as step 32.
+2. How many swipes does a grub take? The manual says "2 swipes", which is clear. A non-lethal swipe in wind-up cancels the lunge, so a player does not need two swipes to cancel. If the designer wants the manual to say this, it is wording.
+3. Experience point from item 4: whether a text-view player should be able to tell the variant from the message (the player reacted to "rears back" alone and dashed at a distant runner). Out of QA scope.
+
+Not covered:
+
+- Player view at 30 FPS.
+- The late-swipe boundary at 30 FPS.
+- A swipe exactly at the end of the wind-up (0.5 s boundary): only the 0.45 s case was run.
+- The 60 vs 30 FPS divergence in item 1 was explained as script timing but not isolated.
+
+## Expected output
+
+Studio: close items 1–4 of this request as not-a-defect. Send the wording question above to `game-designer` (low priority). No fix is requested from `gameplay-engineer`.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/reproduce-defect.md
+- Project: design/combat.md, design/combat-cues-visual-spec.md, repo/manual.md, the build in repo/
+- Decisions: decisions/D-002-contact-edge-graze-accepted.md, decisions/D-003-contact-edge-exact-reach-and-lunge-band.md, decisions/D-005-blocked-contact-consumes-shot-and-spends-lunge.md
+- Previous handoff: goals/G-001-combat-monotony/55-studio-to-qa.md

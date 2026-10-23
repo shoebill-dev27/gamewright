@@ -1,0 +1,105 @@
+
+<invoke name="noop">
+</invoke>
+
+
+
+<invoke name="noop">
+</invoke>
+
+
+I'm writing the files directly.
+
+<<<FILE goals/G-003-dash-readiness/07-studio-to-qa.md
+---
+kind: handoff
+goal: G-003
+seq: 7
+from: studio
+to: qa
+stage: Verify
+outcome: routed
+---
+# 07: studio → qa — verify the dash readiness display at 30 and 60 FPS
+
+## Task
+
+Verify the built change against the dash readiness acceptance criteria (DR numbers in `design/dash-readiness.md`) and check for regressions. Changed or new criteria: DR2, DR4, DR5, DR6, DR7, DR12, DR13, DR14. Regression criteria, unchanged: DR1, DR3, DR8, DR9, DR10, DR11. Run every check at both 30 and 60 FPS.
+
+## Context
+
+Goal G-003. Owner request: 「ダッシュがいつまた使えるのか分かりにくい。分かるようにしてほしい」. The intent is that the player can tell from the player view and `repo/manual.md` whether dash is usable now and, if not, when it will be usable again. The build now shows dash state in the player view and gives specific refusal messages. The dash rules and numbers were not meant to change: the 0.25 s dash, the 0.6 s cooldown and the hit-stun length stay as they were. Decision D-028 settles three points that the spec left open: the tolerance on the ready time, how hit-stun is shown, and when the cooldown starts counting.
+
+## Findings
+
+Nothing to report from earlier steps. Verify from the spec, the Decisions, the manual and the build.
+
+How to exercise the build: use the project's run commands (`run_play` for the player view, `run_trace` for state, `run_tests` for the suite). Useful scenarios:
+- Dash, then press dash again at several moments before the dash is ready, and at the moment it becomes ready.
+- Practice room, spawn a grub at 8.5 4 so that its lunge hits the player, then give a `dash` input within 0.3 s of the hit.
+- Compare the header, the refusal text, the `dash ready` line, the trace value of `dash_ready_in`, and whether the game actually accepts or refuses the dash. They must agree.
+- Check that `repo/manual.md` describes what the player view shows.
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no new buttons, no input buffering.
+- D-028: dash readiness rulings (ready-time tolerance, hit-stun display, cooldown start, build number).
+
+## Constraints
+
+- Must play correctly at 30 and 60 FPS.
+- Judge only against the acceptance criteria and the Decisions. If a case has no defined expected behavior, report it as undefined instead of deciding it.
+- Do not change the game or the spec.
+
+## Open questions
+
+None.
+
+## Expected output
+
+A Verify report with a pass or fail verdict per criterion (DR1 to DR14, at 30 and 60 FPS), reproduction steps for any failure, and a list of regressions found or "none". Address the result to `studio`, because a Play step follows and needs a clean Handoff.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: design/dash-readiness.md, design/combat.md, repo/manual.md, repo/public-driver.md, the build in repo/ (run through the project's run commands)
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-028-dash-readiness-rulings.md
+- Previous handoff: none
+>>>END
+
+<<<EDIT goals/G-003-dash-readiness/goal.md
+<<<<<<< SEARCH
+- Build: built once (Handoff 03); one own test failed. The fix pass applies the rulings (Handoff 05). Not yet verified.
+- Verify: planned, after the Build fix.
+=======
+- Build: done. The fix pass applied the rulings (Handoff 06); the runtime's test run passed (167 tests OK). Not yet independently verified.
+- Verify: open (Handoff 07), at 30 and 60 FPS.
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT goals/G-003-dash-readiness/goal.md
+<<<<<<< SEARCH
+| 4 | Build (fix) | gameplay-engineer | implement-change | open | 05-game-designer-to-gameplay-engineer.md |
+| 5 | Verify | qa | verify-change | planned | — |
+=======
+| 4 | Build (fix) | gameplay-engineer | implement-change | done | 05-game-designer-to-gameplay-engineer.md (result: 06-gameplay-engineer-to-studio.md; tests OK) |
+| 5 | Verify | qa | verify-change | open | 07-studio-to-qa.md |
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT goals/G-003-dash-readiness/goal.md
+<<<<<<< SEARCH
+After step 3: the rulings settle the three points without a rule or number change, so no Decide or Plan is needed. Build fix (4) opens with Handoff 05, fixed to load the test file at repo/tests/. Its result goes to `studio` for Verify. Budget is tight: add nothing beyond the listed stages.
+=======
+After step 4: the fix list is applied and the Build check passed, so the plan holds. Verify (5) opens with a clean Handoff 07 that carries no implementer assessment. The budget is now used: add no stage beyond Verify, Play and the tentative Review.
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT goals/G-003-dash-readiness/goal.md
+<<<<<<< SEARCH
+Start step 4 with `05-game-designer-to-gameplay-engineer.md` (gameplay-engineer, implement-change). Its result is addressed to `studio`, which then routes Verify (qa) with a clean Handoff.
+=======
+Start step 5 with `07-studio-to-qa.md` (qa, verify-change). Its result is addressed to `studio`, which then routes Play (playtester) with a fresh Handoff built from the build and player profile only.
+>>>>>>> REPLACE
+>>>END

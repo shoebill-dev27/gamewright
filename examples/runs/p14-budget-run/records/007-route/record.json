@@ -1,0 +1,118 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-003",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "3d381222-1100-495b-89ce-71b85c3e6394",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 27036,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 2618,
+    "output_tokens_details": {
+     "thinking_tokens": 997
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 27036,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 2618,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 27036,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 27036
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.134328,
+   "attempt": 1,
+   "started": "2026-10-23T18:19:23",
+   "seconds": 23.7,
+   "errors": [
+    "goals/G-003-dash-readiness/05-game-designer-to-gameplay-engineer.md: Load entry missing: tests/test_dash_readiness.py (existing files there: none)"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "aead1244-94a6-4e48-b976-2a368d587cd7",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 27144,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 2091,
+    "output_tokens_details": {
+     "thinking_tokens": 802
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 27144,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 2091,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 27144,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 27144
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.12949,
+   "attempt": 2,
+   "started": "2026-10-23T18:19:46",
+   "seconds": 19.4,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-003-dash-readiness/05-game-designer-to-gameplay-engineer.md": "8d8d070b55898c10d195f811a7af6ddbb0d392d631ab121636ce6e8a26c9c5db",
+  "goals/G-003-dash-readiness/goal.md": "0f39c67199683fa7095e2527ecd1fb0c57595bc7b272685726e44812c1100214"
+ },
+ "decision": {
+  "status": "active",
+  "open": [
+   [
+    "gameplay-engineer",
+    "Build (fix)"
+   ]
+  ]
+ },
+ "seen_through_seq": 5
+}

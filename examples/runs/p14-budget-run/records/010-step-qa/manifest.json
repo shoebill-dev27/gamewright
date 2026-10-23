@@ -1,0 +1,62 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-003-dash-readiness/07-studio-to-qa.md",
+  "sha256": "3d01a29eeddc39044aee6e7366cca20312cd6315f25728fcc21453303c38d06a",
+  "bytes": 3022
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "381742c8f2afe2e1a2a6af9d031dcc91f98f490ada7c90e2a990d6a1aaf27639",
+  "bytes": 1765
+ },
+ {
+  "path": "studio/skills/verify-change.md",
+  "sha256": "da40d2c0030e078ac6d085ea06b17bb9b452495f4e2f412a9e1bd723ac72ddf5",
+  "bytes": 1281
+ },
+ {
+  "path": "design/dash-readiness.md",
+  "sha256": "d46d7ad8b87c1287e582add76a8208d1f00b8aec685f1b5263c5cd6b0c428665",
+  "bytes": 16742
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "63a5eda9f9170e717a9a5055728b3cca734ab8a85669809966faf6134cd6b58a",
+  "bytes": 50654
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "42c5199814ad4e3e76636517fc3293026bcc7da96d5af0827905b44c8a19469d",
+  "bytes": 12946
+ },
+ {
+  "path": "repo/public-driver.md",
+  "sha256": "365e4978670f0137716ca49086e9be1a75ed70e832063afe7178b1c245e86e3a",
+  "bytes": 5108
+ },
+ {
+  "path": "decisions/D-001-one-button-combat.md",
+  "sha256": "c7fe9ca23a369707a5ab439e44789a25a0a8544efce4703a676f8fd180f82ec1",
+  "bytes": 798
+ },
+ {
+  "path": "decisions/D-028-dash-readiness-rulings.md",
+  "sha256": "d42fb571e115572b574c186faed79d91f39d97e9c524324e9f6f0d47881ef5b1",
+  "bytes": 1806
+ },
+ {
+  "path": "@files/repo",
+  "sha256": "88e719aa511ac43cccd282f9f7744cbf9730716c5fb5223669c60950a0fde1c0",
+  "bytes": 729
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ }
+]

@@ -1,0 +1,25 @@
+@run/play/dash-cooldown-60 and @run/play/dash-cooldown-30 follow. I need to see what the player view shows for dash state, including a dash pressed during the cooldown, before I write the spec.
+
+<<<FILE @run/play/dash-cooldown-60
+room empty
+fps 60
+end 4
+player 4 4
+0 dash right
+0.3 dash left
+0.5 dash left
+0.9 dash left
+1.2 dash right
+>>>END
+
+<<<FILE @run/play/dash-cooldown-30
+room empty
+fps 30
+end 4
+player 4 4
+0 dash right
+0.3 dash left
+0.5 dash left
+0.9 dash left
+1.2 dash right
+>>>END

@@ -1,0 +1,92 @@
+---
+kind: handoff
+goal: G-003
+seq: 8
+from: qa
+to: studio
+stage: Route (a Play step follows if you accept this report)
+outcome: partial
+---
+# 08: qa → studio — dash readiness verification report (no failure found; DR8 and DR9 not fully checked)
+
+## Task
+
+Read the verification report below, decide whether the checks listed as not completed need another Verify step, and route the Play step.
+
+## Context
+
+Goal G-003: the Owner could not tell when dash is usable again. Handoff 07 asked for a Verify of DR1–DR14 at 30 and 60 FPS. Build: banner 0.6, public-driver build 0.6-g002-public-32, source id 04e368b0f6ed. I judged from `design/dash-readiness.md`, `design/combat.md`, D-028, `repo/manual.md` and run results only. I did not use the engineer's explanation. Two run rounds were used (play, trace and tests). No old build and no old-build output was available.
+
+## Findings
+
+### Verdict
+
+No criterion failed. I cannot give a plain `pass` for two items that the packet did not let me run: DR8 (the original probe scripts are not in the packet) and DR9 (a) and (c) (they need an old-build diff). Outcome is therefore `partial`. The Studio decides whether to accept DR8 and DR9 as they stand or order another Verify.
+
+### Per criterion (30 / 60 FPS)
+
+| DR | 30 | 60 | Evidence |
+|---|---|---|---|
+| DR1 Ready at start | pass | pass | Every first picture ends `dash: ready`. No `dash ready` line at the start (probe30/60, retry, per). |
+| DR2 Use message | pass | pass | `you dash right`, then `dash recharging: ready again in 0.85 s` at the same timestamp. Tready−Tuse is 0.85 s at 60 and 0.90 s at 30 (limit 0.9167). Trace x goes 8 → 12 (4 tiles) at both rates. |
+| DR3 Ready line | pass | pass | One `dash ready` per recharge, at Tready (60: 0.85, 1.70; 30: 0.90, 1.80). No picture is added by it. |
+| DR4 Boundary | pass | pass | Inputs at +0.3, +0.5, +0.6 and +0.7 are refused. +0.9 is accepted. The accept/refuse outcomes match the earlier table. Fine probe at 60: the input at 0.80 is refused (0.05 s left). Inputs at 0.84 and 0.85 both map to the frame at 0.85; one is accepted and one is refused, with 0.85 s left. Inputs at 0.86 and later are refused. Fine probe at 30: the input at 0.867 is refused (0.01 s left). The input at 0.87 is accepted at 0.90. No input before Tuse+0.85 was accepted. |
+| DR5 Refusal text | pass | pass | At +0.3 and +0.5: 60 shows 0.55 and 0.35 s left. 30 shows 0.57 and 0.37 s left (real Tready−t is 0.60 and 0.40, so within two frames). `(nothing happens)` is never printed. |
+| DR6 Header | pass | pass | `ready` iff accepted, in every picture checked. The 0.50 s picture shows 0.35 (60) and 0.37 (30). The ready picture after the recharge shows `ready` (probe, per60/30). |
+| DR7 Same at both rates | pass | pass | R at 0.50 s differs by 0.02 s. R0 is 0.85 at both. Outcomes outside the 2-frame band are identical. |
+| DR8 Rule unchanged | not fully verified | not fully verified | The accept/refuse sequence of my probes matches the earlier table. The original scripts (dash-cooldown, cd-start-or-end, cd-exact-boundary) are not in the packet, so final positions were not compared against earlier results. The 0.6 s input at 30 FPS was not in the earlier table. |
+| DR9 Threat readability | (b) pass, (a)/(c) not checked | (b) pass, (a)/(c) not checked | (b): in spit30/60, `a spitter takes aim` is printed before `dash ready` at 1.200. No old-build output is available for the character-for-character diff in (a) or the picture count in (c). |
+| DR10 Reaction | pass | pass | `when text "dash ready" then dash left` fires at Tready (60: 0.85, 1.70, 2.55; 30: 0.90, 1.80, 2.70). The header text, `dash not ready` and `dash recharging: ready again` lines never trigger it. |
+| DR11 Pause and entry | pass | pass | R is the same before and after the pause: 60 shows 0.55 → 0.54 after one frame, 30 shows 0.57 → 0.54 after one frame. After a retry, the room entry shows `dash: ready` and no `dash ready` line (retry60/30). |
+| DR12 Trace | pass | pass | `dash_ready_in` matches the player view R at equal times: 0.833 → 0.84 and 0.35 → 0.35 at 60, 0.8167 → 0.82 and 0.3667 → 0.37 at 30. It is 0 at the ready record. At hit it is 0.300. Trace records and pictures taken at different instants differ by a frame, which is not a defect. |
+| DR13 Manual | pass | pass | The Dash bullet says "about 0.85 s" and has the hit-stun sentence. The "Dash readiness" section is present. The Reactions note and the `text "dash ready"` example are present. Wording agrees with DR2–DR4 and DR14. I could not read Handoff 05 itself, so the check of the stun sentence is against DR14 only. |
+| DR14 Hit-stun | pass | pass | Hit by a grub (hit60/30) and by a runner (stun60/30). The header shows `recharging 0.30 s` right after the hit, and R follows the stun left in later pictures (e.g. 0.19 at 0.50 s at 60, 0.24 at 30). Trace `dash_ready_in` equals `stun_left` throughout. Dashes during the stun print `dash not ready: R s left`. No `dash ready` line is printed for a stun alone. A dash one frame or more after the stun end is accepted (hit60: 0.80 refused with 0.04 s left, 0.90 accepted; hit30: 0.80 refused, 0.90 accepted). |
+
+### Observations (not failures; for your decision)
+
+1. **Stun-end frame at 30 FPS.** In the retry30 run (run time 3.033, hit at 2.733, stun end exactly 0.3 s later) the header shows `dash: recharging 0.01 s`. At 60 FPS the first picture after the stun end (3.017) shows `ready`. DR14 says the header shows ready "at the first frame at or after the stun end", with 30 and 60 agreeing "within one frame". I read the 30 FPS case as inside that one-frame allowance, because the header and the game's decision agree (R is shown as 0.01, not 0.00, while refused). I did not probe an input at that exact frame. This looks like a float residual in the timer (about 1e-16) rounded up to 0.01 s. If the Studio wants the stun-end frame itself to show `ready`, that is a ruling for the game-designer.
+2. **R is taken from the nominal timer, not from the real Tready.** At 30 FPS the displayed R is about 0.03 s lower than `Tready − t` (e.g. `0.01 s left` at 0.867 when Tready is 0.900). This is inside the two-frame tolerance of D-028, and the header and refusal text stay consistent with the decision. It is the same 0.05 s that D-028 said it did not explain. Trace at 30 FPS: dash end at 0.267, nominal ready at 0.867 (frame 26), but `dash_ready` fires at frame 27 (0.900).
+3. Several refused inputs mapped to the same frame print duplicate identical lines (e.g. two lines at 0.883). This is expected, since inputs are quantized to frames.
+
+### Regressions
+
+None found. DR1, DR3, DR10 and DR11 pass at both rates. Existing behaviour seen in the runs is unchanged: the warning messages and the `cue:` lines, the lunge timings (0.50 s cue at 60, 0.50 s at 30), the hit messages, and the room entry and retry. The suite ran 167 tests OK (including the engineer's `test_dash_readiness`; I do not count those as independent evidence).
+
+### Reproduction
+
+No failure to reproduce. The checks above use the scripts in the run results: `probe60/30`, `fine60/30`, `basic60/30` (trace), `hit60/30`, `stun60/30`, `react60/30`, `spit60/30`, `per60/30`, `pause60/30` and `retry60/30`.
+
+### What my means cannot show
+
+- Whether any dash or position result differs from the earlier probe scripts (DR8).
+- Whether the room drawing, `~` cells, `cue:` lines and picture counts are character-identical to the old build (DR9 a and c). This needs old-build output for the same scripts.
+- The text of Handoff 05 and the keyboard or gamepad behaviour (D-021).
+- Experience signals (playtest only).
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no new buttons, no input buffering. Nothing seen contradicts it.
+- D-028: ready-time tolerance 0.85 s to 0.85 s + 2 frames (0.9 s at 30 FPS passes), hit-stun display and refusal text, recharge counted from the end of the dash, build stays 0.6. All results above are judged against it.
+
+## Constraints
+
+- Every check was run at both 30 and 60 FPS.
+- No game, spec or manual change was made by QA.
+- Cases without a defined expected result are reported, not decided (see observation 1).
+
+## Open questions
+
+1. Accept DR8 and DR9 (a) and (c) as covered by this step, or order a Verify that runs the original probe scripts and an old-build diff? Only the Studio can provide the old outputs.
+2. Observation 1: should the stun-end frame show `ready` at 30 FPS, or is one frame of lag allowed? If a ruling is wanted, route it to `game-designer`.
+
+## Expected output
+
+The Studio routes the Play step if it accepts this report. Nothing in the build needs to go back to `gameplay-engineer`, since no criterion failed.
+
+## Load
+
+- Role: studio/roles/qa.md (sender); the recipient is the Studio itself, for routing
+- Skills: studio/skills/verify-change.md
+- Project: design/dash-readiness.md, design/combat.md, repo/manual.md
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-028-dash-readiness-rulings.md
+- Previous handoff: goals/G-003-dash-readiness/07-studio-to-qa.md

@@ -1,0 +1,145 @@
+<<<FILE goals/G-003-dash-readiness/goal.md
+---
+kind: goal
+id: G-003
+project: lantern-depths
+status: active
+created: 2026-10-23
+budget: 9
+---
+# G-003: ダッシュの再使用可能タイミングを分かりやすくする
+
+## Owner request
+
+> ダッシュがいつまた使えるのか分かりにくい。分かるようにしてほしい
+
+## Interpretation
+
+Success condition: while playing, the player can tell from what the game shows (the player view and `repo/manual.md`) whether dash is usable now and, if it is not, when it will be usable again. They do not need to guess, count frames, or find out by pressing dash and failing.
+
+This is an experience (readability) problem. Dash is presumably limited after use, but the Project Context does not state the rule. The Designer confirms it from `design/combat.md` and the build.
+
+Out of scope:
+- Changing dash's role in combat or its rules or numbers. The goal is making the existing rule visible. If readability turns out to depend on a rule change, the Designer records that as an option and the Studio routes it (Decide) instead of building it.
+- New input buttons (D-001).
+- Reopening G-002 items (final boss and the verification left unfinished when it was stopped).
+- Numeric thresholds, which belong to Design. The final verdict belongs to Play and Review.
+
+Constraint: it must work correctly at 30 and 60 FPS. Reuse existing systems (project.md#constraints).
+
+## Unknowns
+
+- Observe: skipped. The Owner's first-hand report names the problem; the Designer reads the current display and rules directly.
+- Diagnose: open. What does the player view show about dash availability today, and what rule governs it? → Design step (diagnosis kept brief, inside the spec).
+- Decide: skipped. No choice of direction or scope is needed; showing existing state is within the vision (pillar 3, readable) and D-001. Re-add only if the Designer finds a rule change is needed.
+- Design: open. The display is not specified, and acceptance criteria are needed.
+- Plan: skipped. This is local, reusing existing display and state. Re-add if the Designer's spec touches several systems.
+- Build: planned. The game must change.
+- Verify: planned, after Build.
+- Play: planned. This is about how the game reads to the player.
+- Review: tentative. Needed only if Play is ambiguous or implies a direction change. Otherwise the Studio closes on the Play result.
+- Art Director: skipped. This is a text build and the cue is informational. Re-add if the Designer's cue relies on color or visual style.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Diagnose + Design | game-designer | diagnose-experience, write-design-spec | open | 01-studio-to-game-designer.md |
+| 2 | Build | gameplay-engineer | implement-change | planned | — |
+| 3 | Verify | qa | verify-change | planned | — |
+| 4 | Play | playtester | playtest-session | planned | — |
+| 5 | Review | game-director | review-outcome | tentative | — |
+
+Review is tentative: it is needed only if Play is ambiguous or implies a direction change.
+
+## Route changes
+
+Intake: first route written. No changes yet.
+
+## Next action
+
+Start step 1 with `01-studio-to-game-designer.md` (game-designer).
+
+## Outcome
+
+(To be filled at Close, in Japanese.)
+>>>END
+
+<<<FILE goals/G-003-dash-readiness/01-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-003
+seq: 1
+from: studio
+to: game-designer
+stage: Design
+outcome: routed
+---
+# 01: studio → game-designer — specify how the player can tell when dash is available again
+
+## Task
+
+Find out what the player view currently shows about dash availability and what rule governs when dash can be used again. Then specify, in player-observable terms, how the game should make "dash is usable now / usable again at X" clear, with acceptance criteria.
+
+## Context
+
+G-003. Owner request (verbatim): 「ダッシュがいつまた使えるのか分かりにくい。分かるようにしてほしい」. Success: the player can tell from what the game shows whether dash is usable and, if not, when it will be again. This is an experience (readability) problem. No reproduction or playtest has been run. Observe and Decide were skipped, and Plan is skipped unless your spec says otherwise.
+
+## Findings
+
+Nothing found yet. The Project Context does not state the dash rule, so confirm it from `design/combat.md`, `repo/manual.md` (what ships to the player) and, if needed, the build. Run the build with `python3 play.py --view player {script}` or `--view trace {script}` from `repo/`. Look at how the player view, the manual and any messages communicate dash state.
+
+## Decisions already made
+
+- D-001: Combat uses one attack button plus dash. No new input buttons.
+
+## Constraints
+
+- Make the existing rule visible. Do not change dash's rules or numbers unless readability cannot be achieved otherwise. In that case, list it as an option and hand back to the Studio rather than deciding a rule change that alters combat feel.
+- Must work correctly at 30 and 60 FPS.
+- Small team: reuse existing display and state.
+- Threats must stay readable (vision pillar 3). The new cue must not hide or crowd out warnings.
+- The build is text-based and played through input scripts. Acceptance criteria must be checkable that way.
+
+## Open questions
+
+- What is the current dash rule (limit, duration, what resets it)? Is the state shown anywhere today?
+- If a rule detail (such as a hidden timer or an edge case) is what makes it unclear, is that a display problem or a rule problem?
+
+## Expected output
+
+1. A short diagnosis (what the player sees now and why it is unclear), written in the Findings of your outgoing Handoff.
+2. A design spec as a project file, `design/dash-readiness.md`. Write it in player-observable terms. Include the cue wording or format for each state, when each state is shown, the behavior at 30 and 60 FPS, the `repo/manual.md` text changes, and acceptance criteria that QA and a Playtester can check from the script and player views.
+3. Name any case that would need a rule change or a direction choice, so the Studio can route Decide.
+4. The outgoing Handoff goes to `gameplay-engineer` (Build) when the spec is complete. If it needs a direction choice, hand back to the Studio's route with `to: game-director`, per your contract.
+5. Say in the Build step's Expected output that the engineer's result should be addressed to `studio`, so a Playtester can later receive a clean Handoff.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/diagnose-experience.md, studio/skills/write-design-spec.md
+- Project: project.md#vision, project.md#player-profile, project.md#constraints, design/combat.md, repo/manual.md
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: none
+>>>END
+
+Goal G-003 を作成しました。ダッシュの再使用可否を「いま使えるか／いつ使えるか」として表示で分かるようにするのが目標です。
+
+**ルート:**
+- **1. Diagnose + Design（game-designer）:** 現状の表示とルールを確認し、表示仕様と受け入れ基準を書く。
+- **2. Build（gameplay-engineer）**
+- **3. Verify（qa）**
+- **4. Play（playtester）**
+- **5. Review（game-director、tentative）:** Playの結果が曖昧な場合か方向性に関わる場合だけ行う。
+
+**見送った段階:**
+- **Observe:** ご報告そのものが一次観察のため。
+- **Decide:** 既存のルールを見せるだけなので判断が不要。
+- **Plan:** 変更が局所的なため。
+- **Art Director:** テキストビルドの情報表示なので不要。
+
+ダッシュのルール変更が必要になった場合は、設計者が選択肢として挙げ、再ルーティングします。
+
+予算は9 operations です。
+
+**次の操作:** `goals/G-003-dash-readiness/01-studio-to-game-designer.md` で game-designer のステップを開始してください。

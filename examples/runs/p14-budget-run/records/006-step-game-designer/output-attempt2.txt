@@ -1,0 +1,183 @@
+<<<EDIT design/dash-readiness.md
+<<<<<<< SEARCH
+Let `R` = seconds until dash can be used (0 means usable now). It is never negative.
+=======
+Let `R` = seconds until a dash input would be accepted (0 means usable now). It is the larger of (a) the dash time left plus the 0.6 s recharge, or the recharge left, and (b) the hit-stun time left (step 05 ruling). It is never negative.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| Not usable (dashing or recharging) | `dash: recharging R s`, R with 2 decimals, rounded UP to 0.01 s |
+=======
+| Not usable (dashing, recharging or in hit-stun) | `dash: recharging R s`, R with 2 decimals, rounded UP to 0.01 s. In hit-stun the same text is used (no extra state). |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+- `dash: ready` is shown if and only if a dash input at that moment would be accepted (the same state as the build's decision, not a separate timer).
+=======
+- `dash: ready` is shown if and only if a dash input at that moment would be accepted (the same state as the build's decision, not a separate timer). This includes hit-stun: during the 0.3 s after a hit the header shows `dash: recharging R s` with R at least the stun time left (step 05 ruling, D-028).
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+2. When a dash input is refused because of the dash state, replacing `(nothing happens)`:
+=======
+2. When a dash input is refused because of the dash state or hit-stun (step 05: stun now included), replacing `(nothing happens)`:
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+3. At the first frame on which dash becomes usable again, one line:
+=======
+3. At the first frame on which dash becomes usable again after a recharge (recharge finished and not in hit-stun; if the stun outlasts the recharge, at the end of the stun), one line:
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+- The `dash ready` line appears on the first frame whose time is at or after the ready time. At 30 FPS that can be up to one frame (0.033 s) later than at 60 FPS (0.017 s); this is the same ±1 frame allowance as combat.md.
+=======
+- The `dash ready` line appears on the first frame on which a dash would be accepted (`Tready`). Ready-time tolerance (step 05 ruling, D-028): the nominal ready time is `Tuse + 0.85 s`. The dash end and the recharge end are each rounded up to a frame, so `Tready − Tuse` must satisfy `0.85 s ≤ Tready − Tuse ≤ 0.85 s + 2 frames` (1e-6 s numeric slack): at most 0.8833 s at 60 FPS and 0.9167 s at 30 FPS. 0.9 s at 30 FPS (0.05 s over) PASSES; it is frame quantization, not a defect. Earlier than 0.85 s, or more than 2 frames later, is a defect.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+- A dash input one frame or more after the ready time is accepted; one frame or more before it is refused. Inputs inside the one frame band may differ between the rates and are not a defect.
+=======
+- A dash input before `Tuse + 0.85 s` is always refused; at or after `Tuse + 0.85 s + 2 frames` it is always accepted. Between those, accept or refuse follows the real `Tready` and must agree with the header at that moment; the rates may differ there and that is not a defect.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+- Hit while recharging: if getting hit does not touch the dash timer today, it still does not. Display follows the timer.
+=======
+- Hit (step 05 ruling): getting hit does not touch the dash timer (no rule change). For the 0.3 s of hit-stun a dash input is refused, so the header shows `dash: recharging R s` (R at least the stun left), and a dash pressed then prints `dash not ready: R s left`. No `dash ready` line is printed when only a stun ends and no recharge was pending.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+`R0` equals `Tready − Tuse` within one frame, and the displacement is unchanged (4 tiles).
+=======
+`R0` is the nominal 0.85 s and `Tready − Tuse` is within the ready-time tolerance above (0.85 s to 0.85 s + 2 frames), and the displacement is unchanged (4 tiles).
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+(Use the build's real value; the current evidence puts `Tready − Tuse` in (0.7, 0.9] s, expected 0.85 s.)
+=======
+Ready time bound (step 05): `0.85 s ≤ Tready − Tuse ≤ 0.85 s + 2 frames`, at both rates; 0.9 s at 30 FPS passes. "One frame" in this criterion means the 2-frame band for inputs inside it (see Behavior).
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+rounded up to 0.01 s, within one frame.
+=======
+rounded up to 0.01 s, within two frames.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+agree between 30 and 60 FPS within one frame of time (R within 0.034 s).
+=======
+agree between 30 and 60 FPS within the ready-time tolerance (R and `R0` within 0.067 s; outcomes of inputs outside the 2-frame band are identical).
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+- **DR13 Manual.** The manual contains the text above (or the real values) and agrees with DR2–DR4.
+=======
+- **DR13 Manual.** The manual contains the text above (with "about 0.85 s" and the hit-stun sentence from Handoff 05) and agrees with DR2–DR4 and DR14.
+- **DR14 Hit-stun (new, step 05).** Get hit (practice room, a grub lunge), with dash ready before the hit. In every picture and event record from the hit until 0.3 s after it: the header shows `dash: recharging R s` (never `ready`), and `dash_ready_in` equals R. A dash input in that time prints `dash not ready: R s left`, not `(nothing happens)`, and does nothing. At the first frame at or after the stun end, if no recharge is pending, the header shows `dash: ready` and no `dash ready` line is printed. A dash input at least 1 frame after the stun end is accepted. Same at 30 and 60 FPS within one frame.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+`design/combat.md` is not edited; read its "Dash: ... Cooldown 0.6 s" as "recharge of 0.6 s starting when the dash ends", subject to the Build confirmation above.
+=======
+`design/combat.md` Dash line is edited in step 05 to say the recharge of 0.6 s counts from the end of the dash (confirmed by the Build step from the source), and that dash is refused in hit-stun. Build number stays 0.6 (D-028).
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT design/combat.md
+<<<<<<< SEARCH
+The player is invulnerable for the full dash duration. Cooldown 0.6 s.
+=======
+The player is invulnerable for the full dash duration. Recharge 0.6 s, counted from the end of the dash, so the next dash is usable 0.85 s after the previous one started (up to 2 frames later because both timers end on a frame; G-003, D-028). A dash input is refused during the dash, the recharge and hit-stun, and is not buffered.
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE decisions/D-028-dash-readiness-rulings.md
+---
+kind: decision
+id: D-028
+status: accepted
+decided_by: game-designer
+goal: G-003
+date: 2026-10-23
+supersedes: none
+---
+# D-028: Dash readiness rulings (ready-time tolerance, hit-stun display, cooldown start, build number)
+
+## Decision
+
+1. Ready time: nominal `dash start + 0.85 s` (0.25 s dash, then 0.6 s recharge from the dash end). Accepted measured value: 0.85 s to 0.85 s + 2 frames (0.8833 s at 60 FPS, 0.9167 s at 30 FPS). 0.9 s at 30 FPS is frame quantization and passes. Not earlier than 0.85 s.
+2. Hit-stun: the header and refusal text follow "ready iff a dash would be accepted". During the 0.3 s of stun the header shows `dash: recharging R s` and a dash prints `dash not ready: R s left`. No `dash ready` line for a stun alone.
+3. `design/combat.md`: recharge counts from the end of the dash. Manual wording "about 0.85 s".
+4. Build number stays 0.6; no banner test changes.
+
+Limits: no dash rule or number is changed (0.25 s, 0.6 s, no buffering, hit-stun length). Cause of the 0.05 s is not established; this decision does not say where it comes from.
+
+## Rationale
+
+Dash end and timer end each round up to a frame, so up to 2 frames over nominal is expected; the old ±1 frame was too tight. Showing ready while a dash is refused is exactly the confusion the Goal removes, and the fix is display only.
+
+## Alternatives considered
+
+- Narrow "iff accepted" to "follows the timer": simpler, but the header would claim ready while a press does nothing.
+- A separate stun state/text: extra wording for 0.3 s; rejected.
+- Treat 0.9 s as a defect: nothing shows an off-by-frames bug; a 2-frame bound still catches real ones.
+- Bump the build: no reason, and tests check the banner.
+
+## Revisit when
+
+A trace shows the ready time beyond 2 frames; or a playtest finds the stun display confusing.
+>>>END
+
+<<<FILE goals/G-003-dash-readiness/05-game-designer-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-003
+seq: 5
+from: game-designer
+to: gameplay-engineer
+stage: Build
+outcome: done
+---
+# 05: game-designer → gameplay-engineer — ruling on three spec points; apply the fix list, then address the result to studio
+
+## Task
+
+Apply the fix list below (test bound, hit-stun display, manual text). No dash rule or number changes. Address your result Handoff to `studio` so Verify and Play get clean Handoffs.
+
+## Context
+
+G-003 (Owner: 「ダッシュがいつまた使えるのか分かりにくい。分かるようにしてほしい」). Build check failed on `test_ready_time_is_dash_end_plus_cooldown`: 0.9 s vs 0.85 s at 30 FPS (0.05 s over, delta 1 frame). Rulings are in `design/dash-readiness.md` (updated), `design/combat.md` (Dash line) and D-028.
+
+## Findings
+
+Rulings:
+1. **Ready time.** 0.9 s at 30 FPS is NOT a defect. Dash end and recharge end each round up to a frame, so up to 2 frames over the nominal 0.85 s is expected. Bound: `0.85 s ≤ Tready − Tuse ≤ 0.85 s + 2 frames` (60 FPS: ≤ 0.8833 s; 30 FPS: ≤ 0.9167 s). Earlier than 0.85 s, or beyond 2 frames, is a defect. Input before `Tuse + 0.85` is always refused; at or after `Tuse + 0.85 + 2 frames` always accepted; in between follows the real state and must match the header. If you find an off-by-one cause you may fix it (not required); the bound stays.
+2. **Hit-stun.** Display must follow "ready iff a dash would be accepted". During the 0.3 s stun: header `dash: recharging R s` (R = max of recharge-based time and stun left, rounded up 0.01 s, never `ready`); a dash input prints `dash not ready: R s left` instead of `(nothing happens)`; `dash_ready_in` in the trace is the same R. The dash timer itself is untouched. The `dash ready` line prints at the first frame the dash is usable after a recharge (if the stun outlasts the recharge, at the stun end); no line when only a stun ends with no recharge pending. Other silent causes (pause, clear screen, terminal, player down, reaction-rule refusals) are unchanged.
+3. **Cooldown wording.** Confirmed: 0.6 s counts from the end of the dash (done in `combat.md`). Manual change below.
+4. **Build number.** Keep 0.6. No banner test changes.
+
+Criteria changed: DR2, DR4, DR5, DR7 (tolerance), DR13 (manual), DR14 new (hit-stun); DR6 and DR12 now include stun in R. See `design/dash-readiness.md`.
+
+Not run in this step (no runs): nothing here was measured; the ready-time bound is derived from frame rounding, not from a trace.
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no buffering of a too-early dash.
+- D-028: the rulings above.
+- G-003 Interpretation: no change to dash rules or numbers.
+
+## Constraints
+
+- Works at 30 and 60 FPS; reuse existing systems; do not change 0.25 s, 0.6 s or the hit-stun length.
+- Header, messages and manual must agree (never claim ready while a dash is refused, or the reverse).
+
+## Open questions
+
+None for you. If the source shows a rule or number that differs (e.g. recharge not 0.6 s from the dash end), do not change it; report to `studio`.
+
+## Expected output
+
+Fix list:
+1. `tests/test_dash_readiness.py::test_ready_time_is_dash_end_plus_cooldown`: replace the `assertAlmostEqual(..., delta=1/fps)` with `0.85 - 1e-6 <= ready - start <= 0.85 + 2/fps + 1e-6` at fps 30 and 60 (keep the message with fps).
+2. Header/refusal in `game.py`/`play.py`/`run_driver.py`: include hit-stun in `dash_usable()`, `dash_ready_in()` and the header R, refusal text and `dash_ready_in` in trace, as in ruling 2. Make sure header, refusal and acceptance read the same state.
+3. Add tests: hit-stun header and refusal text (DR14); ready bound at 30 and 60 FPS.
+4. `repo/manual.md`: Dash bullet → "...so you can dash again about 0.85 s after the start of the last one. You cannot dash during the dash, the recharge or the moment after you are hit, and a dash pressed too early is not saved for later." In "Dash readiness" add: "After you are hit you cannot dash for a moment; the line shows `recharging` for that time too."
+5. Run `python3 -m unittest discover -s tests`; report results and what was not run, in a Handoff to `studio` (stage Verify), listing the DR numbers above for QA.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: (Studio fills when routing)
+- Project: design/dash-readiness.md, design/combat.md, repo/manual.md, the build in `repo/`, tests/test_dash_readiness.py
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-028-dash-readiness-rulings.md
+- Previous handoff: goals/G-003-dash-readiness/04-studio-to-game-designer.md
+>>>END

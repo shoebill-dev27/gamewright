@@ -117,3 +117,11 @@ Results and findings: `docs/phase12.md`.
 | `runs/p13-boss-run` | A copy of `runs/p12-boss-run` continued on Codex under the budget rule (records from 092 on). Already past the default budget, the Studio added only a game-director scope step, cut the remaining work (D-025) and twice asked the Owner about cost with an itemized estimate. The Owner extended the budget once (D-026) and then stopped the Goal (D-027): the Resume closed it as `abandoned`, with an Outcome stating what was and was not done, and refreshed only `project.md`'s Current state. The measurement in `measurement.json` meets S1–S3 and B1–B2. |
 
 Results and findings: `docs/phase13.md`.
+
+## Phase 14: a Goal budgeted from Intake
+
+| Run | What it shows |
+|---|---|
+| `runs/p14-budget-run` | G-003 ("ダッシュがいつまた使えるのか分かりにくい。分かるようにしてほしい") on the project as G-002 left it, on Claude. Intake set `budget: 9`; the Goal closed in 13 operations (24 executors), the extra four being one return through Design and Build after a failing build check. Past the budget the Routes only opened the planned Play and Close. The closing Route refreshed only `project.md`'s Current state. The measurement in `measurement.json` meets S1–S3 and B1–B2. |
+
+Results and findings: `docs/phase14.md`.

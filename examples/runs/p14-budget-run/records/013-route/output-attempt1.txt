@@ -1,0 +1,150 @@
+G-003 closes in this Route. Play (step 6) showed that dash readiness is clear, which is what the Owner asked for, so I skipped the tentative Review. The Goal log is not in my write list, so I did not append an entry.
+
+- **Why no Review:** the Playtester's report says the `dash: ready` / `recharging N s` line, the "ready again in 0.85 s" message, the refusal message and the `dash ready` message agreed in every case. Nothing in it points to a direction change.
+- **30 FPS difference:** the 0.85 s vs 0.90 s gap at 30 FPS is about 1.5 frames, inside the 2-frame bound already ruled in D-028, so I did not send it to QA.
+- **Room 3:** the three overlapping spitter lines are a separate readability problem, outside this Goal's scope. I record it as a proposed new Goal.
+
+I changed `goal.md` and the `## Current state` section of `project.md`.
+
+<<<FILE goals/G-003-dash-readiness/goal.md
+---
+kind: goal
+id: G-003
+project: lantern-depths
+status: done
+created: 2026-10-23
+budget: 9
+---
+# G-003: ダッシュの再使用可能タイミングを分かりやすくする
+
+## Owner request
+
+> ダッシュがいつまた使えるのか分かりにくい。分かるようにしてほしい
+
+## Interpretation
+
+Success condition: while playing, the player can tell from what the game shows (the player view and `repo/manual.md`) whether dash is usable now and, if it is not, when it will be usable again. They do not need to guess, count frames, or find out by pressing dash and failing.
+
+This is an experience (readability) problem. Dash is presumably limited after use, but the Project Context does not state the rule. The Designer confirms it from `design/combat.md` and the build.
+
+Out of scope:
+- Changing dash's role in combat or its rules or numbers. The goal is making the existing rule visible. If readability turns out to depend on a rule change, the Designer records that as an option and the Studio routes it (Decide) instead of building it.
+- New input buttons (D-001).
+- Reopening G-002 items (final boss and the verification left unfinished when it was stopped).
+- Numeric thresholds, which belong to Design. The final verdict belongs to Play and Review.
+
+Constraint: it must work correctly at 30 and 60 FPS. Reuse existing systems (project.md#constraints).
+
+## Unknowns
+
+- Observe: skipped. The Owner's first-hand report names the problem.
+- Diagnose: done (inside Design). The player view showed no dash state; the documented rule was ambiguous. No rule change needed.
+- Decide: skipped. No choice of direction or scope arose.
+- Design: done (Handoff 05, D-028). No rule or number change.
+- Plan: skipped. Local change reusing existing display and state.
+- Build: done (Handoff 06).
+- Verify: done (Handoff 08), no failure at 30 and 60 FPS. Not verified: DR8 and DR9 (a)/(c), for lack of old-build output.
+- Play: done (Handoff 10). Dash readiness read clearly in rooms 1 and 3 at 30 and 60 FPS. Not observed: dash invulnerability meeting a lunge or shot, gamepad feel, rooms 2/4/5.
+- Review: skipped. Play was unambiguous on the Goal and implied no direction change; new issues become proposed Goals.
+- Art Director: skipped. Text build, informational cue.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Diagnose + Design | game-designer | diagnose-experience, write-design-spec | done | 01-studio-to-game-designer.md (result: 02-game-designer-to-gameplay-engineer.md) |
+| 2 | Build | gameplay-engineer | implement-change | done | 02-game-designer-to-gameplay-engineer.md (result: 03-gameplay-engineer-to-studio.md) |
+| 3 | Design (rulings) | game-designer | write-design-spec, make-decision | done | 04-studio-to-game-designer.md (result: 05-game-designer-to-gameplay-engineer.md) |
+| 4 | Build (fix) | gameplay-engineer | implement-change | done | 05-game-designer-to-gameplay-engineer.md (result: 06-gameplay-engineer-to-studio.md) |
+| 5 | Verify | qa | verify-change | done | 07-studio-to-qa.md (result: 08-qa-to-studio.md) |
+| 6 | Play | playtester | playtest-session | done | 09-studio-to-playtester.md (result: 10-playtester-to-studio.md) |
+| 7 | Review | game-director | review-outcome | skipped | — |
+
+## Route changes
+
+After step 6: Play confirmed dash readiness reads clearly; the 30 FPS 0.05 s lag is within D-028's 2-frame bound. Review skipped (no ambiguity, no direction change). Room 3 readability goes to a proposed Goal. Goal closed.
+
+## Next action
+
+None. The Goal is closed; the Owner decides on the proposed new Goals.
+
+## Outcome
+
+結果: ダッシュの再使用可否がプレイヤー表示だけで分かるようになった。ダッシュのルールと数値は変えていない。
+- プレイヤー表示に`dash: ready` / `recharging N s`の行が出る。使用時は「ready again in 0.85 s」、拒否時は「dash not ready: N s left」、復帰時は`dash ready`が出る。被弾後の再充電も同じ行で分かる。拒否された入力は保存されない。
+- QAは30/60 FPSで不合格なし。プレイテスターは部屋1・3で、行・メッセージ・実際の復帰時刻が一致することを確認した。
+
+決定: D-028（準備完了の許容は0.85 sに対し2フレーム、被弾後のスタンは再充電として表示、クールダウンはダッシュ終了から数える）。
+
+残る注意点:
+- 旧ビルドの出力と元の検証スクリプトがなく、DR8とDR9 (a)/(c)は未検証。
+- 30 FPSでは復帰が約0.05 s遅れる（許容内）。
+- ダッシュ中の無敵が弾や突進に当たる場面は未観測。被弾後の無敵は表示されない。ゲームパッドの操作感、部屋2・4・5、ボスは未確認。
+
+次のGoal案:
+1. 部屋3の読み取りにくさ: スピッター3体の狙い線が重なり同時に撃つ。プレイテスターはこのせいで12秒で死亡した。Diagnoseから始める。
+2. ダッシュ無敵と被弾後無敵の見せ方: 追加のプレイ確認。
+3. G-002の再開要否（D-027で打切り中）: Ownerの判断が必要。
+
+Ownerへの依頼: 上記Goal案のうち、どれを進めるか選んでください。
+>>>END
+
+<<<FILE project.md
+---
+kind: project
+id: lantern-depths
+name: Lantern Depths (sample, playable)
+repository: repo/ (a small headless build; played through input scripts)
+owner_language: ja
+player_visible: repo/manual.md
+build: repo
+run_tests: python3 -m unittest discover -s tests
+run_play: python3 play.py --view player {script}
+run_trace: python3 play.py --view trace {script}
+run_bots: python3 bots.py {script}
+---
+# Project: Lantern Depths (sample, playable)
+
+## Vision
+
+A short-session top-down action roguelite: descend through lantern-lit caves, one room at a time.
+Pillars:
+
+1. **One-button combat.** Depth comes from positioning, timing and enemy behavior, not from input
+   complexity. Attack and dash are the whole kit (D-001).
+2. **Short runs.** A full run takes 15–20 minutes.
+3. **Readable threats.** Every threat is visible before it can hurt the player.
+
+## Player profile
+
+Action players who want short, intense runs. Comfortable with dodging and spacing; not interested in
+memorizing combo lists. Mostly play with a gamepad.
+
+## Current state
+
+テキスト表示・入力スクリプトで遊ぶビルドは`repo/`（sha: 9e1e50f3311a）。第1〜4部屋から進む連続ラン、第5部屋の単体ボス、終端・再挑戦が実装済み。入力はattackとdash。操作・スクリプト形式は`repo/manual.md`、公開ドライバは`repo/public-driver.md`を参照。
+
+G-003でダッシュの再使用可否を表示（D-028）。プレイヤー表示に`dash: ready`/`recharging N s`、使用時・拒否時のメッセージ、`dash ready`通知がある（再充電0.85 s、被弾後も再充電表示、先行入力は保存しない）。Build報告で167 tests OK。QAは30/60 FPSで不合格なし、Playは部屋1・3で表示の一致を確認。未検証：旧ビルド比較（DR8, DR9 a/c）、ダッシュ無敵の実観測。30 FPSでは復帰が約0.05 s遅れる（許容内）。
+
+実行（repo/で）：試験`python3 -m unittest discover -s tests`、プレイ`python3 play.py --view player {script}`、状態表示`--view trace`、bot`python3 bots.py {script}`。
+
+既知の問題：部屋3は3体のスピッターが同期して狙い、狙い線が重なり読み取りにくい（Play所見、未対応）。G-002はD-027で未達・検証未完了のまま打切り（実装は保持）。ボス再測定・独立Play・Reviewは未実施。通常ラン勝利は約87〜104秒で、15〜20分Visionとの整合は未評価。
+
+## Constraints
+
+- Desktop, keyboard and gamepad.
+- Must play correctly at both 30 and 60 FPS.
+- Small team: prefer changes that reuse existing systems.
+- No new input buttons beyond attack, dash and pause without Owner approval (D-001).
+
+## Art direction
+
+Dark caves lit by the player's lantern; warm light against cold blue-black. Threats use saturated
+orange/red so they read against the dark.
+
+## Design index
+
+- `design/combat.md` — player kit, damage and invulnerability rules, enemies.
+- `repo/manual.md` — controls, the play script format and reaction rules (player-facing; ships
+  with the build).
+>>>END
