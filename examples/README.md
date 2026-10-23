@@ -125,3 +125,11 @@ Results and findings: `docs/phase13.md`.
 | `runs/p14-budget-run` | G-003 ("ダッシュがいつまた使えるのか分かりにくい。分かるようにしてほしい") on the project as G-002 left it, on Claude. Intake set `budget: 9`; the Goal closed in 13 operations (24 executors), the extra four being one return through Design and Build after a failing build check. Past the budget the Routes only opened the planned Play and Close. The closing Route refreshed only `project.md`'s Current state. The measurement in `measurement.json` meets S1–S3 and B1–B2. |
 
 Results and findings: `docs/phase14.md`.
+
+## Phase 15: the corrected budget guidance
+
+| Run | What it shows |
+|---|---|
+| `runs/p15-budget-check-run` | The Phase 14 request again on the same project, on Claude, with the corrected Intake budget guidance. Intake set `budget: 17` and the Goal closed in 20 operations (33 executors), against 9 and 13 in Phase 14. A first Build was lost because the Route loaded no source and the engineer guessed file names; a build-writing Step now always gets the names of the build's files. Near the budget, the Route opened Review as a verdict plus scope cut. The measurement in `measurement.json` meets S1–S3 and B1–B2. |
+
+Results and findings: `docs/phase15.md`.

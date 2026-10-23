@@ -1,0 +1,95 @@
+Step 06 came back `partial`: nothing is wrong with the spec, the engineer just lacked the source files. The right route is the same Role, Build again, with those files in its Load list. I'm writing Handoff 07 and updating the route table, route changes and next action in `goal.md`.
+
+<<<FILE goals/G-003-dash-availability-clarity/07-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-003
+seq: 7
+from: studio
+to: gameplay-engineer
+stage: Build
+outcome: routed
+---
+# 07: studio → gameplay-engineer — Build the dash availability display (A+B+C and manual text), with the source files now supplied
+
+## Task
+
+Implement `design/dash-availability.md` in `repo/` (A+B+C: the always-present `dash:` field, the refusal and ready messages, and the manual text), on both the legacy route and the public driver, with no change to game results. This continues step 05, which step 06 handed back as `partial` because the dash logic and public-driver files were missing.
+
+## Context
+
+Goal G-003: the Owner finds it unclear when dash can be used again. Diagnose and Design are done; the spec is complete, and step 06 found no ambiguity in it. Step 06 changed nothing in `repo/`, so the build is still sha dc0138c2b6d1 and no QA input exists yet. The Load list now includes the files step 06 named as missing: `game.py`, `run_driver.py`, `session.py`, `source_id.py` and the test files that compare player-view or trace output.
+
+## Findings
+
+From step 06 (the engineer's own findings, repeated here as starting points; verify them against the source):
+
+- The legacy picture is printed in `Player.snapshot` and messages come from `Player.describe` in `play.py`. Reaction rules read `view.messages` and `game.hearts` only, so a `dash ready` or refusal message must go into `messages` for `text "..."` rules to match.
+- `bots.py` reads `game.dash_left` and `game.dash_cooldown` directly, not printed text, so the new text cannot affect bot input.
+- Still to find in the now-supplied source: what makes `press("dash")` refuse (cooldown, active dash, hit-stun, attack recovery); whether `dash_cooldown` counts during the dash or only after it; how a refusal is reported (`ignored` event); where hit-stun and room entry clear the state (Q3, Q5); how `run_driver.py` and `session.py` print their picture and status line.
+
+Open items the spec leaves to observation in Build: Q3 (hit during cooldown), Q4 (attack recovery vs dash), Q5 (room-transition clear), and 30 FPS behavior. Record what you observe for each.
+
+## Decisions already made
+
+- D-001: no new input buttons.
+- D-022: the legacy route stays limited; only the display is added.
+- D-028: the dash indicator is shown on the legacy route too, including room 5.
+
+## Constraints
+
+- No change to dash rules, timing, invulnerability or inputs; game results must be identical with the dash field and text stripped (spec Q8).
+- Must play correctly at 30 and 60 FPS.
+- Reuse the existing text view and message system.
+- Edit only the tests and goldens that compare the new field or text, and name them in your report.
+- Nothing may be changed that makes the display appear on one route only. If the packet still cannot hold every needed file, you may use your single `@need` (up to 8 paths) before editing. If that is still not enough, hand back `partial` with what you could verify, rather than shipping a legacy-only change.
+- Do not edit `design/` documents. If the spec turns out ambiguous or contradictory, hand back to the Studio for Design.
+
+## Open questions
+
+- Q3, Q4, Q5 and the 30 FPS case, as above: answer from observation of the build, not from reasoning.
+- If the real cooldown differs between situations in a way that cannot be documented as the spec states, say so plainly; the Studio will then reopen Decide or Design.
+
+## Expected output
+
+Change `repo/` and `repo/manual.md`, then write the Handoff addressed to `studio` (not directly to QA) with: the new sha, files changed, tests run and results (`python3 -m unittest discover -s tests`), tests or goldens edited, and what was observed for Q3, Q4, Q5 and at 30 FPS. Put your own reasoning in `## Sender assessment`; the Studio strips it before QA.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: design/dash-availability.md, design/combat.md, repo/manual.md, repo/public-driver.md, repo/play.py, repo/bots.py, repo/game.py, repo/run_driver.py, repo/session.py, repo/source_id.py, repo/tests/test_split_c.py, repo/tests/test_session.py, repo/tests/test_run_driver.py, repo/tests/test_play_run_controls.py, repo/tests/test_terminal.py, repo/tests/test_game.py, repo/tests/test_d022_observation.py, repo/tests/test_d022_shots_and_note.py, design/final-boss-and-continuous-run.md#2-ランと入場, project.md#constraints
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-022-g002-v1-supplements.md, decisions/D-028-dash-indicator-on-legacy-route.md
+- Previous handoff: goals/G-003-dash-availability-clarity/06-gameplay-engineer-to-studio.md
+>>>END
+
+<<<FILE @edit-placeholder-ignore
+>>>END
+
+<<<EDIT goals/G-003-dash-availability-clarity/goal.md
+<<<<<<< SEARCH
+| 4 | Build | gameplay-engineer | implement-change | open | 05-studio-to-gameplay-engineer.md |
+=======
+| 4 | Build | gameplay-engineer | implement-change | open (retry after partial 06) | 07-studio-to-gameplay-engineer.md |
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT goals/G-003-dash-availability-clarity/goal.md
+<<<<<<< SEARCH
+After Design (04): the spec is complete and touches no dash rules, inputs or scope, so no Decide or Plan. D-028 rebases only G-002's stopped L1 criterion, so no escalation. Build opens; Q3–Q5 are left to observation in Build and Verify.
+=======
+After Build (06, partial): the engineer lacked game.py, run_driver.py, session.py and the output tests; the spec is fine and nothing was built. Same Role retries Build (07) with those files in Load. No QA yet; route unchanged.
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT goals/G-003-dash-availability-clarity/goal.md
+<<<<<<< SEARCH
+Start Step 5: `gameplay-engineer` runs Build from `05-studio-to-gameplay-engineer.md`, addressing the result to `studio`. The Studio Route follows and composes the QA Handoff without the Sender assessment.
+
+Message to the Owner (ja): 仕様が完成しました。ダッシュの再使用は「ダッシュ終了から0.6秒」で、画面の末尾に常に「dash: ready／active／残り秒数」を表示し、拒否時と復帰時にメッセージを出し、マニュアルにも記載します。ダッシュの性能や入力は変えません。次はエンジニアが実装します。
+=======
+`gameplay-engineer` runs Build again from `07-studio-to-gameplay-engineer.md`, addressing the result to `studio`. The Studio Route follows and composes the QA Handoff without the Sender assessment.
+
+Message to the Owner (ja): 実装担当が、ダッシュ処理と公開ドライバのソースが手元になく着手できないと報告しました（仕様の問題ではなく、コードは未変更）。必要なファイルを渡して同じ担当に実装を再依頼します。Ownerの対応は不要です。
+>>>>>>> REPLACE
+>>>END

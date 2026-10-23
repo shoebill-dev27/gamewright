@@ -1,0 +1,195 @@
+Route after Build (14): I'm opening QA and Playtester in parallel. I ran nothing myself, so the 180 passing tests come from the runtime's Build check.
+
+The Build report is `partial`, but nothing it lacks can come from the same Role. The "before" recordings can no longer be made, so QA does an after-only check and the comparison is listed as unverifiable. Budget after this Route is 15 of 17, and the two steps opened here use the last two.
+
+<<<FILE goals/G-003-dash-availability-clarity/goal.md
+---
+kind: goal
+id: G-003
+project: lantern-depths
+status: active
+created: 2026-10-23
+budget: 17
+---
+# G-003: Make it clear when dash can be used again
+
+## Owner request
+
+> ダッシュがいつまた使えるのか分かりにくい。分かるようにしてほしい
+
+## Interpretation
+
+Success condition (qualitative): a player using only what the build shows them (text player view and `repo/manual.md`) can tell, at any moment, whether dash is available now, and when it is not, when it will be available again. They no longer have to guess or press dash to find out.
+
+This is an experience (readability) Goal. The dash rules themselves (recovery length, invulnerability, input set) are assumed to stay as they are. Changing them would be a different Goal.
+
+Out of scope:
+- Rebalancing dash or combat.
+- New input buttons (D-001).
+- Reopening G-002 (stopped by D-027) or its unfinished verification.
+- Any other readability issue the work happens to find (these become proposed Goals).
+
+## Unknowns
+
+- Observe: skipped. The Owner's report is the first-hand observation, and Diagnose established the cause from the player-view output.
+- Diagnose: done (02). The cause is missing information, not rules.
+- Decide: skipped. The display and wording change only; D-029 (12) rules no timing or rule change. It reopens if a later step finds a criterion that needs dash timing or rules changed.
+- Design: done (12, D-029). Settled: 30 FPS tolerance (0.90 s, ready at 1.500 s for a dash at 0.6 s), driver pictures after dash messages, rule-driven refusals print, baseline-free Q8/Q12 evidence.
+- Plan: skipped. Becomes tentative only if a change touches timing or simulation across systems.
+- Build: done (14). Legacy rule path now prints the dash refusal (display-only `quiet` flag no longer set for dash refusals); manual and public-driver text updated; new test file. Build check: 180 tests OK. Engineer ran nothing itself; no before/after comparison possible (before build gone).
+- Verify: open (15). Checks: P6, P7, Q1, Q2 at 30 FPS; P13 on both routes; Q5 script; Q7 by trace; 60 FPS press at 1.433/1.450; P12 via the public replay scripts; Q8/Q12 under D-029; after-only check that game events are identical between player and trace view apart from `quiet`. Unverifiable parts (no baseline) are listed apart and not counted as pass.
+- Play: open (16), parallel with Verify. Fresh Playtester, player-visible information only; clarity judged at 60 FPS.
+- Review: planned. `game-director` judges whether the intent was met.
+- Build identity: QA's earlier id `b62005468da6`, an earlier packet sha `aa28af2ce710`, and the latest Build-check test output shows `3951a3656940`. QA reports the id each tool shows and whether they are the same kind.
+- Budget: 15 of 17 used after this Route. Verify and Play use the last two. The Route after them and Review exceed it, so that Route may add only a `game-director` scope cut or an Owner cost escalation; planned steps may still be opened.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Diagnose | game-designer | diagnose-experience | done | 02-game-designer-to-studio.md |
+| 2 | Decide | game-director | make-decision | skipped (no option changes dash rules or direction) | — |
+| 3 | Design | game-designer | write-design-spec | done | 04-game-designer-to-studio.md |
+| 4 | Build | gameplay-engineer | implement-change | done | 08-gameplay-engineer-to-studio.md |
+| 5 | Verify | qa | verify-change | done (fail at 30 FPS; spec questions) | 10-qa-to-studio.md |
+| 6 | Design (return) | game-designer | write-design-spec | done (D-029) | 12-game-designer-to-studio.md |
+| 7 | Build (fixes) | gameplay-engineer | implement-change | done (partial; comparison not possible) | 14-gameplay-engineer-to-studio.md |
+| 8 | Verify (re-check) | qa | verify-change | open | 15-studio-to-qa.md |
+| 9 | Play | playtester | playtest-session | open (parallel with 8) | 16-studio-to-playtester.md |
+| 10 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+After Build (14, partial): the legacy rule path now prints the refusal with no game change. Nothing else is missing for the Role, and the before/after comparison cannot be made, so QA does an after-only check and lists it as unverifiable. QA (15) and a fresh Playtester (16) open in parallel. The budget runs out after them.
+
+## Next action
+
+Start Steps 15 and 16 in parallel: `qa` from `15-studio-to-qa.md` and `playtester` from `16-studio-to-playtester.md`, both addressing the result to `studio`. The next Route waits for both. If the budget is used by then, it may open Review as a planned step or add only a `game-director` scope cut.
+
+Message to the Owner (ja): エンジニアの修正が完了しました。ルール操作でダッシュが拒否されたときの表示と説明文を更新し、既存の試験180件は成功しています。次にQAによる再検証と、実装を知らないプレイテスターによる体験確認を並行して行います。操作回数の予算（17）はこの2つで使い切るため、その後は範囲を絞るかご相談します。
+
+## Outcome
+
+(open)
+>>>END
+
+<<<FILE goals/G-003-dash-availability-clarity/15-studio-to-qa.md
+---
+kind: handoff
+goal: G-003
+seq: 15
+from: studio
+to: qa
+stage: Verify
+outcome: routed
+---
+# 15: studio → qa — Re-verify the dash availability display against the D-029 spec
+
+## Task
+
+Verify the current build in `repo/` against the acceptance criteria in `design/dash-availability.md` as ruled by D-029, and report pass/fail per criterion. Address the result to `studio`.
+
+## Context
+
+Goal G-003: the Owner finds it unclear when dash can be used again. The display and wording were changed (not dash rules or timing). Your earlier verification (10) failed at 30 FPS because the spec was ambiguous; the designer then ruled in D-029 (30 FPS tolerance 0.90 s; public-driver pictures after dash messages; rule-driven refusals print; baseline-free Q8/Q12 evidence). A fix Build followed.
+
+## Findings
+
+Facts about the build, not reasoning:
+
+- Files changed in this round: `repo/play.py`, `repo/manual.md`, `repo/public-driver.md`, and the new `repo/tests/test_dash_refusal.py`.
+- Intended behavior change: a dash refused by a legacy rule press prints `dash not ready — …`, so `text "not ready"` can be used in rules. `Game` was not meant to change.
+- The runtime's Build check ran `python3 -m unittest discover -s tests`: 180 tests, OK. The new timing assertions (51 frames at 60 FPS, 27 frames at 30 FPS start-to-start) were taken from your earlier measurements.
+- The "before" build no longer exists, so no before/after comparison can be made.
+
+## Decisions already made
+
+- D-028: the dash indicator is shown on the legacy route too (including room 5).
+- D-029: 30 FPS tolerance (0.90 s, ready at 1.500 s for a dash at 0.6 s), public-driver pictures after dash messages, rule-driven refusals print, Q8/Q12 evidence without a baseline.
+
+## Constraints
+
+- Dash rules and timing must be unchanged; the game must play correctly at 30 and 60 FPS.
+- Verify from the spec, the acceptance criteria and the build, not from the implementer's explanation.
+- Do not widen scope: other issues you find are reported, not fixed or judged here.
+
+## Open questions
+
+- Which source id does each tool show (`summary:` blocks, `bots.py` header), and are they the same kind of id? Report each value as shown.
+
+## Expected output
+
+A pass/fail report to `studio` (kind handoff, `to: studio`), covering:
+
+- P6, P7, Q1, Q2 at 30 FPS against 0.90 s.
+- P13 on both routes (legacy rules and public driver), for both attack and dash refusals.
+- The Q5 script, and Q7 by trace.
+- The 60 FPS press at 1.433 s and 1.450 s.
+- P12 via the public replay scripts.
+- Q8 and Q12 under D-029.
+- An after-only check that game events are identical between the player view and the trace view, apart from the display-only `quiet` field.
+- The full test run: `python3 -m unittest discover -s tests`, with the count.
+
+List anything that cannot be verified (e.g., no baseline) in a separate section. Do not count it as pass. Give reproduction commands for any failure. Say plainly what your means cannot show.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: design/dash-availability.md, repo/manual.md, repo/public-driver.md, repo/play.py, repo/tests/test_dash_refusal.py, project.md#constraints
+- Decisions: decisions/D-028-dash-indicator-on-legacy-route.md, decisions/D-029-g003-spec-rulings.md
+- Previous handoff: goals/G-003-dash-availability-clarity/12-game-designer-to-studio.md
+>>>END
+
+<<<FILE goals/G-003-dash-availability-clarity/16-studio-to-playtester.md
+---
+kind: handoff
+goal: G-003
+seq: 16
+from: studio
+to: playtester
+stage: Play
+outcome: routed
+---
+# 16: studio → playtester — Play the build as a player and report what you can tell
+
+## Task
+
+Play the current build as a player would, using only what the game shows you and the player manual, and report your observable experience. Address the result to `studio`.
+
+## Context
+
+Lantern Depths is a short-session top-down action roguelite played here through a text view and input scripts. Players are action players who like short, intense runs, are comfortable with dodging and spacing, dislike memorizing combo lists, and mostly use a gamepad.
+
+## Findings
+
+Nothing from implementation is given. To run the build, work in `repo/`. The manual `repo/manual.md` explains the controls, the script format and how to choose the frame rate. Play with `python3 play.py --view player {script}`, where `{script}` is an input script you write. Do not use the trace view or read source code, tests or design documents.
+
+Play focus: pay attention to how you use movement and dash during fights, and what you can tell about your options at each moment. Play mainly at 60 FPS, and run at least one short session at 30 FPS.
+
+## Decisions already made
+
+None.
+
+## Constraints
+
+- Report only what a player could observe. Do not guess at causes or at how the game is built.
+- Use only player-visible material: the game's output and `repo/manual.md`.
+- Say plainly what you could not observe with the means you have.
+
+## Open questions
+
+None.
+
+## Expected output
+
+An observation report to `studio` (kind handoff, `to: studio`): what you did, with the scripts you used, what the game showed, where you were unsure what you could do or when, and where you had to guess or try something just to find out. Quote the game's text where it matters.
+
+## Load
+
+- Role: studio/roles/playtester.md
+- Skills: studio/skills/playtest-session.md
+- Project: project.md#player-profile, repo/manual.md
+- Decisions: none
+- Previous handoff: none
+>>>END

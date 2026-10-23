@@ -61,4 +61,5 @@ Step; the packet is the only input. The manual operations above remain valid.
   new rooms in the measurement: `tests/test_phase10.py`; `partial` and the build check:
   `tests/test_phase11.py`; Step context requests and directory listings: `tests/test_phase12.py`;
   Goal budgets and closing Resumes: `tests/test_phase13.py`; a budgeted Goal run to Close:
-  `tests/test_phase14.py`; Phases 5-14 need `bwrap`).
+  `tests/test_phase14.py`; build file names for build-writing Steps: `tests/test_phase15.py`;
+  Phases 5-15 need `bwrap`).

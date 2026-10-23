@@ -1,0 +1,139 @@
+Build is done and the QA Handoff is composed without the Sender assessment. I also updated `goal.md`.
+
+<<<FILE goals/G-003-dash-availability-clarity/09-studio-to-qa.md
+---
+kind: handoff
+goal: G-003
+seq: 9
+from: studio
+to: qa
+stage: Verify
+outcome: routed
+---
+# 09: studio → qa — Verify the dash availability display (criteria P1–P12, Q1–Q12) at 30 and 60 FPS
+
+## Task
+
+Verify the built change against the acceptance criteria in `design/dash-availability.md` (sections 5 and 6: P1–P12 and Q1–Q12). Run every applicable check at both 30 and 60 FPS. Give a pass/fail verdict per criterion, and an overall verdict. Report any regression.
+
+## Context
+
+Goal G-003: the Owner said it is unclear when dash can be used again. Diagnose and Design are done, and the spec is `design/dash-availability.md` (D-028). Build has now changed the player-facing display. Dash rules, timing, inputs and game results must stay identical (Q8). Verify the build from the spec, the criteria and the running build.
+
+## Findings
+
+Surfaces that changed, to exercise (what, not why it should work):
+
+- **Legacy route, player view:** the `[t s] hearts n/3` line ends with a `— dash: …` field. Event text covers an accepted dash (`you dash <dir> — usable again in …`), a refused dash (`dash not ready — <R> s left`, optionally `(dashing)` or `(hit-stun)`), and `dash ready`. A `dash_ready` event is logged once per dash.
+- **Legacy trace view:** the state line gains `dash_cooldown=`.
+- **Public driver (`mode run` / `mode room`):** the status line carries the dash field while the state is `combat`, including when paused. A `text "dash ready"` rule is available.
+- **`repo/manual.md`:** the Dash line, a `Dash status` section and a `text "dash ready"` example.
+- **Tests:** a new `tests/test_dash_display.py`. Do not rely on it as evidence. Verify independently.
+
+Points to confirm or decide on observation, with a verdict for each:
+
+1. **Pictures in the public driver.** Spec 3.3 says the accepted-dash and refusal messages get no extra picture. Check what the public driver prints for these messages, and whether it contradicts the spec. State it plainly as a difference or as conforming.
+2. **Quiet refusals.** Check whether `text "not ready"` fires for refusals from scripted presses and whether refusals from held-button reaction rules are silent. Compare this with what the spec and manual promise.
+3. **Other ignored inputs.** They should still print `(nothing happens)`.
+4. **Open observations, Q3–Q5 (record what you see; do not assume).**
+   - Q3: a hit taken during the cooldown.
+   - Q4: attack recovery against a dash.
+   - Q5: room-transition and room-entry state.
+5. **Q7.** The displayed state, the `ready` reading the bots use, and the actual acceptance of a press must agree, including at 30 FPS and under float residue.
+6. **Q8.** Compare game results against the old outputs (or a run with the dash field, dash text and `dash ready` lines and pictures stripped). Results must be identical. If no earlier build exists, say so and use the strongest available comparison.
+
+## Decisions already made
+
+- D-001: no new inputs (attack, dash, pause only).
+- D-028: the dash indicator is shown on the legacy route too, including room 5.
+- D-027: G-002 is stopped, so its unfinished verification is out of scope here.
+
+## Constraints
+
+- Both 30 and 60 FPS apply (project constraint). Timing tolerance is the spec's (about ±1 frame).
+- Run the build through the project's commands only: tests `python3 -m unittest discover -s tests`, play `python3 play.py --view player {script}`, trace `python3 play.py --view trace {script}`, bots `python3 bots.py {script}`, all from `repo/`.
+- Build under test: `repo/`, sha aa28af2ce710 as stated in the packet. Record the source id your run reports.
+- Do not change the game or the spec. A fault goes back as a defect report. Behavior the spec does not define goes back as an open question.
+
+## Open questions
+
+- The behaviors in points 1–2 and the Q3–Q5 observations above need a QA verdict. If the spec is silent or contradictory on any, say so exactly.
+
+## Expected output
+
+A verification report in Findings of your outgoing Handoff: per-criterion pass/fail with the script or command used, FPS, and the evidence, plus regressions and unverified items with the reason. Address the result to `studio`, because the independent Play step follows and the Studio composes its Handoff. Set `outcome` to `pass` or `fail`.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: design/dash-availability.md, repo/manual.md, repo/public-driver.md, project.md#constraints, build in repo/ (run commands in project.md)
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-028-dash-indicator-on-legacy-route.md
+- Previous handoff: none (the Build report holds the implementer's reasoning, which QA must not receive)
+>>>END
+
+<<<FILE goals/G-003-dash-availability-clarity/goal.md
+---
+kind: goal
+id: G-003
+project: lantern-depths
+status: active
+created: 2026-10-23
+budget: 17
+---
+# G-003: Make it clear when dash can be used again
+
+## Owner request
+
+> ダッシュがいつまた使えるのか分かりにくい。分かるようにしてほしい
+
+## Interpretation
+
+Success condition (qualitative): a player using only what the build shows them (text player view and `repo/manual.md`) can tell, at any moment, whether dash is available now, and when it is not, when it will be available again. They no longer have to guess or press dash to find out.
+
+This is an experience (readability) Goal. The dash rules themselves (recovery length, invulnerability, input set) are assumed to stay as they are. Changing them would be a different Goal.
+
+Out of scope:
+- Rebalancing dash or combat.
+- New input buttons (D-001).
+- Reopening G-002 (stopped by D-027) or its unfinished verification.
+- Any other readability issue the work happens to find (these become proposed Goals).
+
+## Unknowns
+
+- Observe: skipped. The Owner's report is the first-hand observation, and Diagnose established the cause from the player-view output.
+- Diagnose: done (02). The cause is missing information, not rules.
+- Decide: skipped. A+B+C change display and wording only. It reopens if Verify shows the real cooldown differs between situations in a way that cannot be documented as is (Q3 hit during cooldown, Q4 attack recovery).
+- Design: done (04, `design/dash-availability.md`, D-028). Cooldown starts at dash end (0.85 s start to start, observed at 60 FPS). Still to be confirmed by QA: after a hit (Q3), attack recovery vs dash (Q4), room-transition clear (Q5), 30 FPS.
+- Plan: skipped. It becomes tentative only if Verify finds a timing or simulation change across systems.
+- Build: done (08). Display on both routes and manual text built; the Build check ran 173 tests OK. Possible spec/build difference: the public driver prints a picture for accepted-dash and refusal messages, where spec 3.3 says none. QA is to judge it (Design decides if the spec must change).
+- Verify: open (09). QA runs P1–P12 and Q1–Q12 at 30 and 60 FPS, including the Q8 comparison with the dash field and text stripped.
+- Play: planned. An independent playtester judges from player-visible output only, using the manual.
+- Review: planned. `game-director` judges whether the intent was met.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Diagnose | game-designer | diagnose-experience | done | 02-game-designer-to-studio.md |
+| 2 | Decide | game-director | make-decision | skipped (no option changes dash rules or direction) | — |
+| 3 | Design | game-designer | write-design-spec | done | 04-game-designer-to-studio.md |
+| 4 | Build | gameplay-engineer | implement-change | done | 08-gameplay-engineer-to-studio.md |
+| 5 | Verify | qa | verify-change | open | 09-studio-to-qa.md |
+| 6 | Play | playtester | playtest-session | planned | — |
+| 7 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+After Build (08, done; Build check 173 tests OK): the result fits the plan, so Verify follows with no added stage. The QA Handoff omits the Sender assessment and asks QA to judge the public-driver picture difference and Q3–Q5, Q7, Q8 by observation.
+
+## Next action
+
+Start Step 9: `qa` runs Verify from `09-studio-to-qa.md`, addressing the result to `studio`. The Studio Route follows and composes the Playtester Handoff from player-visible information only.
+
+Message to the Owner (ja): ダッシュ表示の実装が完了し、既存の試験も通りました。次は独立したQAが、30・60FPSの両方で仕様どおりに表示されるか、ゲームの結果が変わっていないかを確認します。
+
+## Outcome
+
+(open)
+>>>END

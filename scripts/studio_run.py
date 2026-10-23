@@ -808,7 +808,9 @@ def build_step(project, gdir, handoff):
     for entry in load_entries(text):
         if entry != rel:
             packet.add_entry(project, entry, policy["strip_sections"])
-    for label, listing in directory_listings(project, text, role):
+    build = project_meta(project).get("build")
+    writes_build = [build] if build and "@build" in policy["writes"] else []
+    for label, listing in directory_listings(project, text, role, writes_build):
         packet.add(label, listing)
     templates = (
         ["handoff"]
@@ -969,13 +971,15 @@ def unseen(gdir, seen):
 LISTING_MAX = 80
 
 
-def directory_listings(project, text, role):
+def directory_listings(project, text, role, always=()):
     """A Load entry that names a directory (e.g. "the build in repo/") brings no file. List the
     names of the files in it that the Role may load, so the Step can ask for them with @need.
+    Directories in `always` (the build, for a Role that writes it) are listed in any case.
     """
     policy, pmeta, listings = role_policy(role), project_meta(project), []
+    found = re.findall(r"[\w.-]+(?:/[\w.-]*)+", section(parse(text)[1], "Load"))
     for token in dict.fromkeys(
-        re.findall(r"[\w.-]+(?:/[\w.-]*)+", section(parse(text)[1], "Load"))
+        [t.rstrip("/") for t in found] + [a.rstrip("/") for a in always]
     ):
         folder, _ = resolve(project, token.rstrip("/"))
         if not folder.is_dir():

@@ -1,0 +1,5 @@
+<<<FILE @need
+repo/play.py
+repo/bots.py
+repo/tests/test_split_c.py
+>>>END

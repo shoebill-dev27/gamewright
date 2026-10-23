@@ -1,0 +1,452 @@
+The dash display is built across `game.py`, `play.py`, `run_driver.py` and the manual, but I executed nothing, so there is no sha and no test result yet. The runtime's Build check will supply those. `game.py` is now edited with EDIT blocks only, as the validation feedback required.
+
+<<<EDIT repo/game.py
+<<<<<<< SEARCH
+DIRECTIONS = {"left": (-1, 0), "right": (1, 0), "up": (0, -1), "down": (0, 1)}
+=======
+DIRECTIONS = {"left": (-1, 0), "right": (1, 0), "up": (0, -1), "down": (0, 1)}
+
+
+def dash_seconds(r):
+    """Seconds to usable as shown to the player (G-003): one decimal, rounded UP with a 1 ms
+    tolerance, never below 0.1 while a dash would still be refused."""
+    return max(1, math.ceil((r - 0.001) * 10)) / 10
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        self.dash_left = self.dash_cooldown = 0.0
+=======
+        self.dash_left = self.dash_cooldown = 0.0
+        self.dash_pending = False  # a dash was used and its "dash ready" is not yet announced
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+            self.log("ignored", action=action, reason="stunned")
+=======
+            if action == "dash":
+                self.log(
+                    "ignored", action=action, reason="stunned",
+                    wait=self.dash_wait(), why=self.dash_why(),
+                )
+            else:
+                self.log("ignored", action=action, reason="stunned")
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+            self.log("ignored", action=action, reason="dash not ready")
+=======
+            self.log(
+                "ignored", action=action, reason="dash not ready",
+                wait=self.dash_wait(), why=self.dash_why(),
+            )
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+            self.log("dash", direction=direction or _name(self.facing))
+=======
+            self.dash_pending = True
+            self.log("dash", direction=direction or _name(self.facing))
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        self._update_shots(dt)
+        self._resolve_result()
+=======
+        self._update_shots(dt)
+        self._resolve_result()
+        self._announce_dash_ready()
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    def _resolve_result(self):
+=======
+    # --- Dash availability (G-003; display only, no rule is changed) --------------------------
+
+    def dash_state(self):
+        """active | wait | ready, using exactly the conditions under which press("dash") refuses."""
+        if self.dash_left > 0:
+            return "active"
+        if self.dash_cooldown > 0 or self.stun_left > 0:
+            return "wait"
+        return "ready"
+
+    def dash_wait(self):
+        """Seconds until a dash press would be accepted (no new dash, no new hit)."""
+        if self.dash_left > 0:
+            return self.dash_left + DASH_COOLDOWN
+        return max(self.dash_cooldown, self.stun_left)
+
+    def dash_why(self):
+        """Reason suffix for a refusal: dashing, hit-stun, or '' for the plain cooldown."""
+        if self.dash_left > 0:
+            return "dashing"
+        if self.stun_left > self.dash_cooldown:
+            return "hit-stun"
+        return ""
+
+    def _announce_dash_ready(self):
+        if (
+            self.dash_pending
+            and self.outcome is None
+            and self.hearts > 0
+            and self.dash_state() == "ready"
+        ):
+            self.dash_pending = False
+            self.log("dash_ready")
+
+    def _resolve_result(self):
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/play.py
+<<<<<<< SEARCH
+    ROOM_W,
+    Game,
+)
+=======
+    ROOM_W,
+    DASH_COOLDOWN,
+    DASH_TIME,
+    Game,
+    dash_seconds,
+)
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+            show = show or kind in ("hurt", "windup", "aim")
+=======
+            show = show or kind in ("hurt", "windup", "aim", "dash_ready")
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+class Player:
+=======
+def dash_field(g):
+    """The dash status appended to the hearts line (G-003). Empty on terminal screens."""
+    if g.outcome is not None or g.hearts <= 0:
+        return ""
+    state = g.dash_state()
+    if state == "ready":
+        return " — dash: ready"
+    if state == "active":
+        return " — dash: active"
+    return f" — dash: {dash_seconds(g.dash_wait()):.1f} s"
+
+
+class Player:
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+            return f"you dash {details['direction']}"
+=======
+            return (
+                f"you dash {details['direction']} — usable again in "
+                f"{dash_seconds(DASH_TIME + DASH_COOLDOWN):.1f} s"
+            )
+        if kind == "dash_ready":
+            return "dash ready"
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        if kind == "ignored" and not details.get("quiet"):
+            return "(nothing happens)"
+=======
+        if kind == "ignored" and not details.get("quiet"):
+            if details.get("action") == "dash" and "wait" in details:
+                why = f" ({details['why']})" if details.get("why") else ""
+                return f"dash not ready — {dash_seconds(details['wait']):.1f} s left{why}"
+            return "(nothing happens)"
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        print(f"   [{g.t:.2f} s] hearts {g.hearts}/{HEARTS}")
+=======
+        print(f"   [{g.t:.2f} s] hearts {g.hearts}/{HEARTS}{dash_field(g)}")
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+            f"invulnerable={g.invulnerable} dash_left={g.dash_left:.3f} "
+=======
+            f"invulnerable={g.invulnerable} dash_left={g.dash_left:.3f} "
+            f"dash_cooldown={g.dash_cooldown:.3f} "
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/run_driver.py
+<<<<<<< SEARCH
+        from play import cue_lines, draw
+=======
+        from play import cue_lines, dash_field, draw
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+              f"— {s.state}{' — paused' if s.paused else ''}")
+=======
+              f"— {s.state}{' — paused' if s.paused else ''}"
+              f"{dash_field(g) if s.state == 'combat' else ''}")
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/manual.md
+<<<<<<< SEARCH
+- **Dash**: a quick burst in a direction (or the way you face). You cannot be hurt while dashing.
+=======
+- **Dash**: a quick burst in a direction (or the way you face), 0.25 s. You cannot be hurt while dashing. After a dash it needs 0.6 s before you can dash again, counted from the moment the dash ends. So the next dash can start 0.85 s after the previous one started.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+(for example `text "rears back"`) |
+=======
+(for example `text "rears back"` or `text "dash ready"`) |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+  ends during that lunge.
+=======
+  ends during that lunge.
+
+## Dash status
+
+Every picture shows the dash at the end of the status line (`hearts 3/3 — dash: ready`):
+
+| Shown | Meaning |
+|---|---|
+| `dash: ready` | A dash will work now. |
+| `dash: active` | You are dashing right now. |
+| `dash: 0.4 s` | A dash will work in about 0.4 s, rounded up to a tenth. |
+
+A picture shows the state at the time written in its header; pictures come every half second, so the number can be older than the moment you act. The exact moment is announced: when the dash returns the game prints `dash ready` and a picture. A dash prints `you dash right — usable again in 0.9 s`. A dash that cannot happen prints `dash not ready — 0.3 s left`, with `(dashing)` or `(hit-stun)` if that is the reason. Being hit stops all input for 0.3 s, and a dash pressed then is refused. Entering a room makes the dash ready. `dash ready` is printed only when a dash was used before it. Reaction rules can use `text "dash ready"`. Clear and end screens show no dash field.
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE repo/tests/test_dash_display.py
+"""G-003: dash availability display (field, messages, dash ready). Display only; no rule changes."""
+
+import contextlib
+import io
+import re
+import sys
+import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+import play  # noqa: E402
+from game import Game, dash_seconds  # noqa: E402
+
+
+def player(script):
+    setup, inputs, rules = play.read_script(script)
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        play.play(setup, inputs, "player", rules)
+    return out.getvalue()
+
+
+def step_until(game, predicate, limit=10.0):
+    for _ in range(round(limit * game.fps)):
+        game.step()
+        if predicate(game):
+            return True
+    return False
+
+
+SCRIPT_P = (
+    "room empty\nfps {fps}\n0.6 dash right\n0.7 dash right\n1.0 dash right\n"
+    "1.4 dash right\n1.5 dash right\nend 3\n"
+)
+
+
+class RoundingTest(unittest.TestCase):
+    def test_rounds_up_with_tolerance(self):
+        self.assertEqual(dash_seconds(0.45), 0.5)
+        self.assertEqual(dash_seconds(0.6), 0.6)
+        self.assertEqual(dash_seconds(0.85), 0.9)
+        self.assertEqual(dash_seconds(0.05), 0.1)
+        self.assertEqual(dash_seconds(1e-12), 0.1)
+
+
+class LegacyDisplayTest(unittest.TestCase):
+    def test_script_p_at_both_rates(self):
+        for fps in (30, 60):
+            out = player(SCRIPT_P.format(fps=fps))
+            self.assertIn("hearts 3/3 — dash: ready", out, fps)
+            self.assertIn("you dash right — usable again in 0.9 s", out, fps)
+            self.assertIn("dash not ready — 0.8 s left (dashing)", out, fps)
+            self.assertIn("dash not ready — 0.5 s left\n", out, fps)
+            self.assertIn("dash not ready — 0.1 s left\n", out, fps)
+            self.assertTrue(re.search(r"\[1\.00 s\] hearts 3/3 — dash: 0\.5 s", out), fps)
+            lines = out.splitlines()
+            ready = [l for l in lines if l.endswith("  dash ready")]
+            self.assertEqual(len(ready), 2, fps)  # after the first dash and after the 1.5 s dash
+            self.assertTrue(
+                any(l.strip().startswith("1.500") and "you dash right" in l for l in lines), fps
+            )
+            first = lines.index(ready[0])
+            self.assertIn("dash: ready", lines[first + 1], fps)
+
+    def test_no_dash_ready_without_a_dash(self):
+        for fps in (30, 60):
+            out = player(f"room empty\nfps {fps}\nspawn grub 8.5 4\nend 3\n")
+            self.assertIn("YOU ARE HIT", out, fps)
+            self.assertFalse(any(l.endswith("  dash ready") for l in out.splitlines()), fps)
+
+    def test_active_field(self):
+        out = player("room empty\n0.45 dash right\nend 1\n")
+        self.assertIn("dash: active", out)
+
+    def test_text_rule_on_dash_ready(self):
+        out = player('room empty\n0.6 dash right\nwhen text "dash ready" then dash left\nend 4\n')
+        self.assertIn("you dash left", out)
+
+    def test_terminal_picture_has_no_field(self):
+        out = player("room empty\nspawn runner 9 4\n0 attack\nend 3\n")
+        self.assertIn("room cleared", out)
+        self.assertNotIn("room cleared — dash", out)
+
+
+class GameStateTest(unittest.TestCase):
+    def test_hit_stun_refusal_reason(self):
+        for fps in (30, 60):
+            game = Game(fps=fps, room="empty")
+            game.spawn("grub", 8.5, 4)
+            self.assertTrue(step_until(game, lambda g: any(k == "hurt" for _, k, _ in g.events)))
+            game.press("dash", "left")
+            _, kind, details = game.events[-1]
+            self.assertEqual(kind, "ignored", fps)
+            self.assertEqual(details["why"], "hit-stun", fps)
+            self.assertLessEqual(details["wait"], 0.3 + 1e-9, fps)
+
+    def test_a_hit_does_not_change_the_cooldown(self):  # Q3
+        for fps in (30, 60):
+            game = Game(fps=fps, room="empty")
+            game.press("dash", "left")
+            self.assertTrue(step_until(game, lambda g: any(k == "dash_end" for _, k, _ in g.events)))
+            before = game.dash_cooldown
+            game._hurt("shot", "test")
+            self.assertEqual(game.dash_cooldown, before, fps)
+
+    def test_attack_recovery_does_not_block_a_dash(self):  # Q4
+        game = Game(room="empty")
+        game.press("attack")
+        self.assertGreater(game.recovery, 0)
+        game.press("dash", "left")
+        self.assertEqual(game.events[-1][1], "dash")
+
+    def test_state_matches_press(self):
+        for fps in (30, 60):
+            game = Game(fps=fps, room="empty")
+            game.press("dash", "left")
+            for _ in range(2 * fps):
+                game.step()
+                state = game.dash_state()
+                probe = Game(fps=fps, room="empty")
+                probe.dash_left, probe.dash_cooldown = game.dash_left, game.dash_cooldown
+                probe.stun_left = game.stun_left
+                probe.press("dash", "left")
+                accepted = probe.events[-1][1] == "dash"
+                self.assertEqual(state == "ready", accepted, (fps, game.t))
+
+    def test_dash_ready_logged_once_per_dash(self):
+        for fps in (30, 60):
+            game = Game(fps=fps, room="empty")
+            game.press("dash", "left")
+            for _ in range(3 * fps):
+                game.step()
+            self.assertEqual(sum(1 for _, k, _ in game.events if k == "dash_ready"), 1, fps)
+
+
+class PublicDriverTest(unittest.TestCase):
+    def test_field_and_messages_in_mode_room(self):
+        out = player("mode room\nroom empty\nfps 60\nlimit 3\ndriver-limit 4\n0.6 dash right\n")
+        self.assertIn("— dash: ready", out)
+        self.assertIn("— dash: active", out)
+        self.assertIn("you dash right — usable again in 0.9 s", out)
+        self.assertIn("] dash ready", out)
+
+
+if __name__ == "__main__":
+    unittest.main()
+>>>END
+
+<<<FILE goals/G-003-dash-availability-clarity/08-gameplay-engineer-to-studio.md
+---
+kind: handoff
+goal: G-003
+seq: 8
+from: gameplay-engineer
+to: studio
+stage: Build
+outcome: done
+---
+# 08: gameplay-engineer → studio — Dash availability display built (legacy route and public driver); Studio composes the QA Handoff
+
+## Task
+
+Compose the QA Handoff for G-003 from this report. The change is in `repo/` and `repo/manual.md`. Verification is open: I executed nothing in this step.
+
+## Context
+
+Goal G-003: the Owner said it is unclear when dash can be used again. Step 07 supplied the source files that step 05 lacked. This step implements `design/dash-availability.md` sections 3 and 8 on both routes (D-028). Dash rules, timing, inputs and game results are unchanged.
+
+## Findings
+
+**What was built (display and events only):**
+
+- `repo/game.py` (EDIT blocks only; the previous attempt's both-ways error is fixed):
+  - `dash_seconds(r)`: ceil of `(r − 0.001) × 10` as tenths, at least 0.1.
+  - `Game.dash_state()`: `active`, `wait` or `ready`, using exactly the refusal conditions of `press("dash")`: `dash_left > 0`, `dash_cooldown > 0`, `stun_left > 0`.
+  - `Game.dash_wait()`: R. While active it is `dash_left + 0.6`; otherwise `max(cooldown, stun)`.
+  - `Game.dash_why()`: `dashing`, `hit-stun` when the stun is longer than the cooldown, otherwise empty.
+  - New event `dash_ready`, logged at the end of the frame (after `_resolve_result`) when a dash was used (`dash_pending`) and the state is ready. It is not logged after death or a room clear. A new `Game` per room entry resets it.
+  - The `ignored` event of a dash press now carries `wait` and `why`.
+  - The existing `dash` event is the spec's `dash_start`; `dash_end` already existed. No duplicates were added.
+- `repo/play.py`:
+  - `dash_field(g)`; it is empty on terminal frames.
+  - The legacy `[t s] hearts n/3` line now ends with `— dash: …`.
+  - `describe` text: `you dash <dir> — usable again in 0.9 s`, `dash not ready — <R> s left[ (dashing|hit-stun)]`, `dash ready`.
+  - `dash_ready` triggers an event picture.
+  - The legacy trace state line gains `dash_cooldown=`.
+- `repo/run_driver.py`: the status line gets the field at its end when the state is `combat`, including when paused. Messages come through `Player.describe`, so `mode run` and `mode room` use the same text.
+- `repo/manual.md`: the Dash line, the `Dash status` section and a `text "dash ready"` example, per spec section 8.
+- New `repo/tests/test_dash_display.py`.
+
+**Observed from the code (not run):**
+
+- **Q3 (hit during cooldown).** `_hurt` does not touch `dash_cooldown`. The cooldown end is unchanged and `R = max(cooldown, stun)`, as the spec says. This matches the spec; no escalation. Test: `test_a_hit_does_not_change_the_cooldown`.
+- **Q4 (attack recovery).** The dash branch of `press` does not check `recovery`. Recovery does not block a dash, so no recovery suffix is needed. Test: `test_attack_recovery_does_not_block_a_dash`.
+- **Q5 (room entry).** `RunSession._enter` builds a new `Game`, so cooldown, stun and `dash_pending` are cleared. No `dash ready` is printed at entry, and the entry picture shows `dash: ready`.
+- **Cooldown start.** The cooldown is set to 0.6 at the frame the dash ends, and decrements from the next frame. The documented dash-end start point matches the code.
+- **30 FPS.** Not run. Everything is in seconds on accumulated time, so the spec's ±1 frame applies. The tests are written for both rates.
+
+**Behaviors to be aware of (not decided by me):**
+
+- In the public driver every message already prints a picture. The accepted-dash and refusal messages therefore also get a picture there, as `(nothing happens)` did before. Spec 3.3 says "no extra picture" for them. The legacy route follows the spec. This is a possible spec/build difference for QA to confirm.
+- Refusals caused by reaction rules stay quiet (the existing `quiet` rule for held buttons). `text "not ready"` therefore matches only refusals from scripted presses. `text "dash ready"` works for all.
+- The refusal text applies only to dash presses. Other ignored inputs still print `(nothing happens)`.
+- `dash ready` is emitted at the end of the frame that reaches ready, before the next frame's inputs, so a press at that time is accepted after the line.
+
+**Tests and goldens:**
+
+- Run: none in this step. The runtime Build check supplies `python3 -m unittest discover -s tests` against the built source.
+- Edited: no existing test or golden. I found none that compares the `hearts n/3` line, the dash text or `(nothing happens)` for a dash.
+- Added: `tests/test_dash_display.py`: rounding, script P at 30 and 60 FPS, no `dash ready` without a dash, hit-stun reason, Q3, Q4, state-equals-press, once per dash, the public driver and a `text "dash ready"` rule.
+- sha: not computed (not executed). Take it from the Build check or the `source` line of `bots.py`.
+
+## Decisions already made
+
+- D-001: no new inputs.
+- D-022: the legacy route stays limited; only the display was added.
+- D-028: the indicator is on the legacy route including room 5.
+
+## Constraints
+
+- Game results must be identical with the dash field, dash text and `dash ready` lines and pictures stripped (Q8).
+- Both 30 and 60 FPS apply.
+
+## Open questions
+
+- Public-driver pictures for the accepted-dash and refusal messages (above): confirm whether this is acceptable or Design must decide.
+- Whether the bots' `ready` reading and printed state agree under float residue: QA's Q7 covers it. The display uses the same predicate as `press`.
+
+## Expected output
+
+- The Studio composes the QA Handoff (spec sections 5 and 6, Q1–Q12), stripping Sender assessment.
+- If the Build check reports test failures, route back to gameplay-engineer.
+
+## Sender assessment
+
+Confidence is medium-high on logic and medium on first-run test results, because nothing was executed. Risks: exact printed times in my tests at 30 FPS (they rest on hand arithmetic), and `test_state_matches_press`, which builds probe games from copied timers.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: design/dash-availability.md, repo/game.py, repo/play.py, repo/run_driver.py, repo/manual.md, repo/tests/test_dash_display.py
+- Decisions: decisions/D-028-dash-indicator-on-legacy-route.md
+- Previous handoff: goals/G-003-dash-availability-clarity/07-studio-to-gameplay-engineer.md
+>>>END

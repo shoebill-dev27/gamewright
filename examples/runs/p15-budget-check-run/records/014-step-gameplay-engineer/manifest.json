@@ -1,0 +1,97 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-003-dash-availability-clarity/13-studio-to-gameplay-engineer.md",
+  "sha256": "766f983df17076ae25421362ac20ec2437f30fc9e24378cf1f1007e9eae37016",
+  "bytes": 5138
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md",
+  "sha256": "8a447e66877cd14dfff47ac1b8482ba77c850159c8fb43ec2780e91064869351",
+  "bytes": 1742
+ },
+ {
+  "path": "studio/skills/implement-change.md",
+  "sha256": "a9befd7f1d9e09eb94c51a066f030db88c5061ad1b522d9795e62bc2c242964a",
+  "bytes": 1823
+ },
+ {
+  "path": "design/dash-availability.md",
+  "sha256": "7dc7d417b3aa4be23b60953424b7a66eeae775675b6b30cbc416b36a0e857173",
+  "bytes": 19337
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "2e0311e61caaf32c890085bbd0eac56f732e2f62e1588d957117c1a25927f326",
+  "bytes": 13259
+ },
+ {
+  "path": "repo/public-driver.md",
+  "sha256": "365e4978670f0137716ca49086e9be1a75ed70e832063afe7178b1c245e86e3a",
+  "bytes": 5108
+ },
+ {
+  "path": "repo/game.py",
+  "sha256": "b16dc9459a3416dbabd88349fd3aa747a200229a5ad03c144eaa915d34d67118",
+  "bytes": 23452
+ },
+ {
+  "path": "repo/run_driver.py",
+  "sha256": "43bb1f47df60f5ade6a0ad19394ff5eb45f52c370b7d6d4d25ed2a6c82070c35",
+  "bytes": 15602
+ },
+ {
+  "path": "repo/session.py",
+  "sha256": "2ab7d96e541a5c6ba02d865a480140ef950d49ed58af0825062143f866ea7db8",
+  "bytes": 5013
+ },
+ {
+  "path": "repo/source_id.py",
+  "sha256": "9923feba4aef0281e4dd952dbdc5595dfee118d00d8dee61cdd70257472aedfa",
+  "bytes": 873
+ },
+ {
+  "path": "repo/tests/test_dash_display.py",
+  "sha256": "778e2adc895b6a3872c1369373af7c8b06b48c550ed8a254a8f68cadcca78a3b",
+  "bytes": 5787
+ },
+ {
+  "path": "repo/tests/test_run_driver.py",
+  "sha256": "c3d003b6f94022b3eac118cd8413245e2931be14383d60d8b18b200177d3ade1",
+  "bytes": 3429
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "05a33c6f8e50caa20ddf4f3844885137c4261ad4a3e5f3db3eb1b5312b129a9f",
+  "bytes": 237
+ },
+ {
+  "path": "decisions/D-001-one-button-combat.md",
+  "sha256": "c7fe9ca23a369707a5ab439e44789a25a0a8544efce4703a676f8fd180f82ec1",
+  "bytes": 798
+ },
+ {
+  "path": "decisions/D-028-dash-indicator-on-legacy-route.md",
+  "sha256": "f18c4c1e8e324a1a11689b49471b46cf5c0cd19ffd15659d0029154116d165ac",
+  "bytes": 1748
+ },
+ {
+  "path": "decisions/D-029-g003-spec-rulings.md",
+  "sha256": "524a4a444d45573b71f680a9d25ad738dc0c46e38da885ba23db4ff653d639e5",
+  "bytes": 2822
+ },
+ {
+  "path": "goals/G-003-dash-availability-clarity/12-game-designer-to-studio.md",
+  "sha256": "a98763a830c70981eec372f1137c7c5ae46c3de35acccc4afa15cd554d70db3b",
+  "bytes": 8486
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ }
+]

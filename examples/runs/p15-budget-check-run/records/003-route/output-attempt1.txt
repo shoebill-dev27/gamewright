@@ -1,0 +1,127 @@
+<<<FILE goals/G-003-dash-availability-clarity/goal.md
+---
+kind: goal
+id: G-003
+project: lantern-depths
+status: active
+created: 2026-10-23
+budget: 17
+---
+# G-003: Make it clear when dash can be used again
+
+## Owner request
+
+> ダッシュがいつまた使えるのか分かりにくい。分かるようにしてほしい
+
+## Interpretation
+
+Success condition (qualitative): a player using only what the build shows them (text player view and `repo/manual.md`) can tell, at any moment, whether dash is available now, and when it is not, when it will be available again. They no longer have to guess or press dash to find out.
+
+This is an experience (readability) Goal. The dash rules themselves (recovery length, invulnerability, input set) are assumed to stay as they are. Changing them would be a different Goal.
+
+Out of scope:
+- Rebalancing dash or combat.
+- New input buttons (D-001).
+- Reopening G-002 (stopped by D-027) or its unfinished verification.
+- Any other readability issue the work happens to find (these become proposed Goals).
+
+## Unknowns
+
+- Observe: skipped. The Owner's report is the first-hand observation, and Diagnose established the cause from the player-view output.
+- Diagnose: done (02). The cause is missing information, not rules. The player view carries no dash state. A refused dash prints only `(nothing happens)`. Nothing marks the moment dash returns. The manual and spec are silent on the cooldown and its start point. Recommended options: A (persistent status) + B (refusal and ready messages) + C (manual and spec text).
+- Decide: skipped. All options change display and wording only, not dash rules, inputs, scope or a pillar. It reopens if Design finds the real cooldown differs between situations in a way that cannot be documented as is.
+- Design (open): specify the A+B+C wording, the countdown refresh and the ready event. Also fix the cooldown start point as documented behavior, and set acceptance criteria in seconds (30 and 60 FPS). Open items: the after-hit and room-transition cases, the boss room, and the legacy route (D-022).
+- Plan: skipped. It becomes tentative if Design or Build shows a timing or simulation change across systems.
+- Build, Verify: planned (Verify is always after Build).
+- Play: planned. An independent playtester judges whether availability can be read in play.
+- Review: planned. `game-director` judges whether the intent was met.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Diagnose | game-designer | diagnose-experience | done | 02-game-designer-to-studio.md |
+| 2 | Decide | game-director | make-decision | skipped (no option changes dash rules or direction) | — |
+| 3 | Design | game-designer | write-design-spec | open | 03-studio-to-game-designer.md |
+| 4 | Build | gameplay-engineer | implement-change | planned | — |
+| 5 | Verify | qa | verify-change | planned | — |
+| 6 | Play | playtester | playtest-session | planned | — |
+| 7 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+After Diagnose (02): the cause is missing display information, and no option touches dash rules, inputs or scope. Decide is therefore skipped, and Design opens with options A+B+C. Observe and Plan stay skipped.
+
+## Next action
+
+Start Step 3: `game-designer` runs Design from `03-studio-to-game-designer.md`. The Studio Route follows it, opening Build for `gameplay-engineer`.
+
+Message to the Owner (ja): 診断が完了しました。原因はダッシュのルールではなく、画面に使用可否の情報がないことです（状態表示なし、拒否時は「(nothing happens)」のみ、再使用可能の通知なし、マニュアルに記載なし）。常時表示・拒否と復帰のメッセージ・マニュアル記載を組み合わせる方針で、ダッシュの性能や入力は変えないため、Director判断は省略しました。次はゲームデザイナーが仕様化します。
+
+## Outcome
+
+(open)
+>>>END
+
+<<<FILE goals/G-003-dash-availability-clarity/03-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-003
+seq: 3
+from: studio
+to: game-designer
+stage: Design
+outcome: routed
+---
+# 03: studio → game-designer — Specify dash availability display (options A+B+C)
+
+## Task
+
+Write the design spec that lets a player tell from the build's own output whether dash is available now and, if not, when it returns. Cover the persistent status (A), the refusal and ready messages (B), and the manual and spec text (C), with player-observable acceptance criteria in seconds.
+
+## Context
+
+Goal G-003 (Owner: 「ダッシュがいつまた使えるのか分かりにくい。分かるようにしてほしい」). Diagnose (02) found that the cause is missing information. The player view shows only `hearts n/3`. A refused dash prints `(nothing happens)`. Nothing marks the moment dash returns. The manual and `design/combat.md` do not say when the 0.6 s cooldown starts. Dash rules, inputs and timing stay as they are. The Studio skipped Decide because every option changes display and wording only.
+
+## Findings
+
+Taken from 02, which you wrote. Read it for the full probe table.
+
+- The probe at 60 FPS accepted a dash at 0.5 s and refused one at 0.7 s after the start. The next one was accepted 1.0 s after the start. The cooldown probably runs from the dash end, which would make the dash ready about 0.85 s after its start. This is unconfirmed.
+- Periodic pictures come every 0.5 s. That is too coarse to show readiness exactly, so an event on the ready moment is needed.
+- Unchecked: the cooldown after a hit, during enemy wind-ups, and after a room transition.
+
+## Decisions already made
+
+- D-001: attack and dash only; no new input buttons.
+- D-022: the legacy route is intentionally limited. Check whether it needs the indicator before you include it.
+
+## Constraints
+
+- Dash recovery length, invulnerability and input set do not change. Document what the build does.
+- Express all timing in seconds, so the criteria hold at 30 and 60 FPS.
+- Reuse the existing text view and message system. Add no new input.
+- Acceptance criteria must be observable in the player view, from the player's side. A player who has only the screen and the manual must be able to check them.
+- Keep the change to dash availability. Dash invulnerability display and queued inputs are out of scope (proposed Goals).
+
+## Open questions
+
+- Settle the cooldown start point. You may run the trace view (`run_trace`) to confirm it, and to check the after-hit, wind-up and room-transition cases. Then record it as documented behavior.
+- Choose the exact wording and the countdown granularity. The pictures come every 0.5 s, so decide how the status avoids misleading between pictures. Decide whether the ready moment emits its own event picture.
+- Say whether the boss room (room 5) and the legacy route show the same indicator.
+- Escalation condition: if the real cooldown differs between situations in a way that cannot be documented as is, do not decide it. Hand back to the Studio with `outcome: question`, so a `game-director` decision can be routed.
+
+## Expected output
+
+- The spec as a design document (suggested `design/dash-availability.md`), plus the needed edits to `design/combat.md` and `repo/manual.md` text, with acceptance criteria. Make the criteria checkable by `qa` from the build, and by a playtester from player-visible output only.
+- Record a Decision only if you choose between real alternatives that constrain later work.
+- Address the result Handoff to `studio`. The Studio will route Build to `gameplay-engineer`, then QA and an independent playtest.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: project.md#vision, project.md#constraints, project.md#art-direction, design/combat.md, repo/manual.md, repo/public-driver.md, design/final-boss-and-continuous-run.md
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-022-g002-v1-supplements.md
+- Previous handoff: goals/G-003-dash-availability-clarity/02-game-designer-to-studio.md
+>>>END

@@ -1,0 +1,106 @@
+I'm running the first round of checks now, and the full pass/fail report will follow once the results are back.
+
+<<<FILE @run/tests
+>>>END
+
+<<<FILE @run/play/P60
+room empty
+fps 60
+0.6 dash right
+0.7 dash right
+1.0 dash right
+1.4 dash right
+1.5 dash right
+end 3
+>>>END
+
+<<<FILE @run/play/P30
+room empty
+fps 30
+0.6 dash right
+0.7 dash right
+1.0 dash right
+1.4 dash right
+1.5 dash right
+end 3
+>>>END
+
+<<<FILE @run/play/P30edge
+room empty
+fps 30
+0.6 dash right
+1.467 dash left
+1.5 dash left
+end 3
+>>>END
+
+<<<FILE @run/play/E60
+room empty
+fps 60
+0.6 dash right
+1.433 dash left
+1.45 dash left
+end 3
+>>>END
+
+<<<FILE @run/trace/T60
+room empty
+fps 60
+0.6 dash right
+1.433 dash left
+1.45 dash left
+end 3
+>>>END
+
+<<<FILE @run/trace/T30
+room empty
+fps 30
+0.6 dash right
+1.467 dash left
+1.5 dash left
+end 3
+>>>END
+
+<<<FILE @run/play/P13leg
+room empty
+fps 60
+when nothing within 20 then dash right
+when text "not ready" then move up
+end 3
+>>>END
+
+<<<FILE @run/play/P13pub
+mode room
+room empty
+fps 60
+limit 3
+driver-limit 4
+when nothing within 20 then dash right
+when text "not ready" then move up
+>>>END
+
+<<<FILE @run/play/P13legAside
+room empty
+fps 60
+spawn grub 10 4
+when see g within 3 then dash toward
+end 3
+>>>END
+
+<<<FILE @run/play/P13pubAside
+mode room
+room empty
+fps 60
+limit 3
+driver-limit 4
+spawn grub 10 4
+when see g within 3 then dash toward
+>>>END
+
+<<<FILE @run/trace/T13leg
+room empty
+fps 60
+when nothing within 20 then dash right
+when text "not ready" then move up
+end 3
+>>>END

@@ -1,0 +1,165 @@
+---
+kind: handoff
+goal: G-001
+seq: 20
+from: qa
+to: studio
+stage: Verify
+outcome: question
+---
+# 20: qa → studio — Build 0.5 (sha 29993eac7bb0) verified against 1–16 and V12; one open item for the designer: a frame-rate-dependent graze at the contact edge
+
+## Task
+
+Report the independent verification of build 0.5 against combat criteria 1–16 and V12, and settle 16e from the new `log on` output.
+
+## Context
+
+All evidence is from runs made in this step (tests, bots with and without `log`, play/trace scripts). No run rounds are left. Anything not run is marked "not run". The verdict is not `pass` yet. Criteria 1–15 and 16a–d pass. For 16e, the walker's differences are explained by bot timing. But a frame-rate-dependent graze at the contact edge exists in the build, shown by a scripted reproduction. The spec does not say whether that is acceptable, so it goes to `game-designer` through the Studio. No criterion has failed for a second time.
+
+## Findings
+
+### A. Per-criterion result
+
+| # | Result | Evidence |
+|---|---|---|
+| 1 Telegraph | pass, 30 and 60 | Trace `c1-stand`: windup at frame 1 (0.033 s at 30, 0.017 s at 60). The lunge starts exactly 0.5 s later (0.533 / 0.517). The first hit lands at 0.667 / 0.633, so cue to hit is 0.633 s / 0.617 s, which is ≥ 0.5 s. The test suite checks the gap at both rates. |
+| 2 Sidestep | pass, 30 and 60 | Trace `c2-side`: the player moves up from 0.1 s to 0.35 s (1.07 tiles at 30, 1.0 at 60). Hearts stay 3 through the first lunge. Later damage in that trace comes from a second lunge the script does not dodge. |
+| 3 Dash | pass, 30 and 60 | Trace `c3-dash-late` (dash at 0.65 s, inside the window): 3 hearts at both rates, `dash` and `dash_end` logged, no `ignored`. The tests dash at offsets 0, 0.25, 0.5 and 0.6 s after the cue at both rates. |
+| 4 Standing still | pass, 30 and 60 | `c1-stand` loses 2 hearts in 3 s at both rates. The test suite checks it at both rates. |
+| 5 Safe window | pass at 60 (test). 30 FPS not run. | `test_recovery_is_safe` and `test_grub_walking_alone_does_not_hurt` run at 60 only. In `game.py`, grub damage happens only in the lunge phase, so I expect the same result at 30, but I did not observe it. Hurt-invulnerability (0.8 s) equals recovery (0.8 s), so trace `c1-stand` cannot isolate it. |
+| 6 Cancel | pass | Trace `c6-kill-windup` at 30 and 60: the runner is defeated in wind-up, the room clears, with no stagger event and no lunge. Swipe during wind-up gives stagger and no lunge (tests, both rates). The two-swipe kill is a 60 FPS test only. |
+| 7 One at a time | pass, 30 and 60 | Test: the maximum number of grubs in wind-up or lunge is 1 at both rates. |
+| 8 Variants | pass | Swipes to defeat 2 / 1 / 4 (60 FPS test; not run at 30). Marks `r` and `G` are drawn (test) and listed in `manual.md`. |
+| 9 Aim cue | pass, 30 and 60 | Room 3 test: aim to spit is 0.6 s ±1 frame. The shot follows the locked line (y stays 4.0 in the spitter test). |
+| 10 Dodge | pass, 30 and 60 | Spitter sidestep test. |
+| 11 Stagger | pass, 30 and 60 | Room 3 test: first shots at 1.8 / 2.6 / 3.4 s ±1 frame, and at most 3 shots in flight over 12 s. See finding C for a 4-spitter observation. |
+| 12 Rooms | pass | `ROOMS` in `game.py` matches the table for all 5 rooms (I read it). The test checks rooms 2, 4 and the brute in room 5. |
+| 13 | pass at each rate | See table B. |
+| 14 | pass at each rate | See table B. |
+| 15 Dash used | pass at each rate | Dodger dashes in rooms 3/4/5: 8/7/11 at 30 FPS, 10/8/14 at 60 FPS. |
+| 16a | pass, with the gaps listed for 5, 6 and 8 | |
+| 16b | pass | See table B. |
+| 16c | pass | The dodger is identical at both rates: 0 hearts lost in every room and 5/5 cleared. |
+| 16d | acknowledged | The walker differs between rates (per room, 30 FPS: 3✗ 2✓ 0✓ 1✓ 3✗; 60 FPS: 3✗ 2✓ 2✓ 2✓ 2✓). |
+| 16e | walker differences: bot timing. Graze: open (see D and E). | |
+| V12 | not assessable | There is no graphical build. The text-view reference timings hold at both rates: wind-up to lunge is exactly 0.5 s, and aim to spit is 0.6 s ±1 frame. The cue appears on frame 1 at both rates. |
+
+### B. Criteria 13/14/15 numbers
+
+The bots ran with `log off`, from `bots.py`, at each rate separately.
+
+| | 30 FPS | 60 FPS |
+|---|---|---|
+| Walker lost, rooms 3–5 (need 3–6) | 0+1+3 = 4 | 2+2+2 = 6 (top of range) |
+| Walker cleared, rooms 3–5 (need ≥ 2) | 2 | 3 |
+| Dodger lost / cleared, rooms 3–5 (need ≤ half the walker's loss; 3/3) | 0 / 3 | 0 / 3 |
+| Camper cleared, rooms 3–5 (must be < walker) | 0 | 0 |
+| Walker lost, rooms 1–2 (need ≥ 1) | 3+2 = 5 | 3+2 = 5 |
+| Dodger lost / cleared, rooms 1–2 (need ≤ 1; both cleared) | 0 / 2 | 0 / 2 |
+
+The walker at 60 FPS sits at exactly 6, the limit of the range. A change of one heart would break 13. This is a tuning note for the designer, not a failure.
+
+### C. Other observations
+
+Neither of these fails a criterion as written.
+
+1. **Shot cap exceeded with four spitters (practice room).** Trace `cap-four-spitters-60` has four spitters. Cues start for three spitters at 4.6 s, and each cap check sees only 2 shots in flight. At 5.2 s all three fire, while the shots from 2.6 s and 3.4 s are still in flight. By my count that is 5 shots in flight; the trace shows the hits at 5.3 s and 6.1 s. The spec text checks the cap only when a cue starts, so this may be intended. Criterion 11 says "never more than 3 in flight", and the 3-spitter room 3 stayed ≤ 3 in the test. No real room has 4 spitters. Question for the designer: is the cap a limit on cue starts or on shots in flight?
+2. **Hit-stun can last one frame longer than 0.3 s.** Several `skipped decision` lines show "0.000 s of stun left" while the bot was still skipped. Examples: 60 FPS camper room 1 at frame 180; 30 FPS camper room 3 at frame 126. I infer that a tiny floating-point residue keeps `stun_left` above 0 for one extra frame. It is within ±1 frame. It shifts one bot decision, and it is a plain float effect, not tied to one frame rate.
+3. **Criterion 6 and 8:** the two-swipe and variant-swipe tests run at 60 FPS only.
+4. **Not run:** the "spitter index not renumbered after a defeat" edge case. No test or trace covers it.
+5. **Edge cases that were run:** grub at distance 0 (trace `edge-dist0`) aims right (+1,0) and shows the cue and line. The cap delay carries forward (trace `cap-four-spitters-60`: shots at 5.2 s instead of 4.2 s, then +2.4 s).
+6. **Manual check:** `manual.md` lists the marks `r` and `G`, the `~` line, both messages, warnings of 0.5 / 0.35 / 0.7 s and the 0.4 s stagger. It matches the spec.
+
+### D. 16e — walker, room 3, 30 vs 60 FPS (`log on`)
+
+**Room 1 at 0.30 s (the first walker difference): fully explained by the log.**
+- The walker swings when `distance < 2.5`. At 0.30 s the player is at (8.0, 2.8) and the grub at (8.0, 0.3) at both rates, so the true distance is exactly 2.5.
+- The logged exact values are 2.5000000000000004 at 30 FPS and 2.4999999999999964 at 60 FPS.
+- So 30 FPS evaluates "not < 2.5" and walks (it swings first at 0.47 s). 60 FPS evaluates "< 2.5" and swings at 0.30 s.
+- The cause is floating-point residue at an exact threshold tie in the bot. The game and the real geometry are the same. This confirms the hypothesis in handoff 16.
+
+**Room 3: positions diverge long before any damage.**
+- Decisions up to 1.05 s are the same action ("walk to spitter"). The decision grid is the same at both rates. The 30 FPS decisions land 0–1 frame later (for example 0.17 vs 0.15 s), so the player keeps its old heading up to 0.033 s longer.
+- Already at 1.20 s the player is at (4.267, 2.933) at 30 FPS and (3.8, 3.4) at 60 FPS.
+- The aim cue is locked on the player's position at its start, so the first shots differ in direction. From the logs: v = (2.28, 1.95) at 30 FPS and v = (1.8, 2.4) at 60 FPS. At 1.80 s the players are 0.47 tile apart.
+- At 60 FPS the walker, at (3.8, 2.2) at 2.10 s, walks left into the shot. The hit at 2.25 s is at distance ≈ 0.37 (player (3.2, 2.2), shot (2.84, 2.12)), and ≈ 0.47 one frame earlier. That is a clear hit, not a graze.
+- At 30 FPS the walker, at (2.933, 3.067) at 2.10 s, is somewhere else, so there is no contact.
+
+**Conclusion:** I found no pair of decisions at the same game time (±1 frame) from the same positions that gave different outcomes. The walker difference comes from bot decision timing, plus the different positions that follow from it. The walker's room 3 difference is not a build defect. The logs are cut at 20000 characters (up to about 9.3 s at 30 FPS). They cover the first divergence and the whole of room 3 at 60 FPS, but not every later decision.
+
+### E. Frame-rate-dependent graze at the contact edge (exists)
+
+**Reproduction.** Shot reach is 0.4. Scripts, run at `fps 30` and `fps 60`, with `python3 play.py --view trace`:
+
+```text
+room empty
+fps 30            # and 60
+spawn spitter 1.04 3.70
+1.3 move up
+1.4 stop
+end 5
+```
+
+| Spitter position | 30 FPS | 60 FPS |
+|---|---|---|
+| (1.04, 3.70) | **no hit**, 3 hearts at 5 s | **hit at 4.100 s**, 2 hearts |
+| (1.00, 3.70) | hit at 4.100 s | hit at 4.117 s |
+| (1.00, 3.73) | hit at 4.100 s | hit at 4.117 s |
+| (1.00, 3.76) | hit at 4.100 s | hit at 4.117 s |
+
+**What happens.** The first shot (spit at 1.8 s) is locked on the player at (8, 4.0), as of the cue start at 1.2 s. The player then stands at (8, 3.6). The shot line passes at a perpendicular distance of about 0.3996 from the player, which is 0.0004 inside the reach of 0.4. Contact is a distance check once per frame (a shot moves 0.1 tile per frame at 30 FPS and 0.05 at 60 FPS). The hit needs a sampled frame within about ±0.017 tile of the closest approach. That window is narrower than the frame step at both rates, so which rate catches it depends on the phase.
+
+**Reading the 16e rule.** The scripted input, the player position and the shot line are identical at both rates, and the outcome differs. This is not a walker-timing effect. 16e defines a build defect as "same decision, same time, same positions, different outcome". Read literally, this matches. But the Timing rule in the spec only guarantees "no tunnelling", and the spec does not say what collision sampling is allowed to do at the reach edge. I do not decide whether it is acceptable.
+
+**Size (derived by my arithmetic, not run).**
+- The effect only exists when the lateral miss is within about 0.003 tile of the 0.4 reach. Misses of 0.4 or more never hit, and misses more than about 0.003 inside always hit at both rates.
+- Grub lunges use reach 0.6 and a step up to 0.27 tile at 30 FPS. The same logic gives a wider band, about 0.015 tile at 30 FPS. I did not test grubs for this.
+- Severity: low. Frequency: only when a player's lateral miss falls in that very narrow band. The effect is a hit or a miss and does not change timing.
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no new input.
+- Designer's rulings on 13–16 and the five spec defaults (handoff 14). They were applied as written.
+
+## Constraints
+
+- This verification used only the spec, the criteria and the build.
+- The game was not edited.
+- Supported frame rates are 30 and 60 FPS.
+
+## Open questions
+
+For `game-designer`, through the Studio:
+
+1. Is the frame-rate-dependent graze (finding E) acceptable for the text build? If yes, 16e passes as ruled and the verdict becomes `pass`. If not, `gameplay-engineer` must change the contact test (for example a swept test between frames) and QA re-verifies. This would be the first failure of 16, so no `technical-director` re-plan is triggered.
+2. Is the shot cap a limit on starting cues (as built) or a hard limit on shots in flight (finding C1)?
+3. The walker at 60 FPS in rooms 3–5 totals exactly 6 hearts, the upper limit of criterion 13. Does the designer want to keep that margin?
+4. Contradictions between `design/combat.md` and `design/combat-cues-visual-spec.md` (reported only, no ruling):
+   - **Lunge line.** `combat.md` says a "thin" orange-red line for the lunge path. The visual spec draws a lane 1.2 tiles wide.
+   - **Spitter glow.** `combat.md` and the text view show the glow starting at 0%. The visual spec requires a floor of at least 30%.
+   - **Grub cue behaviour.** `combat.md` says the grub "flashes" for the whole wind-up. The visual spec says a steady tint with a slight pulse, no strobe, at 3 Hz or less. The lane in the visual spec stays at full strength until the lunge starts and fades during it. The text view removes the line when the lunge starts.
+   - **Text marks.** `combat.md` leaves the `r` / `G` marks open for the graphical build. The visual spec uses silhouette and size instead, which answers the open question.
+
+## Expected output
+
+The Studio routes finding E and open questions 1–3 to `game-designer`. After the ruling:
+- If E is accepted, QA's verdict is `pass`, and the gaps on criteria 5, 6, 8 at 30 FPS can be closed with one more test run.
+- If E is not accepted, the Studio routes to `gameplay-engineer` with the reproduction above.
+
+V12 stays open until a graphical build exists.
+
+## Regression check
+
+- **Existing tests:** `python3 -m unittest discover -s tests` ran 34 tests, all OK. This includes the replaced walker test (13 and 14 at each rate), the dodger agreement test and the two new log tests.
+- **Log on vs off:** the visible results are identical for the camper in all rooms at both rates, and for the walker in rooms 1, 2 and 3 (room 3 from the separate runs) at both rates. The `all30-log` and `all60-log` outputs were cut at 20000 characters (walker rooms 3–5 and the dodger are not in the visible part). The unit test `test_bot_log_adds_state_and_changes_no_result` covers every bot, rooms 1 and 3 and both rates, and passes.
+- **Bots unchanged:** the `log off` numbers equal the table in handoff 16 and the walker/dodger figures in handoff 14 (walker 4 lost / 2 cleared at 30 FPS and 6 lost / 3 cleared at 60 FPS in rooms 3–5, dodger 0 lost).
+- **Log format:** every decision line has frame, grid time, frame time, player position, hearts, stun, nearest enemy with the exact distance, and shots in flight. Heart-loss lines and skipped-decision lines appear as described in `README.md`.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: design/combat.md, design/combat-cues-visual-spec.md, repo/manual.md, repo/README.md, repo/bots.py, repo/tests/test_game.py, repo/game.py, repo/play.py
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-001-combat-monotony/19-studio-to-qa.md

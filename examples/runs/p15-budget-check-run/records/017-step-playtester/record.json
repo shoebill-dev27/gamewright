@@ -1,0 +1,110 @@
+{
+ "op": "Step",
+ "role": "playtester",
+ "goal": "G-003",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "88a769f7-c6c8-40cf-ae90-c75e002e160a",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 9610,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 628,
+    "output_tokens_details": {
+     "thinking_tokens": 237
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 9610,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 628,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 9610,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 9610
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.044724,
+   "attempt": 1,
+   "started": "2026-10-23T19:05:35",
+   "seconds": 8.7,
+   "errors": [],
+   "runs": [
+    "@run/play/fps60",
+    "@run/play/fps30"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "f2feb159-6350-4e2e-bb24-b8172d62022e",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 21824,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 4983,
+    "output_tokens_details": {
+     "thinking_tokens": 1907
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 21824,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 4983,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 21824,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 21824
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.13713,
+   "attempt": 2,
+   "started": "2026-10-23T19:05:44",
+   "seconds": 43.9,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-003-dash-availability-clarity/18-playtester-to-studio.md": "91a1dfef211197b5deb06603f29bd5932eab09cf18740004973dbc6bbf217602"
+ },
+ "decision": {}
+}

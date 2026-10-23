@@ -1,0 +1,78 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-003",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "ca494b84-e2f9-4470-aff4-657baef5d8f8",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 29144,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 6004,
+    "output_tokens_details": {
+     "thinking_tokens": 1833
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 29144,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 6004,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 29144,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 29144
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.17662,
+   "attempt": 1,
+   "started": "2026-10-23T19:01:10",
+   "seconds": 47.2,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-003-dash-availability-clarity/goal.md": "ad772f0a69875acd689da80e6b7ad1f5f3779f23f9bdb28a6b3da73138851d99",
+  "goals/G-003-dash-availability-clarity/15-studio-to-qa.md": "5309f987761dd19ec90956365d8dd91d4b47b50e286f4dfb68833301a73cb2f4",
+  "goals/G-003-dash-availability-clarity/16-studio-to-playtester.md": "b0fb6d2aac8dd97fc78abe35dc59a4581f7878a27e981e0228b73e13b697ca5a"
+ },
+ "decision": {
+  "status": "active",
+  "open": [
+   [
+    "qa",
+    "Verify (re-check)"
+   ],
+   [
+    "playtester",
+    "Play"
+   ]
+  ],
+  "new": [
+   "playtester",
+   "Play"
+  ]
+ },
+ "seen_through_seq": 16
+}

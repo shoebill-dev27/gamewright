@@ -56,7 +56,7 @@ The request and the enlarged packet are recorded.
 
 A Load entry that names a directory (e.g., "the build in `repo/`") brings no file contents: the
 Step's packet lists the names of the files in it that the Role may load, so the Step can ask for
-the ones it needs.
+the ones it needs. A Step whose Role writes the build always gets the names of the build's files.
 
 ## Build runs
 

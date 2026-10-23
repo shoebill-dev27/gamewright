@@ -1,0 +1,29 @@
+{
+ "op": "Run",
+ "goal": "G-003",
+ "operations": [
+  "002-step-game-designer",
+  "003-route",
+  "004-step-game-designer",
+  "005-route",
+  "006-step-gameplay-engineer",
+  "007-route",
+  "008-step-gameplay-engineer",
+  "009-route",
+  "010-step-qa",
+  "011-route",
+  "012-step-game-designer",
+  "013-route",
+  "014-step-gameplay-engineer",
+  "015-route",
+  "016-step-qa",
+  "017-step-playtester",
+  "018-route",
+  "019-step-game-director",
+  "020-route"
+ ],
+ "stop_reason": "done",
+ "status": "done",
+ "owner_reads": "goals/G-003-dash-availability-clarity/goal.md#outcome",
+ "next": null
+}

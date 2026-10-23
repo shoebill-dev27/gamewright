@@ -1,0 +1,144 @@
+---
+kind: handoff
+goal: G-002
+seq: 84
+from: game-director
+to: studio
+stage: Route
+outcome: question
+---
+# 84: game-director → studio — 残工程に必要な継続予算をOwnerへ諮る
+
+## Task
+
+以下のOwner向けEscalationを提示し、追加継続または未達打切りの判断を得る。判断まではAを含む依存Buildを保留する。
+
+## Context
+
+Owner requestは「最後に手応えのあるボス戦がほしい」。D-026はD-025の範囲でbudget 123を承認したが、83時点で87/123 operations、残36である。
+
+82の再計画は必須作業だけで22〜24 Stepを要する。各Step後のRouteを含め44〜48 operationsとなり、残36を8〜12 operations超える。今回の判断、Ownerへの提示、Resume、失敗修正、追加表示窓はこの差に含まれない。
+
+## Findings
+
+残36以内に収められる、根拠ある工程削減は示せない。D-025の重複削減は既に適用済みであり、Game Directorが技術単位を独自に統合する根拠はない。必須検証とRole分離を維持したまま上限内で完了するとは判断しない。
+
+以下をOwner向けbriefとする。
+
+### Question
+
+D-025の必須範囲を維持して、Resume時点の累計に60 operationsを加えた新上限で継続しますか、それともG-002を未達・検証未完了として打ち切りますか。
+
+### Why this needs the Owner
+
+承認済み予算では残必須工程を賄えない具体的な見通しが出たため、D-026の再判断条件に該当する。予算変更はOwnerの権限であり、Studioは検証免除やGoal解釈の変更によって差を埋められない。
+
+今回は供給条件の再照会ではなく、既存条件のままで継続する費用の判断である。
+
+### Options
+
+#### 案A — 必須範囲を維持し、Resumeから60 operationsを上限に継続
+
+ゲームの範囲・仕様・必須検証を維持する。提案する新budgetは「Owner回答後のResume時点の実累計＋60」とする。現行123からの増加量は、その実累計を使ってStudioが明記する。
+
+60 operationsの内訳は次のとおり。
+
+| 区分 | 担当・内容 | Step | Route | operations |
+|---|---|---:|---:|---:|
+| E1 A〜D | gameplay-engineer：出力整備、実接続、差分分類、監査 | 4 | 4 | 8 |
+| E2 | gameplay-engineer：接触診断 | 1〜2 | 1〜2 | 2〜4 |
+| E3 | gameplay-engineer：ボス4条件 | 4 | 4 | 8 |
+| E4 | gameplay-engineer：保持回帰・記録比較 | 1〜2 | 1〜2 | 2〜4 |
+| E5 | gameplay-engineer：通常公開再生 | 2 | 2 | 4 |
+| Q1〜Q6 | qa：独立検証 | 6 | 6 | 12 |
+| 後続評価 | art-director、playtester、game-designer、game-director各1 Step | 4 | 4 | 8 |
+| 必須工程計 | 既存依存順を維持 | 22〜24 | 22〜24 | 44〜48 |
+| 余裕枠 | 失敗修正、追加表示窓、必要な判断への手戻り、終結処理 | — | — | 12〜16 |
+| 合計上限 | Resume後 | — | — | 60 |
+
+余裕枠は技術的な修正回数の確定見積もりではなく、提案する上限枠である。追加の担当StepとそのRouteは双方をここから消費する。必須工程が48 operationsなら余裕は12 operationsであり、追加のStepとRouteだけに使う場合でも6組に限られる。
+
+各Step最大3回の実行、各出力最大2万字、@need一度最大8ファイルの供給上限は変えない。表示継続が別Stepになれば予算を消費する。
+
+リスクは、接続後の失敗、Designerへの差分判断、可読性修正、独立評価による手戻りが余裕を超えること。完成保証ではなく、ReviewがGoal未達と判断する可能性も残る。
+
+選択後の経路：
+Owner判断を記録し、Studioが新budgetを実累計から設定する。82のAだけを開き、A→B→C→D→E2→E3→E4→E5→独立Q1〜Q6→限定Art Verify→独立Play→Designer実測後判断→Reviewへ進む。D-025の後続条件を適用し、同じ条件判断だけのStepは再追加しない。
+
+各単位後に残工程と残予算を照合する。上限内に収まらない具体的見通しが再び出た場合は、上限到達を待たずOwnerへ戻す。上限到達時は新規作業を開かない。
+
+途中で停止は可能だが、消費したoperationsは戻らない。追加金銭、環境、外部配員、保存機構は伴わない。
+
+#### 案B — 未達・検証未完了を明示して打ち切る
+
+追加の実装・測定・評価を開かず、現在の成果と不足を整理して終了する。連続ランと最終ボスの実装報告は残すが、「手応えのあるボス戦が成立した」とは結論しない。
+
+残る不足は、E1 A〜D、E2以降の必須証拠、独立QA、限定Art Verify、独立Play、Designer実測後判断、Reviewである。161 tests成功はこれらの代用にしない。
+
+追加継続予算は求めず、終結の記録・Routeは現行残枠から消費する。打切りは実装の削除や巻戻しを意味しない。後日の再開は可能だが、その時点で改めて予算と状態の確認が必要となる。
+
+選択後の経路：
+Owner判断を記録し、StudioがGoalを未達・検証未完了として終結報告する。未実施のReviewを実施済みにせず、独立QAの未解消事項と歴史的確認不能を分けて残す。
+
+### Studio recommendation
+
+案Aを推奨する。Resume時点の累計＋60 operationsという上限を提案し、Ownerが予算を決める。
+
+### Reasoning
+
+82は停滞していたE1を、出力、接続、差分、監査へ分け、終了根拠を具体化した。現時点で技術的不成立が示されたわけではなく、必須評価へ進む経路があるため、上限付き継続を推奨する。
+
+ただし、まだAも未実施であり、この再計画が収束する証拠はない。追加予算は既消費分を正当化するためではなく、残る成立確認と独立した体験判断に使う。
+
+60 operationsは44〜48の必須工程と12〜16の余裕を分けた提案であり、統計的な完了予測ではない。供給上限内で必要証拠を構成できない具体的理由、修正反復による見積もり増、または承認範囲で解消できない体験・Vision不整合が判明すれば、継続推奨を見直す。
+
+15〜20分Visionへの整合は未評価であり、既報の通常ラン約87〜104秒というBuild値だけで解消済みとはしない。独立評価とDesigner判断を経ても整合しなければOwnerへ戻す。HP増加や待機の追加で時間だけを合わせない。
+
+待機中に継続する独立作業はない。依存Build・測定・評価は保留し、StudioはOwnerへの提示と予算台帳の照合だけを行う。
+
+### Owner decision required
+
+案A／案Bと条件を回答してください。案Aの場合は「Resume時点の累計＋60 operations」を承認するか、別の上限を指定してください。別上限の場合も、未完了を合格へ変更せず、その枠で可能な継続と停止条件を明示します。
+
+## Decisions already made
+
+- D-021：Studio内のテキストビルドと独立検証で進める。
+- D-023：本文・実行・出力の現実の供給上限を維持する。
+- D-024：現行検証、記録比較、歴史的確認不能を分離する。
+- D-025：必須検証と独立評価を維持し、重複工程を省く。後続工程条件は再審議しない。
+- D-026：budget 123。追加継続はOwner判断であり、完成保証ではない。
+- 本報告は予算変更、技術方式変更、検証免除、Goal達成判定を行わない。D-027はOwner回答前にacceptedとして作成しない。
+
+## Constraints
+
+Ownerへの提示時に最新累計と現行残枠を明記する。83時点の残36をOwner回答時の残枠として固定しない。
+
+案Aの新budgetはResume時点の実累計に承認枠を足して算出し、今回の判断やOwner提示の消費を二重計上しない。
+
+必須検証、Role分離、供給上限、Goal解釈を維持する。技術計画の統合や削減を本briefの承認に読み込まない。歴史的確認不能を合格・免除にせず、未表示・未実行・不適合と区別する。
+
+## Open questions
+
+Ownerが案Aまたは案Bのどちらを選ぶか。案Aの場合、Resume後の継続枠を60 operationsとするか、別上限とするか。
+
+技術上の差分原因や供給成立性はOwnerへの質問にせず、継続が承認された場合に各担当Roleが検証する。
+
+## Expected output
+
+StudioはFindings内のbriefをOwnerへ提示する。最新累計、新budgetの算出基準、推奨が提案であることを保つ。
+
+Owner回答後にDecisionと予算・状態を更新する。案Aなら82のAのみをEngineerへルートし、案Bなら未達・検証未完了の終結報告へ進む。
+
+## Load
+
+- Role: studio/roles/studio.md
+- Project: project.md
+- Project: goals/G-002-final-boss/goal.md
+- Project: design/final-boss-and-continuous-run.md
+- Decisions: decisions/D-021-owner-authorizes-text-build.md
+- Decisions: decisions/D-023-owner-confirms-verification-supply.md
+- Decisions: decisions/D-024-g002-historical-comparison-evidence.md
+- Decisions: decisions/D-025-g002-minimum-remaining-scope.md
+- Decisions: decisions/D-026-owner-extends-g002-budget.md
+- Supporting plan: goals/G-002-final-boss/82-technical-director-to-studio.md
+- Previous handoff: goals/G-002-final-boss/83-studio-to-game-director.md
