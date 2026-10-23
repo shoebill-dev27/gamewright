@@ -133,3 +133,57 @@ def test_writing_the_budget_a_goal_already_has_is_no_change(ws, monkeypatch):
     )
     monkeypatch.setitem(sr.RUNTIMES, "fake", runtime([answer], []))
     sr.do_route(ws, args(goal="G-001", since=1))
+
+
+ESCALATION = (
+    "---\nkind: escalation\ngoal: G-001\nseq: 1\nfrom: game-director\nto: owner\nstatus: open\n"
+    "decision: none\n---\n# 01: Owner decision needed\n\n## Question\n\nGo on or stop?\n\n"
+    "## Why this needs the Owner\n\nx\n\n## Options\n\n### Option A\n\nx\n\n### Option B\n\nx\n\n"
+    "## Studio recommendation\n\nA\n\n## Reasoning\n\nx\n\n## Owner decision required\n\nA / B\n"
+)
+STOP = (
+    "---\nkind: decision\nid: D-002\nstatus: accepted\ndecided_by: owner\ngoal: G-001\n"
+    "date: 2026-10-23\nsupersedes: none\n---\n# D-002: stop\n\n## Decision\n\nB. Owner's words: "
+    "Bで止める。\n\n## Rationale\n\nx\n\n## Alternatives considered\n\nA\n\n## Revisit when\n\nx\n"
+)
+
+
+def resume(ws, monkeypatch, status, outcome, project_text=None):
+    write(ws, f"{G}/01-game-director-to-owner.md", ESCALATION)
+    row = (1, "Decide", "owner", "—", "open", "01-game-director-to-owner.md")
+    write(ws, f"{G}/goal.md", goal([row], status="blocked-on-owner"))
+    resolved = (
+        ESCALATION.replace("status: open", "status: resolved").replace(
+            "decision: none", "decision: D-002"
+        )
+        + "\n**Owner response (2026-10-23):** Bで止める。\n"
+    )
+    closed = goal([(*row[:4], "done (D-002)", row[5])], status=status).replace(
+        "## Outcome\n\n—\n", f"## Outcome\n\n{outcome}\n"
+    )
+    out = (
+        block("decisions/D-002-stop.md", STOP)
+        + block(f"{G}/01-game-director-to-owner.md", resolved)
+        + block(f"{G}/goal.md", closed)
+        + (block("project.md", project_text) if project_text else "")
+    )
+    monkeypatch.setitem(sr.RUNTIMES, "fake", runtime([out], []))
+    sr.execute(ws, *sr.build_resume(ws / "project", ws / "project" / G), args())
+
+
+def test_a_resume_may_close_the_goal_when_the_owner_stops_it(ws, monkeypatch):
+    before = (ws / "project" / "project.md").read_text()
+    state = sr.section(before, "Current state").strip()
+    after = before.replace(state, state + " G-001 stopped unfinished.")
+    resume(ws, monkeypatch, "abandoned", "Stopped by the Owner: not achieved.", after)
+    text = (ws / "project" / G / "goal.md").read_text()
+    assert "status: abandoned" in text and "not achieved" in text
+    assert "G-001 stopped unfinished." in (ws / "project" / "project.md").read_text()
+
+
+def test_a_closing_resume_needs_an_outcome(ws, monkeypatch):
+    with pytest.raises(sr.Rejected):
+        resume(ws, monkeypatch, "abandoned", "—")
+    rec = next((ws / "records").glob("*-resume"))
+    errors = json.loads((rec / "record.json").read_text())["attempts"][0]["errors"]
+    assert any("Outcome" in e for e in errors), errors

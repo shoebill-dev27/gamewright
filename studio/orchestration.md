@@ -108,6 +108,9 @@ files you put in its Load list.
 1. Record the Owner's choice as a Decision with `decided_by: owner` (templates/decision.md),
    including the Owner's own words and any conditions they added.
 2. Set the Escalation to `status: resolved` with `decision: D-NNN`; set the Goal back to `active`.
+   If the Owner's choice ends the Goal (stop, abandon, or accept it as it is), Close instead: no
+   next step, `status: done` or `abandoned`, the Outcome saying plainly what was and was not
+   achieved, and the Current state brought up to date.
 3. Re-plan the remaining route from the Escalation's "If chosen" consequences for the chosen option.
    If the Owner chose something no option described, re-run Intake steps 4–6 on the remaining work.
 4. Write the next Handoff with `from: studio`, citing the Decision under *Decisions already made*.

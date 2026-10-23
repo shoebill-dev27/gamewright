@@ -1248,6 +1248,8 @@ def build_resume(project, gdir, records=None):
         erel,
         f"{grel}/goal.md",
         new.replace("*", "<role>"),
+        "project.md: only if the Owner's choice ends the Goal (status done or abandoned), and only "
+        "its ## Current state (at most 1,500 characters)",
     ]
     request = owner_request(gdir)
     said = re.findall(
@@ -1259,7 +1261,9 @@ def build_resume(project, gdir, records=None):
 
     def validate(files):
         errors = check_writes(
-            files, [f"decisions/{decision}-*.md", erel, f"{grel}/goal.md", new], project
+            files,
+            [f"decisions/{decision}-*.md", erel, f"{grel}/goal.md", new, "project.md"],
+            project,
         )
         dec = [p for p in files if p.startswith("decisions/")]
         if len(dec) != 1 or f"{grel}/goal.md" not in files or erel not in files:
@@ -1277,14 +1281,29 @@ def build_resume(project, gdir, records=None):
         errors += check_goal(files[f"{grel}/goal.md"])
         errors += check_goal_size(files[f"{grel}/goal.md"])
         errors += check_kept(before, files[f"{grel}/goal.md"], ["Owner request"])
-        if parse(files[f"{grel}/goal.md"])[0].get("status") != "active":
-            errors.append("goal.md: status must return to active")
+        status = parse(files[f"{grel}/goal.md"])[0].get("status")
+        closing = status in ("done", "abandoned")  # the Owner's choice ends the Goal
+        if not closing and status != "active":
+            errors.append(
+                "goal.md: status must return to active, or be done or abandoned when the "
+                "Owner's choice ends the Goal (then fill ## Outcome; orchestration.md, Close)"
+            )
+        if closing and not section(files[f"{grel}/goal.md"], "Outcome").strip(" \n—-"):
+            errors.append("goal.md: a closed Goal needs its ## Outcome for the Owner")
+        if "project.md" in files:
+            errors += check_project_update(
+                (project / "project.md").read_text(encoding="utf-8"),
+                files["project.md"],
+                closing,
+            )
         for path in files:
             if fnmatch.fnmatch(path, new):
                 errors += check_artifact(
                     project, path, files[path], request, pending=files
                 )
-        return errors + check_open_steps(project, grel, files, request)
+        return errors + (
+            [] if closing else check_open_steps(project, grel, files, request)
+        )
 
     return packet, validate
 
