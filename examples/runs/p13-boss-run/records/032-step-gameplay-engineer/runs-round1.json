@@ -1,0 +1,10 @@
+[
+ {
+  "run": "@run/tests",
+  "command": "python3 -m unittest discover -s tests",
+  "script": "\n",
+  "exit": "timeout",
+  "seconds": 30.0,
+  "output": "...........................................\n[stopped after 30 s]"
+ }
+]

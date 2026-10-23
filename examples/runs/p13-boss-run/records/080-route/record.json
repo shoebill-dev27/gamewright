@@ -1,0 +1,81 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-002",
+ "attempts": [
+  {
+   "runtime": "codex",
+   "session_id": "01a1649d-e076-7ba2-9c39-a28be295c65b",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 30401,
+    "cached_input_tokens": 7552,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 109,
+    "reasoning_output_tokens": 28
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 1,
+   "started": "2026-10-23T02:17:10",
+   "seconds": 7.2,
+   "errors": [],
+   "need": [
+    "studio/roles/technical-director.md",
+    "goals/G-002-final-boss/62-technical-director-to-studio.md",
+    "decisions/D-023-owner-confirms-verification-supply.md",
+    "decisions/D-024-g002-historical-comparison-evidence.md",
+    "design/g002-historical-comparison-evidence.md"
+   ]
+  },
+  {
+   "runtime": "codex",
+   "session_id": "01a1649d-fc9a-7a50-a4f6-f3629c773b39",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 40330,
+    "cached_input_tokens": 7552,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 3229,
+    "reasoning_output_tokens": 59
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 2,
+   "started": "2026-10-23T02:17:17",
+   "seconds": 69.3,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-002-final-boss/66-studio-to-technical-director.md": "3c6ad4546a1044e175fd27c5a58d4aa1476ff98ca02fbcc7fa58787aed61eadd",
+  "goals/G-002-final-boss/goal.md": "b756fa9128ea2698659a55566eddd9c5cdea8e4c8aa8f494c6ee42211c946d10"
+ },
+ "decision": {
+  "new": [
+   "technical-director",
+   "Plan"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "technical-director",
+    "Plan"
+   ]
+  ]
+ },
+ "seen_through_seq": 66
+}

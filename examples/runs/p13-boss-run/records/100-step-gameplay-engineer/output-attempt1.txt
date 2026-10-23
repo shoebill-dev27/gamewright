@@ -1,0 +1,10 @@
+<<<FILE @need
+repo/bots.py
+repo/game.py
+repo/session.py
+repo/run_driver.py
+repo/play.py
+repo/tests/test_bots_boss.py
+repo/tests/test_split_c.py
+repo/tests/test_g002_evidence.py
+>>>END

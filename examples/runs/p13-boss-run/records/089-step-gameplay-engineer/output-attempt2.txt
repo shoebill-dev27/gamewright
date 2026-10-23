@@ -1,0 +1,218 @@
+<<<EDIT repo/bots.py
+<<<<<<< SEARCH
+def dodger(game, note):
+    """Reads the cues: swipes a wind-up that is in reach when a swipe cancels it (standard grub and
+=======
+def _legacy_dodger(game, note):
+    """Reads the cues: swipes a wind-up that is in reach when a swipe cancels it (standard grub and
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    """Pure prototype, not installed in dodger.
+=======
+    """Pure decision for the boss dodger; accepts only observation and memory.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+            ) <= radius + 0.3
+        else:
+=======
+            ) <= radius + 0.6
+        else:
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        for direction in preferred:
+            dx, dy = DIRECTIONS[direction]
+            inside = (0 <= o.x + dx * 1.5 <= ROOM_W - 1
+                      and 0 <= o.y + dy * 1.5 <= ROOM_H - 1)
+            candidates.append(("move", direction, inside))
+            if inside:
+                return BossChoice(memory, provenance, tuple(candidates),
+                                  tuple(excluded), "escape",
+                                  (("move", direction),))
+            excluded.append((direction, "wall"))
+        return BossChoice(memory, provenance, tuple(candidates),
+                          tuple(excluded), "hold", (("stop", None),))
+=======
+        selected_direction = None
+        for direction in preferred:
+            dx, dy = DIRECTIONS[direction]
+            inside = (0 <= o.x + dx * 1.5 <= ROOM_W - 1
+                      and 0 <= o.y + dy * 1.5 <= ROOM_H - 1)
+            candidates.append(("move", direction, inside))
+            if not inside:
+                excluded.append((direction, "wall"))
+            elif selected_direction is None:
+                selected_direction = direction
+            else:
+                excluded.append((direction, "lower-priority"))
+        if selected_direction is not None:
+            return BossChoice(memory, provenance, tuple(candidates),
+                              tuple(excluded), "escape",
+                              (("move", selected_direction),))
+        return BossChoice(memory, provenance, tuple(candidates),
+                          tuple(excluded), "hold", (("stop", None),))
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+BOTS = {"camper": camper, "walker": walker, "dodger": dodger}
+=======
+def dodger(game, note):
+    """Choose boss actions before entering any legacy combat helper.
+
+    The current room owns the memory. Room replacement and retry therefore
+    discard it, including for direct calls and the session input proxy.
+    """
+    observation = observe_boss(game)
+    if observation is None:
+        return _legacy_dodger(game, note)
+    memory = getattr(game, "_boss_memory", BossMemory())
+    choice = choose_boss(observation, memory)
+    game._boss_memory = choice.memory
+    issued = []
+    for action, direction in choice.buttons:
+        game.press(action, direction)
+        issued.append((action, direction))
+    label = {
+        "approach": "walk to boss",
+        "swipe": "face and swing at boss",
+        "hold": "hold off the boss's locked " + observation.attack + " line",
+        "escape": "escape from " + observation.attack,
+    }[choice.selected]
+    # Diagnostic acquisition through note happens after action selection.
+    note(label + " | public " + repr({
+        "input": observation,
+        "memory_before": memory,
+        "memory_after": choice.memory,
+        "provenance": choice.provenance,
+        "candidates": choice.candidates,
+        "excluded": choice.excluded,
+        "selected": choice.selected,
+        "issued": tuple(issued),
+    }))
+
+
+BOTS = {"camper": camper, "walker": walker, "dodger": dodger}
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    def press(self, action, direction=None):
+        return self._s.press(action, direction)
+
+    def __getattr__(self, name):
+=======
+    @property
+    def _boss_memory(self):
+        return getattr(self._s.game, "_boss_memory", BossMemory())
+
+    @_boss_memory.setter
+    def _boss_memory(self, value):
+        self._s.game._boss_memory = value
+
+    def press(self, action, direction=None):
+        return self._s.press(action, direction)
+
+    def __getattr__(self, name):
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/tests/test_bots_boss.py
+<<<<<<< SEARCH
+class OutcomeTest(unittest.TestCase):
+=======
+class PublicBoundaryConnectionTest(unittest.TestCase):
+    def test_actual_dodger_bypasses_legacy_helpers(self):
+        from unittest import mock
+        for fps in (30, 60):
+            for attack in ("charge", "short shot"):
+                game = boss_warning(attack, (8, 4))
+                notes = []
+                with mock.patch.object(bots, "_legacy_dodger",
+                                       side_effect=AssertionError("legacy read")), \
+                     mock.patch.object(bots, "_threat",
+                                       side_effect=AssertionError("threat read")), \
+                     mock.patch.object(bots, "_escape",
+                                       side_effect=AssertionError("escape read")), \
+                     mock.patch.object(bots, "_face_and_swing",
+                                       side_effect=AssertionError("swing read")):
+                    game.fps, game.dt = fps, 1 / fps
+                    bots.dodger(game, notes.append)
+                    lane = game._boss_memory
+                    boss = game.enemies[0]
+                    boss.phase = "active"
+                    outputs = []
+                    for left, aim, struck in ((0.001, (1, 0), False),
+                                              (99, (0, 1), True)):
+                        boss.phase_left, boss.aim = left, aim
+                        boss.struck = boss.spent = struck
+                        game._boss_memory = lane
+                        game.events.clear()
+                        game.heading = (0, 0)
+                        bots.dodger(game, notes.append)
+                        outputs.append((game.heading, list(game.events),
+                                        game._boss_memory, notes[-1]))
+                    self.assertEqual(outputs[0], outputs[1])
+                    self.assertEqual(game._boss_memory, lane)
+                    boss.phase = "recovery"
+                    bots.dodger(game, notes.append)
+                    self.assertEqual(game._boss_memory, bots.BossMemory())
+
+    def test_proxy_memory_is_owned_by_current_room(self):
+        from session import RunSession
+        session = RunSession()
+        proxy = bots._Proxy(session)
+        remembered = bots.BossMemory((10, 4, -1, 0, 2.4),
+                                     "charge", 0.0)
+        proxy._boss_memory = remembered
+        self.assertEqual(session.game._boss_memory, remembered)
+        session._enter("5", 3)
+        self.assertEqual(proxy._boss_memory, bots.BossMemory())
+        session.state = "dead"
+        proxy._boss_memory = remembered
+        self.assertTrue(session.control("retry"))
+        self.assertEqual(proxy._boss_memory, bots.BossMemory())
+
+    def test_all_escape_candidates_are_enumerated(self):
+        game = boss_warning("charge", (8, 4))
+        choice = bots.choose_boss(bots.observe_boss(game), bots.BossMemory())
+        self.assertEqual(choice.candidates,
+                         (("move", "down", True), ("move", "up", True)))
+        self.assertIn(("up", "lower-priority"), choice.excluded)
+
+    def test_active_adapter_rejects_forbidden_attribute_reads(self):
+        from unittest import mock
+
+        class Guard:
+            def __init__(self, values):
+                object.__setattr__(self, "values", values)
+
+            def __getattr__(self, name):
+                values = object.__getattribute__(self, "values")
+                if name not in values:
+                    raise AssertionError("forbidden read: " + name)
+                return values[name]
+
+        for attack in ("charge", "short shot"):
+            for phase in ("approach", "warning", "active", "recovery"):
+                enemy_values = {
+                    "kind": "boss", "hp": 12, "x": 10, "y": 4,
+                    "phase": phase, "attack_name": attack,
+                }
+                if phase == "warning":
+                    enemy_values.update(aim=(-1, 0), phase_left=0.5)
+                pressed = []
+                game = Guard({
+                    "t": 0, "x": 8, "y": 4,
+                    "enemies": [Guard(enemy_values)], "shots": [],
+                    "_boss_memory": bots.BossMemory(),
+                    "press": lambda a, d=None: pressed.append((a, d)),
+                })
+                with mock.patch.object(
+                        bots, "_legacy_dodger",
+                        side_effect=AssertionError("legacy path")):
+                    bots.dodger(game, lambda text: None)
+                self.assertTrue(pressed, (attack, phase))
+
+
+class OutcomeTest(unittest.TestCase):
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE @run/tests/public-boundary-clearance
+>>>END

@@ -1,0 +1,6 @@
+<<<FILE @need
+repo/tests/
+repo/game.py
+repo/session.py
+design/combat-step-46-room3-cap.md
+>>>END

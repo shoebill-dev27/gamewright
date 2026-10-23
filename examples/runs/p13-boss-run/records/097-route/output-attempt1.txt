@@ -1,0 +1,39 @@
+<<<EDIT goals/G-002-final-boss/goal.md
+<<<<<<< SEARCH
+status: active
+=======
+status: blocked-on-owner
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+- Decide（予算超過時の範囲）：open。80/40 operationsで予算超過。同じ作業のpartial 3回によるTechnical Director再計画より、予算規則のGame Director範囲判断を優先する。Owner requestに必要な残作業へ絞り、不要工程を明示する。Owner Decision・Vision・Goal解釈の変更が必要ならOwnerへエスカレーションする。
+=======
+- Decide（予算超過時の範囲）：done。78でGame DirectorがD-025による削減と、必須検証を残す継続案を提示した。予算変更はOwner権限のため、残作業は回答待ち。
+- Decide（追加予算）：open。現在82/40 operations。78で、Resume時点の累計から追加40 operationsを上限に継続する案Aと、未達・検証未完了で打ち切る案BをOwnerへ提示。追加40は完成見積もりではない。予算は回答前に変更しない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| 7b-scope | Decide | game-director | make-decision, prepare-owner-escalation | open | 77-studio-to-game-director.md |
+=======
+| 7b-scope | Decide | game-director | make-decision, prepare-owner-escalation | done | 77-studio-to-game-director.md → 結果: 78-game-director-to-owner.md |
+| 7b-cost | Decide | owner | — | open | 78-game-director-to-owner.md |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+逐次実行する。まず77で予算超過時の範囲判断を行う。残りのplanned行は既存計画として保持し、このRouteでは開かない。77の判断後に不要工程をskippedへ更新する。従来計画は68のE0→E1→E2→E3群→E4群→E5群→独立Q1〜Q6である。E0の全試験台帳からQAの個別Loadを割り当て、追加試験も含め未配布を残さない。現行必須検証、公開情報条件、再測定、記録差へのDesigner回答が揃い、歴史比較以外の不足を解消した後、Game Directorが歴史的確認不能を保持した評価継続の条件を判断する。認められた場合、限定Art Verify→独立Play→Designer実測後判断→Reviewへ進む。各StepのLoadは個別ファイル指定。全文保存先・別実行枠・変更前ビルドを待たない。明白な対処不能・到達不能や規定外の比較差はDesignerへ戻す。並列Stepは開かない。
+=======
+78のOwner回答を待ち、依存する残作業はすべて停止する。planned行は回答後の再計画用に保持し、このRouteでは開かない。案Aの場合はResumeでOwner指定の予算を記録し、D-025本文に基づいて削減を反映する。78が示す重複した後続条件判断、存在しない資料の再探索、旧構成の任意検証、重複整形と追加の磨き込みは省く。必須検証・独立評価は残し、歴史的一致の確認不能を合格や免除にしない。案Bの場合は未達・検証未完了の打切りとして終了記録を行う。どちらもOwner回答前には実行しない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+76をE1連続partial 3回目として受領し、75のStepを完了記録する。予算超過規則が再計画ループに優先するため、新たなTechnical Director Stepは追加せず、77でGame Directorの範囲判断を開く。160件成功をE1完了や独立QA合格に読み替えず、後続工程は判断まで開かない。
+=======
+78を受領して77の範囲判断Stepを完了とし、既存の78をOwnerへの費用エスカレーションとして開く。現在82/40 operationsのため、追加40 operations上限の継続か未達での打切りかをOwnerに委ねる。依存する残作業を停止し、予算・解釈・達成判定は変更しない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Game Directorが77-studio-to-game-director.mdで、Owner requestに必要な残作業へ範囲を絞る。継続必須・省略可能・Owner判断が必要な項目を区別し、残す工程と終了条件を明示する。技術方式は決めず、基準未確認を免除・合格にしない。
+=======
+Ownerが78-game-director-to-owner.mdに回答する。A：Resume時点の累計から追加40 operationsを上限に継続（別上限の指定も可）、またはB：未達・検証未完了で打切り。予算変更はOwner回答を受けたResumeでのみ行う。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+未完了。76で診断試験を追加し、runtimeはsource e99408d647c7の160件成功を確認したが、実dodger接続と被弾差の原因確定は未完了。E1は連続partial 3回となり、予算も80/40 operationsへ超過している。77でGame DirectorがOwner requestに必要な残作業を絞る。独立QA・体験評価は未完了で、歴史的確認不能と未表示の証拠を保持する。現時点で基準合格やGoal達成とは判定しない。project.mdは変更しない。
+=======
+未完了・Owner回答待ち。連続ランと最終ボスは実装報告済みだが、公開情報限定の実dodger接続、被弾差の原因確定、必須証拠、独立QA・体験評価は未完了。160件の試験成功を独立検証やGoal達成とは扱わない。現在82/40 operationsであり、78で追加40 operationsを上限とする継続か、未達・検証未完了の打切りかを依頼する。追加40は完成保証ではない。歴史的一致の確認不能と15〜20分Visionの未評価を保持し、回答まで後続作業を停止する。
+>>>>>>> REPLACE
+>>>END

@@ -109,3 +109,11 @@ Results and findings: `docs/phase11.md`.
 | `runs/p12-close-run` | The Phase 5 bug Goal run again from `fixtures/lantern-depths-real` on Claude to reach Close (9 operations, 16 executors): the closing Route rewrote only `project.md`'s Current state, a failing build check sent the fix back, and QA asked for a test source with `@need`. |
 
 Results and findings: `docs/phase12.md`.
+
+## Phase 13: a budget per Goal
+
+| Run | What it shows |
+|---|---|
+| `runs/p13-boss-run` | A copy of `runs/p12-boss-run` continued on Codex under the budget rule (records from 092 on). Already past the default budget, the Studio added only a game-director scope step, cut the remaining work (D-025) and twice asked the Owner about cost with an itemized estimate. The Owner extended the budget once (D-026) and then stopped the Goal (D-027): the Resume closed it as `abandoned`, with an Outcome stating what was and was not done, and refreshed only `project.md`'s Current state. The measurement in `measurement.json` meets S1–S3 and B1–B2. |
+
+Results and findings: `docs/phase13.md`.

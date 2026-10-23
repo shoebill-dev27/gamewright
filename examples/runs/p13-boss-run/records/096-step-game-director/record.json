@@ -1,0 +1,64 @@
+{
+ "op": "Step",
+ "role": "game-director",
+ "goal": "G-002",
+ "attempts": [
+  {
+   "runtime": "codex",
+   "session_id": "01a164cf-5092-7723-9c10-e92900624187",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 58415,
+    "cached_input_tokens": 9600,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 73,
+    "reasoning_output_tokens": 0
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 1,
+   "started": "2026-10-23T03:11:10",
+   "seconds": 6.4,
+   "errors": [],
+   "need": [
+    "studio/orchestration.md"
+   ]
+  },
+  {
+   "runtime": "codex",
+   "session_id": "01a164cf-6951-72e1-9378-fed2da64e086",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 61575,
+    "cached_input_tokens": 7552,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 3274,
+    "reasoning_output_tokens": 175
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 2,
+   "started": "2026-10-23T03:11:16",
+   "seconds": 89.9,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "decisions/D-025-g002-minimum-remaining-scope.md": "a9df692ef84a89102f08271d6a4c63e30d7b2d0cb7dfb63c07c6f14ccdd180ea",
+  "goals/G-002-final-boss/78-game-director-to-owner.md": "9b59c5071accbd78adaee504c3a951b0b39992ae6480e2f90b1979f71941c905"
+ },
+ "decision": {}
+}

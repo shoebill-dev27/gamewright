@@ -2202,7 +2202,13 @@ def do_decide(ws, args):
     )
     if esc is None:
         raise Rejected("no open Escalation")
-    if args.text:
+    said = re.findall(
+        r"^\*\*Owner response \([^)]*\):\*\* (.+)$",
+        esc.read_text(encoding="utf-8"),
+        re.M,
+    )
+    if args.text and (not said or said[-1].strip() != args.text.strip()):
+        # A Resume rejected earlier already recorded the same answer: do not repeat it.
         with esc.open("a", encoding="utf-8") as f:
             f.write(
                 f"\n---\n\n**Owner response ({datetime.date.today()}):** {args.text}\n"

@@ -1,0 +1,233 @@
+<<<FILE decisions/D-021-owner-authorizes-text-build.md
+---
+kind: decision
+id: D-021
+status: accepted
+decided_by: owner
+goal: G-002
+date: 2026-10-20
+supersedes: D-020
+---
+# D-021: テキストビルドとStudio内検証でBuildへ進む
+
+## Decision
+
+Ownerは22の案Aを選択し、供給・検証・予算の回答権限者をすべてOwnerとした。実機ホスト・実gamepad・外部配員を今回の開始条件から除き、既存のテキスト表示とスクリプト実行によるBuildを承認した。
+
+Ownerの回答全文：
+
+> 案A。回答の権限者はすべて Owner（私）で、ここで回答します。(1) 実行経路: project.md の build: と run_tests / run_play / run_trace / run_bots がそのまま実行経路です。gameplay-engineer と qa は Step の中で @run を使い、サンドボックスでテスト・プレイ・トレース・ボットを実行できます（G-001 と同じ）。基線は repo/ の現状で、指定 sha の確認は不要です。project.md の「build 0.4」は古い記述で、repo/ が正です。(2) 実機・gamepad・デスクトップの表示環境はなく、用意もしません。Constraints の「Desktop, keyboard and gamepad」は製品の対象環境で、今回の検証環境の要求ではありません。検証は G-001 と同じく、テキスト表示のビルドとスクリプト実行で行います。(3) 独立した QA と Play は、Studio の qa と playtester の Step が担います。外部の配員はありません。(4) 費用: 購入・外部委託・追加の金銭は一切ありません。予算は Studio の通常の Step の範囲で、人日の見積もりは不要です。以上で D-020 の条件は満たされたものとして、Build へ進んでください。
+
+実行基線は作業開始時のrepo/とし、指定shaとの照合は要求しない。project.mdのbuild 0.4表記は基線の根拠にしない。購入・外部委託・追加金銭支出は認めない。人日見積もりや外部検証枠の取得を開始条件にしない。
+
+D-020に代わる開始条件として本Decisionを適用する。D-020に由来する実機ホスト、実gamepad、外部配員、費用見積もり取得の要求は後続計画より本Decisionを優先する。D-015〜D-019のゲーム体験、共有戦闘回帰、30/60 FPS、実測後Designer判断は維持する。独立QA・限定Art Verify・独立PlayはStudio内の別Stepで行う。
+
+これはOwnerによる開始許可と検証範囲の変更であり、実行成功、受け入れ基準合格、体験Goal達成の証拠ではない。
+
+## Rationale
+
+Owner自身から不足していた供給・実行経路・予算方針への回答があり、今回の検証をG-001と同じテキストビルド方式に限定した。Studioが同じ供給確認を繰り返す必要はなく、既存仕様・計画に基づくBuildへ進める。
+
+## Alternatives considered
+
+- 実機ホストと実gamepadを用意する：Ownerが用意しないと明示したため採らない。
+- 見積もり・調達条件を取得する案B：追加金銭を使わず通常Step内で進めるため採らない。
+- 条件整備まで停止する案C：OwnerがBuild開始を明示したため採らない。
+
+## Revisit when
+
+通常のStudio Stepでは実行できない具体的な障害、追加支出の必要性、またはテキスト方式では仕様の意味を定められない矛盾が判明したとき。製品の実機対応を検証する別のGoalを開始するとき。
+>>>END
+
+<<<EDIT goals/G-002-final-boss/22-game-director-to-owner.md
+<<<<<<< SEARCH
+status: open
+decision: none
+=======
+status: resolved
+decision: D-021
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-002-final-boss/goal.md
+---
+kind: goal
+id: G-002
+project: lantern-depths
+status: active
+created: 2026-10-20
+---
+# G-002: 最後に手応えのあるボス戦
+
+## Owner request
+
+> 最後に手応えのあるボス戦がほしい
+
+## Interpretation
+
+既存の第1〜4部屋を連続して進み、第5部屋を置き換えた単体ボスへ到達する。プレイヤーが位置取り、攻撃とダッシュのタイミング、敵の挙動への対応を通じて手応えを感じられる最終戦とし、最終勝利・死亡・ランの最初からの再挑戦まで成立する。短いランと、被害を受ける前に脅威を読み取れる体験を維持する。
+
+D-015により、連続ラン・部屋間継承・終端・再挑戦の新設を今回の範囲に含める。第1〜4部屋の構成と既存の共有戦闘ルールを維持し、新しい戦闘入力、ボス専用チェックポイント、既存部屋の全面改修は対象外。15〜20分を満たすためだけの敵HP増加は含めない。
+
+D-021により、今回はrepo/のテキスト表示とスクリプト実行で実装・検証する。Desktop、keyboard、gamepadは製品対象であり、実機ホストや実gamepadの供給・検証を今回の要件としない。基線はrepo/の現状とし、指定sha確認は不要。独立QA・PlayはStudio内の別Stepが担う。購入・外部委託・追加金銭を使わず、通常Stepの範囲で進める。具体的な追加支出や承認範囲を超える変更が必要になった場合はOwnerへ戻す。
+
+## Unknowns
+
+- Observe：skipped。既存不具合の再現依頼ではない。
+- Diagnose：done。既存基盤の不足と計画上の回帰対応を整理済み。現状repo/の実行基線はBuildで取得する。
+- Decide：done。D-015〜D-019で範囲・体験方向・仕様契約・旧基準の適用関係を確定。
+- Design：done。design/final-boss-and-continuous-run.mdとD-017・D-019が正本。未実装・未検証。
+- Plan：done。16・20の計画と回帰対応を使用する。D-021と衝突する実機ホスト・実機供給・外部配員・見積もり取得の要求は適用しない。
+- Decide（供給・承認）：done。22へのOwner回答をD-021に記録。Ownerは実行経路とStudio内検証を指定し、Build開始を承認。実機供給、指定sha照合、人日見積もりは不要。
+- Plan補完：skipped。新しいOwner条件を後続Stepへ直接渡せるため、同じ供給質問で再発行しない。具体的な技術上の不成立が判明した場合に限り戻す。
+- Build：open。現状repo/の実行基線を記録し、承認仕様と適用可能な既存計画に従って実装する。Owner回答は実行合格の証拠ではない。
+- Verify：planned。独立QAで30/60 FPS、連続到達・勝敗・再挑戦、共有戦闘回帰を検証する。限定Art Verifyはテキストplayer viewの二攻撃、予兆と実弾、回復、HP、終端・retryの識別を扱う。実機検証は要求しない。
+- Play：planned。独立したプレイヤー観察で最終戦・到達体験・通常ランの所要時間を評価する。実装内容と期待結果は渡さない。
+- Design（実測後）：planned。対応botの両FPS基線、独立QA・Play、通常ランの同一試行による到達・終端・時間実測を受け、追加数値ゲート・調整の要否を判断する。不要でも理由を記録。明白な対処不能・到達不能はPlay前に戻す。
+- Review：planned。Game Directorが体験Goalの達成を判断する。
+- Next：結果と残課題をOwnerへ返す。
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Design | game-designer | write-design-spec | done | 01-studio-to-game-designer.md → 結果: 02-game-designer-to-studio.md |
+| 2 | Diagnose | technical-director | technical-plan | done | 03-studio-to-technical-director.md → 結果: 04-technical-director-to-studio.md |
+| 3 | Decide | game-director | make-decision, prepare-owner-escalation | done | 05-studio-to-game-director.md → 結果: 06-game-director-to-owner.md |
+| 3a | Decide | owner | — | done | 06-game-director-to-owner.md → D-015 |
+| 3b | Decide | game-director | make-decision, prepare-owner-escalation | done | 07-studio-to-game-director.md → 結果: 08-game-director-to-studio.md |
+| 4 | Design | game-designer | write-design-spec | done | 09-studio-to-game-designer.md → 結果: 10-game-designer-to-studio.md |
+| 4a | Decide | game-director | make-decision, prepare-owner-escalation | done | 11-studio-to-game-director.md → 結果: 12-game-director-to-studio.md |
+| 4b | Design | game-designer | make-decision, write-design-spec | done | 13-studio-to-game-designer.md → 結果: 14-game-designer-to-studio.md |
+| 5 | Plan | technical-director | technical-plan | done | 15-studio-to-technical-director.md → 結果: 16-technical-director-to-studio.md |
+| 5a | Decide | game-director | make-decision, prepare-owner-escalation | done | 17-studio-to-game-director.md → 結果: 18-game-director-to-studio.md |
+| 5b | Plan | technical-director | technical-plan | done | 19-studio-to-technical-director.md → 結果: 20-technical-director-to-studio.md |
+| 5c | Decide | game-director | make-decision, prepare-owner-escalation | done | 21-studio-to-game-director.md → 結果: 22-game-director-to-owner.md |
+| 5c-owner | Decide | owner | — | done | 22-game-director-to-owner.md → D-021 |
+| 5d | Plan | technical-director | technical-plan | skipped | D-021で供給・承認条件を解決。再照会不要 |
+| 6 | Build | gameplay-engineer | implement-change | open | 23-studio-to-gameplay-engineer.md |
+| 7 | Verify | qa | verify-change | planned | — |
+| 8 | Verify | art-director | visual-review | planned | — |
+| 9 | Play | playtester | playtest-session | planned | — |
+| 9a | Design | game-designer | make-decision, write-design-spec | planned | — |
+| 10 | Review | game-director | review-outcome | planned | — |
+| 11 | Next | studio | — | planned | — |
+
+逐次実行する。Build後は独立QA→限定Art Verify→独立Play→Designer実測後判断→Reviewとする。明白な対処不能・到達不能が判明した場合はDesigner判断を前倒しする。並列Stepは開かない。
+
+## Route changes
+
+22へのOwner回答をD-021として記録し、Escalationをresolved、Goalをactiveへ戻した。実機・外部供給・見積もり要求を今回の開始条件から外し、Plan再発行をskipped、23のBuildをopenとした。後続の独立検証・実測後判断を維持する。
+
+## Next action
+
+Gameplay Engineerが23-studio-to-gameplay-engineer.mdからBuildを開始する。repo/の現状を基線として@runで実行し、仕様と計画をD-021の範囲で実装する。結果はstudioへ返し、次のRouteで独立QAを開く。
+
+## Outcome
+
+未完了。Ownerは案Aを選び、テキストビルド・スクリプト実行・Studio内独立検証によるBuild開始を承認した（D-021）。22は解決済み。実装・実行合格・最終戦の手応え・所要時間は今後確認する。追加金銭支出と実機調達は行わない。Goalはactiveで、23のBuildが次の作業。Goalは閉じず、project.mdは変更しない。
+>>>END
+
+<<<FILE goals/G-002-final-boss/23-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-002
+seq: 23
+from: studio
+to: gameplay-engineer
+stage: Build
+outcome: routed
+---
+# 23: studio → gameplay-engineer — テキストビルドで連続ランと最終ボスを実装する
+
+## Task
+
+承認された最終ボス・連続ラン仕様と既存技術計画に従い、repo/へ実装する。D-021を優先し、現状repo/の実行基線を取得してから変更・試験を行い、結果をstudioへ返す。
+
+## Context
+
+OwnerのGoalは「最後に手応えのあるボス戦がほしい」。DesignとPlan補完は完了したが、実行・実機供給・費用条件が未確定としてBuildを保留していた。22へのOwner回答により、今回の実装・検証方式は既存のテキストビルドとスクリプト実行に確定し、Build開始が承認された。
+
+## Findings
+
+Ownerが指定した実行経路はproject.mdのbuildとrun_tests／run_play／run_trace／run_bots。Gameplay EngineerとQAはStep内の@runを使用できるとの回答がある。
+
+repo/で実行するコマンド：
+
+- `python3 -m unittest discover -s tests`
+- `python3 play.py --view player {script}`
+- `python3 play.py --view trace {script}`
+- `python3 bots.py {script}`
+
+スクリプト形式と利用可能な操作はrepo/manual.mdを読むこと。作業開始時のrepo/を基線とし、指定sha照合は不要。project.mdのbuild 0.4記述は古く、repo/が正本である。Studioは本Resumeで実行しておらず、合格結果はない。
+
+計画正本は16と20、仕様正本はdesign/final-boss-and-continuous-run.md。計画中の実機ホスト追加、実gamepad、外部検証枠、金銭・人日見積もりの取得条件はD-021により今回適用しない。その他の適用可能な計画と回帰対応を用いる。技術方式の実質的な再設計が必要ならTechnical Directorへ、仕様の意味が未確定ならDesignerへ手渡し、推測で仕様を変えない。
+
+## Decisions already made
+
+- D-015：連続ラン・部屋間継承・終端・先頭retryと第5部屋単体ボスを範囲に含める。
+- D-016：読み取り・位置取り・回避後の反撃を中心とする体験方向。
+- D-017：二攻撃のボスと1 heart回復を伴う連続ランの契約。
+- D-018・D-019：旧第5部屋依存の集計と新構成の評価を分離し、保持回帰と代替評価を定める。
+- D-021：D-020を置き換えるOwner判断。現状repo/と既存@run経路でBuildを開始。実機・実gamepad・外部配員・指定sha確認・人日見積もりは不要。追加金銭支出は認めない。
+
+## Constraints
+
+- 第1〜4部屋の構成と既存共有戦闘ルールを維持する。新しい戦闘入力、ボス専用チェックポイント、既存部屋の全面改修を行わない。
+- テキストplayer viewとスクリプト実行を今回の実装・検証対象とする。実機ホストを追加しない。
+- 30/60 FPS、仕様の受け入れ基準、保持する共有戦闘回帰を維持する。
+- 通常Studio Step内で進め、購入・外部委託・追加金銭支出・外部連絡を行わない。
+- 15〜20分を満たすためだけの敵HP増加をしない。
+- 独立QA、限定Art Verify、独立Play、Designer実測後判断、Reviewを省略しない。
+- 未実行・未確認事項を成功と記録しない。Ownerの実行経路指定は実行結果ではない。
+
+## Open questions
+
+- 現状repo/の実行基線、適用可能な回帰試験と両FPSでの結果。
+- 連続到達・継承・ボス二攻撃・勝敗・先頭retryの実装と、仕様基準への対応。
+- 対応bot、通常ランの到達・終端・所要時間を同一試行で記録する経路。
+- D-021適用後も具体的な仕様矛盾や技術上の不成立が残るか。残る場合は根拠と該当箇所を報告する。
+
+## Expected output
+
+実装、必要な試験・プレイヤー向け説明、およびstudio宛ての結果Handoffを作成する。変更内容、実行基線、実行コマンドと結果、30/60 FPSの試験対応、未解決事項、独立検証用の再現手順を記録する。
+
+実装者自身の評価・原因推定・確信度は`## Sender assessment`にまとめ、QAへ渡す検証手順・事実と分ける。QAの合否やGoal達成を代行しない。仕様不明ならDesigner、計画不成立ならTechnical Directorへの差し戻し理由を記し、studioへ返す。
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: project.md#vision
+- Project: project.md#constraints
+- Project: project.md#art-direction
+- Project: repo/
+- Project: repo/manual.md
+- Project: design/final-boss-and-continuous-run.md
+- Project: design/combat.md
+- Project: design/combat-cues-visual-spec.md
+- Project: design/combat-step-44-walker-limit.md
+- Project: design/combat-step-46-room3-cap.md
+- Project: design/combat-step59.md
+- Project: design/combat-step68.md
+- Project: design/combat-step72.md
+- Project: design/combat-step94.md
+- Plan: goals/G-002-final-boss/16-technical-director-to-studio.md
+- Plan: goals/G-002-final-boss/20-technical-director-to-studio.md
+- Decisions: decisions/D-001-one-button-combat.md
+- Decisions: decisions/D-002-contact-edge-graze-accepted.md
+- Decisions: decisions/D-003-contact-edge-exact-reach-and-lunge-band.md
+- Decisions: decisions/D-004-spitter-cue-gap-brute-no-cancel-room2-spitter-deferred.md
+- Decisions: decisions/D-005-blocked-contact-consumes-shot-and-spends-lunge.md
+- Decisions: decisions/D-006-walker-limit-rooms-3-5-structural-ceiling.md
+- Decisions: decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md
+- Decisions: decisions/D-011-variant-named-messages-accepted.md
+- Decisions: decisions/D-012-room3-standard-grub-and-closer-spitter.md
+- Decisions: decisions/D-015-owner-approves-continuous-run-and-final-boss.md
+- Decisions: decisions/D-016-final-boss-experience-direction.md
+- Decisions: decisions/D-017-final-boss-and-run-contract.md
+- Decisions: decisions/D-018-legacy-balance-gate-transition-direction.md
+- Decisions: decisions/D-019-g002-balance-criteria-applicability.md
+- Decisions: decisions/D-021-owner-authorizes-text-build.md
+- Previous handoff: goals/G-002-final-boss/22-game-director-to-owner.md
+>>>END

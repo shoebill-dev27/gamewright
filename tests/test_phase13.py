@@ -4,6 +4,7 @@ Deterministic — a fake runtime stands in for executors. Run with `python3 -m p
 """
 
 import json
+import shutil
 import sys
 from pathlib import Path
 
@@ -187,3 +188,61 @@ def test_a_closing_resume_needs_an_outcome(ws, monkeypatch):
     rec = next((ws / "records").glob("*-resume"))
     errors = json.loads((rec / "record.json").read_text())["attempts"][0]["errors"]
     assert any("Outcome" in e for e in errors), errors
+
+
+def test_deciding_again_after_a_rejected_resume_records_the_answer_once(
+    ws, monkeypatch
+):
+    write(ws, f"{G}/01-game-director-to-owner.md", ESCALATION)
+    row = (1, "Decide", "owner", "—", "open", "01-game-director-to-owner.md")
+    write(ws, f"{G}/goal.md", goal([row], status="blocked-on-owner"))
+    monkeypatch.setitem(sr.RUNTIMES, "fake", runtime(["nothing", "nothing"], []))
+    for _ in range(2):
+        with pytest.raises(sr.Rejected):
+            sr.do_decide(ws, args(goal="G-001", text="Bで止める。"))
+    text = (ws / "project" / G / "01-game-director-to-owner.md").read_text()
+    assert text.count("**Owner response") == 1
+
+
+# --- Recorded live run ---------------------------------------------------------------------
+
+RUN = sr.ROOT / "examples" / "runs" / "p13-boss-run"
+
+
+@pytest.mark.skipif(not RUN.is_dir(), reason="no recorded Phase 13 run")
+def test_recorded_budget_led_to_a_scope_cut_and_an_owner_stop():
+    gdir = sr.goal_dir(RUN / "project", "G-002")
+    meta = sr.parse((gdir / "goal.md").read_text())[0]
+    assert meta["status"] == "abandoned" and meta["budget"] == "123"
+    decisions = {
+        p.name[:5]: sr.parse(p.read_text())[0]
+        for p in (RUN / "project" / "decisions").glob("D-02[5-7]-*.md")
+    }
+    assert decisions["D-025"]["decided_by"] == "game-director"  # the scope cut
+    assert (
+        decisions["D-026"]["decided_by"] == decisions["D-027"]["decided_by"] == "owner"
+    )
+    fixture = (
+        sr.ROOT / "examples" / "runs" / "p12-boss-run" / "project" / "project.md"
+    ).read_text()
+    closed = (RUN / "project" / "project.md").read_text()
+    assert sr.check_project_update(fixture, closed, closing=True) == []
+    assert "G-002" in sr.section(closed, "Current state")
+
+
+@pytest.mark.skipif(
+    not (RUN / "measurement.json").is_file(), reason="no recorded Phase 13 run"
+)
+@pytest.mark.skipif(not shutil.which("bwrap"), reason="no bubblewrap")
+def test_recorded_measurement_reproduces(tmp_path):
+    import test_phase6 as t6
+    import test_phase10 as t10
+
+    repo = RUN / "project" / "repo"
+    code, _, _ = t6.sandboxed_copy(
+        repo, tmp_path, "t", ["python3", "-m", "unittest", "discover", "-s", "tests"]
+    )
+    recorded = json.loads((RUN / "measurement.json").read_text())
+    m = t6.measure(repo, tmp_path)
+    assert m == recorded["measurement"] and code == recorded["tests_exit"]
+    assert t10.boss_verdict(m) == recorded["boss_verdict"]

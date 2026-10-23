@@ -1,0 +1,142 @@
+<<<FILE goals/G-002-final-boss/goal.md
+---
+kind: goal
+id: G-002
+project: lantern-depths
+status: active
+created: 2026-10-20
+---
+# G-002: 最後に手応えのあるボス戦
+
+## Owner request
+
+> 最後に手応えのあるボス戦がほしい
+
+## Interpretation
+
+ランの最後に、プレイヤーが位置取り、攻撃とダッシュのタイミング、敵の挙動への対応を通じて手応えを感じられるボス戦がある。短いランと、被害を受ける前に脅威を読み取れる体験を維持する。
+
+具体的なボスの仕組み、配置、難度、数値基準は担当Roleが定める。新しい入力ボタン、ゲームの基本コンセプト変更、ボス戦に必要のない既存部屋の全面改修は対象外。ラン構成や作業規模を大きく変える必要が生じた場合はOwnerに判断を戻す。
+
+## Unknowns
+
+- Observe：既存の不具合や体験問題の報告ではなく、新しい体験の要望なので skipped。現在のビルドのボス有無や終端構造は未確認であり、Designで確認する。
+- Diagnose：現時点では原因を特定すべき問題がないため skipped。体験上の問題が観測された場合に再検討する。
+- Decide：実質的な方向・優先度・範囲の選択が必要かは未確定。Designが選択を必要とする場合のみ tentative。大きな方向の選択やOwnerの好みが主な判断基準になる場合はOwner判断へ戻す。
+- Design：「手応え」を生む挙動、ラン終端への組み込み、予兆と対処、勝敗の扱い、観測可能な受け入れ基準が未定なので planned。最初に開く。
+- Plan：既存構造での実現方法と技術的リスクが未確認。Design後、非自明・高リスク・複数システムにまたがる変更と判明した場合のみ tentative。
+- Build：要望を実現するゲーム変更が必要なので planned。
+- Verify：Build後に受け入れ基準との一致と回帰を独立確認するため planned。プレイヤーに見える表現を変更する場合のArt Directorによる確認は tentative。
+- Play：最終戦の手応えは仕様適合だけでは判断できないため planned。実装内容や期待結果を知らせない新しい実行コンテキストで行う。
+- Review：体験Goalの達成判断が必要なので planned。
+- Next：結果と残課題をOwnerへ返すため planned。
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Design | game-designer | write-design-spec | open | 01-studio-to-game-designer.md |
+| 2 | Decide | game-director | make-decision, prepare-owner-escalation | tentative | — |
+| 3 | Plan | technical-director | technical-plan | tentative | — |
+| 4 | Build | gameplay-engineer | implement-change | planned | — |
+| 5 | Verify | qa | verify-change | planned | — |
+| 6 | Verify | art-director | visual-review | tentative | — |
+| 7 | Play | playtester | playtest-session | planned | — |
+| 8 | Review | game-director | review-outcome | planned | — |
+| 9 | Next | studio | — | planned | — |
+
+原則として逐次実行する。Art DirectorのVerifyが必要になった場合は、同じビルドに対するQAのVerifyと独立に並行できる。DecideとPlanは条件が成立した場合だけ開き、不要なら省略する。
+
+## Route changes
+
+Intake：新しい最終戦の体験要望としてDesignから開始する。Build・Verify・Play・Reviewを予定し、方向判断・技術計画・表現確認は設計結果に応じて確定する。
+
+## Next action
+
+Game Designerが `01-studio-to-game-designer.md` を受け取り、現行の戦闘仕様とラン終端を確認したうえで、ボス戦の仕様と受け入れ基準を作成する。方向や範囲の判断が必要なら、選択肢を添えてStudioへ戻す。Intakeはここで停止し、次の操作はこのDesign Stepとする。
+
+## Outcome
+
+未完了。Intake時点では実装、検証、体験評価を行っていない。
+>>>END
+
+<<<FILE goals/G-002-final-boss/01-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-002
+seq: 1
+from: studio
+to: game-designer
+stage: Design
+outcome: routed
+---
+# 01: studio → game-designer — 最後のボス戦を仕様化する
+
+## Task
+
+現行の戦闘仕様とラン終端を確認し、位置取り、タイミング、敵の挙動への対応によって手応えが得られる最終ボス戦を、実装と独立検証に使える仕様にする。方向・優先度・範囲の判断が先に必要なら、仕様を独断で確定せず、選択肢と論点をStudioへ返す。
+
+## Context
+
+新規Goal G-002のOwner要望は「最後に手応えのあるボス戦がほしい」。
+
+Project Contextでは、短時間のトップダウン型アクションローグライトで、攻撃とダッシュ、読み取れる脅威、15〜20分のランを柱としている。Current stateには5部屋、2種類の敵、入力スクリプトで遊ぶヘッドレスビルドが記載されている。ボスの有無や終端の具体的な動作はこのIntakeでは確認していない。
+
+これは既存不具合の修正依頼ではないため、最初にDesignを開いた。Studioはボスの内容や難度を決めていない。
+
+## Findings
+
+- 攻撃・ダッシュ・ポーズ以外の入力追加にはOwner承認が必要。
+- キーボードとゲームパッド、30 FPSと60 FPSに対応する必要がある。
+- 小規模チームのため既存システムの再利用を優先する。
+- 過去Decisionのタイトル一覧には、接触判定、予兆、無敵中の接触処理、既存部屋の調整に関する判断がある。タイトルだけで適用範囲を断定せず、関係する本文を確認する。
+- 既存Goalの履歴を読み直すことや、過去の戦闘調整をやり直すことは今回の初期作業には含めない。
+
+## Decisions already made
+
+- `decisions/D-001-one-button-combat.md`：攻撃ボタンとダッシュを基本とする。本文を確認して遵守する。
+- このGoalについての新しい方向・仕様・技術判断はまだない。
+
+## Constraints
+
+- ProjectのVisionとConstraints、既存Decisionを守る。
+- Studioの解釈は「ランの最後に手応えのあるボス戦がある」。部屋追加か既存終端の変更か、具体的な攻撃構成や調整値は未決定。
+- ボス戦に必要のない既存部屋の全面改修を範囲に加えない。
+- 大きな方向の選択、基本コンセプトやOwner Decisionの変更、想定を大きく超える規模・コスト・リスクは自分で承認しない。判断材料をStudioへ返す。
+- 実装と技術方式の確定、QAの合否判定、体験Goalの最終達成判定は行わない。
+- プレイヤーが見る情報は現行ビルドの表現手段に合わせる。グラフィカルな実装の存在を仮定しない。
+
+## Open questions
+
+- 現行ランはどのように終了し、最終戦をどこに組み込めるか。
+- 既存戦闘とどう異なる判断をプレイヤーに求めれば、入力を増やさず手応えを生めるか。
+- 予兆、攻撃機会、回避可能性、勝敗と再挑戦をどう定義するか。
+- ランの短さと脅威の読みやすさをどう維持するか。
+- どの受け入れ基準をQAが検証し、どの体験上の問いを後のPlayとReviewに残すか。
+- Game Directorの方向判断、Art Directorの表現仕様、Technical Directorの計画が必要か。
+
+## Expected output
+
+結果を `to: studio` のHandoffにまとめる。
+
+仕様を確定できる場合は、最終戦への遷移、ボスとプレイヤーの挙動、予兆と対処、勝敗・再挑戦、必要なパラメータ、境界条件、プレイヤーが観測できる受け入れ基準を含む設計文書を作成し、Handoffから参照する。30/60 FPSで確認すべき挙動と、既存戦闘に対する回帰確認の範囲も明示する。
+
+方向判断が必要なら、現状から分かった事実、実質的な選択肢、利点・代償、推奨と根拠、未確定事項を示す。Owner判断が必要な論点とRole内で決められる論点を区別する。
+
+いずれの場合も、次のルーティングに必要な技術的不確実性と表現上の依存を記載する。実装は行わない。
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: project.md
+- Project: design/combat.md
+- Project: repo/manual.md
+- Project: repo/README.md
+- Decisions: decisions/D-001-one-button-combat.md
+- Decisions: decisions/D-002-contact-edge-graze-accepted.md
+- Decisions: decisions/D-003-contact-edge-exact-reach-and-lunge-band.md
+- Decisions: decisions/D-004-spitter-cue-gap-brute-no-cancel-room2-spitter-deferred.md
+- Decisions: decisions/D-005-blocked-contact-consumes-shot-and-spends-lunge.md
+- Previous handoff: none
+>>>END

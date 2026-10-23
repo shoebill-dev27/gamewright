@@ -1,0 +1,7 @@
+<<<FILE @need
+studio/roles/technical-director.md
+goals/G-002-final-boss/68-technical-director-to-studio.md
+goals/G-002-final-boss/79-studio-to-gameplay-engineer.md
+decisions/D-025-g002-minimum-remaining-scope.md
+decisions/D-026-owner-extends-g002-budget.md
+>>>END

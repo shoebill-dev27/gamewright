@@ -1,0 +1,175 @@
+<<<FILE repo/tests/test_split_c.py
+"""Split C Build measurements. Normal runs use recorded public combat inputs.
+
+Reproduce scripts without changing state:
+  python3 -c 'from tests.test_split_c import public_script; print(public_script(30))' > run30.txt
+If tests is not a package, use:
+  PYTHONPATH=tests python3 -c 'from test_split_c import public_script; print(public_script(30))'
+Replace 30 with 60, then run python3 play.py --view trace SCRIPT.
+Generation executes the unchanged dodger policy once to record its button presses.
+Replay uses no bot, reaction rule, observer fixture or state injection.
+"""
+import json
+import math
+import unittest
+from unittest import mock
+
+import bots
+import play
+from run_driver import drive
+from source_id import source_id
+
+
+def public_script(fps):
+    recorded = []
+    original = bots._Proxy.press
+
+    def capture(proxy, action, direction=None):
+        recorded.append((proxy._s.t, action, direction))
+        return original(proxy, action, direction)
+
+    with mock.patch.object(bots._Proxy, "press", capture):
+        result = bots.play_run(bots.dodger, fps, 1200)
+    if result["outcome"] != "won":
+        raise AssertionError(result)
+    lines = [
+        "mode run", f"fps {fps}", "limit 1200", "driver-limit 141",
+        "view-every 10", "trace-every 5",
+        "control 0 pause", "control 2 resume",
+        "control 120 retry", "control 140 retry",
+    ]
+    lines += [
+        f"{t:.12f} {action}" + (f" {direction}" if direction else "")
+        for t, action, direction in recorded
+    ]
+    lines += [
+        "1100 dash left",  # Must never replay in later attempts.
+        "attempt 2", "0 stop",  # Explicit idle attempt: normal enemies cause death.
+        "attempt 3", "0 move up", "0.1 stop", "0.1 attack",
+    ]
+    return "\n".join(lines) + "\n"
+
+
+class SplitCTest(unittest.TestCase):
+    def test_public_normal_pause_victory_retry_death_retry(self):
+        for fps in (30, 60):
+            setup, inputs, rules = play.read_script(public_script(fps))
+            frozen = []
+
+            def observe(session, force):
+                if session.paused:
+                    frozen.append((session.t, session.room_t, session.game.frame))
+
+            session, summary = drive(setup, inputs, rules, observe)
+            self.assertEqual([a["outcome"] for a in summary["attempts"]],
+                             ["clear", "death", "unfinished"])
+            self.assertEqual(set(frozen), {(0.0, 0.0, 0)})
+            self.assertEqual(session.attempt, 3)
+            self.assertEqual(session.game.room, "1")
+            self.assertEqual(session.game.hearts, 3)
+            self.assertAlmostEqual(summary["attempts"][0]["pause_seconds"], 2)
+            self.assertEqual(summary["attempts"][0]["boss_entry_hearts"], 3)
+            self.assertEqual(summary["attempts"][0]["hits"], 0)
+            self.assertEqual(set(summary["attempts"][0]["rooms"]), set("12345"))
+            self.assertEqual(sum(e["kind"] == "retry" for e in session.events), 2)
+            self.assertFalse(any(
+                e["attempt"] > 1 and e["kind"] == "dash"
+                for e in session.events))
+            entries = [e for e in session.events
+                       if e["kind"] == "entry" and e["attempt"] > 1]
+            self.assertEqual([(e["room"], e["run_time"], e["room_time"],
+                               e["details"]["hearts"]) for e in entries],
+                             [("1", 0, 0, 3), ("1", 0, 0, 3)])
+            evidence = []
+            for attempt in summary["attempts"]:
+                events = [e for e in session.events
+                          if e["attempt"] == attempt["attempt"]]
+                transitions = []
+                for room in "1234":
+                    clear = next((e for e in events
+                                  if e["kind"] == "room_clear"
+                                  and e["room"] == room), None)
+                    entry = next((e for e in events if e["kind"] == "entry"
+                                  and e["room"] == str(int(room) + 1)), None)
+                    if clear and entry:
+                        gap = entry["run_time"] - clear["run_time"]
+                        self.assertAlmostEqual(gap, 1)
+                        transitions.append(gap)
+                terminal = next((e for e in events
+                                 if e["kind"] in ("run_won", "run_dead")), None)
+                evidence.append({
+                    **attempt,
+                    "transitions": transitions,
+                    "hurt_sources": [e["details"] for e in events
+                                     if e["kind"] == "hurt"],
+                    "dashes": sum(e["kind"] == "dash" for e in events),
+                    "boss_hits": sum(
+                        hit[0] == "boss" for e in events if e["kind"] == "attack"
+                        for hit in e["details"]["hits"]),
+                    "terminal_wait_seconds": (
+                        attempt["elapsed_excluding_pauses"] - attempt["run_seconds"]
+                        if terminal else 0),
+                    "retry_count_before_attempt": attempt["attempt"] - 1,
+                })
+            print("SPLIT_C_PUBLIC " + json.dumps({
+                "fps": fps, "summary": summary, "attempt_evidence": evidence,
+                "trial_count": 1, "state_injection": False,
+            }, sort_keys=True))
+
+    def test_retained_independent_dodger_baseline_and_fps_comparison(self):
+        # Historical precision from handoff 40; not a pre-boss policy baseline.
+        historical = {
+            30: [(6.6, 3), (20.7, 10), (15.6, 6), (18.3, 7)],
+            60: [(9.6, 5), (25.1, 14), (15.0, 6), (17.0, 8)],
+        }
+        measured = {}
+        for fps in (30, 60):
+            measured[fps] = {}
+            for room, (seconds, dashes) in zip("1234", historical[fps]):
+                result = bots.play_room(bots.dodger, room, fps, 60)
+                self.assertEqual(result["outcome"], "clear")
+                self.assertEqual(result["hearts_lost"], 0)
+                self.assertEqual(round(result["seconds"], 1), seconds)
+                self.assertEqual(result["dashes"], dashes)
+                if room in "34":
+                    self.assertEqual(result["attacks"], {"3": 8, "4": 7}[room])
+                    self.assertGreaterEqual(result["dashes"], 1)
+                measured[fps][room] = result
+        for room in "1234":
+            a, b = measured[30][room], measured[60][room]
+            self.assertEqual(a["cleared"], b["cleared"])
+            self.assertLessEqual(abs(a["hearts_lost"] - b["hearts_lost"]), 1)
+        print("SPLIT_C_RETAINED " + json.dumps({
+            "source": source_id(), "trial_count_per_room_fps": 1,
+            "results": measured,
+        }, sort_keys=True))
+
+    def test_boss_actual_decision_logs_and_hearts_comparisons(self):
+        results = {}
+        for fps in (30, 60):
+            results[fps] = {}
+            for hearts in (3, 2):
+                result = bots.play_room(bots.dodger, "5", fps, 120,
+                                        log=True, hearts=hearts)
+                self.assertEqual(result["outcome"], "clear")
+                self.assertFalse(any("swipe boss wind-up" in line
+                                     for line in result["log"]))
+                self.assertTrue(any("charge" in line for line in result["log"]))
+                self.assertTrue(any("short shot" in line for line in result["log"]))
+                results[fps][hearts] = result
+        for hearts in (3, 2):
+            a, b = results[30][hearts], results[60][hearts]
+            self.assertEqual(a["outcome"], b["outcome"])
+            self.assertLessEqual(abs(a["hearts_lost"] - b["hearts_lost"]), 1)
+        # Complete actual logs, not synthesized examples, for subsequent inspection.
+        print("SPLIT_C_BOSS " + json.dumps({
+            "source": source_id(), "trial_count_per_fps_hearts": 1,
+            "results": results,
+        }, sort_keys=True))
+
+
+if __name__ == "__main__":
+    unittest.main()
+>>>END
+<<<FILE @run/tests
+>>>END

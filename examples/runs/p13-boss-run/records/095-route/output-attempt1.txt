@@ -1,0 +1,9 @@
+<<<FILE @need
+studio/roles/game-director.md
+decisions/D-019-g002-balance-criteria-applicability.md
+decisions/D-021-owner-authorizes-text-build.md
+decisions/D-023-owner-confirms-verification-supply.md
+decisions/D-024-g002-historical-comparison-evidence.md
+goals/G-002-final-boss/68-technical-director-to-studio.md
+design/final-boss-and-continuous-run.md
+>>>END

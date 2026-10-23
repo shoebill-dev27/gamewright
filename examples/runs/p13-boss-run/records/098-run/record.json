@@ -1,0 +1,13 @@
+{
+ "op": "Run",
+ "goal": "G-002",
+ "operations": [
+  "095-route",
+  "096-step-game-director",
+  "097-route"
+ ],
+ "stop_reason": "blocked-on-owner",
+ "status": "blocked-on-owner",
+ "owner_reads": "goals/G-002-final-boss/78-game-director-to-owner.md",
+ "next": "decide examples/runs/p13-boss-run \"<answer>\""
+}

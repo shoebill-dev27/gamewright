@@ -1,0 +1,138 @@
+<<<EDIT goals/G-002-final-boss/goal.md
+<<<<<<< SEARCH
+- Build：open。24は変更対象ソース不足によりquestionで終了し、実装変更なし。今回のInputsにはREADME、game.py、play.py、bots.py、test_game.py全文が供給された。25でこれらを明示ロードし、承認仕様と適用可能な既存計画に従って実装を継続する。69 testsの基線成功は変更後合格を意味しない。
+=======
+- Build：open。26でGame終端基盤、play終了処理、終端3試験の部分実装が報告された。供給された実行証拠は72 tests成功だが、全機能完成や独立合格ではない。27でボス・弾属性から残りの連続ラン、入力・表示、説明、対応bots・測定を継続する。仕様質問・供給不足・承認待ちはない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| 6a | Build | gameplay-engineer | implement-change | open | 25-studio-to-gameplay-engineer.md |
+=======
+| 6a | Build | gameplay-engineer | implement-change | done | 25-studio-to-gameplay-engineer.md → 結果: 26-gameplay-engineer-to-studio.md |
+| 6b | Build | gameplay-engineer | implement-change | open | 27-studio-to-gameplay-engineer.md |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+24のBuild Stepをquestionで完了扱いとした。変更前69 tests成功と実装未着手を分離し、今回供給されたソース全文を明示ロードする25の継続Buildを開く。新しい供給情報があるため同一質問の反復には当たらず、Owner再承認・Plan再発行は不要。後続の独立検証順序を維持する。
+=======
+26のBuild Stepを部分成果で完了扱いとし、27で残りのBuildを継続する。終端基盤と72 tests成功の報告を全機能完了から区別し、独立QA投入は保留する。新しい仕様質問や承認事項はなく、既存計画の実装順と後続の独立検証順序を維持する。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Gameplay Engineerが25-studio-to-gameplay-engineer.mdからBuildを継続する。明示された現状ソース全文と仕様・計画をロードして実装し、変更後試験と独立検証手順をstudioへ返す。実装完了後のRouteで独立QAを開く。
+=======
+Gameplay Engineerが27-studio-to-gameplay-engineer.mdからBuildを継続する。現状ソースと26の部分成果の反映状況を確認し、ボス・弾属性から残作業を進める。全機能、必要試験、説明更新、測定結果と独立検証手順をstudioへ返す。実装完了後のRouteで独立QAを開く。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+未完了。D-021のBuild承認を維持する。24で変更前の69 tests成功が報告されたが、ソース不足により実装変更は行われていない。今回供給されたソースを25へ明示して継続Buildを開く。変更後の実行合格、最終戦の手応え、所要時間は未確認。追加金銭支出と実機調達は行わない。Goalはactiveで、次は25のBuild。Goalは閉じず、project.mdは変更しない。
+=======
+未完了。26で終端基盤の部分実装と、供給された実行証拠での72 tests成功が報告された。ボス・連続ランなどは未実装であり、全機能の合格、最終戦の手応え、通常ランの所要時間は未確認。D-021の承認内で27のBuildを継続する。追加金銭支出と実機調達は行わない。独立QA以降は未実施。Goalはactiveのまま閉じず、project.mdは変更しない。
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-002-final-boss/27-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-002
+seq: 27
+from: studio
+to: gameplay-engineer
+stage: Build
+outcome: routed
+---
+# 27: studio → gameplay-engineer — 部分実装からボス・連続ランのBuildを完成する
+
+## Task
+
+26の終端基盤を現状ソースで確認し、承認仕様と適用可能な既存計画に従って残りのBuildを完成する。ボス・弾属性から進め、全機能と必要試験・説明更新・測定を整えてstudioへ返す。
+
+## Context
+
+Owner requestは「最後に手応えのあるボス戦がほしい」。D-015〜D-019で連続ランと単体ボスの範囲・仕様・評価方針を確定し、D-021で現状repo/のテキスト実行とStudio内検証によるBuildが承認された。
+
+26は部分成果の報告であり、全Build完了ではない。新しい仕様質問、供給要求、開始承認待ちはない。Studioは次の継続Buildを開き、独立QA投入をまだ行わない。
+
+## Findings
+
+26の報告内容：
+
+- game.pyの終端確定・死亡優先・残弾と予兆消去・終端後凍結。
+- play.pyの終端後ループ終了。
+- test_terminal.pyの両FPSを扱う3試験。
+- 変更前基線は24の69 tests成功。26が参照する実行証拠はRound 1が30秒timeout、Round 2が72 tests成功。Studioによる再実行・独立検証ではない。
+- ボス、RunSession、pause/resume、retry、入力・表示契約、説明更新、対応bots、通常ラン測定は未完了。
+
+現状ファイルを正本として26の部分成果の反映状況を確認する。未反映なら仕様・計画に沿って必要な変更を含める。26にある一時的な`@run-results`は次Stepの入力として要求せず、永続した報告と現状ファイルを用いる。過去の成功を今回の完成版の合格証拠として扱わない。
+
+## Decisions already made
+
+- D-001：戦闘入力はattackとdash。
+- D-015〜D-017：第1〜4部屋を連続して進み、第5部屋を単体ボスへ置換。回復・継承・死亡優先・最初からのretryを含む。
+- D-018〜D-019：旧第5部屋に依存する集計の適用終了と代替評価。共有回帰は保持する。
+- D-021：現状repo/のテキスト表示・script実行で進める。指定sha確認、実機供給、gamepad実機検証、外部配員、見積もり取得を開始条件にしない。
+
+## Constraints
+
+- 第1〜4部屋の構成と共有戦闘パラメータを保持する。
+- 新戦闘入力、ボス専用チェックポイント、時間合わせのHP増加・待機を追加しない。
+- 30/60 FPSを対象とする。購入・外部委託・追加金銭を使わない。
+- 16・20の計画はD-021と整合する部分を適用する。実機・外部供給・見積もり要求へ戻さない。
+- 既存計画に従い、ボス・弾属性→Session→parser・表示・説明→対応bots・測定の順で逐次進める。
+- 独立QA→限定Art Verify→独立Play→Designer実測後判断→Reviewを維持する。自分の試験で独立検証を代替しない。
+
+## Open questions
+
+新規の仕様・計画質問はない。実装中に仕様の曖昧さが判明したらDesignerへ、計画が成立しない場合はTechnical Directorへ戻すためstudioに具体的な根拠を返す。実測値の評価・追加数値ゲートの要否は後続Designerが判断する。
+
+## Expected output
+
+`studio`宛てのBuild結果Handoffを作成する。
+
+- 完成した変更、未完了事項、仕様のR/B/T/C/V各基準との対応を区別する。
+- 旧assert移行、共有戦闘回帰、終端・Session・pause/retry、両FPSの試験結果を示す。実行コマンド、入力、終了状態と測定条件を再現可能に残す。
+- player/trace表示、manual/README、対応botsを仕様どおり完成する。
+- 対応botの両FPS、開始hearts 3/2別比較と、正規敵撃破による同一試行の通常ラン到達・終端・所要時間の測定を残す。独立診断scriptを通常ラン到達の証拠にしない。
+- 独立QAが仕様・受入基準・buildから検証できる手順を記載する。実装理由や自己評価は独立した`## Sender assessment`へ置く。
+- 明白な対処不能・到達不能を認めた場合は、その証拠を明示してstudioへ返す。
+
+全Buildが完了するまでQA投入可能としない。残作業がある場合は部分成果と明記し、完成と区別する。
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: project.md#vision
+- Project: project.md#constraints
+- Project: project.md#art-direction
+- Project: repo/README.md
+- Project: repo/manual.md
+- Project: repo/game.py
+- Project: repo/play.py
+- Project: repo/bots.py
+- Project: repo/tests/test_game.py
+- Project: repo/tests/test_terminal.py
+- Project: design/final-boss-and-continuous-run.md
+- Project: design/combat.md
+- Project: design/combat-cues-visual-spec.md
+- Project: design/combat-step-44-walker-limit.md
+- Project: design/combat-step-46-room3-cap.md
+- Project: design/combat-step59.md
+- Project: design/combat-step68.md
+- Project: design/combat-step72.md
+- Project: design/combat-step94.md
+- Plan: goals/G-002-final-boss/16-technical-director-to-studio.md
+- Plan: goals/G-002-final-boss/20-technical-director-to-studio.md
+- Decisions: decisions/D-001-one-button-combat.md
+- Decisions: decisions/D-002-contact-edge-graze-accepted.md
+- Decisions: decisions/D-003-contact-edge-exact-reach-and-lunge-band.md
+- Decisions: decisions/D-004-spitter-cue-gap-brute-no-cancel-room2-spitter-deferred.md
+- Decisions: decisions/D-005-blocked-contact-consumes-shot-and-spends-lunge.md
+- Decisions: decisions/D-006-walker-limit-rooms-3-5-structural-ceiling.md
+- Decisions: decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md
+- Decisions: decisions/D-011-variant-named-messages-accepted.md
+- Decisions: decisions/D-012-room3-standard-grub-and-closer-spitter.md
+- Decisions: decisions/D-015-owner-approves-continuous-run-and-final-boss.md
+- Decisions: decisions/D-016-final-boss-experience-direction.md
+- Decisions: decisions/D-017-final-boss-and-run-contract.md
+- Decisions: decisions/D-018-legacy-balance-gate-transition-direction.md
+- Decisions: decisions/D-019-g002-balance-criteria-applicability.md
+- Decisions: decisions/D-021-owner-authorizes-text-build.md
+- Previous handoff: goals/G-002-final-boss/26-gameplay-engineer-to-studio.md
+>>>END

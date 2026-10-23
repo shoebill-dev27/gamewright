@@ -1,0 +1,122 @@
+<<<EDIT goals/G-002-final-boss/goal.md
+<<<<<<< SEARCH
+status: active
+=======
+status: blocked-on-owner
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+- Decide（残工程と予算）：open。82の見積もりは必須作業だけで22〜24 Step。各Step後のRouteを含め最低44〜48 operationsとなり、現在87/123の残36を超える。Game Directorが費用・範囲のOwner判断に必要なbriefを準備する。予算、必須検証、Goal解釈は変更しない。
+=======
+- Decide（残工程と予算）：blocked-on-owner。84のbriefを85でOwnerへ提示する。今回のpacketは89/123、残34。必須22〜24 StepはRoute込み44〜48 operationsを要し、現行残枠を超える。Resume時点の累計＋60 operationsで継続する案Aか、未達・検証未完了で打ち切る案Bの回答待ち。予算、必須検証、Goal解釈は未変更。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| 7b-budget | Decide | game-director | prepare-owner-escalation | open | 83-studio-to-game-director.md（残工程の費用・範囲brief） |
+=======
+| 7b-budget | Decide | game-director | prepare-owner-escalation | done | 83-studio-to-game-director.md → 結果: 84-game-director-to-studio.md |
+| 7b-budget-owner | Decide | owner | — | open | 85-studio-to-owner.md |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+D-026によりD-025の範囲を維持する。82のE1分割計画を受領したが、必須作業の見積もりにRouteを加えると残予算を超えるため、83でGame Directorへ費用・範囲briefを依頼する。判断まではAを含む依存Buildを開かない。独立QA、限定Art Verify、独立Play、Designer判断、Reviewは削除しない。歴史的一致の確認不能を合格や免除にしない。
+=======
+D-026によりD-025の範囲を維持する。84の費用・範囲briefを85でOwnerへ提示し、回答までA以降の依存Build・測定・評価を保留する。plannedの工程は継続承認を条件とし、現在開かない。独立QA、限定Art Verify、独立Play、Designer判断、Reviewは削除しない。歴史的一致の確認不能を合格や免除にしない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+82を受領して81を完了記録し、E1のA〜D分割を採用する。現在87/123、残36に対し、82の必須22〜24 StepはRoute込み最低44〜48 operations。上限内に収まらない具体的見通しが出たため、A開始に先立ち83でGame Directorへ費用・範囲briefを戻す。必須検証・予算・達成条件は変更しない。
+=======
+84を受領し83のbrief準備を完了記録、85でOwnerの費用判断を開く。packetの最新累計89/123、残34に対し必須工程は44〜48 operations。Goalをblocked-on-ownerとし、依存作業を保留する。案Aの予算はResume時点の実累計＋承認枠で算出し、現行予算・必須検証・達成条件は変更しない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Game Directorが83-studio-to-game-director.mdで残工程と残予算の不一致を評価し、Owner向け費用・範囲エスカレーションをstudioへ返す。依存Buildは保留。
+=======
+Ownerが85-studio-to-owner.mdに案A／案Bと条件を回答する。案AはResume時点の累計＋60 operationsの承認、または別上限の指定。回答まで依存作業を保留する。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+未完了・継続中。OwnerはD-026でD-025の範囲とbudget: 123を承認した。連続ランと最終ボスは実装報告済みだが、公開情報限定の実dodger接続、被弾差の原因確定、必須証拠、独立QA・体験評価は未完了。source fc07c7db6383の161件の試験成功を独立検証やGoal達成とは扱わない。歴史的一致の確認不能と15〜20分Visionの未評価を保持する。追加40 operationsは完成保証ではなく、上限到達時は範囲か費用をOwnerへ再確認する。
+=======
+未完了・Owner判断待ち。D-026のbudget: 123を維持し、85で追加継続または未達打切りを諮る。連続ランと最終ボスは実装報告済みだが、公開情報限定の実dodger接続、被弾差の原因確定、必須証拠、独立QA・体験評価は未完了。source fc07c7db6383の161件の試験成功を独立検証やGoal達成とは扱わない。歴史的一致の確認不能と15〜20分Visionの未評価を保持する。追加予算案は完成保証ではなく、Owner回答前に予算変更や達成判定を行わない。
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-002-final-boss/85-studio-to-owner.md
+---
+kind: escalation
+goal: G-002
+seq: 85
+from: studio
+to: owner
+status: open
+decision: pending
+---
+# 85: Owner判断 — 必須検証の継続予算
+
+## Question
+
+D-025の必須範囲を維持し、Resume時点の実累計に60 operationsを加えた新上限で継続しますか、それともG-002を未達・検証未完了として打ち切りますか。
+
+## Why this needs the Owner
+
+Game Directorが84で作成したbriefを提示します。今回のpacketの最新累計は89/123 operations、残枠は34です。82の残必須工程は22〜24 Stepで、各Step後のRouteを含め44〜48 operationsを要します。現時点でも10〜14 operations不足し、Owner提示後の処理や手戻りは別に必要です。
+
+承認済み予算に収まらない具体的な見通しが出たため、D-026の再判断条件に該当します。予算変更はOwnerの権限です。D-025の重複削減は適用済みで、必須検証やRole分離を維持したまま収まる追加削減の根拠は示されていません。
+
+これは既存条件のままで継続する費用の判断です。環境・外部配員・保存機構の供給を求めるものではありません。
+
+## Options
+
+### Option A — Resumeから60 operationsを上限に継続
+
+ゲームの範囲・仕様・必須検証を維持します。新budgetは「Owner回答後のResume時点の実累計＋60」とします。現行123からの増加量は、Resume時点の実累計で算出し明記します。現在の89や以前の87を固定して計算せず、今回の判断・提示の消費を二重計上しません。
+
+| 必須工程 | Step | Route込みoperations |
+|---|---:|---:|
+| E1 A〜D：出力整備、実接続・記憶、差分分類、実経路監査 | 4 | 8 |
+| E2：接触診断 | 1〜2 | 2〜4 |
+| E3：ボス4条件 | 4 | 8 |
+| E4：保持回帰・記録比較 | 1〜2 | 2〜4 |
+| E5：通常公開再生 | 2 | 4 |
+| Q1〜Q6：独立QA | 6 | 12 |
+| 限定Art Verify、独立Play、Designer実測後判断、Review | 4 | 8 |
+| 必須工程計 | 22〜24 | 44〜48 |
+| 失敗修正、追加表示窓、必要な判断への手戻り、終結処理の余裕 | — | 12〜16 |
+| 合計上限 | — | 60 |
+
+余裕枠は修正回数の確定見積もりではありません。追加StepとそのRouteは双方を消費します。必須工程が48 operationsなら余裕は12で、追加StepとRouteだけに使っても6組です。各Step最大3回の実行、各出力最大2万字、@need一度最大8ファイルという供給上限は維持します。表示継続が別Stepになれば予算を消費します。
+
+接続後の失敗、差分に対するDesigner判断、可読性修正、独立評価での手戻りが余裕を超える可能性があります。完成保証ではなく、ReviewでGoal未達となる可能性も残ります。追加金銭や外部調達は伴いません。途中停止は可能ですが、消費済みoperationsは戻りません。
+
+If chosen: Owner回答をDecisionとして記録し、新budgetを実累計から設定します。82のAだけを開き、A→B→C→D→E2→E3→E4→E5→独立Q1〜Q6→限定Art Verify→独立Play→Designer実測後判断→Reviewの順に進めます。同じ後続条件判断だけのStepは再追加しません。各単位後に残工程と残予算を照合し、収まらない具体的見通しが再び出れば上限到達前にOwnerへ戻します。上限到達時は新規作業を開きません。
+
+### Option B — 未達・検証未完了を明示して打ち切る
+
+追加の実装・測定・評価を開かず、現在の成果と不足を整理して終了します。連続ランと最終ボスの実装報告は残しますが、「手応えのあるボス戦が成立した」とは結論しません。
+
+E1 A〜D、E2以降の必須証拠、独立QA、限定Art Verify、独立Play、Designer実測後判断、Reviewが未完了です。161 tests成功をその代用にしません。歴史的一致の確認不能は、これらの未実施・未解消事項と区別して残します。
+
+追加継続予算は求めず、終結の記録・Routeは現行残枠から消費します。実装の削除や巻戻しは行いません。後日の再開には改めて予算と状態の確認が必要です。
+
+If chosen: Owner判断を記録し、Goalを未達・検証未完了として終結報告します。未実施のReviewを実施済みとは扱いません。
+
+## Studio recommendation
+
+案Aを推奨します。Resume時点の実累計＋60 operationsは提案であり、Owner回答前に予算を変更しません。
+
+## Reasoning
+
+82の再計画は停滞していたE1を分割し、各単位の終了根拠を具体化しています。技術的不成立が示されたわけではなく、必須評価へ進む経路があるため、上限付き継続を推奨します。ただしAも未実施で、再計画が収束する証拠はまだありません。追加枠は残る成立確認と独立した体験判断に使います。
+
+60 operationsは必須44〜48と余裕12〜16を分けた上限提案で、統計的な完了予測ではありません。供給上限内で必要証拠を構成できない具体的理由、修正反復による見積もり増、承認範囲で解消できない体験・Vision不整合が判明すれば継続推奨を見直します。
+
+15〜20分Visionへの整合は未評価です。既報の通常ラン約87〜104秒というBuild値だけで解消済みとは扱いません。独立評価とDesigner判断を経ても整合しなければOwnerへ戻します。HP増加や待機の追加で時間だけを合わせません。
+
+D-021のテキストビルド、D-023の供給上限、D-024の現行検証・記録比較・歴史的確認不能の分離、D-025の必須検証と独立評価を維持します。本承認を技術計画の統合・削減、検証免除、Goal解釈変更の承認とは扱いません。
+
+根拠：84-game-director-to-studio.mdのGame Director brief、82の残工程見積もり、D-026の予算再判断条件。
+
+## Meanwhile
+
+継続する独立作業はありません。Goalはblocked-on-ownerとし、Aを含む依存Build・測定・評価を保留します。
+
+## Owner decision required
+
+案A／案Bと条件を回答してください。案Aの場合は「Resume時点の累計＋60 operations」を承認するか、別上限を指定してください。別上限でも未完了を合格へ変更せず、その枠で可能な継続と停止条件を明示します。
+>>>END

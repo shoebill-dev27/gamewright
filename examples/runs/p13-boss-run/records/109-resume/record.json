@@ -1,0 +1,47 @@
+{
+ "op": "Resume",
+ "role": null,
+ "goal": "G-002",
+ "attempts": [
+  {
+   "runtime": "codex",
+   "session_id": "01a16801-5dea-7af1-aa02-0f39194d4103",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 32468,
+    "cached_input_tokens": 7552,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 5669,
+    "reasoning_output_tokens": 73
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 1,
+   "started": "2026-10-23T18:04:42",
+   "seconds": 137.3,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "decisions/D-027-owner-stops-g002.md": "913dbede37f52bc6097d03e85d2442f056e5ddc6a6d76b982f0dd975c72cf8e8",
+  "goals/G-002-final-boss/85-studio-to-owner.md": "fec5e8f37e9ea08c68a70a2fbbc547ff45b5488c820e79aca6261f1d3c252111",
+  "goals/G-002-final-boss/goal.md": "8f88e51c1ce87fa239909bee90da5a17c940da8e20715b01328711132cfe823a",
+  "project.md": "d1fa7eb21a269a68ec399471b2db7941d2ebb51b9b0372ce0e945ef475eea2d6"
+ },
+ "decision": {
+  "new": [
+   "owner",
+   null
+  ],
+  "status": "abandoned",
+  "open": []
+ },
+ "seen_through_seq": 85
+}

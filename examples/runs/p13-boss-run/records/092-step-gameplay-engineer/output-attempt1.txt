@@ -1,0 +1,103 @@
+<<<EDIT repo/tests/test_split_c.py
+<<<<<<< SEARCH
+class SplitCTest(unittest.TestCase):
+    def test_public_normal_pause_victory_retry_death_retry(self):
+=======
+class SplitCTest(unittest.TestCase):
+    def test_generated_inputs_replay_without_controls(self):
+        """E1 compatibility diagnostic; no new normal-run measurement baseline."""
+        from test_g002_evidence import emit_rows
+
+        rows = []
+        for fps in (30, 60):
+            recorded = []
+            generated = []
+            original_press = bots._Proxy.press
+            original_step = bots.RunSession.step
+
+            def capture_press(proxy, action, direction=None):
+                recorded.append((proxy._s.t, action, direction))
+                return original_press(proxy, action, direction)
+
+            def capture_step(session, limit=None):
+                original_step(session, limit=limit)
+                g = session.game
+                generated.append((
+                    session.attempt, g.room, session.run_frame, g.frame,
+                    g.x, g.y, g.hearts, session.state,
+                    tuple((e.kind, e.x, e.y, e.hp) for e in g.enemies),
+                    tuple(tuple(shot) for shot in g.shots),
+                ))
+
+            with mock.patch.object(bots._Proxy, "press", capture_press), \
+                    mock.patch.object(bots.RunSession, "step", capture_step):
+                result = bots.play_run(bots.dodger, fps, 1200)
+            self.assertEqual(result["outcome"], "won")
+
+            script = "\n".join([
+                "mode run", f"fps {fps}", "limit 1200",
+                "driver-limit 1205",
+                *[
+                    f"{t:.12f} {action}" + (
+                        f" {direction}" if direction else "")
+                    for t, action, direction in recorded
+                ],
+            ]) + "\n"
+            setup, inputs, rules = play.read_script(script)
+            self.assertEqual(len(inputs), len(recorded))
+            for original, parsed in zip(recorded, inputs):
+                self.assertLessEqual(abs(original[0] - parsed[1]), 1e-9)
+                self.assertEqual(original[1:], parsed[2:])
+
+            replayed = []
+
+            def observe(session, force):
+                if force:
+                    return
+                g = session.game
+                replayed.append((
+                    session.attempt, g.room, session.run_frame, g.frame,
+                    g.x, g.y, g.hearts, session.state,
+                    tuple((e.kind, e.x, e.y, e.hp) for e in g.enemies),
+                    tuple(tuple(shot) for shot in g.shots),
+                ))
+
+            session, summary = drive(setup, inputs, rules, observe)
+            first_difference = next((
+                (number, before, after)
+                for number, (before, after) in enumerate(
+                    zip(generated, replayed), 1)
+                if before != after
+            ), None)
+            hurts = [
+                [e["room"], e["run_time"], e["room_time"], e["details"]]
+                for e in session.events if e["kind"] == "hurt"
+            ]
+            rows.append([
+                fps, len(recorded), len(generated), len(replayed),
+                first_difference, hurts,
+                result["outcome"], summary["outcome"],
+            ])
+            # Emit before assertions so a future connected-policy failure
+            # retains its first divergent state rather than only a hit count.
+            emit_rows(
+                f"E1/input-replay/{fps}/current-no-controls",
+                ["fps", "inputs", "generated_frames", "replayed_frames",
+                 "first_difference", "replay_hurts",
+                 "generated_outcome", "replay_outcome"],
+                [rows[-1]],
+                excluded=["pause/retry integration", "E5 acceptance",
+                          "connected public-policy certification"],
+            )
+            self.assertEqual(len(generated), len(replayed))
+            self.assertIsNone(first_difference)
+            self.assertEqual(summary["outcome"], "clear")
+            self.assertEqual(summary["attempts"][0]["hits"],
+                             sum(result["hurt_sources"].values()))
+
+    def test_public_normal_pause_victory_retry_death_retry(self):
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE @run/tests/e1-input-replay-diagnostic
+>>>END

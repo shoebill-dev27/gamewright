@@ -1,0 +1,274 @@
+<<<EDIT repo/bots.py
+<<<<<<< SEARCH
+import math
+import sys
+import time
+=======
+import math
+import sys
+import time
+import json
+from dataclasses import dataclass, field
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        self.shadow = 0.0  # log only: a copy of the clock that also runs while the player is stunned
+=======
+        self.shadow = 0.0  # log only: a copy of the clock that also runs while the player is stunned
+        self.boss_memory = BossMemory()
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+def dodger(game, note):
+=======
+@dataclass(frozen=True, slots=True)
+class BossObservation:
+    """Allowlist adapter output; no Game, Enemy, active timer or contact consumption."""
+    time: float
+    player: tuple
+    boss: tuple
+    phase: str
+    attack: str
+    warning_aim: object
+    shots: tuple
+    stunned: bool
+
+
+@dataclass(slots=True)
+class BossMemory:
+    lane: object = None
+    origin: str = "none"
+    dash_issued: float = -math.inf
+    attack_issued: float = -math.inf
+    number: int = 0
+    records: list = field(default_factory=list)
+
+
+def observe_boss(game):
+    """Read display-backed positions/status; aim is exposed only during warning.
+
+    Positions and shot positions correspond to play.sprites, phase/attack to
+    Output.emit, warning aim to its locked-direction line. Stunned is the
+    existing bot input-suppression observation, not the remaining stun timer.
+    """
+    boss = next((e for e in game.enemies if e.kind == "boss" and e.hp > 0), None)
+    if boss is None:
+        return None
+    return BossObservation(
+        game.t, (game.x, game.y), (boss.x, boss.y),
+        boss.phase, boss.attack_name,
+        tuple(boss.aim) if boss.phase == "warning" and boss.aim else None,
+        tuple((s[0], s[1]) for s in game.shots), game.stun_left > 0,
+    )
+
+
+def boss_decision(view, memory, grid=0.0):
+    """Pure public-input policy. Return buttons; never execute against internal state.
+
+    Readiness is conservative history of issued buttons: a dash occupies
+    0.25 + 0.6 seconds and a swipe occupies 0.35 seconds. Rejected buttons
+    can therefore delay another attempt but cannot reveal a hidden timer.
+    """
+    memory.number += 1
+    if view.phase == "warning" and view.warning_aim is not None:
+        memory.lane = (view.boss, view.warning_aim,
+                       2.4 if view.attack == "charge" else 3.0)
+        memory.origin = "warning"
+    elif view.phase not in ("warning", "active"):
+        memory.lane, memory.origin = None, "cleared by " + view.phase
+    elif view.phase == "active" and memory.lane is None:
+        memory.origin = "missing warning; maximum range in all directions"
+
+    px, py = view.player
+    bx, by = view.boss
+    danger = False
+    if view.phase in ("warning", "active"):
+        if memory.lane is None:
+            danger = math.dist(view.player, view.boss) <= 3.4
+        else:
+            (ox, oy), (ux, uy), length = memory.lane
+            along = max(0.0, min(length, (px - ox) * ux + (py - oy) * uy))
+            danger = math.hypot(px - ox - along * ux, py - oy - along * uy) <= 0.9
+    # No velocity/age/lifetime lookup: every visible nearby shot is conservative danger.
+    danger = danger or any(math.dist(view.player, shot) <= 2.1 for shot in view.shots)
+    buttons = []
+    rejected = []
+    candidates = ["escape", "hold", "approach", "swipe"]
+    if view.stunned:
+        selected = "skipped: stunned"
+        rejected = ["all buttons: stunned"]
+    elif danger:
+        # Existing geometric helpers take only numeric vectors or this allowlisted view.
+        ux, uy = memory.lane[1] if memory.lane else (bx - px, by - py)
+        if abs(ux) >= abs(uy):
+            direction = "down" if py < 4 else "up"
+        else:
+            direction = "right" if px < 7.5 else "left"
+        if view.time - memory.dash_issued >= 0.85 - 1e-9:
+            selected = "escape: dash"
+            buttons = [("dash", direction)]
+            memory.dash_issued = view.time
+        else:
+            selected = "escape: step"
+            rejected.append("dash: issued-button cooldown")
+            buttons = [("move", direction)]
+        rejected += ["hold: danger", "approach: danger", "swipe: danger"]
+    elif view.phase in ("warning", "active"):
+        selected = "hold off the boss's locked line"
+        buttons = [("stop", None)]
+        rejected = ["escape: outside danger", "approach/swipe: warning or active"]
+    elif math.dist(view.player, view.boss) > 1.1:
+        selected = "walk to boss"
+        buttons = [("move", _toward(bx - px, by - py))]
+        rejected = ["escape: no danger", "swipe: outside preferred range"]
+    else:
+        selected = "face and swing at boss"
+        buttons = [("move", _toward(bx - px, by - py)), ("stop", None)]
+        if view.time - memory.attack_issued >= 0.35 - 1e-9:
+            buttons.append(("attack", None))
+            memory.attack_issued = view.time
+        else:
+            rejected.append("attack: issued-button recovery")
+        rejected += ["escape: no danger", "approach: already close"]
+    record = {
+        "decision": memory.number, "grid": grid, "time": view.time,
+        "public": {
+            "player": view.player, "boss": view.boss, "phase": view.phase,
+            "attack": view.attack, "warning_aim": view.warning_aim,
+            "shots": view.shots, "stunned": view.stunned,
+        },
+        "memory": {"lane": memory.lane, "origin": memory.origin},
+        "candidates": candidates, "excluded": rejected,
+        "selected": selected, "buttons": buttons,
+    }
+    memory.records.append(record)
+    return buttons, record
+
+
+def _boss_act(game, note, memory, grid=0.0):
+    view = observe_boss(game)
+    if view is None:
+        return False
+    buttons, record = boss_decision(view, memory, grid)
+    # Internal execution and diagnostic logging occur only after pure selection.
+    note("BOSS_PUBLIC " + json.dumps(record, sort_keys=True))
+    for action, direction in buttons:
+        game.press(action, direction)
+    return True
+
+
+def _bot_act(bot, game, brain):
+    if bot is dodger and _boss_act(
+        game, lambda text: brain.note(game, text), brain.boss_memory, brain.grid
+    ):
+        return
+    bot(game, lambda text: brain.note(game, text))
+
+
+def dodger(game, note):
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    ready = game.dash_left <= 0 and game.dash_cooldown <= 0
+=======
+    if _boss_act(game, note, BossMemory()):
+        return
+    ready = game.dash_left <= 0 and game.dash_cooldown <= 0
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+                    bot(game, lambda text: brain.note(game, text))
+=======
+                    _bot_act(bot, game, brain)
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+                    bot(proxy, lambda text, g=game, b=brain: b.note(g, text))
+=======
+                    _bot_act(bot, proxy, brain)
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/tests/test_bots_boss.py
+<<<<<<< SEARCH
+class OutcomeTest(unittest.TestCase):
+=======
+class PublicBoundaryTest(unittest.TestCase):
+    def test_allowlist_and_internal_active_values_do_not_change_decision(self):
+        from dataclasses import fields
+        self.assertEqual(
+            {f.name for f in fields(bots.BossObservation)},
+            {"time", "player", "boss", "phase", "attack", "warning_aim",
+             "shots", "stunned"},
+        )
+        records = []
+        for remaining, struck, spent in ((0.3, False, False), (0.001, True, True)):
+            game = boss_warning("charge", (8, 4))
+            enemy = game.enemies[0]
+            enemy.phase = "active"
+            enemy.phase_left, enemy.struck, enemy.spent = remaining, struck, spent
+            observation = bots.observe_boss(game)
+            self.assertFalse(hasattr(observation, "phase_left"))
+            self.assertFalse(hasattr(observation, "enemies"))
+            records.append(bots.boss_decision(observation, bots.BossMemory()))
+        self.assertEqual(records[0], records[1])
+
+    def test_warning_lane_survives_active_then_clears(self):
+        from dataclasses import replace
+        observation = bots.observe_boss(boss_warning("charge", (8, 4)))
+        memory = bots.BossMemory()
+        bots.boss_decision(observation, memory)
+        lane = memory.lane
+        active = replace(observation, time=0.9, phase="active",
+                         boss=(9.0, 4.0), warning_aim=None)
+        bots.boss_decision(active, memory)
+        self.assertEqual(memory.lane, lane)
+        self.assertEqual(memory.origin, "warning")
+        bots.boss_decision(replace(active, phase="recovery"), memory)
+        self.assertIsNone(memory.lane)
+        self.assertEqual(memory.origin, "cleared by recovery")
+
+    def test_pure_input_branches_and_bounded_evidence(self):
+        from dataclasses import replace
+        from test_g002_evidence import emit_rows
+        observation = bots.observe_boss(boss_warning("charge", (8, 4)))
+        cases = [
+            ("dash", observation, bots.BossMemory(), "escape: dash"),
+            ("wait", observation, bots.BossMemory(dash_issued=0), "escape: step"),
+            ("off", replace(observation, player=(8, 6)),
+             bots.BossMemory(), "hold off"),
+            ("approach", replace(observation, phase="approach"),
+             bots.BossMemory(), "walk to"),
+            ("swipe", replace(observation, phase="recovery", player=(9, 4)),
+             bots.BossMemory(), "face and swing"),
+            ("stun", replace(observation, stunned=True),
+             bots.BossMemory(), "skipped"),
+            ("missing", replace(observation, phase="active", warning_aim=None),
+             bots.BossMemory(), "escape"),
+        ]
+        rows = []
+        for name, view, memory, expected in cases:
+            buttons, record = bots.boss_decision(view, memory)
+            self.assertIn(expected, record["selected"])
+            self.assertEqual(record["buttons"], buttons)
+            self.assertTrue(record["candidates"])
+            self.assertTrue(record["excluded"])
+            if name == "stun":
+                self.assertEqual(buttons, [])
+            if name == "missing":
+                self.assertIn("missing warning", record["memory"]["origin"])
+            rows.append({"case": name, **record})
+        emit_rows("E1/pure-branches/current/fixture", ["case", "decision record"],
+                  rows, excluded=["runtime integration and FPS measurements"])
+
+    def test_brain_starts_with_fresh_memory(self):
+        first = bots.Brain()
+        first.boss_memory.lane = ((10, 4), (-1, 0), 2.4)
+        first.boss_memory.dash_issued = 12
+        second = bots.Brain()
+        self.assertIsNone(second.boss_memory.lane)
+        self.assertEqual(second.boss_memory.number, 0)
+        self.assertEqual(second.boss_memory.dash_issued, -float("inf"))
+
+
+class OutcomeTest(unittest.TestCase):
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE @run/tests/e1-boundary
+>>>END

@@ -1,0 +1,144 @@
+<<<FILE goals/G-002-final-boss/goal.md
+---
+kind: goal
+id: G-002
+project: lantern-depths
+status: active
+created: 2026-10-20
+---
+# G-002: 最後に手応えのあるボス戦
+
+## Owner request
+
+> 最後に手応えのあるボス戦がほしい
+
+## Interpretation
+
+ランの最後に、プレイヤーが位置取り、攻撃とダッシュのタイミング、敵の挙動への対応を通じて手応えを感じられるボス戦がある。短いランと、被害を受ける前に脅威を読み取れる体験を維持する。
+
+具体的なボスの仕組み、配置、難度、数値基準は担当Roleが定める。新しい入力ボタン、ゲームの基本コンセプト変更、ボス戦に必要のない既存部屋の全面改修は対象外。ラン構成や作業規模を大きく変える必要が生じた場合はOwnerに判断を戻す。
+
+## Unknowns
+
+- Observe：既存の不具合報告ではないため skipped。技術調査は静的確認のみであり、実行による裏付けは未実施。
+- Diagnose：done。提供コードでは個別部屋のセッションのみで、連続ラン・部屋間継承・最終勝利・専用リトライはない。指定shaとの一致、実行時の終端挙動、戦闘時間は未確認。調査の制限は04に記録。
+- Decide：open。配置A/B/C、既存第5部屋の扱い、終端・再挑戦の範囲をGame Directorが判断する。選択可能なボス部屋だけでは現Interpretationの達成を実証できず、連続ラン新設は配置変更とは別の規模となる。Goalの再解釈や大幅な範囲変更が必要ならOwnerへ戻す。
+- Design：方向確定後、攻撃構成、予兆と対処、時間配分、勝敗・残弾・終端後操作・再挑戦、受け入れ基準を仕様化するため planned。
+- Plan：planned。技術調査で、単体敵の複数攻撃切替、表示、終端の契約と共有コードへの影響が判明したため、確定仕様に基づく実装計画が必要。
+- Build：仕様と計画の確定後にゲーム変更が必要なので planned。
+- Verify：Build後の独立確認は planned。30/60 FPSと共有戦闘ルールの回帰を含む。Art Directorの表現確認は、攻撃・表示仕様で依存が確定するまで tentative。
+- Play：最終戦の手応えを独立したプレイヤー観察で評価するため planned。実装内容や期待結果は渡さない。
+- Review：体験Goalの達成判断が必要なので planned。
+- Next：結果と残課題をOwnerへ返すため planned。
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Design | game-designer | write-design-spec | done | 01-studio-to-game-designer.md → 結果: 02-game-designer-to-studio.md |
+| 2 | Diagnose | technical-director | technical-plan | done | 03-studio-to-technical-director.md → 結果: 04-technical-director-to-studio.md |
+| 3 | Decide | game-director | make-decision, prepare-owner-escalation | open | 05-studio-to-game-director.md |
+| 4 | Design | game-designer | write-design-spec | planned | — |
+| 5 | Plan | technical-director | technical-plan | planned | — |
+| 6 | Build | gameplay-engineer | implement-change | planned | — |
+| 7 | Verify | qa | verify-change | planned | — |
+| 8 | Verify | art-director | visual-review | tentative | — |
+| 9 | Play | playtester | playtest-session | planned | — |
+| 10 | Review | game-director | review-outcome | planned | — |
+| 11 | Next | studio | — | planned | — |
+
+原則として逐次実行する。Game Directorの方向判断後にDesign、Planへ進む。Owner判断が必要になった場合は依存する後続Stepを停止する。Art DirectorのVerifyが必要になった場合は、同じビルドに対するQAのVerifyと独立に並行できる。
+
+## Route changes
+
+Technical Directorの静的調査を完了し、予定どおりGame Directorの配置・範囲判断を開く。連続ラン不在と実行未確認を明示し、Goal再解釈・大幅な範囲変更はOwner判断へ戻す。攻撃切替・表示・終端の複数システムへの影響から、設計後のPlanをplannedに確定した。
+
+## Next action
+
+Game Directorが `05-studio-to-game-director.md` から配置・既存第5部屋・終端と再挑戦の範囲を判断する。権限内ならDecisionとStudio宛Handoffを、Owner判断が必要ならEscalationを作成する。次の操作はこのDecide Step。
+
+## Outcome
+
+未完了。初回Designと技術的な静的調査を完了した。配置・範囲の決定、仕様確定、実装、検証、体験評価は未実施。技術調査は実行成功やQA合格を示さない。
+>>>END
+
+<<<FILE goals/G-002-final-boss/05-studio-to-game-director.md
+---
+kind: handoff
+goal: G-002
+seq: 5
+from: studio
+to: game-director
+stage: Decide
+outcome: routed
+---
+# 05: studio → game-director — 最終戦の配置と実装範囲を判断する
+
+## Task
+
+初回Designの候補とTechnical Directorの調査から、ボスの配置、既存第5部屋の扱い、今回の終端・再挑戦の範囲を判断する。Goalの意味を変える、または作業規模を大きく変える必要がある場合は、採択する前にOwner向けEscalationを作成する。
+
+## Context
+
+Owner要望は「最後に手応えのあるボス戦がほしい」。現Interpretationは「ランの最後」に位置取り、攻撃・ダッシュのタイミング、敵への対応を通じた手応えを持つ戦闘を求める。
+
+初回Designは配置を独断で選ばずquestionを返し、その後Technical Directorが提供コードを静的調査した。配置・攻撃・終端について新しいDecisionはまだない。Studioは内容の採択を行っていない。
+
+## Findings
+
+判断の根拠は02と04。詳細はLoadに含める。
+
+- A：第5部屋を単体ボスに置換。部屋数を増やさず単独評価しやすいが、既存混成戦と第5部屋固有の基準の扱いを決める必要がある。Game Designerの第一候補であり、未承認。
+- B：第5部屋の後に追加。既存構成を保持できるが、部屋の追加だけでは前の部屋から到達する経路はできない。
+- C：第5部屋の混成戦に同居。複数脅威の調停と回避可能性、表示の組合せ検証が増える。Game Designerは初手として推奨していない。
+- 提供コードの実行経路は個別部屋選択方式で、連続ラン・状態継承・最終勝利・専用リトライはない。同じコマンドの再実行は新しい部屋セッションになる。
+- 選択可能なボス部屋だけでは「ランの最後に到達する」という現Interpretationを実証できない。連続ランを含める場合、A/B/Cいずれでも進行・継承・終端・再挑戦・時刻と入力の契約が新設となる。
+- 死亡・クリア後も表示用の時間中に弾などが進む可能性が静的に指摘されている。勝敗の優先順位、残弾、終端後の操作は後続仕様で明確化する必要がある。既存不具合のQA判定ではない。
+- 単体敵の複数攻撃切替は未実装。既存戦闘の基盤は再利用可能だが、敵更新・表示・イベント・botsの前提をまたぐ変更になる。設計後のPlanを予定する。
+- player/traceには60秒上限がある。15〜20分はVision上の目標であり、現行ランの実測ではない。独立部屋のbots時間の合算をラン実測として扱えない。
+- 攻撃種、固定方向、危険範囲、回復状態、HPの表示に不足がある。ゲームルール確定後、Art Directorへの限定的な表現仕様依頼が必要か判断材料を残す。
+
+04は提供ファイルの静的所見である。指定sha `27fe16268ac8` と実ファイルの一致、テスト、player/trace、botsは未確認・未実行。資料はbuild 0.6、project.mdのCurrent stateは0.4という差がある。実行・計測を伴う事実として採択しない。
+
+## Decisions already made
+
+- D-001：攻撃とダッシュが基本。追加の戦闘入力はOwner承認が必要。
+- 既存接触端の例外、非中断、cue gap、無敵接触消費の制約は02・04に整理されている。今回それらを変更する承認はない。
+- G-002の配置、攻撃構成、終端・再挑戦範囲のDecisionは未作成。
+
+## Constraints
+
+- project.mdのVisionとConstraints、goal.mdのOwner requestとInterpretationを維持する。
+- Goalの再解釈や大幅な範囲変更をRole内の採択で済ませない。該当時はOwnerへ戻す。
+- 権限内の配置・優先度の判断を、選択肢があるという理由だけでOwnerへ戻さない。
+- 詳細な攻撃ルール・数値はGame Designer、技術方式はTechnical Directorの責任に残す。
+- ボスに不要な既存部屋の全面改修、新規入力、グラフィカルな実装を前提にしない。
+- 静的調査をQA合格、体験評価、戦闘時間の実測として扱わない。
+
+## Open questions
+
+1. A/B/Cのどれを採るか。既存第5部屋と固有基準をどの範囲で保持・置換するか。
+2. 現Interpretationを維持して必要となる到達経路・最終勝利・再挑戦の範囲は何か。それはGoalが含意する範囲内か。
+3. 選択可能なボス部屋に限定する場合、Goalの再解釈を要するか。連続ランを新設する場合、大幅な規模変更としてOwner判断が必要か。
+4. 時間配分の判断に実測が必須か。未実測のまま定められる方向上の限界と、後続で集めるべき証拠は何か。
+5. 診断が判断に不足するなら、どの具体的な追加情報が必要か。
+
+## Expected output
+
+権限内で決められる場合、配置・既存第5部屋・到達経路・終端と再挑戦の範囲、採択理由と代替案、後続設計の限界をDecisionとして記録し、結果をStudio宛Handoffで返す。詳細仕様や技術方式は決めず、Game Designerが仕様化できる方向を示す。
+
+Owner escalationの条件に当たる場合は、prepare-owner-escalationに従い、日本語のEscalationを作成する。必要な判断を一問にまとめ、選択肢、規模・体験への影響、推奨、各選択後のルートを記す。Owner判断前に方向を確定しない。
+
+判断材料が不足する場合は、必要な情報と理由を特定してStudioへ返す。今回は実装・QA・Goal達成判定を行わない。
+
+## Load
+
+- Role: studio/roles/game-director.md
+- Skills: studio/skills/make-decision.md
+- Skills: studio/skills/prepare-owner-escalation.md
+- Project: project.md
+- Project: goals/G-002-final-boss/goal.md
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-002-final-boss/04-technical-director-to-studio.md
+- Supporting handoff: goals/G-002-final-boss/02-game-designer-to-studio.md
+>>>END
