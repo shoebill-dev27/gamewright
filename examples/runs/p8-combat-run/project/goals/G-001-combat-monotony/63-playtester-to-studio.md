@@ -1,0 +1,131 @@
+---
+kind: handoff
+goal: G-001
+seq: 63
+from: playtester
+to: studio
+stage: Play
+outcome: done
+---
+# 63: playtester → studio — Observation report: combat of the current build, rooms 1–5
+
+## Task
+
+Report what I experienced playing rooms 1–5 of the current build through the player view, with separate reaction rules per enemy mark.
+
+## Context
+
+Reply to handoff 61. I played only through input scripts with reaction rules, using `python3 play.py --view player`. I did not read source, design documents or tests, and I did not use the trace view or the bots. I played as the profile describes: an action player who dodges and spaces, with no combo memorizing.
+
+## Findings
+
+### Method
+
+All play was scripted reaction rules, not live play. Six sessions in two rounds. I cannot feel the pad or the timing. Reaction rules act at most every 0.15 s, so "my" dodges are an approximation of a player.
+
+| Session | Style | Result |
+|---|---|---|
+| room 1, 60 FPS, "fast" | Chase every grub, swipe at 1.4 tiles, step aside on "rears back" | Cleared in 6.6 s, 3/3 hearts. |
+| room 2, 60 FPS, "slow" | Wait, face enemies, swipe at 1.4 tiles, step aside on every warning | Output cut at ~27 s. Room not finished. Hearts 2/3. |
+| room 3, 30 FPS | Dash on warnings, walk toward enemies | Output cut at ~26 s. Room not finished. Hearts 3/3. |
+| room 2, 60 FPS, "fast" | Rush the runners and grubs, back off the brute only inside 1.6 tiles | Went down at 11.4 s. |
+| room 4, 60 FPS, "my style" | Chase, dash on grub warnings, step aside on spitter aim | Cleared in 15.2 s, 2/3 hearts. |
+| room 5, 60 FPS, "slow" | Keep distance from the brute, step aside on every warning | Output cut at ~19.5 s. Alive at 1/3 hearts with both spitters still up. |
+
+Rules per mark:
+- **Grub `g`:** I moved aside when it reared back and swiped when it was within 1.4 tiles. Its warning is 0.5 s and a swipe cancels it, so the answer was "step out or hit it first".
+- **Runner `r`:** Same as the grub. The 0.35 s warning left little time to step aside, so swiping early or moving at the first warning mattered more.
+- **Brute `G`:** I stepped away or aside and did not swipe it into its warning. The manual says a swipe will not cancel it. In the fast run I did not give the brute its own dodge rule, which is my mistake and explains that death.
+- **Spitter `s`:** I moved aside or dashed across the aim line (a different answer, because the shot is a slow travelling projectile), and closed in to swipe it.
+
+I made the rules differ for the reason above. In the fast room 2 and room 1 runs I also let "move toward" override spacing.
+
+### Room 1 → room 2 → rooms 3–5
+
+**Room 1 (three grubs).**
+- Every grub asked the same thing: step aside, or swipe it to cancel.
+- Cancelling worked every time I tried (0.6 s, 1.05 s, 2.08 s, 2.53 s, and so on). The fast run took 6.6 s with no damage.
+- It was easy and quick. It was also all one move; there was nothing to adapt to.
+
+**Room 2 (two runners, a grub, a brute).**
+- The runners were over quickly (one swipe each, 3.4 s and 4.3 s in the slow run, 1.3 s and 2.1 s in the fast run).
+- The brute changed the pace. It is slow and has a long warning, and its swipe-cancel does not work.
+- In the slow run the brute fell into a loop from about 8 s to 27 s: it rears back, I step aside, it lunges, it follows me, it rears back again. I counted six or seven of these. I never got to hit it in the gap after a lunge, because my rules did not do that.
+- That stretch felt repetitive, though it may partly be the scripting.
+- In the fast run, the brute killed me after three hits (7.4 s, 9.4 s, 11.4 s). I stood next to it each time and my rules did not react to its warning.
+
+**Room 3 (three spitters, no melee).**
+- Everything was "read the line, move across it".
+- The spitters take aim in turn, and the aim lines are long diagonals or straight lines across the room.
+- I was never hit in the 26 s I saw. Early on I killed two spitters, but the third stayed in the far corner, and for about 20 s the same pattern repeated: aim, dash, shot lands behind me, again.
+- This was the most repetitive stretch of everything I played. Attention dropped, though it stayed safe.
+
+**Room 4 (grub, runner, two spitters).**
+- This was the first room that mixed asks: a melee dodge and an aim line at once.
+- I was hit once by a shot at 7.45 s while moving aside, in a crowd of several projectiles.
+- It felt better than rooms 1 and 3. The grub and runner lunges, the spitter lines and my own movement overlapped, and I had to choose which to answer first.
+
+**Room 5 (two grubs, a brute, two spitters).**
+- This was the busiest room, and the only one where my attention stayed high all the way through.
+- I took a shot at 6.8 s while walking through an aim line, then took a hit that I think came from the brute's lunge at 9.7 s (see the unexplained hit below), and was at 1/3 hearts by 9.7 s.
+- I did kill the brute (11.45 s) and the grubs. The room did not clear in the part I saw; the output was cut while the spitters were still firing and I was still dodging.
+
+### Repeated vs. different
+
+- **Repeated:** the "rears back → step aside → swipe in the gap" loop in room 1, and the slow room 2 brute dance. The spitter-only room 3 felt the same from about 6 s on.
+- **Felt different:** the brute (first time my swipe could not stop the warning), spitters (the first enemy that fights from range, with a line to read), and rooms 4–5 (several asks at once). Rooms 3 → 4 → 5 differ mostly in how many things overlap, not in what each thing asks.
+
+### Did anything hurt me that I couldn't explain?
+
+- **Brute lunge at 9.72 s in room 5.** The only message was "YOU ARE HIT by a grub". The brute's hit is reported as "a grub", and its warning also says "a grub rears back". A runner's and a brute's warnings read the same way in the message line. Only the `cue:` line (`r` / `G`) says which enemy it is. That was confusing for a moment, and a player without the cue line would not know.
+- **Grub hit at 5.82 s in room 2 (slow run).** My swipe landed at 5.72 s ("grub hit") with 0.13 s left on the warning, but did not cancel it, and the lunge arrived. This was explainable (a grub needs 2 swipes, and the first one only wounded it), but easy to misjudge.
+- **Spitter shots in rooms 4 and 5.** The two hits I took came from walking across lines in a field of several shots. I could tell where they came from in the printed rooms. In live play with this many `*` on screen I would expect some hits to feel unfair.
+
+### Impact
+
+| Issue | Impact |
+|---|---|
+| Room 3 spitter standoff repeats the same dodge for 20+ s | High on feel (boredom) |
+| Brute loop in room 2 (dodge, wait, dodge) | Medium on feel |
+| Brute and runner warnings read "a grub rears back" | Medium on clarity |
+| Rooms 4–5 shot clutter | Medium |
+| Room 1 offers only one kind of ask | Low to medium, as a first room it is fine |
+
+### Positives
+
+- Warnings were always shown before damage; I always knew roughly where danger would land.
+- Room 4 and room 5 were clearly different from the single-ask rooms, and engaging.
+- The brute's no-flinch rule makes it distinct from the grubs.
+- The runner is a quick, readable one-swipe threat.
+
+### Limits of my evidence
+
+- All play was scripted reaction rules; I did not hold a pad or react in real time. Rule choices (for example, "move toward" in the fast runs) decided several outcomes.
+- Outputs for room 2 (slow), room 3 and room 5 were cut by the output limit, at about 27 s, 26 s and 19.5 s. I did not see how they ended.
+- I did not play room 1 slow or in my own style, or rooms 3, 4 and 5 as a fast-clear run. Room 4 was my favourite style only and room 5 only slow. The 30 FPS run was room 3 only; I made no comparison against 60 FPS.
+- I saw no difference I could attribute to frame rate.
+- I did not play the practice room.
+
+## Decisions already made
+
+None.
+
+## Constraints
+
+Player view only; no source, design or tests read.
+
+## Open questions
+
+None for the studio. I cannot say, from scripts, whether the room 3 and brute loops would feel as flat to a human player; a live check would help.
+
+## Expected output
+
+Studio reads this and routes experience issues to game-designer, and the "a grub rears back" wording on brute and runner to whoever owns clarity or defects.
+
+## Load
+
+- Role: studio/roles/playtester.md
+- Skills: studio/skills/playtest-session.md
+- Project: project.md#player-profile, repo/manual.md, the build (`repo/`)
+- Decisions: none
+- Previous handoff: goals/G-001-combat-monotony/61-studio-to-playtester.md

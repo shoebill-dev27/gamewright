@@ -1,0 +1,167 @@
+<<<FILE goals/G-001-combat-monotony/76-qa-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 76
+from: qa
+to: studio
+stage: Route
+outcome: fail
+---
+# 76: qa → studio — Verification of the current build (D-011 messages and manual, D-012 room 3) at 30 and 60 FPS: FAIL on one test, behavior evidence otherwise good, three evidence gaps listed
+
+## Task
+
+Route this verification result. The whole test suite is not green (1 of 64 tests fails). Route the failure to Build (`gameplay-engineer`). After the fix, route a short QA re-verify that closes the evidence gaps in section 6 of Findings.
+
+## Context
+
+Goal G-001. Handoff 75 asked QA to verify the current `repo/` build at 30 and 60 FPS. The build has D-011 (variant-named messages and manual wording, `design/combat-step68.md`) and D-012 (room 3 layout, `design/combat-step72.md`). No earlier results existed for this state. QA used `run_tests`, `run_bots` (both rates, rooms 1–5, all bots) and `run_play` traces. QA modified no production code or test. Evidence below comes from the specs, the criteria, the source and the run outputs, not from any implementer explanation.
+
+## Findings
+
+### 0. Verdict
+
+**FAIL (overall).** `run_tests` is red: 63 of 64 pass. No game-behavior criterion was observed to fail. The failing test is a test whose expectation conflicts with the game's specified behavior (see 1). The bot results are inside the criterion 13–15 limits at both rates. One V criterion (V-c) could not be judged for lack of a 0.6.1 baseline. Details follow.
+
+### 1. `run_tests` (whole suite)
+
+`python3 -m unittest discover -s tests`: exit 1, 64 tests, 1 failure.
+
+```
+FAIL: test_wind_up_and_hit_messages_name_the_variant (test_game.VariantMessageTest)
+  line 763: self.assertEqual(out.count(f"a {kind} rears back"), 1, (fps, kind))
+  AssertionError: 3 != 1 : (30, 'grub')
+```
+
+- The test runs `room empty`, one enemy at (9.5, 4), a player who stays still, `end 3`. It expects exactly one `a <kind> rears back` in 3 s.
+- A standing player is lunged at again and again (criterion 4). The traces show the repeat directly:
+  - runner at 30 FPS: second `a runner rears back` at 1.167 s;
+  - runner at 60 FPS: second `a runner rears back` at 1.100 s.
+- For the grub, the count of 3 matches the derived wind-up times of about 0.03 s, 1.47 s and 2.8 s (derived: recovery 0.8 s after each lunge, with the hurt window in between). The brute's second wind-up is derived at about 2.1 s, so the same test would fail for it too.
+- V-a says each wind-up prints its message once. It does not say "one wind-up per 3 s". My reading is that the test expectation is wrong, not the build. The test stops at its first failure (grub, 30 FPS). Runner, brute and 60 FPS are therefore not yet evaluated by this test, and the same wrong expectation will fail them as well.
+- Not a spec question. Route to Build (test tooling). The test must count one message per wind-up (a 1.2 s window or counting wind-up events is enough). QA did not change the test.
+
+### 2. `run_bots` (rooms 1–5; limit 60 s; hearts lost / cleared / dashes)
+
+| Bot | Room | 30 FPS | 60 FPS |
+|---|---|---|---|
+| walker | 1 | lost 3, not cleared | lost 3, not cleared |
+| walker | 2 | lost 2, cleared 8.4 s | lost 2, cleared 8.4 s |
+| walker | 3 | lost 1 (grub 1), cleared 8.9 s | lost 1 (grub 1), cleared 9.2 s |
+| walker | 4 | lost 1, cleared 9.9 s | lost 3 (grub 1, shot 2), not cleared |
+| walker | 5 | lost 3, not cleared | lost 2, cleared 12.9 s |
+| dodger | 1–5 | lost 0 everywhere; cleared 5/5; dashes 3, 10, 6, 7, 11 | lost 0 everywhere; cleared 5/5; dashes 5, 14, 6, 8, 14 |
+| dodger room 3 clear time | | 15.6 s | 15.0 s |
+| camper | rooms 3–5 | none cleared | none cleared |
+
+Against the limits in `combat.md`:
+
+- **13 (rooms 3–5 summed).**
+  - Walker: 5 lost and 2 cleared at 30 FPS; 6 lost and 2 cleared at 60 FPS. The limits are 3 to 6 lost and at least 2 cleared, so it passes at both rates. At 60 FPS it is exactly at the upper limit of 6.
+  - Dodger: 0 lost, 3/3 cleared, which is within half the walker's total.
+  - Camper: 0 cleared, fewer than the walker's 2.
+  - The expected rise of the walker's loss from the room 3 grub (step 72 note) did not push it over the limit.
+- **14 (rooms 1–2).**
+  - Walker lost 5 (at least 1 required).
+  - Dodger lost 0 and cleared 2/2 (limits: at most 1 lost, both cleared).
+- **15.** The dodger used at least 1 dash in each of rooms 3–5 at both rates (30 FPS: 6, 7, 11; 60 FPS: 6, 8, 14).
+- **16c.** The dodger's cleared set is the same at both rates and hearts lost per room are identical (0). The walker differs between rates in rooms 4 and 5, which 16d allows. QA did not investigate whether it comes from bot grid timing (16e).
+- There are no clear-time limits in the design documents, so none were checked.
+- Observation: the comment in `test_walker_meets_criteria_13_and_14_at_each_rate` says the 60 FPS walker lost 7 hearts on 0.6. The current measurement is 6 (with the new room 3). The comment is stale. No tuning question arises.
+
+### 3. Per-criterion verdicts: `combat-step68.md` V-a to V-e
+
+Practice-room traces, one per variant at each rate (spawn at 9.5, 4; player at 8, 4).
+
+| Criterion | Verdict | Evidence |
+|---|---|---|
+| V-a | PASS | Each wind-up prints its own message once, on the cue frame, and the `cue:` line on that frame shows the full wind-up time left.<br>30 FPS: grub at 0.033 s (0.50 s to the lunge), runner at 0.033 s (0.35 s), brute at 0.033 s (0.70 s).<br>60 FPS: 0.017 s, 0.017 s, 0.017 s with the same times left.<br>Wording: `a grub rears back`, `a runner rears back`, `a brute rears back`. The runner's second message at 1.167 s (30 FPS) / 1.100 s (60 FPS) belongs to a new wind-up. |
+| V-b | PASS | The hit message names the variant, with unchanged hearts text.<br>30 FPS: `YOU ARE HIT by a grub — hearts 2/3` at 0.667 s; runner at 0.533 s; brute at 0.867 s.<br>60 FPS: 0.633 s, 0.483 s, 0.833 s.<br>The hearts line in the picture agrees on the same frame.<br>The shot message is `YOU ARE HIT by a shot — hearts N/3` (many traces). |
+| V-c | NOT VERIFIED | The packet has no stored 0.6.1 output to compare against, so byte-identity of everything else cannot be checked. Observed: the `cue:` line, `~` lines and shot, spit and aim messages have the same form as in the design text. A Build-supplied 0.6.1 baseline of the same scripts is needed. |
+| V-d | PASS | `test_rears_back_rule_matches_all_variants` passes (all three variants). In a real room 3, `when text "rears back" then dash aside` fired on the grub's message (30 FPS: `5.667 you dash down`; 60 FPS: `5.650 you dash down`). |
+| V-e | PASS (behavior); bot comparison not possible | The unit tests for criteria 1–11 and 17–21 pass (63/64; the one failure is the message-count test in 1). `bots.py` reads game state, not message strings (source), so the message change cannot move bot results. There is no 0.6.1 bot baseline to compare against, and room 3 changed on purpose. |
+
+Manual text (read against `combat-step68.md`):
+
+- The exact late-swipe sentence block from section 2 is in `repo/manual.md`.
+- The exact spitter sentence ("… so in room 3 up to 5 can be in the air at once.") is in the manual.
+- The old "no more than 3 are in the air at once" is gone.
+- `test_manual_has_the_new_wording` passes.
+- The manual lists the three variant wind-up messages and the three hit messages.
+
+### 4. Per-criterion verdicts: `combat-step72.md` R3-1 to R3-10
+
+| Criterion | Verdict | Evidence (measured unless marked derived) |
+|---|---|---|
+| R3-1 Contents | PASS | `ROOMS["3"]` = spitters (2,1), (10,6), (2,7), grub (15,0), and nothing else. The 0.00 s pictures show the same marks at the same cells at both rates. `test_rooms_match_the_spec` passes. Rooms 1, 2, 4, 5 in `game.py` match the `combat.md` table. |
+| R3-2 Teaching schedule | PASS | Still player at the start, 30 and 60 FPS, identical: aims at 1.200, 2.000, 2.800 s; spits at 1.800, 2.600, 3.400 s. Each cue is 0.6 s before its shot. |
+| R3-3 Grub after the lessons | PASS | Start position is (8, 4) (`START`, manual). First `a grub rears back` with a still player: **6.100 s at 30 FPS, 6.083 s at 60 FPS** (4.0 s required). The grub was at (9.7, 3.0), 1.97 tiles from the player. This agrees with the derived value (8.06 tiles from (15,0), minus 2.0, at 1.0 tile/s, about 6.06 s). Note: the still player is down at 6.300 s from shots (hits at 3.400, 5.500, 6.300 s), before the grub's first lunge (about 6.6 s). |
+| R3-4 Grub criteria in room 3 | PASS with gaps | Real room 3, both rates: the cue shows 0.50 s to the lunge on its first frame (≥ 0.5 required). A dash on the message (30 FPS 5.667 s, 60 FPS 5.650 s) leaves 3/3 hearts through the lunge. A swipe in wind-up cancels it (30 FPS: `7.533 swipe: grub hit` during the wind-up from 7.300, a new wind-up at 7.967 after the 0.4 s stagger, no lunge in between). Two swipes kill (60 FPS: `7.117 grub hit`, `7.483 grub defeated`, in wind-up, no lunge). **Gap:** the sidestep and safe-recovery checks in room 3 itself were not scripted. They are covered by practice-room unit tests (`GrubTest`) for the same standard grub. |
+| R3-5 Spitter criteria with the grub alive | PASS (not re-measured for 17) | Cue timing (9) is 0.6 s before every shot in all room 3 traces. Dodging (10) is covered by the passing tests. Criterion 17 was not re-run: no contact code or spitter position rule changed (only the spitter at (10,6), which affects where a shot starts). |
+| R3-6 D-007 bound; cue starts unchanged by the grub | PASS (counts derived) | Still-player trace, room 3 with grub vs three spitters alone (practice replica, player at (8,4)): aims 1.2, 2.0, 2.8, 3.6, 4.4, 5.6, 6.0 s and spits 1.8, 2.6, 3.4, 4.2, 5.0, 6.2 s, identical, at both rates, until the player is down at 6.3 s (before the grub's first lunge). In-flight count, reactive room 3 trace (method of step 46 note 11d), pictures at 7.5 s: 4 visible `*` + 0 spits in the last 0.3 s = **4** (both rates); at 12.0 s: 3 visible + 0 = **3** (both rates). Cap delay seen: all three spitters start cues together at 6.000 s and spit together at 6.600 s (30 FPS, also at 8.8 and 12.8 s), as accepted in D-007. No count above 5 in any picture inspected. **Gap:** the exact QA 43 / 11d script (`when see * coming within 2 then dash aside`, 15 s) was not run on the new room. |
+| R3-7 Room end | PASS | `test_room_3_clears_only_when_spitters_and_grub_are_all_dead` passes. Reverse case observed: at 60 FPS the grub was defeated at 7.483 s and the run ended with `enemies left 3`, room not cleared. The clear condition is `all(hp <= 0)` over all enemies. |
+| R3-8 Last spitter close | PASS (geometry derived; clear time from a replica) | Spitter distances from source: (2,1)–(10,6) = 9.43; (10,6)–(2,7) = 8.06; (2,1)–(2,7) = 6.0. The maximum is 9.43, which is ≤ 9.5. Practice-room replica (one spitter at (2,1), player at (9,6) walking left, then up, two swipes, no dash): cleared at **3.133 s (30 FPS) and 3.117 s (60 FPS)** from the start of the walk, 3/3 hearts, well inside 6 s. **Gap:** the real room 3 sequence (kill grub and two spitters, then walk to the last one) was not scripted. |
+| R3-9 Messages | PASS | `a grub rears back` appears in room 3 traces; `YOU ARE HIT by a grub` was seen in the practice room (V-b); the `text "rears back"` rule reacted (V-d). |
+| R3-10 Frame-rate independence | PASS (with a note) | All timing evidence above is equal at 30 and 60 FPS (±1 frame). The reactive room 3 traces diverge in detail (30 FPS: swipe miss at 7.133, hit by a shot at 8.700; 60 FPS: grub hit at 7.117, hearts 3/3 throughout). The two runs differ in where the rule fired on the 0.15 s grid (5.667 vs 5.650). QA did not isolate the cause beyond that. Under 16d/16e this is not a verdict. |
+
+### 5. Regression checks
+
+- **Rooms 1, 2, 4, 5:** contents unchanged in `game.py`. Bot results are in section 2: dodger 0 hearts lost and cleared in all, at both rates. Walker: room 1 lost 3 and not cleared, room 2 lost 2 and cleared (at both rates, as ruled in step 14); rooms 4 and 5 differ by rate (allowed by 16d).
+- **Criteria 1–11, 17–21 that touch room 3 or messages:** covered by the passing unit tests (63/64). The only red test is the message-count test in 1.
+- **In-flight bound for room 3:** no count above 5 in the inspected pictures (section 4, R3-6). `test_room_3_first_shots_are_staggered_and_cued_0_6_s_before` passes. It still asserts "at most 3 in flight" over its own run, which is stale against D-007 but passes.
+- **Criterion 16c:** dodger agrees across rates (section 2).
+
+### 6. Defects, document conflicts, undefined behavior, evidence gaps
+
+1. **DEFECT (test, Build): `VariantMessageTest.test_wind_up_and_hit_messages_name_the_variant`.** Fails as in section 1. Route to `gameplay-engineer`. First occurrence of this failure.
+2. **DOCUMENT CONFLICT (not a build defect): `design/combat.md` room 3.** It still has the room 3 row with the spitter at (14,7), no grub, and the old purpose line. Criterion 12 and the Cap paragraph (also superseded by `combat-step72.md`) point to it. Judged by `combat-step72.md` as instructed. The visual spec still says spitter cues are "normally 0.8 s apart". That is true in room 3 only until a cap delay; this was already known. Fold-in is still pending.
+3. **DOCUMENT CONFLICT: build number.** Handoff 75 calls the last verified state 0.6.1, but the banner (`Lantern Depths 0.6 — room N`, asserted by a test), `README.md` and `manual.md` all say 0.6. D-011 item 5 requires a stated build number if a playtest follows. Undefined for QA: which number this build carries. For Design/Studio.
+4. **EVIDENCE GAP: V-c.** No 0.6.1 baseline output to compare with.
+5. **EVIDENCE GAPS (not failures), for the re-verify:**
+   - R3-4: sidestep and recovery in the real room 3;
+   - R3-6: the exact 11d script at 7.5 s and 12.0 s on the new room;
+   - R3-8: the real room 3 kill sequence.
+6. **Observation for `game-designer` (no finding against a criterion).**
+   - Walker at 60 FPS is exactly at the criterion 13 upper limit of 6.
+   - A still player in room 3 is dead at 6.3 s from shots alone, before the grub lunges. Two spitter cues overlap the grub's first wind-up (6.0–6.2 s).
+   - Whether this is the intended experience is for the playtest. No value is proposed.
+
+## Decisions already made
+
+- D-012: room 3 layout and purpose; cap and cue rule unchanged.
+- D-011: variant-named wind-up and hit messages.
+- D-007: room 3 in-flight bound (up to 2 plus the living spitters) and simultaneous cues accepted after a cap delay.
+- D-005: a contact blocked by invulnerability consumes the shot and spends the lunge's hit.
+- D-001: one-button combat.
+
+## Constraints
+
+- Must play correctly at both 30 and 60 FPS.
+- No new input buttons.
+- QA does not modify production code or tests, does not redefine criteria, and does not propose tuning values for bot-based limits.
+
+## Open questions
+
+1. Build number (section 6, item 3): is this build 0.6, 0.6.1 or a new number? Needed before any playtest brief (D-011 item 5).
+2. Can Build provide a 0.6.1 baseline output of the V-a/V-b scripts so V-c can be judged, or should V-c be dropped by Design?
+
+## Expected output
+
+For the Studio:
+
+1. Route the failing test (section 6, item 1) to `gameplay-engineer` as a fix to the test only. The test must count one message per wind-up, which is what V-a asks.
+2. Route open question 1 (build number) and the conflict in item 2 to `game-designer`.
+3. After the fix, route a QA re-verify with this handoff's evidence as the starting point. It should:
+   - run `run_tests`;
+   - close the gaps in section 6, item 5, and V-c if a baseline exists;
+   - not repeat the passing bot runs unless the build changes.
+
+## Load
+
+- Role: none (Studio routing); QA's own contract is studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: design/combat-step72.md, design/combat-step68.md, design/combat.md, design/combat-step-46-room3-cap.md, repo/manual.md, repo/game.py, repo/tests/test_game.py
+- Decisions: decisions/D-012-room3-standard-grub-and-closer-spitter.md, decisions/D-011-variant-named-messages-accepted.md, decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md
+- Previous handoff: goals/G-001-combat-monotony/75-studio-to-qa.md
+>>>END

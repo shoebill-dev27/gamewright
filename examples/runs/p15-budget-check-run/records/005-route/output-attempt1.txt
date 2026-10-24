@@ -1,0 +1,150 @@
+
+<invoke name="note">
+<parameter name="text">Route after step 4 (Design). Writing 05 for Build and updating goal.md.</parameter>
+</invoke>
+
+<<<FILE goals/G-003-dash-availability-clarity/05-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-003
+seq: 5
+from: studio
+to: gameplay-engineer
+stage: Build
+outcome: routed
+---
+# 05: studio → gameplay-engineer — Build the dash availability display (A+B+C) per spec
+
+## Task
+
+Implement `design/dash-availability.md` in `repo/`: the persistent dash status on every live picture (A), the dash messages and the `dash ready` event (B), the trace records, and the manual text (C, spec section 8, applied to `repo/manual.md`). Dash rules, timing and results must not change. Stop and hand back on any ambiguity; do not decide design.
+
+## Context
+
+Goal G-003 (Owner: 「ダッシュがいつまた使えるのか分かりにくい。分かるようにしてほしい」). Diagnose (02) found the cause is missing information: the player view has no dash state, a refused dash prints only `(nothing happens)`, nothing marks the return of dash, and the manual is silent. Design (04) produced the spec with player-observable acceptance criteria in seconds. Build is next; QA and an independent playtest follow.
+
+## Findings
+
+From the Design step (details and wording are in the spec, which is the source of truth):
+
+- The 0.6 s cooldown starts when the dash ends (observed at 60 FPS: a dash at 0.500 is accepted again at 1.350, so 0.85 s start to start).
+- A: every live picture ends with `dash: ready`, `dash: active` or `dash: <R> s`; R is the time until dash is usable, rounded UP to a tenth, so ready is never shown early.
+- B: an accepted dash prints `you dash <dir> — usable again in 0.9 s`. A refused dash prints `dash not ready — <R> s left`, with `(dashing)` or `(hit-stun)` as the reason where it applies. `dash ready` is printed at the exact ready moment with an event picture, and only after a dash was used.
+- Trace records: `dash_start`, `dash_end`, `dash_ready`.
+- Wind-ups do not change the cooldown. Whether a hit changes it (Q3) and whether attack recovery blocks dash (Q4) are not confirmed. The display must follow what the build actually does; report what you observe for Q3, Q4 and the room-transition clear (Q5).
+- D-028: the indicator also appears on the legacy route including room 5. Per D-027, G-002 is stopped, so rebasing its criterion L1 (ignore the dash field, dash text and `dash ready` lines) affects only historical comparisons; QA compares with those stripped (Q8).
+- The periodic grid and `view-every` are unaffected; pictures and results are otherwise unchanged.
+
+## Decisions already made
+
+- D-001: no new input buttons.
+- D-022: the legacy route stays limited; only the display is added.
+- D-028: dash indicator on the legacy route, including room 5.
+- D-027 (context): G-002 is stopped; its unfinished verification is not reopened here.
+
+## Constraints
+
+- No change to dash length, distance, invulnerability, the cooldown value or inputs.
+- All timing in seconds; criteria hold at 30 and 60 FPS (±1 frame).
+- Reuse the existing text view and message system; no new input.
+- Game results must not change. Update existing tests and golden outputs only for the new field and text, and say which you changed. Run the project tests (`python3 -m unittest discover -s tests`) and report the result against the sha you build.
+- Out of scope: dash invulnerability display, queued inputs.
+- The Findings of 04 are a Designer's report, not a verification.
+
+## Open questions
+
+- Does the extra field or message break reaction-rule parsing, `public-driver.md` use, or bot input? If so, report it and hand back to `game-designer` (outcome `question`).
+- If a spec case is ambiguous or contradicts the build (for example a cooldown that differs by situation in a way the spec does not describe), stop and hand back `question`; do not choose.
+
+## Expected output
+
+- The change in `repo/` and `repo/manual.md` with build notes: new sha, files changed, tests run and results, tests or goldens edited, and what you observed for Q3, Q4 and Q5.
+- Address the result to `studio` (QA verifies next, then an independent playtest; the Studio composes those Handoffs).
+- Write `outcome: done`, or `question` / `partial` as the contract requires.
+
+## Sender assessment
+
+Studio routing note only: the Design handoff reports the spec as complete apart from Q3–Q5, which are deliberately left to observation of the build.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: design/dash-availability.md, design/combat.md, repo/manual.md, repo/public-driver.md, design/final-boss-and-continuous-run.md#2-ランと入場, project.md#constraints
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-022-g002-v1-supplements.md, decisions/D-028-dash-indicator-on-legacy-route.md
+- Previous handoff: goals/G-003-dash-availability-clarity/04-game-designer-to-studio.md
+>>>END
+
+<<<FILE goals/G-003-dash-availability-clarity/goal.md
+---
+kind: goal
+id: G-003
+project: lantern-depths
+status: active
+created: 2026-10-23
+budget: 17
+---
+# G-003: Make it clear when dash can be used again
+
+## Owner request
+
+> ダッシュがいつまた使えるのか分かりにくい。分かるようにしてほしい
+
+## Interpretation
+
+Success condition (qualitative): a player using only what the build shows them (text player view and `repo/manual.md`) can tell, at any moment, whether dash is available now, and when it is not, when it will be available again. They no longer have to guess or press dash to find out.
+
+This is an experience (readability) Goal. The dash rules themselves (recovery length, invulnerability, input set) are assumed to stay as they are. Changing them would be a different Goal.
+
+Out of scope:
+- Rebalancing dash or combat.
+- New input buttons (D-001).
+- Reopening G-002 (stopped by D-027) or its unfinished verification.
+- Any other readability issue the work happens to find (these become proposed Goals).
+
+## Unknowns
+
+- Observe: skipped. The Owner's report is the first-hand observation, and Diagnose established the cause from the player-view output.
+- Diagnose: done (02). The cause is missing information, not rules.
+- Decide: skipped. A+B+C change display and wording only. It reopens if Build or Verify shows the real cooldown differs between situations in a way that cannot be documented as is (Q3 hit during cooldown, Q4 attack recovery).
+- Design: done (04, `design/dash-availability.md`, D-028). Cooldown starts at dash end (0.85 s start to start, observed at 60 FPS). Not yet confirmed: after a hit (Q3), attack recovery vs dash (Q4), room-transition clear (Q5), 30 FPS.
+- Plan: skipped. It becomes tentative if Build finds a timing or simulation change across systems.
+- Build (open): implement A+B+C and the manual text with no change to game results.
+- Verify: planned. QA runs criteria P1–P12 and Q1–Q12 at 30 and 60 FPS, comparing old outputs with the dash field and text stripped (Q8).
+- Play: planned. An independent playtester judges from player-visible output only, using the spec's player-visible criteria and the manual.
+- Review: planned. `game-director` judges whether the intent was met.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Diagnose | game-designer | diagnose-experience | done | 02-game-designer-to-studio.md |
+| 2 | Decide | game-director | make-decision | skipped (no option changes dash rules or direction) | — |
+| 3 | Design | game-designer | write-design-spec | done | 04-game-designer-to-studio.md |
+| 4 | Build | gameplay-engineer | implement-change | open | 05-studio-to-gameplay-engineer.md |
+| 5 | Verify | qa | verify-change | planned | — |
+| 6 | Play | playtester | playtest-session | planned | — |
+| 7 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+After Design (04): the spec is complete and touches no dash rules, inputs or scope, so no Decide or Plan. D-028 rebases only G-002's stopped L1 criterion, so no escalation. Build opens; Q3–Q5 are left to observation in Build and Verify.
+
+## Next action
+
+Start Step 5: `gameplay-engineer` runs Build from `05-studio-to-gameplay-engineer.md`, addressing the result to `studio`. The Studio Route follows and composes the QA Handoff without the Sender assessment.
+
+Message to the Owner (ja): 仕様が完成しました。ダッシュの再使用は「ダッシュ終了から0.6秒」で、画面の末尾に常に「dash: ready／active／残り秒数」を表示し、拒否時と復帰時にメッセージを出し、マニュアルにも記載します。ダッシュの性能や入力は変えません。次はエンジニアが実装します。
+
+## Outcome
+
+(open)
+>>>END
+
+**Route done.** Design is marked done and the Build step is open with handoff `05-studio-to-gameplay-engineer.md`. Goal `G-003` stays active, with 5 of 17 operations used after this Route. The next action is for `gameplay-engineer` to run Build and address the result to `studio`.
+
+- **Decide and Plan:** both stay skipped. The spec changes display and wording only, so no escalation fires.
+- **D-028:** it rebases only G-002's criterion L1. G-002 was stopped by D-027, so no Owner decision is needed. The 05 handoff tells QA to compare old outputs with the dash field and text stripped.
+- **Not yet confirmed:** the spec leaves the hit-during-cooldown case (Q3), attack recovery vs dash (Q4), the room-transition clear (Q5) and 30 FPS to observation of the build. Build reports what it sees, and QA checks them.
+- **Handoff 04:** I left it unchanged, because it is addressed to the Studio. The Build-ready version with its own Load list is 05, which carries no sender assessment beyond a routing note.
+- **Log:** I could not append the Goal log entry, because `log.md` is not on my write list.

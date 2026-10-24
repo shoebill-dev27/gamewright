@@ -1,0 +1,134 @@
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-15
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): when an action player from the project's player profile plays through combat encounters, the fights feel varied and engaging, and the player's moment-to-moment choices (positioning, timing, enemy behavior) visibly matter. The player no longer experiences the fights as the same repeated pattern.
+
+Out of scope: adding input buttons beyond attack, dash and pause (D-001, Owner approval needed); changes to the run length or the non-combat systems; numeric targets (these belong to Design as acceptance criteria, and the final verdict to Review).
+
+No immediate escalation: the Goal does not conflict with the vision or D-001, and it needs no reinterpretation. Improving depth through positioning, timing and enemy behavior is what pillar 1 asks for.
+
+## Unknowns
+
+- Observe: has combat been observed first-hand? No. It is an experience problem (the Owner reports a feel, not a defect), so a `playtester` observes. Stage `planned`.
+- Diagnose: the cause of the monotony is unknown (enemy behavior, kit depth, room design, pacing?). `game-designer` with `diagnose-experience`. Stage `planned`.
+- Decide: a real choice of direction or scope is likely once the options are known. `game-director`. Stage `tentative`: needed if the diagnosis offers several viable options, or if one touches the vision or D-001. It escalates to the Owner if a trigger fires.
+- Design: the intended new behavior is not specified (design/combat.md describes the current rules only). `game-designer` with `write-design-spec`. Stage `tentative`: needed once a direction is chosen.
+- Plan: unknown until the spec exists. `technical-director`. Stage `tentative`: only if the spec's change is non-obvious, risky or cross-system.
+- Build: `gameplay-engineer`. Stage `tentative`: follows a spec.
+- Verify: `qa`, always after Build (add `art-director` in parallel if the change affects visuals). Stage `tentative`, same condition as Build.
+- Play: this is an experience Goal, so a `playtester` replays the changed build. Stage `tentative`, same condition as Build.
+- Review: experience Goal. `game-director` with `review-outcome`. Stage `planned`.
+- Skipped: none yet. The Project Context does not answer any entry question.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | open | 01-studio-to-playtester.md |
+| 2 | Diagnose | game-designer | diagnose-experience | planned | — |
+| 3 | Decide | game-director | make-decision | tentative | — |
+| 4 | Design | game-designer | write-design-spec | tentative | — |
+| 5 | Plan | technical-director | technical-plan | tentative | — |
+| 6 | Build | gameplay-engineer | implement-change | tentative | — |
+| 7 | Verify | qa | verify-change | tentative | — |
+| 8 | Play | playtester | playtest-session | tentative | — |
+| 9 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+Initial route from Intake (pattern 2, experience problem with unknown cause). No changes yet.
+
+## Next action
+
+Start step 1: a `playtester` executor runs `goals/G-001-combat-monotony/01-studio-to-playtester.md`. After it finishes, run Route.
+
+## Outcome
+
+(Filled at Close.)
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/01-studio-to-playtester.md
+---
+kind: handoff
+goal: G-001
+seq: 1
+from: studio
+to: playtester
+stage: Observe
+outcome: routed
+---
+# 01: studio → playtester — Play the combat and report what you experience
+
+## Task
+
+Play the game as a player, concentrating on combat, and report what you observe and experience. Cover several combat encounters across the rooms available, not only the first one.
+
+## Context
+
+The studio wants a first-hand, player-side account of how combat plays. Your report goes to the game designer for analysis.
+
+## Findings
+
+None. This Handoff deliberately carries no information about the implementation.
+
+## Decisions already made
+
+None.
+
+## Constraints
+
+- Observe only what a player can see and feel. Use the player view (`run_play`), not the trace or the source.
+- Play with the controls and script format in `manual.md`.
+- Play as the player profile describes: an action player, comfortable with dodging and spacing.
+- Report what you experienced, not what you think should change in the code. Suggestions as a player are welcome, but mark them as such.
+
+## Open questions
+
+None.
+
+## Expected output
+
+An observation report from your `playtest-session`: what you did, what happened, how the fights felt over time (including anything that changed or stayed the same between encounters), moments of tension or boredom, and anything unclear or surprising. If you find behavior that looks plainly broken, record it as a separate item. The report goes to `game-designer` for the Diagnose step.
+
+## Load
+
+- Role: studio/roles/playtester.md
+- Skills: studio/skills/playtest-session.md
+- Project: project.md#player-profile, manual.md, the build in `repo/` (run with `python3 play.py --view player {script}`)
+- Decisions: none
+- Previous handoff: none
+>>>END
+
+Intake が完了しました(Goal G-001「戦闘が単調」)。
+
+**ルート**
+1. Observe(playtester):実際に戦闘を遊び、体験を報告します。単調さの原因を観察していないため、最初に必要です。
+2. Diagnose(game-designer):原因を特定し、選択肢を示します。
+3. Decide(game-director、tentative):方向性に実質的な選択肢がある場合に実施します。
+4. Design、Plan、Build、Verify、Play(tentative):方針が決まり、ゲームを変更する場合に実施します。
+5. Review(game-director):体験型のGoalなので、達成したかを判定します。
+
+**スキップした段階**
+ありません。Project Contextだけでは、どの段階の入口の問いにも答えられません。
+
+**エスカレーション**
+今のところ不要です。ただし、D-001(ボタンは攻撃とダッシュのみ)があります。新しい入力が必要になる案は、Ownerの承認事項になります。
+
+**次のアクション**
+playtester のエグゼキュータで `goals/G-001-combat-monotony/01-studio-to-playtester.md` を実行してください。その後、Route を実行します。
+
+**補足**
+Goal log(`log.md`)への Intake 記録は、今回書き込める範囲外のため追記していません。実行側で追記をお願いします。

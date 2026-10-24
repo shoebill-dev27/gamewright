@@ -1,0 +1,87 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "b7fb7a3d85a62bcd564a33ee20caf62b355a7ef99ce6d8cfb6df0d5adb83abc2",
+  "bytes": 1304
+ },
+ {
+  "path": "goals/G-001-combat-monotony/70-studio-to-game-designer.md",
+  "sha256": "239957db6a3340c951eaf50bde28c397a5bda0e5213e14acaf2a348f0dfd449e",
+  "bytes": 3917
+ },
+ {
+  "path": "studio/roles/game-designer.md",
+  "sha256": "802be90dc84142d0a16436d842f1da18d7c7b34500089a91a617a10dde90e7fb",
+  "bytes": 1595
+ },
+ {
+  "path": "studio/skills/write-design-spec.md",
+  "sha256": "f60b4ce8c6e89c2dc27ff87184c54b91452c45db8422fc378ca9253b45a0efd2",
+  "bytes": 1367
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "8ee4bdbaeb36c69a4446cb6db9dac13f103c24b0b3e2ffc044b8088c805b0d3f",
+  "bytes": 47741
+ },
+ {
+  "path": "design/combat-step-46-room3-cap.md",
+  "sha256": "d52e775fca7b00b414604efa2f55b674cca06bd1b72b27f4e489e2b7fc8cd781",
+  "bytes": 8649
+ },
+ {
+  "path": "design/combat-step68.md",
+  "sha256": "2c52b20718d8c1f6cc68035b1151e3b1680f05dc39e26d735c99004014f792c9",
+  "bytes": 4304
+ },
+ {
+  "path": "design/combat-step59.md",
+  "sha256": "8d36ff97a42c222062e1a31b657bd4dca75f31a93af769cf76d5e0c25f340a25",
+  "bytes": 5067
+ },
+ {
+  "path": "project.md#vision",
+  "sha256": "d3086d29c74b4ce7bd4b6ef724e73f4f0f3dde2be7fda791c0154917fee0cf66",
+  "bytes": 408
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "05a33c6f8e50caa20ddf4f3844885137c4261ad4a3e5f3db3eb1b5312b129a9f",
+  "bytes": 237
+ },
+ {
+  "path": "decisions/D-001-one-button-combat.md",
+  "sha256": "c7fe9ca23a369707a5ab439e44789a25a0a8544efce4703a676f8fd180f82ec1",
+  "bytes": 798
+ },
+ {
+  "path": "decisions/D-004-spitter-cue-gap-brute-no-cancel-room2-spitter-deferred.md",
+  "sha256": "0c7087cd192c63c9e79457bea70d4a603e1e68468fe453b3ad2d5b78bea629c0",
+  "bytes": 3694
+ },
+ {
+  "path": "decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md",
+  "sha256": "70283fc2cfe5f66068caf7216d4f43567af8e4e9f10dbb963c0368a6faf55ee5",
+  "bytes": 3083
+ },
+ {
+  "path": "decisions/D-010-review-pass-2-build-clarity-now-room-3-content.md",
+  "sha256": "f93f704d12d42e46985f1d55e0e1bb4a696e3941dbe8fa646ae13de9bcc8b846",
+  "bytes": 3409
+ },
+ {
+  "path": "goals/G-001-combat-monotony/68-game-designer-to-studio.md",
+  "sha256": "8fbd7480df06bb7ee5430e17aa8ea09017f6939b36fb3fb553eb85610bfeea05",
+  "bytes": 7126
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

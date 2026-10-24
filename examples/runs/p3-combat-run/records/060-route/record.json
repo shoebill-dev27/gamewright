@@ -1,0 +1,107 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "3bb2dddf-4cdf-4c9b-833d-549e0a9c0b00",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 41993,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 27593,
+    "output_tokens_details": {
+     "thinking_tokens": 4920
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 41993,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 27593,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 41993,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 41993
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.443906,
+   "attempt": 1,
+   "started": "2026-10-11T15:20:24",
+   "seconds": 158.8,
+   "errors": [
+    "goals/G-001-combat-monotony/52-studio-to-playtester.md: Load section missing: design/g001-combat-escalation.md#6a",
+    "goals/G-001-combat-monotony/52-studio-to-playtester.md: playtester may not load design/g001-combat-escalation.md#6a"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "7a761373-a3fc-421e-b3a3-5160bbcb5f44",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 42132,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 823,
+    "output_tokens_details": {
+     "thinking_tokens": 805
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 42132,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 823,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 42132,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 42132
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.176762,
+   "attempt": 2,
+   "started": "2026-10-11T15:23:03",
+   "seconds": 11.2,
+   "errors": [
+    "goal.md must be written"
+   ]
+  }
+ ],
+ "status": "rejected"
+}

@@ -1,0 +1,21 @@
+<<<FILE @run/trace/boss-30
+mode room
+room 5
+fps 30
+limit 12
+driver-limit 14
+trace-every 0.5
+control 2.2 pause
+control 4.2 resume
+>>>END
+
+<<<FILE @run/play/boss-60
+mode room
+room 5
+fps 60
+limit 12
+driver-limit 14
+view-every 0.5
+control 2.2 pause
+control 4.2 resume
+>>>END

@@ -1,0 +1,172 @@
+<<<FILE decisions/D-026-owner-extends-g002-budget.md
+---
+kind: decision
+id: D-026
+status: accepted
+decided_by: owner
+goal: G-002
+date: 2026-10-23
+supersedes: none
+---
+# D-026: D-025の範囲で継続し、予算を123 operationsとする
+
+## Decision
+
+Ownerは78の案Aを選択した。D-025で絞った範囲でG-002を継続し、Resume時点の累計83 operationsに40を加え、予算を123 operationsとする。
+
+Ownerの回答原文：
+
+> 案A。D-025 で絞った範囲で続けてください。予算は、Resume 時点の累計（83 operations）に 40 を足した budget: 123 とします。それを使い切ったら、また範囲か費用を Owner に確認してください。
+
+追加40 operationsは完成保証ではない。予算を使い切った場合、さらに作業を継続する前に、範囲または費用をOwnerへ確認する。追加金銭・環境・保存先の供給を承認するものではない。
+
+必須検証と独立評価を維持する。歴史的一致の確認不能を合格・免除とせず、現行検証の完了だけでGoal達成とはしない。
+
+## Rationale
+
+Ownerは、実装報告済みの連続ランと最終ボスについて、未完了の成立確認と体験評価を上限付きで継続することを選択した。
+
+## Alternatives considered
+
+- 案B：未達・検証未完了で打ち切る。Ownerは選択しなかった。
+- 無制限の継続：承認されていない。
+
+## Revisit when
+
+budget: 123を使い切ったとき。上限前でも、承認範囲を超える変更やOwner権限の判断が必要になった場合は再度エスカレーションする。
+>>>END
+
+<<<EDIT goals/G-002-final-boss/78-game-director-to-owner.md
+<<<<<<< SEARCH
+status: open
+decision: pending
+=======
+status: resolved
+decision: D-026
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT goals/G-002-final-boss/goal.md
+<<<<<<< SEARCH
+status: blocked-on-owner
+created: 2026-10-20
+=======
+status: active
+created: 2026-10-20
+budget: 123
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+- Decide（予算超過時の範囲）：done。78でGame DirectorがD-025による削減と、必須検証を残す継続案を提示した。予算変更はOwner権限のため、残作業は回答待ち。
+- Decide（追加予算）：open。現在82/40 operations。78で、Resume時点の累計から追加40 operationsを上限に継続する案Aと、未達・検証未完了で打ち切る案BをOwnerへ提示。追加40は完成見積もりではない。予算は回答前に変更しない。
+- Decide（後続工程条件）：planned。歴史的確認不能を残して限定Art Verify以降へ進む条件をGame Directorに判断してもらう。Engineer・QAは先行可能。現行検証の完了を全基準passやGoal達成に読み替えない。
+=======
+- Decide（予算超過時の範囲）：done。D-025の削減を適用。重複する後続条件判断、存在しない資料の再探索、旧構成の任意検証、重複整形と追加の磨き込みは省く。必須検証と独立評価は維持する。
+- Decide（追加予算）：done。Ownerは案Aを選択。D-026によりResume時点の累計83に40を加えbudget: 123とする。上限を使い切ったら範囲か費用をOwnerへ再確認する。完成保証ではない。
+- Decide（後続工程条件）：skipped。D-025による既存判断を適用し、同じ条件判断だけの別Stepは開かない。歴史的確認不能以外の必須不足を解消して後続評価へ進む。確認不能は最終Reviewへ残し、合格・免除やGoal達成に読み替えない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| 7b-cost | Decide | owner | — | open | 78-game-director-to-owner.md |
+| 7b-build | Build | gameplay-engineer | implement-change | planned | 68のE2→E3群→E4群→E5群を直列分割。70の残作業を継承 |
+=======
+| 7b-cost | Decide | owner | — | done | 78-game-director-to-owner.md → D-026 |
+| 7b-build | Build | gameplay-engineer | implement-change | open | 79-studio-to-gameplay-engineer.md（E1残作業。以後E2→E3群→E4群→E5群を直列分割） |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| 7d | Decide | game-director | make-decision, prepare-owner-escalation | planned | 歴史的確認不能を保持した後続評価工程の条件判断 |
+=======
+| 7d | Decide | game-director | make-decision, prepare-owner-escalation | skipped | D-025により重複条件判断を省略 |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+78のOwner回答を待ち、依存する残作業はすべて停止する。planned行は回答後の再計画用に保持し、このRouteでは開かない。案Aの場合はResumeでOwner指定の予算を記録し、D-025本文に基づいて削減を反映する。78が示す重複した後続条件判断、存在しない資料の再探索、旧構成の任意検証、重複整形と追加の磨き込みは省く。必須検証・独立評価は残し、歴史的一致の確認不能を合格や免除にしない。案Bの場合は未達・検証未完了の打切りとして終了記録を行う。どちらもOwner回答前には実行しない。
+=======
+D-026によりD-025の範囲で再開する。79ではE1の残作業を対象にし、未完了のままE2以降へ進めない。後続は既存計画を直列分割し、Build後の独立QA、限定Art Verify、独立Play、Designer判断、Reviewを維持する。重複条件判断、存在しない資料の再探索、旧構成の任意検証、重複整形と追加の磨き込みは省く。歴史的一致の確認不能を合格や免除にしない。budget: 123を使い切った場合は範囲か費用をOwnerへ再確認し、追加作業を自動継続しない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+78を受領して77の範囲判断Stepを完了とし、既存の78をOwnerへの費用エスカレーションとして開く。現在82/40 operationsのため、追加40 operations上限の継続か未達での打切りかをOwnerに委ねる。依存する残作業を停止し、予算・解釈・達成判定は変更しない。
+=======
+Ownerの案AをD-026に記録し、78を解決、Goalをactive、budgetを123へ変更。D-025の重複工程削減を反映し、79で既存BuildのE1残作業を再開する。必須検証・独立評価は維持し、上限到達時は範囲か費用をOwnerへ再確認する。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Ownerが78-game-director-to-owner.mdに回答する。A：Resume時点の累計から追加40 operationsを上限に継続（別上限の指定も可）、またはB：未達・検証未完了で打切り。予算変更はOwner回答を受けたResumeでのみ行う。
+=======
+Gameplay Engineerが79-studio-to-gameplay-engineer.mdでE1の未完了作業を再開する。既存計画と76の診断から引き継ぎ、成果と残作業をstudioへ返す。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+未完了・Owner回答待ち。連続ランと最終ボスは実装報告済みだが、公開情報限定の実dodger接続、被弾差の原因確定、必須証拠、独立QA・体験評価は未完了。160件の試験成功を独立検証やGoal達成とは扱わない。現在82/40 operationsであり、78で追加40 operationsを上限とする継続か、未達・検証未完了の打切りかを依頼する。追加40は完成保証ではない。歴史的一致の確認不能と15〜20分Visionの未評価を保持し、回答まで後続作業を停止する。
+=======
+未完了・継続中。OwnerはD-026でD-025の範囲とbudget: 123を承認した。連続ランと最終ボスは実装報告済みだが、公開情報限定の実dodger接続、被弾差の原因確定、必須証拠、独立QA・体験評価は未完了。160件の試験成功を独立検証やGoal達成とは扱わない。歴史的一致の確認不能と15〜20分Visionの未評価を保持する。追加40 operationsは完成保証ではなく、上限到達時は範囲か費用をOwnerへ再確認する。
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-002-final-boss/79-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-002
+seq: 79
+from: studio
+to: gameplay-engineer
+stage: Build
+outcome: routed
+---
+# 79: studio → gameplay-engineer — 承認された上限内でE1残作業を再開
+
+## Task
+
+68の実行計画と76の引継ぎから、E1の実dodger公開境界接続、被弾差の診断、監査・判断証拠の未完了作業を再開する。今回の単位を既存計画内で明示し、完了した範囲と残作業をstudioへ返す。
+
+## Context
+
+Owner requestは「最後に手応えのあるボス戦がほしい」。連続ランと最終ボスは実装報告済みだが、独立検証に必要な試験道具と証拠が未完了である。
+
+E1は72・74・76で連続partialとなった。予算超過時のGame Director判断を77で開き、78で費用をOwnerへエスカレーションした。Ownerは案Aを選び、D-025で絞った範囲での継続とbudget: 123を承認した。本Stepはその範囲内の既存Buildを再開するものであり、新しい方向・技術計画をStudioが決めるものではない。
+
+## Findings
+
+- 76では再生互換診断とhelper本文出力を保存したと報告されている。実dodger接続、被弾差の原因確定、記憶・全分岐・判断出力は未完了。
+- source e99408d647c7の160 tests OKは過去のruntime確認。現在のpacketが示すbuildはrepo/、sha 61492279ed13であり、過去の試験結果を現行確認として流用しない。
+- 必要な診断本文は未確認。76の13ファイルQA配布台帳と追加ID、70の残作業を引き継ぐ。
+- E2以降は未着手。E1未完了を成功扱いして先へ進めない。
+- 旧botの約87／104秒は対応後の基線やプレイヤー時間として使用しない。
+
+## Decisions already made
+
+- D-026：Ownerが案Aを選択。累計83 operationsに40を加えbudget: 123。使い切ったら範囲か費用をOwnerへ再確認する。
+- D-025：重複する後続条件判断、存在しない資料の再探索、旧構成の任意検証、重複整形と追加の磨き込みを省く。必須検証と独立評価は維持する。
+- D-024：歴史的一致の確認不能を、現行仕様照合・現行内対照や記録精度での比較と区別する。確認不能を合格・免除にしない。
+- D-021・D-023：テキストビルドとStudio内検証、実際の供給上限で進める。
+
+## Constraints
+
+- 承認済み仕様・難度・秒数ゲートを変更しない。曖昧な仕様や実行不能な計画は担当Roleへ手戻りを報告する。
+- 各Stepの@runは最大3回、各出力は最大2万字。全文保存先は存在しない。必要な追加本文の@needは一度、最大8ファイル。
+- 本文未確認、出力欠落、未実行を成功にしない。既存証拠の識別子と対象ソースを明記する。
+- 変更前ビルド、追加環境、外部配員、購入、存在しない保存機構を要求しない。
+- budget: 123は完成保証でも無制限継続でもない。上限到達時は追加作業を自動継続しない。
+- QA判定、体験判定、Goal達成判定を行わない。
+
+## Open questions
+
+- 既存計画内で、E1の公開境界接続と被弾差の説明を成立させられるか。
+- 接続・記憶・全分岐監査と判断証拠のうち、今回確認できた範囲と残る範囲は何か。
+
+## Expected output
+
+studio宛のHandoffを作成する。今回対象とした作業、変更ファイル、対象ソース、実行した確認と観測結果、証拠の識別子、QA配布台帳の更新、残作業を記す。
+
+E1完了ならその根拠を示し、68のE2以降へ引き継ぐ。未完了ならpartialとして具体的な残作業を示す。既存計画が実行不能ならquestionとして技術上の理由を報告し、同じ未検証案を成功扱いして繰り返さない。独立QAに渡す事実と実装者の評価は分け、後者はSender assessmentへ置く。
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: project.md#constraints
+- Project: design/final-boss-and-continuous-run.md
+- Project: design/g002-historical-comparison-evidence.md
+- Project: repo/
+- Decisions: decisions/D-025-g002-minimum-remaining-scope.md
+- Decisions: decisions/D-026-owner-extends-g002-budget.md
+- Plan: goals/G-002-final-boss/68-technical-director-to-studio.md
+- Evidence inventory: goals/G-002-final-boss/70-gameplay-engineer-to-studio.md
+- Previous implementation handoff: goals/G-002-final-boss/76-gameplay-engineer-to-studio.md
+- Previous handoff: goals/G-002-final-boss/78-game-director-to-owner.md
+>>>END

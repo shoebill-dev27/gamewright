@@ -1,0 +1,171 @@
+<<<FILE goals/G-001-combat-monotony/60-game-director-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 60
+from: game-director
+to: studio
+stage: Route
+outcome: goal-not-met
+---
+# 60: game-director → studio — Review G-001 on build 0.6.1: goal not met yet. Next pass is a variant-aware playtest, not a third Diagnose. No Owner escalation now.
+
+## Task
+
+Route the Review result below. Verdict: **goal-not-met**. The next step is a targeted Play with a changed brief (see "Next step"). It is not another Diagnose. Decision D-009 records this and the conditions that would send the Goal to the Owner.
+
+## Context
+
+Goal G-001, success condition: different situations call for noticeably different play (positioning, timing, attack and dash), and the player can tell why. I judged from the second playtest (53), the first playtest (02), QA on the three hit moments (56) and the Goal record. I did not rely on any implementation explanation. I ran no `play` or `bots` this step.
+
+## Findings
+
+### Verdict and how far the evidence carries
+
+**Goal-not-met.** I cannot call it met, and I also cannot call the "rooms feel alike" finding solid. The evidence is scripted and partial, and the one question that decides the Goal has not been tested.
+
+- **Evidence that the Goal is partly met.**
+  - Room 3 aggressive versus cautious felt like two different fights. The tester called charging the spitters "the most fun combat of the session": fast, tense, cleared in about 10 s.
+  - Room 5 at 6–8 s forced a real choice between swiping grubs and answering the brute's cue. A dash answered the brute lunge.
+  - Threats were readable: "never felt cheated by a shot", and every hit had a visible cue except one that QA showed did have a printed cue (56, item 3).
+  - Standing still, or ignoring cues, costs hearts.
+- **Evidence that it is not met.**
+  - The tester's own summary is that rooms 2, 4 and 5 collapse into one cue-dodge loop, and that by room 4 they had "already seen it all".
+  - Cautious play stalled: about 10 s of nothing kiting the brute in room 2, and a standoff in room 3.
+  - The dash was close to free when used on every cue.
+- **Why I do not trust "rooms feel alike" yet.** The scripts did not test the differences the build was changed to create.
+  - Nearly every script used one rule for all lungers: `text "rears back"` then dash or move aside, and swipe whatever is within 1.4. That is the same answer for every enemy by construction.
+  - The room 2 aggressive script had no rule for the brute (`G`) at all. The tester stood in the brute's line for its whole 0.7 s warning and called it "my own mistake". So "never fought the brute" in that run says little about the design.
+  - The cautious scripts told the player to `move away` from the brute. The 10 s stall was a choice made by the script.
+  - The one run that did contain a brute-specific choice (room 5 aggressive) is the one the tester called interesting.
+  - A human with reaction time and a goal of clearing the room, who can see which mark is which, may well answer a runner, a standard grub and a brute differently. Whether they do is the open question.
+- **Limits.**
+  - The reactions were scripted, not live play, and not hand-timed.
+  - Four round 1 runs were truncated.
+  - Room 1 was not played.
+  - There was no slow, waiting-style play.
+  - The 30 FPS player view was not run.
+  - So the evidence supports "not yet shown to be met" with moderate confidence. It does not support "the melee redesign failed".
+
+### Why not a third Diagnose, and why not an escalation now
+
+- A third Diagnose would work from the same scripted evidence and would be likely to reach the same S1 conclusion as 04 and 31. It would give no new information. The loop limit is correct to stop it.
+- Escalating for a new enemy type, healing or a new input is premature. The cheaper explanation (the playtest did not exercise the differences) has not been ruled out. All options so far are inside D-001 and the pillars, so nothing here is Owner-level yet. D-009 sets the condition that would make it so.
+
+### Hit moments the tester called unfair (QA 56)
+
+- All three match the design: two swipes landed after the wind-up ended, because the grub was about 2 tiles away and out of reach during the whole wind-up, and the third had a printed cue. No defect.
+- They still count against the success condition's second half, "the player can tell why". The tester could not tell whether a late swipe should have worked.
+
+### Parallel Design step (58)
+
+Both items belong in this Goal, as a clarity fix. Neither blocks the verdict.
+
+- **Manual wording on late swipes.** State that a swipe cancels only during the warning, and that a grub starts winding up from about 2 tiles, beyond the 1.5 swipe reach. This is wording only and cheap. It answers issue 7 in 53.
+- **Per-variant cue message.** I support giving a text-view player a way to tell the lunger apart from the message, since the tester dashed at a far-off runner on the message alone. This is a readability point (pillar 3). The wording and any rule detail are for `game-designer` to decide. If 58 changes the message, it goes through Build and QA, and the next playtest must use that build. A message change must not be bundled in a way that stops the next playtest from telling which change worked. Hold the build used for the playtest steady for one pass, or state clearly which version was played.
+
+## Next issues
+
+1. **Variant-aware playtest of build 0.6.1 (the next pass of G-001, not a new Goal).** See "Next step".
+2. **Cautious-play stall (brute kiting in room 2, room 3 standoff).** This is the D-004 trigger "human dodges the brute without fighting it". It is not met on scripted evidence. If the variant-aware playtest still shows it, the response is Design Option 3 (a spitter in room 2) or a similar room change, inside D-001. That is my priority call within the Goal.
+3. **Room 3 simultaneous volleys.** D-007 reopen triggers are not met: the tester read the volleys as readable, there was no shot from nowhere, and no count above 5. The tester's complaint is that the only answer is to slide along a wall. Keep it as an experience note and revisit only if the new playtest points at it. No change now.
+4. **Dash nearly free when used on every cue (53, issue 5).** This follows from the script. It is not actionable until a playtest with differentiated choices shows it. Criterion 15 stays report-only.
+5. **Proposed new Goal at Close:** visual criteria V1–V11 need a graphical build. V12 stays open.
+6. **Coverage gaps to close in the same playtest or by QA:** room 1, slow waiting-style play, the 30 FPS player view, and the late-swipe boundary at 30 FPS (QA 56 "Not covered").
+
+## Next step (Route this)
+
+**Play, fresh `playtester`, build 0.6.1 unchanged, with a brief that does not describe the design.** The brief may say:
+
+- Write separate reaction rules per enemy mark (`g`, `r`, `G`, `s`) and say why each differs, or why you chose not to differ.
+- Include at least one run where you try to clear the room and one where you choose the style you like best.
+- Play rooms 1 and 2 as well as 3–5, and include one slow, deliberate run.
+- Keep each script short enough that the output is not truncated (use `end` and run rooms separately).
+- Report what each enemy asked of you, in your own words, and where you felt "same again".
+
+The brief must not mention the brute rule, the cue gap or any Decision. Suggested read-out for the next Review:
+
+- Can the tester say, without the manual, what the brute wanted, what the runner wanted, and how room 1 differs from room 2?
+- Does the brute get fought, or still kited to a stall?
+- Is there any run where the aggressive and cautious styles end up as the same loop in the melee rooms?
+
+If Route cannot send Play directly after a `goal-not-met` Review, use the narrowest possible Diagnose whose only output is that brief, and do not let it re-open S1.
+
+## Decisions already made
+
+- D-001: no new input. Respected; nothing proposed touches it.
+- D-004: room 2 spitter (Option 3) stays deferred; its trigger is not yet met on this evidence.
+- D-005, D-006, D-007: stand unchanged. No revisit condition reached.
+- New: **D-009** (this step). Next pass is a variant-aware playtest, and the Owner-escalation condition is stated.
+
+## Constraints
+
+- Stay inside D-001 and the pillars. No new enemy type, healing or input without the Owner.
+- New issues become proposed Goals, not growth of G-001, except the playtest pass and the wording fixes that serve "the player can tell why".
+- Playtest evidence stays scripted. Weigh the next report accordingly.
+
+## Open questions
+
+- Does a human-like player, given enemy-specific rules, find the runner, standard grub and brute different? This is the deciding question for the Goal.
+- If not, is the cause the melee behaviors themselves? That would point to a new melee behavior, which is the Owner-level question in D-009.
+
+## Expected output
+
+The Studio routes the Play step above (and the existing 58 Design step in parallel). After the playtest report, run Review again. If goal-met, Close. If goal-not-met with the melee still reading as one fight, I write the Owner escalation (in Japanese) instead of another Diagnose.
+
+## Sender assessment
+
+Confidence in "not yet met": moderate. Confidence that a third Diagnose would add nothing: high. Confidence that the melee redesign works for humans: unknown, which is why the next playtest is needed. I did not run the build.
+
+## Load
+
+- Role: studio/roles/game-director.md
+- Skills: studio/skills/review-outcome.md, studio/skills/make-decision.md
+- Project: project.md#vision, goals/G-001-combat-monotony/goal.md, goals/G-001-combat-monotony/53-playtester-to-studio.md
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-004-spitter-cue-gap-brute-no-cancel-room2-spitter-deferred.md, decisions/D-009-review-next-pass-variant-aware-playtest.md
+- Previous handoff: goals/G-001-combat-monotony/57-studio-to-game-director.md
+>>>END
+
+<<<FILE decisions/D-009-review-next-pass-variant-aware-playtest.md
+---
+kind: decision
+id: D-009
+status: accepted
+decided_by: game-director
+goal: G-001
+date: 2026-10-16
+supersedes: none
+---
+# D-009: After build 0.6.1 the next pass is a variant-aware playtest, not a third Diagnose; no Owner escalation yet
+
+## Decision
+
+1. G-001 is **not met** on build 0.6.1 (handoff 60). The "rooms feel alike" report in playtest 53 is not accepted as a settled design finding, because the scripts used one answer for every lunger and one run had no brute rule at all.
+2. The next pass is a fresh playtest of the unchanged build 0.6.1. The player writes separate rules per enemy mark, plays rooms 1–5 including a slow run, and keeps the output short enough not to be truncated. The brief does not describe the design. No third Diagnose is run on the existing scripted evidence.
+3. No direction change now. D-001, the pillars, D-004 to D-007 stand. Option 3 (a spitter in room 2) stays deferred but is the first lever if the stall is confirmed.
+4. **Owner escalation condition.** If the variant-aware playtest still reports that the melee enemies ask for one answer (runner, standard grub and brute not told apart in play, or the brute only kited), the next Review does not send the Goal to Diagnose. The game-director prepares an Owner escalation (in Japanese) on adding a genuinely different melee behavior or enemy type, healing, or another change that touches D-001 or the pillars. Room content changes such as Option 3 do not need the Owner.
+5. The manual wording on late swipes and a per-variant cue message (step 58) are accepted as in scope, as "the player can tell why". Their detail is the designer's. The playtested build must be stated, and a message change should not be mixed into the same pass without saying so.
+
+## Rationale
+
+- A third Diagnose on the same scripted evidence would repeat 04 and 31 without new information. The loop limit exists for this.
+- The cheapest explanation that fits the evidence is that the test did not exercise the intended differences: uniform rules per cue, no brute rule in room 2 aggressive, and a "move away" rule that produced the 10 s stall. That has to be ruled out before changing direction.
+- Escalating now would ask the Owner to approve new content on evidence that may be an artifact of the test method.
+- The one run with a brute-specific choice (room 5 aggressive) was called interesting, and room 3 showed distinct styles. So the direction is plausible and not shown to have failed.
+
+## Alternatives considered
+
+- **Third Diagnose:** no new evidence; rejected.
+- **Escalate now for a new enemy type or healing:** premature, and a cost to the Owner on weak evidence; rejected.
+- **Declare goal met or partially-met and close:** the tester's report says rooms feel alike and cautious play stalls, and the deciding case is untested; rejected.
+- **Take Option 3 (room 2 spitter) now:** would change room 2 before knowing whether the brute rule works for a human, and would make the next result impossible to attribute (this was the reason for deferring it in D-004); rejected for now.
+- **Bundle the cue message change with the playtest build:** would confound the result; not chosen.
+
+## Revisit when
+
+- The variant-aware playtest report arrives (next Review).
+- The tester still stalls against the brute or kites it with no reason to fight: take Option 3 or a room change.
+- The tester cannot tell runner, standard grub and brute apart in play: apply item 4 (Owner escalation).
+- Step 58 changes the cue message, so the playtested build changes: state the build and re-check that the comparison is fair.
+- A graphical build exists: re-judge variant readability, since silhouettes replace the text message.
+>>>END

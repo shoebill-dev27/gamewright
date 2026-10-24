@@ -1,0 +1,102 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-003-dash-availability-clarity/19-studio-to-game-director.md",
+  "sha256": "2bc9465db405fe63a759c8774629a5f109b74ceb19ce8535a4e99b256205b79c",
+  "bytes": 7065
+ },
+ {
+  "path": "studio/roles/game-director.md",
+  "sha256": "2ff4f183ec488c462c8d757903c226121150048f4cc544310ac0191bb20dab12",
+  "bytes": 1652
+ },
+ {
+  "path": "studio/skills/review-outcome.md",
+  "sha256": "6eda5af1b0de2807864d14a2f9c76c6e5e8f5cbcc02ac0d37cf744ee342ef70e",
+  "bytes": 1051
+ },
+ {
+  "path": "studio/skills/make-decision.md",
+  "sha256": "68436360ad82bd660f2153934ae7305118489c26ad3255d10e5018773d9eb4b6",
+  "bytes": 1129
+ },
+ {
+  "path": "project.md#vision",
+  "sha256": "d3086d29c74b4ce7bd4b6ef724e73f4f0f3dde2be7fda791c0154917fee0cf66",
+  "bytes": 408
+ },
+ {
+  "path": "project.md#player-profile",
+  "sha256": "8ab7a2aeebd9deea8e5f25fb124acb3213563cbd9b926a869af8ed6dd2881a8f",
+  "bytes": 172
+ },
+ {
+  "path": "project.md#current-state",
+  "sha256": "aa8a3826b8bfa3561bda6e41924681dd2ab61a15309e8dee71f78de611d589a0",
+  "bytes": 1405
+ },
+ {
+  "path": "goals/G-003-dash-availability-clarity/goal.md",
+  "sha256": "bf0526b1cc306c48c9e36f1795aa1c01de3c548eaf41defd60e805ca47d517ef",
+  "bytes": 5023
+ },
+ {
+  "path": "goals/G-003-dash-availability-clarity/18-playtester-to-studio.md",
+  "sha256": "91a1dfef211197b5deb06603f29bd5932eab09cf18740004973dbc6bbf217602",
+  "bytes": 8191
+ },
+ {
+  "path": "design/dash-availability.md",
+  "sha256": "7dc7d417b3aa4be23b60953424b7a66eeae775675b6b30cbc416b36a0e857173",
+  "bytes": 19337
+ },
+ {
+  "path": "repo/public-driver.md",
+  "sha256": "e2b12854ca86286cd8baa3077915216071aac54f418a33e10431c46d77128294",
+  "bytes": 5549
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "12da243e386fe6db7eda01a2d092b70abc2133f588c6adc0b831fd4c42d98dba",
+  "bytes": 13458
+ },
+ {
+  "path": "decisions/D-001-one-button-combat.md",
+  "sha256": "c7fe9ca23a369707a5ab439e44789a25a0a8544efce4703a676f8fd180f82ec1",
+  "bytes": 798
+ },
+ {
+  "path": "decisions/D-028-dash-indicator-on-legacy-route.md",
+  "sha256": "f18c4c1e8e324a1a11689b49471b46cf5c0cd19ffd15659d0029154116d165ac",
+  "bytes": 1748
+ },
+ {
+  "path": "decisions/D-029-g003-spec-rulings.md",
+  "sha256": "524a4a444d45573b71f680a9d25ad738dc0c46e38da885ba23db4ff653d639e5",
+  "bytes": 2822
+ },
+ {
+  "path": "goals/G-003-dash-availability-clarity/17-qa-to-studio.md",
+  "sha256": "3d04a3836d05450a4b4290c57facb03451487ef83be365da4f48daa46954534b",
+  "bytes": 13586
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ },
+ {
+  "path": "studio/templates/escalation.md",
+  "sha256": "6e505880bdef28223c7275a4bb19c8f245577964d14c28d48e04561e7a5c7b90",
+  "bytes": 975
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

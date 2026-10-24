@@ -1,0 +1,12 @@
+<<<FILE @run/play/wind-up-swipe
+room empty
+fps 60
+player 8 4
+spawn grub 11 4
+0.0 move right
+0.05 stop
+1.05 attack
+1.5 attack
+2.0 attack
+end 4
+>>>END

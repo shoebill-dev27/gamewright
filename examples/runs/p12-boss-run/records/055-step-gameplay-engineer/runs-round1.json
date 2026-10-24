@@ -1,0 +1,18 @@
+[
+ {
+  "run": "@run/tests/contract-details",
+  "command": "python3 -m unittest discover -s tests",
+  "script": "\n",
+  "exit": 0,
+  "seconds": 0.3,
+  "output": "..................................................................................................................................\n----------------------------------------------------------------------\nRan 130 tests in 0.212s\n\nOK\n"
+ },
+ {
+  "run": "@run/bots/source-id",
+  "command": "python3 bots.py {script}",
+  "script": "bots dodger\nrooms 1\nlimit 1\n",
+  "exit": 0,
+  "seconds": 0.0,
+  "output": "source 7670da50793b; policy: dodger with boss policy v1 (displayed boss fields only), reaction 0.15 s, start (8, 4) facing right; camper/walker unchanged\nbots at 60 FPS, up to 1 s per room, 3 hearts at start\ndodger  room 1: NOT cleared (1.0 s); hearts lost 0 (hit by: none); attacks 0, dashes 1; start hearts 3, end 3, outcome unfinished\ndodger  total: cleared 0/1, hearts lost 0, dashes 1\n"
+ }
+]

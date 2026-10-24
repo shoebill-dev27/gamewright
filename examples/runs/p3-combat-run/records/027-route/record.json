@@ -1,0 +1,106 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "f2095ef2-5516-4a25-8689-65c0b9006c6a",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 22668,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 7989,
+    "output_tokens_details": {
+     "thinking_tokens": 900
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 22668,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 7989,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 22668,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 22668
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.170566,
+   "attempt": 1,
+   "started": "2026-10-11T10:56:19",
+   "seconds": 45.7,
+   "errors": [
+    "goal.md: an active Goal needs its next step marked `open` with its Handoff"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "e6b42f12-6689-41c5-ae5c-aabbd9b918c4",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 22735,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 7272,
+    "output_tokens_details": {
+     "thinking_tokens": 590
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 22735,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 7272,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 22735,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 22735
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.16366399999999998,
+   "attempt": 2,
+   "started": "2026-10-11T10:57:05",
+   "seconds": 39.6,
+   "errors": [
+    "goal.md: an active Goal needs its next step marked `open` with its Handoff"
+   ]
+  }
+ ],
+ "status": "rejected"
+}

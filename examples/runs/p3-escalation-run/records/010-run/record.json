@@ -1,0 +1,17 @@
+{
+ "op": "Run",
+ "goal": "G-002",
+ "operations": [
+  "003-step-game-designer",
+  "004-route",
+  "005-step-technical-director",
+  "006-step-art-director",
+  "007-route",
+  "008-step-game-designer",
+  "009-route"
+ ],
+ "stop_reason": "operation budget reached (6)",
+ "status": "active",
+ "owner_reads": null,
+ "next": "run examples/runs/p3-escalation-run"
+}

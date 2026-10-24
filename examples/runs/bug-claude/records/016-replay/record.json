@@ -1,0 +1,24 @@
+{
+ "of": "003-route",
+ "runtime": "claude",
+ "session_id": "106bea73-2edd-45a1-bcc6-edd7229f6963",
+ "decision": {
+  "status": "active",
+  "open": [
+   [
+    "gameplay-engineer",
+    "Build"
+   ]
+  ]
+ },
+ "original": {
+  "status": "active",
+  "open": [
+   [
+    "gameplay-engineer",
+    "Build"
+   ]
+  ]
+ },
+ "same_decision": true
+}

@@ -1,0 +1,47 @@
+Starting with two play runs, one at 60 FPS and one at 30 FPS. I'll write the report once I have the results.
+
+<<<FILE @run/play/fps60
+mode run
+fps 60
+limit 40
+driver-limit 45
+0 move left
+0.5 stop
+1.0 dash right
+1.5 dash right
+2.0 move up
+2.5 stop
+2.5 attack
+3.0 dash left
+3.9 dash left
+4.5 attack
+5.0 move right
+6.0 stop
+6.0 dash up
+when see g within 3 then face
+when see r within 1.4 then attack
+when see * coming within 1.5 then move aside
+>>>END
+
+<<<FILE @run/play/fps30
+mode run
+fps 30
+limit 40
+driver-limit 45
+0 move left
+0.5 stop
+1.0 dash right
+1.5 dash right
+2.0 move up
+2.5 stop
+2.5 attack
+3.0 dash left
+3.9 dash left
+4.5 attack
+5.0 move right
+6.0 stop
+6.0 dash up
+when see g within 3 then face
+when see r within 1.4 then attack
+when see * coming within 1.5 then move aside
+>>>END

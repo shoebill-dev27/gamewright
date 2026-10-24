@@ -1,0 +1,36 @@
+{
+ "op": "Step",
+ "role": "qa",
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "codex",
+   "session_id": "01a12579-ed89-79d2-b99b-1d9f6b005ace",
+   "model": "gpt-6-astra",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 14936,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 1539,
+    "reasoning_output_tokens": 0
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 1,
+   "started": "2026-10-10T20:01:49",
+   "seconds": 33.8,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-dash-damage/08-qa-to-studio.md": "c667f7d2872178e5bb7feb80ac1638a7f5664d1e953780c9afd2a0768f3e34c7"
+ },
+ "decision": {}
+}

@@ -1,0 +1,94 @@
+Handoffs 58 and 59 are both done, but 10c (57, art-director) is still open. The Route has to wait for all three parallel steps, so I'm only updating the goal record and opening no new Handoffs. I can't write `log.md` in this packet, so I've added no log entry.
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-15
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): when an action player from the project's player profile plays through combat encounters, the fights feel varied and engaging, and the player's moment-to-moment choices (positioning, timing, enemy behavior) visibly matter. The player no longer experiences the fights as the same repeated pattern.
+
+Out of scope: adding input buttons beyond attack, dash and pause (D-001, Owner approval needed); changes to the run length or the non-combat systems; numeric targets (these belong to Design as acceptance criteria, and the final verdict to Review).
+
+No immediate escalation: the Goal does not conflict with the vision or D-001, and it needs no reinterpretation. Improving depth through positioning, timing and enemy behavior is what pillar 1 asks for.
+
+## Unknowns
+
+- Observe (playtester, qa): done (02, 08, 06, 15, 58). 58 settled: no short bite warning (the "rears back" line belonged to another grub), dash 4.00 tiles at 30 and 60 FPS, a dash sets facing, grub "on you" is hit in all facings, bot format and idle/bot reference data. Not settled by QA: "(miss)" text first-hand, knockback of an on-you grub in open floor, D-58-1 at 30 FPS. These go to Verify against the new spec.
+- Diagnose, Decide: done (03, 53; D-002, D-005, D-006, D-011). A4 (120° cone), D1 (facing mechanic) and D2 (room 1 composition) are held with revisit triggers in 59; not routed to the director now.
+- Design: spec updated (59; `design/combat.md`, D-011, AC-19…AC-27): wind-up spacing, engagement cap, hit-stun 0.15 s, body hit, dash facing and edge stop, Strike/Recovery swipes (a hit in Strike cancels it, which settles D-58-1), miss wording. Manual draft is ready for the Owner. Still open: 10c "on you" and "which grub hit you" display (57). Small gap left: knockback direction of a grub exactly on the player (58); the engineer hands it back to Design if the spec does not cover it.
+- Plan: done (14, D-004). Tentative: a new Plan only if the Waiting behavior of a blocked grub is not local to existing systems.
+- Build: next, after 10c returns. Manual changes are placed by the Owner (D-005, D-007 pattern).
+- Verify: the next build needs its own Verify (qa, AC-1…AC-27 at both frame rates; art-director if visuals change). The full suite is re-run with the manual draft in place (D-008, D-009).
+- Play: earlier sessions saw only rooms 1 and 2 by script (50, 54), with defeats. Rooms 3–5, the spitter, projectile hits, room clear, the dash and a survived run are unobserved, so monotony itself is unjudged. Next Play follows the rebuild: fresh playtester, rooms 1–5, reactive play; judged against the retest guideline, which is not forwarded.
+- Review: `game-director` with `review-outcome`, planned after the rebuild and the next Play. Open: run progression after "run over"; F1, F4, F6, F7; numbering of same-type enemies in one cell; A4, D1, D2.
+- Skipped: none.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 02-playtester-to-game-designer.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-game-designer-to-game-director.md |
+| 3a | Decide | game-director | make-decision | done | 05-game-director-to-studio.md |
+| 3b | Observe (defects) | qa | reproduce-defect | done | 06-qa-to-game-designer.md |
+| 3c | Observe (rooms 4–5) | playtester | playtest-session | done | 08-playtester-to-game-designer.md |
+| 4 | Design | game-designer | write-design-spec | done | 10-game-designer-to-studio.md |
+| 5a | Plan | technical-director | technical-plan | done | 14-technical-director-to-studio.md |
+| 5b | Observe (spit line) | qa | reproduce-defect | done | 15-qa-to-studio.md |
+| 5c | Design (visuals) | art-director | visual-review, write-design-spec | done | 16-art-director-to-studio.md |
+| 6a | Build (code) | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md |
+| 6b | Build (`run_tests` check, manual placed) | gameplay-engineer | implement-change | done | 23-gameplay-engineer-to-studio.md |
+| 7a | Verify | qa | verify-change | done (question, no AC failed) | 26-qa-to-studio.md |
+| 7b | Verify (visuals) | art-director | visual-review | done (question, no build output) | 27-art-director-to-studio.md |
+| 7c | Verify (rerun: manual, runs, captures) | qa | verify-change | done (question, no AC failed) | 29-qa-to-studio.md |
+| 7d | Verify (visuals, from captures) | art-director | visual-review | done (fail: V-1, F3) | 32-art-director-to-studio.md |
+| 7e | Design (F1 overlap, AC-15 wording) | game-designer | write-design-spec | done | 33-game-designer-to-studio.md |
+| 7f | Build (F1/F3 render, manual paragraph) | gameplay-engineer | implement-change | done (render built) | 35-gameplay-engineer-to-studio.md |
+| 7f-O | Owner: place the manual paragraph | owner | — | done (Option A, D-007) | 36-studio-to-owner.md |
+| 7g | Verify (all but AC-15) | qa | verify-change | done (pass) | 37-studio-to-qa.md |
+| 7i | Verify (AC-15, `ManualTest`) | qa | verify-change | done (question: ManualTest blocked) | 38-studio-to-qa.md |
+| 7i-O | Owner: `ManualTest` result | owner | — | done (Option A, D-008: 39/40) | 42-studio-to-owner.md |
+| 7h | Verify (visuals) | art-director | visual-review | done (pass; V-6 from code, V-7 not seen) | 41-studio-to-art-director.md |
+| 7j | Design (`run over` manual test failure) | game-designer | write-design-spec | done (test too literal, D-009) | 43-studio-to-game-designer.md |
+| 7k | Build (test fix, line wraps) | gameplay-engineer | implement-change | done (test changed, suite not run) | 46-studio-to-gameplay-engineer.md |
+| 7k-O | Owner: place manual text | owner | — | skipped (manual unchanged, D-009) | — |
+| 7l-O | Owner: AC-15 rerun | owner | — | done (Option A, D-010: 40/40) | 48-studio-to-owner.md |
+| 7l | Verify (AC-15 rerun by QA) | qa | verify-change | skipped (Owner's 40/40 run, D-010) | — |
+| 8 | Play (room 1) | playtester | playtest-session | done (room 1 only, scripted, 2 defeats) | 49-studio-to-playtester.md |
+| 9a | Diagnose (Play findings) | game-designer | diagnose-experience | done (A1–A3, A5, B, C, D held) | 51-studio-to-game-designer.md |
+| 9b | Play (parts not yet seen) | playtester | playtest-session | done (thin: room 2 only, 1 script) | 52-studio-to-playtester.md |
+| 10a | Observe (open facts, bots) | qa | reproduce-defect | done (6 facts settled, 2 partly; D-58-1 ruled in 59) | 55-studio-to-qa.md |
+| 10b | Design (A1–A3, A5, manual draft) | game-designer | write-design-spec, make-decision | done (spec, D-011, manual draft) | 56-studio-to-game-designer.md |
+| 10c | Design (visuals: "on you", hit source) | art-director | visual-review, write-design-spec | open | 57-studio-to-art-director.md |
+| 10-O | Owner: place manual draft (from 59) | owner | — | planned (opens in the Route after 10c) | — |
+| 11 | Plan | technical-director | technical-plan | tentative (only if Waiting behavior is not local) | — |
+| 12 | Build | gameplay-engineer | implement-change | planned | — |
+| 13a | Verify | qa | verify-change | planned | — |
+| 13b | Verify (visuals) | art-director | visual-review | tentative (if 10c changes the view) | — |
+| 14 | Play (rooms 1–5, fresh playtester) | playtester | playtest-session | planned | — |
+| 15 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+After 10a/10b (58, 59): both done; 10c (57) still open, so the Route waits for it. 59's rules already settle D-58-1 (a hit in Strike cancels it), dash distance, facing and miss wording. Left for Build/Verify: on-you knockback direction, "(miss)" first-hand, D-58-1 at 30 FPS. The Owner step for the manual draft (10-O) is now planned.
+
+## Next action
+
+- `art-director` finishes 10c from `57-studio-to-art-director.md`; the result is addressed to `studio`.
+- Then Route, with 58, 59 and the 10c result: open 10-O (Owner places the manual draft from 59) and Build (12) in the same Route. The Build Handoff carries `design/combat.md`, D-011, AC-19…AC-27, the 10c display spec and QA's findings from 58 (including the Waiting-behavior report asked for in 59). It also names the on-you knockback gap, which goes back to Design if the spec does not cover it. Verify (13a) follows Build, with QA's unsettled items in its scope. If 10c finds the cheap fixes insufficient or a facing change necessary, Decide (`game-director`).
+
+## Outcome
+
+(Filled at Close.)
+>>>END

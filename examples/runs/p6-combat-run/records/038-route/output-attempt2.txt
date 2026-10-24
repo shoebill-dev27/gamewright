@@ -1,0 +1,163 @@
+I'm routing to Build now: 7d came back as a V-1 fail and 7e is ruled, so I opened 7f with Handoff 34 for the gameplay-engineer. The earlier rejection is fixed: the Load list now names `repo/tests/test_game.py`.
+
+<<<FILE goals/G-001-combat-monotony/34-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-001
+seq: 34
+from: studio
+to: gameplay-engineer
+stage: Build
+outcome: routed
+---
+# 34: studio → gameplay-engineer — render fix for enemies on the player's tile and under the swipe arc; add the practice-room text to manual.md
+
+## Task
+
+Implement two rendering-only changes in the player view of Build 0.5, with tests, and place one paragraph in `manual.md`. Address the build notes to `studio`.
+
+## Context
+
+Goal G-001 (combat feels monotonous), Option A (D-002), Build 0.5. Verify found no failing AC, but the art director's visual review (32) failed V-1: in "a grub rears back (on you)" draws, the committed grub is hidden under `P`. The game-designer ruled on this (33, D-006) and added AC-18 to `design/combat.md`. The art director also found F3 (the swipe arc hides the hit enemy). The designer also reworded AC-15.
+
+## Findings
+
+### Change 1 — F1: no living enemy is hidden under `P` (spec: D-006, AC-18)
+
+- Gameplay stays unchanged: enemies and the player still have no collision (the dash passes through enemies). Hit tests, damage radius, timings and the swipe use true positions. Only the drawing changes.
+- If a living enemy's cell equals the player's cell, draw its glyph in the nearest free in-room cell beside the player. Try first the side it last approached or struck from, then right, left, above, below. Two overlapping enemies take different cells.
+- It applies in all states, including the "open (on you)" counter window, to grubs and spitters, and to the immediate event draws (wind-up, charge, swipe).
+- Text lines stay as they are, including "(on you)". `x` is still drawn on the player's own cell when down.
+- AC-18 (full text in `design/combat.md`):
+  - Practice room, idle player, grub at distance 4, run to 5.5 s at 30 and 60 FPS: every draw with a living grub shows it in a cell other than `P`'s. Each "a grub rears back" line (including "(on you)") has `G`/`W` visible in that draw, and each "the grub is open (on you)" has `g`/`w` visible.
+  - `player 8 4`, `spawn spitter 8.2 4`: `P` and `s` are in neighbouring cells, and `S` is beside `P` during its Charge.
+  - Timings, hearts and trace positions stay within the AC-1…AC-4 tolerances. AC-17 now includes AC-18.
+
+### Change 2 — F3: enemy glyphs draw over the swipe arc (art director, 32)
+
+- In the draw right after "you swipe: grub hit (1 left)", the arc `)` was drawn over the grub's tile and the `w` was not visible (30 FPS draw [2.53] in QA's capture C3; the 60 FPS draw is identical).
+- Cell priority rule: enemy glyphs draw over the arc, and the arc fills only empty tiles. A committed (uppercase) enemy always wins its cell. The hit-confirming glyph change (`g`→`w` etc.) must be visible in the same draw as the hit line.
+- This is a drawing-only change. Acceptance: repeating the C3 script shows the damaged glyph (`w`) in the hit draw at 30 and 60 FPS, and the arc `)` still shows on the empty tiles of the reach.
+
+### Change 3 — `manual.md` (AC-15, designer ruling 2)
+
+`x` and the practice room must both be listed in the `manual.md#on-screen` section. Add this paragraph in the On screen section, after the mark table, with the wording unchanged (the designer's text in 33):
+
+> The practice room (`room empty`) is not part of a run. Enemies appear only where your script places them (`spawn`), and you stand where `player` puts you. Nothing heals, there is no next room, and the session ends a moment after you go down. If a grub or spitter is on your tile, it is drawn on a free tile next to you, so you can always see it.
+
+- `manual.md` is the Owner's draft (D-005). Change only this paragraph. The glyph table and the phrases the tests require ("room empty", "(miss)" and the others) must stay.
+- Keep `ManualTest` valid: in the earlier rounds the engineer's and QA's workspaces lacked `manual.md` beside `repo/`. State in your notes where `manual.md` stood when you ran `run_tests`.
+
+### Not in this change
+
+- F2 (out-of-order timestamps in the player view at 30 FPS): the art director rules it cosmetic and the designer did not rule on it. Do not change it unless it falls out of the work without risk. If you touch it, say so.
+- No change to rules, timings, parameters or inputs (D-001).
+
+## Decisions already made
+
+- D-001: no new inputs. D-002: Option A. D-004: one sequential change set on the existing simulation. D-005: the Owner places `manual.md`. D-006: enemies may overlap the player but are never hidden; the practice room is listed in the On screen section.
+
+## Constraints
+
+- Must play correctly at 30 and 60 FPS.
+- Prefer reuse of the existing renderer; small team.
+- Stop and hand back with a `question` if the spec is ambiguous, contradicts itself, or misses a case (for example, no free cell beside the player). Do not decide it yourself.
+
+## Open questions
+
+- If you cannot write `manual.md` (as happened twice before), say exactly what blocked you and which parts you did complete. The Studio will not route this to a Role a third time with nothing new; it goes to the Owner.
+- Name the as-built choice of the displaced cell (the order tried, edge cases) in your notes, for the art director's readability check.
+
+## Expected output
+
+Code change plus tests for AC-18 and F3, the `manual.md` paragraph, and the `run_tests` result (all tests, including `ManualTest`, with the `manual.md` location). Build notes address the result to `studio`. The Studio then opens Verify: QA (AC-15, AC-17, AC-18, C1/C7/C3 repeats at 30 and 60 FPS) and the art director for the visual re-check.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: design/combat.md, design/combat-visuals.md, manual.md, repo/README.md, repo/game.py, repo/play.py, repo/tests/test_game.py
+- Decisions: decisions/D-006-overlap-display-and-practice-room-manual.md, decisions/D-001-one-button-combat.md, decisions/D-004-option-a-single-change-set.md
+- Previous handoff: goals/G-001-combat-monotony/33-game-designer-to-studio.md (also for F3: goals/G-001-combat-monotony/32-art-director-to-studio.md)
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-15
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): when an action player from the project's player profile plays through combat encounters, the fights feel varied and engaging, and the player's moment-to-moment choices (positioning, timing, enemy behavior) visibly matter. The player no longer experiences the fights as the same repeated pattern.
+
+Out of scope: adding input buttons beyond attack, dash and pause (D-001, Owner approval needed); changes to the run length or the non-combat systems; numeric targets (these belong to Design as acceptance criteria, and the final verdict to Review).
+
+No immediate escalation: the Goal does not conflict with the vision or D-001, and it needs no reinterpretation. Improving depth through positioning, timing and enemy behavior is what pillar 1 asks for.
+
+## Unknowns
+
+- Observe (playtester): done (02 rooms 1–3, 08 rooms 4–5). Not observed: room 5 fight, approaching a spitter, projectile hits, room clear, dash dodging; the Play step after Build covers them.
+- Observe (qa): done (06, 15). The doubled spit line is a presentation defect covered by AC-8 and a Build requirement.
+- Diagnose: done (03). Cause: single-state, untelegraphed enemy behavior. Option A chosen (D-002); B deferred; C out of scope.
+- Decide: done (D-002, D-005, D-006).
+- Design: done (10, 16, 33). Spec in `design/combat.md` (AC-1…AC-18), run/room rules in D-003, overlap and manual rulings in D-006, visual spec in `design/combat-visuals.md` (V-1…V-8).
+- Plan: done (14, D-004). Gap defaults F1–F11 set by the technical-director; the designer confirms them at Review, F1 (grub speed) matters most.
+- Build: done (18, 22, 23). Reopened as 7f (34): render fix so no enemy is hidden under `P` (F1, AC-18), enemy glyph over the swipe arc (F3), and the practice-room paragraph in `manual.md` (AC-15). F2 (timestamp order) is cosmetic, not required.
+- Verify (7a–7c): no AC observed failing. Suite-only: AC-14 (room clear), AC-10 2-swipe kill, "(too soon)" and "(down)" lines. Pause (F11) not implemented, not verifiable. `ManualTest` has no valid result yet (QA's workspace lacked `manual.md` beside `repo/`); a third hand-back for this with nothing new supplied goes to the Owner.
+- Verify, visuals (32): V-1 fail (hidden committed grub in "(on you)" draws); V-3, V-4, V-7, V-8 pass; V-5 static pass; V-6 (color) not verified, needs a `--color` capture; V-2 gaps: 60 FPS charge-start draw, draw after a missed swipe.
+- Verify after 7f (7g QA, 7h art director): planned. QA repeats C1, C7, C3, checks AC-15, AC-17, AC-18 and takes the extra captures; the art director re-judges V-1, V-2, V-6 and the displaced cell.
+- Play: `playtester` replays the changed build, live and reactive, from a Handoff composed by the Studio from permitted information. Watch slot starvation. Planned, after Verify passes.
+- Review: experience Goal. `game-director` with `review-outcome`. Planned. Open for the designer/Review: run progression after "run over"; F1 (grub speed), F6, F7; numbering of same-type enemies in one cell; a still player going down in about 5 s (tuning).
+- Skipped: none.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 02-playtester-to-game-designer.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-game-designer-to-game-director.md |
+| 3a | Decide | game-director | make-decision | done | 05-game-director-to-studio.md |
+| 3b | Observe (defects) | qa | reproduce-defect | done | 06-qa-to-game-designer.md |
+| 3c | Observe (rooms 4–5) | playtester | playtest-session | done | 08-playtester-to-game-designer.md |
+| 4 | Design | game-designer | write-design-spec | done | 10-game-designer-to-studio.md |
+| 5a | Plan | technical-director | technical-plan | done | 14-technical-director-to-studio.md |
+| 5b | Observe (spit line) | qa | reproduce-defect | done | 15-qa-to-studio.md |
+| 5c | Design (visuals) | art-director | visual-review, write-design-spec | done | 16-art-director-to-studio.md |
+| 6a | Build (code) | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md |
+| 6b | Build (`run_tests` check, manual placed) | gameplay-engineer | implement-change | done | 23-gameplay-engineer-to-studio.md |
+| 7a | Verify | qa | verify-change | done (question, no AC failed) | 26-qa-to-studio.md |
+| 7b | Verify (visuals) | art-director | visual-review | done (question, no build output) | 27-art-director-to-studio.md |
+| 7c | Verify (rerun: manual, runs, captures) | qa | verify-change | done (question, no AC failed) | 29-qa-to-studio.md |
+| 7d | Verify (visuals, from captures) | art-director | visual-review | done (fail: V-1, F3) | 32-art-director-to-studio.md |
+| 7e | Design (F1 overlap, AC-15 wording) | game-designer | write-design-spec | done | 33-game-designer-to-studio.md |
+| 7f | Build (F1/F3 render, manual paragraph) | gameplay-engineer | implement-change | open | 34-studio-to-gameplay-engineer.md |
+| 7g | Verify | qa | verify-change | planned | — |
+| 7h | Verify (visuals) | art-director | visual-review | planned | — |
+| 8 | Play | playtester | playtest-session | planned | — |
+| 9 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+After 7d/7e (32 fail on V-1, 33 done): the designer allowed overlap but never hidden (D-006, AC-18) and reworded AC-15, so Build reopens as 7f (34), with the art director's F3 (enemy over arc). 7g (QA) and 7h (art director) are now planned after it; F2 stays cosmetic.
+
+## Next action
+
+Run `34-studio-to-gameplay-engineer.md` (result addressed to `studio`). Then Route:
+- If the build passes `run_tests`, open 7g (QA, fresh context, without the engineer's assessment) and 7h (art director, from QA's captures, after 7g).
+- If the engineer hands back a spec question, return to Design (`game-designer`).
+- If `manual.md` cannot be written again with nothing new supplied, escalate to the Owner.
+- If QA or the art director fail an item on re-verify, return to Build with the failure report (second fail on the same criterion goes to `technical-director`).
+
+## Outcome
+
+(Filled at Close.)
+>>>END

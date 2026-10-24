@@ -1,0 +1,127 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "4221407a-87ec-49ce-9333-863fc0cbdc05",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 21410,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 9645,
+    "output_tokens_details": {
+     "thinking_tokens": 1972
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 21410,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 9645,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 21410,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 21410
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.182094,
+   "attempt": 1,
+   "started": "2026-10-11T10:35:57",
+   "seconds": 57.8,
+   "errors": [
+    "goal.md: only one step (or one group of parallel steps 2a, 2b) may be open"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "2cc28580-52fa-4278-bec7-1a67abdc8273",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 21482,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 10432,
+    "output_tokens_details": {
+     "thinking_tokens": 2902
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 21482,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 10432,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 21482,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 21482
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.190252,
+   "attempt": 2,
+   "started": "2026-10-11T10:36:55",
+   "seconds": 65.8,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-combat-monotony/goal.md": "42d677764429ae3ef5e49010041b6ca8f770c2a60fdda4a6bfc35167df8af470",
+  "goals/G-001-combat-monotony/07-game-director-to-game-designer.md": "2e82627a577455bc84928f7d881fd139512e32d47a3303c20e37ae09736201cc",
+  "goals/G-001-combat-monotony/09-studio-to-qa.md": "67d55b2037eb05bb8d1da87ff2c85730d666d5ec5f6b9f08f91cc901aff6c0ab"
+ },
+ "decision": {
+  "status": "active",
+  "open": [
+   [
+    "qa",
+    "Verify (dash-damage fix)"
+   ],
+   [
+    "game-designer",
+    "Design (Phase 1 in full; Phase 2 as proposed behaviors)"
+   ]
+  ],
+  "new": [
+   "qa",
+   "Verify"
+  ]
+ },
+ "seen_through_seq": 9
+}

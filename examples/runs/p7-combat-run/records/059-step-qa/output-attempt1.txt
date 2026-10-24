@@ -1,0 +1,112 @@
+I'm starting round 1 of runs: the tests, the player view at 30 FPS for rooms 1–5, and 30 FPS traces of the six late-swipe cases (grub and runner). A 60 FPS comparison follows in round 2.
+
+<<<FILE @run/tests
+>>>END
+
+<<<FILE @run/play/room1-30
+room 1
+fps 30
+when see * coming within 1.5 then move aside
+when text "rears back" then move aside
+when see g within 1.4 then attack
+when see g within 3 then face
+>>>END
+
+<<<FILE @run/play/room2-30
+room 2
+fps 30
+when see * coming within 1.5 then move aside
+when text "rears back" then move aside
+when see r within 1.4 then attack
+when see g within 1.4 then attack
+when see G within 1.4 then attack
+when see r within 3 then face
+when see G within 3 then face
+>>>END
+
+<<<FILE @run/play/room3-30
+room 3
+fps 30
+end 12
+when see * coming within 1.5 then move aside
+when text "takes aim" then move aside
+when see s within 1.4 then attack
+>>>END
+
+<<<FILE @run/play/room4-30
+room 4
+fps 30
+end 15
+when see * coming within 1.5 then move aside
+when text "takes aim" then move aside
+when text "rears back" then move aside
+when see g within 1.4 then attack
+when see r within 1.4 then attack
+when see s within 1.4 then attack
+>>>END
+
+<<<FILE @run/play/room5-30
+room 5
+fps 30
+end 15
+when see * coming within 1.5 then move aside
+when text "takes aim" then move aside
+when text "rears back" then move aside
+when see g within 1.4 then attack
+when see G within 1.4 then attack
+when see s within 1.4 then attack
+>>>END
+
+<<<FILE @run/trace/grub-inreach-30
+room empty
+fps 30
+spawn grub 9.3 4
+player 8 4
+0.40 attack
+end 2
+>>>END
+
+<<<FILE @run/trace/grub-late-30
+room empty
+fps 30
+spawn grub 9.3 4
+player 8 4
+0.60 attack
+end 2
+>>>END
+
+<<<FILE @run/trace/grub-outofreach-30
+room empty
+fps 30
+spawn grub 10 4
+player 8 4
+0.30 attack
+end 2
+>>>END
+
+<<<FILE @run/trace/runner-inreach-30
+room empty
+fps 30
+spawn runner 9.3 4
+player 8 4
+0.20 attack
+end 2
+>>>END
+
+<<<FILE @run/trace/runner-late-30
+room empty
+fps 30
+spawn runner 9.3 4
+player 8 4
+0.43 attack
+end 2
+>>>END
+
+<<<FILE @run/trace/runner-outofreach-30
+room empty
+fps 30
+spawn runner 10 4
+player 8 4
+0.20 attack
+end 2
+>>>END

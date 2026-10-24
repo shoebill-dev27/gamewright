@@ -1,0 +1,73 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "2146b026-a324-4626-b05d-7a8086b739f8",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 23406,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 6470,
+    "output_tokens_details": {
+     "thinking_tokens": 1319
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 23406,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 6470,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 23406,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 23406
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.15832800000000002,
+   "attempt": 1,
+   "started": "2026-10-16T12:14:35",
+   "seconds": 45.5,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-combat-monotony/21-studio-to-game-designer.md": "8c4926e60699b1d2277b95abad0ab669783ed1dd90d3448181db03bda35b32c3",
+  "goals/G-001-combat-monotony/goal.md": "1765e670466c5b7920e06d43f5300900fb8b87337d424ed3516b762d892d429b"
+ },
+ "decision": {
+  "new": [
+   "game-designer",
+   "Design"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "game-designer",
+    "Design (graze, cap, margin, doc conflicts)"
+   ]
+  ]
+ },
+ "seen_through_seq": 21
+}

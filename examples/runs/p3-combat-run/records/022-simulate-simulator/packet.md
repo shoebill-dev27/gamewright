@@ -1,0 +1,206 @@
+# Studio operation packet
+
+operation: Simulate (dry-run harness, not a Studio operation)
+goal: G-001
+
+## You may write
+
+- sim/build-0.5.md
+- sim/repo-notes.md
+
+## Inputs
+
+<<<FILE simulator-instructions
+You are the dry-run build simulator. You are not a Studio Role and make no decisions.
+
+The game does not exist; its build and code are described in text. A change was just implemented.
+From the engineer's description of the change, the previous build description and the repository
+notes, write two files:
+
+1. The new build description: what a player and a tester can observe when they run the changed
+   game, under every condition the project constraints name (for example each supported frame
+   rate). Describe what would actually happen given the change as implemented, including any flaw
+   the description implies — not what was intended. Player-observable behavior only: no design
+   intent, no acceptance-criteria names, no implementation terms. Do not copy HTML comments.
+   Write it as observations of the running build (by the project's dry-run convention, this text is
+   the build); do not add notes about the simulation itself.
+2. The updated repository notes: implementation facts after the change.
+
+Write each file as a file block (<<<FILE <path> ... >>>END) using exactly the paths under
+"You may write". Text outside file blocks is discarded.
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/20-gameplay-engineer-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 20
+from: gameplay-engineer
+to: studio
+stage: Verify
+outcome: done
+---
+# 20: gameplay-engineer → studio — Hit-stun input is now ignored and not buffered (D-003); code-side values reported
+
+## Task
+
+Compose a verification Handoff for `qa` from the Findings below. The build's observable behavior for a dash or attack pressed during hit-stun is now stated and matches D-003. QA also needs to confirm that `sim/build-0.4.md` is the intended latest build. Questions 3 and 4 are answered for the Technical Director and Art Director.
+
+## Context
+
+Goal G-001. QA's handoff 15 could not judge a dash pressed during the 0.3 s hit-stun, because `sim/build-0.4.md` said only "behaves as it did in 0.3" and `sim/build-0.3.md` does not describe it. This step makes the behavior explicit. Scope is hit-stun input handling only. No Phase 1 work and no new input.
+
+## Findings
+
+### Change (stated exactly; counts as made in this dry run)
+
+**What changes.** During hit-stun, dash and attack presses are discarded. Nothing is stored and nothing fires when hit-stun ends.
+
+**Where.** The player's input handling, at the point where button presses are turned into a dash start or an attack start. The player gets a third timestamp on the accumulated game clock, `hitStunUntil`. It is set to hit time + 0.3 s at the same place `hitInvulnUntil` is set. Hit-stun is therefore a timestamp comparison, not a frame count, and behaves the same at 30 and 60 FPS.
+
+1. While `now < hitStunUntil`, a dash or attack press is dropped. It does not start an action, does not enter the "attack queued during a dash" slot, and does not enter any other buffer.
+2. When a hit lands, any pending dash or attack request is cleared, so nothing carries into hit-stun.
+3. Presses are edge-triggered. A button held through the end of hit-stun does not fire at that moment. A new press after hit-stun ends is needed.
+4. A press at or after `hitStunUntil` is accepted normally. A press landing exactly on the 0.3 s edge may differ by one frame between 30 and 60 FPS. This is the same boundary convention as the 0.8 s and 0.25 s edges.
+
+**Unchanged.**
+- `isInvulnerable(now)`, `hitInvulnUntil` and `dashInvulnUntil`.
+- Dash distance, duration and the 0.6 s cooldown.
+- The attack queued during a dash still fires when the dash ends. A hit cannot land during a dash, so hit-stun cannot overlap that queue.
+- Enemies, rooms and the attack.
+
+**How to exercise it (at 30 FPS and 60 FPS).**
+1. Take a hit. Press dash at several moments inside the first 0.3 s, for example about 0.05, 0.15 and 0.28 s after the hit.
+   - Expected: the player does not dash.
+   - Expected: no dash starts when hit-stun ends at 0.3 s.
+   - Expected: the dash cooldown does not start.
+2. Repeat with attack.
+   - Expected: no swipe, either then or at 0.3 s.
+3. Repeat 1 and 2 with the button held down through the end of hit-stun.
+   - Expected: nothing fires when hit-stun ends. A fresh press afterwards works.
+4. Press dash and attack just after 0.3 s, as a fresh press.
+   - Expected: both work, and the dash is fully protected (criteria 1 and 2 in `05-qa-to-studio.md`).
+5. Run the dash-delay matrix from handoff 15 (0.3 to 0.85 s) as before.
+
+**Criteria addressed.** Criterion 2 (dash pressed during hit-stun) and criterion 5 (hit-stun lasts 0.3 s with no input). The other criteria are not affected by this change.
+
+**Tests added.** Unit tests on the simulated game clock at fixed steps of 1/30 s and 1/60 s and with varying delta times:
+- Dash and attack presses at several times inside 0.3 s produce no action at press time, at 0.3 s, or later.
+- A press just after 0.3 s fires normally.
+- A button held through 0.3 s does not fire.
+- A hit clears a pending request.
+
+### Answers to the open questions
+
+1. **What the build did before.** The code notes say only that a dash during hit-stun "is handled as before (unspecified)". They do not say whether it was ignored, buffered or fired. I cannot claim an observed prior behavior, and none is claimed here. After this change, the behavior is the one above for both dash and attack: ignored, nothing fires during hit-stun or at its end.
+2. **Latest build.** `sim/repo-notes.md` is headed "build 0.3.1" and `sim/build-0.4.md` is headed "Simulated build 0.3.1". These agree, and the packet shows no later build. The file name "0.4" and the heading "0.3.1" still disagree. The Studio should confirm the naming. The simulator will update `sim/` from this change, so QA should be given the updated build file.
+3. **Code-side values.** The code notes (`sim/repo-notes.md`) contain none of the following unless noted.
+
+| Item | Value |
+|---|---|
+| Grub speed | not in the code notes (design: "walks straight at the player") |
+| Player speed | not in the code notes |
+| Projectile speed | not in the code notes (design and build: "slow") |
+| Projectile range | not in the code notes |
+| Hearts (player maximum) | not in the code notes (design: a hit costs 1 heart) |
+| Room size in tiles | not in the code notes |
+| Grub hitbox size | not in the code notes |
+| Player hitbox size | not in the code notes (the player's attack is a short arc hitbox in front of the player; no size is given) |
+| Spawn effect or spawner | not in the code notes |
+| Flinch | In the shared enemy controller, which has the states Idle, Chase and Attack. An enemy hit by the player enters a 0.2 s Flinch state that interrupts whatever it is doing, including Attack, then returns to Chase. It is per-controller, not per-type. |
+
+   Design values for reference (from `design/combat.md`, not code facts): dash 4 tiles over 0.25 s, cooldown 0.6 s, Grub HP 2, Spitter HP 2, Spitter fires every 2 s. Someone with access to the real code or data files will have to supply the missing numbers.
+
+4. **Flicker or sound cues.** The code notes state that none are described for invulnerability, and none exist for hit or dash invulnerability as far as the notes show. None are added in this step. QA should record cues as "none described, not checked". Whether any are wanted is a design or art question. It is not part of D-003 or the criteria.
+
+## Decisions already made
+
+- D-001: one attack button plus dash. No new input.
+- D-003: input during hit-stun is ignored, not buffered. Hit and dash invulnerability are independent timers.
+- D-004: timestamps on the accumulated game clock, not frame counts. Phase 1 waits for this fix to pass verification.
+
+## Constraints
+
+- Scope is hit-stun input only. No Phase 1 work.
+- Correct at 30 and 60 FPS.
+- No new input.
+- The simulator needs to update `sim/` from the change above before QA verifies.
+
+## Open questions
+
+- For Studio: confirm that the build named 0.4 and headed 0.3.1 is one build, and that the updated build file is what QA receives.
+- For Studio, `technical-director` and `art-director`: the missing values in answer 3 are "not in the code notes". They cannot be obtained from this packet.
+- Not blocking: hold-through behavior (change 3) follows from "ignored, not buffered". If the designer wants held buttons to fire at the end of hit-stun, that is a different rule and needs a decision.
+
+## Expected output
+
+Studio composes a verification Handoff for `qa` containing the Change, the exercise steps, the criteria addressed, and the updated build description. It must not include the Sender assessment. QA returns pass or fail.
+
+## Sender assessment
+
+- I could not observe the prior behavior, so I did not try to describe it. The spec (D-003) is unambiguous, so implementing "ignore" is within the spec and is not a design choice. The edge-triggered, hold-through detail follows from "not buffered". Nothing fires "at the end of hit-stun" in either reading of D-003, and I have flagged it as a possible clarification.
+- Root cause of the unobservability: the old input path had no explicit hit-stun gate in the notes, so the behavior was an accident of the code path. The timestamp gate makes it explicit and testable.
+- Risk: low. The change adds a guard and one timestamp and touches no invulnerability logic. The one-frame boundary difference at 0.3 s is the same kind as the existing edges.
+- Confidence: high that the stated behavior matches D-003. Moderate that the nominal exercise steps cover pad players, because held-button behavior depends on how the real input layer reports edges.
+- Escalation: this is the second `question` for hit-stun observability, but it is now answered. If QA hands back for the same missing observation again, the Studio escalates to the Owner.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: none
+- Project: design/combat.md; project.md#constraints; sim/build-0.4.md; goals/G-001-combat-monotony/05-qa-to-studio.md (acceptance criteria)
+- Decisions: decisions/D-001-one-button-combat.md; decisions/D-003-input-during-hit-stun.md
+- Previous handoff: goals/G-001-combat-monotony/18-studio-to-gameplay-engineer.md
+>>>END
+
+<<<FILE sim/build-0.4.md
+# Simulated build 0.3.1 — what playing it looks like
+
+Dry-run stand-in for a real build: a player-observable description only.
+
+- Room 1–2: Grubs crawl toward you. Standing still and pressing attack kills each in two swipes before it reaches you. You take damage only if three arrive at once.
+- Room 3: Spitters. Their projectile is slow; a single step sideways avoids it. You walk up and swipe them twice.
+- Room 4–5: mixed rooms. The same pattern works: back into a corner, face the Grubs, swipe; step aside from projectiles.
+- The dash is rarely needed. Most runs use it only to cross the room faster.
+- Every room ends the same way: hold position, swipe until empty. A run feels the same at minute 2 and minute 15.
+
+Dash and hit protection (same at 30 FPS and 60 FPS; only the exact frame at which an edge lands differs):
+
+- Dash with no preceding hit: you cannot be damaged for the full 0.25 s of the dash. Damage can land immediately after it ends.
+- Getting hit: you cannot be damaged for 0.8 s after the hit. You are stunned with no input for the first 0.3 s. After 0.8 s damage can land again.
+- Dash started between 0.3 s and 0.55 s after a hit: no damage during the dash, and none after the dash ends. You stay protected until 0.8 s after the hit, then damage can land again.
+- Dash started between 0.55 s and just under 0.8 s after a hit: no damage during the dash. Protection lasts through the end of the dash and at least until 0.8 s after the hit, whichever is later. Damage cannot land partway through the dash.
+- Dash started at 0.8 s or later after a hit: the hit protection has ended; the dash gives its own 0.25 s of protection.
+- This holds for Grub contact and Spitter projectiles alike, and for dashes toward or away from the damage source.
+- Compared with 0.3, a hit followed quickly by a dash now gives more safe time, since the dash ending no longer ends the hit protection early.
+- A damage event landing exactly on the 0.8 s or 0.25 s boundary counts as after protection; at 30 FPS versus 60 FPS this can differ by one frame.
+- Dash distance, dash duration and the 0.6 s dash cooldown are unchanged. An attack pressed during a dash still fires when the dash ends. A dash pressed during hit-stun behaves as it did in 0.3.
+- No other changes to enemies, rooms or attacks.
+>>>END
+
+<<<FILE sim/repo-notes.md
+# Simulated repository notes — lantern-depths (build 0.3.1)
+
+Dry-run stand-in for reading the game's code. Implementation facts only — never load this for a Playtester.
+
+- Enemies share one controller with the states Idle, Chase and Attack. Per-type behavior is data (speed, HP, attack type) plus a small per-type attack routine.
+- Hit reaction: an enemy hit by the player enters a 0.2 s Flinch state that interrupts whatever it is doing (including Attack), then returns to Chase. Not described in `design/combat.md`.
+- Damage: the player's attack is a short arc hitbox in front of the player. Enemies take damage on overlap. There is no concept of blocking or facing yet.
+- Player invulnerability: the shared on/off flag and its two timers were removed. The player now has two expiry timestamps on the accumulated game clock (sum of delta times): `hitInvulnUntil` (set to hit time + 0.8 s on a hit) and `dashInvulnUntil` (set to dash start time + 0.25 s on dash start). `isInvulnerable(now)` returns `now < max(hitInvulnUntil, dashInvulnUntil)`. Every damage source (Grub contact, Spitter projectile) calls it. Neither window cancels or shortens the other. Hit-stun remains 0.3 s with no input. Dash distance, duration and 0.6 s cooldown unchanged. Attack queued during a dash still fires on dash end. Dash pressed during hit-stun is handled as before (unspecified).
+- No other writers of the old flag were found; no flicker or sound cues for invulnerability are described.
+- Movement: simple steering; walls stop movement.
+- Tests: unit tests for `isInvulnerable` on a simulated game clock, run at fixed steps of 1/30 s and 1/60 s and with varying delta times. They cover dash only, hit only, dashes started 0.3, 0.5, 0.55, 0.6, 0.79 and 0.8 s after a hit, and damage attempts every step up to 1.2 s after a hit. No tests for enemies.
+- Game loop uses variable delta time; 30 and 60 FPS supported.
+>>>END
+
+<<<FILE project.md#constraints
+## Constraints
+
+- Desktop, keyboard and gamepad.
+- Must play correctly at both 30 and 60 FPS.
+- Small team: prefer changes that reuse existing systems.
+- No new input buttons beyond attack, dash and pause without Owner approval (D-001).
+- Dry-run project: there is no real repository. `sim/repo-notes.md` stands in for the code. A Build
+  step implements a change by stating it exactly in its Handoff (what changes, where, and how to
+  exercise it); the change then counts as made, and the runtime's simulator updates `sim/` from it.
+>>>END

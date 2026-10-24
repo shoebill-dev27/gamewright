@@ -1,0 +1,26 @@
+[
+ {
+  "run": "@run/trace/spitlast60",
+  "command": "python3 play.py --view trace {script}",
+  "script": "room empty\nfps 60\nend 5\nplayer 2 4\nspawn spitter 12 4\n3.6166 dash right\n",
+  "exit": 0,
+  "seconds": 0.0,
+  "output": "trace: fps=60 room=empty dt=0.01667\nt=0.000 frame=0 pos=(2.00,4.00) hearts=3 invulnerable=False dash_left=0.000 hurt_left=0.000 stun_left=0.000 | spitter(12.00,4.00,hp=2) | setup\nt=2.000 frame=120 pos=(2.00,4.00) hearts=3 invulnerable=False dash_left=0.000 hurt_left=0.000 stun_left=0.000 | spitter(12.00,4.00,hp=2) | spit\nt=3.633 frame=218 pos=(2.27,4.00) hearts=3 invulnerable=True dash_left=0.233 hurt_left=0.000 stun_left=0.000 | spitter(12.00,4.00,hp=2) | invulnerable {'value': True, 'why': 'dash'}; dash {'direction': 'right'}\nt=3.867 frame=232 pos=(6.00,4.00) hearts=3 invulnerable=False dash_left=0.000 hurt_left=0.000 stun_left=0.000 | spitter(12.00,4.00,hp=2) | dash_end; invulnerable {'value': False, 'why': 'dash timer ended'}\nt=3.883 frame=233 pos=(6.00,4.00) hearts=2 invulnerable=True dash_left=0.000 hurt_left=0.800 stun_left=0.300 | spitter(12.00,4.00,hp=2) | invulnerable {'value': True, 'why': 'hurt'}; hurt {'source': 'shot', 'hearts': 2}\nt=4.000 frame=240 pos=(6.00,4.00) hearts=2 invulnerable=True dash_left=0.000 hurt_left=0.683 stun_left=0.183 | spitter(12.00,4.00,hp=2) | spit\nt=4.683 frame=281 pos=(6.00,4.00) hearts=2 invulnerable=False dash_left=0.000 hurt_left=0.000 stun_left=0.000 | spitter(12.00,4.00,hp=2) | invulnerable {'value': False, 'why': 'hurt timer ended'}\nt=5.000 frame=300 pos=(6.00,4.00) hearts=2 invulnerable=False dash_left=0.000 hurt_left=0.000 stun_left=0.000 | spitter(12.00,4.00,hp=2) | end\n"
+ },
+ {
+  "run": "@run/trace/spitlast30",
+  "command": "python3 play.py --view trace {script}",
+  "script": "room empty\nfps 30\nend 5\nplayer 2 4\nspawn spitter 12 4\n3.6 dash right\n",
+  "exit": 0,
+  "seconds": 0.0,
+  "output": "trace: fps=30 room=empty dt=0.03333\nt=0.000 frame=0 pos=(2.00,4.00) hearts=3 invulnerable=False dash_left=0.000 hurt_left=0.000 stun_left=0.000 | spitter(12.00,4.00,hp=2) | setup\nt=2.000 frame=60 pos=(2.00,4.00) hearts=3 invulnerable=False dash_left=0.000 hurt_left=0.000 stun_left=0.000 | spitter(12.00,4.00,hp=2) | spit\nt=3.633 frame=109 pos=(2.53,4.00) hearts=3 invulnerable=True dash_left=0.217 hurt_left=0.000 stun_left=0.000 | spitter(12.00,4.00,hp=2) | invulnerable {'value': True, 'why': 'dash'}; dash {'direction': 'right'}\nt=3.867 frame=116 pos=(6.00,4.00) hearts=3 invulnerable=False dash_left=0.000 hurt_left=0.000 stun_left=0.000 | spitter(12.00,4.00,hp=2) | dash_end; invulnerable {'value': False, 'why': 'dash timer ended'}\nt=3.900 frame=117 pos=(6.00,4.00) hearts=2 invulnerable=True dash_left=0.000 hurt_left=0.800 stun_left=0.300 | spitter(12.00,4.00,hp=2) | invulnerable {'value': True, 'why': 'hurt'}; hurt {'source': 'shot', 'hearts': 2}\nt=4.000 frame=120 pos=(6.00,4.00) hearts=2 invulnerable=True dash_left=0.000 hurt_left=0.700 stun_left=0.200 | spitter(12.00,4.00,hp=2) | spit\nt=4.700 frame=141 pos=(6.00,4.00) hearts=2 invulnerable=False dash_left=0.000 hurt_left=0.000 stun_left=0.000 | spitter(12.00,4.00,hp=2) | invulnerable {'value': False, 'why': 'hurt timer ended'}\nt=5.000 frame=150 pos=(6.00,4.00) hearts=2 invulnerable=False dash_left=0.000 hurt_left=0.000 stun_left=0.000 | spitter(12.00,4.00,hp=2) | end\n"
+ },
+ {
+  "run": "@run/trace/hurtmid60",
+  "command": "python3 play.py --view trace {script}",
+  "script": "room empty\nfps 60\nend 3\nplayer 8 4\nspawn grub 8.5 4\n0.75 dash left\n",
+  "exit": 0,
+  "seconds": 0.0,
+  "output": "trace: fps=60 room=empty dt=0.01667\nt=0.000 frame=0 pos=(8.00,4.00) hearts=3 invulnerable=False dash_left=0.000 hurt_left=0.000 stun_left=0.000 | grub(8.50,4.00,hp=2) | setup\nt=0.017 frame=1 pos=(8.00,4.00) hearts=2 invulnerable=True dash_left=0.000 hurt_left=0.800 stun_left=0.300 | grub(8.50,4.00,hp=2) | invulnerable {'value': True, 'why': 'hurt'}; hurt {'source': 'grub', 'hearts': 2}\nt=0.767 frame=46 pos=(7.73,4.00) hearts=2 invulnerable=True dash_left=0.233 hurt_left=0.050 stun_left=0.000 | grub(8.47,4.00,hp=2) | dash {'direction': 'left'}\nt=1.000 frame=60 pos=(4.00,4.00) hearts=2 invulnerable=False dash_left=0.000 hurt_left=0.000 stun_left=0.000 | grub(8.00,4.00,hp=2) | dash_end; invulnerable {'value': False, 'why': 'dash timer ended'}\nt=2.717 frame=163 pos=(4.00,4.00) hearts=1 invulnerable=True dash_left=0.000 hurt_left=0.800 stun_left=0.300 | grub(4.57,4.00,hp=2) | invulnerable {'value': True, 'why': 'hurt'}; hurt {'source': 'grub', 'hearts': 1}\nt=3.000 frame=180 pos=(4.00,4.00) hearts=1 invulnerable=True dash_left=0.000 hurt_left=0.517 stun_left=0.017 | grub(4.54,4.00,hp=2) | end\n"
+ }
+]

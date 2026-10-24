@@ -1,0 +1,171 @@
+<<<FILE decisions/D-027-owner-stops-g002.md
+---
+kind: decision
+id: D-027
+status: accepted
+decided_by: owner
+goal: G-002
+date: 2026-10-23
+supersedes: none
+---
+# D-027: G-002を未達・検証未完了で打ち切る
+
+## Decision
+
+Ownerは85の案Bを選択した。G-002を未達・検証未完了として打ち切り、status: abandonedでCloseする。追加の実装・測定・評価は開かない。予算は123 operationsのままとし、追加継続予算は設定しない。実装の削除・巻戻しは行わない。
+
+Ownerの回答原文：
+
+> 案B。ここで打ち切ってください。理由: 残りに少なくとも 44〜48 operations が要るという見積もりは、この Goal にかけられる費用を超えます。未達・検証未完了のまま、現在の成果（連続ランと部屋 5 の単体ボス、試験 161 件）と、終わっていない検証を Outcome に正直に書いて Close してください。続きが要るかは、別の Goal として後で判断します。
+
+現在の成果と不足をOutcomeに記録する。試験成功を独立QA・体験評価・Goal達成の代用にせず、未実施のReviewを実施済みと扱わない。歴史的一致の確認不能は、未実施・未解消の検証と区別する。
+
+## Rationale
+
+必須残工程の見積もり44〜48 operationsが、OwnerのこのGoalにかけられる費用を超えるため。完成や検証合格による終了ではなく、費用判断による打切りである。
+
+## Alternatives considered
+
+案Aの「Resume時点の実累計＋60 operations」での継続は、Ownerが費用を理由に選択しなかった。必須検証を免除して達成扱いにする案は採用しない。
+
+## Revisit when
+
+Ownerが続きの必要性を別Goalとして判断するとき。再開時は、その時点のビルド・未完了事項・予算を確認し、新たに範囲を定める。
+>>>END
+
+<<<EDIT goals/G-002-final-boss/85-studio-to-owner.md
+<<<<<<< SEARCH
+status: open
+decision: pending
+=======
+status: resolved
+decision: D-027
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT goals/G-002-final-boss/goal.md
+<<<<<<< SEARCH
+status: blocked-on-owner
+=======
+status: abandoned
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+## Unknowns
+
+- Observe：skipped。既存不具合の再現依頼ではない。
+- Diagnose：done。既存基盤の不足と計画上の回帰対応を整理済み。24に変更前のtests基線（69 tests、OK）が報告されている。
+- Decide：done。D-015〜D-019で範囲・体験方向・仕様契約・旧基準の適用関係を確定。
+- Design：done。design/final-boss-and-continuous-run.mdとD-017・D-019が正本。24では実装変更なし。変更後の検証は未実施。
+- Plan：done。16・20の計画と回帰対応を使用する。D-021と衝突する実機ホスト・実機供給・外部配員・見積もり取得の要求は適用しない。
+- Decide（供給・承認）：done。22へのOwner回答をD-021に記録。Ownerは実行経路とStudio内検証を指定し、Build開始を承認。実機供給、指定sha照合、人日見積もりは不要。
+- Plan補完：skipped。新しいOwner条件を後続Stepへ直接渡せるため、同じ供給質問で再発行しない。具体的な技術上の不成立が判明した場合に限り戻す。
+- Build：done。56でSplit Cを納品。runtimeの保存ソース04fa2b1c168aは全suite152件OK。pause/retry込み通常ランの同一試行計測、dodger独立1〜4の回帰固定、ボス判断ログを提出済み。報告された通常ラン勝利時間は30 FPS 86.967 s／60 FPS 103.533 s。履歴値との報告精度での一致と、変更前の厳密な同一性の未証明を区別する。Build証拠であり独立検証・体験判定ではない。
+- Verify：未完了。60はfail。製品戦闘の再現済み不具合や同一基準の修正後再失敗2回とは扱わない。同じ不足のまま第三のQA依頼は出さず、D-023に合わせた基準整理・再計画・試験道具対応・再測定後に独立QAを再開する。全文保存先は存在しないため、検証対象を明示した出力と直列分割で必要な証拠を構成し、未確認を合格にしない。
+- Plan（検証供給・試験道具）：done。62で公開情報だけのボス判断境界、接触診断、完全証拠保存、4条件再測定、独立1〜4回帰、変更前基線調査を計画。実行・修正・基線探索は未実施。仕様・難度・秒数ゲートは変更しない。
+- Decide（検証供給）：done。D-023で案Aと供給上限を確定。Loadは個別ファイル本文、@needは一度8ファイルまで、@runはStepごとに3回まで、出力は最大2万字で全文保存先なし。変更前ビルドは存在しない。D-021のまま進める。
+- Design（変更前一致）：done。65とD-024で、歴史的一致の確認不能、独立1〜4 dodgerの40の記録精度での比較、現行仕様照合・現行内対照を分離した。確認不能はpass・免除にせず最終Reviewへ残す。
+- Plan（供給条件への適合）：done。68が62の実行計画を置換する。E0棚卸し→E1公開情報bot→E2接触診断→E3ボス4条件→E4保持回帰→E5公開再生→独立Q1〜Q6を直列実行する。各Step最大3回・各出力2万字以内、欠落は未確認。存在しない保存機構や変更前ビルドを前提にしない。
+- Build（試験道具・再測定）：未完了。80で突進被弾をshot診断から分離し、両FPSの通常命中fixtureを保存。runtimeはsource fc07c7db6383の161 tests OKを確認した。実dodger接続、被弾差の原因確定、記憶・全分岐・判断出力は未完了で、E1は72・74・76・80とpartialが続く。生成・再生の必要本文は切断により未確認。13ファイルのQA配布台帳と80の追加IDを維持する。E2全体・E3以降は未実施。
+- Plan（E1分割・再計画）：done。82でE1をA出力整備→B実接続・記憶→C差分分類→D実経路監査へ分割。未実装・未測定であり、全項目完了までE2へ進めない。
+- Decide（残工程と予算）：blocked-on-owner。84のbriefを85でOwnerへ提示する。今回のpacketは89/123、残34。必須22〜24 StepはRoute込み44〜48 operationsを要し、現行残枠を超える。Resume時点の累計＋60 operationsで継続する案Aか、未達・検証未完了で打ち切る案Bの回答待ち。予算、必須検証、Goal解釈は未変更。
+- Decide（予算超過時の範囲）：done。D-025の削減を適用。重複する後続条件判断、存在しない資料の再探索、旧構成の任意検証、重複整形と追加の磨き込みは省く。必須検証と独立評価は維持する。
+- Decide（追加予算）：done。Ownerは案Aを選択。D-026によりResume時点の累計83に40を加えbudget: 123とする。上限を使い切ったら範囲か費用をOwnerへ再確認する。完成保証ではない。
+- Decide（後続工程条件）：skipped。D-025による既存判断を適用し、同じ条件判断だけの別Stepは開かない。歴史的確認不能以外の必須不足を解消して後続評価へ進む。確認不能は最終Reviewへ残し、合格・免除やGoal達成に読み替えない。
+- Play：planned。独立したプレイヤー観察で最終戦・到達体験・通常ランの所要時間を評価する。実装内容と期待結果は渡さない。
+- Design（実測後）：planned。対応botの両FPS基線、独立QA・Play、通常ランの同一試行による到達・終端・時間実測を受け、追加数値ゲート・調整の要否を判断する。不要でも理由を記録。明白な対処不能・到達不能はPlay前に戻す。
+- Review：planned。Game Directorが体験Goalの達成を判断する。
+- Next：結果と残課題をOwnerへ返す。
+=======
+## Unknowns
+
+- Design・方向判断：完了。D-015〜D-019で連続ラン、単体ボス、仕様契約と旧基準の適用関係を確定。D-021・D-023でテキストビルドとStudio内検証の供給条件を確定した。
+- Build：連続ランと第5部屋の単体ボスは実装報告済み。56には通常ラン、pause/retry、独立1〜4回帰と判断ログのBuild証拠がある。通常ラン勝利時間の報告値は30 FPS 86.967秒／60 FPS 103.533秒。独立検証・体験判定ではない。
+- Build（試験道具・再測定）：未完了のまま打切り。80で突進被弾とshot診断を分離し、両FPSの通常命中fixtureを保存。source fc07c7db6383で161 tests OKをruntimeが確認した。公開情報限定の実dodger接続、記憶・全分岐・判断出力、被弾差の原因確定は未完了。必要本文の一部は出力切断で未確認。
+- Plan：68の供給適合計画、82のE1 A〜D分割を作成済み。A〜Dの実行完了には至っていない。
+- Verify：未完了。58・60の証拠・供給不足は解消済みとしない。E2全体、E3ボス4条件、E4保持回帰・記録比較、E5通常公開再生、独立Q1〜Q6、限定Art Verifyは未完了。再現済み製品戦闘不具合や同一基準の修正後再失敗2回という判定ではない。
+- 歴史的比較：D-024により、変更前ビルド不在による厳密な歴史的一致の確認不能を、記録精度での比較、現行仕様照合、現行内対照から分離する。確認不能を合格・免除としない。
+- Play・実測後Design・Review：未実施で打切り。最終戦の手応え、到達体験、追加数値ゲート・調整の要否、15〜20分Visionとの整合は未評価。Goal達成のReview verdictはない。
+- Decide（終了）：完了。Ownerは85の案Bを選択し、D-027で費用を理由に未達・検証未完了でのCloseを決定。budgetは123のまま。残工程は今回実施しないためskippedとするが、検証免除や合格を意味しない。
+- Next：本Resumeで終了。続きの必要性はOwnerが別Goalとして後日判断する。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| 7b-budget-owner | Decide | owner | — | open | 85-studio-to-owner.md |
+| 7b-e1-A | Build | gameplay-engineer | implement-change | planned | 82のA。費用・範囲判断後に開始 |
+| 7b-e1-B | Build | gameplay-engineer | implement-change | planned | 82のB。A完了後 |
+| 7b-e1-C | Build | gameplay-engineer | implement-change | planned | 82のC。Bの保存接続集合または具体的失敗を受ける |
+| 7b-e1-D | Build | gameplay-engineer | implement-change | planned | 82のD。B・C後 |
+| 7c | Verify | qa | verify-change | planned | E0の全試験台帳を使い68のQ1〜Q6を直列分割 |
+| 7d | Decide | game-director | make-decision, prepare-owner-escalation | skipped | D-025により重複条件判断を省略 |
+| 8 | Verify | art-director | visual-review | planned | — |
+| 9 | Play | playtester | playtest-session | planned | — |
+| 9a | Design | game-designer | make-decision, write-design-spec | planned | — |
+| 10 | Review | game-director | review-outcome | planned | — |
+| 11 | Next | studio | — | planned | — |
+
+D-026によりD-025の範囲を維持する。84の費用・範囲briefを85でOwnerへ提示し、回答までA以降の依存Build・測定・評価を保留する。plannedの工程は継続承認を条件とし、現在開かない。独立QA、限定Art Verify、独立Play、Designer判断、Reviewは削除しない。歴史的一致の確認不能を合格や免除にしない。
+=======
+| 7b-budget-owner | Decide | owner | — | done | 85-studio-to-owner.md → D-027 |
+| 7b-e1-A | Build | gameplay-engineer | implement-change | skipped | D-027による打切り。82のAは未完了 |
+| 7b-e1-B | Build | gameplay-engineer | implement-change | skipped | D-027による打切り。82のBは未完了 |
+| 7b-e1-C | Build | gameplay-engineer | implement-change | skipped | D-027による打切り。82のCは未完了 |
+| 7b-e1-D | Build | gameplay-engineer | implement-change | skipped | D-027による打切り。82のDは未完了 |
+| 7b-e2 | Build | gameplay-engineer | implement-change | skipped | 接触診断全体は未完了。D-027 |
+| 7b-e3 | Build | gameplay-engineer | implement-change | skipped | ボス4条件の再測定は未実施。D-027 |
+| 7b-e4 | Build | gameplay-engineer | implement-change | skipped | 保持回帰・記録比較は未実施。D-027 |
+| 7b-e5 | Build | gameplay-engineer | implement-change | skipped | 通常公開再生は未実施。D-027 |
+| 7c | Verify | qa | verify-change | skipped | 独立Q1〜Q6は未実施。D-027 |
+| 7d | Decide | game-director | make-decision, prepare-owner-escalation | skipped | D-025により重複条件判断を省略 |
+| 8 | Verify | art-director | visual-review | skipped | 未実施。D-027 |
+| 9 | Play | playtester | playtest-session | skipped | 未実施。D-027 |
+| 9a | Design | game-designer | make-decision, write-design-spec | skipped | 実測後判断は未実施。D-027 |
+| 10 | Review | game-director | review-outcome | skipped | 未実施。達成判定なし。D-027 |
+| 11 | Next | studio | — | done | D-027に基づき本ResumeでClose |
+
+D-027により残工程を打ち切る。skippedは終了に伴う未実施の記録であり、必須検証の合格・免除を意味しない。新しいHandoffは発行しない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+84を受領し83のbrief準備を完了記録、85でOwnerの費用判断を開く。packetの最新累計89/123、残34に対し必須工程は44〜48 operations。Goalをblocked-on-ownerとし、依存作業を保留する。案Aの予算はResume時点の実累計＋承認枠で算出し、現行予算・必須検証・達成条件は変更しない。
+=======
+Ownerの案BをD-027に記録し85をresolvedとする。費用を理由に残工程をskippedとし、G-002を未達・検証未完了でabandonedとしてClose。budgetは123を維持し、成果と不足をOutcomeおよびproject.mdのCurrent stateへ反映する。次Stepは開かない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Ownerが85-studio-to-owner.mdに案A／案Bと条件を回答する。案AはResume時点の累計＋60 operationsの承認、または別上限の指定。回答まで依存作業を保留する。
+=======
+なし。D-027により終了。続きの必要性はOwnerが別Goalとして後日判断する。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+未完了・Owner判断待ち。D-026のbudget: 123を維持し、85で追加継続または未達打切りを諮る。連続ランと最終ボスは実装報告済みだが、公開情報限定の実dodger接続、被弾差の原因確定、必須証拠、独立QA・体験評価は未完了。source fc07c7db6383の161件の試験成功を独立検証やGoal達成とは扱わない。歴史的一致の確認不能と15〜20分Visionの未評価を保持する。追加予算案は完成保証ではなく、Owner回答前に予算変更や達成判定を行わない。
+=======
+**未達・検証未完了で打切り。** Ownerは、残必須工程44〜48 operationsが今回かけられる費用を超えるとして案Bを選択した。D-027に基づきstatus: abandonedでCloseし、budgetは123のまま追加作業を開かない。
+
+成果として、既存第1〜4部屋から続く連続ランと、第5部屋を置き換える単体ボスが実装報告済み。終端・再挑戦を含むBuild証拠も提出されている。source fc07c7db6383では161件の試験成功をruntimeが確認した。今回のcurrent_buildはrepo/、sha dc0138c2b6d1であり、このResumeで再試験はしていない。実装の削除・巻戻しは行わない。
+
+未完了なのは、E1 A〜Dの出力整備・公開情報限定の実dodger接続と記憶・被弾差の原因確定・実経路監査、E2接触診断全体、E3ボス4条件の再測定、E4保持回帰・記録比較、E5通常公開再生と必要証拠の確認。独立QA Q1〜Q6、限定Art Verify、独立Play、Designer実測後判断、最終Reviewも未実施である。以前のQAの証拠・供給不足は解消済みとしない。161件の成功は、これらの代用でも「手応えのあるボス戦が成立した」という結論でもない。
+
+変更前ビルド不在による厳密な歴史的一致の確認不能は、D-024に従って上記の未実施・未解消事項と区別して残す。Build報告の通常ラン勝利時間は30 FPS 86.967秒／60 FPS 103.533秒だが、15〜20分Visionとの整合や到達・最終戦の体験は未評価である。
+
+D-015〜D-025で範囲・方向・仕様・検証条件を定め、D-026で継続予算を123に変更し、D-027で費用による終了を決めた。続きが必要なら、残検証と体験評価を対象とする別Goalの要否・範囲・予算をOwnerが後日判断する。現在、回答待ちのOwner事項や開いているStepはない。
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT project.md
+<<<<<<< SEARCH
+## Current state
+
+Vertical-slice prototype, build 0.4 in `repo/`: 5 rooms in one cave biome, 2 enemy types, player
+kit of attack and dash. Build 0.4 fixed damage during a dash. A play session is an input script
+(`repo/manual.md`): `run_play` shows what a player sees, `run_trace` the simulation state, and
+`run_tests` runs the build's tests. `run_bots` lets the team's balance bots play rooms and reports
+clear times, hearts lost and actions used (`repo/bots.py`).
+=======
+## Current state
+
+テキスト表示・入力スクリプトで遊ぶビルドは`repo/`（今回のsha: dc0138c2b6d1）。既存第1〜4部屋から進む連続ラン、第5部屋の単体ボス、終端・再挑戦が実装報告済み。入力はattackとdash。操作・スクリプト形式は`repo/manual.md`、公開ドライバは`repo/public-driver.md`を参照。
+
+repo/で実行：試験は`python3 -m unittest discover -s tests`、プレイは`python3 play.py --view player {script}`、状態表示は`python3 play.py --view trace {script}`、botは`python3 bots.py {script}`。source fc07c7db6383で161 tests OKの記録がある。今回のshaでの再試験は本Resumeでは未実施。
+
+G-002はD-027により費用を理由に未達・検証未完了で打切り。実装は保持する。公開情報限定botの実接続・記憶、被弾差の原因確定、経路監査、接触診断全体、ボス4条件・保持回帰の再測定、公開再生の証拠確認が未完了。独立QAの再検証、限定Art Verify、独立Play、実測後Designer判断、最終Reviewも未実施。試験成功は体験Goal達成を示さない。
+
+変更前ビルド不在による歴史的一致の確認不能は別途残る。通常ラン勝利時間のBuild報告は約87〜104秒で、15〜20分Visionとの整合は未評価。再開の必要性は別GoalとしてOwnerが判断する。
+>>>>>>> REPLACE
+>>>END

@@ -1,0 +1,46 @@
+<<<FILE @run/tests
+>>>END
+
+<<<FILE @run/trace/room1
+room 1
+end 1
+>>>END
+
+<<<FILE @run/trace/room2
+room 2
+end 1
+>>>END
+
+<<<FILE @run/trace/room3
+room 3
+end 1
+>>>END
+
+<<<FILE @run/trace/room4
+room 4
+end 1
+>>>END
+
+<<<FILE @run/trace/room5
+room 5
+end 1
+>>>END
+
+<<<FILE @run/trace/empty
+room empty
+end 1
+>>>END
+
+<<<FILE @run/trace/room1-idle-60s
+room 1
+end 60
+>>>END
+
+<<<FILE @run/play/room1-idle-60s
+room 1
+end 60
+>>>END
+
+<<<FILE @run/bots
+room 1
+>>>END

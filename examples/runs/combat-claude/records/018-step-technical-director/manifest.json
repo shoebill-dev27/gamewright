@@ -1,0 +1,102 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/15-studio-to-technical-director.md",
+  "sha256": "3ac7ff7c242a2ba9339d24bb66ae8cdcc88ce5de3fa48c893ce3f076a02e19d5",
+  "bytes": 9976
+ },
+ {
+  "path": "studio/roles/technical-director.md",
+  "sha256": "ed92f0e83566076b084fda3312efaafc5ec12b3246001ffbc0c86522a2f7ee80",
+  "bytes": 1420
+ },
+ {
+  "path": "studio/skills/technical-plan.md",
+  "sha256": "8e140abc942d3eaa8838fc766938a7b25b9813b799108f75112ad82f20e46c92",
+  "bytes": 1264
+ },
+ {
+  "path": "studio/skills/make-decision.md",
+  "sha256": "68436360ad82bd660f2153934ae7305118489c26ad3255d10e5018773d9eb4b6",
+  "bytes": 1129
+ },
+ {
+  "path": "studio/skills/prepare-owner-escalation.md",
+  "sha256": "aa513b1d59e5e7f1caef545cb3a64bc1c45cfd1b2548c8d8ec4ab3a336e2e67e",
+  "bytes": 1207
+ },
+ {
+  "path": "project.md",
+  "sha256": "eb3a1f3e9d131417f9e3c6fd836599f3ae249eea497ce2f8eca2061773ad76d2",
+  "bytes": 1510
+ },
+ {
+  "path": "sim/repo-notes.md",
+  "sha256": "9d2a0c8d3c25a33a3a305e1fe5f3a6d4ed024bb20db9e161c4cde5d2237c7f0e",
+  "bytes": 1203
+ },
+ {
+  "path": "sim/build-0.3.md",
+  "sha256": "3159bf3f32d15e24e59b3276d1b8618ee3b0d65f884c8681aa7b2b85f4eb6d64",
+  "bytes": 851
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "883fcf4805d72138797f043030a901fce6e5a5bf0b6e0d3f7d592fe462d6eb57",
+  "bytes": 24328
+ },
+ {
+  "path": "design/grub-charge-telegraph.md",
+  "sha256": "0a7288d2658c9063e5f41742e0ae2fef1f9a0acb9f8279debd82c65267a780b9",
+  "bytes": 16055
+ },
+ {
+  "path": "decisions/D-001-one-button-combat.md",
+  "sha256": "c7fe9ca23a369707a5ab439e44789a25a0a8544efce4703a676f8fd180f82ec1",
+  "bytes": 798
+ },
+ {
+  "path": "decisions/D-002-combat-direction-rooms-and-grub-charge.md",
+  "sha256": "5b57fe5f9c1c8abb81f10f593c5926997255382e9bba9e0f1fc764289a50bab2",
+  "bytes": 4969
+ },
+ {
+  "path": "decisions/D-003-grub-charge-and-room-rules.md",
+  "sha256": "ec13f8620784000f21125c3b999a018e405da2c2f3a59749e4559687a0818ec2",
+  "bytes": 2323
+ },
+ {
+  "path": "decisions/D-004-technical-approach-grub-charge-and-waves.md",
+  "sha256": "f7b898214a665b72c8cf26b68de022dd9fe6ae2ebf8e802d4dea3f2922f469ff",
+  "bytes": 4563
+ },
+ {
+  "path": "decisions/D-005-flinch-contact-and-far-slot-rules.md",
+  "sha256": "b4f9da5d5557328df1d08e0a652c6f7e9df46a3fe0604b0c36d325794f2edf06",
+  "bytes": 5682
+ },
+ {
+  "path": "decisions/D-006-grub-charge-telegraph-visual.md",
+  "sha256": "5bd58d6c836400290565961679a87658878eada9dfbffd7314d8e1504fc054b4",
+  "bytes": 5370
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "00e93d3ba6b07e002008b83fe12ca37f6d6ed529640a08ac48b1e7c3cb3ec0de",
+  "bytes": 2053
+ },
+ {
+  "path": "studio/templates/escalation.md",
+  "sha256": "6e505880bdef28223c7275a4bb19c8f245577964d14c28d48e04561e7a5c7b90",
+  "bytes": 975
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

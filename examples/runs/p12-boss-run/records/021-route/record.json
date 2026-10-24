@@ -1,0 +1,84 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-002",
+ "attempts": [
+  {
+   "runtime": "codex",
+   "session_id": "01a1596a-1ab9-7841-b0df-1a77e80e9597",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 31267,
+    "cached_input_tokens": 7680,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 213,
+    "reasoning_output_tokens": 99
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 1,
+   "started": "2026-10-20T22:04:48",
+   "seconds": 9.9,
+   "errors": [],
+   "need": [
+    "studio/roles/game-director.md",
+    "studio/skills/make-decision.md",
+    "studio/skills/prepare-owner-escalation.md",
+    "decisions/D-015-owner-approves-continuous-run-and-final-boss.md",
+    "decisions/D-016-final-boss-experience-direction.md",
+    "decisions/D-017-final-boss-and-run-contract.md",
+    "decisions/D-019-g002-balance-criteria-applicability.md",
+    "design/final-boss-and-continuous-run.md"
+   ]
+  },
+  {
+   "runtime": "codex",
+   "session_id": "01a1596a-4151-71a2-8a67-c3c44357c7c0",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 46887,
+    "cached_input_tokens": 7680,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 3264,
+    "reasoning_output_tokens": 60
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 2,
+   "started": "2026-10-20T22:04:58",
+   "seconds": 74.9,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-002-final-boss/17-studio-to-game-director.md": "ec7165f3788087561b94a7c476fddd6bcae5f11430574cbadb7d57f9eabd2c4b",
+  "goals/G-002-final-boss/goal.md": "c7e36c5d990a4085d9fff33012bdf2da48be0422f1ffa63a62c675df90c41c54"
+ },
+ "decision": {
+  "new": [
+   "game-director",
+   "Decide"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "game-director",
+    "Decide"
+   ]
+  ]
+ },
+ "seen_through_seq": 17
+}

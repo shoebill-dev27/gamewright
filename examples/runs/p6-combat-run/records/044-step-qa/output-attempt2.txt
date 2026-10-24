@@ -1,0 +1,88 @@
+<<<FILE goals/G-001-combat-monotony/40-qa-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 40
+from: qa
+to: studio
+stage: Verify
+outcome: question
+---
+# 40: qa → studio — AC-15 cannot be passed: `manual.md` is missing from the test workspace (blocker). The paragraph and the behavior checks pass.
+
+## Task
+
+Verify AC-15 (practice-room paragraph in `manual.md#on-screen`, `ManualTest`, behavior of the practice room).
+
+## Verdict
+
+**AC-15: not passed, blocked.** I cannot give `pass` because `ManualTest` has no valid result again. This is not a test failure. The workspace that runs the tests still has no `manual.md` beside `repo/`. Nothing is failing in the build or in the manual text. The verdict stays open until `ManualTest` runs against a placed file.
+
+## Evidence
+
+### 1. Paragraph check (read from the `manual.md` supplied in this packet)
+
+- In `## On screen`, after the mark table and the color sentence, the last paragraph reads: "The practice room (`room empty`) is not part of a run. Enemies appear only where your script places them (`spawn`), and you stand where `player` puts you. Nothing heals, there is no next room, and the session ends a moment after you go down. If a grub or spitter is on your tile, it is drawn on a free tile next to you, so you can always see it."
+- It is identical, word for word, to the paragraph in handoff 38 and D-007.
+- It sits inside `## On screen`, before `## What you hear and read`.
+- The `x` mark is listed in the same section's table ("you, down (out of hearts)").
+- **Limit:** I read this copy from the packet's input files. I could not confirm that the `manual.md` in the workspace used for the test run has the same content. That workspace has no such file (see 2).
+
+### 2. `run_tests` (`python3 -m unittest discover -s tests`)
+
+Exit 1, 40 tests ran, 38 passed, 2 errors, both in `ManualTest`:
+
+```text
+ERROR: test_manual_lists_glyphs_and_lines (test_game.ManualTest)
+FileNotFoundError: [Errno 2] No such file or directory: '/manual.md'
+ERROR: test_on_screen_section_lists_x_and_the_practice_room (test_game.ManualTest)
+FileNotFoundError: [Errno 2] No such file or directory: '/manual.md'
+Ran 40 tests in 0.060s
+FAILED (errors=2)
+```
+
+- Both errors are `FileNotFoundError` at `MANUAL.read_text`, before any content is checked.
+- So neither `ManualTest` test has a result. This is the same environment gap as before.
+- The other 38 tests pass, including the non-manual ones.
+- QA has no permission to write `manual.md` (D-005, and it is not in my write list), so I could not fix this.
+- D-005 mentions "34/34". The suite now has 40 tests, so that figure is outdated.
+
+### 3. Behavior checks (`run_play` and `run_trace`, practice room, 60 FPS unless noted)
+
+| Claim in the paragraph | Result | Evidence |
+|---|---|---|
+| Enemies appear only where `spawn` places them; you stand where `player` puts you | Pass | `grub-d4` trace: `setup` row has `pos=(8.00,4.00)` and one `grub#0(12.00,4.00...)`, nothing else. |
+| Not part of a run | Pass | No "run over" or run screen in `down-practice`; the session just ends. |
+| Nothing heals | Pass | `clear-practice`: hearts 2/3 at the clear (1.317 s) and still 2/3 at 6.0 s. No heal on clear. |
+| No next room | Pass | `clear-practice`: after `cleared {'room': 'empty'}`, the room stays empty and the session runs to `end` at 6.0 s. |
+| Session ends a moment after you go down | Pass | `down-practice`: "you went down" at 3.633 s, `end at 5.63 s: hearts 0/3`. That is 2.0 s after going down, with no run-over screen. `grub-d4` also ends at the scripted end (5.5 s) after going down at 5.0 s. |
+| Enemy on the player's tile is drawn on a free adjacent tile | Pass | `down-practice` (grub 0.2 tiles from `P`): the map shows `Pg` and `PG`, never a bare `P`. Trace shows `side: 'on you'` while the map shows `Pg` / `PG`. In `grub-d4`, 3.583 s "the grub is open (on you)" shows `Pg`, and 4.483 s "a grub rears back (on you)" shows `PG`. |
+| Spitter on the player's tile is drawn beside `P` | Pass | `spitter-on-tile` (30 FPS, `spawn spitter 8.2 4`): `Ps` before and after, `PS` during the charge (1.00 s and 1.50 s). |
+| Down marker | Pass | At 0 hearts the map shows `xg`: `x` on the player's cell, the grub still visible beside it. |
+
+I did not run these checks:
+- An empty room with no `spawn` (the room starts with no enemies).
+- A swipe that defeats a grub drawn on the displaced side.
+
+Neither is needed to answer the AC-15 behavior question, and the existing runs cover the paragraph's claims. Grub scenarios were run at 60 FPS only. The spitter scenario was at 30 FPS. AC-17 was covered by step 37.
+
+## What is needed to close AC-15
+
+- The Owner places `manual.md` where `ManualTest` reads it (beside `repo/` in the QA workspace).
+- Then rerun `run_tests` (or `ManualTest` only).
+- If both `ManualTest` tests pass, AC-15 passes. All behavior checks above already pass.
+- If they fail after placement, report the failing assertion (the paragraph is in the right section, so a failure would point to a test-side expectation).
+
+## Not verifiable here
+
+- The two `ManualTest` tests.
+- That the placed `manual.md` in the workspace matches the packet copy.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: manual.md; design/combat.md (AC-15, AC-18)
+- Decisions: decisions/D-005-owner-places-manual-draft.md, decisions/D-006-overlap-display-and-practice-room-manual.md, decisions/D-007-practice-room-paragraph-placed-by-owner.md
+- Previous handoff: goals/G-001-combat-monotony/38-studio-to-qa.md
+>>>END

@@ -1,0 +1,12 @@
+{
+ "op": "Run",
+ "goal": "G-001",
+ "operations": [
+  "002-step-qa",
+  "003-route"
+ ],
+ "stop_reason": "runtime error: runtime could not start: [Errno 2] No such file or directory: 'claude'",
+ "status": "active",
+ "owner_reads": null,
+ "next": "run examples/runs/p12-close-run"
+}

@@ -1,0 +1,117 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-002-final-boss/77-studio-to-game-director.md",
+  "sha256": "1d2b7c33761f5bba0ebcd0f37c1c195951fe4b19a30038f6ad4ecb5424c71266",
+  "bytes": 5593
+ },
+ {
+  "path": "studio/roles/game-director.md",
+  "sha256": "2ff4f183ec488c462c8d757903c226121150048f4cc544310ac0191bb20dab12",
+  "bytes": 1652
+ },
+ {
+  "path": "studio/skills/make-decision.md",
+  "sha256": "68436360ad82bd660f2153934ae7305118489c26ad3255d10e5018773d9eb4b6",
+  "bytes": 1129
+ },
+ {
+  "path": "studio/skills/prepare-owner-escalation.md",
+  "sha256": "aa513b1d59e5e7f1caef545cb3a64bc1c45cfd1b2548c8d8ec4ab3a336e2e67e",
+  "bytes": 1207
+ },
+ {
+  "path": "project.md",
+  "sha256": "8a32edee44b970d2c1a5a0a76e19b3235e61b1786bb24c06583400cfa0924712",
+  "bytes": 2102
+ },
+ {
+  "path": "goals/G-002-final-boss/goal.md",
+  "sha256": "4ff625659265d6bd7d902b5277e5eb4ef2195ab20652b28e073d462cb08d46c9",
+  "bytes": 15549
+ },
+ {
+  "path": "design/final-boss-and-continuous-run.md",
+  "sha256": "71c26a7d706bc6e7d532026d605475bb738b84d741222ca656be7ec1d500ff28",
+  "bytes": 39605
+ },
+ {
+  "path": "design/g002-historical-comparison-evidence.md",
+  "sha256": "86e1e4f5b27f45086d57a5cefd2b4888a81330b8e09ca5255a99701eee5b42a2",
+  "bytes": 7952
+ },
+ {
+  "path": "goals/G-002-final-boss/68-technical-director-to-studio.md",
+  "sha256": "97c22fdcedfe4e54b90f3456e8fed7520eb2f1e7170c9ff5d6ae7ae989c6a853",
+  "bytes": 23412
+ },
+ {
+  "path": "goals/G-002-final-boss/60-qa-to-studio.md",
+  "sha256": "8d95b9209b2c4a745f16d01b5d0fdc5b735fd29e9c938c03bb62113a124afbe3",
+  "bytes": 16900
+ },
+ {
+  "path": "decisions/D-015-owner-approves-continuous-run-and-final-boss.md",
+  "sha256": "e0bd5b794a3b4e0e37edf8ca0324ebd38f3f062d2ecf5aedcd6896c55df3b1cb",
+  "bytes": 2110
+ },
+ {
+  "path": "decisions/D-016-final-boss-experience-direction.md",
+  "sha256": "03aa3e89898d2361f61fddea143d5e99eb4dafbae8f16d1717ac6e93e7ee4684",
+  "bytes": 4425
+ },
+ {
+  "path": "decisions/D-017-final-boss-and-run-contract.md",
+  "sha256": "48adbb02a672e45434a1b0f61c77b8c1747c437124e183b1a849e34c705f4283",
+  "bytes": 3341
+ },
+ {
+  "path": "decisions/D-019-g002-balance-criteria-applicability.md",
+  "sha256": "db369f14df8125734146c8b7feb643e58a4ce8c2780fc211e23a9f59a85c62c7",
+  "bytes": 5895
+ },
+ {
+  "path": "decisions/D-021-owner-authorizes-text-build.md",
+  "sha256": "9df4329db4178c6d573c6121007e0dbe1109abca068e1c303386eb94cbbd3575",
+  "bytes": 3514
+ },
+ {
+  "path": "decisions/D-022-g002-v1-supplements.md",
+  "sha256": "8a721e0d0eb480ad361b9c9e0d80bb07362e455d9f71a553cacc0946e774682e",
+  "bytes": 2306
+ },
+ {
+  "path": "decisions/D-023-owner-confirms-verification-supply.md",
+  "sha256": "c9bc2441d23c3b10e4fa7b4482d790329c94145a531b4a41fd4dd198958e25c0",
+  "bytes": 3264
+ },
+ {
+  "path": "decisions/D-024-g002-historical-comparison-evidence.md",
+  "sha256": "3293baad7960fa5e870fc1e36e24b151e3e0943101e6bbf4a3cc3b0e67335cec",
+  "bytes": 3442
+ },
+ {
+  "path": "goals/G-002-final-boss/76-gameplay-engineer-to-studio.md",
+  "sha256": "18d54afe87a47fe5414c227a6333203136a4619c01ef8b149e9369b1701247c6",
+  "bytes": 13695
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ },
+ {
+  "path": "studio/templates/escalation.md",
+  "sha256": "6e505880bdef28223c7275a4bb19c8f245577964d14c28d48e04561e7a5c7b90",
+  "bytes": 975
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

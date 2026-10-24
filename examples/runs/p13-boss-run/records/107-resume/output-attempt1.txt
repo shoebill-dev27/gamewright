@@ -1,0 +1,117 @@
+<<<FILE decisions/D-027-owner-stops-g002.md
+---
+kind: decision
+id: D-027
+status: accepted
+decided_by: owner
+goal: G-002
+date: 2026-10-23
+supersedes: none
+---
+# D-027: G-002を未達・検証未完了で打ち切る
+
+## Decision
+
+Ownerは85の案Bを選択した。追加の実装・測定・評価を開かず、G-002を未達・検証未完了として終了する。Goalのstatusはabandonedとし、budget: 123は変更しない。実装の削除や巻戻しは行わない。
+
+Ownerの回答原文：
+
+> 案B。ここで打ち切ってください。理由: 残りに少なくとも 44〜48 operations が要るという見積もりは、この Goal にかけられる費用を超えます。未達・検証未完了のまま、現在の成果（連続ランと部屋 5 の単体ボス、試験 161 件）と、終わっていない検証を Outcome に正直に書いて Close してください。続きが要るかは、別の Goal として後で判断します。
+
+連続ラン、第5部屋の単体ボス、161件の試験成功という報告を残す。ただし、独立検証の合格、体験Goalの達成、Review完了とは扱わない。歴史的一致の確認不能を、未実施の検証や未解消事項と区別して残す。
+
+## Rationale
+
+残必須工程の見積もり44〜48 operationsが、Ownerの許容する費用を超えるため。成果と不足を記録して終了し、継続の要否は別Goalで判断する。
+
+## Alternatives considered
+
+- 案A：Resume時点の実累計＋60 operationsで継続。費用を理由にOwnerが採用しなかった。
+- 検証を省いて達成扱いにする案：Ownerの指示に反し、未完了を合格に読み替えるため採用しない。
+
+## Revisit when
+
+Ownerが別Goalとして継続を求めたとき。現在のビルド、未完了項目、予算を改めて確認し、本Goalを達成済みとは扱わない。
+>>>END
+
+<<<EDIT goals/G-002-final-boss/85-studio-to-owner.md
+<<<<<<< SEARCH
+status: open
+decision: pending
+=======
+status: resolved
+decision: D-027
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT goals/G-002-final-boss/goal.md
+<<<<<<< SEARCH
+status: blocked-on-owner
+=======
+status: abandoned
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+## Unknowns
+=======
+## Unknowns
+
+D-027により追加作業を停止し、以下の未完了事項を解消せず終結する。下記のplanned、blocked-on-owner、回答待ちは停止前の状態記録であり、現在の実行予定やOwnerへの依頼ではない。現在の状態はRoute、Next action、Outcomeに従う。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| 7b-budget-owner | Decide | owner | — | open | 85-studio-to-owner.md |
+| 7b-e1-A | Build | gameplay-engineer | implement-change | planned | 82のA。費用・範囲判断後に開始 |
+| 7b-e1-B | Build | gameplay-engineer | implement-change | planned | 82のB。A完了後 |
+| 7b-e1-C | Build | gameplay-engineer | implement-change | planned | 82のC。Bの保存接続集合または具体的失敗を受ける |
+| 7b-e1-D | Build | gameplay-engineer | implement-change | planned | 82のD。B・C後 |
+| 7c | Verify | qa | verify-change | planned | E0の全試験台帳を使い68のQ1〜Q6を直列分割 |
+| 7d | Decide | game-director | make-decision, prepare-owner-escalation | skipped | D-025により重複条件判断を省略 |
+| 8 | Verify | art-director | visual-review | planned | — |
+| 9 | Play | playtester | playtest-session | planned | — |
+| 9a | Design | game-designer | make-decision, write-design-spec | planned | — |
+| 10 | Review | game-director | review-outcome | planned | — |
+| 11 | Next | studio | — | planned | — |
+
+D-026によりD-025の範囲を維持する。84の費用・範囲briefを85でOwnerへ提示し、回答までA以降の依存Build・測定・評価を保留する。plannedの工程は継続承認を条件とし、現在開かない。独立QA、限定Art Verify、独立Play、Designer判断、Reviewは削除しない。歴史的一致の確認不能を合格や免除にしない。
+=======
+| 7b-budget-owner | Decide | owner | — | done | 85-studio-to-owner.md → D-027（案B） |
+| 7b-e1-A | Build | gameplay-engineer | implement-change | skipped | D-027により未完了のまま停止 |
+| 7b-e1-B | Build | gameplay-engineer | implement-change | skipped | D-027により未完了のまま停止 |
+| 7b-e1-C | Build | gameplay-engineer | implement-change | skipped | D-027により未完了のまま停止 |
+| 7b-e1-D | Build | gameplay-engineer | implement-change | skipped | D-027により未完了のまま停止 |
+| 7b-e2-e5 | Build | gameplay-engineer | implement-change | skipped | E2〜E5は未実施。D-027により停止 |
+| 7c | Verify | qa | verify-change | skipped | Q1〜Q6の独立QAは未実施。D-027により停止 |
+| 7d | Decide | game-director | make-decision, prepare-owner-escalation | skipped | D-025により重複条件判断を省略 |
+| 8 | Verify | art-director | visual-review | skipped | D-027により未実施のまま停止 |
+| 9 | Play | playtester | playtest-session | skipped | D-027により未実施のまま停止 |
+| 9a | Design | game-designer | make-decision, write-design-spec | skipped | D-027により未実施のまま停止 |
+| 10 | Review | game-director | review-outcome | skipped | 未実施。Goal達成の判定なし |
+| 11 | Next | studio | — | done | D-027に基づき本Resumeで終結 |
+
+D-027により残工程を停止した。skippedはOwnerの打切りによる未実施を示し、必須検証の合格・免除を意味しない。開いているStepはなく、次のHandoffは発行しない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+84を受領し83のbrief準備を完了記録、85でOwnerの費用判断を開く。packetの最新累計89/123、残34に対し必須工程は44〜48 operations。Goalをblocked-on-ownerとし、依存作業を保留する。案Aの予算はResume時点の実累計＋承認枠で算出し、現行予算・必須検証・達成条件は変更しない。
+=======
+Ownerの案BをD-027に記録し85を解決。残必須工程44〜48 operationsは許容費用を超えるため、残作業を停止しG-002をabandonedとして終結する。予算123、Owner request、Interpretationは維持。追加Handoffは発行せず、成果・未完了検証・確認不能をOutcomeに記録する。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Ownerが85-studio-to-owner.mdに案A／案Bと条件を回答する。案AはResume時点の累計＋60 operationsの承認、または別上限の指定。回答まで依存作業を保留する。
+=======
+なし。D-027により終結。継続の要否はOwnerが別Goalとして後日判断する。project.mdのCurrent state更新は本operationの書込許可対象外のため実施できていない。後続の文脈では、同節のbuild 0.4記載だけを現状とせず、本Outcomeを併読する必要がある。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+未完了・Owner判断待ち。D-026のbudget: 123を維持し、85で追加継続または未達打切りを諮る。連続ランと最終ボスは実装報告済みだが、公開情報限定の実dodger接続、被弾差の原因確定、必須証拠、独立QA・体験評価は未完了。source fc07c7db6383の161件の試験成功を独立検証やGoal達成とは扱わない。歴史的一致の確認不能と15〜20分Visionの未評価を保持する。追加予算案は完成保証ではなく、Owner回答前に予算変更や達成判定を行わない。
+=======
+**未達・検証未完了で終了。** Ownerは残必須工程44〜48 operationsが許容費用を超えるとして案Bを選択した。D-027に記録し、statusをabandonedとした。追加作業は開かず、budget: 123を維持する。実装の削除や巻戻しは行わない。
+
+現在の成果として、第1〜4部屋から第5部屋の単体ボスへ進む連続ラン、部屋間継承、勝利・死亡・再挑戦の実装が報告されている。runtimeはsource fc07c7db6383で161件の試験成功を確認した。本packetのcurrent_buildはrepo/（sha dc0138c2b6d1）。この終結処理ではビルドを再実行しておらず、161件成功を現在のshaでの再測定、独立QA合格、または「手応えのあるボス戦」の成立とは扱わない。実行方法はrepo/で `python3 -m unittest discover -s tests`、プレイは `python3 play.py --view player {script}`（形式はrepo/manual.md）。
+
+未完了事項は、E1 A〜Dの出力整備・公開情報限定の実dodger接続と記憶・被弾差の原因分類・実経路監査、E2接触診断全体、E3ボス4条件、E4保持回帰と記録比較、E5通常公開再生、Q1〜Q6の独立QA、限定Art Verify、独立Play、Designer実測後判断、最終Review。過去のQA 58・60は証拠・供給不足を残し、合格には至っていない。突進診断の限定修正などの部分成果は、これらの完了を意味しない。
+
+変更前ビルドが存在しないため歴史的な厳密一致は確認不能であり、D-024に従って未実施の現行検証と区別して残す。通常ラン約87〜104秒という既報のBuild値と15〜20分Visionとの整合も未評価。未確認を合格・免除へ読み替えず、Reviewも実施済みとはしない。
+
+主要判断はD-015の連続ラン・ボス範囲承認、D-021・D-023のテキスト検証と供給条件、D-024の歴史的確認不能の扱い、D-025の重複工程削減、D-026の予算123への変更、D-027の打切り。今回、仕様・達成条件・Goal解釈は変更していない。
+
+今後の候補は、別Goalでの試験道具と必須検証の完了、および独立したボス体験・ラン時間の評価。継続するかはOwnerが後日判断し、現時点で追加承認や回答は不要。project.mdのCurrent stateは本operationの書込許可外のため更新できておらず、古いbuild 0.4の記載が残るという記録上の制約がある。
+>>>>>>> REPLACE
+>>>END

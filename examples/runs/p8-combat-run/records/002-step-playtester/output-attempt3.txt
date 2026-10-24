@@ -1,0 +1,124 @@
+<<<FILE goals/G-001-combat-monotony/02-playtester-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 2
+from: playtester
+to: studio
+stage: Observe
+outcome: done
+---
+# 02: playtester → studio — Observation report on combat (rooms 1, 2, 3 and the practice room)
+
+## Task
+
+Report the player-visible experience of combat. Intended for `game-designer` (Diagnose) via the Studio's Route operation.
+
+## Context
+
+The Owner asked for a first-hand player observation of combat. I played as the profile describes: an action player who likes dodging and spacing and dislikes memorizing combos. I had no expectations to check.
+
+## Findings
+
+### Method (what I actually did)
+
+- I did **not** play live. I played through input automation: reaction-rule scripts from the manual, run with `python3 play.py --view player`. I read the room drawings and the event log.
+- Four sessions: room 1, room 2, room 3, and the practice room with one spitter.
+- I could not see the feel of real-time play: animation, sound, hit feedback. I only saw half-second snapshots plus hit events.
+- **Not played:** rooms 4 and 5, and any session where I deliberately timed inputs by hand.
+- I tried one rule set per room, one attempt each. This is a thin sample.
+- In the practice room my script was flawed. The "move toward" rule only triggered within 8 tiles, and the spitter was 9 away. I mostly stood still and only sidestepped shots. That session shows spitter shots, not a fair fight.
+
+### Session summary
+
+| Session | Enemies | Result | Time |
+|---|---|---|---|
+| Room 1 | 3 grubs | Killed 2, went down with 1 left | 4.7 s |
+| Room 2 | 4 grubs | Killed 2, went down with 2 left | 5.6 s |
+| Room 3 | 3 spitters | Killed 1, went down with 2 left | 14.5 s |
+| Practice | 1 spitter | Never reached it, went down | 10.1 s |
+
+I won none of the four. Each time I lost all 3 hearts.
+
+### Concrete moments
+
+**Grubs, room 1**
+- 0.9 s: swipe, "grub hit". The grub survived.
+- 1.37 s: "YOU ARE HIT by a grub." 1.68 s: swipe, grub defeated.
+- 2.38 s: swipe, "grub hit". 2.63 s: hit again. 2.98 s: defeated.
+- 3.0–4.3 s: one grub left. I walked toward it for about 1.3 s with nothing happening.
+- 4.27 s: swipe, grub hit. 4.68 s: it hit me and I went down before my second swipe.
+- Each grub took two swipes, and nearly every grub landed a hit on me. I felt I was trading hits, not avoiding them. I never dodged a grub and had no clear window to do so.
+
+**Grubs, room 2**
+- It felt like room 1 with one more grub.
+- 1.35–3.3 s: swipe, get hit, swipe, kill, then repeat.
+- 3.3–5.3 s: more walking toward slow-closing grubs, then another trade at 5.3 s. A hit at 5.63 s ended the run.
+- My loop here was walk toward, swipe, swipe, take a hit.
+- I saw no difference in how grubs behaved between rooms 1 and 2. They just walk straight at me.
+
+**Spitters, room 3**
+- This was the only session with real tension and decisions.
+- Each spitter fires every 2 s, so a volley comes from several spitters at once (three shots at 2.0 s). The screen filled with `*` quickly.
+- I dashed about 9 times in 15 s ("you dash right/down/left/up"), mostly sideways or down, away from shots.
+- I got one spitter down (swipes at 1.78 s, 3.53 s, 3.98 s) early.
+- After 4 s I never got near the others. They sit in the corners at the far edge, and I spent the rest of the session dodging. I had no moment to attack.
+- I was hit at 9.5 s, 12.7 s and 14.5 s. Some hits came right after a dash (dash at 12.1 s, hit at 12.7 s). The dash did not feel like a reliable safe move, and I could not tell where shots would be.
+- Dodging was engaging for the first ~8 s. After that it felt like an endless chore, because there was no way to make progress.
+
+**Practice room, spitter at distance 9**
+- Shots are slow and travel a long way. They pile up on screen, with up to 4–5 in flight.
+- Moving "aside" did not reliably avoid them. I was hit at 8.35 s, 9.2 s and 10.1 s.
+- Because the spitter keeps firing every 2 s from the far side, closing the distance means crossing a lane of shots.
+
+### Issues and impact
+
+| Issue | Impact |
+|---|---|
+| Grub fights are a repeated loop: walk in, swipe twice, trade a hit. I never needed to dodge or space them. | **High.** It was the main feel of rooms 1 and 2, and it was boring. |
+| Rooms 1 and 2 felt the same apart from enemy count. Nothing new appeared. | **High** |
+| Idle walking toward the last enemy, with nothing to do (room 1, 3.0–4.3 s). | **Medium** |
+| Spitters stay far away, so combat turns into dodging with no way to counter-attack. | **High**, in room 3 |
+| Shots fill the screen, and I could not read a safe path. Dashing sometimes still led into hits. | **Medium–high** |
+| I always lost all 3 hearts and saw no healing or recovery. Runs ended in 5–15 s. | **Medium** |
+
+I only ever used swipe and dash. My script never tried a different approach. Whether other approaches work better is unknown.
+
+### Positives
+
+- Spitter volleys were visually clear (`*`), and the hit events were easy to follow.
+- Room 3 gave a taste of the dodging and spacing this player wants, for a short time.
+- Runs are short, which suits the profile.
+
+### What I wanted to do but couldn't
+
+- Dodge or space a grub, such as step out of its path and strike. I saw no cue for when a grub would hit.
+- Reach and attack the spitters without crossing their shots.
+- Find any variation in my own options. I only had swipe and dash, and I used them the same way each time.
+
+## Decisions already made
+
+None.
+
+## Constraints
+
+I did not read code or design documents, and I make no claims about internals.
+
+## Open questions
+
+- Is the grub fight as repetitive when I play by hand, with deliberate timing, instead of by reaction rules?
+- What do rooms 4 and 5 add? I did not play them.
+- Does the dash give any protection, such as invulnerability? From the log alone I could not tell.
+
+## Expected output
+
+Route to `game-designer` (Diagnose) via the Studio's Route operation.
+
+## Load
+
+- Role: studio/roles/playtester.md
+- Skills: studio/skills/playtest-session.md
+- Project: project.md#player-profile, repo/manual.md
+- Decisions: none
+- Previous handoff: goals/G-001-combat-monotony/01-studio-to-playtester.md
+>>>END

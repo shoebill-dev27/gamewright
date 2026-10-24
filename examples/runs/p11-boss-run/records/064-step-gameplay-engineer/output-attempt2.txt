@@ -1,0 +1,394 @@
+<<<EDIT repo/play.py
+<<<<<<< SEARCH
+    out = Player(game) if view == "player" else Trace(game)
+    out.start()
+=======
+    out = Player(game) if view == "player" else Trace(game)
+    if view == "player" and game.room == "5":
+        print('note: legacy route — boss status and messages are incomplete; add "mode room" for the full boss display')
+    out.start()
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/game.py
+<<<<<<< SEARCH
+        self.shots = []  # [x, y, vx, vy, age]
+=======
+        self.shots = []  # [x, y, vx, vy, age]
+        self.shot_sequence = None  # Public sessions opt in; legacy logs stay unchanged.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        self.shots.clear()
+        for enemy in self.enemies:
+=======
+        for shot in self.shots:
+            self._shot_removed(shot, "cleared")
+        self.shots.clear()
+        for enemy in self.enemies:
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+                    shot.born_frame = self.frame
+                    self.shots.append(shot)
+=======
+                    shot.born_frame = self.frame
+                    self._emit_shot(shot, "boss")
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+                self.shots.append(
+                    [e.x, e.y, e.aim[0] * SHOT_SPEED, e.aim[1] * SHOT_SPEED, 0.0]
+                )
+=======
+                source = "spitter" + str(
+                    [enemy for enemy in self.enemies if enemy.kind == "spitter"].index(e) + 1
+                )
+                self._emit_shot(
+                    Shot(e.x, e.y, e.aim[0] * SHOT_SPEED, e.aim[1] * SHOT_SPEED),
+                    source,
+                )
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    def _update_shots(self, dt):
+=======
+    def _emit_shot(self, shot, source):
+        if self.shot_sequence is not None:
+            self.shot_sequence += 1
+            shot.id = f"S{self.shot_sequence}"
+            shot.event_source = source
+            self.log("shot_fired", id=shot.id, source=source)
+        self.shots.append(shot)
+
+    def _shot_removed(self, shot, reason):
+        if self.shot_sequence is not None:
+            if hasattr(shot, "id"):
+                self.log(
+                    "shot_removed", id=shot.id,
+                    source=shot.event_source, reason=reason,
+                )
+        elif reason in ("lifetime", "edge"):
+            self.log(
+                "shot_removed", source=getattr(shot, "source", "spitter"),
+                reason=reason,
+            )
+
+    def _update_shots(self, dt):
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+                self.log("shot_removed", source=source, reason="lifetime")
+=======
+                self._shot_removed(shot, "lifetime")
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+                self.log("shot_removed", source=source, reason="edge")
+=======
+                self._shot_removed(shot, "edge")
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+                if not self.invulnerable:
+                    # Step 94: the message names the side the shot came from.
+                    self._hurt("shot", "shot from the " + shot_source(shot[2], shot[3]))
+                continue
+=======
+                blocked = self.invulnerable
+                if not blocked:
+                    # Step 94: the message names the side the shot came from.
+                    self._hurt("shot", "shot from the " + shot_source(shot[2], shot[3]))
+                self._shot_removed(shot, "absorbed" if blocked else "hit")
+                continue
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/session.py
+<<<<<<< SEARCH
+        self.attempt = 1
+        self.generation = 0
+=======
+        self.attempt = 1
+        self.shot_sequence = 0
+        self.generation = 0
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        self.game = Game(fps=self.fps, room=room)
+        self.game.hearts = hearts
+=======
+        self.game = Game(fps=self.fps, room=room)
+        self.game.shot_sequence = self.shot_sequence
+        self.game.hearts = hearts
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+                self.attempt += 1
+                self.run_frame = 0
+=======
+                self.attempt += 1
+                self.shot_sequence = 0
+                self.run_frame = 0
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    def _collect(self):
+        for _, kind, details in self.game.events[self.game_seen:]:
+=======
+    def _collect(self):
+        self.shot_sequence = self.game.shot_sequence
+        for _, kind, details in self.game.events[self.game_seen:]:
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/run_driver.py
+<<<<<<< SEARCH
+        self.game = Game(self.fps, setup["room"])
+        for kind, x, y in setup["spawns"]:
+=======
+        self.game = Game(self.fps, setup["room"])
+        self.game.shot_sequence = self.shot_sequence
+        for kind, x, y in setup["spawns"]:
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+                    "shots": [list(shot) for shot in g.shots],
+=======
+                    "shots": [
+                        {
+                            "id": getattr(shot, "id", None),
+                            "source": getattr(shot, "event_source", None),
+                            "state": list(shot),
+                        }
+                        for shot in g.shots
+                    ],
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE repo/tests/test_d022_shots_and_note.py
+"""D-022 controlled probes; these are not continuous-reachability evidence."""
+
+import contextlib
+import io
+import unittest
+
+import play
+from game import Game, Shot
+from session import RunSession
+
+
+NOTE = ('note: legacy route — boss status and messages are incomplete; '
+        'add "mode room" for the full boss display')
+
+
+class LegacyNoteTest(unittest.TestCase):
+    def test_note_scope_and_position(self):
+        for fps in (30, 60):
+            for room in ("1", "2", "3", "4", "5", "empty"):
+                for view in ("player", "trace"):
+                    with self.subTest(fps=fps, room=room, view=view):
+                        setup, inputs, rules = play.read_script(
+                            f"room {room}\nfps {fps}\nend 0.1\n")
+                        output = io.StringIO()
+                        with contextlib.redirect_stdout(output):
+                            play.play(setup, inputs, view, rules)
+                        lines = output.getvalue().splitlines()
+                        expected = room == "5" and view == "player"
+                        self.assertEqual(lines.count(NOTE), int(expected))
+                        if expected:
+                            self.assertEqual(lines[0], NOTE)
+
+
+class ShotLifecycleTest(unittest.TestCase):
+    def test_short_shot_removal_and_fixed_recovery(self):
+        for fps in (30, 60):
+            for case in ("lifetime", "edge", "hit", "dash", "protection"):
+                with self.subTest(fps=fps, case=case):
+                    s = RunSession(fps)
+                    s._enter("5", 3)
+                    g, boss = s.game, s.game.enemies[0]
+                    boss.x, boss.y = (0.05 if case == "edge" else 10), 4
+                    boss.phase, boss.attack_name = "warning", "short shot"
+                    boss.phase_left, boss.aim = g.dt, (-1, 0)
+                    g.place_player(0, 0)
+                    s.step()
+                    fired = s.t
+                    if case in ("hit", "protection"):
+                        g.place_player(9.7, 4)
+                    elif case == "dash":
+                        # Dash toward the shot, so actual protected contact occurs.
+                        g.place_player(9.4, 4)
+                        s.press("dash", "right")
+                    if case == "protection":
+                        g.hurt_left, g.invulnerable = 0.8, True
+                    for _ in range(fps):
+                        s.step()
+                    emitted = [e for e in s.events if e["kind"] == "shot_fired"]
+                    removed = [e for e in s.events if e["kind"] == "shot_removed"]
+                    self.assertEqual(len(emitted), 1)
+                    self.assertEqual(len(removed), 1)
+                    self.assertEqual(emitted[0]["details"],
+                                     {"id": "S1", "source": "boss"})
+                    expected = "absorbed" if case in ("dash", "protection") else case
+                    self.assertEqual(removed[0]["details"],
+                                     {"id": "S1", "source": "boss", "reason": expected})
+                    self.assertEqual(g.shots, [])
+                    recovery = [e for e in s.events if e["kind"] == "boss_recovery"]
+                    self.assertEqual(len(recovery), 1)
+                    self.assertAlmostEqual(recovery[0]["run_time"] - fired, 1)
+                    self.assertEqual(g.hearts, 2 if case == "hit" else 3)
+
+    def test_clear_room_sequence_and_retry(self):
+        for fps in (30, 60):
+            s = RunSession(fps)
+            s.game._emit_shot(Shot(0, 0, 0, 0), "spitter1")
+            for enemy in s.game.enemies:
+                enemy.hp = 0
+            s.step()
+            for _ in range(fps):
+                s.step()
+            s.game._emit_shot(Shot(0, 0, 0, 0), "spitter1")
+            self.assertEqual(s.game.shots[0].id, "S2")
+            s.game.hearts = 0
+            s.step()
+            removed = [e for e in s.events if e["kind"] == "shot_removed"]
+            self.assertEqual([e["details"]["id"] for e in removed], ["S1", "S2"])
+            self.assertTrue(all(e["details"]["reason"] == "cleared" for e in removed))
+            self.assertTrue(s.control("retry"))
+            mark = len(s.events)
+            s.game._emit_shot(Shot(0, 0, 0, 0), "spitter1")
+            self.assertEqual(s.game.shots[0].id, "S1")
+            s.step()
+            self.assertFalse(any(e["kind"] == "shot_removed" for e in s.events[mark:]))
+
+    def test_legacy_emission_has_no_new_events(self):
+        for fps in (30, 60):
+            g = Game(fps, "empty")
+            g._emit_shot(Shot(8.2, 4, 0, 0), "spitter1")
+            g.step()
+            self.assertFalse(any(k in ("shot_fired", "shot_removed")
+                                 for _, k, _ in g.events))
+
+    def test_player_messages_hide_ids(self):
+        from run_driver import messages_for
+        for kind in ("shot_fired", "shot_removed"):
+            self.assertIsNone(messages_for({
+                "kind": kind, "room": "5",
+                "details": {"id": "S1", "source": "boss", "reason": "hit"},
+            }))
+
+
+if __name__ == "__main__":
+    unittest.main()
+>>>END
+
+<<<EDIT repo/manual.md
+<<<<<<< SEARCH
+messages and status display; use explicit `mode room` for boss observation.
+=======
+messages and status display; use explicit `mode room` for boss observation.
+Legacy room 5 player output begins with:
+`note: legacy route — boss status and messages are incomplete; add "mode room" for the full boss display`.
+Other legacy rooms and legacy trace output omit this note.
+
+Public trace and session event logs identify emitted shots as `S1`, `S2`, and so on,
+sharing one sequence across boss and spitter shots and across rooms in an attempt.
+Retry restarts numbering at `S1`. `shot_fired` records ID and source (`boss` or a
+room-local spitter identifier such as `spitter1`). Each removed emitted shot records
+one `shot_removed` event with its ID, source, and reason: `lifetime`, `edge`, `hit`,
+`absorbed`, or terminal `cleared`. Session events include run and room times.
+Player messages do not display shot IDs.
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-002-final-boss/52-gameplay-engineer-to-studio.md
+---
+kind: handoff
+goal: G-002
+seq: 52
+from: gameplay-engineer
+to: studio
+stage: Build
+outcome: partial
+---
+# 52: gameplay-engineer → studio — shot lifecycle and legacy note delivered; observation work remains
+
+## Task
+
+Continue D-022 implementation with observation intervals, per-attempt summaries, remaining acceptance coverage, and final-source execution. Keep Split C deferred until the full suite is green.
+
+## Context
+
+51 supplied the missing source files. The packet also included unpersisted proposals and a historical run of those proposals: 142 tests, four failures. Those proposals are not the current repository baseline and are not delivered wholesale here.
+
+## Findings
+
+Delivered changes:
+
+- `repo/play.py`: exactly one leading note for legacy room 5 player output.
+- `repo/game.py`: opt-in public shot IDs, firing events, and removal events for lifetime, edge, hit, absorbed, and terminal cleared. Legacy logging retains its existing behavior.
+- `repo/session.py`: integer shot sequence persists across room entry and resets on retry.
+- `repo/run_driver.py`: diagnostic sessions enable shot tracking; trace active-shot records include ID, source, and indexed state.
+- `repo/tests/test_d022_shots_and_note.py`: new controlled probes at both FPS for note scope, short-shot removal reasons and unchanged recovery timing, cross-room numbering, terminal clearing, retry numbering, legacy event isolation, and hidden player IDs.
+- `repo/manual.md`: documents the note and shot event contract.
+
+Existing tests were not edited. The unpersisted `test_v1_supplements.py` proposal is not added.
+
+The integer counter avoids storing a session-bound allocator method in Game state, which caused the two historical fresh-state equality failures. The new dash fixture moves toward the projectile to exercise actual contact; the historical fixture dashed away and observed lifetime expiry.
+
+Player-observable scope is limited to the approved legacy note. Public trace and session logs gain developer shot metadata; combat parameters and player message wording are unchanged.
+
+Remaining work:
+
+1. Implement parser dispatch and validation for `view-every` and numeric `trace-every`.
+2. Implement bounded periodic output without thinning event output or changing simulation.
+3. Reset observation scheduling appropriately on retry and preserve default output behavior.
+4. Implement one final summary covering every attempt, outcomes, clocks, room times, boss entry hearts, hits, attacks, pauses, driver elapsed time excluding pauses, and processing time.
+5. Complete L1 output/result equivalence coverage, public spitter/boss shared-sequence coverage, and O1–O6 coverage, including controlled 1200-second executions separately at 30 and 60 FPS.
+6. Update interval/summary documentation and stale integration-gap descriptions.
+7. Execute and inspect the full suite, including `tests/test_play_run_controls.py`, against the completed final sources and record their source id.
+
+No execution was requested in this response. The runtime Build check should report the result of:
+`python3 -m unittest discover -s tests`
+against these saved changes. No new passing result, final source id, trace execution, or bot execution is claimed here. The packet's four failures are historical results from different proposed sources.
+
+## Decisions already made
+
+- D-017: boss combat, run progression, clocks, terminal priority, retry, and presentation.
+- D-019: retained regressions and subsequent measurement and Designer judgment.
+- D-021: current text build and Studio verification authorized.
+- D-022: exact supplement behavior; no pending design clarification.
+
+## Constraints
+
+Preserve rooms 1–4, shared combat rules, legacy behavior except the note, and existing tests. Exercise acceptance cases independently at 30 and 60 FPS. Report results against the executed source id. Do not start Split C before the full suite is green. Independent QA remains required.
+
+## Open questions
+
+None. Remaining work is implementation and validation, not a missing dependency or design decision.
+
+## Expected output
+
+Route a continuation to gameplay-engineer. Deliver the remaining D-022 observation implementation, complete acceptance coverage and documentation, and full-suite results with the final source id. Return the completed Build report to Studio before Split C or independent verification.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: project.md#constraints
+- Project: design/final-boss-and-continuous-run.md
+- Project: repo/README.md
+- Project: repo/manual.md
+- Project: repo/public-driver.md
+- Project: repo/play.py
+- Project: repo/session.py
+- Project: repo/source_id.py
+- Project: repo/run_driver.py
+- Project: repo/game.py
+- Project: repo/bots.py
+- Project: repo/tests/test_d022_shots_and_note.py
+- Project: repo/tests/test_play_run_controls.py
+- Project: repo/tests/test_run_driver.py
+- Project: repo/tests/test_session.py
+- Project: repo/tests/test_terminal.py
+- Project: repo/tests/test_game.py
+- Project: repo/tests/test_boss.py
+- Project: repo/tests/test_boss_contract.py
+- Project: repo/tests/test_boss_contract_details.py
+- Project: repo/tests/test_bots_boss.py
+- Decisions: decisions/D-017-final-boss-and-run-contract.md
+- Decisions: decisions/D-019-g002-balance-criteria-applicability.md
+- Decisions: decisions/D-021-owner-authorizes-text-build.md
+- Decisions: decisions/D-022-g002-v1-supplements.md
+- Previous handoff: goals/G-002-final-boss/51-studio-to-gameplay-engineer.md
+>>>END

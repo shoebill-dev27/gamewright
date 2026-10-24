@@ -1,0 +1,187 @@
+---
+kind: handoff
+goal: G-003
+seq: 10
+from: qa
+to: studio
+stage: Verify (report to Studio; the independent Play step follows)
+outcome: fail
+---
+# 10: qa → studio — Verification report for the dash availability display (P1–P12, Q1–Q12): fail at 30 FPS on P6/P7/Q2, plus spec questions and unverified items
+
+## Task
+
+Studio: compose the next Handoff from this report. Route the 30 FPS timing-tolerance ruling and the three behavior questions below to `game-designer`. Decide whether the independent Play step goes ahead in parallel. The display is truthful, so Play can judge clarity, but it cannot judge the 30 FPS timing.
+
+## Context
+
+Goal G-003: the Owner said it is unclear when dash can be used again. Build changed the player-facing display per `design/dash-availability.md` (D-028). I verified from the spec, the criteria and the running build. I did not use the Build report, and I did not rely on `tests/test_dash_display.py`.
+
+Runs used: tests, play, trace and bots, 3 rounds. 0 rounds are left, so nothing below can be re-run in this step.
+
+Source id: every run reports `b62005468da6` (build string `0.6-g002-public-32`). The packet names sha `aa28af2ce710`. **These differ.** I cannot tell whether the packet sha is a repo commit id and the run id a different hash, or whether another build was verified. Studio must confirm that `b62005468da6` is the build meant. If it is not, this report applies only to `b62005468da6`.
+
+## Findings
+
+### Method
+
+All commands ran from `repo/`.
+
+- Tests: `python3 -m unittest discover -s tests`. Result: 173 tests, OK, source `b62005468da6`. This only shows that the suite passes; it is not criterion evidence. The suite's D022 long observations show periodic output counts of 121/121 and 241/241 at both rates.
+- Play, player view (`@run/play/...`), cited by script name:
+  - P60 and P30: script P at 60 and 30 FPS.
+  - dash-only-60 and dash-only-30: a single dash at 0.6 s.
+  - hit-cooldown: 60 FPS, grub at 13,4, dense dash presses.
+  - hit-cd-30: the same script at 30 FPS.
+  - hit-nodash: no dash, a hit.
+  - hit-early-60 and hit-early-30: a hit during the cooldown.
+  - q4-attack-60 and q4-attack-30: swipe at 0.5, dash at 0.6.
+  - rules-text and rules-held: reaction rules.
+  - legacy-room3 and legacy-room5.
+  - mode-run: `mode run` with rules.
+  - public-pause (60 FPS) and pause-30: `mode room`, `room 5`, with pause.
+- Trace: T60, T30, mode-run-trace.
+- Bots: dodger on rooms 3,4 at 60 and 30 FPS, and the dodger on the boss with `mode room`.
+- The first bots attempt (`room 3` as a script) was my invalid script, not a build fault. It exited with 1 and printed the usage line.
+
+### Per-criterion results
+
+Times are ±1 frame as the spec requires. "ok" means the observed value matches.
+
+| ID | FPS | Result | Evidence |
+|---|---|---|---|
+| P1 | 30, 60 | **pass** | P60 and P30: the pictures at 0.00 and 0.50 end `dash: ready`. |
+| P2 | 30, 60 | **pass** | `0.600 you dash right — usable again in 0.9 s` in both. |
+| P3 | 30, 60 | **pass** | `0.700 dash not ready — 0.8 s left (dashing)` in both. |
+| P4 | 30, 60 | **pass** | The picture at 1.00 ends `dash: 0.5 s`. The press at 1.000 prints `0.5 s left`. |
+| P5 | 30, 60 | **pass** | `1.400 dash not ready — 0.1 s left` in both. |
+| P6 | 60 | **pass** | `1.450 dash ready` is followed by a picture ending `dash: ready`. The picture at 1.50 is also ready. The press at 1.500 prints `you dash right`. |
+| P6 | 30 | **FAIL (literal)** | `dash ready` and the ready picture appear at **1.500**, not 1.45. 1.45 ± 0.033 is 1.417–1.483, and 1.5 is outside by 0.017 s (1.5 frames from nominal). The press at 1.5 was accepted. Details in "Finding F1" below. |
+| P7 | 60 | **pass** | T60 trace: first dash at 0.617, second at 1.467, start-to-start 0.85 s. |
+| P7 | 30 | **FAIL (literal)** | T30 trace: a press 0.867 s after the first (1.467) is refused with wait 0.033. The next frame (1.500, 0.9 s after) is accepted. Start-to-start is 27 frames = 0.9 s, not 0.85 s. |
+| P8 | 30, 60 | **pass** | dash-only-60 and dash-only-30: `dash ready` appears once, at 1.450 and 1.500. hit-nodash (no dash, a hit): no `dash ready`, and the field counts down 0.3 → 0.1 → ready. |
+| P9 | 30, 60 | **pass** | hit-cooldown: the cooldown ended at about 0.85 and stun lasted to about 1.0. Presses at 0.90 and 0.95 print `0.1 s left (hit-stun)`. hit-cd-30 at 0.967 also prints `0.1 s left (hit-stun)`. R ≤ 0.3 throughout. |
+| P10 | 30, 60 | **pass** (no contradiction found) | Compared with the accept/refuse of every press in P60, P30, T60, T30, hit-cooldown, hit-cd-30, hit-early-60/30, q4 and the rule runs. No `ready` or `0.0` appeared before a refusal. No time was shown before an accept. `dash ready` is always printed before the same-frame press. |
+| P11 | 30, 60 | **pass** (variant) | hit-cooldown and hit-cd-30 have a grub winding up near the player from 0.017/0.033. I used a denser press script, not literally script P. The refusal numbers follow the cooldown formula exactly (0.8 dashing, 0.7 dashing, 0.6, 0.5, 0.4, 0.3), so the wind-up changes nothing. |
+| P12 | 60 | **pass on what was run; coverage gap** | legacy-room3 and public-pause (boss, `mode room`) show the field in every live picture and `dash ready` after each dash. The 60 s dodger bots do not print pictures, so "every picture of a dodger-bot run" was not inspected. |
+| Q1 | 30 | **pass** | T30: dash_end 0.867, dash_ready 1.500, a difference of 19 frames against 18 nominal (+1 frame). The press at 1.467 (1 frame before) is refused. The press at 1.500 is accepted. |
+| Q1 | 60 | **pass; one gap** | T60: dash_end 0.850, dash_ready 1.450, exactly +0.6. Presses at 1.317/1.350/1.417 are refused. 1.45 is accepted. A press exactly 1 frame before ready (1.433) was not issued. |
+| Q2 | 30, 60 | **FAIL** | Follows P6/P7 at 30 FPS. Everything else holds at both rates. |
+| Q3 | 30, 60 | **observed: matches the spec** | hit-early-60: dash at 1.6, hit at 2.033 during the cooldown, ready announced at 2.450. That is the unchanged cooldown end, later than hit+0.3 = 2.333. The press at 2.45 was accepted. hit-early-30: ready 2.500, accepted. hit-cooldown (ready 0.85, stun end ~1.0): `dash ready` at 1.017 and the press at 1.1 accepted. The first accepted press is max(ready, hit+0.3) in every case. A hit does not change the cooldown. |
+| Q4 | 30, 60 | **observed: attack recovery does not block dash** | q4-attack-60/30: swipe at 0.5, dash at 0.6 (inside the 0.35 s recovery) is accepted. The field was `ready` before it. No refusal reason exists for it. |
+| Q5 | – | **UNVERIFIED** | See "Unverified". |
+| Q6 | 30, 60 | **pass** | public-pause and pause-30: dash at 0.2, pause at 0.5–1.5. The picture at the pause reads `dash: 0.6 s` and the resumed picture reads `dash: 0.6 s`. The field is frozen and no `dash ready` is printed during the pause. The `paused` status line also carries the field. |
+| Q7 | – | **partial** | See "Unverified". |
+| Q8 | – | **UNVERIFIED** | See "Unverified". |
+| Q9 | – | **pass; gaps** | Field seen in: legacy `room empty`, legacy rooms 3 and 5 (the note line is kept and the field is present), `mode run` rooms 1–2, and `mode room` boss. Clear screens (`room_clear`) and the death screen carry no field. Not displayed in this step: legacy rooms 1, 2 and 4, and `mode room` rooms 1–4. |
+| Q10 | – | **pass (limited)** | The suite's D022 observations hold periodic counts. In every play run, periodic pictures stay on the grid (legacy on x.0/x.5, `mode run` `view-every 5` on 5.0/10.0). `dash ready` pictures are event pictures, at most one per dash. |
+| Q11 | 60 | **pass** | rules-text: `when text "dash ready" then dash left` fires once at each of 1.45, 2.30, 3.15 and 4.00, each time with an accepted dash. |
+| Q12 | – | **not evaluated** | The note line is kept in legacy room 5. The stripped comparison was not run (no baseline, no strip tool). G-002 is out of scope (D-027). |
+
+### Finding F1 — 30 FPS ready moment and start-to-start (fails P6, P7 and Q2 as written)
+
+Evidence:
+
+- T30 shows the dash active for 8 frames (accepted frame 18, `dash_end` at frame 26). The cooldown then needs 18 more frames, and `dash_ready` is logged at the start of frame 45. That is 27 frames = 0.9 s from press to next accepted press.
+- At 60 FPS the same chain gives 51 + 36 = 87 frames from the press at frame 36, i.e. 0.85 s.
+- Nominal ready is 1.45 s. At 30 FPS the available frame instants are 1.433, 1.467 and 1.500.
+- Nominal 1.45 ± 1 frame allows 1.417–1.483. The build accepts first at 1.500.
+
+The display agrees with the build: `dash ready` and the ready field appear at 1.500, the refusal at 1.467 shows `0.1 s left`, and the accepted message says "usable again in 0.9 s". So this is not a display fault. It comes from frame quantization of the dash length and cooldown, which Q8 says must not change.
+
+I did not patch or soften it. I did not decide the intended behavior either. Two readings:
+
+- The ±1 frame tolerance in section 5 is meant against the nominal 0.85 s.
+- The tolerance is meant against the build's own frame-quantized timing.
+
+I cannot say whether the 30 FPS quantization is older than this change (no earlier build). The spec itself says the ready time at 30 FPS was "not confirmed" (section 2). Whichever way it is read, the manual line "the next dash can start 0.85 s after the previous one started" is about 0.05 s short of the observed 30 FPS value.
+
+I cannot judge from this step whether engineer action is needed. A fix would change dash timing, which D-028 and Q8 forbid. A ruling by the designer is therefore likely the right route.
+
+### Points 1–3 of the handoff
+
+**1. Pictures in the public driver — difference from the spec's wording.**
+
+- Spec 3.3 says the accepted-dash and refusal messages get "no extra picture".
+- Legacy route: conforming. Dash and refusal messages are text lines only, with no picture.
+- Public driver: an event picture follows each message. For example `you dash right — usable again in 0.9 s` at run 0.200 is followed by a picture at 0.217 with `dash: active`. `dash not ready — 0.4 s left` at 2.050 is followed by a picture at 2.067.
+- This is the public driver's general pattern. The same happens after `you swipe: miss` and `(nothing happens)`. I could not check whether the pre-change driver did the same for the dash text, because there is no earlier build.
+- Consequence: one picture per refused press. Pressing every 0.1 s in a public run prints a picture per press, which counts as event output under Q10.
+- This is a difference from spec 3.3, not a conforming case. Whether it is acceptable is a question for `game-designer`.
+
+**2. Quiet refusals — behavior differs between routes and the spec is silent.**
+
+- Scripted presses: refusals are printed, and `text "not ready"` fires on them. In rules-text the refusal at 0.700 was followed by the rule's attack at 0.850 (0.15 s reaction).
+- Legacy held rule `when nothing within 20 then dash right` (rules-held): no refusal text at all appears between the accepted dash at 0.000 and the next one at 0.900, nor between 0.900 and 1.800. The accepted dashes fall on the rule's 0.15 s grid (0.9 = 6 × 0.15, 1.8 = 12 × 0.15). That is not 0.85 or 1.75, when the cooldown ended. So the rule is pressing and being refused silently. `when text "not ready" then move up` never fired.
+- Public driver rule `when see g within 1.2 then dash toward` (mode-run): a rule-driven refusal IS printed (`0.817 dash not ready — 0.7 s left (dashing)`).
+- Rule-driven attacks that do nothing print `(nothing happens)` in `mode run`, for example at 2.183, 7.633 and 7.783.
+- I cannot separate "legacy route vs public driver" from "action type", because the two rule scripts differ in both.
+- The spec (3.4) says `text "not ready"` becomes "usable like any message". The manual says "A dash that cannot happen prints `dash not ready — …`". For legacy rule-driven presses neither holds, and neither document says what a rule-driven refusal should do.
+- This is an open question for `game-designer`, not a QA verdict.
+
+**3. Other ignored inputs — pass.** `(nothing happens)` still prints for an attack during hit-stun (hit-cooldown 0.750, hit-cd-30 0.767) and for rule-driven attacks in recovery (mode-run).
+
+### Q7, Q8 and other gaps (unverified items, with reasons)
+
+- **Q5 — room entry (unverified).** In mode-run the dash at 4.317 was followed by the room-1 clear at 4.967 and entry at 5.967. Entry showed `dash: ready` with no `dash ready` message at entry or on the clear screen. This does not discriminate: dash end 4.567 + 0.6 = 5.167 would be ready by itself before entry. No run left a cooldown pending at entry. Whether entry clears the cooldown, or whether a press at entry time is accepted, is unobserved. A discriminating run needs the cooldown to still be running at the entry frame.
+- **Q7 — consistency (partial).**
+  - Per-press consistency is established in the legacy and public play runs listed in P10. In bot logs, "dash ready" reads and a `dash not ready` step decision agree with the elapsed time since each dash.
+  - The bot logs print decisions, not each press's acceptance or the announced R. My results truncate the 60 s dodger outputs, so "every dash input accepted iff the last announced R was 0" was not checked across them.
+  - Float residue at 30 FPS: T30 frame 44 shows `dash_cooldown=0.000` after the step and the press in that frame refused with wait 0.033. This agrees with the state before the step. No `dash: 0.0 s` was ever displayed.
+- **Q8 — no side effects (unverified).**
+  - There is no earlier build and no strip tool, so no byte-comparison was possible.
+  - Strongest available evidence: the 173-test suite, including long-standing game, bot and driver tests, passes. Dash timing at 60 FPS matches the pre-change probe in spec section 2 (start-to-start 0.85 s). The periodic grid is unchanged in all runs. Normal-run clear times in the suite (86.97 s at 30 FPS, 103.53 s at 60 FPS) fall in the range project.md records (about 87–104 s). Dodger room results (hearts lost 0, room 3: attacks 8, dashes 6 at both rates) match the suite's own retained figures — but those come from the same build, not a baseline.
+  - None of this proves "identical to before". One further doubt that I cannot separate without a baseline: whether dash-related event pictures in the public driver shift the default 0.5 s periodic schedule, which public-driver.md says resumes "after event pictures".
+- **Q12:** not evaluated (see table).
+- **Q1 at 60:** a press exactly 1 frame before ready was not exercised.
+- **Float residue under other conditions** (for example after a long pause) was not exercised.
+
+### Docs checked against behavior
+
+`repo/manual.md` matches the observed field and message texts, the "no field on clear or end screens" line, and `text "dash ready"`. Two statements do not match or are unverified:
+
+- "next dash can start 0.85 s after the previous one started" — observed 0.9 s at 30 FPS (F1).
+- "Entering a room makes the dash ready" — Q5 unverified.
+
+## Decisions already made
+
+- D-001: no new inputs. No new button was seen.
+- D-028: the dash indicator shows on the legacy route too, including room 5. Confirmed: field and note line both present.
+- D-027: G-002 is stopped; its verification is out of scope.
+
+## Constraints
+
+- Both 30 and 60 FPS apply. Tolerance ±1 frame (spec).
+- I did not change the game or the spec. The code under test is not modified.
+- 0 run rounds are left in this step, so no new evidence can be produced here.
+
+## Open questions
+
+For `game-designer` (the spec is silent or its criteria cannot be met as written):
+
+1. **30 FPS tolerance (F1).** Is the ±1 frame in P6, P7 and Q1 measured against the nominal 0.85 s, so that 0.9 s at 30 FPS fails? Or is the frame-quantized value acceptable, in which case what should the manual say about 30 FPS? A rule change would break Q8, so this needs a designer ruling, not a patch.
+2. **Public-driver pictures.** Spec 3.3 says no extra picture for the accepted-dash and refusal messages, but the public driver prints one per message. Amend the spec or require suppression?
+3. **Rule-driven refusals.** Should a refused dash from a reaction rule print `dash not ready` (as in the public driver) or stay silent (as in legacy rules-held)? Should `text "not ready"` be able to fire on it? The manual promise "a dash that cannot happen prints…" currently holds only for scripted presses and the public-driver rule case I saw.
+4. Q4 is recorded: attack recovery does not block dash. Spec 3.1/3.3 already follows the build here, so no change is needed unless the designer wants one.
+5. Q3 is recorded: a hit does not change the cooldown. The spec rule applies unchanged.
+
+For Studio:
+
+6. Confirm which sha was meant (`aa28af2ce710` vs the reported `b62005468da6`).
+7. If another QA round is run, it needs: a discriminating Q5 script (a `mode run` dash timed to leave the cooldown pending at the room-1 clear/entry); a 1-frame-before press at 60 FPS (1.433); a baseline or strip tool for Q8 and Q12; and bot output that records each press's acceptance for Q7.
+
+## Expected output
+
+Studio composes the next Handoff. Recommended routing:
+
+- `game-designer`: open questions 1–3, because the 30 FPS finding cannot be fixed without changing dash timing (Q8).
+- Independent Play step: the display is truthful and the 60 FPS timings are within spec, so Play can judge clarity. Play must be told it cannot judge the 30 FPS timing.
+- Do not pass this goal until Q5, Q7, Q8 and Q12 have been verified or explicitly deferred.
+
+## Load
+
+- Role: studio/roles/qa.md (this report's author); the recipient is the Studio, which has no role file.
+- Skills: studio/skills/verify-change.md
+- Project: design/dash-availability.md, repo/manual.md, repo/public-driver.md, project.md#constraints, build in repo/ (source `b62005468da6`)
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-028-dash-indicator-on-legacy-route.md
+- Previous handoff: goals/G-003-dash-availability-clarity/09-studio-to-qa.md

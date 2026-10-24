@@ -1,0 +1,203 @@
+---
+kind: handoff
+goal: G-001
+seq: 58
+from: qa
+to: studio
+stage: Observe
+outcome: done
+---
+# 58: qa → studio — Six open facts settled (two partly); one low-severity contradiction, no short bite warning
+
+## Task
+
+Pass this report to `game-designer` for the spec gaps listed below and to `gameplay-engineer` if the designer rules on D-58-1. The build was not changed. All findings come from the trace and player views and the bot runs, at 60 FPS and 30 FPS unless noted.
+
+## Context
+
+G-001, handoff 55. I used two run rounds: 5 runs in the first and 17 in the second (labels in brackets below). I have one round left and did not use it. Items 4 and 5 are only partly settled; see "Not settled".
+
+## Findings
+
+### Summary
+
+| # | Fact | Result | Against spec |
+|---|---|---|---|
+| 1 | Short bite warning | Not real. The "rears back" line belonged to a different grub. | Matches |
+| 2 | Dash distance | 4.00 tiles in open floor at both frame rates. Clamped at walls. | Matches. Wall behaviour is unspecified. |
+| 3 | Facing after dash | Dash sets facing to the dash direction. | Unspecified |
+| 4 | Swipe vs grub states | (a) hits but gives no knockback; (b) hits, 1.0-tile knockback; (c) a second swipe hits. "(miss)" not seen first-hand. | One contradiction (D-58-1) |
+| 5 | Grub on you | Hit in all four facings. | Matches. Knockback direction unsettled. |
+| 6 | Bots | Format found. No idle bot exists, so idle runs came from the trace view. | n/a |
+
+### 1. Possibly short bite warning (settled: no short warning)
+
+Runs: `trace/grub-room1-idle-30` (`room 1`, `fps 30`, `end 16`) and `trace/grub-room1-idle-60` (same at `fps 60`).
+
+- The playtester's session restarted room 1 about 10.0 s into the run. Idle room 1 at 30 FPS reproduces their log with a +10.0 s offset:
+
+| Playtester log | Idle trace at 30 FPS | Trace +10 s |
+|---|---|---|
+| "rears back (left)" at 11.90 s | `windup who 0 side left` at 1.900 | 11.90 |
+| heart lost at 11.97 s | `hurt` at 1.967 | 11.97 |
+| hits at 13.47 s and 14.97 s | hurts at 3.467 and 4.967 | 13.47, 14.97 |
+
+- The bite at 1.967 belongs to grub#2. Its wind-up (side `above`) started at 1.400 and its strike at 1.900 (0.500 s later).
+- The "rears back (left)" line at 1.900 belongs to grub#0. That grub struck at 2.400 (0.500 s later) and hurt nobody, because the player was invulnerable.
+- At 1.900 grub#2's strike and grub#0's wind-up started in the same tick. So the heart loss followed the "rears back" line by 0.067 s, but from another grub. The misread was by the playtester, and the build is correct.
+- No grub strikes less than 0.500 s after its own wind-up in either trace, at 30 or 60 FPS. The pairs below were taken from the wind-up and strike rows:
+
+| FPS | Grub | Wind-up start | Strike start |
+|---|---|---|---|
+| 30 | #2 | 1.400 | 1.900 |
+| 30 | #0 | 1.900 | 2.400 |
+| 30 | #1 | 2.900 | 3.400 |
+| 30 | #2 | 2.967 | 3.467 |
+| 60 | #2 | 1.383 | 1.883 |
+| 60 | #0 | 1.883 | 2.383 |
+
+- A heart is lost 0.05–0.07 s after strike start, while the lunge closes to 1.0 tile. That is 0.55–0.57 s after the wind-up line, which explains the playtester's "0.5–0.65 s" for the other bites.
+- 30 vs 60 FPS: event order is identical and timestamps differ by at most 0.034 s (hurt 1.967 vs 1.933). The first down is at 4.967 vs 4.950. This is within the 0.07 s allowance.
+- The "rears back (side)" line does not say which grub struck. With several grubs, a cue for one can coincide with a hit from another. This is a readability note for the designer, not a defect.
+
+### 2. Dash distance (settled; wall behaviour is a spec gap)
+
+Runs: `trace/dash-open-and-wall` (60 FPS) and `trace/dash30` (30 FPS), both in `room empty`; `play/dash-wall-view` (60 FPS).
+
+- Open floor: 8→12 and 12→8 (60 FPS), and 8→12 and 15→11 (30 FPS). That is exactly 4.00 tiles at both frame rates, a difference of 0.00 against the 0.25 allowance. The dash lasts about 0.25 s (`dash_end` at 0.233 s after the first logged frame, which is 0.25 s from the press). Invulnerable for the whole dash.
+- Next to a wall the dash is clamped at the room edge:
+  - 12→15 moved 3 tiles.
+  - 4→0 moved 4 tiles.
+  - A dash from y=0 upward or from x=15 rightward moves 0 tiles but still prints "you dash right", turns on invulnerability for 0.25 s and spends the dash. In `play/dash-wall-view`, from 14 it moved 1 tile, and the second dash at the wall did not move.
+- The spec says "4 tiles". It is silent on walls. The manual gives no distance, only "a quick burst".
+- The playtester's "2–3 tiles" is not the build's behaviour. A likely cause is that the player view draws only every 0.5 s (hypothesis).
+- Cooldown: a dash 0.3 s after another was refused with "(dash not ready)" (`dash30`). I did not measure the exact cooldown.
+
+### 3. Facing (settled; spec silent)
+
+Runs: `play/facing-default`, `play/facing-dash60` and `play/facing-dash30`.
+
+- Default facing is right. With spitters at 7.2 and 8.8 either side of `P` at 8, a swipe at 0.1 s hit only the right one ("spitter hit (1 left)").
+- A dash changes facing to the dash direction:
+  - Spitters at 11 and 13; the player moved left briefly, then dashed right at 0.3 s. The dash passed through the spitter at 11.
+  - At 0.8 s the player stood at about 12, with one spitter behind and one ahead. The swipe hit one spitter only ("spitter hit (1 left)"), the one ahead and to the right (`z` at x=13), not the one behind (`s` at x=11).
+  - Results are identical at 30 and 60 FPS.
+- Facing was inferred from which enemy was hit. The player view does not print facing.
+- The spec says only "a swipe in the facing direction". Whether a dash sets facing is unspecified: spec gap, hand to `game-designer`.
+
+### 4. Swipe timing against grubs (partly settled)
+
+Runs: `trace/strike-a` (swipe at 0.51), `trace/strike-b` (swipe at 0.54) and `trace/recovery-knock` (swipes at 1.0, 1.4, 1.8 and 2.2), all at 60 FPS with a grub at 9.24 and the player at 8.
+
+- **(a) In Strike.**
+  - Strike began at 0.517. The swipe at 0.51 took effect in frame 32 (0.533) and hit the grub, which went to HP 1. The same tick shows `hurt`, so the player still lost a heart.
+  - The grub did not stop: it kept its Strike and moved from 9.13 to 8.24 into Recovery.
+  - No `knockback` event occurred in this run.
+  - The strike damages the player 1–2 frames after it starts, and the player is stunned from that moment. A swipe pressed even 0.03 s later is rejected as `stunned` (`strike-b`: pressed at 0.54, rejected at 0.567).
+  - A swipe can therefore hit a grub in Strike only on the same tick or frame as the strike starts.
+- **(b) In Recovery, adjacent.**
+  - The swipe at 1.0 (taken at 1.017) hit a grub at 8.24, 0.11 tiles from the player. HP went 2→1 and a `knockback` event fired.
+  - The grub ended at 9.24 by 1.333, a push of exactly 1.00 tile (one frame at 1.017 moved it 0.08, consistent with 1 tile in 0.2 s). It stayed in Recovery with its timer running on.
+- **(c) After the first hit.**
+  - The second swipe at 1.4 (taken at 1.417) hit the grub at 9.24, 1.11 tiles from the player at 8.13 and within the 1.5 reach. It was defeated and "room cleared" printed.
+  - Knockback of 1 tile does not move an adjacent grub out of reach.
+- **"(miss)":** the trace shows `attack ... hits []` for swipes at 1.8 and 2.2 with no enemy left. I did not run the player view for a living grub out of reach, so I did not see the "(miss)" text myself. Handoff 54 saw "(miss)" at 1.0 s in room 2 with all grubs far away.
+- **Input delay:** inputs sometimes take effect one or two frames after their script time (0.51→0.533, 0.54→0.567).
+
+**D-58-1 (low): no knockback when the first hit lands in Strike.**
+- Expected: `design/combat.md` says "First hit (HP 2→1): the grub is knocked back 1 tile over 0.2 s". It states no exception for Strike.
+- Actual: the grub took the hit (HP 1, damaged state) but showed no `knockback` event and no push (`strike-a`). The Strike continued and still damaged the player.
+- Conditions: 60 FPS only. I did not repeat at 30 FPS because the case needs a same-tick hit.
+- Severity: low. The case is rare because of the timing above, and the effect is only that the grub is not pushed.
+- Whether a hit in Strike should interrupt, knock back or be ignored is not specified (the spec defines wind-up cancel and defeat-mid-state only). **Hand to `game-designer`** for a ruling before the engineer acts.
+- Acceptance criteria once ruled (conditions: at 30 and 60 FPS, the room and grub as in `strike-a`):
+  1. A first hit that lands in a grub's Strike produces the ruled outcome (knockback of 1 tile, or an explicit exemption), and the trace shows it.
+  2. The hit line "grub hit (1 left)" still prints.
+  3. The strike's own damage follows the ruling.
+  4. The Wind-up (AC-5), Recovery and defeat cases are unchanged.
+
+### 5. Grub "on you" (settled for the swipe; knockback direction unsettled)
+
+Runs: `play/onyou-right`, `play/onyou-left`, `play/onyou-up` and `play/onyou-down` (60 FPS; each has the grub spawned on the player's tile, a `move` in that direction at 0.01 and a swipe at 0.2).
+
+- Right, left, up and down all print "you swipe: grub hit (1 left)" and "the grub is open (on you)" at 0.2.
+- A swipe hits a grub on the player's tile whichever facing is used. That matches the spec's "true position" rule.
+- The hit cancelled the wind-up, and the grub rewound to the next "rears back (on you)" at 0.8 s. That is 0.6 s of Recovery, as in AC-5.
+- Display: the grub is drawn beside `P` (right of `P` at the left, top and bottom walls; left of `P` at the right wall), as D-006 requires.
+- **Limitation:** every test placed the player at a wall (x=15, x=0, y=0, y=8), and the facing was set only by a `move` into that wall; I did not read it from the trace. The grub still printed "(on you)" at 0.8 s, 0.6 s after a hit that should have knocked it back 1 tile. A hypothesis, not a finding: when the grub is exactly on the player, the knockback direction is the facing direction, and my wall positions clamped it to no movement. Where an on-you grub is pushed in open floor is unsettled and is also a spec gap.
+
+### 6. Bot reference data
+
+- **Format:** the script keys are `bots <list>`, `rooms <range|list>`, `fps <30|60>` and `limit <seconds>`. The failed script used `room 1`, which the parser does not know. The key is `rooms`.
+- `repo/README.md` lists only camper, walker and dodger. `reactive` exists in `bots.py` but is missing from the README (cosmetic).
+- **No idle bot exists.** `camper` stands still but turns and swings at enemies in reach. For passive (idle) numbers I used the trace view with no inputs (`trace/idle-room2-60` … `idle-room5-60`, `grub-room1-idle-30` and `-60`).
+- Bots start each room fresh with 3 hearts and no run flow (no carry-over, no heal, no 1.5 s transition). Their decisions depend on the frame step, so a bot run at 30 and 60 FPS can differ and cannot be used for AC-17.
+
+**Idle player** (no actions; trace, 60 FPS unless noted):
+
+| Room | Down at (s) | Hearts lost | Hit by | Actions |
+|---|---|---|---|---|
+| 1 | 4.95 (60), 4.97 (30) | 3 | grub 3 | 0 |
+| 2 | 5.05 | 3 | grub 3 | 0 |
+| 3 | 5.52 | 3 | shot 3 | 0 |
+| 4 | 5.03 | 3 | grub 3 | 0 |
+| 5 | 4.53 | 3 | grub 2, shot 1 | 0 |
+
+**Bots, 60 FPS** (`bots/ref60`). Cells give clear time in s, hearts lost, attacks, dashes. "NOT" = not cleared; the bot went down.
+
+| Bot | Room 1 | Room 2 | Room 3 | Room 4 | Room 5 |
+|---|---|---|---|---|---|
+| camper | 3.5, 0, 6, 0 | 4.8, 0, 7, 0 | NOT 5.5, 3 (shot), 0, 0 | NOT 6.9, 3 (shot), 4, 0 | NOT 6.9, 3 (shot), 6, 0 |
+| walker | 3.5, 0, 6, 0 | 5.1, 0, 8, 0 | 9.0, 0, 6, 0 | 9.1, 0, 8, 0 | 11.2, 0, 10, 0 |
+| dodger | 3.5, 0, 6, 0 | 5.1, 0, 8, 0 | 11.8, 0, 6, 4 | 10.0, 0, 8, 1 | 9.8, 0, 10, 2 |
+| reactive | 3.5, 0, 6, 0 | 6.3, 1 (grub), 8, 3 | 11.8, 0, 6, 4 | 12.9, 0, 9, 5 | 11.1, 0, 11, 2 |
+
+**Bots, 30 FPS** (`bots/ref30`):
+
+| Bot | Room 1 | Room 2 | Room 3 | Room 4 | Room 5 |
+|---|---|---|---|---|---|
+| camper | 3.5, 0, 6, 0 | 4.9, 0, 7, 0 | NOT 5.5, 3 (shot), 0, 0 | NOT 6.9, 3 (shot), 4, 0 | NOT 6.9, 3 (shot), 6, 0 |
+| walker | 3.5, 0, 6, 0 | 4.8, 0, 8, 0 | 9.2, 0, 6, 0 | 9.1, 0, 8, 0 | 12.3, 0, 10, 0 |
+| dodger | 3.5, 0, 6, 0 | 4.8, 0, 8, 0 | 9.5, 0, 6, 2 | 10.1, 0, 8, 1 | 14.5, 0, 10, 6 |
+| reactive | 3.5, 0, 6, 0 | 4.8, 0, 8, 0 | 9.5, 0, 6, 2 | 14.3, 0, 8, 6 | 11.1, 0, 10, 2 |
+
+### Spec gaps for `game-designer` (not defects)
+
+- Does a dash set facing? (Observed: yes.)
+- What does a dash into a wall do? (Observed: it clamps, and a dash against the wall is spent without movement.)
+- What happens to a grub hit during Strike (see D-58-1)?
+- In which direction is a grub that stands exactly on the player knocked back?
+- Should the "rears back" line name which grub it is, given that a cue and a hit from different grubs can coincide?
+- `manual.md` gives no dash distance (optional documentation note).
+
+### Not settled
+
+- Item 4, "(miss)" text with a living grub out of reach: not seen in the player view first-hand. Only handoff 54's observation and the trace's empty hit list support it.
+- Item 5, knockback of an on-you grub in open floor: not tested. A run with `player 8 4` and a grub on that tile would settle it.
+- D-58-1 was observed at 60 FPS only.
+- Idle runs for rooms 2–5 were done at 60 FPS only. The 30 FPS idle run covers room 1 only.
+
+## Decisions already made
+
+- D-001, D-003 and D-006 were respected. I changed no build files and made no balance judgement.
+
+## Constraints
+
+- The Studio must keep the cell contents of the bot tables as measured here.
+- Do not read the bot numbers as AC-17 evidence (see item 6).
+
+## Open questions
+
+- Should I use the remaining run round to settle the "Not settled" items above, or does `game-designer` need to rule on the spec gaps first?
+
+## Expected output
+
+The Studio routes D-58-1 and the spec gaps to `game-designer`, and the rest to review.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/reproduce-defect.md
+- Project: design/combat.md, manual.md, repo/bots.py
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-006-overlap-display-and-practice-room-manual.md
+- Previous handoff: goals/G-001-combat-monotony/55-studio-to-qa.md

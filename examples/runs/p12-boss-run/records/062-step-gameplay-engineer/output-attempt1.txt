@@ -1,0 +1,92 @@
+<<<FILE goals/G-002-final-boss/50-gameplay-engineer-to-studio.md
+---
+kind: handoff
+goal: G-002
+seq: 50
+from: gameplay-engineer
+to: studio
+stage: Build
+outcome: partial
+---
+# 50: gameplay-engineer → studio — supply the shared session and legacy driver sources
+
+## Task
+
+Continue implementation of D-022 after supplying the missing implementation files. Implement the supplements and acceptance tests, update the manual, and run the full suite against the final source id.
+
+## Context
+
+Handoff 49 requests legacy boss display guidance, per-attempt shot IDs and removal events, bounded observation intervals, and a final summary. The pause/retry work from 46 remains unverified.
+
+This operation is restricted to the supplied packet. It does not include several sources required to make and validate these changes without guessing.
+
+## Findings
+
+No repository files were changed and no runs were requested. No source id or test result is reported.
+
+The required observable changes are defined by §11:
+
+- Legacy room 5 player output gains exactly one leading note; other legacy output and simulation behavior remain unchanged.
+- Public shots gain creation-order IDs shared across rooms within an attempt, reset on retry, and exactly one removal event with the specified reason.
+- Public output supports validated observation intervals without thinning events or changing simulation.
+- Player and trace output finish with one summary covering all attempts and their clocks, rooms, boss entry hearts, hits, swipes, and elapsed measurements.
+
+The following missing sources block a complete implementation:
+
+1. `repo/play.py`: owns legacy dispatch, player rendering, `Player.describe`, and parser dispatch. Its exact implementation is needed to add the legacy note without changing other output, route the interval directives, and ensure new shot events do not introduce player wording.
+2. `repo/session.py`: owns attempt lifecycle, room entry, retry, and event collection. Its exact implementation is needed to maintain one shot counter across rooms, reset it on retry, preserve event ordering and clock attribution, and collect complete per-attempt summaries.
+3. `repo/source_id.py`: defines the source identity used by the requested verification. It is needed to understand which final files contribute to the recorded identifier.
+
+The supplied `game.py` can support additional shot metadata, but integrating it without the session and presentation sources would leave the core acceptance conditions unresolved. No speculative implementation was delivered.
+
+The existing pause/retry tests and the full suite remain unrun. Split C has not started.
+
+## Decisions already made
+
+- D-017 defines boss combat, run boundaries, terminal priority, retry, clocks, and display.
+- D-019 retains shared regressions and requires subsequent measurement and Designer judgment.
+- D-021 authorizes the current text build and Studio execution without real-device or specified-sha prerequisites.
+- D-022 defines the three supplements; no design clarification is currently required.
+
+## Constraints
+
+- Preserve rooms 1–4 and shared combat rules.
+- Preserve legacy timing, results, and output except the specified note.
+- Preserve existing tests without weakening or editing them.
+- Evaluate acceptance cases separately at 30 and 60 FPS.
+- Report execution results only against the final source id.
+- Do not start Split C before the full suite is green.
+- Use only supplied packet material; do not infer missing source implementations.
+
+## Open questions
+
+No specification question is identified.
+
+Packet dependency: supply the complete current `repo/play.py`, `repo/session.py`, and `repo/source_id.py` alongside the existing implementation inputs.
+
+## Expected output
+
+Route a continuation to gameplay-engineer with the missing sources. The continuation should deliver the D-022 implementation, acceptance tests, manual update, and full-suite results including `tests/test_play_run_controls.py`, tied to the final source id.
+
+Return the completed implementation report to Studio. Independent QA remains required.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: design/final-boss-and-continuous-run.md
+- Project: repo/manual.md
+- Project: repo/play.py
+- Project: repo/session.py
+- Project: repo/source_id.py
+- Project: repo/run_driver.py
+- Project: repo/game.py
+- Project: repo/bots.py
+- Project: repo/tests/test_play_run_controls.py
+- Project: repo/tests/test_run_driver.py
+- Decisions: decisions/D-017-final-boss-and-run-contract.md
+- Decisions: decisions/D-019-g002-balance-criteria-applicability.md
+- Decisions: decisions/D-021-owner-authorizes-text-build.md
+- Decisions: decisions/D-022-g002-v1-supplements.md
+- Previous handoff: goals/G-002-final-boss/49-studio-to-gameplay-engineer.md
+>>>END

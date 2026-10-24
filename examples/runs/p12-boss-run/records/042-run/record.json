@@ -1,0 +1,17 @@
+{
+ "op": "Run",
+ "goal": "G-002",
+ "operations": [
+  "035-route",
+  "036-step-gameplay-engineer",
+  "037-route",
+  "038-step-gameplay-engineer",
+  "039-route",
+  "040-step-gameplay-engineer",
+  "041-route"
+ ],
+ "stop_reason": "no progress: gameplay-engineer handed back `question` twice and was opened again",
+ "status": "active",
+ "owner_reads": null,
+ "next": "run examples/runs/p10-boss-run"
+}

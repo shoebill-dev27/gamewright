@@ -1,0 +1,5 @@
+I can't judge criterion 5 yet. The suite is green with 10 tests, but nothing in the packet shows whether the regression test covers both 30 and 60 FPS or whether its assertions were weakened in the last pass. I'm requesting the test file once, before writing the verdict.
+
+<<<FILE @need
+repo/tests/test_game.py
+>>>END

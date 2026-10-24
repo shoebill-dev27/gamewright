@@ -1,0 +1,72 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/82-studio-to-qa.md",
+  "sha256": "9f44fc34722180522132a2f12732296753b79763e778144125c88d4497386307",
+  "bytes": 2572
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "381742c8f2afe2e1a2a6af9d031dcc91f98f490ada7c90e2a990d6a1aaf27639",
+  "bytes": 1765
+ },
+ {
+  "path": "studio/skills/verify-change.md",
+  "sha256": "da40d2c0030e078ac6d085ea06b17bb9b452495f4e2f412a9e1bd723ac72ddf5",
+  "bytes": 1281
+ },
+ {
+  "path": "design/combat-visuals.md",
+  "sha256": "79b9d7bb9a26711aec03503b11b0da7458560cfcc6a01967a0989411aeebe815",
+  "bytes": 19112
+ },
+ {
+  "path": "design/combat-visuals-verify-rulings.md",
+  "sha256": "3cc07b9d559d2c45e389a372eceb2ee132d31fd4b4f107709c491be3f21b0e41",
+  "bytes": 2364
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "2d36d32ef73d8f0e6cd6d94d9684a85d7d934d4e9a1da7ecf046d4158441a81f",
+  "bytes": 41687
+ },
+ {
+  "path": "manual.md",
+  "sha256": "fc06710951221dbee76cc6aa69fd5cf82b94b7d64d640b910800bea6be5d6034",
+  "bytes": 4128
+ },
+ {
+  "path": "decisions/D-012-on-you-line-for-displaced-enemies.md",
+  "sha256": "12836ed5c581c097d1e801ce55cb3b7a46ecb7a377b362a54a90f5e6368ed66b",
+  "bytes": 2879
+ },
+ {
+  "path": "decisions/D-014-one-rule-for-cells-on-you-and-hit-line-word.md",
+  "sha256": "b42ac5c5cb38215d624662b65c20c9f2f2c3a5e2160f43f48f9da15602d30749",
+  "bytes": 4825
+ },
+ {
+  "path": "decisions/D-015-lunge-draws-and-shot-at-spawn-accepted.md",
+  "sha256": "ddde0e6439548b7b2091b68b4485ee3e51850c53cf4c56da05a42cafb78b7989",
+  "bytes": 3241
+ },
+ {
+  "path": "goals/G-001-combat-monotony/77-qa-to-studio.md",
+  "sha256": "557958294fe4974952a1b3a483facae48f820be794fd97fbfa14d1c7d28a17cc",
+  "bytes": 71539
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "@run-results",
+  "sha256": "90a8bf1ea030a323d38dd4e57a95d62b0557801aa3780c82af3f5cea3856374f",
+  "bytes": 19157
+ }
+]

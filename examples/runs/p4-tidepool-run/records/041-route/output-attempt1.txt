@@ -1,0 +1,182 @@
+Route for step 34 is done: Verify 5d is open for `qa` with a fresh Handoff (35) that leaves out the Sender assessment and the implementer's reasoning. The build record corrections are not in my write list, so I am relying on the simulator updating `sim/` from Handoff 34, which produced `sim/build-0.6.md`.
+
+<<<FILE goals/G-001-first-puzzle-stall/35-studio-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 35
+from: studio
+to: qa
+stage: Verify
+outcome: routed
+---
+# 35: studio → qa — Verify the level 1 sand-tap response after a cancelled pulse (spec revision 5)
+
+## Task
+
+Verify build `sim/build-0.6.md` against checks 4, 13, 18, 19, 20 and 21 of the level 1 design spec (`design/onboarding.md`, revision 5). Checks 4, 19, 20 and 21 are new or changed. Checks 13 and 18 are regression checks because they share the sand-tap flash. Report pass or fail per check, with severity and reproduction detail for any failure.
+
+## Context
+
+Goal G-001: children stall at the first puzzle (level 1). Build 0.6 is the newest build. It implements spec revision 5 and carries corrected build record wording. Earlier verification passed checks 1–20 on the build record (build 0.5). It also found a spec gap, which the designer then closed in revision 5 with D-006. The project has no device or repository. As in earlier passes, the build record `sim/build-0.6.md` stands in for the running build.
+
+## Findings
+
+Observable behavior to verify in level 1, in default mode and in the reduce-motion setting:
+
+1. **Sand tap after a pulse cancelled by a pool touch (check 4, check 21).** Start a redirect pulse by tapping the crab or by tapping sand on a fresh load. Touch and hold the pool while the pulse is still showing, i.e. within 0.6 s of the pulse start. This cancels the pulse. Release, then tap empty sand before 1.5 s have passed since the pulse started.
+   - Expected: the pool flash shows within 0.1 s. It is pool brightness +15%, fading over 0.3 s, with no scale change and no movement. No new pulse starts.
+   - This must hold from the moment of the cancel, with no 0.6 s wait. It must also hold during the pool's 0.15 s release shrink.
+   - In reduce-motion mode the response is the same.
+2. **Uncancelled pulse.** A sand tap during the first 0.6 s of a pulse that was not cancelled shows the pulse itself and no flash.
+3. **Window.** The 1.5 s limit counts from the pulse start, and the flash does not move it. A sand tap at 1.5 s or later starts a new pulse and no flash.
+4. **Other taps.** A crab tap or a home tap gets its own response only, with no flash.
+5. **Held pool (check 18).** A sand tap while a finger still holds the pool behaves as before.
+6. **Flash limits.** A running flash is not restarted. At most one flash runs at a time.
+7. **Cancelled pending pulse.** A pool touch during the ease-back, when the pulse has not yet started, behaves as before: no pulse and no window.
+8. **Reduce-motion pulse (checks 19, 20).** The two beats of the 0.6 s pulse are contiguous, with at most one frame at normal brightness between them. The crab brightening is one 0.4 s change per touch-down, within 0.1 s, not held while the finger is down, with nothing extra on release.
+
+Times worth exercising: a cancel at about P+0.1 s and P+0.4 s, a sand tap at P+0.45 s, a tap inside the release shrink, and a tap at P+1.5 s or later. P is the pulse start.
+
+Build record wording: check that the text in `sim/build-0.6.md` agrees with the behavior above and with spec revision 5.
+- The pulse spacing reads "at least 1.5 s" after the previous pulse start.
+- The sand-tap lines state the cancelled-pulse exception.
+- The pulse-cut-short line states that the flash applies from the moment of the cancel, also during the release shrink.
+- The header notes the flash after a cancelled pulse in both modes.
+
+## Decisions already made
+
+- D-001: no failure, no timers, no inactivity cue.
+- D-003, D-004, D-005: sand-tap flash, ease-back and window origin, reduce-motion pulse.
+- D-006: a pulse cancelled by a pool touch stops being the response; the reduce-motion beats are contiguous.
+
+## Constraints
+
+- Level 1 only. Touch only. No text dependence.
+- Judge from the spec, the acceptance criteria and the build record. Levels 2 and 3 were stated unchanged and are not in scope.
+- The project has no device, so frame-level timing and visuals rest on the build record's stated values. State which checks you could only confirm that way. Do not present them as captured.
+
+## Open questions
+
+None. If an expected behavior is undefined for a case you try, report it as a spec gap instead of deciding it.
+
+## Expected output
+
+A verification report (pass or fail per check) with severity, reproduction detail and any spec gaps. Address the result to `studio`. List separately which checks rest on the record alone. Write it as a Handoff from `qa` to `studio`.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: design/onboarding.md, sim/build-0.6.md
+- Decisions: decisions/D-001-no-fail-states.md, decisions/D-003-sand-tap-blip-and-pool-hit-area.md, decisions/D-004-ease-back-taps-window-origin-held-pool.md, decisions/D-005-reduce-motion-pulse-fills-window.md, decisions/D-006-cancelled-pulse-and-reduce-motion-beats.md
+- Previous handoff: none (the incoming Handoff carries the implementer's assessment, which QA does not receive)
+>>>END
+
+<<<FILE goals/G-001-first-puzzle-stall/goal.md
+---
+kind: goal
+id: G-001
+project: tidepool-garden
+status: active
+created: 2026-10-10
+---
+# G-001: Children stall at the first puzzle
+
+## Owner request
+
+> 最初のパズルで子どもが手を止めてしまう。直したい
+
+## Interpretation
+
+Success condition: when children in the target group (ages 7–10) play the first puzzle (level 1 in
+build 0.2), they begin purposeful touch interaction with the puzzle on their own, without a long
+pause and without an adult having to explain what to do. How long a pause counts as "a stall" is
+not set here; Observe reports what actually happens and Design turns it into a player-observable
+acceptance criterion.
+
+Out of scope:
+
+- Levels 2 and later. If the same problem shows up there, it becomes a proposed new Goal.
+- Changing a vision pillar or Decision D-001 (no failure, no timers). Any fix must stay inside them.
+- New art beyond the existing sprite sheet (project constraint).
+
+## Unknowns
+
+Entry questions (`studio/workflows/development-loop.md`) the Project Context cannot answer:
+
+- **Observe** — done (stage 1, playtester; an experience problem, not a defect).
+- **Diagnose** — done (2 game-designer, 2b art-director).
+- **Design** — done. Spec revision 5 is settled (3h; SG-1 ruling, blip after a cancelled pulse; D-006). Earlier gaps are closed in revisions 2–4 and D-003 to D-005.
+- **Build** — done. Build 0.6 implements revision 5 (4f, stated in Handoff 34) with corrected build record wording. The engineer had no source or test run in the packet, so the code change counts as made only through the simulated build record.
+- **Verify** — Always after Build. 5d is open (35): checks 4, 13, 18, 19, 20, 21 (21 new; 4, 19, 20 changed; 13 and 18 regression). If check 4 fails a second time, route to `technical-director` (loop limit).
+- **Play** — Is the Goal about how the game plays or feels? Yes. Stage 6, fresh context without implementation history, on the build after 5d passes.
+- **Review** — Experience Goal: yes. Stage 7 (`game-director`).
+- **Next** — Always. Stage 8.
+
+Skipped:
+
+- **Decide** — The fix choices are player-facing behavior inside the approved direction
+  (`game-designer` authority). Option C (idle hint) is excluded; if wanted later, route Decide
+  because it touches D-001.
+- **Plan** — The change is local to level 1. If Build finds it is not local, the return rules send
+  it to Plan.
+
+Flag for Review: the start-of-level intro motion is judged by the designer to be outside D-001
+(one-time, no timer, no inactivity trigger). `game-director` should confirm. Also watch whether a
+child reads the post-cancel pool blip as an error (D-006 revisit trigger).
+
+Open items (non-blocking, carry to Review / Close):
+
+- Whether iOS "Reduce Motion" / Android "Remove animations" are readable on target platforms is
+  unconfirmed. The spec's fallback works either way. An item for the Owner.
+- The project has no device: QA has no real image of the home styling or a 60 fps recording. Checks
+  2, 3, 11, 17, 18, 19, 20 and 21 rest on the build record's stated values, and the pulse tail
+  (0.55–0.6 s) is unseen on a capture.
+- Levels 2 and 3 were not run by QA (stated unchanged).
+- Settled in 3h: crab brightening under reduce-motion is one 0.4 s change per touch-down, not held;
+  O2 is a minimum (build record wording fixed in build 0.6).
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 01-studio-to-playtester.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 02-playtester-to-game-designer.md |
+| 2b | Diagnose | art-director | visual-review | done | 03-studio-to-art-director.md |
+| 3 | Design | game-designer | write-design-spec | done | 06-studio-to-game-designer.md |
+| 3c | Plan | technical-director | technical-plan | skipped | — |
+| 4 | Build | gameplay-engineer | implement-change | done | 08-studio-to-gameplay-engineer.md (held: question, no change made) |
+| 3d | Design | game-designer | write-design-spec | done | 09-gameplay-engineer-to-game-designer.md (answered in 10) |
+| 4b | Build | gameplay-engineer | implement-change | done | 11-studio-to-gameplay-engineer.md (result: 12) |
+| 5 | Verify | qa | verify-change | done | 13-studio-to-qa.md (pass, 12/12; report: 14) |
+| 3e | Design | game-designer | write-design-spec | done | 15-studio-to-game-designer.md (result: 16) |
+| 4c | Build | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md (held: question 18, no build 0.4) |
+| 3f | Design | game-designer | write-design-spec | done | 19-studio-to-game-designer.md (result: 20) |
+| 4d | Build | gameplay-engineer | implement-change | done | 21-studio-to-gameplay-engineer.md (result: 22, build 0.4) |
+| 5b | Verify | qa | verify-change | done | 23-studio-to-qa.md (fail: check 4 under reduce-motion; report: 24) |
+| 3g | Design | game-designer | write-design-spec | done | 25-studio-to-game-designer.md (result: 26, spec rev 4, D-005) |
+| 4e | Build | gameplay-engineer | implement-change | done | 27-studio-to-gameplay-engineer.md (result: 28, build 0.5) |
+| 5c | Verify | qa | verify-change | done | 29-studio-to-qa.md (pass 20/20 on record; SG-1, O1; report: 30) |
+| 3h | Design | game-designer | write-design-spec | done | 31-studio-to-game-designer.md (result: 32, spec rev 5, D-006) |
+| 4f | Build | gameplay-engineer | implement-change | done | 33-studio-to-gameplay-engineer.md (result: 34, build 0.6) |
+| 5d | Verify | qa | verify-change | open | 35-studio-to-qa.md |
+| 6 | Play | playtester | playtest-session | planned | — |
+| 7 | Review | game-director | review-outcome | planned | — |
+| 8 | Next | studio | — | planned | — |
+
+Status: planned | tentative | open | done | skipped. The route is a plan; the Route operation
+revises it.
+
+## Route changes
+
+After step 4f (34): Build is done as build 0.6 (spec revision 5, SG-1 change; build record wording fixed). No spec gap or question came back, so Plan stays skipped and nothing escalates. Verify 5d is open for `qa` (35) with the Sender assessment left out. Play and Review stay planned.
+
+## Next action
+
+Run step 5d (Step operation): `qa` on `35-studio-to-qa.md`, reporting to `studio`. Then Route. If Verify passes, compose a Playtester Handoff from permitted information only (build and player profile; no change, no expected result) to open Play 6. If a check fails, apply the return rules (Build with the failure report; a second failure of check 4 goes to `technical-director`; an undefined behavior goes to Design). Carry the non-blocking items forward to Review / Close. Phase 1: the Studio stops after every Route.
+
+## Outcome
+
+<!-- Filled at close, for the Owner, in owner_language (ja). -->
+>>>END

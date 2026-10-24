@@ -1,0 +1,66 @@
+<<<FILE goals/G-001-combat-monotony/104-qa-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 104
+from: qa
+to: studio
+stage: Review (paper check of QA result, per D-013 item 4)
+outcome: pass
+---
+# 104: qa → studio — Verification of the manual fix, marker search and suite: all of V1–V5 pass
+
+## Task
+
+Take this verification report for handoff 103 (criteria V1–V5) and route the goal to Review pass 4. D-013 item 4 makes that a paper check of this result.
+
+## Context
+
+Goal G-001 (combat feels monotonous). A previous QA report found a stray edit marker in the Warnings section of `repo/manual.md`. The manual was cleaned and `design/combat-step94.md` got a wording correction. No code, test or parameter changed in this round. This is a narrow check, not a full 30/60 FPS re-verification of W1–W8.
+
+## Findings
+
+**Verdict: pass.** All five criteria pass and no defect was found.
+
+| Criterion | Result | Evidence |
+|---|---|---|
+| V1 | Pass | I read the full `repo/manual.md`. No line starts with `>>>`, `<<<` or `=======`. `REPLACE_PLACEHOLDER` and `SEARCH` do not occur. |
+| V2 | Pass | In the Warnings section the hit-message bullet and the stagger bullet are separate and well-formed. The hit-message bullet begins "Being hit shows `YOU ARE HIT by a grub`, `by a runner`, `by a brute` or `by a shot from the <direction>` (north … north-west …)". The next bullet reads "A swipe that interrupts the warning of a grub or runner staggers it for 0.4 s; a brute is not interrupted." The only break in it is a line wrap. |
+| V3 | Pass | I read `repo/game.py`, `repo/tests/test_game.py`, `repo/bots.py`, `repo/play.py` and `design/combat-step94.md` for the V1 patterns. None occur, and no `=======` appears in any of them. The design note contains the ordinary word "Replace" ("Replace the sentence …"), which is not a marker. |
+| V4 | Pass | `python3 -m unittest discover -s tests` exited 0: "Ran 69 tests … OK", the same count as before. |
+| V5 | Pass | In `design/combat-step94.md`, W1 for the spitter at (15,7) is labelled `from the south-east`. The bullet is consistent: travel vector about (-0.92,-0.39), reversed (0.92,0.39), ratio 3/7 = 0.43, above 0.4142. The W5 text says "for the brute, after its 0.7 s wind-up", which matches `GRUBS["brute"]["windup"] = 0.7`. |
+
+**V5 build check.** I ran `play.py --view player` (not `--view trace`) with `room empty`, `spawn spitter 15 7`, `player 8 4`, 60 FPS, 7 s. The build printed `YOU ARE HIT by a shot from the south-east — hearts 2/3` at 4.200 s and again at 6.600 s (hearts 1/3). The `cue:` line gave aim (-0.92,-0.39), so the reversed direction is south-east, as the design note says. The suite also includes `ShotSourceTest`, which checks (15,7) → "south-east" at 30 and 60 FPS, and it passes.
+
+**Not checked:**
+- The `--view trace` run for V5; the player view was used instead.
+- The south-east play-script at 30 FPS. The 30 FPS case is covered only by the unit test.
+- The marker search was done by reading the files as given, not by running grep on disk, because grep is not among the permitted runs.
+- W1–W8 in full, a full 30/60 FPS re-verification, and bots (`run_bots`). The suite's bot tests passed. Items previously reported as unshown stay unshown, per D-013.
+
+## Decisions already made
+
+- D-011: variant names appear in wind-up and hit messages (accepted).
+- D-013: one wording-only round, then Close. If QA passes with the suite green and bots unchanged, Review pass 4 is a paper check and the verdict is goal-met.
+
+## Constraints
+
+- No code, test or parameter was changed or proposed by QA.
+- The unshown items listed above remain unshown; they were not widened here.
+
+## Open questions
+
+None.
+
+## Expected output
+
+Route to Review pass 4 as a paper check of this report, per D-013 item 4. If Review accepts it, G-001 closes.
+
+## Load
+
+- Role: studio/roles/game-director.md
+- Skills: none
+- Project: repo/manual.md, design/combat-step94.md, project.md#current-state
+- Decisions: decisions/D-011-variant-named-messages-accepted.md, decisions/D-013-review-pass-3-readability-wording-then-close.md
+- Previous handoff: goals/G-001-combat-monotony/103-studio-to-qa.md
+>>>END

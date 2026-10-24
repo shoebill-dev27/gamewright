@@ -1,0 +1,12 @@
+I can't see the game source (`play.py`, the engine or the view code) in this packet, so I can't implement the dash display without guessing. I'm requesting the likely source files once. Paths that don't exist should simply not load.
+
+<<<FILE @need
+repo/play.py
+repo/bots.py
+repo/game.py
+repo/session.py
+repo/driver.py
+repo/view.py
+repo/engine.py
+repo/tests/test_split_c.py
+>>>END

@@ -1,0 +1,156 @@
+<<<FILE goals/G-001-combat-monotony/98-qa-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 98
+from: qa
+to: studio
+stage: Route
+outcome: fail
+---
+# 98: qa → studio — Verification of wording changes W1–W8 (build sha 0f2c1f134c79): one deliverable defect, several items unshown
+
+## Task
+
+Report the per-criterion result for W1–W8 at 30 and 60 FPS, the suite and bot results, and regressions. The Studio routes this to Review pass 4 or back to Build.
+
+## Context
+
+I judged only from `design/combat-step94.md`, `combat.md`, `manual.md` and the run results. I used the `play.py --view player` outputs, the test suite and the bots. No `--view trace` output exists in the results and no rounds were left. So everything below comes from the player view only. Nothing was run on the build before the change.
+
+## Verdict: fail
+
+No W1–W8 behavior I could run shows a wrong result. The fail is for the following reasons:
+1. A defect in the player-facing manual (section D).
+2. W3 is inconclusive and may hide a regression (W3 below).
+3. W7 and parts of W2, W4, W6 and W8 are unshown, so I cannot pass them (section C).
+
+I did not soften any of these into a pass.
+
+## A. Per-criterion results
+
+Evidence is cited as time `[30 FPS / 60 FPS]`.
+
+### W1 Direction words — PASS at 30 and 60 FPS
+Every hit line begins `YOU ARE HIT by a shot from the `.
+
+| Spitter at | Cue direction | Hit line and time | Expected |
+|---|---|---|---|
+| (15,4) | (-1,0) | east, 4.000 / 3.983 | east ✓ |
+| (8,0) | (0,+1) | north, 2.967 / 3.000 | north ✓ |
+| (1,4) | (+1,0) | west, 4.000 / 4.000 | west ✓ |
+| (8,8) | (0,-1) | south, 3.000 / 3.000 | south ✓ |
+| (15,0) | (-0.87,+0.50) | north-east, 4.333 / 4.350 | north-east ✓ (ratio 0.57) |
+| (15,7) | (-0.92,-0.39) | south-east, 4.200 / 4.200 | south-east ✓ (ratio 3/7 = 0.43 > 0.4142) |
+
+- Each word is the reverse of the cue direction.
+- The `hearts n/3` suffix is unchanged.
+- Hit times differ by 1 frame or less between rates.
+- The 30 FPS north hit is 2.967 against 3.000 at 60. The reach contact falls on different frames, which is allowed.
+- Question for game-designer (spec wording, not a build issue): the last W1 bullet is labelled `from the east`, but its own text says the diagonal `south-east` is expected. I judged by the formula, and the build shows `south-east` at both rates.
+
+### W2 Real room — PARTIAL
+- Room 4 at 60 FPS passes. One shot hit at 5.550 says `south-east`. It was fired at 3.0 s from (15,8), whose cue at 2.4 s pointed (-0.87,-0.50). Reversed, that is south-east ✓.
+- Room 5 at 60 FPS passes for all three shot hits:
+  - 4.350 `north-east`, from the (15,0) spitter, cue direction (-0.87,+0.50) ✓.
+  - 5.550 `south-east`, from the (15,8) spitter ✓.
+  - 6.750 `north-east`, from the (15,0) spitter ✓.
+- Room 4 at 30 FPS is unshown. The player died to runners at 5.800, and the one shot hit in the trace is not a damaging shot.
+- Room 5 at 30 FPS was not run.
+- The shot origins are my inference from arrival times against shot speed 3.0 and reach 0.4. The player view does not name the spitter.
+
+### W3 Prefix kept — INCONCLUSIVE
+- `text "rears back"` with `move aside` worked (w3-grub-rule-60). The player moved at 0.5 s.
+- `text "by a shot"` with `move up` showed no movement at 60 FPS. The hit was at 3.983, and P was still on row 4 at 4.5, 5.0 and 5.5.
+- I cannot tell whether the rule failed to match or whether its action was swallowed by the 0.3 s hit-stun, because the message and the stun begin on the same frame.
+- I have no pre-change run to compare. This could be a regression, and I cannot rule it out.
+- `YOU ARE HIT by` and `takes aim` rules were not run.
+- The suite is green (section B), but I do not know whether it covers these rules.
+- Needed: a pre-change run, or a rule whose action is not blocked by hit-stun.
+
+### W4 Absorbed shots — PASS for the dash case at 30 and 60 FPS; hurt-window case unshown
+- Dash right at 3.8 s into the shot (w4-dash): the `*` is gone by the 4.00 view.
+- There is no `YOU ARE HIT` line and hearts stay 3/3 to the end (4.17 s / 4.15 s).
+- The run ends at 4.15 s, so "no damage afterwards" is not covered. W4 does not ask for it.
+
+### W5 Late swipe — PASS at 30 and 60 FPS
+- Grub at (10,4), player at (8,4), swipe at 0.6 s.
+  - The line `the grub's lunge had already started, the swipe was too late to stop it` appears at 0.600, before `you swipe: grub hit`.
+  - It comes before `YOU ARE HIT by a grub`, at 0.733 / 0.700.
+  - The hit time matches wind-up 0.5 s plus 1.4 tiles at 8 tiles/s.
+  - The lunge was not cancelled.
+  - The grub survived. It rears back again at 1.567 / 1.517, so it lost less than its 2 HP. The player view shows no HP, so the exact loss of 1 is inferred.
+- Brute: the line `the brute's lunge had already started, the swipe was too late to stop it` at 0.800 [30 / 60], before `YOU ARE HIT by a brute` at 0.933 / 0.900. The brute rears back again at 2.117 (60 FPS), so it is alive. The brute 30 FPS run ended at 1.5 s.
+
+### W6 No line elsewhere — PARTIAL (no violation seen)
+- Grub swipe in wind-up at 0.3 s, 30 and 60 FPS: no late line. The grub is cancelled and rears back again at 0.733 / 0.717.
+- Brute swipe in wind-up at 0.3 s, 60 FPS: only `the brute shrugs off the swipe`, no late line.
+- Grub swipe in recovery at 1.3 s, 60 FPS: no late line.
+- Unshown:
+  - Brute wind-up at 30 FPS.
+  - Recovery at 30 FPS.
+  - Approach.
+  - Stagger.
+  - Kill.
+
+### W7 No behavior change — UNSHOWN
+- No trace view was run, and no pre-change run exists. The player/trace comparison the handoff asked for was not done.
+- Sanity only, not a comparison. The observed times match `combat.md`:
+  - Cue 0.6 s before the shot.
+  - First shots at 1.8 s, with 2.4 s intervals.
+  - Room 4 first shots at 1.8 s and 3.0 s, cue gap 0.6 s.
+  - Wind-ups of 0.5, 0.35 and 0.7 s.
+  - Shot contact times consistent with speed 3.0.
+- Hit-message wording otherwise matches D-011.
+
+### W8 Frame-rate independence — PARTIAL
+- Same wording at both rates for all W1 cases, W5 (grub and brute), W4 (dash) and the W6 grub wind-up.
+- The unshown items are those listed under W2, W3, W6 and W7.
+
+## B. Suite and bots
+
+- **Tests:** `unittest discover -s tests` ran 69 tests, OK, exit 0.
+- **Bots:** these ran at 60 FPS only. 30 FPS was not run.
+  - Walker:
+    - Room 1: not cleared, 3 hearts lost.
+    - Room 2: cleared, 2 lost.
+    - Room 3: cleared, 1 lost.
+    - Room 4: not cleared, 3 lost (grub 1, shot 2).
+    - Room 5: cleared, 2 lost.
+    - Total: cleared 3/5, 11 lost.
+  - Dodger: 0 hearts lost, cleared 5/5, 47 dashes, at least 6 per room in rooms 3–5.
+  - Camper: cleared 0/5.
+  - The `shot` tally still parses `by a shot from the …`, so the prefix works for the bots.
+- **Criteria 13–15 as written, at 60 FPS:**
+  - Rooms 3–5: the walker loses 6 and clears 2 of 3. The dodger loses 0 and clears 3/3. The camper clears 0.
+  - Rooms 1–2: the walker loses 5. The dodger loses 0 and clears 2/2.
+  - The dodger uses the dash in each of rooms 3–5.
+  - All within the limits.
+- "Hearts and clears as before" is not shown. I have no pre-change bot numbers, only the older 0.5 numbers in `combat.md`.
+
+## C. Known gaps (D-013 item 5), tried or not tried
+- R3-8 at 60 FPS, the room 3 sidestep and the 30 FPS cancel and recovery swipe: not tried, no rounds left. They remain known gaps.
+
+## D. Defect — manual text artifact
+
+- **Where:** `repo/manual.md`, Warnings section, the bullet that begins `Being hit shows …`.
+- **Observed:** a stray line `>>>REPLACE_PLACEHOLDER A swipe that interrupts the warning of a` sits between the new `Being hit shows …` bullet and `grub or runner staggers it for 0.4 s; a brute is not interrupted.`
+- **Expected:** a normal bullet `- A swipe that interrupts the warning of a grub or runner staggers it for 0.4 s; a brute is not interrupted.`, with no markers. The manual is `player_visible`.
+- **Severity:** low in function, visible to players. The two required sentences from the spec are present and correct.
+- **Fix:** restore the bullet and remove the marker. Wording only.
+
+## E. Open questions
+- Designer: the W1 (15,7) bullet label contradicts its own text (above).
+- Designer or Studio: are the unshown items acceptable under D-013 pre-commitment item 4, which says a pass is needed for a paper-check Review? I cannot call it a pass.
+
+## Expected output
+Studio: route D to Build for a one-line manual fix. Re-verify with a pre/post comparison for W3 and W7, or decide the unshown items are accepted. Nothing in the unshown list shows a defect.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: design/combat-step94.md, design/combat.md, repo/manual.md
+- Decisions: decisions/D-005-blocked-contact-consumes-shot-and-spends-lunge.md, decisions/D-011-variant-named-messages-accepted.md, decisions/D-013-review-pass-3-readability-wording-then-close.md
+- Previous handoff: goals/G-001-combat-monotony/97-studio-to-qa.md
+>>>END

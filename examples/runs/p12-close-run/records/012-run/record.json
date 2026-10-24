@@ -1,0 +1,17 @@
+{
+ "op": "Run",
+ "goal": "G-001",
+ "operations": [
+  "005-route",
+  "006-step-gameplay-engineer",
+  "007-route",
+  "008-step-gameplay-engineer",
+  "009-route",
+  "010-step-qa",
+  "011-route"
+ ],
+ "stop_reason": "done",
+ "status": "done",
+ "owner_reads": "goals/G-001-dash-damage/goal.md#outcome",
+ "next": null
+}

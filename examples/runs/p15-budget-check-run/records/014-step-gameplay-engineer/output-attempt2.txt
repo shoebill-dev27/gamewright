@@ -1,0 +1,220 @@
+The change is made in `repo/play.py`, but I could not run anything or record before/after traces, so item 3 is not done. The build check will give the test count and source id after my answer. The handoff to `studio` is below.
+
+<<<EDIT repo/play.py
+<<<<<<< SEARCH
+        for _, kind, details in game.events[before:]:
+            if kind == "ignored":
+                details["quiet"] = True  # a held button, not news
+=======
+        for _, kind, details in game.events[before:]:
+            # A held button is not news, except a refused dash (G-003, D-029): it prints.
+            if kind == "ignored" and not (
+                details.get("action") == "dash" and "wait" in details
+            ):
+                details["quiet"] = True
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/manual.md
+<<<<<<< SEARCH
+counted from the moment the dash ends. So the next dash can start 0.85 s after the previous one started.
+=======
+counted from the moment the dash ends. So the next dash can start 0.85 s after the previous one started (60 FPS); at 30 FPS the frames make it 0.9 s. Pictures after the dash messages in a `mode` run are the usual event pictures.
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/manual.md
+<<<<<<< SEARCH
+Reaction rules can use `text "dash ready"`. Clear and end screens show no dash field.
+=======
+A dash refused for a reaction rule prints the same line, and rules can use `text "dash ready"` and `text "not ready"`. Clear and end screens show no dash field.
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/public-driver.md
+<<<<<<< SEARCH
+Periodic scheduling resets on retry.
+=======
+After an accepted-dash message and after a `dash not ready — …` refusal the driver prints its usual
+event picture, as after swipe-miss and `(nothing happens)`; the legacy route prints none. A refused
+dash prints the same line whether it came from a scripted press or a rule (`text "not ready"` can
+fire on it). Dash timing is frame-quantized: the next dash can start 0.85 s after the previous
+one started at 60 FPS and 0.9 s at 30 FPS.
+
+Periodic scheduling resets on retry.
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE repo/tests/test_dash_refusal.py
+"""G-003 step 14: refused dashes print from every source; timing and the picture grid unchanged."""
+
+import contextlib
+import io
+import re
+import sys
+import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+import play  # noqa: E402
+from game import Game  # noqa: E402
+
+
+def player(script):
+    setup, inputs, rules = play.read_script(script)
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        play.play(setup, inputs, "player", rules)
+    return out.getvalue()
+
+
+RULE = "when nothing within 20 then dash right\n"
+REACT = 'when text "not ready" then move up\n'
+
+
+def player_rows(out):
+    """Row index of P in every picture (legacy picture rows start with three spaces and a bar)."""
+    rows, run = [], 0
+    for line in out.splitlines():
+        if line.startswith("   |"):
+            if "P" in line:
+                rows.append(run)
+            run += 1
+        else:
+            run = 0
+    return rows
+
+
+class RefusalSourcesTest(unittest.TestCase):
+    def test_legacy_rule_refusal_prints(self):
+        for fps in (30, 60):
+            out = player(f"room empty\nfps {fps}\n{RULE}end 3\n")
+            self.assertIn("dash not ready — ", out, fps)
+            self.assertNotIn("(nothing happens)", out, fps)
+
+    def test_legacy_rule_refusal_fires_text_rule(self):
+        out = player(f"room empty\nfps 60\n{RULE}{REACT}end 3\n")
+        self.assertTrue(any(r < 4 for r in player_rows(out)))
+        quiet = player(f"room empty\nfps 60\n{RULE}end 3\n")
+        self.assertTrue(all(r == 4 for r in player_rows(quiet)))
+
+    def test_public_driver_rule_refusal_prints(self):
+        out = player(
+            f"mode room\nroom empty\nfps 60\nlimit 3\ndriver-limit 4\n{RULE}"
+        )
+        self.assertIn("dash not ready — ", out)
+
+    def test_scripted_press_refusal_prints(self):
+        out = player("room empty\n0.6 dash right\n0.7 dash right\nend 2\n")
+        self.assertIn("dash not ready — 0.8 s left (dashing)", out)
+
+    def test_rule_attack_that_does_nothing_stays_quiet_on_legacy(self):
+        out = player("room empty\nwhen nothing within 20 then attack\nend 2\n")
+        self.assertNotIn("dash not ready", out)
+
+
+class GridTest(unittest.TestCase):
+    def test_periodic_pictures_stay_on_half_second_grid(self):
+        for fps in (30, 60):
+            out = player(f"room empty\nfps {fps}\n{RULE}end 4\n")
+            previous = ""
+            seen = 0
+            for line in out.splitlines():
+                m = re.match(r"\s+\[(\d+\.\d+) s\]", line)
+                if m:
+                    seen += 1
+                    if not previous.endswith("dash ready"):
+                        t = float(m.group(1))
+                        self.assertAlmostEqual(t * 2, round(t * 2), 6, (fps, line))
+                previous = line
+            self.assertGreater(seen, 3)
+
+
+class TimingTest(unittest.TestCase):
+    def test_start_to_start_frames_unchanged(self):
+        for fps, frames in ((60, 51), (30, 27)):
+            game = Game(fps=fps, room="empty")
+            game.press("dash", "right")
+            n = 0
+            while game.dash_state() != "ready":
+                game.step()
+                n += 1
+                self.assertLess(n, 200)
+            self.assertEqual(n, frames, fps)
+
+
+if __name__ == "__main__":
+    unittest.main()
+>>>END
+
+<<<FILE goals/G-003-dash-availability-clarity/14-gameplay-engineer-to-studio.md
+---
+kind: handoff
+goal: G-003
+seq: 14
+from: gameplay-engineer
+to: studio
+stage: Route (compose the QA re-check from this report)
+outcome: partial
+---
+# 14: gameplay-engineer → studio — Legacy rule-driven dash refusals now print; manual updated; same-code comparison not done
+
+## Task
+
+Route the QA re-check. Note the one gap below (before/after comparison) before deciding.
+
+## Context
+
+Goal G-003, handoff 13. Wanted: a refused dash prints `dash not ready — …` on the legacy rule path too, `text "not ready"` can fire on it, the manual carries the four spec changes, no timing or result changes.
+
+## Findings
+
+**Answer to the open question: yes, the legacy rule path can print the refusal without changing results.**
+
+Root cause: `play.py` `react()` (legacy rules only) marks every `ignored` event produced by a rule press with `details["quiet"] = True` ("a held button, not news"). `Player.describe` returns nothing for quiet events, so the refusal was silent and `text "not ready"` could not see it. The public driver does not set `quiet`, which is why it already printed.
+
+Change (one condition, `repo/play.py`): `quiet` is no longer set when the event is a dash refusal (`action == "dash"` and `"wait"` in details). All other ignored events from rules (e.g. attacks during recovery, `(nothing happens)`) stay quiet as before. The flag is display-only. `Game` is untouched: no event, timing, RNG or order changes. A refusal line does not trigger a picture on the legacy route (the picture triggers are hurt, windup, aim, dash_ready).
+
+Side effects to know:
+- Legacy trace view prints event details, so dash-refusal events from legacy rules no longer show `'quiet': True` in their detail dict. That is the only trace difference expected (not a game event change).
+- A legacy rule such as `text "dash"` would now also match the refusal line (it contains "dash"); `text "dash ready"` does not match it.
+
+Files changed:
+- `repo/play.py` (above).
+- `repo/manual.md`: 30 FPS dash line plus the "usual event pictures in a `mode` run" note; rule refusals print and `text "not ready"` is usable (Dash status paragraph). The Reactions table already listed `text "dash ready"`.
+- `repo/public-driver.md`: note on event pictures after dash/refusal messages, refusals from any source, 0.85 s / 0.9 s.
+- `repo/tests/test_dash_refusal.py` (new): legacy rule refusal (30 and 60 FPS); `text "not ready"` firing a move rule (and not moving without it); public-driver rule refusal; scripted-press refusal; rule attack stays quiet; periodic pictures stay on the 0.5 s grid (except pictures right after `dash ready`) at 30 and 60 FPS; start-to-start 51 frames at 60 FPS and 27 frames at 30 FPS.
+
+**What I could not do**
+- I ran nothing myself (no `@run` used), so there is no test count from me, no before/after trace or bot comparison (item 3), and I have not confirmed the new tests pass. The runtime's Build check will report the test result. The new timing assertions (51 and 27 frames) are taken from QA's measured values and should be checked there.
+- The "before" recordings can no longer be made, since the edits apply to the project. The no-change argument is the code argument above; QA can add an after-only check (game events identical between player and trace view, stripped of `quiet`).
+- Source ids: I could not compute them. `source_id.py` reports a 12-hex sha256 over game.py, session.py, play.py, run_driver.py, bots.py, source_id.py and tests/*.py (path and bytes). The BUILD string `0.6-g002-public-32` is separate. Whether `aa28af2ce710` is the same kind of id as QA's `b62005468da6` I cannot tell from the packet; it changes with my edits and the new test file. Read the new value from any `summary:` block or `bots.py` header line.
+
+## Decisions already made
+
+- D-001, D-028, D-029 (rulings 1–4). No timing change.
+
+## Constraints
+
+- Dash rules and timing unchanged; both 30 and 60 FPS.
+
+## Open questions
+
+- Confirm the source-id relationship and read the post-change id from a run.
+
+## Expected output
+
+QA re-check per handoff 12 (P13 on both routes with both action types, P6/P7/Q1/Q2 at 30 FPS against 0.90 s, Q5, Q7, 60 FPS 1.433/1.450, P12, Q8/Q12 under D-029), with the unverifiable parts listed. Also run `python3 -m unittest discover -s tests` and report the count.
+
+## Sender assessment
+
+Low risk: a display-only flag changed on one path. Confidence that results are unchanged is high by reading, not by measurement. The test file was not executed by me.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: design/dash-availability.md, repo/manual.md, repo/play.py, repo/tests/test_dash_refusal.py
+- Decisions: decisions/D-028-dash-indicator-on-legacy-route.md, decisions/D-029-g003-spec-rulings.md
+- Previous handoff: goals/G-003-dash-availability-clarity/13-studio-to-gameplay-engineer.md
+>>>END

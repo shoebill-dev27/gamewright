@@ -1,0 +1,22 @@
+The packet doesn't include `game.py`, so I'm running the build before writing the report. This first round traces a dash through an approaching Grub at 60 and 30 FPS and runs the existing tests.
+
+<<<FILE @run/trace/dash-grub-60
+room empty
+fps 60
+end 4
+player 2 4
+spawn grub 8 4
+0.5 dash right
+>>>END
+
+<<<FILE @run/trace/dash-grub-30
+room empty
+fps 30
+end 4
+player 2 4
+spawn grub 8 4
+0.5 dash right
+>>>END
+
+<<<FILE @run/tests
+>>>END

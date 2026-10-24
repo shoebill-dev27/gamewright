@@ -1,0 +1,79 @@
+{
+ "op": "Resume",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "42bbe0a3-4a62-4489-a777-995cc6d423d7",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 19664,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 7372,
+    "output_tokens_details": {
+     "thinking_tokens": 938
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 19664,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 7372,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 19664,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 19664
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.15238000000000002,
+   "attempt": 1,
+   "started": "2026-10-15T19:51:18",
+   "seconds": 48.9,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "decisions/D-007-practice-room-paragraph-placed-by-owner.md": "162a441532b46be13c5667d482c398fafda54a741ec335237c7c40c507fe32cb",
+  "goals/G-001-combat-monotony/36-studio-to-owner.md": "6cb09ad19e807b8b6c186268f9ee6fcf28ac6a28ce5b79a715ac4a553cc9e37a",
+  "goals/G-001-combat-monotony/38-studio-to-qa.md": "6f03aa1853c0f98fb88ce1dd15139a3fd954bfbfd2615af6cc8a60e713da206b",
+  "goals/G-001-combat-monotony/goal.md": "fab2f446cb13a7aa841f4fb832a6ede532f0666ad18def13c82f0263ce745a80"
+ },
+ "decision": {
+  "new": [
+   "qa",
+   "Verify"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "qa",
+    "Verify (all but AC-15)"
+   ],
+   [
+    "qa",
+    "Verify (AC-15, `ManualTest`)"
+   ]
+  ]
+ },
+ "seen_through_seq": 38
+}

@@ -1,0 +1,130 @@
+<<<EDIT goals/G-002-final-boss/goal.md
+<<<<<<< SEARCH
+status: active
+created: 2026-10-20
+=======
+status: active
+created: 2026-10-20
+budget: 40
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+- Build（試験道具・再測定）：open。74はE1の連続partial 2回目（72・74）。70は別作業E0のため加算しない。保存済みsource b0770a4180c9は159件OKだが実dodger未接続。未保存接続案2集合は公開再生の無傷assertに失敗し不採用。75で実経路接続・被弾差診断・記憶初期化・全分岐試験・判断出力を継続する。13ファイル配布台帳と追加5IDのQ1/Q4割当を保持する。切断部分は未確認。次もE1 partialならTechnical Directorへ分割・再計画を戻す。E2以降は未着手。
+- Decide（後続工程条件）：planned。歴史的確認不能を残して限定Art Verify以降へ進む条件をGame Directorに判断してもらう。Engineer・QAは先行可能。現行検証の完了を全基準passやGoal達成に読み替えない。
+=======
+- Build（試験道具・再測定）：未完了。76はE1の連続partial3回目（72・74・76）。70のE0は含めない。保存済みsource e99408d647c7はruntimeで160 tests OK。再生互換診断とhelper本文露出を追加したが、実dodgerの公開境界接続、被弾差原因、記憶・全分岐・判断本文は未成立。必要診断本文は未確認。13ファイルのQA配布台帳と追加IDの割当を保持する。E2以降は未着手。同じE1の第四の実装継続は開かず、継続にはTechnical Directorの分割・再計画が必要。
+- Decide（範囲・後続工程条件）：open。79/40 operationsの超過を受け、既存の予定工程7dを前倒しする。Game DirectorがOwner requestに必要な残作業と省略可能な予定作業を判断する。Studioは新しいstageを追加せず、技術再計画もまだ開かない。既存承認内で進められない費用・範囲変更ならOwner向けbriefを作る。歴史的確認不能、60のfail、現行検証とGoal達成の区別を維持する。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| 7b-e1b | Build | gameplay-engineer | implement-change | open | 75-studio-to-gameplay-engineer.md |
+=======
+| 7b-e1b | Build | gameplay-engineer | implement-change | done | 75-studio-to-gameplay-engineer.md → 結果: 76-gameplay-engineer-to-studio.md（E1 partial 3回目） |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| 7d | Decide | game-director | make-decision, prepare-owner-escalation | planned | 歴史的確認不能を保持した後続評価工程の条件判断 |
+=======
+| 7d | Decide | game-director | make-decision, prepare-owner-escalation | open | 77-studio-to-game-director.md |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+逐次実行する。68に従いE0→E1→E2→E3群→E4群→E5群→独立Q1〜Q6を進める。E0の全試験台帳からQAの個別Loadを割り当て、追加試験も含め未配布を残さない。現行必須検証、公開情報条件、再測定、記録差へのDesigner回答が揃い、歴史比較以外の不足を解消した後、Game Directorが歴史的確認不能を保持した評価継続の条件を判断する。認められた場合、限定Art Verify→独立Play→Designer実測後判断→Reviewへ進む。各StepのLoadは個別ファイル指定。全文保存先・別実行枠・変更前ビルドを待たない。明白な対処不能・到達不能や規定外の比較差はDesignerへ戻す。並列Stepは開かない。
+=======
+既存の予定工程7dだけを前倒しして開く。残るplanned行はGame Directorの範囲判断待ちであり、実行開始の指示ではない。79/40 operationsの超過中はstageを追加しない。必要な予定作業だけを残し、省略可能な作業はGame Directorの判断後にskippedへ変更する。E1を継続する場合も第四の直接Buildは不可で、Technical Directorの分割・再計画を経る必要がある。その経路と費用が既存承認内で成立するかを77で判断し、成立しなければOwnerへ費用をエスカレーションする。Verify after Build、独立性、未確認を合格にしない原則を維持する。全文保存先・別実行枠・変更前ビルドを再要求せず、並列Stepは開かない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+74をE1の連続partial 2回目（72・74）として受領し、75で同Roleへ継続する。70はE0であり同じE1の回数に含めない。保存済み159件成功と未保存接続案の失敗を区別し、E2は開かない。次もE1 partialならTechnical Directorへ分割・再計画を戻す。
+=======
+76をE1の連続partial3回目として受領し75を完了記録する。79/40 operationsの超過により新stageは追加せず、既存予定7dを77で前倒しし、Game Directorへ必要範囲・省略候補・費用超過の判断を求める。第四のBuild、技術再計画、E2以降、QAはまだ開かない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Gameplay Engineerが75-studio-to-gameplay-engineer.mdでE1を継続する。公開再生の被弾差を診断し、既存assertを保持して実dodger接続・記憶・全分岐・判断本文を整える。未保存案を保存済み基線へ混同しない。次のE1結果もpartialならTechnical Directorへ戻し、E1完了確認まではE2を開かない。
+=======
+Game Directorが77-studio-to-game-director.mdで、既存予定工程のうちOwner requestに必要な残作業と省略可能な作業を判断する。E1継続には技術再計画が必要であることを踏まえ、既存承認内の経路を示すか、追加費用のOwner向けEscalationを作る。Studioはその結果まで別のStepを開かない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+未完了。公開境界prototypeの限定監査を受領したが、実dodger接続は未完了。保存済みsource b0770a4180c9の159件成功は独立QAや基準充足を示さない。未保存接続案は公開再生の無傷assertに失敗し不採用。同じE1のpartialは2回であり同Roleへ継続し、次もpartialなら再計画へ戻す。未表示・切断・未対応を合格にしない。歴史的確認不能、記録精度に限定した比較、試験道具対応・再測定、独立QA、後続工程条件判断、限定Art Verify・独立Play・Designer判断・Reviewを残す。戦闘本体の不具合・難度・時間Visionとの差は未判定。project.mdは変更しない。
+=======
+未完了。76の保存済みsource e99408d647c7は160 tests成功だが、実dodgerの公開情報条件と必要診断本文は未確認であり、独立QAやGoal達成を示さない。E1は連続partial3回となり、同じ実装の直接継続を止める。予算79/40 operationsを踏まえ、既存予定のGame Director判断を前倒しした。残工程の必要範囲・省略と、技術再計画を含む継続費用を判断する。60のfail、歴史的確認不能、未表示・未対応を保持する。Goalは閉じず、project.mdは変更しない。
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-002-final-boss/77-studio-to-game-director.md
+---
+kind: handoff
+goal: G-002
+seq: 77
+from: studio
+to: game-director
+stage: Decide
+outcome: routed
+---
+# 77: studio → game-director — 予算超過下の残工程と継続範囲を判断する
+
+## Task
+
+既存予定工程7dを前倒しし、Owner request「最後に手応えのあるボス戦がほしい」に必要な残作業と、省略可能な予定作業を判断する。79/40 operationsの超過とE1連続partial3回を踏まえ、既存承認内で成立する経路を示すか、継続費用についてOwner向けEscalationを作る。
+
+## Context
+
+今回のRouteは新しいstageを追加していない。76を受領して75を完了記録し、既存のplanned Decideを開いた。Studioにはゲームの必要範囲を決める権限がないため、残工程を独断でskippedにしていない。
+
+D-023は利用可能な供給内での継続指示であり、予算変更や未確認基準の免除ではない。GoalのOwner requestとInterpretationは維持する。
+
+## Findings
+
+- 72・74・76は同じE1の連続partial3回。70はE0であり含めない。
+- 76の保存済みsource e99408d647c7はruntimeで160 tests OK。診断試験と出力helperを変更したが、製品・botの行動変更はない。
+- 実dodgerは旧経路のまま。公開境界接続、被弾差の根因、記憶初期化、全分岐監査、判断本文は未成立。必要診断本文の切断・未表示を成功件数で補えない。
+- ループ制限により、同じE1を第四の直接Buildへ戻せない。継続にはTechnical Directorによる分割・再計画が必要。ただし、このRouteではそのStepを追加・開設していない。
+- 68の残計画はE2接触診断、E3四条件再測定、E4保持回帰・記録比較、E5公開再生、独立Q1〜Q6。その後に既存予定の限定Art Verify、独立Play、Designer実測後判断、Reviewがある。
+- 60のfailは維持する。歴史的確認不能はD-024により現行検証・記録比較と分離し、最終判断へ残す。
+
+## Decisions already made
+
+- D-015〜D-019：連続ラン・最終ボスの範囲、体験方向、仕様・評価契約。
+- D-021：テキスト表示とスクリプト実行、Studio内の独立QA・Playで進める。
+- D-022：表示・弾・長時間観測の補足契約。
+- D-023：個別Load、@need一度最大8件、@run最大3回、各出力最大2万字。全文保存先と変更前ビルドはない。
+- D-024：歴史的確認不能をpass・免除へ読み替えない。
+
+## Constraints
+
+予算40はOwnerだけがResumeで変更できる。予算超過中にstageを増やす計画を承認済みとして扱わない。
+
+方向・範囲の判断を行い、技術的な分割方法はTechnical Directorに委ねる。必要な継続が費用・範囲の大幅変更となる場合はOwnerへ戻す。Owner requestの再解釈、仕様・難度・秒数ゲートの変更を暗黙に行わない。
+
+Build後のVerifyとQA・Playの独立性を守る。未確認を合格とせず、既存assertを弱めない。存在しない供給を再要求しない。
+
+## Open questions
+
+1. 既存の残工程のうち、今回のOwner requestに不可欠なもの、省略可能なものはどれか。省略は工程・対象ごとに理由を示せるか。
+2. E1の技術再計画が必要な状況で、既存承認内の継続経路は成立するか。成立しない場合、どの継続費用をOwnerに判断してもらうべきか。
+3. 歴史的確認不能を保持した後続評価の条件を現時点で定められるか。現行検証の未完了とは分けて示すこと。
+
+## Expected output
+
+既存承認内で進められる場合は、必要な予定工程・省略する予定工程・各理由・次の担当を明示したHandoffをstudioへ返す。E1継続を必要とするなら、直接Buildではなく技術再計画が必要な点と、予算制約への適合を明示する。
+
+費用・範囲の大幅変更やGoal再解釈が必要なら、prepare-owner-escalationに従い、日本語で選択肢・推奨・各選択後の経路を持つOwner向けEscalationを作る。既存の供給質問を繰り返さない。判断だけでGoal達成やQA合格を宣言しない。
+
+## Load
+
+- Role: studio/roles/game-director.md
+- Skills: studio/skills/make-decision.md
+- Skills: studio/skills/prepare-owner-escalation.md
+- Project: project.md
+- Project: goals/G-002-final-boss/goal.md
+- Project: design/final-boss-and-continuous-run.md
+- Project: design/g002-historical-comparison-evidence.md
+- Supporting plan: goals/G-002-final-boss/68-technical-director-to-studio.md
+- Supporting report: goals/G-002-final-boss/60-qa-to-studio.md
+- Supporting contract: studio/roles/technical-director.md
+- Process: studio/orchestration.md
+- Decisions: decisions/D-015-owner-approves-continuous-run-and-final-boss.md
+- Decisions: decisions/D-016-final-boss-experience-direction.md
+- Decisions: decisions/D-017-final-boss-and-run-contract.md
+- Decisions: decisions/D-019-g002-balance-criteria-applicability.md
+- Decisions: decisions/D-021-owner-authorizes-text-build.md
+- Decisions: decisions/D-022-g002-v1-supplements.md
+- Decisions: decisions/D-023-owner-confirms-verification-supply.md
+- Decisions: decisions/D-024-g002-historical-comparison-evidence.md
+- Previous handoff: goals/G-002-final-boss/76-gameplay-engineer-to-studio.md
+>>>END

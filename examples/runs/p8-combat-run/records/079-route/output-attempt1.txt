@@ -1,0 +1,158 @@
+Routing: QA's fail is a single red test, a defect in the test and not in the build. It goes back to Build, with the doc conflicts QA flagged going to Design in parallel.
+
+<<<FILE goals/G-001-combat-monotony/77-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-001
+seq: 77
+from: studio
+to: gameplay-engineer
+stage: Build
+outcome: routed
+---
+# 77: studio → gameplay-engineer — Fix the red test `test_wind_up_and_hit_messages_name_the_variant` (test only)
+
+## Task
+
+Fix the test defect QA found in `repo/tests/test_game.py` so the whole suite is green at 30 and 60 FPS. Change test code only; do not change game behavior in `repo/game.py`, `repo/bots.py` or `repo/manual.md`.
+
+## Context
+
+Goal G-001 (combat monotony). Verify 24 (QA report 76) ran the 22a build (D-011 variant messages and manual text) and the 23 build (D-012 room 3 layout). 63 of 64 tests pass and no build-behavior defect was found. The one failure:
+
+```
+FAIL: test_wind_up_and_hit_messages_name_the_variant (test_game.VariantMessageTest)
+AssertionError: 3 != 1 : (30, 'grub')   (out.count("a grub rears back"), test_game.py line 763)
+```
+
+## Findings
+
+From QA 76 (defect 1, severity low):
+- The test runs 3 s with a still player and asserts the wind-up message appears once. A still player is hit, the variant recovers, walks up and winds up again, so more than one message in 3 s is correct. QA's trace shows the runner winding up at 0.033 s and again at 1.167 s at 30 FPS. For the grub QA derived wind-ups at about 0.03, 1.5 and 2.8 s at 30 FPS (not separately traced).
+- The assertion stops at the first failure, so the runner and brute cases and the 60 FPS cases of this test never ran. Expect further failures of the same kind once the grub case is fixed.
+- The spec (`design/combat-step68.md`, V-a) says each wind-up prints its message once, on the first frame in range. It does not say "once in 3 s".
+
+## Decisions already made
+
+- D-011: variant-named wind-up and hit messages (accepted). The build behaves as specified; only the test's expectation is wrong.
+- D-012: room 3 layout. Not to be touched.
+
+## Constraints
+
+- Test code only. If you find that the build behavior differs from V-a or V-b, stop and report it instead of changing game code.
+- Acceptance criteria for the fix:
+  1. The whole suite is green (`run_tests`).
+  2. For every variant (grub, runner, brute) and at both 30 and 60 FPS, the test still checks that (a) a wind-up message names the matching variant, (b) one message is printed per wind-up and not per frame, and (c) the hit message names the matching variant and keeps the hearts suffix. Counting messages per wind-up (for example, comparing the count with the number of wind-ups seen in the trace, or limiting the window to the first wind-up) satisfies (b).
+  3. The test does not rely on a window in which a second wind-up can occur unless it counts that wind-up.
+- Must play correctly at both 30 and 60 FPS (project constraint).
+- Run `run_bots` for rooms 1–5 after the change and state that the output is unchanged from what QA 76 reported (section 2 of that report). It should be, since no game code changes.
+
+## Open questions
+
+None.
+
+## Expected output
+
+Address the result to `studio`. Report: the test change, the full `run_tests` result, and the bot check. The next step is a QA re-verify in a fresh context, so keep implementation reasoning in `## Sender assessment`, which is removed before QA receives it.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: repo/tests/test_game.py, repo/game.py, repo/bots.py, repo/README.md, design/combat-step68.md, project.md
+- Decisions: decisions/D-011-variant-named-messages-accepted.md
+- Previous handoff: goals/G-001-combat-monotony/76-qa-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/78-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-001
+seq: 78
+from: studio
+to: game-designer
+stage: Design
+outcome: routed
+---
+# 78: studio → game-designer — Bring `combat.md` in line with the step 68 and step 72 specs; fix a stray line in D-007 (documents only)
+
+## Task
+
+Remove the document conflicts QA found, so the next verification has one consistent reference. Edit documents only. Do not change any rule, parameter or player-facing behavior.
+
+## Context
+
+Goal G-001 (combat monotony). Verify 24 (QA report 76, section 6, item 2) found that the build follows `design/combat-step68.md` (D-011) and `design/combat-step72.md` (D-012), but older documents still say otherwise. A QA re-verify follows once a test fix (handoff 77, in parallel) is done, and it will use these documents.
+
+## Findings
+
+Conflicts reported by QA 76:
+1. `design/combat.md` still has the old room 3 row (a spitter at (14,7), no grub), the old room 3 purpose, criterion 12, and criterion 11 ("rooms 1–5 never more than 3"). Per D-007 and `combat-step72.md` the room 3 contents are spitters (2,1), (10,6), (2,7) and a grub (15,0), and the in-flight bound is the one D-007 states.
+2. `design/combat.md` still says the wind-up message is "a grub rears back (all variants)". `combat-step68.md` and D-011 govern: messages name the variant, and the build prints `a grub/runner/brute rears back` and `YOU ARE HIT by a grub/runner/brute`.
+3. `design/combat-cues-visual-spec.md` says spitter cues are "normally 0.8 s apart". That holds only in room 3 and is already noted for the art director. Fix the wording or add a pointer.
+4. `decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md` ends with a stray `</parameter>` line, which looks like a formatting leftover. Remove only that line.
+
+## Decisions already made
+
+- D-007, D-011, D-012 (the governing texts). The documents are brought to them, not the other way round.
+
+## Constraints
+
+- Change no numbers or rules. Where a document would need a rule decision to resolve a conflict, do not decide it: report it in the result and hand back with `outcome: question`.
+- Do not edit `combat-step68.md` or `combat-step72.md`, or the content of any Decision beyond the stray line in item 4.
+- Prefer a short pointer ("see `combat-step72.md`") where copying content would risk new drift.
+
+## Open questions
+
+None.
+
+## Expected output
+
+Address the result to `studio`, `outcome: done`. List each document edited and what changed in Findings. The next step after this and handoff 77 is a QA re-verify (fresh context).
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: design/combat.md, design/combat-step68.md, design/combat-step72.md, design/combat-cues-visual-spec.md, project.md
+- Decisions: decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md, decisions/D-011-variant-named-messages-accepted.md, decisions/D-012-room3-standard-grub-and-closer-spitter.md
+- Previous handoff: goals/G-001-combat-monotony/76-qa-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+tests, bots and traces not yet run.
+=======
+QA 76: no build-behavior defect; one red test (test defect), bots criteria 13–16 pass.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Any new build needs Verify.
+=======
+Verify 24 (76) failed only on a red test; gaps for re-verify: V-c/V-e baseline (none available), R3-8 timed run, R3-4 room 3 sidestep/late-dash/recovery scripts.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| 24 | Verify (22a + 23; V-a..e, R3-1..10; 30 and 60 FPS) | qa | verify-change | open | 75-studio-to-qa.md |
+| 25 | Play (fresh, new build, live or hand-timed) | playtester | playtest-session | planned | — |
+| 26 | Review (pass 3) | game-director | review-outcome | planned | — |
+| 27 | Next | studio | — | planned | — |
+=======
+| 24 | Verify (22a + 23; V-a..e, R3-1..10; 30 and 60 FPS) | qa | verify-change | done (fail: red test only) | 75-studio-to-qa.md (result: 76-qa-to-studio.md) |
+| 25a | Build (fix test, test code only) | gameplay-engineer | implement-change | open | 77-studio-to-gameplay-engineer.md |
+| 25b | Design (doc conflicts, documents only) | game-designer | write-design-spec | open | 78-studio-to-game-designer.md |
+| 26 | Verify (re-verify; close R3-8, R3-4 gaps) | qa | verify-change | planned | — |
+| 27 | Play (fresh, new build, live or hand-timed) | playtester | playtest-session | planned | — |
+| 28 | Review (pass 3) | game-director | review-outcome | planned | — |
+| 29 | Next | studio | — | planned | — |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+After 23 (74): room 3 data change built on top of 22a, as planned. Neither 22a nor 23 has any test, bot or trace result yet. Verify 24 opened (75) for both builds in one pass, composed for QA without the engineer's notes. Design docs: combat.md still shows the old room 3; combat-step72.md governs.
+=======
+After Verify 24 (76): fail, but only a test defect (3 s still-player assertion); build behavior, bots and criteria pass. Return rule: Build (77, test only). Doc conflicts QA listed go to Design in parallel (78). Re-verify (26) waits for both. No baseline exists for V-c/V-e: re-verify reads them against the specs.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Run `qa` (fresh context) with 75-studio-to-qa.md (address the result to `studio`). Then Route: on pass, open a fresh playtest (25) stating the build, with room 3 played live or hand-timed, then Review pass 3 (26). A failure goes by the return rules; a tuning question about criterion 13 or 14 goes to `game-designer`. Escalate to the Owner only if Review pass 3 says the melee still reads as one fight (D-009).
+=======
+Run `gameplay-engineer` with 77-studio-to-gameplay-engineer.md (result addressed to `studio`) and, in parallel, `game-designer` with 78-studio-to-game-designer.md. Then Route: open QA re-verify (26) in a fresh context with a Handoff composed without the engineer's notes, covering the R3-8 timed run and the R3-4 room 3 scripts. On pass, open a fresh playtest (27) stating the build, then Review pass 3 (28). Escalate to the Owner only if Review pass 3 says the melee still reads as one fight (D-009).
+>>>>>>> REPLACE
+>>>END

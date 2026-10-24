@@ -1,0 +1,87 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/22-studio-to-gameplay-engineer.md",
+  "sha256": "a71b600fe6dd6149253ce5de086d35b5b920e9a3415bcf71fefd7fd347904f8f",
+  "bytes": 3711
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md",
+  "sha256": "18ecbace72fe54a14efe4897ffa4e7456facff677234c671d8841408747cb7d0",
+  "bytes": 1609
+ },
+ {
+  "path": "studio/skills/implement-change.md",
+  "sha256": "a9befd7f1d9e09eb94c51a066f030db88c5061ad1b522d9795e62bc2c242964a",
+  "bytes": 1823
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "05a33c6f8e50caa20ddf4f3844885137c4261ad4a3e5f3db3eb1b5312b129a9f",
+  "bytes": 237
+ },
+ {
+  "path": "manual.md",
+  "sha256": "d10c599290afc33475886ba7d8c5f15d8e443a005082fa105bbe0ef8b80c7a26",
+  "bytes": 3781
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "8cc6f664f6db174e1501214e4f87b3e86706a62816667fc6cead10f7863d58c4",
+  "bytes": 14270
+ },
+ {
+  "path": "design/combat-visuals.md",
+  "sha256": "da6dfdf9ba7f8a8dec270a75cd8136d21952b4c90b62cee9a1fd35818e6a8419",
+  "bytes": 6739
+ },
+ {
+  "path": "repo/README.md",
+  "sha256": "ed2d47427f733e416ceeae3304620fa38f5f2a2a65e258c5add3505fe322c7e6",
+  "bytes": 331
+ },
+ {
+  "path": "repo/game.py",
+  "sha256": "c7d498623a684620d24020a3a043e91be7d6a1e619f65e58b743f2eeacca3c7f",
+  "bytes": 22267
+ },
+ {
+  "path": "repo/tests/test_game.py",
+  "sha256": "80b49301c500831b1024e9ae0bed82a86ccebb86b38c12f15dc3e488f5d937f7",
+  "bytes": 21258
+ },
+ {
+  "path": "goals/G-001-combat-monotony/18-gameplay-engineer-to-studio.md",
+  "sha256": "ed44a9f4ec3094361e689d2142244b9ae67632ec1ebac2e0bc829f10fac4fd79",
+  "bytes": 12907
+ },
+ {
+  "path": "goals/G-001-combat-monotony/20-gameplay-engineer-to-studio.md",
+  "sha256": "fbef3034ca97c994c3c0ea0e601b41df8e1eb9f85b766ea31406ce831a9b695a",
+  "bytes": 3882
+ },
+ {
+  "path": "decisions/D-004-option-a-single-change-set.md",
+  "sha256": "1e118edfdfbcb59a9457184d84d30fd07131dbed55cfe31bc2a3fcf561a8863d",
+  "bytes": 2463
+ },
+ {
+  "path": "decisions/D-005-owner-places-manual-draft.md",
+  "sha256": "8761e9ad769db4c760c905fce26b38d4f06cee5d28e3fa8af7d4e026bd6608d1",
+  "bytes": 1879
+ },
+ {
+  "path": "goals/G-001-combat-monotony/21-studio-to-owner.md",
+  "sha256": "9323dcbb42a852ef02c798a84d0ff1c808d184618780ccfd1c1bd7838ad04b68",
+  "bytes": 4353
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ }
+]

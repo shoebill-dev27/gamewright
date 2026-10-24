@@ -1,0 +1,7 @@
+<<<FILE @need
+design/combat-step68.md
+design/combat-step72.md
+design/combat-step94.md
+goals/G-002-final-boss/40-gameplay-engineer-to-studio.md
+studio/orchestration.md
+>>>END

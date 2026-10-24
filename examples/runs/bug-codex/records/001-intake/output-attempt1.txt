@@ -1,0 +1,133 @@
+<<<FILE goals/G-001-dash-damage/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-10
+---
+# G-001: ダッシュ中の被ダメージ不具合を修正する
+
+## Owner request
+
+> ダッシュ中なのにダメージを受けることがある。再現できるので直してほしい。
+
+## Interpretation
+
+報告された被ダメージを再現し、既存仕様でダメージを受けないと定められたダッシュの状態ではダメージを受けず、通常の被ダメージも仕様どおりに動作することをQAが確認できる状態にする。
+
+ダッシュ全期間が無敵であるとは、この依頼だけからは判断しない。戦闘の方向性変更、新しい入力の追加、無関係なバランス調整は対象外。報告された挙動が既存仕様どおりで、修正にGoalの再解釈が必要なら、実装へ進まずOwnerへ確認する。
+
+## Unknowns
+
+- Observe: Ownerは再現可能と報告しているが、具体的な操作、発生条件、直接観察の記録は未提供。QAによる再現が必要。
+- Diagnose: 原因は未確定。ただし独立した診断工程が必要かも未確定。まずQAで現象を特定し、局所的な不具合ならBuildでエンジニアが原因を調べる。技術的な広がりが判明した場合のみ独立工程を設ける。
+- Decide: 現時点では既存仕様への復帰を求める依頼で、方向性の選択は不要。仕様との衝突やスコープ変更が判明した場合は再ルートする。
+- Design: ダッシュの無敵条件を定める資料として `design/combat.md` があるが、本文は今回のpacketにない。QAが確認し、期待動作が未定義ならDesignを行う。
+- Plan: 技術的な難度と影響範囲は不明。複数システムにまたがる場合や技術リスクがある場合のみ必要。
+- Build: 修正依頼のため予定する。ただしQAが仕様との差異と受入条件を確定してから開始する。
+- Verify: Build後は必須。30・60 FPS、キーボード・ゲームパッドの制約も確認対象とする。
+- Play: 体験改善ではなく不具合修正の依頼なので省略。
+- Review: 体験Goalでも方向性Decisionを伴う依頼でもないため省略。
+- Next: 検証結果に基づきStudioがOwner向けOutcomeを記録する。
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | qa | reproduce-defect | open | goals/G-001-dash-damage/01-studio-to-qa.md |
+| 2 | Diagnose | technical-director | technical-plan | tentative | — |
+| 3 | Decide | game-director | make-decision, prepare-owner-escalation | skipped | — |
+| 4 | Design | game-designer | write-design-spec | tentative | — |
+| 5 | Plan | technical-director | technical-plan | tentative | — |
+| 6 | Build | gameplay-engineer | implement-change | planned | — |
+| 7 | Verify | qa | verify-change | planned | — |
+| 8 | Play | playtester | playtest-session | skipped | — |
+| 9 | Review | game-director | review-outcome | skipped | — |
+| 10 | Next | studio | — | planned | — |
+
+基本経路はObserve → Build → Verify → Next。暫定工程の発動条件はUnknownsの記載どおり。順次実行し、並列工程は設けない。視覚表現の変更が必要と判明した場合は、Verifyへのart-director追加を再検討する。
+
+## Route changes
+
+初回Intake。即時エスカレーションを要する衝突は提供情報からは確認されていない。D-001はタイトルとproject.md内の制約のみ確認済みであり、本文や戦闘仕様の内容は推測していない。
+
+## Next action
+
+新しい実行コンテキストでQAのObserveを開始する。入力は `goals/G-001-dash-damage/01-studio-to-qa.md` と、そのLoad一覧。QAの報告を受けた後にStudioがRouteを行い、暫定工程の要否を確定する。
+
+## Outcome
+
+未完了。今回はIntakeのみを実施し、再現確認への引き継ぎを作成した。修正・検証は未実施。
+>>>END
+
+<<<FILE goals/G-001-dash-damage/01-studio-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 1
+from: studio
+to: qa
+stage: Observe
+outcome: routed
+---
+# 01: studio → qa — ダッシュ中の被ダメージを再現する
+
+## Task
+
+Ownerが報告したダッシュ中の被ダメージを模擬ビルドで観察し、戦闘仕様と照合する。再現条件、期待動作、実際の動作、修正を検証できる受入条件を含む不具合報告を作成する。
+
+## Context
+
+対象はLantern Depthsの縦切りプロトタイプ、build 0.3。Ownerの依頼は次のとおり。
+
+> ダッシュ中なのにダメージを受けることがある。再現できるので直してほしい。
+
+これは初回の再現確認であり、実装や修正の履歴はない。
+
+## Findings
+
+- Ownerは再現可能と述べているが、具体的な手順や発生条件は未提供。
+- このプロジェクトでは `sim/build-0.3.md` を読むことがビルドの実行に相当する。
+- 関連仕様は `design/combat.md`。今回のIntakeには本文が含まれていないため、無敵の開始・終了条件や原因は未確認。
+- ダッシュ中の全期間が無敵であるという前提を置かず、仕様から期待動作を特定する。
+
+## Decisions already made
+
+- `decisions/D-001-one-button-combat.md` — Combat uses one attack button plus dash。project.mdによれば、攻撃・ダッシュ・ポーズ以外の入力追加にはOwner承認が必要。本Stepでは入力体系の変更を提案・決定しない。
+
+## Constraints
+
+- 実機や実リポジトリのないdry-runである。模擬ビルドに記載された観察と、確認できなかった事項を区別する。
+- 対応対象はデスクトップ、キーボードとゲームパッド、30・60 FPS。
+- QAは再現性と仕様適合性を判定する。期待動作を新しく設計したり、実装方法を決定したりしない。
+- 実装者の自己評価や原因説明を入力にしない。
+- 資料が不足する場合は推測で補わず、不足資料と検証への影響を報告する。
+
+## Open questions
+
+- どの操作順序、敵や攻撃、ダッシュのタイミングで被ダメージが発生するか。
+- 仕様が定める無敵条件は何か。観察された挙動はどの条件に反するか。
+- 入力方式やフレームレートによる差を、模擬ビルドから確認できるか。
+- 修正の受入条件と、通常の被ダメージ・無敵終了後の挙動について必要な回帰確認は何か。
+- 不具合として確定できるか、仕様の未定義や追加情報の不足があるか。
+
+## Expected output
+
+結果を `studio` 宛てのHandoffとして返す。Findingsに再現手順、期待動作と仕様の参照箇所、実際の動作、再現性、重大度、受入条件、未確認事項を記録する。
+
+仕様との差異を確認できれば、不具合報告を完成させて `outcome: done` とする。再現不能、資料不足、期待動作の未定義、または報告された挙動が仕様どおりである場合は `outcome: question` とし、次の判断に必要な情報を明示する。Studioが結果を受けて次の工程を決める。
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/reproduce-defect.md
+- Project: project.md#Current state
+- Project: project.md#Constraints
+- Project: design/combat.md
+- Project: sim/build-0.3.md
+- Decisions: decisions/D-001-one-button-combat.md
+- Current task: goals/G-001-dash-damage/01-studio-to-qa.md
+- Output template: studio/templates/handoff.md
+- Previous handoff: none
+>>>END

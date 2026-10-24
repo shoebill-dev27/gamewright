@@ -1,0 +1,24 @@
+{
+ "op": "Run",
+ "goal": "G-001",
+ "operations": [
+  "079-route",
+  "080-step-gameplay-engineer",
+  "081-step-game-designer",
+  "082-route",
+  "083-step-qa",
+  "084-route",
+  "085-step-qa",
+  "086-step-game-designer",
+  "087-step-playtester",
+  "088-route",
+  "089-step-qa",
+  "090-route",
+  "091-step-game-director",
+  "092-route"
+ ],
+ "stop_reason": "no progress: game-designer handed back `question` twice and was opened again",
+ "status": "active",
+ "owner_reads": null,
+ "next": "run examples/runs/p8-combat-run"
+}

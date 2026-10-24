@@ -1,0 +1,10 @@
+<<<FILE @need
+goals/G-002-final-boss/23-studio-to-gameplay-engineer.md
+goals/G-002-final-boss/16-technical-director-to-studio.md
+goals/G-002-final-boss/20-technical-director-to-studio.md
+repo/README.md
+repo/game.py
+repo/play.py
+repo/bots.py
+repo/tests/test_game.py
+>>>END

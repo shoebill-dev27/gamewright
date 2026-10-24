@@ -1,0 +1,119 @@
+<<<FILE goals/G-001-combat-monotony/33-gameplay-engineer-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 33
+from: gameplay-engineer
+to: studio
+stage: Build
+outcome: question
+---
+# 33: gameplay-engineer → studio — Phase 1 is blocked by spec gaps and a contradiction; hand back to game-designer, nothing delivered to QA
+
+## Task
+
+Route the questions below to `game-designer` (via the Studio). Phase 1 cannot be entered as data until they are answered. Nothing is delivered to QA from this step. I applied no Phase 1 change in this step, so `sim/build-0.5.md` stays the current build.
+
+## Context
+
+Handoff 32 asks for Phase 1 of `design/g001-combat-escalation.md`, sections 1–3. Handoff 32 also says that if the spec is ambiguous, contradictory or misses a case, I stop and hand back. Following the implement-change method, I listed every player-observable behavior Phase 1 produces and checked each against the spec. Section 1 of the Findings is the contradiction. Sections 2–5 are gaps. Each blocks the room data or the wave scheduler.
+
+## Findings
+
+### Blocking questions
+
+**1. Wave trigger: do not-yet-spawned enemies count as "alive"? (contradiction in 3.3)**
+- 3.3: "wave N+1 markers start when the previous waves have 1 or fewer enemies alive, or 8 s after wave N's markers started."
+- If "alive" means enemies that exist on the field, the condition is already true before any wave 1 enemy has appeared. In room 2, wave 1 has 3 enemies and the first marker lasts 0.8 s. Wave 2 would start at once, and the "from the E edge after the W wave" structure would collapse.
+- Cases at stake: rooms 2–5, every room with a wave 2.
+- Options:
+  - (a) Count enemies in a marker phase as alive. Wave N+1 starts when the unresolved enemies of earlier waves (pending + on the field) number 1 or fewer. Cost: trivial, one counter.
+  - (b) Count only enemies on the field, and add a guard that the trigger is not evaluated until every enemy of wave N has spawned. Cost: trivial.
+- The two differ in timing. Under (a), room 2 wave 2 starts when 1 of the 3 wave 1 enemies remains. Under (b), it starts when 1 remains after all 3 have spawned.
+- Proposed default (not applied): (a).
+
+**2. Which spawn point is used, and is it deterministic? (gap in 3.2 and 3.3)**
+- The spec says "spawn points along an edge" and "use another point on the same edge". It does not say how many points an edge has, where they are, or how a point is chosen when several are at least 5 tiles from the player.
+- Random choice would make criterion 5 (scripted run at 30 and 60 FPS, times matching) hard to check. It would also make the "2G from W edge" lanes vary from run to run.
+- Options:
+  - (a) Each enemy has an ordered candidate list of points in the room data. The first one that meets the 5-tile rule is used, with no RNG. Cost: small, data only.
+  - (b) Choose randomly among qualifying points on the edge with a seeded RNG. Cost: small, plus a test seed.
+- Proposed default: (a). The designer gives the points, or says "evenly spaced N per edge".
+
+**3. Which corners the Spitters cover (gap in 3.4 and the room table)**
+- 3.4 says "within 2 tiles of a corner, fires along that wall". The table does not say which corner or wall for:
+  - room 3 (N wall);
+  - room 4 wave 1 ("1S per 3.4") and room 4 wave 2 (S wall);
+  - room 5 (two Spitters, "two different corners").
+- The choice decides which stance the Spitter punishes against the Grub edges (W, E, N, S), so it is player-facing. I cannot enter the data without it.
+- Proposed (not applied): the designer names each corner. For example, room 3 N wall near NE; room 4 wave 1 N wall near NW and wave 2 S wall near SE; room 5 NW and SE.
+
+**4. Spitter placement conflicts with the 5-tile minimum distance (contradiction between 3.3 and 3.4)**
+- 3.3 gives every spawn at least 5 tiles from the player at marker start. If it is closer, use another point on the same edge. 3.4 pins corner-covering Spitters to within 2 tiles of one corner. A player standing in that corner is exactly the case the Spitter is meant to punish, and the player may be there when its marker starts.
+- Options:
+  - (a) Spitters are exempt from the 5-tile rule, but the 0.8 s marker still applies. A Spitter can then appear next to a player in the corner. This conflicts with criterion 4, "spawns are at least 5 tiles away".
+  - (b) Each Spitter has an alternative corner-covering point list. If its first point is too close, use the next, and if none qualifies, use the farthest. Cost: data only.
+- Proposed default: (b).
+
+**5. What "simul." means when a spawn point is relocated (gap in 3.2)**
+- 3.2: "simul." means the same marker start and equal travel distance, so arrival is within 0.3 s. It does not say whether the distance is measured to the player at marker start or is a fixed property of the point pair. It does not say what happens when the 5-tile rule moves one point.
+- Grub speed is not known to me (see below), so I cannot verify the 0.3 s figure.
+- Options:
+  - (a) "Simul." means the same marker start only. The arrival gap is whatever the points give. Cost: none.
+  - (b) After picking points, the scheduler checks the distance difference and picks the next candidate if the gap exceeds the Grub speed × 0.3 s. Cost: small, and it needs the speed.
+- Proposed default: (a), with the 0.3 s figure listed in section 7 as a playtest tuning value.
+
+**6. Marker start for the Spitter and the first wave (gap in 3.2 and 3.3)**
+- The spec gives "markers 1.0 s apart" for Grubs, but it does not say when the Spitter's marker starts within wave 1. It also does not say when the first markers start after the player enters a room.
+- Proposed default: wave 1 markers start on the frame the player gains control of the room. In a wave, the Spitter's marker starts together with the first Grub marker of that wave.
+
+### Values requested in handoff 32
+
+- The packet cannot supply Grub speed, player speed, projectile speed, hearts or room size. They are not in `sim/repo-notes.md`, and no real repository is available. I did not invent them: they are existing values, not Phase 1 data, and Phase 1 does not change them. A made-up value would be reported to QA as fact.
+- I need these numbers for three things: (1) criterion 1 (the 2-hit threshold needs the heart count); (2) the "equal travel distance" and "on screen" checks; (3) the Grub-speed tuning knob in 3.5.
+- The Studio should obtain them from someone with the real data. If that is not possible, the designer should say that Phase 1 proceeds without them and that the playtest reports them.
+- Spawn effect: the notes list no existing spawn or ground-ring effect. Once unblocked, I would build the minimal ring from `design/g001-telegraph-visuals.md` section 3 (1.5 → 0.75 tiles, 0.8 s, pop at spawn). It would be flagged for art-director review. A1–A5 would be checked on that ring, not on a reused effect. I cannot see the real code, so this rests only on the notes.
+
+### What can proceed and is held
+
+- Independent of the answers: the Spitter first shot no sooner than 1.0 s after it appears, with the 2 s interval after that (3.3), and the marker visual.
+- Room data for rooms 1–2 depends on Questions 1, 2 and 6. Rooms 3–5 depend on all six questions.
+- I did not apply these now. A partial Phase 1 would change what `sim/` shows players while the wave rules are still undefined. Neither piece needs rework when the answers arrive, so I can build the full Phase 1 in one pass.
+
+## Decisions already made
+
+- D-001: one-button combat; no new input.
+- D-002: encounter escalation first.
+- D-003: input during hit-stun is ignored (built and verified, handoff 31).
+- D-004: Phase 1 is one serial Build with no separate Plan. If a spawner rework beyond a small scheduler were needed it would go to the technical-director. The questions above need only a small scheduler, so this is not triggered.
+- D-007: `sim/build-0.5.md` is the current build.
+
+## Constraints
+
+- Combat stays one-button. Do not change the verified dash, hit-stun or invulnerability behavior.
+- Correct at 30 and 60 FPS, with all timers as timestamps on the accumulated game clock.
+- No Phase 2 content.
+
+## Open questions
+
+For `game-designer`: Questions 1–6 above. 1 to 4 are blocking. 5 and 6 have proposed defaults that the designer can accept or change. I will not apply any default before the designer confirms it.
+
+## Expected output
+
+The designer amends `design/g001-combat-escalation.md` sections 3.2–3.4, or confirms the proposed defaults, and returns it through the Studio. Then the Studio routes Phase 1 back to the gameplay-engineer. The engineer states the whole change and reports the values used, whether the spawn effect was reused, and the heart count and room size if the Studio has supplied them.
+
+## Sender assessment
+
+- Confidence is high that Questions 1 and 4 are real contradictions: each follows from the spec text taken literally. Question 1 would make wave 2 start at once under the plain reading of "alive". Confidence is medium-high on Questions 2, 3 and 6: the room data cannot be written without them, but a designer may regard them as small. I proposed defaults so the answer can be quick.
+- Question 5 is the weakest. It could be left as (a) and tuned in the playtest.
+- I considered building with my own choices and flagging them. I did not, because handoff 32 and the Role say not to decide player-facing behavior, and the choices change which stance works in rooms 3–5. That is the Goal's core.
+- No Owner or Director escalation is needed.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: design/g001-combat-escalation.md, design/g001-telegraph-visuals.md, design/combat.md, sim/build-0.5.md, sim/repo-notes.md
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-002-combat-variety-direction.md, decisions/D-003-input-during-hit-stun.md, decisions/D-004-phase-2-technical-approach.md
+- Previous handoff: goals/G-001-combat-monotony/32-studio-to-gameplay-engineer.md
+>>>END

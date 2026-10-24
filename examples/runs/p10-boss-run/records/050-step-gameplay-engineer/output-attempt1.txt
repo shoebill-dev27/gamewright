@@ -1,0 +1,30 @@
+<<<FILE @run/tests
+>>>END
+
+<<<FILE @run/bots/ind34-fps30
+bots camper,walker,dodger
+rooms 3,4
+fps 30
+>>>END
+
+<<<FILE @run/bots/ind34-fps60
+bots camper,walker,dodger
+rooms 3,4
+fps 60
+>>>END
+
+<<<FILE @run/bots/boss-fps30
+bots dodger
+rooms 5
+hearts 3,2
+limit 120
+fps 30
+>>>END
+
+<<<FILE @run/bots/boss-fps60
+bots dodger
+rooms 5
+hearts 3,2
+limit 120
+fps 60
+>>>END

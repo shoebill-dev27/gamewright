@@ -1,0 +1,13 @@
+<<<FILE @run/bots/all60
+bots camper,walker,dodger
+rooms 1-5
+fps 60
+limit 60
+>>>END
+
+<<<FILE @run/bots/all30
+bots camper,walker,dodger
+rooms 1-5
+fps 30
+limit 60
+>>>END

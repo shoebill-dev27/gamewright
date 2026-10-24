@@ -1,0 +1,12 @@
+{
+ "op": "Run",
+ "goal": "G-001",
+ "operations": [
+  "026-step-qa",
+  "027-route"
+ ],
+ "stop_reason": "blocked-on-owner",
+ "status": "blocked-on-owner",
+ "owner_reads": null,
+ "next": "decide examples/runs/bug-codex2 \"<answer>\""
+}

@@ -1,0 +1,213 @@
+I'm routing after the playtest (9a). The report raises design/experience issues, which go to Diagnose, and one possible defect, which goes to QA. The two steps are independent and run alongside the still-open 9b. The Goal log, `log.md`, is not in my write list, so I haven't appended an entry.
+
+<<<FILE goals/G-001-combat-monotony/28-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-001
+seq: 28
+from: studio
+to: game-designer
+stage: Diagnose
+outcome: routed
+---
+# 28: studio → game-designer — Diagnose the combat variety problems a fresh playtester still reports in build 0.5
+
+## Task
+
+Using the playtest report in handoff 27, diagnose why combat still feels monotonous across rooms 1–5. Give causes and solution options in design terms (`diagnose-experience`).
+
+## Context
+
+G-001: the Owner said combat is monotonous. The first Diagnose (04) led to the 0.5 changes. QA passed criteria 1–17 at 30 and 60 FPS. A fresh playtester then played the build through input scripts, with the player view only and no knowledge of what changed. The playtester still found combat monotonous in places. This is the second time the Goal enters Diagnose. Loop limit: a third pass without measurable progress goes to `game-director`.
+
+## Findings
+
+Experience issues from the playtest (27, stated as the playtester's observations):
+
+1. **Melee enemies all draw the same reaction.** Grub, runner and brute each get "sidestep the warning, then swipe or ignore". Rooms 1 and 2 felt interchangeable apart from enemy count. The runner's short warning never tested the playtester. The brute asked for patience, not a different approach.
+2. **The dash was never needed against melee.** A one-tile sidestep always sufficed. Dash and sidestep were indistinguishable in room 1.
+3. **Spitters were the only enemy that changed how the playtester moved.** Their solution was still "keep moving", and with several spitters the room turned into attrition.
+4. **Spitter rooms 3–5 became repetitive or a crossfire the playtester found unreadable.** In rooms 4 and 5 two spitters in opposite corners fire in sync and their lines cross. Stepping aside from one line sometimes put the playtester in another, and the playtester could not tell which line to avoid. They felt this was the least fair moment.
+5. **The brute gave no reason to fight it.** The playtester asked whether it is meant to be attacked at all.
+
+Positives to keep: warnings were consistently readable, rooms were short, and cancelling or staggering a lunge with a swipe felt good.
+
+Limits on the evidence:
+- All play was scripted. Reaction scripts react in about 0.15 s every time, which is steadier than a human. Human-reaction problems are likely hidden and dodging is probably flattered.
+- Not seen: how the room 2 and room 3 sessions ended, a brute kill, room 3 cleared, the practice room, or timed (non-reactive) scripts in rooms 2–5.
+- Each reaction script ran once per room, so single outcomes are anecdotes.
+- You may use `run_trace` and `run_bots` to check or extend a claim. Say which findings rest on the playtester's report alone.
+
+The playtester's possible defect (grub hit at about 6.0 s after a swipe in room 2) goes to QA as handoff 29. Do not diagnose it here.
+
+## Decisions already made
+
+- D-001: one attack button plus dash. No new input.
+- D-002: the contact-edge graze is accepted. Do not reopen it.
+
+## Constraints
+
+- Stay inside D-001 and the vision pillars (one-button combat, short runs, readable threats). Prefer changes that reuse existing systems (small team).
+- Must play correctly at 30 and 60 FPS.
+- If an option needs a new enemy type, a healing system, a new input, or a scope change, mark it as such. It then goes to Decide (`game-director`), and to the Owner if a trigger fires.
+- Do not propose numeric thresholds as final. Numbers belong to Design.
+- Handoff 26 (9b: two non-blocking QA notes on the contact edge) is open with you in parallel. It is independent of this diagnosis. Handle it separately and do not mix the two.
+
+## Open questions
+
+- Which of the five issues are real causes of monotony rather than artefacts of scripted, fixed-reaction play?
+- Which options give different enemies or rooms noticeably different answers within one-button combat? Say why the player can tell the difference.
+- Is any option a direction or priority change (for example, making the brute worth fighting, or a role for the dash)?
+- Does the evidence support another playtest round with hand-varied timing before any Build?
+
+## Expected output
+
+A diagnosis with options and your recommendation, written as a handoff to `studio` (address the result to `studio`). Say whether Decide (`game-director`) is needed or whether you can go straight to Design.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/diagnose-experience.md
+- Project: project.md#vision, project.md#player-profile, project.md#constraints, design/combat.md, design/combat-cues-visual-spec.md, repo/manual.md, goals/G-001-combat-monotony/04-game-designer-to-studio.md (first diagnosis), goals/G-001-combat-monotony/22-game-designer-to-studio.md (latest design rulings)
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-002-contact-edge-graze-accepted.md
+- Previous handoff: goals/G-001-combat-monotony/27-playtester-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/29-studio-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 29
+from: studio
+to: qa
+stage: Observe
+outcome: routed
+---
+# 29: studio → qa — Reproduce a possible defect: a grub hit right after a lunge-cancelling swipe, room 2
+
+## Task
+
+Try to reproduce the reported behavior in the build and decide whether it is a defect or intended behavior. If it is a defect, write a defect report with acceptance criteria (`reproduce-defect`).
+
+## Context
+
+G-001 (combat feels monotonous). A playtester, playing through input scripts with the player view only, reported an odd moment in room 2. The playtester is unsure it is a defect. The playtester did not use the trace view, so the cause is unknown.
+
+## Findings
+
+Playtester's account (observations only):
+
+- Room 2 starts with 2 runners, 1 grub and 2 brutes. The playtester used a reaction script that sidesteps on "rears back", swipes things close by and approaches.
+- A grub began rearing back at 5.37 s.
+- The playtester swiped it ("grub hit") at 5.9 s.
+- The playtester was hit by a grub at 6.017 s, about 0.1 s after the swipe.
+- The manual says a swipe within 1.5 tiles cancels the lunge.
+- The playtester cannot tell whether the lunge came from a different grub, whether the swipe's reach did not cancel this grub's lunge, or whether the hit was already in progress.
+- The playtester's exact script is not available. Rebuild the situation from the room 2 layout and the described reaction behavior. Several script variants may be needed.
+
+## Decisions already made
+
+- D-002: per-frame contact sampling is kept, and the contact-edge graze is an accepted limitation of the text build. A hit explained by that graze is not a new defect. Say if that is what you find.
+
+## Constraints
+
+- Verify from the manual, the design documents and the build, not from any explanation of why it should work.
+- Check at 30 and 60 FPS (project constraint).
+- Do not propose design changes. Intended behavior that feels wrong is an experience matter for the designer.
+- If you cannot reproduce it, say what you tried (scripts and views) and report "not reproduced".
+
+## Open questions
+
+- Is the hit from a second grub, from a lunge that was not cancelled, or from the contact-edge graze?
+- Does the swipe's cancel rule behave as the manual and `design/combat.md` state?
+
+## Expected output
+
+A report to `studio` (address the result to `studio`) with the scripts used, what you observed in both the player and trace views, and a verdict: not reproduced, intended behavior, accepted limitation (D-002), or defect (with severity and acceptance criteria).
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/reproduce-defect.md
+- Project: design/combat.md, repo/manual.md, the build in repo/ (run commands in project.md: `run_play`, `run_trace`, `run_tests`)
+- Decisions: decisions/D-002-contact-edge-graze-accepted.md
+- Previous handoff: goals/G-001-combat-monotony/27-playtester-to-studio.md (use only the "Room 2, odd moment" and "Issues and impact" item 5 sections)
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-16
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): a player playing the current build's combat experiences it as varied and engaging instead of monotonous. Different situations call for noticeably different play (positioning, timing, use of attack and dash), and the player can tell why. The improvement stays inside the vision pillars: one-button combat (attack + dash only, D-001), short runs, readable threats. Numeric thresholds belong to Design; the final verdict belongs to Review.
+
+Out of scope: new input buttons (needs Owner approval per D-001), changing run length, new biomes or content unrelated to combat variety, and any change to the core concept. Not a defect report: nothing in the request says combat is broken.
+
+## Unknowns
+
+- Observe: done (scripted play, rooms 1–3 + practice room; Play 27 covered rooms 1–5). Hand-timed (non-reactive) play in rooms 2–5, brute kills and the practice room are still unobserved.
+- Observe (FPS divergence, qa): done (16, 20). Walker 30/60 differences are bot timing, not the build. The contact-edge graze is accepted (D-002).
+- Observe (possible defect, qa): open (29). Playtester saw a grub hit about 0.1 s after a lunge-cancelling swipe in room 2; may be a second grub, the D-002 graze, or a real defect.
+- Diagnose: open again (28), second pass. The playtest (27) still reports: melee enemies share one answer (sidestep, then swipe), the dash is never needed against melee, spitter rooms 3–5 become attrition or an unreadable crossfire, and the brute gives no reason to fight. Evidence is scripted play with a fixed 0.15 s reaction. A third pass without progress goes to `game-director`.
+- Decide: skipped so far. Returns if the diagnosis needs a new enemy type, a healing system, a new input or a scope change.
+- Design: done for 0.5 (14, 22). Two non-blocking QA notes (24: shot at exactly 0.40, lunge band in D-002) are with the designer (26). A new Design follows if Diagnose yields a chosen option.
+- Plan: skipped. Approach reuses the enemy update loop. Returns if the same criterion fails verification twice.
+- Build: 0.5 implemented (10), tooling done (18). Reopens only for a new Design, a defect from 29, or a `<` ruling in 26.
+- Verify (visual): done (15). V1–V11 need a graphical build and become a proposed new Goal at Close; V12 is open until a graphical build exists.
+- Verify (QA): done (24) for 0.5. Criteria 1–17 pass at 30 and 60 FPS. Any new Build needs a new Verify.
+- Manual wording ("no more than 3 in the air") is true in rooms 1–5 only. Optional fix ("in the five rooms"), raise at Close.
+- Play: first pass done (27). Another pass is tentative, after any new Build or if Diagnose asks for hand-varied timing.
+- Review: planned (`game-director`), experience Goal. Graphical cue acceptance is still open at that point.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 01-studio-to-playtester.md (report: 02-playtester-to-studio.md) |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-studio-to-game-designer.md (result: 04-game-designer-to-studio.md) |
+| 3 | Decide | game-director | make-decision | skipped (no real choice yet; see Unknowns) | — |
+| 4a | Design | game-designer | write-design-spec | done | 05-studio-to-game-designer.md (result: 07-game-designer-to-studio.md) |
+| 4b | Observe (FPS divergence) | qa | reproduce-defect | done | 06-studio-to-qa.md (result: 08-qa-to-studio.md) |
+| 5 | Plan | technical-director | technical-plan | skipped (approach local; see Unknowns) | — |
+| 6 | Build | gameplay-engineer | implement-change | done | 09-studio-to-gameplay-engineer.md (result: 10-gameplay-engineer-to-studio.md) |
+| 7a | Design (criterion 14, spec gaps) | game-designer | write-design-spec | done | 11-studio-to-game-designer.md (result: 14-game-designer-to-studio.md) |
+| 7b | Verify (visual) | art-director | visual-review | done | 12-studio-to-art-director.md (result: 15-art-director-to-studio.md) |
+| 7c | Observe (walker 30/60 divergence) | qa | reproduce-defect | done | 13-studio-to-qa.md (result: 16-qa-to-studio.md) |
+| 7d | Build (bot log data, walker test) | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md (result: 18-gameplay-engineer-to-studio.md) |
+| 8 | Verify (criteria 1–16, V12) | qa | verify-change | done (question: graze) | 19-studio-to-qa.md (result: 20-qa-to-studio.md) |
+| 8b | Design (graze, cap, margin, doc conflicts) | game-designer | write-design-spec | done | 21-studio-to-game-designer.md (result: 22-game-designer-to-studio.md) |
+| 8c | Build (contact test / cap) | gameplay-engineer | implement-change | skipped (graze and cap accepted as built) | — |
+| 8d | Verify (criteria 1–17; close 30 FPS gaps) | qa | verify-change | done (pass) | 23-studio-to-qa.md (result: 24-qa-to-studio.md) |
+| 9a | Play | playtester | playtest-session | done | 25-studio-to-playtester.md (report: 27-playtester-to-studio.md) |
+| 9b | Design (QA notes: exact-reach miss, lunge band) | game-designer | write-design-spec | open | 26-studio-to-game-designer.md |
+| 10a | Diagnose (second pass, from playtest) | game-designer | diagnose-experience | open | 28-studio-to-game-designer.md |
+| 10b | Observe (possible defect, room 2) | qa | reproduce-defect | open | 29-studio-to-qa.md |
+| 11 | Decide | game-director | make-decision | tentative (if an option changes direction or scope) | — |
+| 12 | Design / Build / Verify | game-designer, gameplay-engineer, qa | write-design-spec, implement-change, verify-change | tentative (after a chosen option or a defect) | — |
+| 13 | Play (again) | playtester | playtest-session | tentative (after any new Build) | — |
+| 14 | Review | game-director | review-outcome | planned | — |
+| 15 | Next | studio | — | planned | — |
+
+## Route changes
+
+After 9a (Play): does not fit. The playtester still found melee enemies sharing one answer, the dash unneeded, and spitter rooms 3–5 turning into attrition or an unreadable crossfire. Reopened Diagnose (28, second pass) and opened QA (29) for one possible defect, in parallel with 9b. Decide, Build, Verify and a second Play are tentative.
+
+## Next action
+
+Run three independent steps: game-designer with 28-studio-to-game-designer.md (Diagnose), qa with 29-studio-to-qa.md (reproduce), and game-designer with 26-studio-to-game-designer.md (9b). Then Route: if the diagnosis needs a direction or scope choice, open Decide (`game-director`); otherwise open Design. A confirmed defect from 29 goes to Build and Verify. A third Diagnose pass without progress goes to `game-director`.
+
+## Outcome
+
+(open)
+>>>END

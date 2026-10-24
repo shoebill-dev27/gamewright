@@ -1,0 +1,167 @@
+<<<FILE decisions/D-020-g002-host-scope-and-plan-entry-conditions.md
+---
+kind: decision
+id: D-020
+status: accepted
+decided_by: game-director
+goal: G-002
+date: 2026-10-20
+supersedes: none
+---
+# D-020: 実機ホストの必要性を認め、費用・供給条件を限定調査で確定する
+
+## Decision
+
+D-015／D-016とproject.mdのdesktop・keyboard／gamepad要件に照らし、承認された連続ランを実機で操作・表示するための最小ホストは、Goalを追加するものではなく、既存要件を実現するための作業としてPlanの検討対象に含める。
+
+ただし、この判断はホスト新設の費用・リスクがD-015の承認内であるとの認定ではない。具体的ライブラリ、OS、機器、依存、構造はTechnical Directorが評価する。グラフィカル素材制作、対応プラットフォーム拡張、ゲーム内容の追加を承認しない。
+
+次はTechnical DirectorのPlan補完へ返す。許可するのは既存資料・実行環境・利用可能資源の確認と計画の補完であり、ゲームやホストの実装、依存の新規導入、機器購入、外部費用の確約は含めない。実行権限や資料が足りなければ、その不足を具体的に返す。
+
+Buildは保留する。解除には以下をすべて必要とする。
+
+1. 対象commit、指定shaとの関係、Python・依存、実行基線、版表記の差を記録し、未解決事項の影響を整理する。
+2. 保持・置換する回帰正本を読み、D-019と仕様の試験対応を補完する。
+3. 実機ホストの対象環境、実現方式、依存導入権限、keyboard／gamepad機器、独立実機検証の供給元と利用条件を確認する。V2の合格はBuild後の独立QAで判断する。
+4. 実機ホスト、統合、独立QA・Art・Play、Designer判断、修正・再検証を含む費用・リスクを、確定部分と未確定部分に分ける。
+5. 費用・リスクを承認内と判断できる根拠を示す。既存承認との照合で判断できなければ、必要なOwner承認を具体化して実装前に戻す。
+
+現時点では、承認超過またはOwnerしか供給できない環境の必要性は確定していないため、OwnerへのEscalationは作らない。予算不明を承認内とも超過とも扱わない。
+
+## Rationale
+
+実機入力は既存のプロジェクト要件であり、D-017のV2にも残っている。headlessだけへ縮小する判断はできない。一方、必要な手段であることだけでは、その追加費用や調達リスクまで承認済みとはいえない。
+
+16の11.5〜20人日は実行基線未確認の暫定値である。別枠の独立QA・Art・Playを加えた提示済み部分は15〜26人日だが、Designer判断、修正・再検証、機器・ライセンス等の金銭費用は含まれていない。総額や承認上限との関係を確定する証拠にはならない。
+
+限定調査によってRoleで取得できる証拠を先に揃えれば、Ownerに必要な判断を一つの具体的な問いとして提示できる。
+
+## Alternatives considered
+
+- 直ちにBuildを許可する：実行基線、実機検証の供給、費用承認の根拠が不足している。
+- ホスト新設という理由だけで直ちにOwnerへ戻す：既存要件の実現手段であり、新設だけでは承認超過を示さない。必要物・調達条件も未特定である。
+- headlessだけで完了する：desktop実機要件とV2を満たさず、仕様を暗黙に緩和する。
+- 予算上限がないため見積もりを承認内とする：D-015の範囲承認を費用の無制限承認へ拡張するため採らない。
+
+## Revisit when
+
+最小ホストでも新たな調達・権限・外部費用が必要と判明した場合、既存資源で独立実機検証を供給できない場合、費用承認の根拠を取得できない場合、またはD-015を超える範囲・費用・リスクが具体化した場合。
+
+限定調査が資料・実行権限の不足で進められない場合も、同じ未確認事項を繰り返さず、必要な供給物と回答者を示してStudioへ返す。
+>>>END
+
+<<<FILE goals/G-002-final-boss/18-game-director-to-studio.md
+---
+kind: handoff
+goal: G-002
+seq: 18
+from: game-director
+to: studio
+stage: Plan
+outcome: done
+---
+# 18: game-director → studio — 最小ホストの位置付けとPlan補完・Build保留条件
+
+## Task
+
+D-020に従い、Technical Directorへ限定したPlan補完をルーティングする。実行基線、回帰正本、実機環境の供給、費用承認の根拠を揃え、解決できないOwner権限の問題は具体化してGame Directorへ戻す。
+
+## Context
+
+OwnerはD-015で連続ラン、第5部屋の単体ボス、ラン先頭からの再挑戦を承認した。16の技術計画は提出済みだが、実行基線・実機環境・費用が未確認で、Buildは開始していない。
+
+本Stepは承認範囲の解釈と次の調査条件を決めた。技術方式、詳細仕様、実装、検証の代行はしていない。
+
+## Findings
+
+### 承認範囲の判断
+
+D-020を採択した。desktopのkeyboard／gamepadは既存要件であり、その操作・表示に必要な最小ホストをPlanで検討することは、Goalの追加ではない。ホスト新設の必要性と、費用・リスクの承認は別に判断する。
+
+16のBuild準備〜統合11.5〜20人日にはホスト2〜4人日が含まれる。独立QA 2〜3、限定Art 0.5〜1、独立Play 1〜2を加えると提示済み部分は15〜26人日である。これは確約でも総費用でもない。Designer判断、修正・再検証、機器・ライセンス等の金銭費用は未算入または未確認で、予算上限もない。
+
+現時点で承認超過・環境供給不能が確定したとは判断しない。OwnerへのEscalationはまだ作らず、無条件のBuild許可も出さない。
+
+### 次のPlan補完で取得する最小の証拠
+
+| 項目 | Technical Directorが確認する事項 | Roleで解決できない場合の返却内容 |
+|---|---|---|
+| 実行対象 | gitルート、対象commit、指定sha `27fe16268ac8`との関係、作業差分の有無、0.4／0.6表記の由来 | 必要なcheckout・資料・権限と、取得できない理由 |
+| 実行基線 | Python版・既存依存、既存tests、player／trace、各botの30/60 FPS結果。実行条件・終了理由・失敗を記録 | 利用可能な実行経路と不足。静的所見を実行済みにしない |
+| 回帰正本 | combat.md、step44、step46、step68、step72、step94、関連Decisionと実テストを読み、保持／終了／置換先を照合 | 未提供の正本を特定。未読を不存在としない |
+| 実機環境 | 利用可能なdesktop OS・表示環境、keyboard／gamepadの種類、既存依存、導入権限、独立検証担当・利用条件 | 必要なOS・機器・権限・検証枠、既存資源で代替できない理由 |
+| ホスト計画 | 共通Sessionへの接続、実機入力・表示・記録、保持入力解除、30/60 FPSと実時間pause確認の実現方式 | 最小方式でも残る制約・リスクと代替案 |
+| 費用・承認 | 環境確認後の見積もり、前提・除外・不確実性、独立検証・Designer判断・修正枠、金銭費用の有無、既存承認との対応 | Ownerに承認を求める具体的な幅・必要物・未確定部分 |
+
+既存資源の調査と、新たな供給の確約を分ける。OS、機器、予算上限、導入権限をRoleが推定・創作して埋めない。既存の権限内で確認できればOwnerへ質問する必要はない。購入、追加予算、権限付与、Roleでは確保できない検証環境などが必要なら、供給権限を持つ相手を特定する。
+
+### 返却条件とBuild保留解除
+
+Plan補完は、各依存について「確認済みの証拠」「残る不足」「解決する担当・経路」を示して返す。実行不能なら、不能の証拠と必要な供給物を返すことで調査結果とするが、開始条件の充足にはしない。
+
+BuildはD-020の五条件がすべて解決した後にStudioが開く。特に、予算資料がないまま見積もりを承認内と認定しない。既存承認だけで費用・リスクを判断できなければ、環境確認済みの最小案と見積もりを添えてGame Directorへ戻す。
+
+Owner権限の問題が具体化した場合は、次のEscalationを作れる形で返す。
+
+- 一つの判断対象：必要な供給・費用を伴う現行仕様の継続を認めるか。
+- 必要な機器・OS・依存権限・独立検証枠、費用幅と未確定部分。
+- 供給して継続、必要なら追加調査、範囲変更、停止のうち現実的な2〜3案と各ルート。
+- 推奨と、その推奨を変える証拠。
+
+範囲変更はOwner判断後にDesigner／Technical Directorへ戻す。V2を任意化したり、headlessのみで満たした扱いにしたりしない。
+
+### 証拠の限界
+
+本Stepは提供パケットのみを使用し、play／botsを実行していない。指定sha一致、実行成功、実機供給、難度、時間の新しい証拠はない。
+
+make-decisionとprepare-owner-escalationが参照するstudio/orchestration.mdはパケットに含まれていない。D-015と17に明記された承認超過・Owner権限の境界で判断した。Studioは次のLoadへ同文書を追加し、他の適用トリガーがあればBuild前に解決する。
+
+## Decisions already made
+
+- D-015：連続ラン、第5部屋単体ボス、先頭retryをOwnerが承認。承認超過は実装前に戻す。
+- D-016：読み取り、位置取り、回避後の反撃を優先し、既存部屋・共有規則と再利用方針を維持。
+- D-017：ボス・ラン・入力・表示・終端の詳細契約。実機入力と長時間検証はPlan依存。
+- D-019：旧集計の適用整理、保持回帰、ボス対応bot比較、Review前のDesigner実測後判断。
+- D-020：最小ホストを既存要件の実現作業としてPlanで検討する。費用承認は未確定。限定調査へ返し、開始条件の充足までBuildを保留。
+
+## Constraints
+
+- Owner request、Interpretation、D-015〜D-019、詳細仕様を変更しない。
+- 技術方式はTechnical Directorが選ぶ。本判断はSDL系その他のライブラリを指定しない。
+- 次Stepでゲーム・ホストの実装、新規依存導入、購入、外部費用の確約を行わない。
+- 秘密情報、環境変数の値、個人情報を調査記録へ含めない。
+- 過去Decision、G-001の結果、project.mdのCurrent stateを変更しない。
+- Plan補完→Build→独立QA→限定Art Verify→独立Play→Designer実測後判断→Reviewを維持する。明白な対処不能・到達不能はPlay前でもDesignerへ戻す。
+- 追加難度ゲートの未設定はD-019による実測後判断であり、それ自体をBuild阻害へ追加しない。
+
+## Open questions
+
+1. 実行対象・指定sha・Python基線・版表記の差を、どの証拠で確定できるか。
+2. 利用可能なOS・機器・導入権限・独立実機検証枠でV2と実時間pause確認を実施できるか。追加供給が必要なら何か。
+3. 環境確認後の見積もりと残る不確実性は何か。費用・リスクを既存承認内と判断する根拠はあるか、Ownerの具体的承認が必要か。
+
+## Expected output
+
+StudioはD-020を記録し、Technical DirectorへPlan補完をルーティングする。次のLoadには16の既存Loadに加え、D-020、studio/orchestration.md、未読の回帰正本step46・step68・step72・step94およびD-011〜D-014を、プロジェクト一覧の正確なパスで追加する。
+
+Technical Directorの返却には、実行証拠、回帰対応、実機方式と供給条件、更新見積もり、承認根拠、各未解決依存とBuild開始可否を必要とする。取得不能の場合も必要物と解決経路を明記する。
+
+Owner権限の問題が具体化したらGame Directorへ戻し、日本語の具体的なEscalationを準備する。それまではBuildを開かず、調査の完了と実装開始条件の充足を区別する。
+
+## Load
+
+- Role: studio/roles/studio.md
+- Skills: studio/skills/make-decision.md
+- Skills: studio/skills/prepare-owner-escalation.md
+- Project: studio/orchestration.md
+- Project: project.md
+- Project: goals/G-002-final-boss/goal.md
+- Project: design/final-boss-and-continuous-run.md
+- Decisions: decisions/D-015-owner-approves-continuous-run-and-final-boss.md
+- Decisions: decisions/D-016-final-boss-experience-direction.md
+- Decisions: decisions/D-017-final-boss-and-run-contract.md
+- Decisions: decisions/D-019-g002-balance-criteria-applicability.md
+- Decisions: decisions/D-020-g002-host-scope-and-plan-entry-conditions.md
+- Project: goals/G-002-final-boss/16-technical-director-to-studio.md
+- Previous handoff: goals/G-002-final-boss/17-studio-to-game-director.md
+>>>END

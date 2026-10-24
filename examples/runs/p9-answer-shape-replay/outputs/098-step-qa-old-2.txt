@@ -1,0 +1,85 @@
+<<<FILE goals/G-001-combat-monotony/98-qa-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 98
+from: qa
+to: studio
+stage: Review
+outcome: fail
+---
+# 98: qa → studio — Verification of W1–W8 (build sha 0f2c1f134c79) at 30 and 60 FPS
+
+## Verdict
+
+**Not pass.** The wording itself (W1, W5, and the dash half of W4) is correct at both rates. One defect was observed in the manual, and W3 and W7 could not be shown. No QA rounds are left, so I cannot close them. D-013's pre-commitment ("suite green, bots unchanged, wording passes → goal-met") is not satisfied. I make no claim that the rules or numbers changed; nothing observed suggests they did.
+
+I judged only from the spec, the criteria and the runs in @run-results. All evidence is from `play.py --view player`, the suite and the bots. **The trace view was not run.** There is no pre-change baseline in the packet, so nothing could be compared with "before".
+
+## Per-criterion results
+
+| ID | 30 FPS | 60 FPS | Evidence |
+|---|---|---|---|
+| W1 direction words | PASS | PASS | Spitter at (15,4) gives `from the east` (hit 4.000 / 3.983). (8,0) gives `north` (2.967 / 3.000). (1,4) gives `west` (4.000 at both rates). (8,8) gives `south` (3.000 at both rates). (15,0) gives `north-east` (4.333 / 4.350). (15,7) gives `south-east` (4.200 at both rates). Every line begins `YOU ARE HIT by a shot from the `, with ` — hearts n/3` unchanged. |
+| W2 rooms 4 and 5 | NOT SHOWN | PASS | Room 4 (60): hit 5.550 `south-east`. Room 5 (60): hits 4.350 `north-east`, 5.550 `south-east`, 6.750 `north-east`. Each matches the cue of the spitter that fired it, reversed. Spitter (15,0) cues `(-0.87,+0.50)`, giving north-east. Spitter (15,8) cues `(-0.87,-0.50)`, giving south-east. The fire and arrival times fit: 1.8 + 2.55 = 4.35, 3.0 + 2.55 = 5.55, 4.2 + 2.55 = 6.75. At 30 FPS the room 4 run ended with the player dead at 5.8 s, killed by a runner, before any shot hit. Room 5 was not run at 30 FPS. |
+| W3 prefix kept | NOT SHOWN | INCONCLUSIVE | `text "rears back"` still triggers (`move aside` worked, 60 FPS). `text "by a shot"` with `move up` did not visibly act after the hit at 3.983: P stayed on row 4 through 5.5 s. I cannot tell whether this is a prefix regression or the existing 0.3 s hit-stun swallowing the input on the one frame the text is "just shown". There is no baseline run. `text "YOU ARE HIT by"` and `text "takes aim"` were not run. |
+| W4 absorbed shots | PASS (dash) | PASS (dash) | Spitter (15,4), `3.8 dash right`. The shot was on screen at 3.6 and gone by the 4.00 frame, with no `*` in front of or behind P. Hearts 3/3 and no hit message at the end (4.17 / 4.15). The hurt-window case was not run. |
+| W5 late swipe | PASS | PASS | Grub at (10,4), swipe at 0.6. The line `the grub's lunge had already started, the swipe was too late to stop it` comes before `you swipe: grub hit` and before `YOU ARE HIT by a grub` (0.733 / 0.700). The lunge still lands. Brute, swipe at 0.8: `the brute's lunge had already started, ...` appears before the hit (0.933 / 0.900) at both rates. "Grub loses 1 HP" is not directly visible in the player view; only the `grub hit` / `brute hit` text is seen. |
+| W6 no line elsewhere | PARTIAL | PARTIAL | Wind-up swipe at 0.3: the grub is cancelled and re-rears later, with no late line (30 and 60). Brute wind-up (60): `the brute shrugs off the swipe`, no late line. Grub recovery swipe at 1.3 (60): no late line. Not run: approach, stagger, kill, and the brute wind-up and grub recovery at 30 FPS. |
+| W7 no behavior change | NOT SHOWN | NOT SHOWN | No trace and no baseline. Suite: 69 tests, OK. Bots (60 FPS only): see Bots below. |
+| W8 rate independence | PASS for what was run | PASS for what was run | W1, the W4 dash, W5 and the W6 wind-up swipe give the same wording at both rates. W2 and the rest of W6 are only shown at one rate (see the table). |
+
+## Suite and bots
+
+- `unittest`: Ran 69, OK.
+- Bots (60 FPS only; no 30 FPS bot run was provided):
+  - **Criterion 13, rooms 3–5:**
+    - walker: lost 1+3+2 = 6 (limit 3–6), cleared 2 of 3.
+    - dodger: lost 0, cleared 3/3.
+    - camper: cleared 0.
+  - **Criterion 14, rooms 1–2:**
+    - walker: lost 5 hearts.
+    - dodger: lost 0, cleared both.
+  - **Criterion 15, dashes:**
+    - dodger: dashed 6 / 8 / 14 times in rooms 3 / 4 / 5.
+  - The bot output still categorizes shot hits (`shot 2`, `shot 3`), so the new suffix does not break the `YOU ARE HIT by a shot` matching.
+  - No baseline was available for "bots' hearts and clears as before"; the values are inside the criterion limits.
+
+## Incidental checks
+
+These came from the same runs and are consistent with `combat.md`:
+
+- Room 4 and 5 first shots at 1.8 s and 3.0 s.
+- Cues 0.6 s before each shot.
+- Cue gap of 0.6 s or more between consecutive cues (3.0→3.6, 4.2→4.8, 5.4→6.0).
+- Runner wind-up 0.35 s, brute 0.70 s.
+- Dash and sidestep rules behaved as specified.
+
+## Defect and questions
+
+1. **Defect (manual, `repo/manual.md` as supplied).** In the Warnings list, the line after the "Being hit shows…" bullet begins with a leftover marker, `>>>REPLACE_PLACEHOLDER A swipe that interrupts the warning of a grub or runner staggers it for 0.4 s; a brute is not interrupted.` This is player-visible junk text. The stagger sentence is also now detached from the grub bullet. I saw this only in the packet copy; I did not run anything against it. Severity: low to medium (wording only). The fix is in Build: remove the marker and put the sentence back in a sensible place. The two new manual sentences are present and match the spec.
+2. **Spec inconsistency in W1.** The bullet for spitter (15,7) reads `from the east` and then says south-east is expected. The formula (ratio 3/7 = 0.43 > 0.4142) gives `south-east`, and the build prints that at both rates. I treated the formula as governing. The designer should correct the bullet.
+3. **W3 question.** Is a reaction rule meant to act on a hit message shown during hit-stun? If the stun discards that input, the `by a shot` script is not a valid test. The rule needs a trigger that is not swallowed, or a baseline to compare against.
+
+## Unshown (no QA rounds left; not guessed)
+
+- W2 at 30 FPS (room 4 and room 5).
+- W3 for `YOU ARE HIT by` and `takes aim`, and for `by a shot` at 30 FPS.
+- W4 hurt-window absorption.
+- W6 cases: approach, stagger, kill, brute wind-up at 30 FPS, grub recovery at 30 FPS.
+- W7 trace comparison (player and trace view against the previous behavior), and the bots at 30 FPS.
+- HP loss on the late swipe (needs the trace view).
+- The D-013 known gaps: R3-8 at 60 FPS, the room 3 sidestep, and the 30 FPS cancel and recovery swipe in room 3. The 30 FPS wind-up cancel was seen only in the practice room.
+
+## Expected output / routing
+
+Studio: the manual defect goes to Build (`gameplay-engineer`). The designer should fix the W1 bullet and settle the W3 question. Review pass 4 cannot be a paper check with W3 and W7 unshown. Either accept those as further known gaps with a decision, or allow one more QA try to run W3, the W7 traces and the W6 and W2 cases listed above.
+
+## Load
+
+- Role: studio/roles/studio.md
+- Skills: none
+- Project: design/combat-step94.md, repo/manual.md
+- Decisions: decisions/D-013-review-pass-3-readability-wording-then-close.md
+- Previous handoff: goals/G-001-combat-monotony/97-studio-to-qa.md
+>>>END

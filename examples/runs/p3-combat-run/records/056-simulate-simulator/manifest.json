@@ -1,0 +1,27 @@
+[
+ {
+  "path": "simulator-instructions",
+  "sha256": "9a2f90e328cfa5cf9c79dd30bf7719b236244cca1d868e87b8cd77c435fc5ee5",
+  "bytes": 1164
+ },
+ {
+  "path": "goals/G-001-combat-monotony/47-gameplay-engineer-to-studio.md",
+  "sha256": "bfae07b587ac5797a297a7ace75d20856b5efdea2e5d69083d1ab80afa45a1cc",
+  "bytes": 10478
+ },
+ {
+  "path": "sim/build-0.6.md",
+  "sha256": "56c97168a218ad065b1cac55d495f9325cc427ee2a48a644ab58563830adb942",
+  "bytes": 8143
+ },
+ {
+  "path": "sim/repo-notes.md",
+  "sha256": "20ae4f73a83ba12e816d25cce0ce34418c311fa93c04eea1c30b7896e08d8733",
+  "bytes": 6997
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "35d04ba78f0574457c6c379efd3ab930a1f4e729e41fe06c133511c5b4cb53a5",
+  "bytes": 534
+ }
+]

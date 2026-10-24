@@ -1,0 +1,60 @@
+{
+ "op": "Simulate",
+ "role": "simulator",
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "8b289fa1-4e46-454c-8a01-97000e8e35c2",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 6415,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 2246,
+    "output_tokens_details": {
+     "thinking_tokens": 0
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 6415,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 2246,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 6415,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 6415
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.048124,
+   "attempt": 1,
+   "started": "2026-10-11T10:49:20",
+   "seconds": 17.2,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "sim/build-0.5.md": "c02f46f99f0946efa0cac8fc9a656733b8e2fe3fe11787761732517937877662",
+  "sim/repo-notes.md": "4ece1d6bb3526c65ae5a0b8d07fe32d37f4ccbd89506bfedd89d80b81fe95a3c"
+ },
+ "decision": {}
+}

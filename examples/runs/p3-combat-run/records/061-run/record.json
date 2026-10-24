@@ -1,0 +1,17 @@
+{
+ "op": "Run",
+ "goal": "G-001",
+ "operations": [
+  "054-route",
+  "055-step-gameplay-engineer",
+  "056-simulate-simulator",
+  "057-route",
+  "058-step-qa",
+  "059-step-art-director",
+  "060-route"
+ ],
+ "stop_reason": "rejected: 060-route: output rejected after 2 attempts",
+ "status": "active",
+ "owner_reads": null,
+ "next": "run examples/runs/p3-combat-run"
+}

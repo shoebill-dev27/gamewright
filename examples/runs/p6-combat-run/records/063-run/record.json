@@ -1,0 +1,18 @@
+{
+ "op": "Run",
+ "goal": "G-001",
+ "operations": [
+  "055-step-playtester",
+  "056-route",
+  "057-step-game-designer",
+  "058-step-playtester",
+  "059-route",
+  "060-step-qa",
+  "061-step-game-designer",
+  "062-step-art-director"
+ ],
+ "stop_reason": "runtime error: claude run failed: You've hit your session limit · resets 12:10am (Asia/Tokyo)",
+ "status": "active",
+ "owner_reads": null,
+ "next": "run examples/runs/p6-combat-run"
+}

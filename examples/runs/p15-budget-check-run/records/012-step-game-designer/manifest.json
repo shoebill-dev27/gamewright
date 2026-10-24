@@ -1,0 +1,77 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-003-dash-availability-clarity/11-studio-to-game-designer.md",
+  "sha256": "dbe59c5be20e8262505db25e2e91dc6c473fe8044ce036f13448a3cb3c1919c9",
+  "bytes": 5057
+ },
+ {
+  "path": "studio/roles/game-designer.md",
+  "sha256": "802be90dc84142d0a16436d842f1da18d7c7b34500089a91a617a10dde90e7fb",
+  "bytes": 1595
+ },
+ {
+  "path": "studio/skills/write-design-spec.md",
+  "sha256": "f60b4ce8c6e89c2dc27ff87184c54b91452c45db8422fc378ca9253b45a0efd2",
+  "bytes": 1367
+ },
+ {
+  "path": "design/dash-availability.md",
+  "sha256": "4e9b49340bd963c86389083ee71f3d6af0eefdf803eeafa027915e8cbe8f5524",
+  "bytes": 14889
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "7a737106c02326f479f5e32262f611b558b52ee2f4bc65415d56e72e22a82049",
+  "bytes": 50924
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "2e0311e61caaf32c890085bbd0eac56f732e2f62e1588d957117c1a25927f326",
+  "bytes": 13259
+ },
+ {
+  "path": "repo/public-driver.md",
+  "sha256": "365e4978670f0137716ca49086e9be1a75ed70e832063afe7178b1c245e86e3a",
+  "bytes": 5108
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "05a33c6f8e50caa20ddf4f3844885137c4261ad4a3e5f3db3eb1b5312b129a9f",
+  "bytes": 237
+ },
+ {
+  "path": "decisions/D-001-one-button-combat.md",
+  "sha256": "c7fe9ca23a369707a5ab439e44789a25a0a8544efce4703a676f8fd180f82ec1",
+  "bytes": 798
+ },
+ {
+  "path": "decisions/D-028-dash-indicator-on-legacy-route.md",
+  "sha256": "f18c4c1e8e324a1a11689b49471b46cf5c0cd19ffd15659d0029154116d165ac",
+  "bytes": 1748
+ },
+ {
+  "path": "decisions/D-024-g002-historical-comparison-evidence.md",
+  "sha256": "3293baad7960fa5e870fc1e36e24b151e3e0943101e6bbf4a3cc3b0e67335cec",
+  "bytes": 3442
+ },
+ {
+  "path": "goals/G-003-dash-availability-clarity/10-qa-to-studio.md",
+  "sha256": "e8c4a33baa0e9bf5eddec08c8697fabe40511c7b091101714286218cceb64662",
+  "bytes": 18055
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

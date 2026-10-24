@@ -1,0 +1,45 @@
+<<<FILE goals/G-001-combat-monotony/104-qa-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 104
+from: qa
+to: studio
+stage: Verify (manual line, marker grep, suite)
+outcome: pass
+---
+# 104: qa → studio — Verification of the manual fix, marker search and suite: pass
+
+## Task
+
+Verify the wording-only change (`repo/manual.md`, `design/combat-step94.md`), search for stray edit markers, and run the suite. This was a narrow check, not a re-verification of W1–W8.
+
+## Verdict
+
+**Pass.** V1–V5 all pass. I found no defects.
+
+## Per-criterion results
+
+- **V1: pass.** I read the full text of `repo/manual.md`. No line starts with `>>>`, `<<<` or `=======`. `REPLACE_PLACEHOLDER` and `SEARCH` do not occur. The Warnings section ends cleanly with the last bullet, about a grub's lunge that touches you while you cannot be hurt.
+- **V2: pass.** The Warnings section has two separate bullets:
+  - The hit-message bullet begins "Being hit shows `YOU ARE HIT by a grub`, `by a runner`, `by a brute` or `by a shot from the <direction>` (north, … north-west: the side the shot came from, the same line the `cue:` line and `~` showed before the shot)." It ends with a closing parenthesis and a full stop.
+  - The stagger bullet follows as its own bullet: "A swipe that interrupts the warning of a grub or runner staggers it for 0.4 s; a brute is not interrupted." The only difference from the required text is a line wrap.
+- **V3: pass.** I read `repo/game.py`, `repo/tests/test_game.py`, `repo/bots.py`, `repo/play.py` and `design/combat-step94.md` for the V1 patterns. None of them has a line starting with `>>>`, `<<<` or `=======`, and none contains `REPLACE_PLACEHOLDER` or `SEARCH`. No `=======` appears even as ordinary text.
+- **V4: pass.** `python3 -m unittest discover -s tests` exited 0: "Ran 69 tests … OK". This matches the previous result.
+- **V5: pass.**
+  - In `design/combat-step94.md`, W1 for the spitter at (15,7) is labelled `from the south-east`.
+  - The bullet is consistent. The travel vector is about (-0.92,-0.39) and its reverse is (0.92,0.39). The ratio is 3/7 = 0.43, which is above 0.4142, so the diagonal applies.
+  - The W5 text states "for the brute, after its 0.7 s wind-up".
+  - Build check: I ran `play.py --view player` (not `run_trace`) for a spitter at (15,7) with the player at (8,4), at 60 FPS. The cue line shows aim `(-0.92,-0.39)`. Both hits print `YOU ARE HIT by a shot from the south-east — hearts 2/3` and `… 1/3`. The build agrees with the design note.
+
+## Not checked
+
+- I searched by reading the supplied file contents, not with a shell `grep`, so the V1 and V3 results rest on that reading.
+- The south-east case was run only at 60 FPS in the play view. The 30 FPS case is covered only by the suite's `ShotSourceTest`, which passed.
+- I did not re-verify W2–W8 (rooms 4–5 direction consistency, rule prefixes, absorbed shots, late swipe, no-behavior-change, bots). Beyond the suite passing, I did not run `run_bots`.
+- I did not re-verify the full 30/60 FPS criteria. Items already reported as unshown stay unshown, per D-013.
+
+## Next
+
+Per D-013 item 4, QA has passed the wording with the suite green. Review pass 4 can be the paper check of this result.
+>>>END

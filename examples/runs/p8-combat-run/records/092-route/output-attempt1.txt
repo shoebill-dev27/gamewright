@@ -1,0 +1,119 @@
+Route for Review pass 3 (92): the verdict is goal-not-met by one clause. I'm opening a wording-only Design step for `game-designer` (93). I can't append to `log.md`, which is outside my writable paths, so that entry is not written. No Owner escalation fires.
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+Row 11 (Owner escalation) stays tentative: only if Review pass 3 says the melee still reads as one fight.
+=======
+Row 11 (Owner escalation) skipped: Review pass 3 (92, D-013) found the melee does not read as one fight.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Wording fixes done (87).
+=======
+Wording fixes done (87). Open (93): wording only for shot-hit source and late-swipe explanation (D-013).
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+- Review: pass 1 (60) and pass 2 (67) done, both goal-not-met; the gap is narrow. Pass 3 is open (91).
+=======
+- Review: passes 1 (60), 2 (67) and 3 (92) done, all goal-not-met; pass 3 narrowed the gap to "the player can tell why" for shot hits and late swipes. Pass 4 is a paper check after the wording round.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| 11 | Decide (Owner escalation if the melee still reads as one fight, D-009) | game-director | prepare-owner-escalation | tentative (only if Review pass 3 says so) | — |
+=======
+| 11 | Decide (Owner escalation if the melee still reads as one fight, D-009) | game-director | prepare-owner-escalation | skipped (not fired in pass 3, D-013) | — |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| 28 | Review (pass 3) | game-director | review-outcome | open | 91-studio-to-game-director.md |
+| 29 | Next | studio | — | planned | — |
+=======
+| 28 | Review (pass 3) | game-director | review-outcome | done (goal-not-met; D-013) | 91-studio-to-game-director.md (result: 92-game-director-to-studio.md) |
+| 29a | Design (wording: shot-hit source, late-swipe line) | game-designer | write-design-spec | open | 93-studio-to-game-designer.md |
+| 29b | Build (wording only) | gameplay-engineer | implement-change | planned | — |
+| 29c | Verify (text appears; reaction rules, bots, suite; 30 and 60 FPS) | qa | verify-change | planned | — |
+| 30 | Review (pass 4, paper check of QA result) | game-director | review-outcome | planned | — |
+| 31 | Next | studio | — | planned | — |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+After QA 27b (90): no defect. The player's room 4 hits were not reproduced, and dash invulnerability matches the design. Two readability gaps (shot hit names no source; no line explains a late swipe) are given to Review rather than a new Design step. The room 3 timed items stay unshown and go to Review as known gaps. Review pass 3 opened (91).
+=======
+After Review pass 3 (92, D-013): goal-not-met by one clause (shot hit names no source; no line explains a late swipe). No Diagnose (barred, cause known), no Owner escalation: row 11 skipped. Added wording-only Design (93), then Build, Verify at 30 and 60 FPS, and Review pass 4 on paper.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Run `game-director` with 91-studio-to-game-director.md (result addressed to `studio`). Then Route: goal-met goes to Close; goal-not-met goes to Diagnose or Design as the Review directs (the readability gaps are the likely Design input), and to the Owner only if the melee still reads as one fight (D-009). At Close, propose the visual criteria V1–V12 (graphical build) as a new Goal and list the D-007 stray line as an Owner item.
+=======
+Run `game-designer` with 93-studio-to-game-designer.md (result addressed to `studio`). Then Route to Build (wording only), Verify (QA, fresh context), and Review pass 4 (paper). At Close, propose the visual criteria V1–V12 (graphical build), the grub-sameness/dodge-heavy-spitter and brute-tail Goals (only if a live player reports them), and list the D-007 stray line as an Owner item.
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/93-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-001
+seq: 93
+from: studio
+to: game-designer
+stage: Design
+outcome: routed
+---
+# 93: studio → game-designer — Specify two player-view wording changes: shot-hit source and late-swipe explanation
+
+## Task
+
+Write a wording-only spec, with player-observable acceptance criteria, for two readability changes in the text player view:
+
+- **(A)** A shot hit is traceable to its source.
+- **(B)** A swipe that damages a grub already in its lunge says the lunge had started and the swipe was too late to stop it.
+
+## Context
+
+Goal G-001 (combat feels monotonous). Review pass 3 (D-013) found the variety half of the success condition met. The "player can tell why" half has two confirmed holes. The build behaves correctly in both; the text view does not show the cause. A third Diagnose is barred by the loop limit and unnecessary, since the cause is known. After your spec: Build, Verify (QA, 30 and 60 FPS), then Review pass 4 as a paper check.
+
+## Findings
+
+From Review 92 and QA 90:
+
+- **Hole A.** `YOU ARE HIT by a shot` names no source. The shot is consumed at contact, so no later frame can show where it came from. In playtest 88 the tester could not tell which shot hit them in two of three room 4 hits. QA 90 found dash and invulnerability behavior correct and confirmed the message gap.
+- **Hole B.** A swipe landing after the lunge has begun does not cancel it. That is correct by design, and QA 90 reproduced it at 30 FPS. Only the brute has a "shrugs off" line. The tester raised the missing explanation in rooms 2, 3 and 5 and asked "What exactly makes a swipe cancel a rear-back?"
+- Review suggestions, for you to decide: for A, name the spitter or its side, or the compass direction the shot came from. For B, add a line when the swipe damages a grub already in its lunge.
+- Not in scope (Review judged them non-blocking): grub sameness in room 1, dodge-heavy spitter rooms, the room 5 brute tail, the room 3 timed gaps.
+
+## Decisions already made
+
+- D-001: one-button combat, no new inputs.
+- D-005: blocked contact consumes the shot and spends the lunge's hit.
+- D-007: room 3 in-flight bound, shot cap and cue rule unchanged.
+- D-011: variant-named wind-up and hit messages are accepted.
+- D-012: room 3 content.
+- D-013: wording-only Design/Build/Verify round, then Close.
+
+## Constraints
+
+- No rule, number, timing or input change. No change to the shot cap, cue schedule, or blocked-contact behavior.
+- The change must be identical in effect at 30 and 60 FPS.
+- Keep the substrings `takes aim`, `rears back` and `YOU ARE HIT by`, and keep the existing brute "shrugs off" line, so existing reaction rules and `bots.py` keep working.
+- Message (A) must reveal nothing the existing `cue:` and `~` lines did not already show. It must not make the text view easier than the graphical build is meant to be (readable threats pillar).
+- Reuse the existing message system.
+- Update the affected design documents and `repo/manual.md` wording in line with the spec, if your paths allow. Report any file you could not edit.
+
+## Open questions
+
+- Which exact wording for (A) and (B) satisfies the constraints? You decide, and record a Decision only if a real alternative is rejected and it constrains later work.
+- Does (A) need any information the build does not already carry at hit time? If so, say exactly what the engineer must carry, still without a rule change.
+
+## Expected output
+
+A short spec (new design document or a section in `design/combat.md`) giving the exact message formats for A and B. It also gives player-observable acceptance criteria that QA can check at 30 and 60 FPS:
+
+- the new text appears;
+- existing reaction rules still match;
+- no timing, hit or cue changes.
+
+Hand off with your result addressed to `studio`.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: project.md#vision, project.md#constraints, design/combat.md, design/combat-cues-visual-spec.md, repo/manual.md, goals/G-001-combat-monotony/90-qa-to-studio.md, goals/G-001-combat-monotony/88-playtester-to-studio.md
+- Decisions: decisions/D-005-blocked-contact-consumes-shot-and-spends-lunge.md, decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md, decisions/D-011-variant-named-messages-accepted.md, decisions/D-013-review-pass-3-readability-wording-then-close.md
+- Previous handoff: goals/G-001-combat-monotony/92-game-director-to-studio.md
+>>>END

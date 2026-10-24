@@ -1,0 +1,94 @@
+---
+kind: handoff
+goal: G-001
+seq: 32
+from: art-director
+to: studio
+stage: Verify
+outcome: fail
+---
+# 32: art-director → studio — visual review of Build 0.5 (V-1…V-8): V-1 fails where a grub shares the player's tile; V-6 is not verified
+
+## Task
+
+Give a verdict per V-item of `design/combat-visuals.md` from QA's captures C1–C8 in handoff 29, and answer whether F1 is a V-item failure or only a readability note.
+
+## Context
+
+Goal G-001, Build 0.5 (Option A). In round 27 I could check only V-5. I have now judged the verbatim player-view captures at 30 and 60 FPS. I judged only what the captures show. I did not edit the build or any rules.
+
+## Findings
+
+### Verdict per V-item
+
+| V-item | Verdict | Evidence |
+|---|---|---|
+| V-1 uppercase = committed, lowercase = harmless | **fail** (in one situation), pass elsewhere | **Pass cases:** C1 1.40 `PG`, 1.97 `PG` (strike); C2 2.67 `PW`; C4 1.00 `S`, 1.30 `GP`; C6 1.00/1.80/3.50 (`S`, `Z`); C8 AC-10 2.20 `PZ`. Harmless states are lowercase: C1 2.07, C2 `Pw`, C6 `s`/`z`. The glyph drops to `w` in the same draw as the interrupt hit line (C2 1.63 and 60 FPS 1.62). **Fail case:** C1 4.50 (30 FPS) and 4.48 (60 FPS) print "a grub rears back (on you)" and the draw shows only `P`. The committed grub has no glyph at all in that draw. The strike follows at 5.03/5.00. C7 3.57–4.50 and C4 4.40/4.83 print the same "(on you)" wind-up lines, so the situation recurs. |
+| V-2 own draw at wind-up, charge and each swipe, at 30 and 60 FPS | **pass for the observed part; two gaps not verified** | Observed: wind-up draw at the event (C1 [1.40] at 30 FPS, [1.38] at 60 FPS); charge draw at 30 FPS (C4 [1.00], C6 [1.00], C8 [2.20]); hit-swipe draw one frame after the input (C2 [1.63]/[1.62], C3 [2.53], C8 [0.03], [1.23]/[1.22]); projectile spawn (C6 [1.80]); down (C1 [5.03]). **Not verified:** (a) the charge-start draw at 60 FPS, since only line lists are given; (b) the content of the draw after a missed swipe (C8 AC-12 0.50 "(miss)": the draw at 0.53 is cut, so I cannot see the arc). |
+| V-3 uppercase grub before the first heart is lost | **pass** | C1: `G` at 1.40 and 1.38 (60 FPS), first heart lost at 1.967/1.933. C5 [0.90] `GP`, first hit at 1.467. |
+| V-4 full vs damaged distinguishable by glyph | **pass** | `g`/`w` (C2 `Pw`, C8 AC-12 `w`). `G`/`W` (C1 `PG` vs C2 2.67 `PW`). `s`/`z` (C6 2.03 vs 2.53). `S`/`Z` (C6 `S` vs the hit spitter's `Z` at 3.50; C8 `PZ`). Whether the tint differs cannot be seen in plain text; the letter already separates them. |
+| V-5 `x`, arc characters and glyph table in `manual.md#on-screen` | **pass (static only)** | QA's reading in 29 section A: all of `P x * ) ( ^ v g G w W s S z Z` are backticked in the On screen table. This matches my round-27 check. ManualTest has still not run, so this is not a test result. |
+| V-6 no saturated orange/red except telegraphed glyphs and `*` | **specified, not verified** | The run command gives plain text; no capture contains color. QA's code reading (player 229, alert enemies 202, shots 196) is consistent with the spec but is not a capture. It says nothing about the muted `g/w/s/z`, the arc or `x`. **Capture that settles it:** `run_play` with `--color`, raw output with ANSI escapes kept, for room 4 (spitters, grubs, shot in flight, the arc and the down) and room 1. Then list the distinct SGR codes per glyph. Pass if `P`, `)(^v`, `x`, and lowercase glyphs use none of the orange/red 196–202 range. Pass only if `G W S Z *` use it. |
+| V-7 two spitters distinguishable | **pass** | C4: "spitter (top right) charges" at 1.000, "spitter (bottom right) charges" at 1.800, different positions on the map. They never print identical lines at one timestamp. C6 names top left, bottom right and bottom left. Same sequence at 60 FPS. |
+| V-8 run-over shows restart prompt | **pass** | C4 6.933 / 60 FPS 6.917, C5 6.000, C7 6.967: "run over — rooms cleared: 0" then "press attack to start again". After it, an attack gives "a new run begins" (C7 15.000). The map content of the run-over draw was cut in the captures, so the "plain, nothing else on the map" rule from the spec's Run-over section is not verified. It is not a V-item. |
+
+### F1 from the visual side
+
+F1 is a failure of V-1, not only a readability note.
+
+- V-1 says that in every draw after a Wind-up begins, the committed enemy is an uppercase glyph. In the "(on you)" draws the enemy has no glyph at all. This also breaks pillar 3 ("every threat is visible before it can hurt"). It also breaks the spec intent that a player can tell "what is about to hurt them" from one frame.
+- The text line does carry the state, so principle 1 ("in the character or in a text line") is formally not broken. The V-item and the pillar are the stricter test, and they are failed.
+- The hidden state is also a harmless one, and that is only a note. In "the grub is open (on you)" the map shows `P`, and the counter window is carried by the text line alone.
+- Whether a grub may stand on the player's tile is the game-designer's rule (parallel handoff 30). I do not rule on it. My requirement is that the rule makes V-1 true:
+  - **Preferred (visually):** grubs never share the player's tile. `P` is always visible and no glyph priority question arises. This is a rules change, so it is the designer's call.
+  - **If overlap stays:** a committed grub or spitter draws its uppercase glyph in that cell, in alert color, over `P`. The "(on you)" line then names the player's position. A harmless enemy on the player's tile is drawn as `P`. This needs a line in `manual.md#on-screen` saying so.
+- Either way, QA must repeat C1 and C7 and show a `G`/`W` glyph (or no overlap) in every "(on you)" wind-up draw.
+
+### New finding F3: the swipe arc can hide the enemy it hits
+
+- C3 (30 FPS) draw [2.53], right after "you swipe: grub hit (1 left)": the row reads `P)`. The arc is drawn over the grub's tile and the `w` is not visible. The 60 FPS draw is stated identical.
+- In the other captures the enemy sits on top of the arc: C2 `Pw` with `)` above and below, C8 AC-10 `Pz` with `)` above and below, C8 AC-12 `w` in the cone.
+- The spec requires the glyph to change in the same draw as the hit line, and the arc must show reach, not conceal the target. The cell priority is inconsistent.
+- Visual rule for the fix: enemy glyphs draw over the arc, and the arc fills only empty tiles. Within the V-1 rule above, a committed enemy always wins its cell.
+- This is a readability defect, not a failed V-item. A hit confirmation must be visible in the draw that shows the hit.
+
+### F2 (out-of-order timestamps)
+
+I rule this cosmetic. It is not a V-item and it hides no threat. Text lines should print in timestamp order, but Build can do that as polish, below F1 and F3.
+
+### Consistency with the art direction
+
+Glyph choices are consistent with the direction. Case separates danger from harmless, and `P` and the arc carry the lantern role. Color remains unverified. No change to the style pillars is needed.
+
+## Decisions already made
+
+- Art direction (`project.md`): dark caves, warm lantern light against cold blue-black, threats in saturated orange/red.
+- D-001: no new inputs. Nothing here adds one.
+- No new decision file. The glyph-priority rule above is in this handoff and applies to the build; it becomes a spec line once the designer rules on F1.
+
+## Constraints
+
+- I judged only the captures in 29. V-6 and two parts of V-2 need more captures.
+- I changed no rules, timings or parameters. The overlap rule is the designer's.
+- Any build change goes to Build through the Studio.
+
+## Open questions
+
+1. **For game-designer (already in parallel, 30):** do grubs share the player's tile? My visual preference is no. If yes, see "If overlap stays" above.
+2. **For QA, next round:** (a) the `--color` capture for V-6; (b) a 60 FPS charge-start draw (room 4 or 3); (c) the draw after a missed swipe (for example C8 AC-12 at 0.53) with the arc visible; (d) the repeat of C1/C7 and C3 after any fix.
+
+## Expected output
+
+The Studio routes the F1 overlap rule to the game-designer. After the ruling, it sends Build a change covering: no overlap or an uppercase glyph in the overlap cell, and enemy over arc priority (F3). Then QA re-captures per question 2. V-1 can go to pass after that; V-6 needs the color capture. Until then the visual verdict for Build 0.5 stays `fail`, with V-3, V-4, V-5 (static), V-7 and V-8 passing.
+
+## Sender assessment
+
+I am confident in the V-1 fail because the "(on you)" draws are verbatim and show `P` alone while the line says a wind-up has started. I have moderate confidence in F3: it rests on one pair of draws (C3 [2.53]) where the grub's cell shows `)`, and I cannot see the trace position of the grub in that draw. V-6 may stay unverified if the Owner does not need color review for this build, but then it should be recorded as such.
+
+## Load
+
+- Role: studio/roles/art-director.md
+- Skills: studio/skills/visual-review.md
+- Project: project.md#art-direction, design/combat-visuals.md
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-001-combat-monotony/31-studio-to-art-director.md

@@ -1,0 +1,5 @@
+<<<FILE @need
+studio/roles/game-director.md
+goals/G-002-final-boss/02-game-designer-to-studio.md
+decisions/D-001-one-button-combat.md
+>>>END

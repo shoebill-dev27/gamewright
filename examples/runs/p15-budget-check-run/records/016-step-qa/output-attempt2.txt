@@ -1,0 +1,65 @@
+Requesting a second run round for the checks the first round did not cover: the 30 FPS one-frame-early press (the earlier script's 1.467 rounded up to the 1.500 frame), legacy room 5 and the boss room, the Q5 first run, bots and their source id header, and a player/trace event comparison.
+
+<<<FILE @run/play/P30pre
+room empty
+fps 30
+0.6 dash right
+1.46 dash left
+1.5 dash left
+end 3
+>>>END
+
+<<<FILE @run/play/R5leg
+room 5
+fps 60
+0.6 dash right
+1.5 dash left
+end 3
+>>>END
+
+<<<FILE @run/play/R5pub
+mode room
+room 5
+fps 30
+limit 4
+driver-limit 5
+0.6 dash right
+1.5 dash left
+>>>END
+
+<<<FILE @run/trace/Q5a
+mode run
+fps 60
+limit 15
+driver-limit 20
+when see g within 1.4 then attack
+when see r within 1.4 then attack
+when see G within 1.4 then attack
+when see g within 8 then move toward
+when see r within 8 then move toward
+when see G within 8 then move toward
+>>>END
+
+<<<FILE @run/bots/B1
+dodger room 3 fps 60
+>>>END
+
+<<<FILE @run/play/EVp
+room 3
+fps 30
+when see * coming within 1.5 then dash aside
+when see r within 1.4 then attack
+when see g within 1.4 then attack
+when see g within 4 then move toward
+end 12
+>>>END
+
+<<<FILE @run/trace/EVt
+room 3
+fps 30
+when see * coming within 1.5 then dash aside
+when see r within 1.4 then attack
+when see g within 1.4 then attack
+when see g within 4 then move toward
+end 12
+>>>END

@@ -1,0 +1,118 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "892b590b-0dcf-4785-98c0-98c0c64c4586",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 17144,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 4523,
+    "output_tokens_details": {
+     "thinking_tokens": 751
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 17144,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 4523,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 17144,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 17144
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.11381,
+   "attempt": 1,
+   "started": "2026-10-11T10:19:48",
+   "seconds": 29.5,
+   "errors": [
+    "open step 5: handoff 04-studio-to-qa.md is not needed; starts from 03-gameplay-engineer-to-qa.md does not exist"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "f10e9ccc-b67f-4674-b70b-ff040a6cbb30",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 17242,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 4562,
+    "output_tokens_details": {
+     "thinking_tokens": 1072
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 17242,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 4562,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 17242,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 17242
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.114592,
+   "attempt": 2,
+   "started": "2026-10-11T10:20:18",
+   "seconds": 28.4,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-dash-damage/03-gameplay-engineer-to-qa.md": "2bdad4f366b69da4f3a14441a9730452710e3a3409139b69b4e9133adaed03a4",
+  "goals/G-001-dash-damage/goal.md": "e5514adce80b8873561348ceffb95521230afe541c84df36c6babb3f0bda9c9d"
+ },
+ "decision": {
+  "status": "active",
+  "open": [
+   [
+    "qa",
+    "Verify"
+   ]
+  ]
+ },
+ "seen_through_seq": 3
+}

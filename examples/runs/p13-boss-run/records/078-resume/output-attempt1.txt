@@ -1,0 +1,179 @@
+<<<FILE decisions/D-023-owner-confirms-verification-supply.md
+---
+kind: decision
+id: D-023
+status: accepted
+decided_by: owner
+goal: G-002
+date: 2026-10-23
+supersedes: none
+---
+# D-023: 実際の供給上限に合わせてテキスト検証を継続する
+
+## Decision
+
+Ownerは63の案Aを選び、D-021を維持して進めると決定した。ただし、利用可能な供給は以下に限られる。
+
+- Loadに個別指定したファイルは本文が届く。ディレクトリ指定では中のファイル名だけが届く。
+- Stepは@needを一度、最大8ファイルまで使用できる。
+- @runは1 Stepにつき最大3回。別の実行枠はない。
+- 実行結果は先頭と末尾を含む最大2万字。全文保存先はない。長い出力は確認対象の行を出すスクリプトで絞る。
+- 変更前ビルドは保存されていない。変更前一致の基準について、記録数値との比較にするか、確認不能として扱うかはGame Designerが決める。
+
+案Aに記載された全文保存・再閲覧機構の新設は実行条件としない。利用可能な出力から何を検証できるかは各担当Roleが判断し、未確認を合格として扱わない。製品仕様、難度、秒数ゲート、Goal達成の判断を本Decisionで変更しない。
+
+Ownerの原文：
+
+> 案A。供給の事実を答えます。(1) 本文: Load に書いたファイルは本文が届きます。ディレクトリ（repo/ など）を書くと本文は届かず、中のファイル名だけが届きます。足りない本文は、Step が @need で 1 回、8 ファイルまで追加で求められます。Route は、検証に要るテストなどのファイルを 1 つずつ Load に書いてください。(2) 実行: 1 回の Step で @run を 3 回まで使えます。別の実行の枠はありません。(3) ログ: 実行結果は先頭と末尾を含む 2 万字までで、全文の保存先はありません。長い出力は、確かめたい行だけを出すスクリプトで絞ってください。(4) 変更前のビルドは保存されていません。変更前との一致を求める基準は、記録にある数値と比べるか、確かめられないものとして扱うかを Designer が決めてください。以上の範囲で、D-021 のまま進めてください。
+
+## Rationale
+
+Ownerが利用可能な供給条件を確定した。存在しない実行枠、保存機構、変更前ビルドを待つ反復を止め、本文の個別指定、出力の絞り込み、必要な直列分割で進める。変更前一致の扱いは、指定された仕様責任者の判断を先行させる。
+
+## Alternatives considered
+
+- 案BのGoal縮小：Ownerは選択していない。検証未完了を理由にStudioが範囲や基準を免除しない。
+- 案Cの停止：Ownerは継続を指示した。
+- 全文保存先や変更前ビルドの供給を再要求する：確定した供給事実と合わないため採らない。
+
+## Revisit when
+
+担当Roleが、出力の絞り込みや直列分割でも必要な判断を成立させられない具体的な理由を示した場合。または供給条件が変わった場合。変更前一致の個別基準の扱いは、まずGame Designerが判断する。
+>>>END
+
+<<<EDIT goals/G-002-final-boss/63-studio-to-owner.md
+<<<<<<< SEARCH
+status: open
+decision: none
+=======
+status: resolved
+decision: D-023
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT goals/G-002-final-boss/goal.md
+<<<<<<< SEARCH
+status: blocked-on-owner
+=======
+status: active
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+- Verify：未完了。60はfail。同じ入力不足の報告が2回に達したため、第三のQA再発行はしない。62では一部tests本文と最大3 roundsの供給改善が報告されたが、後続QAの全本文・実行枠・完全ログ保存参照経路は未確認。製品戦闘の再現済み不具合や同一基準の修正後再失敗2回とは扱わない。ボスbotの公開情報条件への対応・再測定と供給確認後に独立QAを再開する。
+=======
+- Verify：未完了。60はfail。製品戦闘の再現済み不具合や同一基準の修正後再失敗2回とは扱わない。同じ不足のまま第三のQA依頼は出さず、D-023に合わせた基準整理・再計画・試験道具対応・再測定後に独立QAを再開する。全文保存先は存在しないため、検証対象を明示した出力と直列分割で必要な証拠を構成し、未確認を合格にしない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+- Decide（検証供給）：open。63でOwnerへ、承認済み経路の供給調整／Goal縮小／供給待ち停止を提示する。D-021の承認自体は維持し、依存Stepは回答待ちとする。
+=======
+- Decide（検証供給）：done。D-023で案Aと供給上限を確定。Loadは個別ファイル本文、@needは一度8ファイルまで、@runはStepごとに3回まで、出力は最大2万字で全文保存先なし。変更前ビルドは存在しない。D-021のまま進める。
+- Design（変更前一致）：open。Designerが各該当基準を記録数値との比較にするか確認不能として扱うか決定する。比較の精度・限界と未確認の残し方を明示し、厳密な変更前同一性を主張しない。
+- Plan（供給条件への適合）：planned。Designer判断後、Technical Directorが62の計画をD-023へ適合させる。個別Load、最大3回の実行、出力上限内の証拠、直列分割、公開情報botの再測定と独立QAへの受渡しを具体化する。存在しない保存機構や変更前ビルドを前提にしない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| 7b-owner | Decide | owner | — | open | 63-studio-to-owner.md |
+| 7b-build | Build | gameplay-engineer | implement-change | tentative | 案Aの供給確認後、62の試験道具対応・再測定 |
+| 7c | Verify | qa | verify-change | tentative | Owner回答・供給確認・試験道具対応後 |
+=======
+| 7b-owner | Decide | owner | — | done | 63-studio-to-owner.md → D-023 |
+| 7b-design | Design | game-designer | make-decision, write-design-spec | open | 64-studio-to-game-designer.md |
+| 7b-plan | Plan | technical-director | technical-plan | planned | Designer判断を受け62をD-023へ適合 |
+| 7b-build | Build | gameplay-engineer | implement-change | planned | 適合計画に従う試験道具対応・再測定 |
+| 7c | Verify | qa | verify-change | planned | 基準整理・計画適合・試験道具対応後 |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+逐次実行する。現在は63へのOwner回答待ち。供給条件はこのRouteでは確定しておらず、全依存Stepを停止する。案Aなら供給・保存再閲覧確認→Engineerの試験道具対応・再測定→独立QA→限定Art Verify→独立Play→Designer実測後判断→Review。案BならGame Director→Designer→Technical Directorで範囲と計画を再整理し、案Cなら停止を維持する。明白な対処不能・到達不能が判明した場合はDesigner判断を前倒しする。並列Stepは開かない。
+=======
+逐次実行する。D-023を受け、Designerの変更前一致基準整理→Technical Directorの供給条件に適合した再計画→Engineerの試験道具対応・再測定→独立QA→限定Art Verify→独立Play→Designer実測後判断→Reviewとする。各StepのLoadは必要なファイルを個別指定する。全文保存先・別実行枠・変更前ビルドの供給を待たない。明白な対処不能・到達不能が判明した場合はDesigner判断を前倒しする。並列Stepは開かない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+62の技術計画とOwner宛brief準備を完了として記録し、63で検証供給の調整・範囲縮小・停止をOwnerへ提示する。Goalをblocked-on-ownerにし、依存Stepを停止。今回の供給改善と後続供給の未確認を区別し、第三のQA再発行は行わない。
+=======
+63へのOwner回答をD-023に記録し、Goalをactiveへ戻す。64でDesignerに変更前一致基準の扱いを委ね、その後に62を実際の供給上限へ適合させる再計画を置く。全文保存や変更前ビルドの供給待ちは解消し、同じ不足のまま第三のQA依頼は出さない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+63-studio-to-owner.mdへのOwner回答を待つ。A／B／Cと条件を回答し、Aの場合は全本文・独立実行枠・完全ログ保存参照経路の調整担当と確認方法、変更前資料の提供可否を指定する。回答後のResumeでOwner Decisionを記録し、選択に応じて再ルートする。
+=======
+Game Designerが64-studio-to-game-designer.mdを開始する。変更前一致を求める各基準について、記録数値との比較か確認不能かを決め、Technical Directorの再計画に使える形でStudioへ返す。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+未完了。63で検証供給についてOwner判断を求め、Goalをblocked-on-ownerとした。推奨はD-021を維持した供給調整（案A）。62では一部資料と実行枠の改善が報告されたが、後続Stepの全本文・独立実行・完全ログ保存参照は未確認。ボスbotの公開情報条件への対応と再測定は技術計画済みで、未実施。戦闘本体の不具合や難度の結論には拡張しない。新たなOwner判断はまだなく、独立QA・限定Art Verify・独立Play・Designer判断・Reviewは未完了。通常再生時間とVisionとの差も保持する。project.mdは変更しない。
+=======
+未完了。Ownerは案Aを選び、D-023で実際の供給条件を確定した。D-021のテキスト方式を継続し、Designerの変更前一致基準整理から再開する。全文保存先と変更前ビルドは存在しないため、それらの供給を待たず、出力の絞り込みと直列分割を計画する。ボスbotの公開情報条件への対応・再測定、独立QA・限定Art Verify・独立Play・実測後Designer判断・Reviewは未完了。戦闘本体の不具合や難度の結論は未確定で、通常再生時間とVisionとの差も保持する。project.mdは変更しない。
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-002-final-boss/64-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-002
+seq: 64
+from: studio
+to: game-designer
+stage: Design
+outcome: routed
+---
+# 64: studio → game-designer — 変更前一致基準の証拠と扱いを確定する
+
+## Task
+
+変更前ビルドが存在しない条件で、変更前との一致を求める基準を個別に整理する。Ownerの指定に従い、記録数値との比較にするか、確認不能として扱うかを決め、後続の技術再計画と独立QAが使える基準を示す。
+
+## Context
+
+G-002は、既存第1〜4部屋から最終単体ボスへ進む連続ランを、repo/のテキスト方式で成立させるGoalである。Build後のQAでは検証資料・実行・ログ不足が二度報告され、Technical Directorが62で試験道具と証拠構成の計画を提出した。
+
+Ownerは63に案Aと回答し、D-023で供給条件を確定した。変更前ビルドは保存されておらず、その供給を待つ計画は採れない。Ownerは変更前一致基準の扱いをDesignerに委ねた。今回はその判断を先行させる。実測後の難度・追加数値ゲート判断は別の予定Stepとして残る。
+
+## Findings
+
+- 現行buildはrepo/。操作packetの識別値はd86d55d41027。D-021により旧指定sha照合は要件ではない。
+- 56のBuild報告には通常ラン勝利時間30 FPS 86.967 s／60 FPS 103.533 s、保存ソース04fa2b1c168aの全suite152件OKがある。これらは独立QAの合格でも変更前同一性の証明でもない。
+- 60のQA結果、62の計画、正本仕様と関連Decisionから、L1/O3を含む該当基準を特定すること。数値の意味、測定条件、精度を本文で確認してから比較可能性を判断する。
+- ボスbotの非公開active残時間の参照について対応計画がある。対応前の比較値を新たな合格根拠にしない。製品戦闘の不具合や難度不合格と同一視しない。
+
+## Decisions already made
+
+- D-021：テキストビルドとStudio内の別Stepによる独立検証で進める。
+- D-019：旧集計の適用関係と代替評価を定める。具体的内容は本文を参照する。
+- D-022：V1補足を定める。具体的内容は本文を参照する。
+- D-023：案Aを選択。変更前一致基準を記録数値との比較にするか確認不能として扱うかはDesignerが決める。
+
+## Constraints
+
+- 製品仕様、戦闘パラメータ、難度、秒数ゲートを供給不足だけを理由に変更しない。
+- 記録数値との一致から、保存されていない変更前実装との厳密な同一性を主張しない。
+- 確認不能は合格・免除・Goal達成と区別する。Goalの再解釈や範囲縮小が必要なら、権限を越えて決定せず手戻り理由を示す。
+- Loadは個別ファイル本文が届く。ディレクトリ指定はファイル名だけ。追加本文は@need一度、最大8ファイルまで。
+- @runはStepあたり最大3回。出力は先頭と末尾を含む最大2万字で、全文保存先も別実行枠もない。必要なら検証対象を絞った出力を使う。
+- 実機、gamepad、外部配員、追加金銭、存在しない変更前ビルドを要求しない。
+- 実装やQA判定は今回行わない。
+
+## Open questions
+
+- 変更前一致を要求する基準はどれか。それぞれどの記録を使えるか。
+- 記録比較が成立するものの測定条件、精度、比較方法、証明できる範囲は何か。
+- 確認不能の項目を、後続QAと最終Reviewへどう明示して渡すか。
+
+## Expected output
+
+重要な判断を新規Decisionに記録し、必要なら正本仕様の該当箇所を更新する。各基準について、従来要求、採用する扱い、根拠資料、比較条件と精度、未確認として残る点を表で示す。
+
+結果Handoffはto: studioとする。Technical Directorが62をD-023へ適合させるために必要な仕様上の入力と、追加で必要な個別ファイル名を明示する。QAへ直接免除を依頼しない。
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/make-decision.md
+- Skills: studio/skills/write-design-spec.md
+- Project: project.md
+- Project: design/final-boss-and-continuous-run.md
+- Project: design/combat.md
+- Project: goals/G-002-final-boss/56-gameplay-engineer-to-studio.md
+- Project: goals/G-002-final-boss/60-qa-to-studio.md
+- Project: goals/G-002-final-boss/62-technical-director-to-studio.md
+- Decisions: decisions/D-019-g002-balance-criteria-applicability.md
+- Decisions: decisions/D-021-owner-authorizes-text-build.md
+- Decisions: decisions/D-022-g002-v1-supplements.md
+- Decisions: decisions/D-023-owner-confirms-verification-supply.md
+- Previous handoff: goals/G-002-final-boss/63-studio-to-owner.md
+>>>END

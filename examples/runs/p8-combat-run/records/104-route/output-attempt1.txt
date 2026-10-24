@@ -1,0 +1,94 @@
+Both steps are in and fit the plan. Build 29d removed the stray marker from `manual.md`, and Design 29e fixed the W1 (15,7) label and the W5 brute timing. The engineer could not grep the other files or run the suite, so the verify step covers both. No escalation trigger fires. I'm opening Verify 29f with a fresh QA handoff that leaves out the engineer's assessment. I can't append to `log.md` from this packet, so that entry is not written.
+
+<<<FILE goals/G-001-combat-monotony/103-studio-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 103
+from: studio
+to: qa
+stage: Verify (manual line, marker grep, suite)
+outcome: routed
+---
+# 103: studio → qa — Verify the manual fix, grep for stray markers, run the suite
+
+## Task
+
+Verify a small, text-only change to `repo/manual.md` and confirm that no stray edit markers remain anywhere in the build. Run the test suite. Address the result to `studio`.
+
+## Context
+
+Goal G-001 (combat monotony), wording-only round (D-013). Your report 98 found a stray edit marker in the manual's Warnings section. The marker has since been removed and the surrounding text re-wrapped. The design note `design/combat-step94.md` was also corrected in wording (W1 label for a spitter at (15,7); W5 brute timing). No gameplay, timing or parameter change was intended in this round.
+
+## Findings
+
+Nothing from the implementation side is included, so you verify from the spec and the files.
+
+## Decisions already made
+
+- D-011: variant names in wind-up and hit messages (accepted).
+- D-013: wording-only round, then Close.
+
+## Constraints
+
+- Verify only the items below. Do not start a new full W1–W8 round.
+- Items you could not show in report 98 (W2 at 30 FPS, W3, W4, W6, W7, bots at 30 FPS) and the earlier room 3 gaps stay as known gaps. Do not try to close them here. If cheap and incidental, you may note anything you do observe.
+- Use the project run commands (`run_tests`, `run_play`, `run_trace`).
+
+## Open questions
+
+None.
+
+## Expected output
+
+A verification report (pass/fail per criterion) addressed to `studio`, covering:
+
+1. **Markers.** No lines matching `^>>>`, `^<<<`, `REPLACE_PLACEHOLDER`, `SEARCH` or `^=======` in `repo/manual.md`, `repo/game.py`, `repo/bots.py`, `repo/play.py`, `repo/README.md` and `repo/tests/`. Report the grep patterns and files covered. Legitimate matches (e.g. the word "search" in code) are to be listed and judged, not hidden.
+2. **Manual structure.** In the Warnings section of `repo/manual.md`, the hit-message bullet (shot hit with direction) and the late-swipe stagger statement are separate, well-formed bullets. The stagger statement reads as: a swipe that interrupts the warning of a grub or runner staggers it for 0.4 s; a brute is not interrupted.
+3. **Manual wording vs spec.** The manual's shot-hit direction wording and late-swipe line agree with `design/combat-step94.md` (W1, W5). Report any disagreement.
+4. **Suite.** `python3 -m unittest discover -s tests`: report the test count and result. The previous result was 69 tests OK.
+5. **W1 (15,7) label.** Using one trace of a spitter shot at (15,7), confirm the traced direction is south-east as the corrected design note now states. One FPS is enough. If you cannot run it, say so.
+
+If a defect is found, give a precise report with reproduction steps and acceptance criteria.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: project.md#current-state, repo/manual.md, repo/game.py, repo/bots.py, repo/play.py, repo/README.md, repo/tests/test_game.py, design/combat-step94.md
+- Decisions: decisions/D-011-variant-named-messages-accepted.md, decisions/D-013-review-pass-3-readability-wording-then-close.md
+- Previous handoff: goals/G-001-combat-monotony/98-qa-to-studio.md
+>>>END
+
+<<<FILE @none
+>>>END
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+| 29d | Build (manual.md stray marker, text only) | gameplay-engineer | implement-change | open | 99-studio-to-gameplay-engineer.md |
+=======
+| 29d | Build (manual.md stray marker, text only) | gameplay-engineer | implement-change | done (marker removed; grep/suite not run) | 99-studio-to-gameplay-engineer.md (result: 101-gameplay-engineer-to-studio.md) |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| 29e | Design (W1 bullet for spitter at (15,7)) | game-designer | write-design-spec | open | 100-studio-to-game-designer.md |
+| 29f | Verify (manual line only, suite) | qa | verify-change | planned | — |
+=======
+| 29e | Design (W1 bullet for spitter at (15,7)) | game-designer | write-design-spec | done (label fixed; W5 brute timing added) | 100-studio-to-game-designer.md (result: 102-game-designer-to-studio.md) |
+| 29f | Verify (manual line, marker grep, suite) | qa | verify-change | open | 103-studio-to-qa.md |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+manual has a stray edit marker (fix: 99).
+=======
+manual stray marker removed in 29d (101); marker grep of other files and the suite run are still open (29f).
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+After Verify 29c (98, fail): W1, W5 pass; manual.md has a stray edit marker (unconfirmed by QA, so Build checks it), and the W1 (15,7) bullet contradicts itself. Opened Build 29d (99) and Design 29e (100) in parallel, then a manual-only re-verify 29f. Unshown items go to Review as known gaps; no new full QA round.
+=======
+After Build 29d (101) and Design 29e (102): marker removed, W1 (15,7) label fixed. The engineer could not grep other files or run the suite, so Verify 29f (103, fresh QA, no sender assessment) covers the manual lines, marker grep, suite and one W1 trace. Unshown items stay known gaps for Review.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Run `gameplay-engineer` with 99-studio-to-gameplay-engineer.md and `game-designer` with 100-studio-to-game-designer.md (parallel; both address results to `studio`). Then Route: open Verify 29f (QA, fresh, manual line and suite only), then Review pass 4 (paper), passing the QA 98 unshown items as known gaps.
+=======
+Run `qa` with 103-studio-to-qa.md (fresh context; result addressed to `studio`). Then Route: if it passes, open Review pass 4 (paper check, `game-director`), passing the QA 98 unshown items as known gaps; if it fails, return to Build with the failure report.
+>>>>>>> REPLACE
+>>>END

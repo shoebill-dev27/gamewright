@@ -1,0 +1,18 @@
+[
+ {
+  "run": "@run/tests",
+  "command": "python3 -m unittest discover -s tests",
+  "script": "\n",
+  "exit": 0,
+  "seconds": 0.2,
+  "output": "......................................................\n----------------------------------------------------------------------\nRan 54 tests in 0.186s\n\nOK\n"
+ },
+ {
+  "run": "@run/bots/fps30",
+  "command": "python3 bots.py {script}",
+  "script": "fps 30\n",
+  "exit": 0,
+  "seconds": 0.0,
+  "output": "bots at 30 FPS, up to 60 s per room, 3 hearts each\ncamper  room 1: NOT cleared (5.7 s); hearts lost 3 (hit by: grub 3); attacks 5, dashes 0\ncamper  room 2: cleared in 10.2 s; hearts lost 2 (hit by: grub 2); attacks 8, dashes 0\ncamper  room 3: NOT cleared (5.5 s); hearts lost 3 (hit by: shot 3); attacks 0, dashes 0\ncamper  room 4: NOT cleared (6.7 s); hearts lost 3 (hit by: shot 3); attacks 1, dashes 0\ncamper  room 5: NOT cleared (6.7 s); hearts lost 3 (hit by: shot 3); attacks 2, dashes 0\ncamper  total: cleared 1/5, hearts lost 14, dashes 0\nwalker  room 1: NOT cleared (4.9 s); hearts lost 3 (hit by: grub 3); attacks 5, dashes 0\nwalker  room 2: cleared in 8.4 s; hearts lost 2 (hit by: grub 2); attacks 8, dashes 0\nwalker  room 3: cleared in 9.6 s; hearts lost 0 (hit by: none); attacks 6, dashes 0\nwalker  room 4: cleared in 9.9 s; hearts lost 1 (hit by: grub 1); attacks 7, dashes 0\nwalker  room 5: NOT cleared (10.2 s); hearts lost 3 (hit by: grub 2, shot 1); attacks 9, dashes 0\nwalker  total: cleared 3/5, hearts lost 9, dashes 0\ndodger  room 1: cleared in 6.6 s; hearts lost 0 (hit by: none); attacks 6, dashes 3\ndodger  room 2: cleared in 20.7 s; hearts lost 0 (hit by: none); attacks 8, dashes 10\ndodger  room 3: cleared in 19.7 s; hearts lost 0 (hit by: none); attacks 6, dashes 8\ndodger  room 4: cleared in 18.3 s; hearts lost 0 (hit by: none); attacks 7, dashes 7\ndodger  room 5: cleared in 24.2 s; hearts lost 0 (hit by: none); attacks 12, dashes 11\ndodger  total: cleared 5/5, hearts lost 0, dashes 39\n"
+ }
+]

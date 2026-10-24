@@ -1,0 +1,199 @@
+Routing is done: 9b, 10a and 10b are closed, and two new steps are open in parallel (Design and a QA trace). I could not append to `log.md`, which is not on my write list, so the Route log entry still needs to be added by whoever can write it.
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-16
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): a player playing the current build's combat experiences it as varied and engaging instead of monotonous. Different situations call for noticeably different play (positioning, timing, use of attack and dash), and the player can tell why. The improvement stays inside the vision pillars: one-button combat (attack + dash only, D-001), short runs, readable threats. Numeric thresholds belong to Design; the final verdict belongs to Review.
+
+Out of scope: new input buttons (needs Owner approval per D-001), changing run length, new biomes or content unrelated to combat variety, and any change to the core concept. Not a defect report: nothing in the request says combat is broken.
+
+## Unknowns
+
+- Observe: done (scripted play, rooms 1–3 + practice room; 02). FPS divergence (qa): done (16, 20); the contact-edge graze is accepted (D-002, D-003).
+- Diagnose: second pass done (31). Melee enemies share one answer (S1, the core of the Goal); rooms 4–5 spitter crossfire is unfair because cue gaps are only 0.2 s (S4). Evidence is scripted play; runner, brute and crossfire for a human are unconfirmed. A third Diagnose pass without progress goes to `game-director` review (loop limit).
+- Observe (qa): room 2 grub hit after swipe is not a defect (32); the swipe landed during the lunge. Open: trace of rooms 3–4 spitter fire times (34), because the playtest said "in sync" and "opposite corners", which conflicts with the spec.
+- Decide: skipped. The diagnosed options (31) are variant parameters, a per-variant cancel flag, spitter timing and room contents, all inside D-001 and the pillars. Tentative again (game-director) if Design finds the need for a new enemy type, healing, new input, or a scope or priority change.
+- Design: 9b done (30, D-003). Open (33): Options 1 and 2 (Option 3 at the designer's discretion), manual wording on when a swipe cancels, and the "3 in the air" wording.
+- Plan: skipped (approach local, reuses the enemy update loop). Returns if the same criterion fails verification twice.
+- Build: 0.5 done (10, 18). Planned after Design 33 (new build 0.6).
+- Verify (QA): criteria 1–17 pass for 0.5 at 30 and 60 FPS (24); new and changed criteria need Verify after the next Build. Verify (visual): V1–V11 need a graphical build, a proposed new Goal at Close; V12 open until a graphical build exists.
+- Play: first pass done (27). Second pass planned after the next Verify; ideally hand-timed on rooms 2, 4 and 5 (runner, brute, crossfire; see 31 finding 5).
+- Manual wording ("no more than 3 in the air") is true in rooms 1–5 only; included in Design 33.
+- Review: planned (`game-director`), experience Goal. The Goal is not yet met.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 01-studio-to-playtester.md (report: 02-playtester-to-studio.md) |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-studio-to-game-designer.md (result: 04-game-designer-to-studio.md) |
+| 3 | Decide | game-director | make-decision | skipped (no real choice; see Unknowns) | — |
+| 4a | Design | game-designer | write-design-spec | done | 05-studio-to-game-designer.md (result: 07-game-designer-to-studio.md) |
+| 4b | Observe (FPS divergence) | qa | reproduce-defect | done | 06-studio-to-qa.md (result: 08-qa-to-studio.md) |
+| 5 | Plan | technical-director | technical-plan | skipped (approach local; see Unknowns) | — |
+| 6 | Build | gameplay-engineer | implement-change | done | 09-studio-to-gameplay-engineer.md (result: 10-gameplay-engineer-to-studio.md) |
+| 7a | Design (criterion 14, spec gaps) | game-designer | write-design-spec | done | 11-studio-to-game-designer.md (result: 14-game-designer-to-studio.md) |
+| 7b | Verify (visual) | art-director | visual-review | done | 12-studio-to-art-director.md (result: 15-art-director-to-studio.md) |
+| 7c | Observe (walker 30/60 divergence) | qa | reproduce-defect | done | 13-studio-to-qa.md (result: 16-qa-to-studio.md) |
+| 7d | Build (bot log data, walker test) | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md (result: 18-gameplay-engineer-to-studio.md) |
+| 8 | Verify (criteria 1–16, V12) | qa | verify-change | done (question: graze) | 19-studio-to-qa.md (result: 20-qa-to-studio.md) |
+| 8b | Design (graze, cap, margin, doc conflicts) | game-designer | write-design-spec | done | 21-studio-to-game-designer.md (result: 22-game-designer-to-studio.md) |
+| 8c | Build (contact test / cap) | gameplay-engineer | implement-change | skipped (graze and cap accepted as built) | — |
+| 8d | Verify (criteria 1–17; close 30 FPS gaps) | qa | verify-change | done (pass) | 23-studio-to-qa.md (result: 24-qa-to-studio.md) |
+| 9a | Play | playtester | playtest-session | done | 25-studio-to-playtester.md (report: 27-playtester-to-studio.md) |
+| 9b | Design (QA notes: exact-reach miss, lunge band) | game-designer | write-design-spec | done | 26-studio-to-game-designer.md (result: 30-game-designer-to-studio.md) |
+| 10a | Diagnose (playtest issues 1–4) | game-designer | diagnose-experience | done | 28-studio-to-game-designer.md (result: 31-game-designer-to-studio.md) |
+| 10b | Observe (room 2 grub hit after swipe) | qa | reproduce-defect | done (not a defect) | 29-studio-to-qa.md (result: 32-qa-to-studio.md) |
+| 11 | Decide (if Design implies direction or scope change) | game-director | make-decision | tentative | — |
+| 12a | Design (Options 1–2, manual wording) | game-designer | write-design-spec | open | 33-studio-to-game-designer.md |
+| 12b | Observe (spitter fire times, rooms 3–4) | qa | reproduce-defect | open | 34-studio-to-qa.md |
+| 13 | Build (build 0.6 per Design) | gameplay-engineer | implement-change | planned | — |
+| 14 | Verify (after Build, 30 and 60 FPS) | qa | verify-change | planned | — |
+| 15 | Play (fresh, hand-timed rooms 2, 4, 5) | playtester | playtest-session | planned | — |
+| 16 | Review | game-director | review-outcome | planned | — |
+| 17 | Next | studio | — | planned | — |
+
+## Route changes
+
+After 9b, 10a, 10b: all fit. Diagnose 31 needs no Decide (options inside D-001), so Decide stays tentative. Room 2 hit is not a defect (32). Opened Design (33, Options 1–2, manual wording) and, in parallel, a QA spitter-timing trace (34) to settle the "in sync" conflict. Build, Verify, Play are now planned.
+
+## Next action
+
+Run the game-designer step with 33-studio-to-game-designer.md and the qa step with 34-studio-to-qa.md; they are independent. Then Route: wait for both. If the trace contradicts the spec or 31's S4 cause, send the result back to the designer before Build; if QA confirms a spitter defect, route it to Build with the report. If Design implies a direction or scope change, open Decide (`game-director`).
+
+## Outcome
+
+(open)
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/33-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-001
+seq: 33
+from: studio
+to: game-designer
+stage: Design
+outcome: routed
+---
+# 33: studio → game-designer — Specify Options 1 and 2 from your second Diagnose, plus manual wording
+
+## Task
+
+Write the design spec (`write-design-spec`) for the changes your Diagnose (handoff 31) recommended as "do": Option 1 (breathing room in spitter rooms 4–5) and Option 2 (the brute's wind-up swipe does not cancel its lunge). Decide yourself whether Option 3 (room 2 spitter) belongs in this slice. Also settle the manual wording items below.
+
+## Context
+
+G-001 (combat monotony). Build 0.5 passed QA (criteria 1–17). The fresh playtest (27) still found monotony: melee enemies share one answer and rooms 4–5 crossfire feels unfair. Your Diagnose (31) ranked the options; the Studio found no Decide needed because all options stay inside D-001 and the pillars. A parallel QA step (handoff 34) is tracing spitter fire times in rooms 3–4, because the playtest said "in sync" and "opposite corners", which conflicts with the spec. That result arrives after this step.
+
+## Findings
+
+- From 31: S1 (melee share one answer) is the core cause of "monotonous". S4 (rooms 4–5 crossfire) is the most important problem: the next cue locks 0.2 s after the previous one ends, at the position the player dodged to. Options 1 and 2 are independent and can be built together.
+- From 32 (QA, room 2): the "grub hit right after a swipe" was not a defect. The swipe landed after the 0.5 s wind-up had ended, so the lunge continued, which conforms to `design/combat.md`. `repo/manual.md` says "swipe it (within 1.5 tiles) to cancel the lunge" without saying this works only during the warning. QA asks whether the manual should say so; this is a wording question, not a rule change.
+- Known manual item: "no more than 3 in the air" is true in rooms 1–5 only.
+- Runner and brute behavior for a human, and the real crossfire experience, are unconfirmed by scripted evidence; a hand-timed playtest will follow the Build.
+
+## Decisions already made
+
+- D-001: attack and dash only; no new input.
+- D-002, D-003: per-frame contact sampling, graze accepted, exactly the reach is inside the band.
+
+## Constraints
+
+- Stay inside D-001 and the pillars (one-button combat, short runs 15–20 min, readable threats); reuse existing systems; correct at 30 and 60 FPS.
+- Keep lane geometry identical across variants (visual spec); if a change needs presentation work, name it for the `art-director` rather than styling it.
+- Make Option 1 robust whether or not the spitters currently fire together: state the required gap between cue windows as a rule in the spec, with player-observable criteria, and do not depend on the "in sync" claim.
+- Every new or changed criterion must be checkable by scripts or bots at 30 and 60 FPS. Say which existing criteria change (for example 6, 8, 13, 14) and re-derive the affected bot expectations, flagging any you cannot verify without running the bots.
+- Wording of `repo/manual.md` is player-facing text that ships with the build: give the exact lines to add or change (swipe cancels only during the warning; the brute rule if Option 2 is taken; the "3 in the air" scope). The Build step will apply them.
+
+## Open questions
+
+- Include Option 3 in this slice or defer it? Your call; say why.
+- Does the Option 2 change need any signal to the player beyond the manual (for example a cue-text line)? If it does, name it as an item for the `art-director`.
+- If you find the changes need a new enemy type, healing, new input, or a scope or priority change, stop and hand back to the Studio for a Decide step.
+
+## Expected output
+
+Update `design/combat.md` (and the visual spec only if needed), then write a handoff addressed to `studio`: the rulings, the changed and new criteria, the exact manual wording, whether Build is needed (expected yes), what QA must verify, and anything the Playtester should be asked to focus on without revealing the expected result. Record a Decision only if a real alternative was rejected.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: design/combat.md, design/combat-cues-visual-spec.md, repo/manual.md, project.md#vision, project.md#constraints
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-002-contact-edge-graze-accepted.md, decisions/D-003-contact-edge-exact-reach-and-lunge-band.md
+- Previous handoff: goals/G-001-combat-monotony/31-game-designer-to-studio.md (also read goals/G-001-combat-monotony/32-qa-to-studio.md for the manual wording question)
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/34-studio-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 34
+from: studio
+to: qa
+stage: Observe
+outcome: routed
+---
+# 34: studio → qa — Trace spitter fire times in rooms 3 and 4 against the spec
+
+## Task
+
+Use the `reproduce-defect` skill to check whether the spitters in rooms 3 and 4 fire at the times and positions `design/combat.md` specifies, and how many shots are in flight. Report whether the build conforms.
+
+## Context
+
+G-001 (combat monotony). A fresh playtest of build 0.5 (rooms 1–5, scripted play) reported:
+
+- in rooms 4–5 the two spitters were in "opposite corners" and "fired in sync";
+- in room 3 a double fire at about 5.8 s;
+- deaths in room 4 (about 15.75 s) and room 5 (about 11.1 s), from shots, with the player hit while lined up for another warning.
+
+The room table in the design appears to put the two spitters on the same side, and the spec has them firing 0.8 s apart. The Studio does not know which side is right.
+
+## Findings
+
+Nothing yet; this is the Observe step. No change is requested.
+
+## Decisions already made
+
+- D-002: per-frame contact sampling and the contact-edge graze are accepted. Do not report graze cases as defects.
+
+## Constraints
+
+- Report only. Do not change the build, tests or scripts in `repo/`.
+- Use the project's run commands (`run_trace`, optionally `run_play`) at both 30 and 60 FPS.
+- Verify from the spec and the build, not from a guess about what the designer intends.
+
+## Open questions
+
+- Where is each spitter placed in rooms 3, 4 and 5 (from the trace), and does that match the spec's room table?
+- Spitter shot times and cue windows in room 4 (and room 3 around 5.8 s): the offset between the two spitters, and any case where two shots start together or one cue starts less than 0.6 s after another ends. Does it match the spec, at both rates?
+- Shots in flight over time in rooms 3–5, against the spec's limit.
+- Does a player who stays still, and a player who dodges one line, get hit by a shot already in flight? State which cause (a shot in flight, a new aim lock, or a misread line) you see in each hit.
+
+## Expected output
+
+A handoff addressed to `studio` with the trace evidence (times, positions, rates), a verdict (conforms or differs, and how), and defect details with severity and reproduction steps if the build differs from the spec. State what you did not cover.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/reproduce-defect.md
+- Project: design/combat.md, repo/manual.md, project.md#current-state, the build in repo/
+- Decisions: decisions/D-002-contact-edge-graze-accepted.md
+- Previous handoff: goals/G-001-combat-monotony/32-qa-to-studio.md
+>>>END

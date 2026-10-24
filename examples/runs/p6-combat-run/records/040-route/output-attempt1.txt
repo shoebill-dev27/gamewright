@@ -1,0 +1,197 @@
+Handoff 35 is a `question`: the engineer finished the render fix, but `manual.md` is outside every Role's write list, so the practice-room paragraph is not placed. This is the third round with the same missing input and nothing new supplied, so I'm escalating to the Owner. The render verification doesn't depend on that answer, so I'm opening QA in parallel.
+
+<<<FILE goals/G-001-combat-monotony/36-studio-to-owner.md
+---
+kind: escalation
+goal: G-001
+seq: 36
+from: studio
+to: owner
+status: open
+decision: 
+---
+# 36: オーナー判断のお願い — `manual.md` に練習部屋の段落を入れてください
+
+## Question
+
+`manual.md` の `## On screen` セクションに、下記の英文1段落を (文言そのままで) 追記してもらえますか。
+
+## Why this needs the Owner
+
+作業は、どのロールも作れない素材 (書き込めない `manual.md`) で止まっています。D-005 により `manual.md` はオーナーが置くもので、エンジニアの書き込み範囲にも入っていません。同じ入力 (`manual.md` の更新) が3回続けて足りず、その間に新しい材料も供給されていないため、ロールへは再度回さずオーナーに上げます (orchestration.md の「ロールが作れない情報・素材で止まる場合」)。
+
+## Options
+
+### Option A — オーナーが段落を追記する (推奨)
+
+`manual.md` の `## On screen` セクション (記号表のあと、"With color on…" 段落の前後どちらでも可、セクション内であること) に次の段落を一字も変えずに入れます。`manual.md` は `repo/` と同じ階層に置いてください (`ManualTest` がそこを参照します)。
+
+> The practice room (`room empty`) is not part of a run. Enemies appear only where your script places them (`spawn`), and you stand where `player` puts you. Nothing heals, there is no next room, and the session ends a moment after you go down. If a grub or spitter is on your tile, it is drawn on a free tile next to you, so you can always see it.
+
+数分の作業で、可逆です。AC-15 (D-006 の練習部屋の記載) が満たされ、`ManualTest` 2件が通るようになります。
+If chosen: Resume。D-007 として記録し、Goal を `active` に戻し、QA (7g) の AC-15 確認を `ManualTest` 込みで行います。7h (アートディレクター)、Play、Review は計画どおりです。
+
+### Option B — 今後 `manual.md` をロールが編集できるようにする
+
+オーナーが実行環境の書き込み許可を広げ (または D-005 を改め)、エンジニアが `manual.md` を直接編集できるようにします。以後の手戻りは減りますが、D-005 (オーナーが置く) の方針変更になり、設定変更の手間もあります。
+If chosen: D-005 を改める Decision を記録し、7f を書き込み許可付きで再度エンジニアに回します。
+
+### Option C — 練習部屋の段落を見送る
+
+AC-15 のうち練習部屋の記載を外し、プレイヤー向けマニュアルは現状のままにします。D-006 の「練習部屋は On screen セクションに載せる」という裁定を覆すので、game-designer / game-director の再判断が必要です。
+If chosen: Design (game-designer) に戻して AC-15 と D-006 を見直し、`ManualTest` の該当テストを削ります。
+
+## Studio recommendation
+
+Option A。
+
+## Reasoning
+
+文面はすでに確定していて (D-006、AC-15)、必要なのは追記だけです。B は恒久的な方針変更、C は既存の裁定を覆すため、この小さな欠落には釣り合いません。A が長引く場合に B を検討してください。
+
+## Meanwhile
+
+描画変更 (F1/AC-18、F3、AC-17) の検証は `manual.md` に依存しないため続行します。QA 7g (37) を開き、AC-15 と `ManualTest` は「未実行」として扱います。アートディレクターの 7h は 7g の後に、Play と Review はその後に続きます。
+
+## Owner decision required
+
+A / B / C — 選択肢と条件を返信してください。
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/37-studio-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 37
+from: studio
+to: qa
+stage: Verify
+outcome: routed
+---
+# 37: studio → qa — verify the rendering change (build 0.5) except the manual check
+
+## Task
+
+Verify the current build against AC-17 and AC-18 in `design/combat.md` (and the D-006 display ruling), and confirm that nothing else changed. Do not judge AC-15 (manual text): it is waiting on the Owner, so report `ManualTest` as not run, not as a failure.
+
+## Context
+
+G-001 (combat feels monotonous). The enemy rework is built. The last Build step changed only how the player view draws enemies: an enemy standing on the player's tile must never be hidden (AC-18, D-006), and enemy glyphs must be visible over the swipe arc. The simulation (`game.py`) is meant to be unchanged, so the timings, hearts and hit results from earlier verification should be identical. The previous QA pass (29) repeated scripts C1, C7 and C3 and captured raw output; those are the baseline.
+
+## Findings
+
+None to hand over. Work from the acceptance criteria and the build.
+
+## Decisions already made
+
+- D-006: enemies may overlap the player but are never hidden; the practice room is listed in the manual's On screen section.
+- D-001: no new inputs.
+
+## Constraints
+
+- Play correctly at 30 and 60 FPS: run each check at both.
+- Run through the project's commands (`run_tests`, `run_play`, `run_trace`, `run_bots`).
+- `manual.md` may be missing from your workspace. If so, the two `ManualTest` errors are an environment matter. Do not count them against any AC.
+
+## Open questions
+
+None.
+
+## Expected output
+
+A pass/fail report per criterion, with exact scripts and the raw output you rely on. Cover:
+1. AC-17 and AC-18 (grub and spitter on the player's tile, wind-up and strike draws, a down player, two enemies overlapping).
+2. Repeats of C1, C7, C3 at 30 and 60 FPS compared with the earlier results: timings, hearts and hit results should be unchanged.
+3. The hit draw with the swipe arc: the enemy glyph is visible over the arc.
+4. Raw captures for the art director's visual re-check: grub on the player's tile in wind-up, strike and recovery draws, a spitter on the tile, a swipe after a miss, the 60 FPS charge-start draw, and one `--color` capture.
+5. Anything not verifiable.
+
+Address the result to `studio`.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: design/combat.md, manual.md, repo/ (build; run commands in project.md)
+- Decisions: decisions/D-006-overlap-display-and-practice-room-manual.md
+- Previous handoff: goals/G-001-combat-monotony/29-qa-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: blocked-on-owner
+created: 2026-10-15
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): when an action player from the project's player profile plays through combat encounters, the fights feel varied and engaging, and the player's moment-to-moment choices (positioning, timing, enemy behavior) visibly matter. The player no longer experiences the fights as the same repeated pattern.
+
+Out of scope: adding input buttons beyond attack, dash and pause (D-001, Owner approval needed); changes to the run length or the non-combat systems; numeric targets (these belong to Design as acceptance criteria, and the final verdict to Review).
+
+No immediate escalation: the Goal does not conflict with the vision or D-001, and it needs no reinterpretation. Improving depth through positioning, timing and enemy behavior is what pillar 1 asks for.
+
+## Unknowns
+
+- Observe (playtester, qa): done (02, 08, 06, 15). Not observed: room 5 fight, approaching a spitter, projectile hits, room clear, dash dodging; Play covers them.
+- Diagnose, Decide: done (03; D-002, D-005, D-006). Cause: single-state, untelegraphed enemy behavior; Option A.
+- Design: done (10, 16, 33). Spec `design/combat.md` (AC-1…AC-18), D-003, D-006, `design/combat-visuals.md` (V-1…V-8).
+- Plan: done (14, D-004). Gap defaults F1–F11; the designer confirms them at Review, F1 (grub speed) matters most.
+- Build: code done (18, 22, 23, 35). 7f built the render fix (F1/AC-18, F3) in `play.py` with tests (38 of 40 pass). Not done: the AC-15 practice-room paragraph in `manual.md`, which only the Owner can place (D-005); escalated in 36. F2 is cosmetic.
+- Verify: no AC observed failing so far. Suite-only: AC-14, AC-10 2-swipe kill, "(too soon)" and "(down)" lines. Pause (F11) not implemented. `ManualTest` has no valid result yet; it needs the Owner's paragraph and `manual.md` beside `repo/`.
+- Verify, visuals: earlier V-1 fail (hidden grub), F3. Open: V-6 (color) needs a `--color` capture; V-2 gaps (60 FPS charge-start draw, draw after a missed swipe). 7h re-judges V-1, V-2, V-6 and the displaced cell from QA's captures.
+- Play: `playtester`, live and reactive, from a Handoff composed by the Studio from permitted information. Watch slot starvation. Planned, after Verify passes.
+- Review: `game-director` with `review-outcome`. Planned. Open: run progression after "run over"; F1, F6, F7; numbering of same-type enemies in one cell; a still player going down in about 5 s.
+- Skipped: none.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 02-playtester-to-game-designer.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-game-designer-to-game-director.md |
+| 3a | Decide | game-director | make-decision | done | 05-game-director-to-studio.md |
+| 3b | Observe (defects) | qa | reproduce-defect | done | 06-qa-to-game-designer.md |
+| 3c | Observe (rooms 4–5) | playtester | playtest-session | done | 08-playtester-to-game-designer.md |
+| 4 | Design | game-designer | write-design-spec | done | 10-game-designer-to-studio.md |
+| 5a | Plan | technical-director | technical-plan | done | 14-technical-director-to-studio.md |
+| 5b | Observe (spit line) | qa | reproduce-defect | done | 15-qa-to-studio.md |
+| 5c | Design (visuals) | art-director | visual-review, write-design-spec | done | 16-art-director-to-studio.md |
+| 6a | Build (code) | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md |
+| 6b | Build (`run_tests` check, manual placed) | gameplay-engineer | implement-change | done | 23-gameplay-engineer-to-studio.md |
+| 7a | Verify | qa | verify-change | done (question, no AC failed) | 26-qa-to-studio.md |
+| 7b | Verify (visuals) | art-director | visual-review | done (question, no build output) | 27-art-director-to-studio.md |
+| 7c | Verify (rerun: manual, runs, captures) | qa | verify-change | done (question, no AC failed) | 29-qa-to-studio.md |
+| 7d | Verify (visuals, from captures) | art-director | visual-review | done (fail: V-1, F3) | 32-art-director-to-studio.md |
+| 7e | Design (F1 overlap, AC-15 wording) | game-designer | write-design-spec | done | 33-game-designer-to-studio.md |
+| 7f | Build (F1/F3 render, manual paragraph) | gameplay-engineer | implement-change | done (render built; manual paragraph with Owner) | 35-gameplay-engineer-to-studio.md |
+| 7f-O | Owner: place the manual paragraph | owner | — | open | 36-studio-to-owner.md |
+| 7g | Verify (all but AC-15) | qa | verify-change | open | 37-studio-to-qa.md |
+| 7h | Verify (visuals) | art-director | visual-review | planned | — |
+| 7i | Verify (AC-15, `ManualTest`) | qa | verify-change | tentative | — |
+| 8 | Play | playtester | playtest-session | planned | — |
+| 9 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+After 7f (35, question): render fix built and tested; only the `manual.md` paragraph is missing, a third round with nothing new supplied, so it is escalated (36, Option A recommended). 7g (37) runs meanwhile without AC-15; 7i (AC-15) is tentative on the Owner's answer.
+
+## Next action
+
+Waiting for the Owner on `36-studio-to-owner.md` (A / B / C). Meanwhile run `37-studio-to-qa.md` (result addressed to `studio`), then Route:
+- If 7g passes, open 7h (art director, from QA's captures).
+- On a QA fail, return to Build with the report (second fail on the same criterion goes to `technical-director`).
+- After the Owner answers, Resume (Decision, Goal `active`) and open 7i for AC-15 and `ManualTest`.
+
+## Outcome
+
+(Filled at Close.)
+>>>END

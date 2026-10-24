@@ -1,0 +1,67 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-003-dash-availability-clarity/09-studio-to-qa.md",
+  "sha256": "eaab771e4ea298863dcce644c4a7100eb15cca6c6515e836a9d3db0f435d4cd8",
+  "bytes": 4729
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "381742c8f2afe2e1a2a6af9d031dcc91f98f490ada7c90e2a990d6a1aaf27639",
+  "bytes": 1765
+ },
+ {
+  "path": "studio/skills/verify-change.md",
+  "sha256": "da40d2c0030e078ac6d085ea06b17bb9b452495f4e2f412a9e1bd723ac72ddf5",
+  "bytes": 1281
+ },
+ {
+  "path": "design/dash-availability.md",
+  "sha256": "4e9b49340bd963c86389083ee71f3d6af0eefdf803eeafa027915e8cbe8f5524",
+  "bytes": 14889
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "2e0311e61caaf32c890085bbd0eac56f732e2f62e1588d957117c1a25927f326",
+  "bytes": 13259
+ },
+ {
+  "path": "repo/public-driver.md",
+  "sha256": "365e4978670f0137716ca49086e9be1a75ed70e832063afe7178b1c245e86e3a",
+  "bytes": 5108
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "05a33c6f8e50caa20ddf4f3844885137c4261ad4a3e5f3db3eb1b5312b129a9f",
+  "bytes": 237
+ },
+ {
+  "path": "project.md",
+  "sha256": "d1fa7eb21a269a68ec399471b2db7941d2ebb51b9b0372ce0e945ef475eea2d6",
+  "bytes": 3042
+ },
+ {
+  "path": "decisions/D-001-one-button-combat.md",
+  "sha256": "c7fe9ca23a369707a5ab439e44789a25a0a8544efce4703a676f8fd180f82ec1",
+  "bytes": 798
+ },
+ {
+  "path": "decisions/D-028-dash-indicator-on-legacy-route.md",
+  "sha256": "f18c4c1e8e324a1a11689b49471b46cf5c0cd19ffd15659d0029154116d165ac",
+  "bytes": 1748
+ },
+ {
+  "path": "@files/repo",
+  "sha256": "cf0bbe4438acbed82a3fbe8f4a2c207aa9d3c228d77b0d8778a5317414010dd1",
+  "bytes": 727
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ }
+]

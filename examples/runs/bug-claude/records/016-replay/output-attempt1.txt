@@ -1,0 +1,162 @@
+Route is done for G-001 step 1. The defect report fits the plan, so Design is dropped and Build is next. I edited the Build Handoff in place and updated `goal.md`.
+
+<<<FILE goals/G-001-damage-during-dash/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-10
+---
+# G-001: Player takes damage while dashing
+
+## Owner request
+
+> ダッシュ中なのにダメージを受けることがある。再現できるので直してほしい。
+
+## Interpretation
+
+The Owner reports a defect: the player sometimes takes damage while in the middle of a dash. The Owner says it is reproducible and wants it fixed.
+
+Success condition (qualitative): when the player is dashing, damage is applied exactly as the combat design says it should be during a dash. The situations the Owner saw, where damage landed mid-dash, no longer happen, and nothing else about dash or damage regresses. It must hold at both 30 and 60 FPS, a project constraint.
+
+Numeric thresholds, such as invulnerability frame counts, belong to the design's acceptance criteria. They are not set here.
+
+Out of scope:
+- Changing the dash or damage rules as a design improvement.
+- Adding buttons or inputs (D-001).
+- Rebalancing enemies.
+- Any experience or feel tuning.
+
+Note for the route: the Owner assumes dash should prevent damage. QA has since confirmed that `design/combat.md` specifies full invulnerability for the whole dash duration (see Route changes).
+
+## Unknowns
+
+Entry questions from `development-loop.md`:
+
+- **Observe: has the problem been reproduced first-hand?** No. The Owner says it is reproducible, but there is no defect report yet and the exact conditions are unknown (which enemy or attack, which dash phase, which frame rate). This creates an Observe step with `qa`. It is a defect, not an experience problem: the Owner describes behavior that contradicts the expected dash protection.
+- **Diagnose: is the cause understood?** Unknown. For defects, root cause belongs to `gameplay-engineer` as part of Build (Decision authority), so there is no separate Diagnose stage. If QA finds the cause is technical and cross-system, Plan covers it.
+- **Decide: is there a real choice of direction, priority or scope?** No. Nothing conflicts with the vision or with D-001, so the stage is skipped. It becomes relevant only if the fix would change scope or direction (return rules).
+- **Design: is the intended behavior specified well enough to build and verify?** Answered by QA's report: yes. `design/combat.md` states the player is invulnerable for the full dash duration. Stage skipped.
+- **Plan: is the technical approach non-obvious, risky, cross-system or parallelizable?** Still unknown, because the cause is not yet seen (the enemy attack type and frame-rate dependence are not established). Tentative: needed only if the engineer finds the cause is non-local, such as frame-rate-dependent timing or interaction between several systems. A local, obvious fix needs no Plan. A fix for a frame-rate-dependent cause also falls under the 30/60 FPS constraint.
+- **Build:** the game must change, so this is planned.
+- **Verify:** always after Build, so this is planned.
+- **Play / Review: skipped.** The Goal is a defect, not about feel, and involves no direction Decision. Both stages are skipped, following the development-loop note that a defect needs no Play or Review.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | qa | reproduce-defect | done | 01-studio-to-qa.md |
+| 2 | Design | game-designer | write-design-spec | skipped (QA confirmed `design/combat.md` specifies full dash invulnerability; the build contradicts it) | — |
+| 3 | Plan | technical-director | technical-plan | tentative (only if the engineer finds the cause cross-system or frame-rate dependent, or the fix non-obvious) | — |
+| 4 | Build | gameplay-engineer | implement-change | open | 02-qa-to-gameplay-engineer.md |
+| 5 | Verify | qa | verify-change | planned | — |
+
+Status: planned | tentative | open | done | skipped. Handoff: the incoming Handoff that starts the
+step. Parallel steps: 2a, 2b. Step numbers need not
+match Handoff seq numbers. The route is a plan; the Route operation revises it.
+
+## Route changes
+
+- After step 1 (Observe): QA reproduced the defect as intermittent mid-dash damage after a recent hit, and confirmed the intended behavior is specified in `design/combat.md`. Design is therefore dropped (skipped). Plan stays tentative, since the cause and frame-rate dependence are not yet known. If Build finds the cause is non-local, the return rules send it to Plan (`technical-director`). Handoff 02 was edited in place so the engineer's result is addressed to `studio`, which lets the Studio compose QA's Verify Handoff without the implementation history.
+
+## Next action
+
+Run Step on `goals/G-001-damage-during-dash/02-qa-to-gameplay-engineer.md` as `gameplay-engineer` (fix the defect with `implement-change`; address the result to `studio`). Then run Route, which composes the Verify Handoff to `qa` with the `## Sender assessment` section removed.
+
+## Outcome
+
+(Filled at Close, in Japanese.)
+>>>END
+
+<<<FILE goals/G-001-damage-during-dash/02-qa-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-001
+seq: 2
+from: qa
+to: gameplay-engineer
+stage: Build
+outcome: done
+---
+# 02: qa → gameplay-engineer — Fix: player takes damage mid-dash after a recent hit (defect report)
+
+## Task
+
+Fix the defect below so the player takes no damage at any point during a dash, as `design/combat.md` specifies. Then return your result to `studio` with the acceptance criteria below unchanged.
+
+## Context
+
+Goal G-001. The Owner reported (verbatim): 「ダッシュ中なのにダメージを受けることがある。再現できるので直してほしい。」 ("I sometimes take damage even while dashing. It's reproducible.")
+
+QA ran the dry-run build (`sim/build-0.3.md`) and compared it with `design/combat.md`. The expected behavior is specified, and the build contradicts it in one reproduced case, so this goes to Build, not Design.
+
+## Findings
+
+### Defect report
+
+**Title:** Player takes damage partway through a dash that is started shortly after being hit.
+
+**Source of "expected":** `design/combat.md`, Player kit, Dash: "The player is invulnerable for the full dash duration" (4 tiles over 0.25 s). It has no exception for dashing soon after a hit. The same document says that after a hit there is 0.3 s hit-stun (no input), then invulnerability until 0.8 s after the hit. That also covers a dash started right after the hit-stun ends.
+
+**Actual (from `sim/build-0.3.md`):** "Occasionally, if you dash right after being hit, you take damage partway through the dash."
+
+**Reproduction steps (as far as the build description supports):**
+1. Enter a room with enemies (Grubs and/or Spitters) and let one hit you (1 heart).
+2. As soon as input returns after the 0.3 s hit-stun, press dash.
+3. Watch for a second heart of damage taken during the dash movement.
+
+**Conditions and boundary:**
+- Trigger: dash started soon after taking a hit. The build notes describe it only as "occasionally", so it is intermittent, not every attempt.
+- Dash phase: "partway through", meaning the middle of the dash, not the start or end. No finer timing is available.
+- Not triggered in the normal flow of dashing without a recent hit. The build notes say the dash is otherwise used to cross rooms.
+- **Not established from the packet:**
+  - Which enemy or attack deals the damage (Grub contact bite vs. Spitter projectile).
+  - Exact timing and positions.
+  - Whether it depends on frame rate. The build description has no 30 vs. 60 FPS information, so I could not vary frame rate. The report makes no claim about frame rate, and Verify must check both.
+  - Whether the hit-stun, post-hit invulnerability and dash invulnerability windows interact in a way that matters. Engineers should treat this as a hypothesis only. It is not established fact.
+
+**Reproducibility:** Sometimes (intermittent). Reproduced on the dry-run build description only. No logs or recordings exist.
+
+**Severity:** Hurts the experience, not progress-blocking. The player loses a heart in a situation where the design guarantees safety. It is a rare path because the dash is rarely needed, but it breaks the dash's core promise and the Owner can reproduce it.
+
+**Evidence:** `sim/build-0.3.md` last bullet; `design/combat.md` Dash rule. No other artifacts.
+
+### Acceptance criteria (for Verify, at both 30 FPS and 60 FPS)
+
+1. Take a hit, then dash as soon as input returns after hit-stun (about 0.3 s after the hit). Repeat at least 20 times per frame rate, against a Grub contact and against a Spitter projectile. The player takes no damage at any moment from dash start to dash end (0.25 s).
+2. Repeat the above, starting the dash at several delays after the hit (immediately after hit-stun, and during the remainder of the 0.8 s post-hit invulnerability window). No damage during the dash in any case.
+3. With no recent hit, dashing through a Grub or into a projectile still causes no damage during the dash (no regression).
+4. Without dashing, a hit still deals 1 heart, applies 0.3 s hit-stun, and grants invulnerability until 0.8 s after the hit (no regression).
+5. Dash distance and duration are unchanged (4 tiles over 0.25 s), cooldown is unchanged (0.6 s), and an attack pressed during a dash still fires when the dash ends.
+6. Results are the same at 30 and 60 FPS.
+
+## Decisions already made
+
+None that touch this Goal. D-001 (one attack button plus dash) applies: do not add input buttons.
+
+## Constraints
+
+- Must play correctly at both 30 and 60 FPS.
+- No new input buttons beyond attack, dash and pause (D-001).
+- Prefer changes that reuse existing systems (small team).
+- Do not change the design. Dash invulnerability is as specified.
+
+## Open questions
+
+1. Root cause is the gameplay engineer's call. Confirm which enemy attacks produce the mid-dash damage and whether frame rate matters. The packet had no data on either.
+2. If the root cause turns out to be non-local (for example frame-rate-dependent timing or interaction between several systems), or the fix is not obvious, hand back to `studio` with outcome `question` so the route can add a Plan step with `technical-director`. If the spec turns out to be ambiguous or missing a case, hand back for Design. Do not decide it yourself.
+
+## Expected output
+
+A fix to the build, and a handoff addressed to `studio` (not directly to QA) stating what changed and how to exercise it, so that the Studio can compose the Verify Handoff for QA to check the acceptance criteria above at 30 and 60 FPS. State the root cause you found. Put any self-assessment or reasoning about why the fix should work under `## Sender assessment`, which the Studio removes before QA sees the Handoff.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: project.md#constraints, design/combat.md, sim/build-0.3.md, sim/repo-notes.md
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-001-damage-during-dash/01-studio-to-qa.md
+>>>END

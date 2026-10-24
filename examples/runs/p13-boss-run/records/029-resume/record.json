@@ -1,0 +1,52 @@
+{
+ "op": "Resume",
+ "role": null,
+ "goal": "G-002",
+ "attempts": [
+  {
+   "runtime": "codex",
+   "session_id": "01a15974-8393-7a42-bf78-1c81d267e26a",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 29146,
+    "cached_input_tokens": 7680,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 5122,
+    "reasoning_output_tokens": 117
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 1,
+   "started": "2026-10-20T22:16:10",
+   "seconds": 97.0,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "decisions/D-021-owner-authorizes-text-build.md": "9df4329db4178c6d573c6121007e0dbe1109abca068e1c303386eb94cbbd3575",
+  "goals/G-002-final-boss/goal.md": "dfc54d552b5a2c42def154e2b7d8a44833abfe22d8f777adb98db4aef4e1e00c",
+  "goals/G-002-final-boss/23-studio-to-gameplay-engineer.md": "b1184f38fe68b6bdb9ad737c9dfdef024a0b425d5b76117dfefeec9d65f5e38c",
+  "goals/G-002-final-boss/22-game-director-to-owner.md": "6dba531e80884be8b1d1b12b2448b1dfc3db6ef013e1179d955e0e30dce555ff"
+ },
+ "decision": {
+  "status": "active",
+  "open": [
+   [
+    "gameplay-engineer",
+    "Build"
+   ]
+  ],
+  "new": [
+   "gameplay-engineer",
+   "Build"
+  ]
+ },
+ "seen_through_seq": 23
+}

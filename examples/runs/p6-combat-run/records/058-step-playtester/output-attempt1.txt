@@ -1,0 +1,13 @@
+I'll start with room 2 to see an enemy setup I haven't seen yet.
+
+<<<FILE @run/play/room2-first-look
+room 2
+fps 30
+end 20
+1 attack
+3 move right
+5 stop
+5.5 attack
+8 dash left
+10 attack
+>>>END

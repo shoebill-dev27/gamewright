@@ -1,0 +1,5 @@
+<<<FILE @need
+studio/roles/game-director.md
+decisions/D-020-g002-host-scope-and-plan-entry-conditions.md
+goals/G-002-final-boss/18-game-director-to-studio.md
+>>>END

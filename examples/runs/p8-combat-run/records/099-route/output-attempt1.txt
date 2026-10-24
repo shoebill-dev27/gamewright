@@ -1,0 +1,138 @@
+Routing after QA 98. I'm opening two parallel steps, a manual-only Build fix and a Design wording fix. QA's Verify and Review pass 4 stay planned behind them.
+
+<<<FILE goals/G-001-combat-monotony/99-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-001
+seq: 99
+from: studio
+to: gameplay-engineer
+stage: Build (manual text only)
+outcome: routed
+---
+# 99: studio → gameplay-engineer — Remove the stray edit marker from repo/manual.md
+
+## Task
+
+Open `repo/manual.md`. QA reports leftover text in the "Warnings" section, right after the bullet starting `Being hit shows … by a shot from the <direction> (…)`: a line `>>>REPLACE_PLACEHOLDER A swipe that interrupts the warning of a`, followed by `grub or runner staggers it for 0.4 s; …`. If it is there, remove the marker and restore a separate bullet: "A swipe that interrupts the warning of a grub or runner staggers it for 0.4 s; a brute is not interrupted." (Keep the original wording of the rest of that sentence if it differs.) If the marker is not there, change nothing and say so. Change nothing else in the manual, and no code. Also search `repo/` for any other leftover edit marker (`>>>`, `<<<`, `PLACEHOLDER`, `SEARCH`/`REPLACE` lines) and report it. Remove one only if it is in `repo/manual.md`; otherwise only report.
+
+## Context
+
+Build 29b (wording only) was verified by QA (98): W1 and W5 pass, but the player-facing manual defect blocks a pass. QA saw the text in the packet copy and did not open the repo file, so confirm it yourself.
+
+## Findings
+
+QA 98 ("Defect: `repo/manual.md`"): the hit-message bullet and the stagger sentence are merged around the marker. The intended step-94 wording (late-swipe sentence, hit wording with direction) is otherwise present. Severity low to medium, no gameplay effect.
+
+## Decisions already made
+
+- D-011: variant names in messages (accepted).
+- D-013: wording-only round, then Close.
+
+## Constraints
+
+- Manual text only. No gameplay, message or code change.
+- Run `python3 -m unittest discover -s tests` and report the result (QA's last run: 69 tests OK).
+
+## Open questions
+
+None.
+
+## Expected output
+
+A handoff to `studio` with outcome `done`: whether the marker was present, the exact fix (before/after of the lines), any other marker found, and the test result.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: repo/manual.md, design/combat-step94.md (manual wording section)
+- Decisions: decisions/D-011-variant-named-messages-accepted.md
+- Previous handoff: goals/G-001-combat-monotony/98-qa-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/100-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-001
+seq: 100
+from: studio
+to: game-designer
+stage: Design (criterion text correction, documents only)
+outcome: routed
+---
+# 100: studio → game-designer — Fix the self-contradictory W1 bullet for the spitter at (15,7)
+
+## Task
+
+In `design/combat-step94.md`, correct the W1 bullet for the spitter at (15,7) with the player at (8,4). It labels the case `from the east` and then says the diagonal is expected. QA measured cue (-0.92,-0.39); the reversed vector (0.92,0.39) has ratio 0.42 > 0.4142, so the stated formula gives `south-east`, and the build shows `south-east`. Decide the intended expected value and make the bullet say it once. If the formula, not the build, is what you intend to change, do not edit: hand back with `question`, since the build is not to change in this round. Also read W1–W8 once for any other self-contradiction and fix wording only.
+
+## Context
+
+QA 98 verified W1–W8 on the wording-only build. W1 passes by the formula. QA asks for the criterion text to be corrected (Open question 1). The game behavior stays as built.
+
+## Findings
+
+QA 98, section W1. All six W1 cases pass at 30 and 60 FPS, using the formula for (15,7).
+
+## Decisions already made
+
+- D-011: variant-named hit and wind-up messages.
+- D-013: wording-only round, then Close.
+
+## Constraints
+
+- Documents only; no thresholds, timings or rules change.
+- Edit only `design/combat-step94.md`, and `design/combat.md` only if it repeats the same contradictory text.
+
+## Open questions
+
+None.
+
+## Expected output
+
+A handoff to `studio` with outcome `done`: the corrected bullet (before/after) and any other wording fix.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: design/combat-step94.md, design/combat.md
+- Decisions: decisions/D-011-variant-named-messages-accepted.md, decisions/D-013-review-pass-3-readability-wording-then-close.md
+- Previous handoff: goals/G-001-combat-monotony/98-qa-to-studio.md
+>>>END
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+| 29c | Verify (text appears; reaction rules, bots, suite; 30 and 60 FPS) | qa | verify-change | open | 97-studio-to-qa.md |
+=======
+| 29c | Verify (text appears; reaction rules, bots, suite; 30 and 60 FPS) | qa | verify-change | done (fail: manual marker; gaps) | 97-studio-to-qa.md (result: 98-qa-to-studio.md) |
+| 29d | Build (manual: remove stray marker) | gameplay-engineer | implement-change | open | 99-studio-to-gameplay-engineer.md |
+| 29e | Design (W1 (15,7) bullet contradiction) | game-designer | write-design-spec | open | 100-studio-to-game-designer.md |
+| 29f | Verify (manual line only, paper or play view) | qa | verify-change | planned | — |
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+Visual V1–V11 need a graphical build, a proposed new Goal at Close; V12 open.
+=======
+Visual V1–V11 need a graphical build, a proposed new Goal at Close; V12 open. Verify 29c (98): suite 69 OK, bots within limits at 60 FPS; W1, W5 pass; stray marker in manual.md blocks a pass (Build 29d). Unshown (W2 at 30 FPS, W3 other substrings, W4 hurt window, W6 several, W7 no baseline, bots at 30 FPS) go to Review as known gaps; no more QA rounds except the manual line.
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+After Build 29b (96): fits the plan, no open questions, no escalation trigger. Opened Verify 29c (97) for a fresh QA. The engineer's assessment is kept out of it. The handoff lists W2 and W7 as not covered by tests. Review pass 4 follows unchanged.
+=======
+After Verify 29c (98): fail only on a manual stray marker (Build, no code); no criterion failed twice. Opened Build 29d (99) and, in parallel, Design 29e (100, W1 bullet wording). Added a manual-line-only Verify 29f. Review pass 4 then judges the unshown items as known gaps.
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT goals/G-001-combat-monotony/goal.md
+<<<<<<< SEARCH
+Run `qa` with 97-studio-to-qa.md (fresh context, W1–W8 at 30 and 60 FPS, result addressed to `studio`). Then Route to Review pass 4 (paper).
+=======
+Run `gameplay-engineer` with 99-studio-to-gameplay-engineer.md and `game-designer` with 100-studio-to-game-designer.md (independent, either order). Then Route: open Verify 29f (qa, manual line only, fresh context, result addressed to `studio`), then Review pass 4 (paper).
+>>>>>>> REPLACE
+>>>END

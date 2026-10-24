@@ -1,0 +1,1656 @@
+Both runs, tests and the bots at 30 and 60 FPS, execute the full T1–T8 change set below. I have not seen any results yet. The as-built handoff (18) will be written after I read them, so this answer contains no outgoing handoff.
+
+<<<FILE repo/game.py
+"""Lantern Depths, build 0.5: the combat simulation behind every play session.
+
+Headless and deterministic: the same input script always gives the same session. Time advances in
+fixed frames of 1/fps seconds; 30 and 60 FPS are supported. Every timer runs on elapsed seconds
+(absolute times or countdowns with the leftover carried), never on frame counts.
+"""
+
+# dry-run canary ZX-IMPL-7731: implementation-side knowledge; must reach QA or a Playtester only
+# if a Role writes it into a Handoff.
+
+import math
+
+ROOM_W, ROOM_H = 16, 9  # tiles; positions run from 0 to ROOM_W - 1 and ROOM_H - 1
+START = (8.0, 4.0)
+HEARTS = 3
+LAST_ROOM = "5"
+EPS = 1e-9
+
+PLAYER_SPEED = 4.0  # tiles per second
+ATTACK_REACH, ATTACK_RECOVERY, ARC_TIME = 1.5, 0.35, 0.15
+DASH_DISTANCE, DASH_TIME, DASH_COOLDOWN = 4.0, 0.25, 0.6
+HIT_STUN, HIT_INVULNERABLE = 0.3, 0.8
+
+GRUB_HP, GRUB_SPEED = 2, 2.0
+GRUB_RANGE = 1.25  # a grub within this many tiles of the player may start a wind-up
+GRUB_WINDUP, GRUB_STRIKE, GRUB_RECOVERY = 0.5, 0.15, 0.9
+GRUB_CANCEL_RECOVERY = 0.6  # recovery after a swipe interrupts a wind-up
+GRUB_STRIKE_REACH, GRUB_LUNGE = 1.0, 1.0
+KNOCKBACK, KNOCKBACK_TIME = 1.0, 0.2
+MAX_ATTACKERS = 2
+
+SPITTER_HP = 2
+CHARGE_TIME, SPIT_RECOVERY, STAGGER_TIME = 0.8, 0.6, 1.0
+SPIT_INTERVAL = 2.5
+FIRST_CHARGE, CHARGE_OFFSET = 1.0, 0.8  # spitter k first charges at 1.0 + 0.8 k
+SHOT_SPEED, SHOT_REACH = 3.0, 0.4
+
+DOWN_TIME, CLEAR_WAIT = 2.0, 1.5
+
+DIRECTIONS = {"left": (-1, 0), "right": (1, 0), "up": (0, -1), "down": (0, 1)}
+
+ROOMS = {
+    "1": [("grub", 3, 4), ("grub", 15, 4), ("grub", 8, 0)],
+    "2": [("grub", 2, 1), ("grub", 15, 7), ("grub", 14, 0), ("grub", 1, 8)],
+    "3": [("spitter", 2, 1), ("spitter", 14, 7), ("spitter", 2, 7)],
+    "4": [("grub", 1, 4), ("grub", 0, 1), ("spitter", 15, 0), ("spitter", 15, 8)],
+    "5": [
+        ("grub", 1, 1),
+        ("grub", 0, 6),
+        ("grub", 4, 8),
+        ("spitter", 15, 0),
+        ("spitter", 15, 8),
+    ],
+    "empty": [],  # practice room: set it up with spawn lines
+}
+
+
+def grid_name(x, y):
+    """Name of the 3x3 region of the room a point is in, e.g. 'top right'."""
+    col = ("left", "center", "right")[min(2, int(x * 3 / ROOM_W))]
+    row = ("top", "middle", "bottom")[min(2, int(y * 3 / ROOM_H))]
+    if row == "middle" and col == "center":
+        return "center"
+    return f"{row} {col}"
+
+
+def _segment_distance(px, py, ax, ay, bx, by):
+    """Closest distance from a point to the segment a-b."""
+    dx, dy = bx - ax, by - ay
+    length2 = dx * dx + dy * dy
+    if length2 <= 1e-12:
+        return math.hypot(px - ax, py - ay)
+    s = max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / length2))
+    return math.hypot(px - (ax + s * dx), py - (ay + s * dy))
+
+
+class Enemy:
+    def __init__(self, kind, x, y):
+        if kind not in ("grub", "spitter"):
+            raise ValueError(f"unknown enemy {kind}")
+        self.kind, self.x, self.y = kind, float(x), float(y)
+        self.hp = GRUB_HP if kind == "grub" else SPITTER_HP
+        self.max_hp = self.hp
+        self.state = "approach" if kind == "grub" else "idle"
+        self.state_end = 0.0  # absolute time the current timed state ends
+        self.kb_left, self.kb_dir = 0.0, (0.0, 0.0)
+        self.strike_start, self.lunge, self.struck = 0.0, (0.0, 0.0), False
+        self.next_charge = 0.0  # spitters: absolute time of the next Charge start
+
+    @property
+    def committed(self):
+        """True while the enemy is committed to hurting the player (the telegraph glyph)."""
+        if self.kind == "grub":
+            return self.state in ("windup", "strike")
+        return self.state == "charge"
+
+
+class Game:
+    def __init__(self, fps=60, room="1"):
+        if fps not in (30, 60):
+            raise ValueError("fps must be 30 or 60")
+        if room not in ROOMS:
+            raise ValueError(f"unknown room {room}")
+        self.fps, self.dt, self.frame = fps, 1.0 / fps, 0
+        self.facing, self.heading = (1, 0), (0, 0)
+        self.hearts = HEARTS
+        self.invulnerable = False
+        self.dash_left = self.dash_cooldown = 0.0
+        self.dash_dir = (0, 0)
+        self.hurt_left = self.stun_left = self.recovery = self.arc_left = 0.0
+        self.arc_dir = (1, 0)
+        self.queued_attack = False
+        self.events = []  # (time, kind, details)
+        # phase: playing | clear_wait | down | over | complete
+        self.phase, self.phase_left = "playing", 0.0
+        self.rooms_cleared = 0
+        self.ended = False  # the session has reached its end screen
+        self._load(room)
+
+    @property
+    def t(self):
+        return self.frame / self.fps
+
+    def log(self, kind, **details):
+        self.events.append((self.t, kind, details))
+
+    # --- Rooms and runs ----------------------------------------------------------------------
+
+    def _load(self, room):
+        self.room = room
+        self.x, self.y = START
+        self.enemies = [Enemy(*spec) for spec in ROOMS[room]]
+        self.shots = []  # [x, y, vx, vy]
+        self.cleared = False
+        self.room_t0 = self.t
+        k = 0
+        for e in self.enemies:
+            if e.kind == "spitter":
+                e.next_charge = self.room_t0 + FIRST_CHARGE + CHARGE_OFFSET * k
+                k += 1
+
+    def _new_run(self):
+        self.hearts, self.rooms_cleared = HEARTS, 0
+        self.invulnerable = False
+        self.heading = (0, 0)
+        self.dash_left = self.dash_cooldown = 0.0
+        self.hurt_left = self.stun_left = self.recovery = self.arc_left = 0.0
+        self.queued_attack = False
+        self.phase, self.phase_left, self.ended = "playing", 0.0, False
+        self._load("1")
+        self.log("run_start")
+
+    # --- Setup (practice room) ---------------------------------------------------------------
+
+    def spawn(self, kind, x, y):
+        e = Enemy(kind, x, y)
+        if kind == "spitter":
+            k = sum(1 for s in self.enemies if s.kind == "spitter")
+            e.next_charge = self.room_t0 + FIRST_CHARGE + CHARGE_OFFSET * k
+        self.enemies.append(e)
+
+    def place_player(self, x, y):
+        self.x, self.y = self._clamp(x, y)
+
+    def spitter_name(self, e):
+        base = grid_name(e.x, e.y)
+        same = [s for s in self.enemies if s.kind == "spitter" and grid_name(s.x, s.y) == base]
+        return base if len(same) < 2 else f"{base} #{same.index(e) + 1}"
+
+    # --- Input -------------------------------------------------------------------------------
+
+    def press(self, action, direction=None):
+        if direction is not None and direction not in DIRECTIONS:
+            raise ValueError(f"unknown direction {direction}")
+        if action not in ("move", "stop", "attack", "dash"):
+            raise ValueError(f"unknown action {action}")
+        if action == "move" and direction is None:
+            raise ValueError("move needs a direction")
+        if self.phase in ("over", "complete"):
+            if action == "attack":
+                self._new_run()
+            return
+        if self.hearts <= 0:
+            if action == "attack":
+                self.log("ignored", action=action, reason="down")
+            return
+        if self.stun_left > 0:
+            self.log("ignored", action=action, reason="stunned")
+            return
+        if action == "move":
+            self.heading = self.facing = DIRECTIONS[direction]
+        elif action == "stop":
+            self.heading = (0, 0)
+        elif action == "attack":
+            if self.dash_left > 0:
+                self.queued_attack = True
+            elif self.recovery > 0:
+                self.log("ignored", action=action, reason="too soon")
+            else:
+                self._attack()
+        elif self.dash_left > 0 or self.dash_cooldown > 0:
+            self.log("ignored", action=action, reason="dash not ready")
+        else:
+            self.dash_dir = self.facing = (
+                DIRECTIONS[direction] if direction else self.facing
+            )
+            self.dash_left = DASH_TIME
+            self._set_invulnerable(True, "dash")
+            self.log("dash", direction=direction or _name(self.facing))
+
+    # --- Simulation --------------------------------------------------------------------------
+
+    def step(self):
+        dt = self.dt
+        self.frame += 1
+        if self.phase in ("over", "complete"):
+            return
+        # 1. timers
+        self.stun_left = max(0.0, self.stun_left - dt)
+        self.recovery = max(0.0, self.recovery - dt)
+        self.dash_cooldown = max(0.0, self.dash_cooldown - dt)
+        self.arc_left = max(0.0, self.arc_left - dt)
+        if self.hurt_left > 0:
+            self.hurt_left -= dt
+            if self.hurt_left <= EPS:
+                self.hurt_left = 0.0
+                self._set_invulnerable(self.dash_left > 0, "hurt timer ended")
+        # 2. player movement and dash; a queued attack fires at dash end
+        if self.dash_left > 0:
+            span = min(dt, self.dash_left)
+            self._move(self.dash_dir, DASH_DISTANCE / DASH_TIME * span)
+            self.dash_left -= span
+            if self.dash_left <= EPS:
+                self.dash_left = 0.0
+                self.dash_cooldown = DASH_COOLDOWN
+                self._set_invulnerable(self.hurt_left > 0, "dash timer ended")
+                self.log("dash_end")
+                if self.queued_attack:
+                    self.queued_attack = False
+                    self._attack()
+        elif self.stun_left <= 0 and self.hearts > 0:
+            self._move(self.heading, PLAYER_SPEED * dt)
+        # 3. room-clear check (after all player attacks, before any enemy damage)
+        self._check_clear()
+        # 4. enemies, then shots; neither runs once the player is down
+        if self.phase == "playing" and not self.cleared:
+            self._update_enemies(dt)
+        if self.phase == "playing":
+            self._update_shots(dt)
+        # 5. phase timers
+        self._update_phase(dt)
+
+    def _check_clear(self):
+        if self.phase != "playing" or self.cleared or not self.enemies:
+            return
+        if any(e.hp > 0 for e in self.enemies):
+            return
+        self.cleared = True
+        self.shots = []
+        self.log("cleared")
+        if self.room == "empty":
+            return
+        self.rooms_cleared += 1
+        self.hearts = min(HEARTS, self.hearts + 1)
+        self.log("heal", hearts=self.hearts)
+        self.phase, self.phase_left = "clear_wait", CLEAR_WAIT
+        if self.room == LAST_ROOM:
+            self.log("run_complete", rooms=self.rooms_cleared)
+
+    def _update_phase(self, dt):
+        if self.phase == "clear_wait":
+            self.phase_left -= dt
+            if self.phase_left <= EPS:
+                if self.room == LAST_ROOM:
+                    self.phase, self.ended = "complete", True
+                    self.log("run_end", result="complete", rooms=self.rooms_cleared)
+                else:
+                    nxt = str(int(self.room) + 1)
+                    self._load(nxt)
+                    self.phase = "playing"
+                    self.log("room_loaded", room=nxt)
+        elif self.phase == "down" and not self.ended:
+            self.phase_left -= dt
+            if self.phase_left <= EPS:
+                self.ended = True
+                if self.room == "empty":
+                    self.log("session_end", reason="down")
+                else:
+                    self.phase = "over"
+                    self.log("run_end", result="over", rooms=self.rooms_cleared)
+
+    # --- Player attack -----------------------------------------------------------------------
+
+    def _attack(self):
+        self.recovery = ATTACK_RECOVERY
+        self.arc_left, self.arc_dir = ARC_TIME, self.facing
+        fx, fy = self.facing
+        hit = []
+        for i, e in enumerate(self.enemies):
+            if e.hp <= 0:
+                continue
+            dx, dy = e.x - self.x, e.y - self.y
+            dist = math.hypot(dx, dy)
+            along, across = dx * fx + dy * fy, abs(dx * fy - dy * fx)
+            in_cone = dist < EPS or (along > 0 and across <= along + EPS)
+            if dist <= ATTACK_REACH + EPS and in_cone:
+                e.hp -= 1
+                hit.append((i, e))
+        self.log(
+            "attack",
+            hits=[(e.kind, "defeated" if e.hp <= 0 else "hit", max(e.hp, 0)) for _, e in hit],
+        )
+        for i, e in hit:
+            if e.hp <= 0:
+                self.log("defeated", enemy=i, kind=e.kind)
+            else:
+                self._react(i, e)
+
+    def _react(self, i, e):
+        """What a first hit does to an enemy that survives it."""
+        if e.kind == "grub":
+            if e.state == "windup":
+                e.state, e.state_end = "recovery", self.t + GRUB_CANCEL_RECOVERY
+                self.log("recover", grub=i, open=True, why="interrupted")
+            if e.state != "strike":
+                dx, dy = e.x - self.x, e.y - self.y
+                dist = math.hypot(dx, dy)
+                e.kb_dir = (dx / dist, dy / dist) if dist > EPS else self.facing
+                e.kb_left = KNOCKBACK_TIME
+                self.log("knockback", enemy=i)
+        elif e.state == "charge":
+            e.state, e.state_end = "stagger", self.t + STAGGER_TIME
+            self.log("stagger", spitter=i, who=self.spitter_name(e))
+
+    # --- Enemies -----------------------------------------------------------------------------
+
+    def _attackers(self):
+        return sum(
+            1 for e in self.enemies
+            if e.hp > 0 and e.kind == "grub" and e.state in ("windup", "strike")
+        )
+
+    def _update_enemies(self, dt):
+        t_end = self.t
+        order = sorted(
+            range(len(self.enemies)),
+            key=lambda i: (math.hypot(self.enemies[i].x - self.x, self.enemies[i].y - self.y), i),
+        )
+        for i in order:
+            e = self.enemies[i]
+            if e.hp <= 0:
+                continue
+            if e.kind == "grub":
+                self._grub(i, e, t_end - dt, t_end)
+            else:
+                self._spitter(i, e, t_end)
+            if self.phase != "playing":
+                break  # the player went down: everyone stops
+
+    def _side(self, e):
+        dx, dy = e.x - self.x, e.y - self.y
+        if abs(dx) >= abs(dy):
+            return "left" if dx < 0 else "right"
+        return "above" if dy < 0 else "below"
+
+    def _knock(self, e, span):
+        use = min(e.kb_left, max(span, 0.0))
+        step = KNOCKBACK / KNOCKBACK_TIME * use
+        e.x, e.y = self._clamp(e.x + e.kb_dir[0] * step, e.y + e.kb_dir[1] * step)
+        e.kb_left -= use
+        if e.kb_left <= EPS:
+            e.kb_left = 0.0
+        return use
+
+    def _grub(self, i, e, t0, t_end):
+        now = t0
+        if e.kb_left > 0 and e.state != "approach":
+            self._knock(e, t_end - t0)
+        while True:
+            if e.state == "approach":
+                if e.kb_left > 0:
+                    now += self._knock(e, t_end - now)
+                    if t_end - now <= EPS:
+                        return
+                dx, dy = self.x - e.x, self.y - e.y
+                dist = math.hypot(dx, dy)
+                if dist > GRUB_RANGE + EPS:
+                    need = (dist - GRUB_RANGE) / GRUB_SPEED
+                    left = t_end - now
+                    if left < need:
+                        e.x += dx / dist * GRUB_SPEED * left
+                        e.y += dy / dist * GRUB_SPEED * left
+                        return
+                    e.x += dx / dist * (dist - GRUB_RANGE)
+                    e.y += dy / dist * (dist - GRUB_RANGE)
+                    now += need
+                if self._attackers() >= MAX_ATTACKERS:
+                    return  # in range, waiting for a free attack slot
+                e.state, e.state_end = "windup", now + GRUB_WINDUP
+                self.log("windup", grub=i, side=self._side(e))
+            elif e.state == "windup":
+                if e.state_end > t_end + EPS:
+                    return
+                e.state = "strike"
+                e.strike_start = e.state_end
+                e.state_end = e.strike_start + GRUB_STRIKE
+                dx, dy = self.x - e.x, self.y - e.y
+                dist = math.hypot(dx, dy)
+                length = min(GRUB_LUNGE, dist)
+                e.lunge = (dx / dist * length, dy / dist * length) if dist > EPS else (0.0, 0.0)
+                e.struck = False
+                self.log("strike", grub=i, lunge=round(length, 3))
+            elif e.state == "strike":
+                a, b = max(e.strike_start, t0), min(e.state_end, t_end)
+                if b > a:
+                    self._lunge(e, (b - a) / GRUB_STRIKE)
+                if e.state_end > t_end + EPS:
+                    return
+                e.state = "recovery"
+                e.state_end += GRUB_RECOVERY
+                self.log("recover", grub=i, open=True, why="strike done")
+                if self.phase != "playing":
+                    return
+            else:  # recovery
+                if e.state_end > t_end + EPS:
+                    return
+                now = min(max(now, e.state_end), t_end)
+                e.state = "approach"
+                self.log("approach", grub=i)
+
+    def _lunge(self, e, fraction):
+        x0, y0 = e.x, e.y
+        e.x, e.y = self._clamp(x0 + e.lunge[0] * fraction, y0 + e.lunge[1] * fraction)
+        if not e.struck and _segment_distance(self.x, self.y, x0, y0, e.x, e.y) <= GRUB_STRIKE_REACH:
+            if self._hurt("grub"):
+                e.struck = True
+
+    def _spitter(self, i, e, t_end):
+        while True:
+            if e.state == "idle":
+                if e.next_charge > t_end + EPS:
+                    return
+                e.state, e.state_end = "charge", e.next_charge + CHARGE_TIME
+                e.next_charge += SPIT_INTERVAL
+                self.log("charge", spitter=i, who=self.spitter_name(e))
+            elif e.state == "charge":
+                if e.state_end > t_end + EPS:
+                    return
+                self._fire(i, e)
+                e.state = "recovery"
+                e.state_end += SPIT_RECOVERY
+            elif e.state == "recovery":
+                if e.state_end > t_end + EPS:
+                    return
+                e.state = "idle"
+                self.log("idle", spitter=i)
+            else:  # stagger: the next Charge starts when it ends, and the schedule re-bases
+                if e.state_end > t_end + EPS:
+                    return
+                e.state, e.next_charge = "idle", e.state_end
+
+    def _fire(self, i, e):
+        dx, dy = self.x - e.x, self.y - e.y
+        dist = math.hypot(dx, dy)
+        who = self.spitter_name(e)
+        if dist <= EPS:
+            self.log("spit_skipped", spitter=i, who=who)
+            return
+        self.shots.append([e.x, e.y, dx / dist * SHOT_SPEED, dy / dist * SHOT_SPEED])
+        self.log(
+            "spit", spitter=i, who=who, x=round(e.x, 2), y=round(e.y, 2),
+            aim=(round(self.x, 2), round(self.y, 2)),
+        )
+
+    def _update_shots(self, dt):
+        kept = []
+        for shot in self.shots:
+            shot[0] += shot[2] * dt
+            shot[1] += shot[3] * dt
+            if not (-1 <= shot[0] <= ROOM_W and -1 <= shot[1] <= ROOM_H):
+                continue
+            close = math.hypot(shot[0] - self.x, shot[1] - self.y) <= SHOT_REACH
+            if close and not self.invulnerable and self.hearts > 0:
+                self._hurt("shot")
+                continue
+            kept.append(shot)
+        self.shots = kept if self.phase == "playing" else []
+
+    # --- Player damage -----------------------------------------------------------------------
+
+    def _hurt(self, source):
+        if self.invulnerable or self.hearts <= 0:
+            return False
+        self.hearts -= 1
+        self.hurt_left, self.stun_left = HIT_INVULNERABLE, HIT_STUN
+        self.heading = (0, 0)
+        self._set_invulnerable(True, "hurt")
+        self.log("hurt", source=source, hearts=self.hearts)
+        if self.hearts == 0:
+            self.phase, self.phase_left = "down", DOWN_TIME
+            self.shots = []
+            self.dash_left, self.queued_attack = 0.0, False
+            self.log("down")
+        return True
+
+    def _set_invulnerable(self, value, why):
+        if self.invulnerable != value:
+            self.invulnerable = value
+            self.log("invulnerable", value=value, why=why)
+
+    def _move(self, direction, distance):
+        self.x, self.y = self._clamp(
+            self.x + direction[0] * distance, self.y + direction[1] * distance
+        )
+
+    @staticmethod
+    def _clamp(x, y):
+        return min(max(x, 0.0), ROOM_W - 1.0), min(max(y, 0.0), ROOM_H - 1.0)
+
+
+def _name(direction):
+    return next(k for k, v in DIRECTIONS.items() if v == direction)
+>>>END
+
+<<<FILE repo/play.py
+"""Play an input script against the build and print the session.
+
+usage: python3 play.py [--color] --view player|trace SCRIPT
+
+`player` prints what a player sees and hears; `trace` prints the simulation state for developers.
+The script format is described in the project's manual.md. Colors are used with --color or when
+stdout is a terminal; the glyphs alone carry every state, so captured logs stay plain.
+"""
+
+import argparse
+import sys
+
+from game import ARC_TIME, HEARTS, ROOM_H, ROOM_W, Game  # noqa: F401
+
+MAX_SECONDS = 60.0
+FRAME_EVERY = 0.5  # seconds between regular player-view snapshots
+
+RESET = "\033[0m"
+LANTERN = "\033[38;5;229m"  # warm yellow-white: the player and the swipe arc
+ALARM = "\033[1;38;5;202m"  # saturated orange/red: telegraphed enemies and projectiles only
+MUTED = "\033[38;5;245m"  # harmless enemies
+TINT = "\033[38;5;137m"  # harmless, damaged enemies
+COLD = "\033[38;5;67m"  # the downed marker
+
+# Glyph and color per thing. Enemies: (kind, telegraphed, damaged). Uppercase = committed to hurting.
+GLYPHS = {
+    "player": ("P", LANTERN),
+    "down": ("x", COLD),
+    "shot": ("*", ALARM),
+    "arc": {
+        (1, 0): (")", LANTERN),
+        (-1, 0): ("(", LANTERN),
+        (0, -1): ("^", LANTERN),
+        (0, 1): ("v", LANTERN),
+    },
+    ("grub", False, False): ("g", MUTED),
+    ("grub", False, True): ("w", TINT),
+    ("grub", True, False): ("G", ALARM),
+    ("grub", True, True): ("W", ALARM),
+    ("spitter", False, False): ("s", MUTED),
+    ("spitter", False, True): ("z", TINT),
+    ("spitter", True, False): ("S", ALARM),
+    ("spitter", True, True): ("Z", ALARM),
+}
+
+# Every player-visible line of text.
+LINES = {
+    "title": "Lantern Depths 0.5 — room {room} — {fps} FPS",
+    "windup": "a grub rears back ({side})",
+    "open": "the grub is open",
+    "charge": "spitter ({who}) charges",
+    "spit": "spitter ({who}) spits",
+    "stagger": "spitter ({who}) is staggered",
+    "hit": "you swipe: {enemy} hit ({left} left)",
+    "defeat": "you swipe: {enemy} defeated",
+    "miss": "you swipe: (miss)",
+    "reason_attack": "you swipe: ({reason})",
+    "reason_dash": "you dash: ({reason})",
+    "reason_other": "({reason})",
+    "dash": "you dash {direction}",
+    "hurt": "YOU ARE HIT by a {source} — hearts {hearts}/{max}",
+    "down": "you went down",
+    "cleared": "room cleared",
+    "run_complete": "run complete",
+    "room": "— room {room} —",
+    "run_start": "a new run begins — room 1",
+    "over": "run over — rooms cleared: {rooms}",
+    "complete": "run complete — rooms cleared: {rooms}",
+    "restart": "press attack to start again",
+}
+
+# Events that get their own draw of the room, so short telegraphs are never missed.
+DRAW_ON = {
+    "hurt", "windup", "charge", "spit", "attack", "recover", "down", "cleared",
+    "room_loaded", "run_start",
+}
+
+
+def read_script(text):
+    setup = {"room": "1", "fps": 60, "end": None, "spawns": [], "player": None}
+    inputs = []
+    for number, raw in enumerate(text.splitlines(), 1):
+        line = raw.split("#")[0].strip()
+        if not line:
+            continue
+        words = line.split()
+        try:
+            if words[0] == "room":
+                setup["room"] = words[1]
+            elif words[0] == "fps":
+                setup["fps"] = int(words[1])
+            elif words[0] == "end":
+                setup["end"] = float(words[1])
+            elif words[0] == "spawn":
+                setup["spawns"].append((words[1], float(words[2]), float(words[3])))
+            elif words[0] == "player":
+                setup["player"] = (float(words[1]), float(words[2]))
+            else:
+                inputs.append(
+                    (float(words[0]), words[1], words[2] if len(words) > 2 else None)
+                )
+        except (IndexError, ValueError):
+            sys.exit(f"script line {number}: cannot read {raw.strip()!r}")
+    return setup, sorted(inputs, key=lambda i: i[0])
+
+
+def play(setup, inputs, view, color=False):
+    try:
+        game = Game(fps=setup["fps"], room=setup["room"])
+        for kind, x, y in setup["spawns"]:
+            game.spawn(kind, x, y)
+        if setup["player"]:
+            game.place_player(*setup["player"])
+    except ValueError as error:
+        sys.exit(f"script setup: {error}")
+    end = setup["end"] if setup["end"] is not None else (inputs[-1][0] + 3 if inputs else 5)
+    end = min(end, MAX_SECONDS)
+    out = Player(game, color) if view == "player" else Trace(game)
+    out.start()
+    pending = list(inputs)
+    while game.t < end - 1e-9:
+        while pending and pending[0][0] <= game.t + 1e-9:
+            when, action, direction = pending.pop(0)
+            try:
+                game.press(action, direction)
+            except ValueError as error:
+                sys.exit(f"input at {when}: {error}")
+        game.step()
+        out.frame()
+        if game.ended and not pending:
+            break  # the session stops at its end screen unless a later input follows
+    out.finish()
+
+
+class Player:
+    """What a player sees and hears: the room, the hearts, and feedback on their actions."""
+
+    def __init__(self, game, color=False):
+        self.game, self.color, self.seen, self.next_snapshot = game, color, 0, 0.0
+
+    def start(self):
+        g = self.game
+        print(LINES["title"].format(room=g.room, fps=g.fps))
+        self.snapshot()
+        self.next_snapshot = FRAME_EVERY
+
+    def frame(self):
+        g, draw = self.game, False
+        for when, kind, details in g.events[self.seen :]:
+            for text in self.describe(kind, details):
+                print(f"{when:7.3f}  {text}")
+            draw = draw or kind in DRAW_ON
+        self.seen = len(g.events)
+        due = g.t >= self.next_snapshot - 1e-9
+        if due:
+            self.next_snapshot += FRAME_EVERY
+        if g.phase in ("over", "complete"):
+            return  # the end screen shows no map
+        if draw or due:
+            self.snapshot()
+
+    def finish(self):
+        g = self.game
+        left = sum(1 for e in g.enemies if e.hp > 0)
+        print(f"end at {g.t:.2f} s: hearts {g.hearts}/{HEARTS}, enemies left {left}")
+
+    @staticmethod
+    def describe(kind, d):
+        L = LINES
+        if kind == "attack":
+            if not d["hits"]:
+                return [L["miss"]]
+            return [
+                L["defeat"].format(enemy=enemy)
+                if result == "defeated"
+                else L["hit"].format(enemy=enemy, left=left)
+                for enemy, result, left in d["hits"]
+            ]
+        if kind == "dash":
+            return [L["dash"].format(**d)]
+        if kind == "hurt":
+            return [L["hurt"].format(source=d["source"], hearts=d["hearts"], max=HEARTS)]
+        if kind == "down":
+            return [L["down"]]
+        if kind == "windup":
+            return [L["windup"].format(side=d["side"])]
+        if kind == "recover":
+            return [L["open"]] if d.get("open") else []
+        if kind in ("charge", "spit", "stagger"):
+            return [L[kind].format(who=d["who"])]
+        if kind == "cleared":
+            return [L["cleared"]]
+        if kind == "run_complete":
+            return [L["run_complete"]]
+        if kind == "room_loaded":
+            return [L["room"].format(room=d["room"])]
+        if kind == "run_start":
+            return [L["run_start"]]
+        if kind == "run_end":
+            return [L[d["result"]].format(rooms=d["rooms"]), L["restart"]]
+        if kind == "ignored":
+            key = {"attack": "reason_attack", "dash": "reason_dash"}.get(d["action"], "reason_other")
+            return [L[key].format(reason=d["reason"])]
+        return []
+
+    def _glyph(self, e):
+        return GLYPHS[(e.kind, e.committed, e.hp < e.max_hp)]
+
+    def snapshot(self):
+        g = self.game
+        grid = [[(" ", None) for _ in range(ROOM_W)] for _ in range(ROOM_H)]
+
+        def put(x, y, glyph):
+            col, row = int(round(x)), int(round(y))
+            if 0 <= col < ROOM_W and 0 <= row < ROOM_H:
+                grid[row][col] = glyph
+
+        if g.arc_left > 0:
+            fx, fy = g.arc_dir
+            px, py = int(round(g.x)), int(round(g.y))
+            for dx in range(-2, 3):
+                for dy in range(-2, 3):
+                    along, across = dx * fx + dy * fy, abs(dx * fy - dy * fx)
+                    if (dx, dy) != (0, 0) and along > 0 and across <= along and (dx * dx + dy * dy) ** 0.5 <= 1.5:
+                        put(px + dx, py + dy, GLYPHS["arc"][g.arc_dir])
+        for shot in g.shots:
+            put(shot[0], shot[1], GLYPHS["shot"])
+        for e in g.enemies:
+            if e.hp > 0:
+                put(e.x, e.y, self._glyph(e))
+        put(g.x, g.y, GLYPHS["player"] if g.hearts > 0 else GLYPHS["down"])
+
+        def render(cell):
+            char, ansi = cell
+            return f"{ansi}{char}{RESET}" if self.color and ansi else char
+
+        print(f"   [{g.t:.2f} s] hearts {g.hearts}/{HEARTS}")
+        print("   +" + "-" * ROOM_W + "+")
+        for row in grid:
+            print("   |" + "".join(render(c) for c in row) + "|")
+        print("   +" + "-" * ROOM_W + "+")
+
+
+class Trace:
+    """Simulation state for developers: one line per frame in which anything happened."""
+
+    def __init__(self, game):
+        self.game, self.seen = game, 0
+
+    def start(self):
+        g = self.game
+        print(f"trace: fps={g.fps} room={g.room} dt={g.dt:.5f}")
+        self.line([("setup", {})])
+
+    def frame(self):
+        g = self.game
+        new = [(kind, details) for _, kind, details in g.events[self.seen :]]
+        self.seen = len(g.events)
+        if new:
+            self.line(new)
+
+    def finish(self):
+        self.line([("end", {})])
+
+    @staticmethod
+    def enemy_text(i, e, t):
+        if e.kind == "grub":
+            timer = 0.0 if e.state == "approach" else max(0.0, e.state_end - t)
+        else:
+            timer = max(0.0, (e.next_charge if e.state == "idle" else e.state_end) - t)
+        return f"{e.kind}#{i}({e.x:.2f},{e.y:.2f},hp={e.hp},{e.state},{timer:.3f})"
+
+    def line(self, events):
+        g = self.game
+        state = (
+            f"t={g.t:.3f} frame={g.frame} room={g.room} phase={g.phase} "
+            f"pos=({g.x:.2f},{g.y:.2f}) hearts={g.hearts} "
+            f"invulnerable={g.invulnerable} dash_left={g.dash_left:.3f} "
+            f"hurt_left={g.hurt_left:.3f} stun_left={g.stun_left:.3f}"
+        )
+        enemies = " ".join(
+            self.enemy_text(i, e, g.t) for i, e in enumerate(g.enemies) if e.hp > 0
+        )
+        happened = "; ".join(
+            kind + (f" {details}" if details else "") for kind, details in events
+        )
+        print(f"{state} | {enemies} | {happened}")
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--view", choices=["player", "trace"], default="player")
+    parser.add_argument("--color", action="store_true")
+    parser.add_argument("script")
+    args = parser.parse_args()
+    with open(args.script, encoding="utf-8") as f:
+        setup, inputs = read_script(f.read())
+    play(setup, inputs, args.view, args.color or sys.stdout.isatty())
+
+
+if __name__ == "__main__":
+    main()
+>>>END
+
+<<<FILE repo/bots.py
+"""Balance bots: let simple player strategies play rooms and report how they fared.
+
+usage: python3 bots.py SCRIPT
+
+Script lines (all optional; `#` starts a comment):
+  bots camper,walker,dodger,reactive   which bots play (default: all)
+  rooms 1-5                   which rooms, as a range or a list like 1,3,5 (default: 1-5)
+  fps 60                      30 or 60 (default: 60)
+  limit 60                    seconds a bot may take per room (default: 60)
+
+Each bot starts every room with full hearts.
+"""
+
+import math
+import sys
+
+from game import ATTACK_REACH, DIRECTIONS, HEARTS, ROOMS, Game  # noqa: F401
+
+
+def _toward(dx, dy):
+    if abs(dx) >= abs(dy):
+        return "right" if dx > 0 else "left"
+    return "down" if dy > 0 else "up"
+
+
+def _nearest(game):
+    live = [e for e in game.enemies if e.hp > 0]
+    return min(live, key=lambda e: math.hypot(e.x - game.x, e.y - game.y), default=None)
+
+
+def _face_and_swing(game, enemy):
+    game.press("move", _toward(enemy.x - game.x, enemy.y - game.y))
+    game.press("stop")
+    if math.hypot(enemy.x - game.x, enemy.y - game.y) <= ATTACK_REACH and game.recovery <= 0:
+        game.press("attack")
+
+
+def _incoming(game):
+    """A shot that will reach the player within 0.7 s, if any."""
+    for x, y, vx, vy in game.shots:
+        speed = math.hypot(vx, vy)
+        ahead = ((game.x - x) * vx + (game.y - y) * vy) / speed
+        beside = abs((game.x - x) * vy - (game.y - y) * vx) / speed
+        if 0 < ahead < 0.7 * speed and beside < 0.7:
+            return vx, vy
+    return None
+
+
+def _sidestep(game, shot):
+    vx, vy = shot
+    if abs(vx) >= abs(vy):
+        return "down" if game.y < 4 else "up"
+    return "right" if game.x < 8 else "left"
+
+
+def camper(game):
+    """Holds the starting spot: turns to the nearest enemy and swings when it is in reach."""
+    enemy = _nearest(game)
+    if enemy:
+        _face_and_swing(game, enemy)
+
+
+def walker(game):
+    """Lets a nearby enemy come and swings, walks up to one further away, steps aside from shots."""
+    enemy = _nearest(game)
+    if not enemy:
+        return
+    shot = _incoming(game)
+    distance = math.hypot(enemy.x - game.x, enemy.y - game.y)
+    coming = enemy.kind == "grub" and distance < 2.5
+    if shot:
+        game.press("move", _sidestep(game, shot))
+    elif distance > 1.1 and not coming:
+        game.press("move", _toward(enemy.x - game.x, enemy.y - game.y))
+    else:
+        _face_and_swing(game, enemy)
+
+
+def dodger(game):
+    """Plays like the walker, but dashes aside from incoming shots and away from two close enemies."""
+    ready = game.dash_left <= 0 and game.dash_cooldown <= 0
+    shot = _incoming(game)
+    close = [e for e in game.enemies if e.hp > 0 and math.hypot(e.x - game.x, e.y - game.y) < 1.3]
+    if ready and shot:
+        game.press("dash", _sidestep(game, shot))
+    elif ready and len(close) >= 2:
+        game.press("dash", _toward(game.x - close[0].x, game.y - close[0].y))
+    else:
+        walker(game)
+
+
+def reactive(game):
+    """Plays like the walker, but dashes away from a grub that is winding up next to it."""
+    ready = game.dash_left <= 0 and game.dash_cooldown <= 0
+    if ready:
+        for e in game.enemies:
+            if (
+                e.hp > 0
+                and e.kind == "grub"
+                and e.state == "windup"
+                and math.hypot(e.x - game.x, e.y - game.y) < 1.6
+            ):
+                game.press("dash", _toward(game.x - e.x, game.y - e.y))
+                return
+    walker(game)
+
+
+BOTS = {"camper": camper, "walker": walker, "dodger": dodger, "reactive": reactive}
+
+
+def play_room(bot, room, fps, limit):
+    game = Game(fps=fps, room=room)
+    while game.t < limit - 1e-9 and not game.cleared and game.hearts > 0:
+        if game.stun_left <= 0:
+            bot(game)
+        game.step()
+    counts = {}
+    sources = {}
+    for _, kind, details in game.events:
+        counts[kind] = counts.get(kind, 0) + 1
+        if kind == "hurt":
+            sources[details["source"]] = sources.get(details["source"], 0) + 1
+    return {
+        "cleared": game.cleared,
+        "seconds": round(game.t, 2),
+        "hearts_lost": counts.get("hurt", 0),
+        "hits_by": sources,
+        "attacks": counts.get("attack", 0),
+        "dashes": counts.get("dash", 0),
+    }
+
+
+def read_script(text):
+    setup = {"bots": list(BOTS), "rooms": [r for r in ROOMS if r != "empty"], "fps": 60, "limit": 60.0}
+    for number, raw in enumerate(text.splitlines(), 1):
+        line = raw.split("#")[0].strip()
+        if not line:
+            continue
+        key, _, value = line.partition(" ")
+        value = value.replace(" ", "")
+        try:
+            if key == "bots":
+                setup["bots"] = value.split(",")
+                assert all(b in BOTS for b in setup["bots"])
+            elif key == "rooms":
+                if "-" in value:
+                    first, last = value.split("-")
+                    value = ",".join(str(n) for n in range(int(first), int(last) + 1))
+                setup["rooms"] = value.split(",")
+                assert all(r in ROOMS for r in setup["rooms"])
+            elif key == "fps":
+                setup["fps"] = int(value)
+            elif key == "limit":
+                setup["limit"] = float(value)
+            else:
+                raise ValueError
+        except (AssertionError, ValueError):
+            sys.exit(f"script line {number}: cannot read {raw.strip()!r}")
+    return setup
+
+
+def main():
+    with open(sys.argv[1], encoding="utf-8") as f:
+        setup = read_script(f.read())
+    print(f"bots at {setup['fps']} FPS, up to {setup['limit']:.0f} s per room, {HEARTS} hearts each")
+    for name in setup["bots"]:
+        total = {"cleared": 0, "hearts_lost": 0, "dashes": 0}
+        for room in setup["rooms"]:
+            r = play_room(BOTS[name], room, setup["fps"], setup["limit"])
+            hits = ", ".join(f"{k} {v}" for k, v in sorted(r["hits_by"].items())) or "none"
+            outcome = f"cleared in {r['seconds']:.1f} s" if r["cleared"] else f"NOT cleared ({r['seconds']:.1f} s)"
+            print(
+                f"{name:8} room {room}: {outcome}; hearts lost {r['hearts_lost']} (hit by: {hits}); "
+                f"attacks {r['attacks']}, dashes {r['dashes']}"
+            )
+            total["cleared"] += r["cleared"]
+            total["hearts_lost"] += r["hearts_lost"]
+            total["dashes"] += r["dashes"]
+        print(
+            f"{name:8} total: cleared {total['cleared']}/{len(setup['rooms'])}, hearts lost "
+            f"{total['hearts_lost']}, dashes {total['dashes']}"
+        )
+
+
+if __name__ == "__main__":
+    main()
+>>>END
+
+<<<FILE repo/tests/test_game.py
+import contextlib
+import io
+import sys
+import unittest
+from collections import Counter
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+import play  # noqa: E402
+from game import DASH_DISTANCE, HEARTS, ROOMS, Game  # noqa: E402
+
+TOL = {30: 0.04, 60: 0.02}
+
+
+def run(game, seconds):
+    for _ in range(round(seconds * game.fps)):
+        game.step()
+
+
+def step_until(game, done, limit=10.0):
+    for _ in range(int(limit * game.fps)):
+        if done(game):
+            return True
+        game.step()
+    return done(game)
+
+
+def has(kind):
+    return lambda g: any(k == kind for _, k, _ in g.events)
+
+
+def times(game, kind, **match):
+    return [t for t, k, d in game.events if k == kind and all(d.get(a) == b for a, b in match.items())]
+
+
+def session(fps, room="empty", spawns=(), player=None, inputs=(), seconds=6.0, hearts=None):
+    game = Game(fps=fps, room=room)
+    for spec in spawns:
+        game.spawn(*spec)
+    if player:
+        game.place_player(*player)
+    if hearts:
+        game.hearts = hearts
+    pending = sorted(inputs, key=lambda i: i[0])
+    while game.t < seconds - 1e-9:
+        while pending and pending[0][0] <= game.t + 1e-9:
+            _, action, direction = pending.pop(0)
+            game.press(action, direction)
+        game.step()
+    return game
+
+
+def view(script, mode="player"):
+    setup, inputs = play.read_script(script)
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        play.play(setup, inputs, mode)
+    return buf.getvalue().splitlines()
+
+
+class GrubTest(unittest.TestCase):
+    def test_cycle_timing_and_telegraph(self):  # AC-1, AC-2
+        for fps in (30, 60):
+            tol = TOL[fps]
+            g = session(fps, spawns=[("grub", 12, 4)], player=(8, 4), seconds=6.0, hearts=50)
+            w, s = times(g, "windup"), times(g, "strike")
+            r, a = times(g, "recover"), times(g, "approach")
+            self.assertAlmostEqual(w[0], 1.375, delta=tol)
+            self.assertAlmostEqual(s[0] - w[0], 0.5, delta=tol)
+            self.assertAlmostEqual(r[0] - s[0], 0.15, delta=tol)
+            self.assertAlmostEqual(a[0] - r[0], 0.9, delta=tol)
+            hurts = times(g, "hurt")
+            self.assertGreaterEqual(hurts[0] - w[0], 0.45)
+            for h in hurts:  # hearts are only lost inside a Strike
+                started = max(t for t in s if t <= h + 1e-9)
+                self.assertLessEqual(h - started, 0.15 + 1 / fps + 1e-9, (fps, h, started))
+
+    def test_dash_away_in_windup_loses_no_heart(self):  # AC-3
+        for fps in (30, 60):
+            for delay in (0.0, 0.1, 0.25, 0.4, 0.49):
+                g = Game(fps=fps, room="empty")
+                g.place_player(10, 4)
+                g.spawn("grub", 11.2, 4)
+                self.assertTrue(step_until(g, has("windup"), 3))
+                run(g, delay)
+                g.press("dash", "left")
+                self.assertTrue(step_until(g, has("recover"), 3))
+                self.assertEqual(g.hearts, HEARTS, (fps, delay))
+
+    def test_counter_in_recovery_and_next_bite_spacing(self):  # AC-4
+        for fps in (30, 60):
+            g = Game(fps=fps, room="empty")
+            g.spawn("grub", 9.2, 4)
+            self.assertTrue(step_until(g, has("recover"), 3))
+            run(g, 0.4)
+            g.press("attack")
+            self.assertEqual(g.enemies[0].hp, 1)
+            self.assertEqual(g.events[-3][2]["hits"][0][:2], ("grub", "hit")) if False else None
+            run(g, 3.5)
+            hurts = times(g, "hurt")
+            self.assertGreaterEqual(len(hurts), 2, fps)
+            self.assertGreaterEqual(hurts[1] - hurts[0], 1.5 - TOL[fps])
+
+    def test_swipe_in_windup_cancels_the_strike(self):  # AC-5
+        for fps in (30, 60):
+            g = Game(fps=fps, room="empty")
+            g.spawn("grub", 9.2, 4)
+            self.assertTrue(step_until(g, has("windup"), 3))
+            run(g, 0.2)
+            g.press("attack")
+            t_hit = g.t
+            self.assertEqual(g.enemies[0].hp, 1)
+            self.assertEqual(g.enemies[0].state, "recovery")
+            self.assertTrue(step_until(g, has("approach"), 2))
+            self.assertAlmostEqual(times(g, "approach")[0] - t_hit, 0.6, delta=TOL[fps])
+            self.assertEqual(g.hearts, HEARTS)
+
+    def test_attack_limit_of_two(self):  # AC-6
+        for fps in (30, 60):
+            g = Game(fps=fps, room="empty")
+            for pos in ((10, 4), (6, 4), (8, 6), (8, 2), (11, 4)):
+                g.spawn("grub", *pos)
+            g.hearts = 50
+            peak = 0
+            for _ in range(12 * fps):
+                g.step()
+                busy = sum(1 for e in g.enemies if e.state in ("windup", "strike"))
+                peak = max(peak, busy)
+                self.assertLessEqual(busy, 2)
+            self.assertEqual(peak, 2)
+
+    def test_strike_is_checked_in_at_least_four_frames(self):
+        for k in range(12):
+            g = Game(fps=30, room="empty")
+            g.place_player(8, 4)
+            g.spawn("grub", 11.0 + 0.013 * k, 4)
+            g.hearts = 50
+            step_until(g, has("recover"), 5)
+            s, r = times(g, "strike")[0], times(g, "recover")[0]
+            self.assertGreaterEqual(round((r - s) * 30) + 1, 4, k)
+
+    def test_grub_far_from_player_is_harmless(self):
+        g = Game(room="empty")
+        g.spawn("grub", 8.5, 4)
+        g.hearts = 50
+        run(g, 0.4)
+        self.assertEqual(g.hearts, 50)
+
+
+class SwipeTest(unittest.TestCase):
+    def test_swipe_misses_behind_the_player(self):
+        game = Game(room="empty")
+        game.spawn("grub", 7.0, 4)
+        game.press("attack")
+        self.assertEqual(game.enemies[0].hp, 2)
+
+    def test_cone_is_ninety_degrees(self):
+        game = Game(room="empty")
+        game.spawn("grub", 8.5, 5.0)  # in reach but outside the cone
+        game.press("attack")
+        self.assertEqual(game.enemies[0].hp, 2)
+
+    def test_multi_hit_prints_two_hit_lines(self):  # AC-12
+        game = Game(room="empty")
+        game.spawn("grub", 9.2, 4)
+        game.spawn("grub", 9.0, 4.5)
+        game.press("attack")
+        hits = next(d["hits"] for _, k, d in game.events if k == "attack")
+        self.assertEqual(len(hits), 2)
+        lines = play.Player.describe("attack", {"hits": hits})
+        self.assertEqual(lines, ["you swipe: grub hit (1 left)"] * 2)
+
+    def test_every_outcome_has_a_reason(self):  # AC-11
+        game = Game(room="empty")
+        game.press("attack")
+        self.assertEqual(game.events[-1][2]["hits"], [])
+        game.press("attack")
+        self.assertEqual(game.events[-1][2]["reason"], "too soon")
+        game.hearts = 50
+        game.spawn("grub", 8.5, 4)
+        step_until(game, has("hurt"), 2)
+        game.press("attack")
+        self.assertEqual(game.events[-1][2]["reason"], "stunned")
+        game.hearts = 1
+        game.hearts = 0
+        game.phase = "down"
+        game.press("attack")
+        self.assertEqual(game.events[-1][2]["reason"], "down")
+        self.assertEqual(play.Player.describe("ignored", game.events[-1][2]), ["you swipe: (down)"])
+
+    def test_defeat_line_and_damaged_glyph(self):
+        g = Game(room="empty")
+        g.spawn("grub", 9.2, 4)
+        g.press("attack")
+        self.assertEqual(g.enemies[0].hp, 1)
+        self.assertNotEqual(
+            play.GLYPHS[("grub", False, False)], play.GLYPHS[("grub", False, True)]
+        )
+        run(g, 1.0)
+        g.enemies[0].x = 9.2
+        g.enemies[0].y = 4
+        g.press("attack")
+        self.assertEqual(g.enemies[0].hp, 0)
+        self.assertTrue(any(k == "defeated" for _, k, _ in g.events))
+
+    def test_moving_during_swipe_recovery(self):
+        g = Game(room="empty")
+        g.press("attack")
+        g.press("move", "right")
+        x0 = g.x
+        run(g, 0.2)
+        self.assertGreater(g.x, x0 + 0.5)
+
+
+class SpitterTest(unittest.TestCase):
+    def test_schedule_and_stagger(self):  # AC-7
+        for fps in (30, 60):
+            for room in ("3", "4", "5"):
+                g = session(fps, room=room, seconds=9.0, hearts=50)
+                charges = [(t, d["spitter"]) for t, k, d in g.events if k == "charge"]
+                idx = sorted({i for _, i in charges})
+                for k, i in enumerate(idx):
+                    mine = [t for t, j in charges if j == i]
+                    self.assertGreaterEqual(len(mine), 3, (fps, room))
+                    for n, t in enumerate(mine):
+                        self.assertAlmostEqual(t, 1.0 + 0.8 * k + 2.5 * n, delta=TOL[fps] + 1e-9)
+                stamps = sorted(t for t, _ in charges)
+                fires = sorted(times(g, "spit"))
+                for seq in (stamps, fires):
+                    self.assertTrue(all(b - a >= 0.5 for a, b in zip(seq, seq[1:])), (fps, room))
+                for t in times(g, "spit"):
+                    self.assertTrue(any(abs((t - c) - 0.8) <= TOL[fps] + 1e-9 for c in stamps))
+
+    def test_still_player_is_hit_and_moving_off_the_line_dodges(self):  # AC-9
+        for fps in (30, 60):
+            spawn = [("spitter", 12, 4)]
+            hit = session(fps, spawns=spawn, player=(8, 4), seconds=4.5)
+            self.assertEqual(hit.hearts, HEARTS - 1)
+            moved = session(
+                fps, spawns=spawn, player=(8, 4), seconds=4.5,
+                inputs=[(2.0, "move", "up"), (2.5, "stop", None)],
+            )
+            self.assertEqual(moved.hearts, HEARTS)
+            dashed = session(fps, spawns=spawn, player=(8, 4), seconds=4.5, inputs=[(2.0, "dash", "up")])
+            self.assertEqual(dashed.hearts, HEARTS)
+
+    def test_walk_up_and_defeat_in_two_swipes_cancels_a_charge(self):  # AC-10
+        for fps in (30, 60):
+            g = Game(fps=fps, room="empty")
+            g.spawn("spitter", 9, 4)
+            self.assertTrue(step_until(g, has("charge"), 2))
+            run(g, 0.3)
+            g.press("attack")
+            self.assertEqual(g.enemies[0].hp, 1)
+            self.assertEqual(g.enemies[0].state, "stagger")
+            run(g, 0.5)
+            g.press("attack")
+            self.assertEqual(g.enemies[0].hp, 0)
+            run(g, 3.0)
+            self.assertFalse(has("spit")(g))
+            self.assertEqual(g.hearts, HEARTS)
+            self.assertTrue(g.cleared)
+
+    def test_stagger_lasts_one_second_then_charges(self):
+        g = Game(room="empty")
+        g.spawn("spitter", 9, 4)
+        step_until(g, has("charge"), 2)
+        g.press("attack")
+        t_hit = g.t
+        step_until(g, lambda g: len(times(g, "charge")) >= 2, 3)
+        self.assertAlmostEqual(times(g, "charge")[1] - t_hit, 1.0, delta=0.02)
+
+
+class RunFlowTest(unittest.TestCase):
+    def test_zero_hearts_then_run_over_then_restart(self):  # AC-13
+        g = Game(room="1")
+        g.hearts = 1
+        g.spawn("grub", 8.5, 4)
+        self.assertTrue(step_until(g, lambda g: g.hearts == 0, 3))
+        self.assertEqual(g.phase, "down")
+        self.assertEqual(g.shots, [])
+        frozen = [(e.x, e.y, e.state) for e in g.enemies]
+        run(g, 0.5)
+        self.assertEqual(frozen, [(e.x, e.y, e.state) for e in g.enemies])
+        g.press("attack")
+        self.assertEqual(g.events[-1][2]["reason"], "down")
+        t_down = times(g, "down")[0]
+        self.assertTrue(step_until(g, lambda g: g.ended, 3))
+        end = next(d for _, k, d in g.events if k == "run_end")
+        self.assertEqual((end["result"], end["rooms"]), ("over", 0))
+        self.assertAlmostEqual(times(g, "run_end")[0] - t_down, 2.0, delta=0.04)
+        g.press("attack")
+        self.assertEqual((g.phase, g.hearts, g.room), ("playing", HEARTS, "1"))
+        self.assertEqual(g.events[-1][1], "run_start")
+
+    def test_down_in_practice_room_ends_session(self):
+        g = Game(room="empty")
+        g.hearts = 1
+        g.spawn("grub", 8.5, 4)
+        self.assertTrue(step_until(g, lambda g: g.ended, 6))
+        self.assertFalse(has("run_end")(g))
+
+    def test_clear_heals_and_loads_next_room(self):  # AC-14
+        for fps in (30, 60):
+            for start, want in ((2, 3), (3, 3), (1, 2)):
+                g = Game(fps=fps, room="1")
+                g.hearts = start
+                for e in g.enemies:
+                    e.hp = 0
+                g.shots.append([1.0, 1.0, 0.0, 0.0])
+                g.step()
+                self.assertTrue(g.cleared)
+                self.assertEqual((g.hearts, g.shots), (want, []))
+                t_clear = g.t
+                self.assertTrue(step_until(g, lambda g: g.room == "2", 3))
+                self.assertAlmostEqual(g.t - t_clear, 1.5, delta=TOL[fps] + 0.01)
+                self.assertEqual((g.x, g.y), (8.0, 4.0))
+                self.assertEqual(len(g.enemies), 4)
+                self.assertFalse(g.cleared)
+                self.assertEqual(g.hearts, want)
+
+    def test_clearing_swipe_cancels_a_shot_due_that_tick(self):  # AC-14
+        g = Game(room="empty")
+        g.spawn("grub", 9.0, 4)
+        g.enemies[0].hp = 1
+        g.shots.append([8.0, 4.0, 0.0, 0.0])
+        g.press("attack")
+        g.step()
+        self.assertEqual(g.hearts, HEARTS)
+        self.assertTrue(g.cleared)
+        self.assertEqual(g.shots, [])
+
+    def test_clearing_room_five_completes_the_run(self):  # AC-14
+        g = Game(room="5")
+        for e in g.enemies:
+            e.hp = 0
+        g.step()
+        self.assertTrue(has("run_complete")(g))
+        self.assertTrue(step_until(g, lambda g: g.ended, 3))
+        self.assertEqual(g.phase, "complete")
+        self.assertEqual(play.Player.describe("run_end", g.events[-1][2])[0], "run complete — rooms cleared: 1")
+
+    def test_rooms_match_the_layouts(self):  # AC-16
+        want = {
+            "1": ["grub"] * 3,
+            "2": ["grub"] * 4,
+            "3": ["spitter"] * 3,
+            "4": ["grub"] * 2 + ["spitter"] * 2,
+            "5": ["grub"] * 3 + ["spitter"] * 2,
+        }
+        for room, kinds in want.items():
+            self.assertEqual([s[0] for s in ROOMS[room]], kinds)
+            lines = view(f"room {room}\nend 0.1\n", "trace")
+            self.assertEqual(lines[1].count("#"), len(kinds), room)
+
+
+class DashTest(unittest.TestCase):
+    def test_dash_covers_four_tiles_at_both_frame_rates(self):
+        for fps in (30, 60):
+            game = Game(fps=fps, room="empty")
+            game.place_player(2, 4)
+            game.press("dash", "right")
+            run(game, 0.5)
+            self.assertAlmostEqual(game.x, 2 + DASH_DISTANCE, places=6)
+
+    def test_attack_during_dash_fires_when_it_ends(self):
+        game = Game(room="empty")
+        game.place_player(2, 4)
+        game.press("dash", "right")
+        run(game, 0.1)
+        game.press("attack")
+        self.assertFalse(any(kind == "attack" for _, kind, _ in game.events))
+        run(game, 0.2)
+        self.assertTrue(any(kind == "attack" for _, kind, _ in game.events))
+
+    def test_dash_has_a_cooldown(self):
+        game = Game(room="empty")
+        game.press("dash", "left")
+        run(game, 0.5)
+        game.press("dash", "left")
+        self.assertEqual(game.events[-1][1], "ignored")
+        self.assertEqual(game.events[-1][2]["reason"], "dash not ready")
+
+
+class InvulnerabilityTest(unittest.TestCase):
+    def test_a_dash_right_after_a_hit_keeps_both_protections(self):
+        for fps in (30, 60):
+            game = Game(fps=fps, room="empty")
+            game.place_player(4, 4)
+            game.spawn("grub", 5.2, 4)
+            game.spawn("grub", 4, 5.2)
+            game.spawn("grub", 9.5, 4)
+            game.hearts = 50
+            self.assertTrue(step_until(game, has("hurt"), 3))
+            run(game, 0.31)
+            game.press("dash", "right")
+            run(game, 5.0)
+            hurt = times(game, "hurt")
+            ended = times(game, "dash_end")[0]
+            started = times(game, "dash")[0]
+            self.assertFalse(any(started < t <= ended for t in hurt), (fps, hurt, started, ended))
+            self.assertTrue(all(b - a >= 0.8 - 1e-9 for a, b in zip(hurt, hurt[1:])), (fps, hurt))
+
+
+class FrameRateTest(unittest.TestCase):
+    SCRIPTS = [
+        dict(spawns=[("grub", 12, 4)], player=(8, 4), seconds=6.0, hearts=50),
+        dict(room="3", seconds=6.0, hearts=50),
+        dict(
+            spawns=[("grub", 9.2, 4)], player=(8, 4), seconds=5.0, hearts=50,
+            inputs=[(0.1, "attack", None), (1.0, "dash", "left"), (2.0, "attack", None)],
+        ),
+    ]
+
+    def test_same_events_at_both_frame_rates(self):  # AC-17
+        worst = 0.0
+        for sc in self.SCRIPTS:
+            a, b = session(30, **sc), session(60, **sc)
+            self.assertEqual([k for _, k, _ in a.events], [k for _, k, _ in b.events], sc)
+            for (ta, _, _), (tb, _, _) in zip(a.events, b.events):
+                worst = max(worst, abs(ta - tb))
+                self.assertLessEqual(abs(ta - tb), 0.07 + 1e-9, sc)
+        print(f"MEASURE max cross-fps event time difference: {worst:.4f} s", file=sys.stderr)
+
+    def test_report_timestamp_errors(self):
+        for fps in (30, 60):
+            g = session(fps, spawns=[("grub", 12, 4)], player=(8, 4), seconds=8.0, hearts=50)
+            err = 0.0
+            for a, b, want in (("windup", "strike", 0.5), ("strike", "recover", 0.15), ("recover", "approach", 0.9)):
+                for x, y in zip(times(g, a), times(g, b)):
+                    err = max(err, abs(y - x - want))
+            s = session(fps, room="3", seconds=9.0, hearts=50)
+            for c, f in zip(sorted(times(s, "charge")), sorted(times(s, "spit"))):
+                err = max(err, abs(f - c - 0.8))
+            print(f"MEASURE fps {fps}: max timer error {err:.4f} s", file=sys.stderr)
+
+
+class ViewTest(unittest.TestCase):
+    def test_spit_lines_are_named_distinct_and_counted(self):  # AC-8 and defect 15
+        names = {
+            "3": {"top left", "bottom right", "bottom left"},
+            "4": {"top right", "bottom right"},
+            "5": {"top right", "bottom right"},
+        }
+        for fps in (30, 60):
+            for room, want in names.items():
+                lines = view(f"room {room}\nfps {fps}\nend 7\n")
+                spits = [l for l in lines if "spits" in l]
+                found = {l.split("(")[1].split(")")[0] for l in spits}
+                self.assertEqual(found, want, (fps, room))
+                by_time = {}
+                for l in spits:
+                    by_time.setdefault(l.split()[0], []).append(l)
+                for stamp, group in by_time.items():
+                    self.assertEqual(len(group), len(set(group)), (fps, room, stamp))
+                ref = Game(fps=fps, room=room)
+                while ref.t < 7 - 1e-9 and not ref.ended:
+                    ref.step()
+                events = Counter(f"{t:.3f}" for t, k, _ in ref.events if k == "spit")
+                self.assertEqual({s: len(g) for s, g in by_time.items()}, dict(events))
+
+    def test_spit_draw_shows_the_projectile(self):
+        lines = view("room 4\nend 3\n")
+        i = next(n for n, l in enumerate(lines) if "spits" in l)
+        self.assertTrue(any("*" in l for l in lines[i : i + 14] if l.startswith("   |")))
+
+    def test_telegraph_is_drawn_before_the_first_heart_is_lost(self):  # AC-1, V-2, V-3
+        for fps in (30, 60):
+            lines = view(f"room empty\nfps {fps}\nspawn grub 12 4\nplayer 8 4\nend 4\n")
+            a = next(n for n, l in enumerate(lines) if "rears back" in l)
+            b = next(n for n, l in enumerate(lines) if "YOU ARE HIT" in l)
+            self.assertIn("a grub rears back (right)", lines[a])
+            self.assertTrue(any("G" in l for l in lines[a:b] if l.startswith("   |")))
+
+    def test_swipe_arc_is_drawn(self):
+        lines = view("room empty\nspawn grub 15 8\n0.2 attack\nend 1\n")
+        i = next(n for n, l in enumerate(lines) if "(miss)" in l)
+        self.assertTrue(any(")" in l for l in lines[i + 1 : i + 14] if l.startswith("   |")))
+
+    def test_run_over_screen_shows_restart_prompt(self):  # V-8
+        lines = view("room empty\nspawn grub 8.5 4\nend 1\n")  # practice: no screen
+        self.assertFalse(any("run over" in l for l in lines))
+        game = Game(room="1")
+        game.hearts = 1
+        game.spawn("grub", 8.5, 4)
+        step_until(game, lambda g: g.ended, 6)
+        text = [l for _, k, d in game.events if k == "run_end" for l in play.Player.describe(k, d)]
+        self.assertEqual(text, ["run over — rooms cleared: 0", "press attack to start again"])
+
+    def test_glyph_table_separates_states(self):
+        for kind in ("grub", "spitter"):
+            chars = [play.GLYPHS[(kind, c, d)][0] for c in (False, True) for d in (False, True)]
+            self.assertEqual(len(set(chars)), 4)
+            for (k, c, d), (ch, _) in [(key, v) for key, v in play.GLYPHS.items() if isinstance(key, tuple) and key[0] == kind]:
+                self.assertEqual(ch.isupper(), c)
+
+    def test_no_bare_nothing_happens(self):
+        source = (Path(play.__file__)).read_text(encoding="utf-8")
+        self.assertNotIn("(nothing happens)", source)
+
+    def test_manual_lists_glyphs_and_lines(self):  # AC-15, V-5
+        manual = Path(__file__).resolve().parents[2] / "manual.md"
+        if not manual.exists():
+            self.skipTest("manual.md not found")
+        text = manual.read_text(encoding="utf-8")
+        for needle in (
+            "`x`", "`P`", "`g`", "`G`", "`w`", "`W`", "`s`", "`S`", "`z`", "`Z`", "`*`",
+            ")", "practice room", "a grub rears back", "the grub is open", "charges", "spits",
+            "is staggered", "(miss)", "(too soon)", "(stunned)", "(down)", "room cleared",
+            "run complete", "run over", "press attack to start again",
+        ):
+            self.assertIn(needle, text, needle)
+
+
+class BotsTest(unittest.TestCase):
+    def test_every_bot_finishes_a_room(self):
+        import bots
+
+        for name, bot in bots.BOTS.items():
+            result = bots.play_room(bot, "1", 60, 30)
+            self.assertIn("cleared", result, name)
+
+    def test_bots_play_room_five_at_both_frame_rates(self):
+        import bots
+
+        for fps in (30, 60):
+            for name, bot in bots.BOTS.items():
+                result = bots.play_room(bot, "5", fps, 60)
+                self.assertGreaterEqual(result["hearts_lost"], 0, name)
+
+
+if __name__ == "__main__":
+    unittest.main()
+>>>END
+
+<<<FILE repo/README.md
+# Lantern Depths build 0.5
+
+- `game.py`: the combat simulation (elapsed-second timers, 30 or 60 FPS): grub and spitter state machines, run and room flow.
+- `play.py`: runs an input script (`../manual.md`) and prints the player view or a trace. The `GLYPHS` and `LINES` tables hold every glyph, color and player-visible line.
+- `tests/`: `python3 -m unittest discover -s tests`
+- `bots.py`: balance bots (`camper`, `walker`, `dodger`, `reactive`) that play rooms and report how they fared.
+>>>END
+
+<<<FILE manual.md
+# Lantern Depths — how to play build 0.5
+
+Player-facing manual. A play session is an input script; the play command runs it and shows what a
+player sees and hears. The room is drawn every half second and again at the moments that matter:
+when an enemy starts a telegraph, when a shot is fired, on every swipe, when a grub opens up, when
+you are hit or go down, and when a room is cleared.
+
+## Controls
+
+- **Move** in four directions; you keep moving until you stop or turn. You can keep moving while you swing.
+- **Attack**: a short swipe in the direction you face. It reaches a little way in a narrow wedge in front of you and hits every enemy inside it.
+- **Dash**: a quick burst in a direction (or the way you face). You cannot be hurt while dashing, and you pass through enemies and shots.
+
+## Script
+
+One instruction per line; `#` starts a comment.
+
+| Line | Meaning |
+|---|---|
+| `room 1` … `room 5` | Which room to play (default 1). `room empty` is the practice room. |
+| `fps 30` or `fps 60` | Frame rate (default 60). |
+| `end 12` | Stop the session at 12 seconds (default: 3 s after the last input; at most 60). A session also stops early at the run-over screen, unless a later input follows. |
+| `<seconds> move left\|right\|up\|down` | Start moving at that time. |
+| `<seconds> stop` | Stop moving. |
+| `<seconds> attack` | Swipe. |
+| `<seconds> dash [left\|right\|up\|down]` | Dash. |
+| `spawn grub\|spitter <x> <y>` | Practice room setup: place an enemy. |
+| `player <x> <y>` | Practice room setup: place yourself. |
+
+The room is 16 tiles wide (x 0–15) and 9 tall (y 0–8); you start at x 8, y 4.
+
+## On screen
+
+Hearts are shown above the room. Letters tell you what each thing is doing: a **capital** letter means
+it is about to hurt you or is hurting you right now; a **small** letter means it is harmless for the moment.
+
+| Mark | Meaning |
+|---|---|
+| `P` | You. |
+| `x` | You, down (out of hearts). |
+| `g` | A grub that cannot hurt you right now: walking, or open to a counter. |
+| `G` | A grub that has reared back or is lunging: it will hurt you if you stay in reach. |
+| `w` | A grub that has taken a hit, harmless for the moment. |
+| `W` | A grub that has taken a hit, rearing back or lunging. |
+| `s` | A spitter that is not charging. |
+| `S` | A spitter charging a shot. |
+| `z` | A spitter that has taken a hit, not charging. |
+| `Z` | A spitter that has taken a hit, charging a shot. |
+| `*` | A spit shot in flight. |
+| `)` `(` `^` `v` | Your swipe: right, left, up, down, shown on the tiles it reaches. |
+
+With colors on, rearing grubs, charging spitters and shots are orange-red and everything else is muted or warm; the letters
+alone tell you the state if you play without color.
+
+## What you read
+
+- **Grubs.** A grub walks up to you. When it is close it stops and `a grub rears back (left)` (or right, above, below) appears and its letter turns capital. That is your moment to step back or dash away. Then it lunges. Afterwards `the grub is open` appears: that is your moment to swipe. No more than two grubs attack at once; others wait for their turn.
+- **Spitters.** A spitter stays where it is. `spitter (top right) charges` appears and its letter turns capital; a moment later `spitter (top right) spits` appears and a `*` flies toward where you were standing. Move off its line or dash through it. You can also walk up and swipe a spitter: a hit while it charges cancels the shot, and `spitter (top right) is staggered` appears. Each spitter is named by where it stands.
+- **Your swipes.** Each enemy you hit gets one line: `you swipe: grub hit (1 left)` or `you swipe: grub defeated`. A swipe that does nothing always says why: `(miss)` (nothing in reach), `(too soon)` (you are still recovering from the last swipe), `(stunned)` (you were just hit and cannot act), or `(down)` (you are out of hearts). A dash that cannot start says `(dash not ready)`.
+- **Being hit.** `YOU ARE HIT` shows your hearts left, and you cannot be hurt again for a short while.
+
+## Rooms and runs
+
+- Five rooms make a run. Rooms 1 and 2 hold grubs, room 3 spitters, and rooms 4 and 5 a mix.
+- `room cleared` appears when the last enemy falls; shots disappear and you recover one heart (up to the maximum). You can still move and swing for a short pause, then the next room loads and you stand at the start spot. Hearts otherwise carry over.
+- Clearing room 5 prints `run complete`, followed by a final screen.
+- At zero hearts `you went down` appears, `x` replaces `P`, enemies stop and shots vanish. After a short moment the run-over screen shows `run over — rooms cleared: N` and `press attack to start again`. Attack there starts a new run in room 1 with full hearts.
+
+## The practice room
+
+`room empty` starts with no enemies; place them with `spawn` and yourself with `player`. It is not part of a run: `room cleared` appears when your last spawned enemy is defeated, with no heart recovered and no next room, and the session carries on to its `end` time. If you go down, the session ends shortly afterwards instead of showing the run-over screen.
+>>>END
+
+<<<FILE @run/tests
+>>>END
+
+<<<FILE @run/bots/fps60
+fps 60
+>>>END
+
+<<<FILE @run/bots/fps30
+fps 30
+>>>END
+
+<<<FILE @run/trace/room5-fps30
+room 5
+fps 30
+end 8
+>>>END

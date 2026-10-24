@@ -1,0 +1,43 @@
+I need the build's output to settle these, so this round runs the trace, play and bot commands. The report follows once I have the results.
+
+<<<FILE @run/trace/grub-room1-idle-30
+room 1
+fps 30
+end 16
+>>>END
+
+<<<FILE @run/trace/grub-room1-idle-60
+room 1
+fps 60
+end 16
+>>>END
+
+<<<FILE @run/trace/dash-open-and-wall
+room empty
+fps 60
+player 8 4
+end 8
+1 dash right
+2 dash left
+3 dash left
+4 dash left
+5 dash up
+6 dash up
+7 dash up
+>>>END
+
+<<<FILE @run/bots/ref60
+bots camper,walker,dodger,reactive
+rooms 1-5
+fps 60
+limit 60
+>>>END
+
+<<<FILE @run/play/dash-wall-view
+room empty
+fps 60
+player 14 4
+end 4
+1 dash right
+2 dash right
+>>>END

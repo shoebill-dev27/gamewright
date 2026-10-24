@@ -1,0 +1,75 @@
+{
+ "op": "Intake",
+ "role": null,
+ "goal": "G-001 (new)",
+ "attempts": [
+  {
+   "runtime": "codex",
+   "session_id": "01a12571-b208-7bd1-8ed7-f273216e6d85",
+   "model": "gpt-6-astra",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 16773,
+    "cached_input_tokens": 2688,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 1653,
+    "reasoning_output_tokens": 217
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 1,
+   "started": "2026-10-10T19:52:49",
+   "seconds": 43.8,
+   "errors": [
+    "goal.md: an active Goal needs its next step marked `open` with its Handoff"
+   ]
+  },
+  {
+   "runtime": "codex",
+   "session_id": "01a12572-592c-7cd2-96d8-f824db3cae17",
+   "model": "gpt-6-astra",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 16816,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 2145,
+    "reasoning_output_tokens": 42
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 2,
+   "started": "2026-10-10T19:53:33",
+   "seconds": 45.1,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-dash-damage/goal.md": "e788a7196460b1e5535bec730ad4671fed7f3f918097cb66cd918f799a24fd91",
+  "goals/G-001-dash-damage/01-studio-to-qa.md": "5cb137fe8e47f317d9e27a94a5e9b2b3d04b45a7e696799c3754a06b281b6fd4"
+ },
+ "decision": {
+  "status": "active",
+  "open": [
+   [
+    "qa",
+    "Observe"
+   ]
+  ],
+  "new": [
+   "qa",
+   "Observe"
+  ]
+ }
+}

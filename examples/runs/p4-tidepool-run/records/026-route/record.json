@@ -1,0 +1,73 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "74df67e8-fd0f-410c-aef9-5c8acc25c53d",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 22448,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 6149,
+    "output_tokens_details": {
+     "thinking_tokens": 1203
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 22448,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 6149,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 22448,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 22448
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.151286,
+   "attempt": 1,
+   "started": "2026-10-12T07:58:08",
+   "seconds": 39.4,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-first-puzzle-stall/23-studio-to-qa.md": "ae2b43de2b70a9ffb4f78c6aeff3c223e1413ff58ae54c02fb0fa610f807f04a",
+  "goals/G-001-first-puzzle-stall/goal.md": "335dfe4c17af4647d89cddf8bb782d14c73914302483aafe5e4b37d920d867ec"
+ },
+ "decision": {
+  "new": [
+   "qa",
+   "Verify"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "qa",
+    "Verify"
+   ]
+  ]
+ },
+ "seen_through_seq": 23
+}

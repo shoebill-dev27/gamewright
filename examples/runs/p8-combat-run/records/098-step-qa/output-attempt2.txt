@@ -1,0 +1,28 @@
+I'm running the late-swipe checks (W5) before I write the verdict. W1 is already traced at both rates.
+
+<<<FILE @run/play/w5-grub-30
+room empty
+fps 30
+spawn grub 10 4
+player 8 4
+0.6 attack
+end 3
+>>>END
+
+<<<FILE @run/play/w5-grub-60
+room empty
+fps 60
+spawn grub 10 4
+player 8 4
+0.6 attack
+end 3
+>>>END
+
+<<<FILE @run/play/w5-brute-60
+room empty
+fps 60
+spawn brute 10 4
+player 8 4
+0.8 attack
+end 3
+>>>END

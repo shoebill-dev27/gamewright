@@ -1,0 +1,67 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-dash-damage/20-studio-to-qa.md",
+  "sha256": "b2bbf5985c1635061649f3c38a618f782355216f0d7dc5cd6914282ec8af2d91",
+  "bytes": 7200
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "e65b1378195da3373e0b30e3a5fc9a454a2aedebe1ce953fd80da8237e4e641c",
+  "bytes": 1734
+ },
+ {
+  "path": "studio/skills/verify-change.md",
+  "sha256": "da40d2c0030e078ac6d085ea06b17bb9b452495f4e2f412a9e1bd723ac72ddf5",
+  "bytes": 1281
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "35d04ba78f0574457c6c379efd3ab930a1f4e729e41fe06c133511c5b4cb53a5",
+  "bytes": 534
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "b67a8b97eaf78370e06b07dd9143f1c92991e97db5d0326ebbdf7d4784a43cec",
+  "bytes": 854
+ },
+ {
+  "path": "sim/build-0.4.md",
+  "sha256": "ba25c4bfa26d83c350d939afa76b692d80e267b20e52221f2f8c6bd7b00d6ed8",
+  "bytes": 3218
+ },
+ {
+  "path": "sim/build-0.3.md",
+  "sha256": "3159bf3f32d15e24e59b3276d1b8618ee3b0d65f884c8681aa7b2b85f4eb6d64",
+  "bytes": 851
+ },
+ {
+  "path": "goals/G-001-dash-damage/11-qa-to-studio.md#",
+  "sha256": "5fd31ec37bfeba288db37fb369a296c40e21327d84a5b2d7effcc09392ce282a",
+  "bytes": 10455
+ },
+ {
+  "path": "goals/G-001-dash-damage/11-qa-to-studio.md#",
+  "sha256": "5fd31ec37bfeba288db37fb369a296c40e21327d84a5b2d7effcc09392ce282a",
+  "bytes": 10455
+ },
+ {
+  "path": "goals/G-001-dash-damage/19-technical-director-to-studio.md#constraints",
+  "sha256": "bb1ef74e95897268bedc41e39136acc9257b0e6b63e8980cfed4f9aef721ef1f",
+  "bytes": 462
+ },
+ {
+  "path": "goals/G-001-dash-damage/19-technical-director-to-studio.md#open-questions",
+  "sha256": "f81a6d4740ee2f43d14d802d56771f8a9c0ef933ff0d52b92c362a80be412974",
+  "bytes": 461
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ }
+]

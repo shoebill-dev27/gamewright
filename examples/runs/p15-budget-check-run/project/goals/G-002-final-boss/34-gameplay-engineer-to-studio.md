@@ -1,0 +1,156 @@
+---
+kind: handoff
+goal: G-002
+seq: 34
+from: gameplay-engineer
+to: studio
+stage: Build
+outcome: question
+---
+# 34: gameplay-engineer → studio — 短射の時間整合を修正、統合Buildと測定は未完了
+
+## Task
+
+本出力の変更を保存し、実行roundを利用できる継続Buildで保存版suiteから再開する。対応bot、基準別不足、公開表示・文書、同一試行測定が揃うまで独立QAへ投入しない。
+
+## Context
+
+33は保存版の検証と統合Build完成を要求した。D-021の開始承認は有効であり、実機供給、指定sha照合、費用承認の再取得は不要である。
+
+今回のoperation headerではtests／trace／botsの実行round残数が0である。供給された@run-resultsはあるが、各roundの対象ソースを特定する情報がなく、本出力後の検証結果にはできない。
+
+## Findings
+
+### 今回の保存対象
+
+| ファイル | 変更 |
+|---|---|
+| `repo/game.py` | ボス短射へ発射frameを付け、そのframeの移動・加齢を開始しない処理を追加 |
+| `repo/tests/test_boss_contract.py` | 未接触短射の発射位置・初期age・3 tiles移動・寿命消去と回復開始の一致、および通常接触／保護吸収後も回復開始を早めない2試験を追加。各試験内で30／60 FPSを別に確認 |
+| 本Handoff | 保存対象、実行証拠の限界、残作業と再開手順を記録 |
+
+パケット末尾の「proposed … not written」は既存ファイルとして扱っていない。今回のtest_boss_contract.pyは上記2試験を持つ新規ファイルとして出力する。提案された6試験全体を保存したという報告ではない。
+
+### 実装前に照合した可視挙動
+
+仕様§3、B4は、短射の発射から1.0秒後の寿命消去と回復開始、最大移動3.0 tilesを要求する。接触・吸収による早期消去でもボスのactive時間は変わらない。
+
+この契約に合わせ、ボス短射の発射時点は発射位置・age0とし、次の戦闘frameから移動・加齢する。既存spitterの発射frame処理と共有プレイヤーパラメータは変更しない。既発射弾を勝敗確定前に独立危害として解決する順序も維持する。
+
+### 基準別対応と未達
+
+以下は実装・試験の対応表であり、合格判定ではない。
+
+| 基準 | 保存ソース上の対応 | 残作業 |
+|---|---|---|
+| R1 | 公開mode runと正規入場処理 | 正規敵を実際に倒した同一試行の1→5到達、player出力 |
+| R2 | test_game.pyの第1〜4部屋配置assert | 保存版suite実行、共有基準の個別不足確認 |
+| R3〜R5・C1 | test_session.pyの回復・境界・時計、test_run_driver.pyの境界入力 | 反応記憶初期化の専用試験、入場表示と入力順序の対照、実行 |
+| B1〜B3 | test_boss.pyの初期状態、予兆、固定方向、突進・壁 | 各攻撃3回以上の順序、HP低下時、距離0、毎frame軌道の不足補完と実行 |
+| B4 | 今回の短射時間修正と2試験、既存接触・寿命試験 | 部屋端、弾IDと全消去理由、公開出力との対照、実行 |
+| B5〜B7 | 既存の保護接触試験が一部対応 | 両攻撃の直交移動、実dash接触、保護終了後と次攻撃を含む専用試験 |
+| B8・B9 | 予兆swipe、致死相打ち、4回反撃試験 | 全phase非致死比較、致死時新発動抑止、回復時刻と接触の不足補完 |
+| B10 | 仕様の接触帯を保持 | 両攻撃の帯内・帯外・上端の軌道試験 |
+| T1〜T4 | Game終端、Session retry、既存fixture試験 | 実勝利／実死亡からのretry、2秒凍結、旧未来入力と反応記憶破棄 |
+| C2 | dash・予約攻撃・境界pauseの既存試験 | ボス予兆・保護途中、pause中入力、再開後継続の対照 |
+| C3 | limitと結果の別字段 | 勝利／死亡と同frame limitの統合試験 |
+| V1 | 新driverのplayer／trace、予兆線・活動弾数 | 全表示契機、旧構文経路の契約、イベントbuild字段、弾ID・全消去理由、長時間蓄積 |
+| D-019 | 独立1〜4の既存bot方針・保持assert | ボス対応dodger、3／2 hearts別FPS比較、独立3・4全bot報告 |
+| 文書 | public-driver.mdに公開構文あり | manual／README統合と検証状態の更新 |
+| V2 | D-021により今回の実機検証対象外 | 実機対応検証済みとは報告しない |
+
+旧assertの適用は仕様§8とPlan16・20を維持する。旧13集計は復活させない。独立1〜2比較、独立3・4のdash、独立1〜4のdodger FPS比較を保持し、新5番は対応botとB試験へ接続する。
+
+### 実行対象・コマンド・実結果
+
+公開driver内の識別文字列は引き続き`0.6-g002-public-32`である。この文字列だけでは今回の戦闘修正前後を区別できない。継続Buildは今回の保存後ソースを固定し、識別を更新したうえで測定結果と対応付ける必要がある。
+
+供給された結果：
+
+| Round | コマンド | 供給された実結果 | 帰属の限界 |
+|---|---|---|---|
+| 1 | `python3 -m unittest discover -s tests` | Exit 0、96 tests、0.184秒、OK | 対象ソースの明細なし |
+| 2 | 同上 | Exit 0、102 tests、0.189秒、OK | 提案版と保存版の対応を確定できない |
+| 3 | 同上 | Exit 0、102 tests、0.188秒、OK | 本出力後の試験ではない |
+
+今回新たに実行したコマンドはない。本出力の2試験を上記件数に加算して成功件数を推定しない。保存版suite、trace、bots、通常ラン測定は未実行である。
+
+### 測定条件と値
+
+新しい測定値はない。以下はすべて未取得である。
+
+- 独立3・4の全bot×両FPSの開始／終了hearts、損失、clear／death／unfinished、秒数、被弾源、攻撃・dash数、判断ログ。
+- 独立5番のボス対応dodgerによる開始3／2 hearts別、同一limit・方針でのFPS比較。
+- 正規撃破による同一試行の部屋別時間、4回の1秒遷移、ボス入場hearts、被弾、回復中反撃、終端、retry、pause、処理実時間。
+
+独立部屋時間やfixture通過を通常ランの到達・所要時間へ転用していない。15〜20分のVisionとの差、攻略不能・到達不能の有無も測定証拠からは判断できない。
+
+### 再開・独立再現のための手順
+
+1. 本出力を保存後、`repo/`で`python3 -m unittest discover -s tests`を実行する。対象ファイルとbuild識別、実件数、失敗全文を対応付ける。
+2. 今回のtest_boss_contract.pyで、短射発射時age0、次frameから加齢、発射1秒後に消去と回復開始が一致することを両FPSで確認する。
+3. 不足試験と観測字段を補い、public-driver.mdの独立5番例を両FPSのplayer／traceで実行する。旧構文のroom 5経路も対照する。
+4. 公開観測だけを利用するボス対応dodgerを実装し、反応間隔0.15秒、同一limit・初期条件で開始3／2 heartsをそれぞれ比較する。独立1〜4の方針への影響を分けて確認する。
+5. 独立3・4の全bot結果を両FPSで部屋別報告する。保持対象の共有回帰を確認する。
+6. 正規撃破のみで通常ランを測る。各試行のsimulation run／room時刻、pause・終端待機を含むdriver時刻、processing実時間を別に記録する。
+7. manual／READMEを公開経路へ統合する。完了資料をStudioへ返し、独立QAへの投入はStudioが判断する。
+
+### Sender assessment
+
+保存ソースでは短射生成後、同じGame.step内で即座に移動・加齢するため、未接触弾の寿命消去がボス回復開始より1frame早くなる構造を確認した。今回の修正はその共有更新順によるずれをボス短射に限定して除くものだが、実行による確認は未実施である。
+
+33の統合Build完成要求は未達である。実行round枯渇は検証・測定の阻害要因であり、対応bot、試験網羅、観測、文書の残作業は別の実装未完了事項である。自己承認しない。
+
+## Decisions already made
+
+- D-017：二攻撃、境界回復、死亡優先、先頭retry、時計・表示契約。
+- D-019：旧集計の適用終了、共有回帰、対応bot比較、実測後Designer判断。
+- D-021：現状repo/とStudio内テキスト検証でBuildを継続。実機・指定sha・費用承認を再取得しない。
+
+## Constraints
+
+第1〜4部屋と共有戦闘規則を保持する。新戦闘入力、ボスcheckpoint、時間合わせのHP・待機、購入・外部委託・追加金銭を追加しない。
+
+未実行を成功とせず、fixtureや独立部屋合算を通常到達・通常ラン時間の証拠にしない。独立QA→限定Art Verify→独立Play→Designer実測後判断→Reviewを維持する。
+
+## Open questions
+
+新たな仕様質問・Owner承認待ちはない。今回の実行round残数0では保存後の検証と測定を完了できない。Studioは実行可能な継続Buildへ、上記の実装残作業と保存後検証をまとめて渡す必要がある。
+
+## Expected output
+
+Studioは今回の短射修正と2試験を保存し、Gameplay Engineerへ継続Buildをルーティングする。保存版suite、基準別不足、対応bot、文書統合、同一試行測定を完成した結果を受けて、独立QAへの投入可否を判断する。
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: project.md#vision
+- Project: project.md#constraints
+- Project: repo/game.py
+- Project: repo/session.py
+- Project: repo/play.py
+- Project: repo/run_driver.py
+- Project: repo/bots.py
+- Project: repo/manual.md
+- Project: repo/README.md
+- Project: repo/public-driver.md
+- Project: repo/tests/test_game.py
+- Project: repo/tests/test_terminal.py
+- Project: repo/tests/test_boss.py
+- Project: repo/tests/test_boss_contract.py
+- Project: repo/tests/test_session.py
+- Project: repo/tests/test_run_driver.py
+- Project: design/final-boss-and-continuous-run.md
+- Project: design/combat.md
+- Project: design/combat-step-44-walker-limit.md
+- Project: design/combat-step-46-room3-cap.md
+- Project: design/combat-step68.md
+- Project: design/combat-step72.md
+- Project: design/combat-step94.md
+- Plan: goals/G-002-final-boss/16-technical-director-to-studio.md
+- Plan: goals/G-002-final-boss/20-technical-director-to-studio.md
+- Decisions: decisions/D-017-final-boss-and-run-contract.md
+- Decisions: decisions/D-019-g002-balance-criteria-applicability.md
+- Decisions: decisions/D-021-owner-authorizes-text-build.md
+- Previous handoff: goals/G-002-final-boss/33-studio-to-gameplay-engineer.md

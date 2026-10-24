@@ -1,0 +1,40 @@
+Round 1 reproduces item A: room 4 with reaction rules like the player's, at both frame rates. Each run is traced, and one is also played in the player view.
+
+<<<FILE @run/trace/r4-60
+room 4
+fps 60
+when text "takes aim" then move aside
+when text "rears back" then dash aside
+when see * coming within 2 then dash aside
+when see g within 1.4 then attack
+when see r within 1.4 then attack
+when see g within 20 then move toward
+when see r within 20 then move toward
+when see s within 20 then move toward
+>>>END
+
+<<<FILE @run/trace/r4-30
+room 4
+fps 30
+when text "takes aim" then move aside
+when text "rears back" then dash aside
+when see * coming within 2 then dash aside
+when see g within 1.4 then attack
+when see r within 1.4 then attack
+when see g within 20 then move toward
+when see r within 20 then move toward
+when see s within 20 then move toward
+>>>END
+
+<<<FILE @run/play/r4-60
+room 4
+fps 60
+when text "takes aim" then move aside
+when text "rears back" then dash aside
+when see * coming within 2 then dash aside
+when see g within 1.4 then attack
+when see r within 1.4 then attack
+when see g within 20 then move toward
+when see r within 20 then move toward
+when see s within 20 then move toward
+>>>END

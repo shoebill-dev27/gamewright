@@ -1,0 +1,84 @@
+<<<EDIT repo/bots.py
+<<<<<<< SEARCH
+        else:
+            gone = [
+                s
+                for s in shots_before
+=======
+        elif source == "boss":
+            hit = [
+                e for e in game.enemies
+                if e.kind == "boss" and e.struck
+            ]
+            there = (
+                ", ".join(
+                    f"boss charge at ({e.x:.6f}, {e.y:.6f}), "
+                    f"post-move distance {math.hypot(e.x - game.x, e.y - game.y):.9f}, "
+                    f"struck {e.struck}, spent {e.spent}"
+                    for e in hit
+                )
+                or "boss charge position not found"
+            )
+        else:
+            gone = [
+                s
+                for s in shots_before
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/tests/test_bots_boss.py
+<<<<<<< SEARCH
+class BossPolicyTest(unittest.TestCase):
+=======
+class AContactDiagnosticTest(unittest.TestCase):
+    def test_charge_hurt_log_is_not_a_shot_diagnostic(self):
+        """Controlled contact fixture; diagnostic reads occur after combat."""
+        from test_g002_evidence import emit_rows
+
+        rows = []
+        for fps in (30, 60):
+            game = Game(fps=fps, room="5")
+            boss = game.enemies[0]
+            game.place_player(8, 4)
+            boss.x, boss.y = 8.5, 4.0
+            boss.phase, boss.attack_name = "active", "charge"
+            boss.aim, boss.phase_left = (-1.0, 0.0), 0.3
+            first = len(game.events)
+            game.step()
+            self.assertEqual(game.hearts, 2)
+            self.assertTrue(boss.struck)
+            self.assertFalse(boss.spent)
+            before = (
+                game.x, game.y, game.hearts, tuple(game.events),
+                boss.x, boss.y, boss.struck, boss.spent,
+            )
+            lines = bots._hurt_lines(game, first, [], {})
+            self.assertEqual(len(lines), 1)
+            self.assertIn("source boss", lines[0])
+            self.assertIn("boss charge at", lines[0])
+            self.assertIn("post-move distance", lines[0])
+            self.assertNotIn("shot", lines[0])
+            self.assertEqual(before, (
+                game.x, game.y, game.hearts, tuple(game.events),
+                boss.x, boss.y, boss.struck, boss.spent,
+            ))
+            rows.append([fps, game.frame, lines[0]])
+        emit_rows(
+            "E1/charge-hurt-log/current-controlled-fixture",
+            ["fps", "frame", "diagnostic"],
+            rows,
+            excluded=[
+                "public-policy connection",
+                "connected-policy damage difference root cause",
+                "blocked and non-contact frames",
+                "E2 complete contact audit",
+            ],
+        )
+
+
+class BossPolicyTest(unittest.TestCase):
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE @run/tests
+>>>END

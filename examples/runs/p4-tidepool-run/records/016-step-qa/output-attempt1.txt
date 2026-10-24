@@ -1,0 +1,117 @@
+<<<FILE goals/G-001-first-puzzle-stall/14-qa-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 14
+from: qa
+to: studio
+stage: Route
+outcome: pass
+---
+# 14: qa → studio — build 0.3 level 1 verification report: 12 of 12 checks pass, with one spec gap and several low-severity notes
+
+## Task
+
+Report the verdict on the 12 checks in `design/onboarding.md` for the level 1 opening change in build 0.3, with evidence and regressions. Answer the two open questions. The Studio composes the next handoff for the Playtester from permitted information only.
+
+## Context
+
+Goal G-001: children aged 7–10 stalled at the start of level 1 in build 0.2. The change is specified in `design/onboarding.md` and D-002. This is a dry-run project, so I verified by reading the build behavior in `sim/build-0.3.md` against the spec. I did not run a device or a screen recording. Every "measured" value below is the value the build record states, not my own capture. Where that limits the evidence, I say so. I received no implementer assessment.
+
+## Findings
+
+### Verdict per check
+
+| # | Result | Evidence |
+|---|--------|----------|
+| 1 | PASS | After the intro (about 1.6 s after load) the pool is the only object with the darker outline, and it has a continuous 1.00–1.06 pulse with a 2.0 s period. The crab sits still with the lighter scenery outline. The home does not move and has the lighter outline. |
+| 2 | PASS (thin margin) | Grayscale luminance contrast between the pool fill and the sand is about 1.8:1 on the starting colors, against a threshold of 1.5:1. The build record says the exact ratio depends on the sand's real color and the grayscale conversion. This is a stated value, not an independent pixel measurement. Re-measure on a real capture when one is available. |
+| 3 | PASS | The crab has no bob and the same outline as scenery. The home has the lighter scenery outline, no motion, and "any highlight-style look from 0.2 is gone". Nothing else has a darker outline. The home capture is taken from the build record, not a real image (see Open questions). |
+| 4 | PASS for the exercised protocol (one spec gap, see below) | Touching the crab or home gives a visible response within 0.1 s. The pool pulse starts within 0.2 s. A pool touch gives the lift to 1.10 within 0.1 s. A sand touch gives the pool pulse within 0.2 s. With taps spaced at least 1.5 s apart there are no silent touches. |
+| 5 | PASS | The crab does not move when dragged. It leans about 10° toward the pool and springs back on release. One pool pulse happens, at touch-down. |
+| 6 | PASS | The pool pulse starts at most once per 1.5 s. Rapid tapping on sand, crab and home for 5 s gives about three or four pulses. That matches the maximum of 4 (at 0, 1.5, 3.0 and 4.5 s). The crab and home reactions still play on every tap. |
+| 7 | PASS | The intro plays once per load. It slides 25% toward the home over 0.8 s and back over 0.8 s, with the pulse after that. It does not replay on rotation. A pool touch-down cancels it, and the pool follows the finger 1:1 from where it is drawn. The hit area follows the drawn position during the slide. |
+| 8 | PASS | The level is completed by touch alone, with the bubble hidden or ignored. No mechanic depends on the text. |
+| 9 | PASS | There is no failure message, timer or countdown. No inactivity-triggered cue exists, so there is nothing to report against D-001. The idle pulse is continuous, not inactivity-triggered. Undo after a drop restores the previous position, and a second undo does nothing. |
+| 10 | PASS (see note N3) | Artwork is the existing sheet with only color, flip, size, rotation, position and brightness changes. |
+| 11 | PASS | On a non-pool touch during the intro, the intro stops. The pool glides to its authored start in 0.15 s. The crab flip and wiggle, or the home glow, start at once. For sand, the visible response is the glide plus the pool pulse. The pulse starts at 0.15 s, which is no later than 0.2 s, if the 1.5 s limit allows. Each case starts from a fresh load, so no earlier pulse blocks it. The idle pulse then runs. A touch on the pool during the glide makes it follow the finger. A touch on another object during the glide plays that object's response, and the glide continues. |
+| 12 | PASS | After any intro-cancel, or an uncancelled intro, drag, drop and undo return the pool to the authored start. A second undo does nothing, so there is no extra undo step for the intro. |
+
+Overall: all 12 checks pass.
+
+### Spec gap (for game-designer, not a build defect)
+
+**G1: sand taps inside the rate-limit window can be silent. Severity: low to medium.**
+- Rule 5 says a sand tap triggers only the redirect pulse, and the pulse is limited to one per 1.5 s.
+- The sand itself shows nothing. A sand tap that lands after the previous pulse has finished (0.6 s) but before 1.5 s has passed therefore gets no visible response.
+- That conflicts with check 4's "no silent touches" and with the experience intent that a touch never feels ignored.
+- I passed check 4 because the spec explicitly defines this behavior and the build matches it. I did not redefine the criterion.
+- Ask the game-designer whether sand taps in that window need a minimal response, or whether check 4 should say it applies to taps at least 1.5 s apart.
+- Watch for it in the playtest: a child tapping sand repeatedly may see "nothing happened".
+
+### Notes and low-severity observations (no check fails)
+
+- **N1: pulsing rim.** The hit area is the pool's size at rest. While the pool pulses larger (up to 6%), a touch on its visible outer rim is read as sand and gives the pool pulse, not a grab. This is per spec ("hit areas at rest size"). It is a small chance of a child feeling "I touched the pool and it did not take it". Watch for it in the playtest.
+- **N2: crab flip timing after an intro-cancel.** The crab flips to face the side the pool is on at touch-down. If the pool is mid-slide, it then glides back to its authored start. If the crab's center lies between those two positions, the crab could face away from the pool's final position. The spec does not say which position counts. I did not find a case that breaks a check. Spec clarification is optional and low priority.
+- **N3: pool shadow source.** The build record lists allowed changes as color, flip, size, rotation, position and brightness. It does not say where the soft shadow under the lifted pool comes from. I could not confirm it is an existing sprite or a drawn effect, not a new asset. Confirm with the engineer or art-director if there is any doubt. Check 10 is passed on the build's own statement that all artwork is from the existing sheet.
+- **N4: idle pulse and redirect pulse at the end of the ease-back.** Both are due to start at that moment after an intro-cancel. The build says the redirect pulse starts "and the idle pulse begins". It does not say which wins visually. I assume the redirect pulse plays and the idle pulse resumes after it. Not a failure, but not confirmed.
+
+### Regressions checked
+
+- Levels 2 and 3: the build record says they "look and respond exactly as in 0.2". No difference was found. I did not run them. No level 1 change touches their rules, so no regression is identified.
+- Level 1, already-working behavior: pool drag 1:1, release at rest scale, drop on home completes the level, drop on crab leaves the pool there with no crab reaction, clamping to the play area, ignoring a second finger on a held pool, and rotation not replaying the intro. All are as in the spec.
+- Undo: after a first drop, undo returns to the authored start in every intro case. It never returns to a mid-intro position.
+
+## Decisions already made
+
+- D-001: no failure, no timers, every move undoable. Holds in 0.3 (check 9).
+- D-002: intro cancel eases back over 0.15 s, and the intro is never in the undo history. Holds in 0.3 (checks 11, 12).
+- Idle hint (Option C): not present in 0.3, so no D-001 failure.
+
+## Constraints
+
+- Phones and tablets, touch only. No mechanic depends on reading text.
+- Existing sprite sheet only. Level 1 only.
+- The Playtester must receive only permitted information. Do not pass on the QA notes about implementation or on this report's reading of the build.
+
+## Open questions
+
+### Platform check: reduced-motion availability
+
+- **What I can establish:** iOS has a "Reduce Motion" accessibility setting, and apps can read its state. Android has "Remove animations" under Accessibility, in the Android versions that include it (Android 9 and later). Apps can read it through the system animation scale settings. This is from general platform knowledge, not from anything in the packet.
+- **What I cannot establish:** the target OS versions and devices are not named in the packet, and I could not run a device. So I cannot confirm availability on the actual targets. I cannot confirm that older Android versions or OEM variants expose the same setting or label.
+- **Result:** not confirmable from the packet. This does not block the verdict.
+- **What a reduced-motion run shows, per the build record (not run):**
+  - The intro is skipped, so the intro-cancel case does not arise and checks 7 and 11 cannot be exercised in this mode.
+  - The idle pulse, redirect pulse, crab wiggle and crab lean become plain brightness changes of about 0.4 s. The crab and home do not move.
+  - The darker outline and the color/value separation remain.
+  - The pool still grows to 1.10, gets its shadow, follows the finger and shrinks on release.
+  - The crab still flips instantly.
+  - The setting is read when the level loads. A change made while level 1 is open would likely show only after a reload. This is my inference from the build record's wording.
+- **Recommended follow-up:** the Studio names the target platforms and OS versions, and someone runs checks 1, 4, 5, 6, 8, 9 and 12 with the setting on, on one iOS and one Android device.
+
+### Home styling capture
+
+- The build record describes the home as having the same lighter outline as other scenery, no movement, and no leftover highlight look from 0.2.
+- Check 3 is passed on that record. A real image capture of the home was not available in this dry run.
+- If a capture is wanted for the record, take one at level start and compare the home outline to the sand and scenery.
+
+## Expected output
+
+This report is the QA verification report. The Studio routes next to the Playtester, with Handoff 12's implementation details withheld. The Playtester round follows the experience signals in `design/onboarding.md`.
+
+For the playtest, the points worth observing, stated without implementation detail:
+- Does the child touch the pool within about 10 s?
+- Does the child ever tap the sand repeatedly and seem to feel ignored?
+- Does the child ever touch the pool's edge and fail to pick it up?
+
+Route G1 (sand tap rate-limit gap) to `game-designer` in parallel, or note it as an open question for Review.
+
+## Load
+
+- Role: studio/roles/studio.md
+- Skills: none
+- Project: design/onboarding.md, sim/build-0.3.md
+- Decisions: decisions/D-001-no-fail-states.md, decisions/D-002-intro-cancel-and-undo.md
+- Previous handoff: goals/G-001-first-puzzle-stall/13-studio-to-qa.md
+>>>END

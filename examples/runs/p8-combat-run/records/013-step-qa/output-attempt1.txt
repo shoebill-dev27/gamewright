@@ -1,0 +1,27 @@
+I'm starting with the bot runs that reproduce the walker divergence, with decision logs on, at both rates.
+
+<<<FILE @run/bots/walker30
+bots walker
+rooms 1-5
+fps 30
+log on
+>>>END
+
+<<<FILE @run/bots/walker60
+bots walker
+rooms 1-5
+fps 60
+log on
+>>>END
+
+<<<FILE @run/bots/all30
+bots camper,walker,dodger
+rooms 1-5
+fps 30
+>>>END
+
+<<<FILE @run/bots/all60
+bots camper,walker,dodger
+rooms 1-5
+fps 60
+>>>END

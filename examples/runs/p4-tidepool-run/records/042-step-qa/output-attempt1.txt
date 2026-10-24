@@ -1,0 +1,91 @@
+<<<FILE goals/G-001-first-puzzle-stall/36-qa-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 36
+from: qa
+to: studio
+stage: Route
+outcome: pass
+---
+# 36: qa → studio — Verification of build 0.6 (spec revision 5): checks 4, 13, 18, 19, 20, 21 pass
+
+## Task
+
+Receive the verification report for `sim/build-0.6.md` against checks 4, 13, 18, 19, 20 and 21 of `design/onboarding.md` (revision 5). Route the next stage (Review and Close, with the non-blocking captures listed below).
+
+## Context
+
+Goal G-001 (children stall at the first puzzle). Handoff 35 asked QA to verify build 0.6. Checks 4, 19, 20 and 21 are new or changed. Checks 13 and 18 are regression checks because they share the sand-tap flash. The project has no device or repository. As in earlier passes, the build record stands in for the running build.
+
+**Evidence basis:** every result below was judged by reading the build record against the spec. Nothing was captured on a device or in a 60 fps recording. The record's stated timings are not presented as captured. QA did not use the implementer's assessment.
+
+## Findings
+
+**Verdict: pass.** No criterion fails, no regression was found, and there are no blocking spec gaps. Three minor record-wording observations are listed below.
+
+### Per-check results
+
+| Check | Result | Evidence from the build record | Basis |
+|---|---|---|---|
+| 4 (revised) | **Pass** | Crab, home, sand and pool each answer within 0.2 s. The crab and home respond within 0.1 s. Pool lift is within 0.1 s. A pulse starts within 0.2 s, including 0.15 s after an intro-cancel. During the glide, a sand tap gets the pending pulse at 0.15 s, which is inside 0.2 s. A second-finger sand tap while the pool is held gets the flash. Sand after a cancelled pulse gets the flash within 0.1 s. "Every touch on the crab, home, sand or pool shows a visible response within 0.2 s." The reduce-motion section covers the same cases. | Record only |
+| 13 (regression) | **Pass** | A sand tap from 0.6 s up to just under 1.5 s after a pulse start gets the flash: +15% within 0.1 s, fading over 0.3 s, with no size change or movement and no new pulse. A running flash is not restarted ("Only one flash plays at a time"). At 1.5 s or later a new pulse starts and there is no flash. Flashes do not count toward the limit and never delay a pulse. Reduce-motion is the same: the first pulse is the two-beat +30% pulse and the flash is unchanged. | Record only |
+| 18 (regression) | **Pass** | A second-finger sand tap on a held pool gives the flash, with no pulse and no change of lifted size. A crab or home tap gives its own response only, and the crab faces the position under the finger. "These taps do not change when the next pulse is allowed", and after release the 1.5 s window counts from the last pulse that actually started. Both modes: the flash is stated as the same in reduce-motion. | Record only |
+| 19 (new) | **Pass** | Sand taps from the pulse start up to 1.4 s each get a visible response: the running beat up to about 0.55 s (beat 2 at 0.4 and 0.5 s), the faint end of beat 2 from about 0.55 to 0.6 s, and the flash from 0.6 s (including exactly 0.6 s) to under 1.5 s. At 1.5 s or later a new pulse starts and there is no flash. The record does not name the 0.3 s tap. It follows from "single frame at normal brightness" and "beat 2 starts the instant beat 1 ends": beat 2 rises from the next frame, well inside 0.2 s. | Record only. Needs a 60 fps capture (non-blocking): the 0.3 s instant, and taps at 0.55–0.6 s (accepted tail, D-006 O3). |
+| 20 (revised) | **Pass** | Two beats, each rising to +30% within 0.1 s and back to normal by 0.3 s after its start. Beat 2 starts the instant beat 1 ends, so the pool is at normal brightness for a single frame only. Total 0.6 s, with no size change or movement. The pool shows the larger of the active changes, never the sum. A flash still fading is ended at once by a new pulse. The idle brightness effect (max +8%) is hidden during a pulse and restarts from normal. | Record only. Needs a 60 fps capture (non-blocking): beat shape, the single frame between the beats, and the 0.55–0.6 s tail. |
+| 21 (new) | **Pass** | After a pulse is cancelled by a pool touch, a sand tap before 1.5 s from the pulse start gets the flash within 0.1 s, "from the moment of the cancel, with no 0.6 s wait, also during the pool's release shrink". This covers cancels at about P+0.1 s and P+0.4 s, a tap at P+0.45 s and a tap inside the release shrink. The flash has no new pulse and no size change. A sand tap at 1.5 s or later after the pulse start gets a new pulse and no flash. A crab or home tap in the window gets its own response only. While the finger still holds the pool, the held-pool rule applies (check 18). The reduce-motion section states the cancel case and says the pool brightness is back to normal at touch-down, so the flash rises from normal. An uncancelled pulse is unchanged: a sand tap in its first 0.6 s shows the pulse and no flash. | Record only |
+
+### Other behaviors in Handoff 35, Findings 1–8
+
+All eight agree with the record. This includes the cancelled pending pulse during the ease-back (no pulse, no window) and the crab brightening under reduce-motion. It is one change per touch-down, starts within 0.1 s, is not held while the finger is down, and has nothing extra on release.
+
+### Build record wording (requested)
+
+- **Pulse spacing:** the record reads "at least 1.5 s" after the previous pulse start, in "Repeated touches". Agrees with the spec.
+- **Sand-tap lines:** both state the cancelled-pulse exception. One is the "(… or the pulse was cancelled by a pool touch)" condition. The other is "unless the pulse was cancelled by a pool touch". Agrees.
+- **Pulse cut short:** the record states that the flash applies "from the moment of the cancel, with no 0.6 s wait, also during the pool's release shrink". Agrees.
+- **Header:** it notes the flash after a cancelled pulse in both modes. Agrees.
+
+### Non-blocking observations (not failures; wording only)
+
+1. **Crab brightening timing (reduce-motion):** the record says it "brightens from normal to +20% at 0.2 s and back over about 0.4 s". Read literally, that could mean 0.2 s up and 0.4 s down, about 0.6 s in total. The spec says one change of about 0.4 s in total. The behavior stays judged as passing, but the record should say "about 0.4 s in total, peak at 0.2 s". Severity: low, wording only. No check depends on the crab duration.
+2. **Flash and pool touch (default mode):** spec rule 5 says a touch-down on the pool cancels a running flash. The record's "Touching the pool" section lists only the opening movement, ease-back and redirect pulse. The reduce-motion section does say it ends "any running pulse or flash". The default-mode cancel of a running flash cannot be confirmed from the record. Severity: low. It is outside checks 4, 13, 18, 19, 20 and 21. Suggest adding "and any running flash" to the default-mode line, or confirming the behavior in the next capture.
+3. **Glide landing:** "even if a pulse started less than 1.5 s earlier" is consistent with the spec (the pending pulse always starts), but it describes a case that cannot happen on a fresh load. It is harmless.
+
+### Spec gaps
+
+None blocking. Every case tried had a defined expected behavior.
+
+### Checks resting on the record alone
+
+All six: 4, 13, 18, 19, 20 and 21. Within them, these items additionally need a 60 fps capture (non-blocking, for Review and Close): the single frame between the reduce-motion beats (checks 19 and 20), the 0.55–0.6 s tail and taps at 0.56–0.59 s (checks 19 and 20), and the 0.1 s and 0.3 s flash timings (checks 4, 13 and 21).
+
+Checks 1–3, 5–12, 14–17 were outside this pass. Handoff 35 gave the earlier pass on build 0.5 as the basis for checks 1–20, and QA has not re-run them on 0.6 here.
+
+## Decisions already made
+
+- D-001: no failure, no timers, no inactivity cue. Nothing observed in the record conflicts.
+- D-003, D-004, D-005: sand-tap flash, ease-back and window origin, reduce-motion pulse. The record is consistent.
+- D-006: a pulse cancelled by a pool touch stops being the response, and the reduce-motion beats are contiguous. The record implements both.
+
+## Constraints
+
+- Level 1 only, touch only, no text dependence. Levels 2 and 3 are out of scope.
+- QA did not modify any production file and did not redefine any criterion.
+
+## Open questions
+
+None.
+
+## Expected output
+
+Studio: record the pass for checks 4, 13, 18, 19, 20 and 21, and route to Review and Close. Carry the non-blocking device and 60 fps capture items above. Optionally ask the engineer for the two record wording fixes (observations 1 and 2).
+
+## Load
+
+- Role: none (report back to Studio; no further Role work is requested)
+- Skills: studio/skills/verify-change.md
+- Project: design/onboarding.md, sim/build-0.6.md
+- Decisions: decisions/D-001-no-fail-states.md, decisions/D-003-sand-tap-blip-and-pool-hit-area.md, decisions/D-004-ease-back-taps-window-origin-held-pool.md, decisions/D-005-reduce-motion-pulse-fills-window.md, decisions/D-006-cancelled-pulse-and-reduce-motion-beats.md
+- Previous handoff: goals/G-001-first-puzzle-stall/35-studio-to-qa.md
+>>>END

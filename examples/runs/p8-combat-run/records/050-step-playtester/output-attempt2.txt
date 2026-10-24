@@ -1,0 +1,48 @@
+Round 1 gave me one approach per room. I'm using a second round to play the other approach in each room before I write the report.
+
+<<<FILE @run/play/room2-cautious
+room 2
+end 16
+when see * coming within 1.5 then move aside
+when text "rears back" then move aside
+when see r within 1.4 then attack
+when see g within 1.4 then attack
+when see G within 1.4 then attack
+when see G within 3 then move away
+when see r within 3 then move away
+>>>END
+
+<<<FILE @run/play/room3-aggressive
+room 3
+end 16
+when see * coming within 1.5 then move aside
+when text "takes aim" then move aside
+when see s within 1.4 then attack
+when see s within 12 then move toward
+>>>END
+
+<<<FILE @run/play/room4-cautious
+room 4
+end 16
+when see * coming within 1.5 then move aside
+when text "rears back" then move aside
+when text "takes aim" then move aside
+when see r within 1.4 then attack
+when see g within 1.4 then attack
+when see s within 1.4 then attack
+when see g within 3 then move away
+when see r within 3 then move away
+>>>END
+
+<<<FILE @run/play/room5-cautious
+room 5
+end 16
+when see * coming within 1.5 then move aside
+when text "rears back" then move aside
+when text "takes aim" then move aside
+when see r within 1.4 then attack
+when see g within 1.4 then attack
+when see G within 1.4 then attack
+when see G within 3 then move away
+when see g within 3 then move away
+>>>END

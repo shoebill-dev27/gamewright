@@ -1,0 +1,123 @@
+{
+ "op": "Resume",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "80b08493-1bfc-49ed-b40c-81d1aac93125",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 28784,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 23765,
+    "output_tokens_details": {
+     "thinking_tokens": 2184
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 28784,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 23765,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 28784,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 28784
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.35279000000000005,
+   "attempt": 1,
+   "started": "2026-10-10T13:50:06",
+   "seconds": 133.9,
+   "errors": [
+    "goal.md: route row 6f has unknown role (ランタイムのシミュレーター。Role ではない)"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "4d167e18-d2c8-4513-a9f1-0054f5a64a68",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 28860,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 21790,
+    "output_tokens_details": {
+     "thinking_tokens": 2056
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 28860,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 21790,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 28860,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 28860
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.33334400000000003,
+   "attempt": 2,
+   "started": "2026-10-10T13:52:20",
+   "seconds": 120.3,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "decisions/D-008-owner-simulated-build-judgment.md": "a4271bb4325eae6ca29ef615e8c89eed66ea6f6bfe8f00d70074fb15444f23dc",
+  "goals/G-001-combat-monotony/20-technical-director-to-owner.md": "dd40435847d6748e033a840e8fa9cd4ad7bb24a477e9aab93fcd0d19ee7347d2",
+  "goals/G-001-combat-monotony/21-studio-to-gameplay-engineer.md": "1eebd9576a2d4cc1d531fe95809b0b96f665e0aa175ce6c822f965da76cacc8e",
+  "goals/G-001-combat-monotony/goal.md": "de9c8f5873646e4da7a9bef24bd0efb0005293b36ae3e7c2331a0e96902488a3"
+ },
+ "decision": {
+  "new": [
+   "gameplay-engineer",
+   "Build"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "gameplay-engineer",
+    "Build(変更内容の記述。D-008 により、記述の完了で Build 完了)"
+   ]
+  ]
+ }
+}

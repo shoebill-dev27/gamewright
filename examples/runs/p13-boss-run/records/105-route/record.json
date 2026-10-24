@@ -1,0 +1,50 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-002",
+ "attempts": [
+  {
+   "runtime": "codex",
+   "session_id": "01a16662-cb1d-7042-bc51-55da00a02eae",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 33048,
+    "cached_input_tokens": 7552,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 3284,
+    "reasoning_output_tokens": 109
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 1,
+   "started": "2026-10-23T10:31:52",
+   "seconds": 82.9,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-002-final-boss/85-studio-to-owner.md": "5aa42c7866cf0f6f0d08ea508474b5de53916e04cc5ee29dcfa3ab8d31f3e556",
+  "goals/G-002-final-boss/goal.md": "58711e55b35389e1259c78f6124350d502422bbf9922d868fcad14fbc46240b7"
+ },
+ "decision": {
+  "new": [
+   "owner",
+   null
+  ],
+  "status": "blocked-on-owner",
+  "open": [
+   [
+    "owner",
+    "Decide"
+   ]
+  ]
+ },
+ "seen_through_seq": 85
+}

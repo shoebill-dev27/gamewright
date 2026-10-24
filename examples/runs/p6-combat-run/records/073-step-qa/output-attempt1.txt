@@ -1,0 +1,186 @@
+I can't run anything directly, so this first round requests the suite, the miss causes, the on-tile and wall knockback, a Strike hit, room 2 with a still player, a dash and facing check, and the bots at both frame rates. I'll write the report from these results and follow up in later rounds.
+
+<<<FILE @run/tests
+>>>END
+
+<<<FILE @run/play/miss-far-30
+fps 30
+room empty
+player 8 4
+spawn grub 10 4
+end 1
+0.05 attack
+>>>END
+
+<<<FILE @run/play/miss-far-60
+fps 60
+room empty
+player 8 4
+spawn grub 10 4
+end 1
+0.05 attack
+>>>END
+
+<<<FILE @run/play/miss-side-30
+fps 30
+room empty
+player 8 4
+spawn grub 8 5
+end 1
+0.05 attack
+>>>END
+
+<<<FILE @run/play/miss-side-60
+fps 60
+room empty
+player 8 4
+spawn grub 8 5
+end 1
+0.05 attack
+>>>END
+
+<<<FILE @run/play/miss-none-30
+fps 30
+room empty
+player 2 4
+spawn grub 12 4
+end 1
+0.05 attack
+>>>END
+
+<<<FILE @run/play/miss-none-60
+fps 60
+room empty
+player 2 4
+spawn grub 12 4
+end 1
+0.05 attack
+>>>END
+
+<<<FILE @run/play/knock-ontile-30
+fps 30
+room empty
+player 8 4
+spawn grub 8 4
+end 2
+0.2 attack
+>>>END
+
+<<<FILE @run/play/knock-ontile-60
+fps 60
+room empty
+player 8 4
+spawn grub 8 4
+end 2
+0.2 attack
+>>>END
+
+<<<FILE @run/trace/knock-ontile-30
+fps 30
+room empty
+player 8 4
+spawn grub 8 4
+end 2
+0.2 attack
+>>>END
+
+<<<FILE @run/trace/knock-ontile-60
+fps 60
+room empty
+player 8 4
+spawn grub 8 4
+end 2
+0.2 attack
+>>>END
+
+<<<FILE @run/play/knock-wall-30
+fps 30
+room empty
+player 14.5 4
+spawn grub 14.5 4
+end 2
+0.2 attack
+>>>END
+
+<<<FILE @run/trace/knock-wall-60
+fps 60
+room empty
+player 14.5 4
+spawn grub 14.5 4
+end 2
+0.2 attack
+>>>END
+
+<<<FILE @run/trace/strike-hit-30
+fps 30
+room empty
+player 8 4
+spawn grub 9.2 4
+end 3
+0.55 attack
+>>>END
+
+<<<FILE @run/trace/strike-hit-60
+fps 60
+room empty
+player 8 4
+spawn grub 9.2 4
+end 3
+0.55 attack
+>>>END
+
+<<<FILE @run/trace/room2-still-30
+fps 30
+room 2
+end 12
+>>>END
+
+<<<FILE @run/trace/room2-still-60
+fps 60
+room 2
+end 12
+>>>END
+
+<<<FILE @run/trace/dashface-30
+fps 30
+room empty
+player 8 4
+spawn grub 0 0
+end 3
+0.0 move right
+0.2 stop
+0.4 dash left
+1.2 attack
+>>>END
+
+<<<FILE @run/play/dashface-60
+fps 60
+room empty
+player 8 4
+spawn grub 0 0
+end 3
+0.0 move right
+0.2 stop
+0.4 dash left
+1.2 attack
+>>>END
+
+<<<FILE @run/bots/room1-30
+room 1
+fps 30
+>>>END
+
+<<<FILE @run/bots/room1-60
+room 1
+fps 60
+>>>END
+
+<<<FILE @run/bots/room2-30
+room 2
+fps 30
+>>>END
+
+<<<FILE @run/bots/room2-60
+room 2
+fps 60
+>>>END

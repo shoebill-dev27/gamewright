@@ -1,0 +1,158 @@
+Both parallel steps (6a and 6b) are done. Neither result is a blocker, but both sets of open questions are the Game Designer's to answer, and the answers affect Build. The Technical Director's SQ1 (Flinch) decides whether telegraphs work at all. The Art Director's N1 (Grub lock timing) is a rules question. Under the return rules, a known spec gap goes to Design before Build, so I route to `game-designer` first.
+
+<<<FILE goals/G-002-combat-monotony/10-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-002
+seq: 10
+from: studio
+to: game-designer
+stage: Design
+outcome: routed
+---
+# 10: studio → game-designer — Answer the spec questions raised by the Plan and the visual design, before Build
+
+## Task
+
+Rule on the open spec questions below (SQ1–SQ5, N1, Q-A, Q-B). Update `design/combat-enemy-depth.md` where an answer changes or fills in the spec. Do not change anything outside your authority: visuals belong to the Art Director, technical approach to the Technical Director.
+
+## Context
+
+G-002 "戦闘が単調なので改善したい": the Owner chose enemy-side depth with one-button combat kept (D-002; no hold-to-charge attack). You wrote `design/combat-enemy-depth.md`. Two parallel steps have finished:
+- The Technical Director's plan (`08-technical-director-to-studio.md`) fits Option A and the constraints. The D-003 cap fits the existing controller. Nothing in the spec is infeasible.
+- The Art Director's cue design (`design/combat-enemy-visuals.md`, summary in `09-art-director-to-studio.md`) changes no timings or rules.
+
+Both found places where the spec is silent or ambiguous. The Engineer must not decide those (Build returns to Design on ambiguity), so they are settled now.
+
+## Findings
+
+Questions for you. Each has the default the Technical Director will build to if you do not change it.
+
+- **SQ1 (Flinch), the most important.** Build 0.3 has a 0.2 s Flinch when an enemy is hit, and it interrupts any state including Attack. It is not in `design/combat.md`. If it stays, one swipe cancels every telegraph, "stand still and swipe" survives, and the Charger rule "swipes never interrupt windup, charge or recovery" breaks. Default: Flinch applies only while the enemy is in Chase or Waiting. It is ignored in Telegraph, Active, Recovery, Stunned and Cooldown, for all types. Please rule per enemy type. Spec 3.1, 3.2 and 4.2 are silent.
+- **SQ2 (slot lifetime).** The slot is taken before a telegraph starts, held through Telegraph and Active, and released at the start of Recovery. A Spitter releases when the shot is fired, and shots in flight hold no slot. Release also happens on death or room end. Is this what "in a telegraph or attack phase" means (D-003)?
+- **SQ3 (obstacles).** Does a Charger charge that ends on an obstacle (not only a wall) also cause the 1.5 s stun? Default: yes, any static solid.
+- **SQ4 (waiting behavior).** What does an enemy do while it waits for a free slot? Default: Grub holds about 1.5 tiles away or circles slowly; Charger repositions; Shieldbearer keeps walking toward the player but does not start a bash; Spitter stays put. Waiting enemies show no threat cue.
+- **SQ5 (guard reference point).** Is the Shieldbearer's guard check made against the player's position at swipe time, or against the swipe hitbox center? Default: the player's position at swipe time (projectiles: the projectile's position when it reaches the shield).
+- **N1 (Grub lock timing, from the Art Director).** The Grub's lunge direction locks at the end of its 0.5 s telegraph and the lunge takes 0.15 s, so there is almost no reaction time after the lock. Intended? If not, give the lock point (for example 0.2 s before the lunge, like the Spitter). The Art Director's visual works either way, but if you change the timing, say so explicitly, because Studio will route the cue update back to the Art Director.
+- **Q-A / Q-B.** Fix the numbers the visual design had to assume: Spitter projectile range, Grub lunge width (assumed about 1 tile), Spitter line width, and the Shieldbearer bash cone angle (assumed about 90°; the Technical Director's plan says 1.5-tile range over 0.1 s). These are rules values, not visuals.
+
+For awareness (no decision needed from you unless you object): the Technical Director's plan puts every spec number in one per-enemy data table and rejects any telegraph under 0.4 s at load. The Charger lane is cut at the first solid. Rooms 2, 4 and 5 may need a layout audit, but layout is Build's task (T7).
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no new inputs.
+- D-002 (Owner): enemy-side depth; no hold-to-charge attack in this Goal.
+- D-003: time-based telegraphs with a 0.4 s floor; at most 2 enemies attacking at once.
+- D-004: bounded combat sub-steps and a central attack-slot arbiter.
+
+## Constraints
+
+- Keep D-001–D-004: no new inputs, 0.4 s telegraph floor, attack cap of 2. If an answer would need one of them to change, hand back with that stated instead of ruling.
+- The Playtester's later handoff must not include implementation details or experience signals; keep spec section 7.2 (experience signals) separate from anything a player would be told.
+- Stay within the 5-room slice and the existing controller and data approach.
+
+## Open questions
+
+None beyond the list above. If any answer changes a timing or shape that appears in `design/combat-enemy-visuals.md`, name which cue is affected.
+
+## Expected output
+
+1. `design/combat-enemy-depth.md` updated with the answers (in the spec itself, so Build and QA can verify from it).
+2. A handoff addressed to `studio` (not directly to Build) containing: each answer (SQ1–SQ5, N1, Q-A, Q-B) with a one-line reason, which acceptance criteria changed, and whether the Art Director must revise any cue. The Studio will then merge the Technical Director's plan, the visual design and your answers into the Build Handoff.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: design/combat-enemy-depth.md, design/combat.md, design/combat-enemy-visuals.md, project.md#constraints
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-002-enemy-side-combat-depth.md, decisions/D-003-time-based-telegraphs-and-attack-limit.md, decisions/D-004-combat-timing-substeps-and-attack-slots.md
+- Previous handoff: goals/G-002-combat-monotony/08-technical-director-to-studio.md (also read goals/G-002-combat-monotony/09-art-director-to-studio.md)
+>>>END
+
+<<<FILE goals/G-002-combat-monotony/goal.md
+---
+kind: goal
+id: G-002
+project: lantern-depths
+status: active
+created: 2026-10-10
+---
+# G-002: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success: in a playtest of the 5-room slice, the player has to make different decisions across rooms
+(where to stand, when to dash, which enemy first) instead of repeating one pattern, and the Game
+Director judges the monotony addressed on that evidence. Out of scope: new biomes,
+meta-progression, run length. Also out of scope (Owner, D-002): a hold-to-charge attack.
+
+## Unknowns
+
+All stages of route pattern 2 are open: the monotony has not been observed or diagnosed, a
+direction choice is likely (D-001 limits some options), new behavior will need a spec and a plan,
+and it is an experience Goal (Play, Review).
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 01-studio-to-playtester.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 02-playtester-to-game-designer.md |
+| 3 | Decide | game-director | make-decision, prepare-owner-escalation | done (escalated) | 03-game-designer-to-game-director.md |
+| 4 | Decide | owner | — | done (Option A, D-002) | 04-game-director-to-owner.md |
+| 5 | Design | game-designer | write-design-spec | done | 05-studio-to-game-designer.md |
+| 6a | Plan | technical-director | technical-plan | done | 06-game-designer-to-technical-director.md (result: 08-technical-director-to-studio.md) |
+| 6b | Design (visual cues) | art-director | write-design-spec | done | 07-studio-to-art-director.md (result: 09-art-director-to-studio.md) |
+| 7 | Design (spec rulings before Build) | game-designer | write-design-spec | open | 10-studio-to-game-designer.md |
+| 8 | Build | gameplay-engineer | implement-change | planned | — |
+| 9a | Verify | qa | verify-change | planned | — |
+| 9b | Verify (visual) | art-director | visual-review | planned | — |
+| 10 | Play | playtester | playtest-session | planned | — |
+| 11 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+- After step 3: Option B would change Owner Decision D-001 while the evidence leaves A and B both
+  viable → escalation triggers → step 4 (Owner); all later steps paused.
+- After step 4: the Owner chose Option A (D-002) with the condition that a hold-to-charge attack is
+  not part of this Goal. The remaining route matches Option A's "If chosen" (Design → Plan → Build →
+  Verify → Play → Review), so steps 5–10 are unchanged. Goal set back to `active`. Step 9 must be
+  routed to the Playtester through a fresh Studio-composed Handoff without implementation
+  knowledge.
+- After step 5: the spec leaves the visual design of telegraph cues, the Charger lane indicator and
+  the block/stun cues undecided (Designer's Q1), and these affect what the player sees (pillar 3,
+  readable threats). Added step 6b (Design, `art-director`) in parallel with Plan 6a: neither
+  consumes the other's output. Because the change affects visuals, Verify gains a parallel visual
+  review (8b). Build (7) waits for both 6a and 6b. If the cue designs need timing changes, they go
+  back to `game-designer`, not decided by the Art Director.
+- After steps 6a and 6b: both done and mutually compatible (cue interface, lock moments for Spitter
+  and Charger, and shape types match). The plan fits Option A and the constraints (about 17–21
+  person-days, D-003 revisit trigger not met), so no escalation and no return to Decide. But both
+  results carry open spec questions that belong to `game-designer`: Flinch (SQ1, which decides
+  whether telegraphs work at all), slot lifetime, obstacle stun, waiting behavior, guard reference
+  point, the Grub lock timing (N1), and unspecified widths, angles and range (Q-A, Q-B). The
+  Engineer must not decide these (return rule: Build with ambiguous spec → Design), so a new Design
+  step 7 was inserted before Build. Later steps renumbered (Build 8, Verify 9a/9b, Play 10, Review
+  11). If the rulings change a cue timing, step 7's result goes to `art-director` before Build. The
+  Technical Director's F1–F7 feasibility checks for the cues and the saturated-color sprite check
+  (F6) are left as first Build tasks; if one fails, Build returns to `technical-director` or
+  `art-director`.
+
+## Next action
+
+game-designer starts step 7 (Design, spec rulings) from `10-studio-to-game-designer.md`, and
+addresses the result to `studio`. Then the Route operation:
+- decides whether `art-director` must revise any cue (only if a timing or shape changed), and
+- writes the Build Handoff for `gameplay-engineer` from: `08-technical-director-to-studio.md` (task list T0–T9, D-004, cue interface, test strategy, Build A / Build B slicing), `09-art-director-to-studio.md` and `design/combat-enemy-visuals.md` (VC1–VC14), and the Designer's rulings. It must give acceptance checks V1–V11 and VC1–VC14 for QA, tell Build to state which SQ defaults it used, and ask for the result to be addressed to `studio`.
+
+Pending Studio item: add `design/combat-enemy-depth.md` and `design/combat-enemy-visuals.md` to the Design index in `project.md` (not writable in this operation; do it in the next operation that can edit `project.md`).
+When Build and Verify are routed, their Handoffs must ask for results addressed to `studio` (needed to compose the independent Playtester Handoff for step 10). VE1–VE5 (experience signals) and spec 7.2 stay out of the Playtester's handoff.
+
+## Outcome
+
+—
+>>>END

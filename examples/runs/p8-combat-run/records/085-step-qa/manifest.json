@@ -1,0 +1,77 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "b7fb7a3d85a62bcd564a33ee20caf62b355a7ef99ce6d8cfb6df0d5adb83abc2",
+  "bytes": 1304
+ },
+ {
+  "path": "goals/G-001-combat-monotony/84-studio-to-qa.md",
+  "sha256": "bfc622f61edd2e650c058521e8daa36879db38954c4be6bc1ad9e723a52224ef",
+  "bytes": 2460
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "381742c8f2afe2e1a2a6af9d031dcc91f98f490ada7c90e2a990d6a1aaf27639",
+  "bytes": 1765
+ },
+ {
+  "path": "studio/skills/verify-change.md",
+  "sha256": "da40d2c0030e078ac6d085ea06b17bb9b452495f4e2f412a9e1bd723ac72ddf5",
+  "bytes": 1281
+ },
+ {
+  "path": "project.md",
+  "sha256": "8a32edee44b970d2c1a5a0a76e19b3235e61b1786bb24c06583400cfa0924712",
+  "bytes": 2102
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "436989d7223f53ca69a0ce4d34a319b31b3a5be492d460d43a463a646dfb51d1",
+  "bytes": 5716
+ },
+ {
+  "path": "repo/bots.py",
+  "sha256": "44e205f03e3151a7538c15ca517b8ba1980b76886a7693992541bf8c24067488",
+  "bytes": 15466
+ },
+ {
+  "path": "repo/tests/test_game.py",
+  "sha256": "9012cf02bf0987d8a7839d66d1431dc6efc0b86ee0b0c39c7e70d0cabb3c944c",
+  "bytes": 33265
+ },
+ {
+  "path": "design/combat-step72.md",
+  "sha256": "0e504d1ebcfb8dc391a82e725a11645a5670b9f52ceaff1152ead0130aa69215",
+  "bytes": 11550
+ },
+ {
+  "path": "design/combat-step-46-room3-cap.md",
+  "sha256": "d52e775fca7b00b414604efa2f55b674cca06bd1b72b27f4e489e2b7fc8cd781",
+  "bytes": 8649
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "ad9f52402ea64bbc599213f6cf6b6f0923b1dce2bbc95e3a57bb61827ff2fca5",
+  "bytes": 48610
+ },
+ {
+  "path": "decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md",
+  "sha256": "70283fc2cfe5f66068caf7216d4f43567af8e4e9f10dbb963c0368a6faf55ee5",
+  "bytes": 3083
+ },
+ {
+  "path": "decisions/D-012-room3-standard-grub-and-closer-spitter.md",
+  "sha256": "6d7804de297c7dc8c9ce8533ceb174c36ff613bc19915f65b1dfd4eb1d1c2897",
+  "bytes": 2626
+ },
+ {
+  "path": "goals/G-001-combat-monotony/82-qa-to-studio.md",
+  "sha256": "e57cfea928bba6127d83ab53255a05706a1abda0a2b20ab6834a7ae4878f662f",
+  "bytes": 11876
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ }
+]

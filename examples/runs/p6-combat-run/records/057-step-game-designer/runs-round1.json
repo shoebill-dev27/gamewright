@@ -1,0 +1,10 @@
+[
+ {
+  "run": "@run/bots/room1-reference",
+  "command": "python3 bots.py {script}",
+  "script": "room 1\n",
+  "exit": 1,
+  "seconds": 0.0,
+  "output": "script line 1: cannot read 'room 1'\n"
+ }
+]

@@ -1,0 +1,26 @@
+<<<FILE @run/tests/probe
+
+>>>END
+
+<<<FILE repo/tests/test_probe.py
+import inspect
+import sys
+import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+import play  # noqa: E402
+
+
+class ProbeTest(unittest.TestCase):
+    def test_show_play_source(self):
+        src = inspect.getsource(play)
+        print("=== PLAY.PY SOURCE BEGIN ===")
+        print(src)
+        print("=== PLAY.PY SOURCE END ===")
+        self.fail("probe only: play.py source printed above")
+
+
+if __name__ == "__main__":
+    unittest.main()
+>>>END

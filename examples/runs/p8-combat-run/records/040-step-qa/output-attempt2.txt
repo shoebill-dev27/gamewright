@@ -1,0 +1,143 @@
+<<<FILE @run/trace/room3s-30
+room 3
+fps 30
+when see * coming within 2 then dash aside
+end 15
+>>>END
+
+<<<FILE @run/trace/room3s-60
+room 3
+fps 60
+when see * coming within 2 then dash aside
+end 15
+>>>END
+
+<<<FILE @run/trace/room4s-30
+room 4
+fps 30
+when text "rears back" then dash aside
+when see * coming within 2 then dash aside
+end 15
+>>>END
+
+<<<FILE @run/trace/room4s-60
+room 4
+fps 60
+when text "rears back" then dash aside
+when see * coming within 2 then dash aside
+end 15
+>>>END
+
+<<<FILE @run/trace/room5s-30
+room 5
+fps 30
+when text "rears back" then dash aside
+when see * coming within 2 then dash aside
+end 15
+>>>END
+
+<<<FILE @run/trace/room5s-60
+room 5
+fps 60
+when text "rears back" then dash aside
+when see * coming within 2 then dash aside
+end 15
+>>>END
+
+<<<FILE @run/trace/c20a-30
+room empty
+fps 30
+spawn spitter 15 4
+spawn grub 3 4
+player 8 4
+end 7
+>>>END
+
+<<<FILE @run/trace/c20a-60
+room empty
+fps 60
+spawn spitter 15 4
+spawn grub 3 4
+player 8 4
+end 7
+>>>END
+
+<<<FILE @run/trace/c20b-30
+room empty
+fps 30
+spawn spitter 15 4
+player 8 4
+3.85 dash right
+end 7
+>>>END
+
+<<<FILE @run/trace/c20b-60
+room empty
+fps 60
+spawn spitter 15 4
+player 8 4
+3.85 dash right
+end 7
+>>>END
+
+<<<FILE @run/trace/c21std-30
+room empty
+fps 30
+spawn grub 1.9 4
+player 0.5 4
+0.5 dash left
+end 3.5
+>>>END
+
+<<<FILE @run/trace/c21std-60
+room empty
+fps 60
+spawn grub 1.9 4
+player 0.5 4
+0.5 dash left
+end 3.5
+>>>END
+
+<<<FILE @run/trace/c21brute-30
+room empty
+fps 30
+spawn brute 1.9 4
+player 0.5 4
+0.1 attack
+0.7 dash left
+end 4
+>>>END
+
+<<<FILE @run/trace/c21brute-60
+room empty
+fps 60
+spawn brute 1.9 4
+player 0.5 4
+0.1 attack
+0.7 dash left
+end 4
+>>>END
+
+<<<FILE @run/trace/c19c-30
+room empty
+fps 30
+spawn brute 9 4
+player 8 4
+0.1 attack
+0.5 attack
+1.2 attack
+2.3 attack
+end 4
+>>>END
+
+<<<FILE @run/trace/c19c-60
+room empty
+fps 60
+spawn brute 9 4
+player 8 4
+0.1 attack
+0.5 attack
+1.2 attack
+2.3 attack
+end 4
+>>>END

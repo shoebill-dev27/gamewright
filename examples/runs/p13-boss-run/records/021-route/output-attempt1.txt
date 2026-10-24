@@ -1,0 +1,10 @@
+<<<FILE @need
+studio/roles/game-director.md
+studio/skills/make-decision.md
+studio/skills/prepare-owner-escalation.md
+decisions/D-015-owner-approves-continuous-run-and-final-boss.md
+decisions/D-016-final-boss-experience-direction.md
+decisions/D-017-final-boss-and-run-contract.md
+decisions/D-019-g002-balance-criteria-applicability.md
+design/final-boss-and-continuous-run.md
+>>>END

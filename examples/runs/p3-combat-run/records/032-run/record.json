@@ -1,0 +1,13 @@
+{
+ "op": "Run",
+ "goal": "G-001",
+ "operations": [
+  "029-route",
+  "030-step-qa",
+  "031-route"
+ ],
+ "stop_reason": "blocked-on-owner",
+ "status": "blocked-on-owner",
+ "owner_reads": "goals/G-001-combat-monotony/27-studio-to-owner.md",
+ "next": "decide examples/runs/p3-combat-run \"<answer>\""
+}

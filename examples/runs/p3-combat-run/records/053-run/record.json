@@ -1,0 +1,27 @@
+{
+ "op": "Run",
+ "goal": "G-001",
+ "operations": [
+  "036-step-qa",
+  "037-route",
+  "038-step-qa",
+  "039-route",
+  "040-step-gameplay-engineer",
+  "041-route",
+  "042-step-game-designer",
+  "043-route",
+  "044-step-gameplay-engineer",
+  "045-simulate-simulator",
+  "046-route",
+  "047-step-qa",
+  "048-step-art-director",
+  "049-route",
+  "050-step-game-designer",
+  "051-step-art-director",
+  "052-route"
+ ],
+ "stop_reason": "runtime error: claude run failed: You've hit your session limit · resets 3:10pm (Asia/Tokyo)",
+ "status": "active",
+ "owner_reads": null,
+ "next": "run examples/runs/p3-combat-run"
+}

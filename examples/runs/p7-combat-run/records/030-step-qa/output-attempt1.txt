@@ -1,0 +1,28 @@
+<<<FILE @run/tests
+>>>END
+
+<<<FILE @run/trace/fps60
+room 2
+fps 60
+end 12
+when text "rears back" then move aside
+when see r within 1.4 then attack
+when see g within 1.4 then attack
+when see G within 1.4 then attack
+when see r within 20 then move toward
+when see g within 20 then move toward
+when see G within 20 then move toward
+>>>END
+
+<<<FILE @run/trace/fps30
+room 2
+fps 30
+end 12
+when text "rears back" then move aside
+when see r within 1.4 then attack
+when see g within 1.4 then attack
+when see G within 1.4 then attack
+when see r within 20 then move toward
+when see g within 20 then move toward
+when see G within 20 then move toward
+>>>END

@@ -1,0 +1,114 @@
+
+<invoke name="note">
+<parameter name="text">Routing 44 -> 45 (Split B). Writing goal.md edits and the new handoff.</parameter>
+</invoke>
+
+<<<EDIT goals/G-002-final-boss/goal.md
+<<<<<<< SEARCH
+- Build：open（6j）。41は未着手で返った（42：Load不足。game/session/play/manualを43で追加）。40で保存版
+=======
+- Build：open（6k）。44で契約試験18件を追加済み（B3／B6／B7／B9／B10、T1〜T4、C2、C3。130件OK、source id 7670da50793b、実装変更なし）。40で保存版
+>>>>>>> REPLACE
+<<<EDIT goals/G-002-final-boss/goal.md
+<<<<<<< SEARCH
+残: V1補完、契約試験の細目（B3／B6／B7／B9／B10、T1〜T4、C2、C3、共有回帰）、pause・retry込みの通常ラン計測、dodger部屋1〜4の回帰固定。仕様質問・承認待ちはない。
+=======
+残: Split B（V1補完、bots.play_runのpause・retry拡張と試験）、Split C（pause・retry込み通常ラン計測、dodger部屋1〜4の回帰固定）。仕様質問・承認待ちはない。
+>>>>>>> REPLACE
+<<<EDIT goals/G-002-final-boss/goal.md
+<<<<<<< SEARCH
+| 6j | Build | gameplay-engineer | implement-change | open | 43-studio-to-gameplay-engineer.md |
+| 6k | Build | gameplay-engineer | implement-change | planned | V1補完とplay_runのpause・retry拡張 |
+=======
+| 6j | Build | gameplay-engineer | implement-change | done | 43-studio-to-gameplay-engineer.md → 結果: 44-gameplay-engineer-to-studio.md |
+| 6k | Build | gameplay-engineer | implement-change | open | 45-studio-to-gameplay-engineer.md |
+>>>>>>> REPLACE
+<<<EDIT goals/G-002-final-boss/goal.md
+<<<<<<< SEARCH
+40で保存版を初めて実行できた（112件OK、測定取得）ため、実行不能の再返却ではない。契約試験の細目・V1補完・pause/retry計測が未了のため、完成資料として独立QAへ送らず41で残りのBuildを行う。新5番・通常ランの実測は、QA・Play後のDesigner実測後判断（9a）へ回す。順序は変更しない。
+=======
+44で契約試験の細目（18件、130件OK、実装変更なし）が完了し、計画に合致。残るV1補完とpause/retry拡張（Split B）を45で行い、その後Split C（6l）。V1・pause/retry計測・回帰固定が未了のため独立QAへはまだ送らない。順序は変更しない。
+>>>>>>> REPLACE
+<<<EDIT goals/G-002-final-boss/goal.md
+<<<<<<< SEARCH
+Gameplay Engineerが41-studio-to-gameplay-engineer.mdから開始する。未実施の契約試験・V1補完・pause/retry計測・dodger部屋1〜4の回帰固定を実装・実行し、source idと結果を対応付けてstudioへ返す。完成資料を受けたRouteで独立QAを開く。
+=======
+Gameplay Engineerが45-studio-to-gameplay-engineer.mdから開始する（Split B：V1補完、play_runのpause・retry拡張と試験）。source idと結果を対応付けてstudioへ返す。続いて6l（Split C）。完成資料を受けたRouteで独立QAを開く。
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-002-final-boss/45-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-002
+seq: 45
+from: studio
+to: gameplay-engineer
+stage: Build
+outcome: routed
+---
+# 45: studio → gameplay-engineer — Split B: V1 supplements and bots.play_run pause/retry extension
+
+## Task
+
+Implement Split B: (1) the V1 supplements, (2) extend `bots.play_run` with pause and retry and add tests for it. Run the full suite and report the source id with the results. Split C is a later step; do not start it.
+
+## Context
+
+G-002 Build. 44 added `repo/tests/test_boss_contract_details.py` (18 tests; B3, B6, B7, B9, B10, T1–T4, C2, C3). Result: 130 tests OK at source id 7670da50793b, no production change, no spec gap. Remaining Build work is Split B (this step) and Split C (6l). Independent QA waits until both are done.
+
+## Findings
+
+From 44 (summary):
+
+- `RunSession.control("pause"|"resume"|"retry")` returns True/False and logs `pause`, `resume`, `retry`, `control_rejected`.
+- Discarding future-timed old inputs on retry lives in the driver (`drive`) and is not yet tested.
+- The README still says "112 tests".
+- The 112-test baseline at 5145454ab956 was not re-confirmed separately; it is not required now.
+
+Split B scope:
+
+1. **V1 supplements** (per design/final-boss-and-continuous-run.md and D-017/D-019): legacy-route boss display, bullet IDs and removal reasons, long observation. Take the exact wording from the design document; if it is ambiguous or missing a case, hand back with a question rather than deciding.
+2. **bots.play_run**: add `pause_at`, `pause_seconds`, `retries` parameters using `RunSession.control`; reset reaction memory on a new generation (after retry). Add tests, including that old future-timed inputs are discarded on retry in the driver.
+3. Update the README test count / source id only if the file set is final after this step; otherwise leave it and say so.
+
+## Decisions already made
+
+- D-017: two attacks, boundary recovery, death priority, terminal retry, clock and display contract.
+- D-019: old aggregates retired; shared regressions; boss-adapted bot comparison; Designer judgment after measurement.
+- D-021: Build on the current repo with Studio-internal text verification; no real device, sha check, purchase or extra spending.
+
+## Constraints
+
+- Rooms 1–4, shared combat rules and the independent 1–4 bot policy stay unchanged. No new input, checkpoint, HP padding, or tuning toward 15–20 minutes.
+- Must hold at both 30 and 60 FPS.
+- Any code or test change gives a new source id; report results only against the final id.
+- Do not weaken or edit existing tests to pass; if one fails, fix the cause or report it.
+
+## Open questions
+
+None expected. If the spec is ambiguous for V1, hand back as `question` with the exact case.
+
+## Expected output
+
+Handoff to `studio` (address the result to `studio`) containing: files changed, tests added, full-suite result and final source id, per-item table for V1 and pause/retry (what was run, at which id, 30/60 FPS), and what remains for Split C. Keep verification claims separate from self-assessment.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: design/final-boss-and-continuous-run.md
+- Project: repo/game.py
+- Project: repo/session.py
+- Project: repo/play.py
+- Project: repo/bots.py
+- Project: repo/run_driver.py
+- Project: repo/manual.md
+- Project: repo/tests/test_bots_boss.py
+- Project: repo/tests/test_run_driver.py
+- Project: repo/tests/test_boss_contract_details.py
+- Decisions: decisions/D-017-final-boss-and-run-contract.md
+- Decisions: decisions/D-019-g002-balance-criteria-applicability.md
+- Decisions: decisions/D-021-owner-authorizes-text-build.md
+- Previous handoff: goals/G-002-final-boss/44-gameplay-engineer-to-studio.md
+>>>END

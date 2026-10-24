@@ -1,0 +1,161 @@
+<<<FILE goals/G-001-combat-monotony/82-qa-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 82
+from: qa
+to: studio
+stage: Verify
+outcome: done
+---
+# 82: qa → studio — Re-verification of build 1ac4d04d0e75 (room 3, variant messages, aligned documents): suite green, no defect found; five checks still unverified, so this is not a full pass
+
+## Task
+
+Report the re-verification of `repo/` (sha 1ac4d04d0e75) at 30 and 60 FPS against the criteria in handoff 81. The items are the suite, the gaps from report 76, the bot regression, the document alignment and the D-007 leftover.
+
+## Context
+
+Goal G-001. Report 76 failed on one red test and listed gaps. The test file has since been corrected. I used one run round: the full suite, the bots for rooms 1–5 at both rates, and player-view traces of grub, runner and brute at both rates (the same scripts as in 76). I did not use the two remaining rounds, so R3-8 and the room 3 scripts for R3-4 were not run (section 2).
+
+## Findings
+
+### Verdict
+
+- No failing criterion and no build defect found.
+- This is **not a full pass**. The skill allows `pass` only when every criterion is judged. Five items remain unjudged: R3-8 (the timed run), R3-4 (the direct room 3 sidestep, late-dash and recovery scripts), V-c, the baseline part of V-e, and V1–V12 (the visual criteria, out of scope).
+- The Studio decides whether to accept those as unverified, route another QA round for R3-8 and R3-4, or supply a baseline.
+
+### 1. Suite
+
+- `run_tests`: Ran 64 tests, OK, exit 0. Report 76 had 63 passing and 1 failing, so the red test is fixed.
+- `VariantMessageTest.test_wind_up_and_hit_messages_name_the_variant` is green. It passes for grub, runner and brute at 30 and 60 FPS.
+- **Direct traces** (practice room, enemy at (9.5, 4), player at the start, 1.0 s):
+
+  | Variant | Wind-up message, 30 / 60 FPS | Hit message and time, 30 / 60 FPS |
+  |---|---|---|
+  | grub | `a grub rears back` 0.033 / 0.017 s | `YOU ARE HIT by a grub — hearts 2/3` 0.667 / 0.633 s |
+  | runner | `a runner rears back` 0.033 / 0.017 s | `YOU ARE HIT by a runner — hearts 2/3` 0.533 / 0.483 s |
+  | brute | `a brute rears back` 0.033 / 0.017 s | `YOU ARE HIT by a brute — hearts 2/3` 0.867 / 0.833 s |
+
+  - Each trace shows one wind-up message and one hit message, with the hearts suffix intact.
+  - The `cue:` line shows 0.50, 0.35 and 0.70 s to the lunge at the first picture.
+  - These timings are identical to those in report 76.
+- **V-a: pass.** One message per wind-up, on the first frame in range.
+- **V-b: pass.** The hit message names the matching variant on the contact frame, with unchanged hearts text.
+- **Does the test check V-a and V-b?** Mostly.
+  - It checks the right things: the count of `a <kind> rears back` is 1, the count of `YOU ARE HIT by a <kind>` is 1, the full `— hearts 2/3` string is present, and no other variant's wording appears. All of this runs for 3 variants at 2 rates.
+  - It does **not** check that the message comes at the same moment as before (V-a "±1 frame") or on the contact frame (V-b). It checks only the counts.
+  - "One message per wind-up" is enforced indirectly, through the window length, not by comparing wind-up events with messages.
+- **Fragility.** The test is deterministic but depends on timing margins.
+  - The 1.0 s window must stay after the hit and before any second wind-up.
+  - The brute's hit is at 0.867 s at 30 FPS, which leaves 0.13 s (about 4 frames) to the end of the window.
+  - The runner's second wind-up is at 1.167 s at 30 FPS (report 76), which leaves about 0.17 s.
+  - A small change in lunge, recovery or walk-speed tuning would break it without any message defect. The window is documented in the test comment.
+  - Low severity, no action needed now. A sturdier form would compare message count with the count of windup events, but that is a Build decision.
+
+### 2. Open gaps from report 76
+
+- **R3-8 (timed run of room 3): not run.**
+  - The geometry part was already a pass: the largest distance between spitters is 9.43 tiles, within 9.5.
+  - The timed part ("within 6 s of the previous kill") needs a script that kills the grub and two spitters and then walks to the last one. The grub's path and the kill times depend on play, and the packet gives no position data to script it deterministically in one run.
+  - It stays unverified. The derived value is about 3 s against the 6 s limit.
+- **R3-4 (room 3 sidestep, late dash, recovery swipe): not run in room 3.**
+  - Report 76 already observed in room 3: cue of 0.5 s, cancel by swipe, two-swipe kill, and a dash on the cue with no hit.
+  - The sidestep, late dash and recovery swipe are covered only by the practice-room tests (`GrubTest`, `LungeContactTest`), which pass at both rates. They use the same code path, but they are not room 3 scripts.
+  - It stays partial.
+- **V-c (output byte-identical to 0.6.1): not establishable.**
+  - Spec: `combat-step68.md` V-c.
+  - No 0.6.1 output exists in the packet.
+  - What can be said: the `cue:` line, the `~` line, the hearts text and the picture layout match the spec, and all times are identical to those in report 76. That shows no change since 76, not equality with 0.6.1.
+- **V-e, "no bot result changes": not establishable against 0.6.1.**
+  - Room 3 changed in the same build, so a changed walker result would be expected anyway.
+  - What can be said: this round's bot output is identical to report 76 section 2, line by line, at both rates, so nothing changed since 76.
+  - The criteria 1–11 and 17–21 part of V-e is covered by the green suite at both rates.
+- **V-d:** passes (test green, and the live room 3 rule firing was shown in 76).
+
+### 3. Regression: bots, rooms 1–5, limit 60 s
+
+The output is identical to report 76 section 2.
+
+| | 30 FPS | 60 FPS |
+|---|---|---|
+| walker lost, rooms 3 / 4 / 5 | 1 / 1 / 3 = 5 | 1 / 3 / 2 = 6 |
+| walker cleared, rooms 3–5 | 2 | 2 |
+| walker lost, rooms 1–2 | 5 | 5 |
+| dodger | all 5 rooms cleared, 0 hearts lost | all 5 rooms cleared, 0 hearts lost |
+| dodger dashes, rooms 3 / 4 / 5 | 6 / 7 / 11 | 6 / 8 / 14 |
+| camper cleared, rooms 3–5 | 0 | 0 |
+
+- **13: pass at both rates.**
+  - 30 FPS: walker lost 5, within 3–6, and cleared 2. The dodger lost 0 and cleared 3/3. The camper cleared fewer (0).
+  - 60 FPS: the walker lost 6 and cleared 2, so it sits exactly on the upper limit (6) and on the lower clear limit (2). The dodger lost 0 and cleared 3/3. The camper cleared 0.
+- **14: pass.** The walker lost 5 (≥1). The dodger lost 0 and cleared 2/2.
+- **15: pass.** The dodger dashes at least once in each of rooms 3–5.
+- **16c: pass.** The dodger result is the same at both rates: same rooms cleared, 0 hearts lost in each.
+- Nothing is outside a limit, so no tuning question arises.
+- The 60 FPS walker has no margin on either limit. This is not a defect, but any further layout change to rooms 3–5 will probably move it.
+
+### 4. Documents against the specs and decisions
+
+Checked `design/combat.md` and `design/combat-cues-visual-spec.md` against `combat-step68.md`, `combat-step72.md`, `combat-step-46-room3-cap.md`, D-007, D-011 and D-012.
+
+**Resolved since report 76:**
+- Room 3 layout: the row, the purpose line and criterion 12 now match `combat-step72.md` (spitters (2,1), (10,6), (2,7) plus a grub at (15,0)). They also match `game.py` and the contents test.
+- In-flight bound: criterion 11 and the Cap paragraph now give 2 plus living spitters (≤3 in rooms 4–5, up to 5 in room 3).
+- Variant messages: the wind-up bullet names `a grub/runner/brute rears back` and `YOU ARE HIT by a grub/runner/brute`, with `combat-step68.md` governing.
+- Cue spacing in the visual spec: it now says room 3 cues are normally 0.8 s apart, and in rooms 4–5 at least 0.6 s apart and never overlapping.
+
+**Remaining conflicts or stale text** (all wording; none contradicts a rule):
+1. `combat.md` cue gap rule, "Room 3 and practice rooms do not use this rule. Their gap stays at the old 0.2 s between consecutive cues in the room." After D-007 a simultaneous cue start in room 3 after a cap delay is accepted, so a 0.2 s gap is not guaranteed there. It is true only of the first-shot schedule. A reader could take it as a rule that criterion 18 would then fail. Suggested wording: "...their first-shot schedule has 0.2 s between consecutive cues; after a cap delay simultaneous starts are accepted (D-007)."
+2. `combat.md` open question "Step 38: a real-room trace of room 3 with a surviving player past 7 s, to see if simultaneous cue starts occur there (D-005 revisit)." This was answered by QA 43 and D-007 (they occur, and are accepted). It is stale.
+3. `combat.md` step 38 ruling text, "Reopen if a real-room trace in room 3 shows simultaneous starts that a player cannot answer." This is consistent with D-007, but it is now a reopen condition for a case already seen. It should point to D-007's reopen triggers.
+4. `combat-cues-visual-spec.md` grub lane item 1 still says "the design text says 'thin line'". `combat.md` itself says that sentence is out of date (the thin line is withdrawn for the grub; it applies to the spitter only).
+5. `combat.md` header still says "Until 0.6 exists, build 0.5 behaves as described..." and the title says build 0.5. Harmless, but dated.
+6. `combat.md` criterion 13 and the room 3 bot text mention the walker at "6 / upper limit" for build 0.5, while the test comment notes 7 earlier on 0.6. The measured values for this build are in section 3. Not a conflict.
+
+No conflict remains on room 3 layout, the in-flight bound, or the variant-named messages. `repo/manual.md` matches (verified by the passing manual-wording test).
+
+### 5. Decision file D-007
+
+Confirmed. The file ends with a stray `</parameter>` line directly after the last bullet of "Revisit when", just before the end of the file. I did not edit it. The Studio should route its removal.
+
+### 6. Defects
+
+None found in the build, bots, tests or documents' rules in this round.
+
+### 7. Not verifiable here
+
+- Visual criteria V1–V11 and V12: they need a graphical build (out of scope per the handoff).
+- Questions of human readability (can a player answer a simultaneous room 3 volley, or the grub on top of the aim cue): these are for the hand-timed playtest named in D-007 and D-012.
+
+## Decisions already made
+
+D-007, D-011 and D-012 applied as written. None changed.
+
+## Constraints
+
+I checked 30 and 60 FPS everywhere I ran something. I changed no code or document. I verified from the specs, criteria and build, not from an explanation.
+
+## Open questions
+
+1. Accept R3-8 and the R3-4 room 3 scripts as unverified, or route another QA round? Another round would need a hand-built script with the grub's walk path known (a trace run first), then the timed kill sequence.
+2. Can a 0.6.1 baseline (play output for the V-c scripts and bot output) be supplied, or should V-c and the baseline part of V-e be closed as not establishable?
+3. Should `game-designer` or the Studio fold in the wording items in section 4 (items 1–4)? None changes a rule.
+
+## Expected output
+
+The Studio decides routing:
+- No failure, so nothing goes to `gameplay-engineer`.
+- Document wording items 1–4 go to `game-designer`; they change no rule.
+- The D-007 `</parameter>` removal goes to whoever owns decision files.
+- If the unverified items are to be closed, route a further QA round for R3-8 and R3-4.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: project.md, repo/manual.md, repo/tests/test_game.py, repo/bots.py, design/combat.md, design/combat-step-46-room3-cap.md, design/combat-step68.md, design/combat-step72.md, design/combat-cues-visual-spec.md
+- Decisions: decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md, decisions/D-011-variant-named-messages-accepted.md, decisions/D-012-room3-standard-grub-and-closer-spitter.md
+- Previous handoff: goals/G-001-combat-monotony/81-studio-to-qa.md
+>>>END

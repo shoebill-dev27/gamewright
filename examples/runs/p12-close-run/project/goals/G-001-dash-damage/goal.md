@@ -1,0 +1,70 @@
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: done
+created: 2026-10-23
+---
+# G-001: Damage taken while dashing
+
+## Owner request
+
+> ダッシュ中なのにダメージを受けることがある。再現できるので直してほしい。
+
+## Interpretation
+
+The Owner reports a defect: the player sometimes takes damage while dashing. The Owner says it is reproducible but gave no steps.
+
+Success condition: in the situations where the Owner sees it, the player no longer takes damage during a dash, to whatever extent the design documents (`design/combat.md` invulnerability rules) say a dash protects the player. It must hold at both 30 and 60 FPS.
+
+Out of scope:
+- Changing the dash's design (duration, cooldown, distance, whether it is invulnerable) unless the design documents turn out not to define the case. That would be a Design question, not part of this fix.
+- New input buttons (D-001).
+- Other combat tuning.
+
+## Unknowns
+
+- Observe: settled. QA reproduced the defect at 30 and 60 FPS.
+- Diagnose, Decide: skipped. No cause analysis or choice of direction was needed.
+- Design: skipped. `design/combat.md` defines full-dash invulnerability. QA found one undefined case (the frame on which the dash timer reaches 0); it is non-blocking and proposed as a follow-up Goal.
+- Plan: skipped. The fix was local and no criterion failed Verify twice.
+- Build: settled. Fix in, suite green (10 tests).
+- Verify: settled. Pass on all five criteria at 30 and 60 FPS.
+- Play and Review: skipped. This is a defect, not an experience Goal.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | qa | reproduce-defect | done | 01-studio-to-qa.md |
+| 2 | Design | game-designer | write-design-spec | skipped (spec defines full-dash invulnerability) | — |
+| 3 | Plan | technical-director | technical-plan | skipped (no repeated Verify failure) | — |
+| 4 | Build | gameplay-engineer | implement-change | done | 02-qa-to-gameplay-engineer.md |
+| 4b | Build (fix test failure) | gameplay-engineer | implement-change | done (suite green) | 04-studio-to-gameplay-engineer.md |
+| 5 | Verify | qa | verify-change | done (pass) | 05-gameplay-engineer-to-qa.md |
+
+## Route changes
+
+After Verify (06): pass on all criteria. The dash-end-frame gap is non-blocking and not the reported defect, so no Design step is added; it becomes a proposed new Goal rather than scope growth. Goal closed.
+
+## Next action
+
+None. The Goal is closed. The Owner decides whether to open the proposed follow-up Goal.
+
+## Outcome
+
+結果: 「ダッシュ中にダメージを受ける」不具合は修正され、QAが検証して合格しました（30FPS・60FPSの両方）。
+
+- 原因: 被弾後の無敵時間（0.8秒）が切れる直前にダッシュを始めると、ダッシュ中に無敵フラグが落ち、Spitterの弾などが当たっていました。
+- 修正: ダッシュ開始のタイミングに関わらず、ダッシュ中は常に無敵になりました。ダッシュ終了後も被弾後の無敵時間が終わるまで無敵が続きます。回帰テストを追加し、テストスイート（10件）は全て成功しています。
+- 変更なし: 通常の被弾（1ハート減、硬直0.3秒、無敵0.8秒）、通常のダッシュ（0.25秒）、クールダウンは従来どおりです。
+- 決定（Decision）: この Goal で新たに記録した Decision はありません。D-001（攻撃ボタン1つ＋ダッシュ）の範囲内で、入力は追加していません。
+
+QAが確認できなかった点:
+- 無敵時間の開始タイミング（残り時間）は全パターンの総当たりではなく、0.033〜0.450秒の範囲で抽出して確認しました。
+- ソースコード自体は読んでおらず、トレースとテスト結果に基づく検証です。
+
+次の課題（新しい Goal の提案）:
+- ダッシュの最終フレーム（ダッシュタイマーが0になるフレーム）に接触していると、被弾します。`design/combat.md` は「ダッシュ時間の全体で無敵」としか書かれておらず、このフレームが含まれるか未定義です。今回報告された不具合（ダッシュ残り約0.17秒での被弾）とは別の問題で、設計判断（game-designer）が必要です。
+
+Owner への確認事項: 上記の「ダッシュ最終フレーム」を新しい Goal として扱うかどうか、ご判断ください。

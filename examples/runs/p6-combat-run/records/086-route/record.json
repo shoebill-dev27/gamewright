@@ -1,0 +1,91 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "567f32a9-5579-4173-bfb0-eb4e0eef0cff",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 31190,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 20447,
+    "output_tokens_details": {
+     "thinking_tokens": 11130
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 31190,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 20447,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 31190,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 31190
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.32923399999999997,
+   "attempt": 1,
+   "started": "2026-10-16T02:42:28",
+   "seconds": 147.7,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-combat-monotony/85-studio-to-game-designer.md": "88541c1c11d87b3d9efecaa8cc103ce6b8f4e80bcbc2f009b3bd67e89328a603",
+  "goals/G-001-combat-monotony/86-studio-to-playtester.md": "050a6d618c52a856baf20431229774d55166c96f9e386a610725c4b897fe8887",
+  "goals/G-001-combat-monotony/87-studio-to-art-director.md": "17b76935db9ff3e916e40fb5fb257814ebb8758e99557ceaf2cd89f73ef5a4cb",
+  "goals/G-001-combat-monotony/goal.md": "85aea21bbd52245210909beeed3dfa234ea6c06aa41b473b6db61faa9ef6a8c3"
+ },
+ "decision": {
+  "new": [
+   "art-director",
+   "Verify (visuals: V-17 from QA captures; dash-draw wording)"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "owner",
+    "Owner: place manual draft (59) and V-15 text"
+   ],
+   [
+    "owner",
+    "Owner: run suite with manual.md (AC-15)"
+   ],
+   [
+    "art-director",
+    "Verify (visuals, V-17 and dash-draw wording)"
+   ],
+   [
+    "playtester",
+    "Play (rooms 3–5, started directly)"
+   ],
+   [
+    "game-designer",
+    "Diagnose (room-1 findings from 84, held items)"
+   ]
+  ]
+ },
+ "seen_through_seq": 87
+}

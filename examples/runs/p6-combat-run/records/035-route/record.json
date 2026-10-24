@@ -1,0 +1,78 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "3d6f6ee4-f75b-4fd4-8737-7e4620b66b37",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 34232,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 7773,
+    "output_tokens_details": {
+     "thinking_tokens": 2359
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 34232,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 7773,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 34232,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 34232
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.21466200000000002,
+   "attempt": 1,
+   "started": "2026-10-15T19:39:59",
+   "seconds": 60.0,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-combat-monotony/goal.md": "2366da7604687f04d4803af02693f876b7f989cebbb7bad6287745974c9cb3a5",
+  "goals/G-001-combat-monotony/30-studio-to-game-designer.md": "bd135d4d4a521e1a289b1ebee498d7583b43b61eb9051e414e014e0fa10f8279",
+  "goals/G-001-combat-monotony/31-studio-to-art-director.md": "3f8598098828075e931c1962589f3a101e2a65dc10c2085793a2d597912acd9f"
+ },
+ "decision": {
+  "status": "active",
+  "open": [
+   [
+    "art-director",
+    "Verify (visuals, from captures)"
+   ],
+   [
+    "game-designer",
+    "Design (F1 overlap, AC-15 wording)"
+   ]
+  ],
+  "new": [
+   "art-director",
+   "Verify"
+  ]
+ },
+ "seen_through_seq": 31
+}

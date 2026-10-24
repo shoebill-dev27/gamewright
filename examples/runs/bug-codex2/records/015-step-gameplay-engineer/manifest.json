@@ -1,0 +1,82 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-dash-damage/14-studio-to-gameplay-engineer.md",
+  "sha256": "c6fd51f6a753246926a8d0ba9e64c3d007cd93f80e3ad716a1f602c8a2eababf",
+  "bytes": 6976
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md",
+  "sha256": "ec063b0c2f3a86b58d7fc1774ef705d02b02e87267f735b8f4c058bb1a3ab5e8",
+  "bytes": 1569
+ },
+ {
+  "path": "studio/skills/implement-change.md",
+  "sha256": "a9befd7f1d9e09eb94c51a066f030db88c5061ad1b522d9795e62bc2c242964a",
+  "bytes": 1823
+ },
+ {
+  "path": "project.md#vision",
+  "sha256": "d3086d29c74b4ce7bd4b6ef724e73f4f0f3dde2be7fda791c0154917fee0cf66",
+  "bytes": 408
+ },
+ {
+  "path": "project.md#current-state",
+  "sha256": "53ecf0161a21aca77fa216fa0286648ecb77fb26abf0a581a0959bb6b7715a30",
+  "bytes": 196
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "35d04ba78f0574457c6c379efd3ab930a1f4e729e41fe06c133511c5b4cb53a5",
+  "bytes": 534
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "b67a8b97eaf78370e06b07dd9143f1c92991e97db5d0326ebbdf7d4784a43cec",
+  "bytes": 854
+ },
+ {
+  "path": "sim/repo-notes.md",
+  "sha256": "9d2a0c8d3c25a33a3a305e1fe5f3a6d4ed024bb20db9e161c4cde5d2237c7f0e",
+  "bytes": 1203
+ },
+ {
+  "path": "sim/build-0.3.md",
+  "sha256": "3159bf3f32d15e24e59b3276d1b8618ee3b0d65f884c8681aa7b2b85f4eb6d64",
+  "bytes": 851
+ },
+ {
+  "path": "goals/G-001-dash-damage/11-qa-to-studio.md",
+  "sha256": "5fd31ec37bfeba288db37fb369a296c40e21327d84a5b2d7effcc09392ce282a",
+  "bytes": 10455
+ },
+ {
+  "path": "decisions/D-001-one-button-combat.md",
+  "sha256": "c7fe9ca23a369707a5ab439e44789a25a0a8544efce4703a676f8fd180f82ec1",
+  "bytes": 798
+ },
+ {
+  "path": "decisions/D-002-resume-with-owner-observations.md",
+  "sha256": "c35cdad36475e729d82fbd6c62d4ddd88bec596af17ced3106a9f61e22234b23",
+  "bytes": 2013
+ },
+ {
+  "path": "decisions/D-003-independent-invulnerability.md",
+  "sha256": "e45ad995e4e78323d29aa605e1d7f2f52d06c21f8d040cf6ee3fc63f9694c35a",
+  "bytes": 2668
+ },
+ {
+  "path": "goals/G-001-dash-damage/13-technical-director-to-studio.md",
+  "sha256": "251971222e45d5008c6bff9462bfe73ad12628484dbcc9c70169ef0cd89a4149",
+  "bytes": 14303
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ }
+]

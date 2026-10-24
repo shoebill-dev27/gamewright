@@ -1,0 +1,67 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/54-studio-to-gameplay-engineer.md",
+  "sha256": "fda8d7660298b7bd747130822a967f422dba1621b24fe96f0655216ae7eecc0f",
+  "bytes": 5173
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md",
+  "sha256": "ec063b0c2f3a86b58d7fc1774ef705d02b02e87267f735b8f4c058bb1a3ab5e8",
+  "bytes": 1569
+ },
+ {
+  "path": "studio/skills/implement-change.md",
+  "sha256": "a9befd7f1d9e09eb94c51a066f030db88c5061ad1b522d9795e62bc2c242964a",
+  "bytes": 1823
+ },
+ {
+  "path": "sim/build-0.7.md",
+  "sha256": "da81ae170fafa9aafcf35118b1d0516995dc7a3e34c172083723e273c53e5aea",
+  "bytes": 10150
+ },
+ {
+  "path": "design/g001-combat-escalation.md",
+  "sha256": "35fd411842d17ac8d02750fee8ea4a1dae951aad5a8a121528b257a8aa03b6be",
+  "bytes": 43647
+ },
+ {
+  "path": "sim/repo-notes.md",
+  "sha256": "e3da76857825de2cf165e8a35e845f905363dc3c9ec0d577f93e8deabf6ec1c9",
+  "bytes": 7995
+ },
+ {
+  "path": "decisions/D-008-phase-1-spawn-and-wave-rules.md",
+  "sha256": "5c1ab64e3deb2a5f16e75cde9312ca34b5e954ed2d65d04d18ed20f8b37aa48f",
+  "bytes": 3945
+ },
+ {
+  "path": "decisions/D-009-judging-basis-criteria-1-and-2.md",
+  "sha256": "c4ba258bded2d9d26f73ebadd16f78d70b72fe7e1d381c22c6e5e3c82cba76fb",
+  "bytes": 4046
+ },
+ {
+  "path": "goals/G-001-combat-monotony/53-game-designer-to-studio.md",
+  "sha256": "6bbfe29b1f7473d99dfc0e03fa79496f445acf6078db4fa1039bf1733029962c",
+  "bytes": 9955
+ },
+ {
+  "path": "goals/G-001-combat-monotony/50-qa-to-studio.md",
+  "sha256": "7bfb4f4ba97be9b8f8a25b9aa4694796cf998ee1a2976d02fe4e44e4e0cb1fe1",
+  "bytes": 16397
+ },
+ {
+  "path": "goals/G-001-combat-monotony/51-art-director-to-studio.md",
+  "sha256": "71ce5b33216999bd597afdbb8696681af98447b0842c7993032f1f0b92f8be56",
+  "bytes": 5975
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ }
+]

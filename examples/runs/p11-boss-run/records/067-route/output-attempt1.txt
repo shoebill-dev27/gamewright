@@ -1,0 +1,9 @@
+<<<FILE @need
+goals/G-002-final-boss/40-gameplay-engineer-to-studio.md
+goals/G-002-final-boss/53-studio-to-gameplay-engineer.md
+decisions/D-019-g002-balance-criteria-applicability.md
+decisions/D-021-owner-authorizes-text-build.md
+design/final-boss-and-continuous-run.md
+repo/public-driver.md
+repo/bots.py
+>>>END

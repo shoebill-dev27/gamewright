@@ -1,0 +1,10 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [],
+ "status": "error",
+ "errors": [
+  "[Errno 2] No such file or directory: 'claude'"
+ ]
+}

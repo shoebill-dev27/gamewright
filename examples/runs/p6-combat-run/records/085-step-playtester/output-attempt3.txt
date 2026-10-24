@@ -1,0 +1,17 @@
+I'm using the last run to try a different approach. Both earlier sessions ended in room 1 with zero rooms cleared. This time I'll dash the moment the first grub rears back, then turn to face it and swipe while it is open.
+
+<<<FILE @run/play/s3-room1-dash-on-cue
+room 1
+fps 30
+end 12
+1.55 dash down
+2.2 move up
+2.3 stop
+2.4 attack
+3.0 attack
+3.6 dash left
+4.2 attack
+4.8 attack
+5.4 attack
+6.0 attack
+>>>END

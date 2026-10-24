@@ -1,0 +1,72 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-first-puzzle-stall/33-studio-to-gameplay-engineer.md",
+  "sha256": "2f039b4ad2ab0f73dc2ac953772df04d7fd0ae1c956dfdcede0c6a4089c89177",
+  "bytes": 5046
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md",
+  "sha256": "ec063b0c2f3a86b58d7fc1774ef705d02b02e87267f735b8f4c058bb1a3ab5e8",
+  "bytes": 1569
+ },
+ {
+  "path": "studio/skills/implement-change.md",
+  "sha256": "a9befd7f1d9e09eb94c51a066f030db88c5061ad1b522d9795e62bc2c242964a",
+  "bytes": 1823
+ },
+ {
+  "path": "design/onboarding.md",
+  "sha256": "4a0734a978bc103d169183344d5f116631b35e69b102f1d684e220071350b9b0",
+  "bytes": 36396
+ },
+ {
+  "path": "sim/build-0.5.md",
+  "sha256": "dd81bc6bafb3baddb5f94fae2ab048d176efc2f49000273516e0a020f038b9d1",
+  "bytes": 11146
+ },
+ {
+  "path": "sim/repo-notes.md",
+  "sha256": "8e3531ea69a7041177f7a193791f5b2fe4847d80f6c83f8e7a6b99cb3b359ec9",
+  "bytes": 11412
+ },
+ {
+  "path": "decisions/D-001-no-fail-states.md",
+  "sha256": "99362efd3625e792d862dcbec7744a761cee478a97eae271621290daff508b4e",
+  "bytes": 505
+ },
+ {
+  "path": "decisions/D-003-sand-tap-blip-and-pool-hit-area.md",
+  "sha256": "33f6904beaa5ff202abf355b91f021c4c5bfa9f036932b5385933fb643d304e1",
+  "bytes": 2412
+ },
+ {
+  "path": "decisions/D-004-ease-back-taps-window-origin-held-pool.md",
+  "sha256": "e78d4050831064e759af427628b44ca3dd1a81e81b1b4130ef6f2c25e6d76633",
+  "bytes": 2544
+ },
+ {
+  "path": "decisions/D-005-reduce-motion-pulse-fills-window.md",
+  "sha256": "ef5c5e50142b2ee4c4d7ea26c9cfaab8a6c85df13bba7d99456074d5c88756a1",
+  "bytes": 2785
+ },
+ {
+  "path": "decisions/D-006-cancelled-pulse-and-reduce-motion-beats.md",
+  "sha256": "da28d3dfba016343a9ce38bf383f9850982dbfe6e7804d9d0be635191d09a321",
+  "bytes": 3193
+ },
+ {
+  "path": "goals/G-001-first-puzzle-stall/32-game-designer-to-studio.md",
+  "sha256": "068788c134b74dd3f174e5de7d0171875b871aa33d26f02411a0ae2a30bde5b6",
+  "bytes": 6976
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ }
+]

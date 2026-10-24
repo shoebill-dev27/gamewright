@@ -1,0 +1,33 @@
+{
+ "op": "Run",
+ "goal": "G-001",
+ "operations": [
+  "064-route",
+  "065-step-art-director",
+  "066-route",
+  "067-step-gameplay-engineer",
+  "068-route",
+  "069-step-game-designer",
+  "070-route",
+  "071-step-gameplay-engineer",
+  "072-route",
+  "073-step-qa",
+  "074-step-art-director",
+  "075-route",
+  "076-step-game-designer",
+  "077-route",
+  "078-step-gameplay-engineer",
+  "079-route",
+  "080-step-qa",
+  "081-route",
+  "082-step-art-director",
+  "083-route",
+  "084-step-qa",
+  "085-step-playtester",
+  "086-route"
+ ],
+ "stop_reason": "no progress: art-director would be opened a 4th time in this run",
+ "status": "active",
+ "owner_reads": null,
+ "next": "run examples/runs/p6-combat-run"
+}

@@ -1,0 +1,231 @@
+<<<EDIT repo/bots.py
+<<<<<<< SEARCH
+        for direction in preferred:
+            dx, dy = DIRECTIONS[direction]
+            inside = (0 <= o.x + dx * 1.5 <= ROOM_W - 1
+                      and 0 <= o.y + dy * 1.5 <= ROOM_H - 1)
+            candidates.append(("move", direction, inside))
+            if inside:
+                return BossChoice(memory, provenance, tuple(candidates),
+                                  tuple(excluded), "escape",
+                                  (("move", direction),))
+            excluded.append((direction, "wall"))
+        return BossChoice(memory, provenance, tuple(candidates),
+                          tuple(excluded), "hold", (("stop", None),))
+=======
+        selected_direction = None
+        for direction in preferred:
+            dx, dy = DIRECTIONS[direction]
+            inside = (0 <= o.x + dx * 1.5 <= ROOM_W - 1
+                      and 0 <= o.y + dy * 1.5 <= ROOM_H - 1)
+            candidates.append(("move", direction, inside))
+            if not inside:
+                excluded.append((direction, "wall"))
+            elif selected_direction is None:
+                selected_direction = direction
+            else:
+                excluded.append((direction, "lower-priority"))
+        if selected_direction is not None:
+            return BossChoice(memory, provenance, tuple(candidates),
+                              tuple(excluded), "escape",
+                              (("move", selected_direction),))
+        return BossChoice(memory, provenance, tuple(candidates),
+                          tuple(excluded), "hold", (("stop", None),))
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/tests/test_bots_boss.py
+<<<<<<< SEARCH
+class OutcomeTest(unittest.TestCase):
+=======
+class PublicBoundaryAuditTest(unittest.TestCase):
+    def test_all_escape_candidates_are_enumerated(self):
+        for attack in ("charge", "short shot"):
+            game = boss_warning(attack, (8, 4))
+            choice = bots.choose_boss(bots.observe_boss(game), bots.BossMemory())
+            self.assertEqual(choice.candidates,
+                             (("move", "down", True), ("move", "up", True)))
+            self.assertIn(("up", "lower-priority"), choice.excluded)
+            self.assertEqual(choice.buttons, (("move", "down"),))
+
+    def test_adapter_rejects_forbidden_attribute_reads(self):
+        class Guard:
+            def __init__(self, values):
+                object.__setattr__(self, "_values", values)
+
+            def __getattr__(self, name):
+                values = object.__getattribute__(self, "_values")
+                if name not in values:
+                    raise AssertionError("forbidden read: " + name)
+                return values[name]
+
+        for attack in ("charge", "short shot"):
+            for phase in ("approach", "warning", "active", "recovery"):
+                values = {
+                    "kind": "boss", "hp": 12, "x": 10, "y": 4,
+                    "phase": phase, "attack_name": attack,
+                }
+                if phase == "warning":
+                    values.update(aim=(-1, 0), phase_left=0.5)
+                game = Guard({
+                    "t": 0, "x": 8, "y": 4,
+                    "enemies": [Guard(values)], "shots": [],
+                })
+                observation = bots.observe_boss(game)
+                self.assertEqual(observation.phase, phase)
+                choice = bots.choose_boss(observation, bots.BossMemory())
+                self.assertTrue(choice.buttons)
+                if phase != "warning":
+                    self.assertIsNone(observation.aim)
+                    self.assertIsNone(observation.warning_left)
+
+
+class OutcomeTest(unittest.TestCase):
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-002-final-boss/74-gameplay-engineer-to-studio.md
+---
+kind: handoff
+goal: G-002
+seq: 74
+from: gameplay-engineer
+to: studio
+stage: Build
+outcome: partial
+---
+# 74: gameplay-engineer → studio — E1候補列挙・adapter検査を保存、接続案は未採用
+
+## Task
+
+E1を継続する。本件をE1の連続partialとして数え、3回連続に該当する場合は73の指示どおりTechnical Directorへ分割・再計画を戻す。E2は開かない。
+
+## Context
+
+73、71、68§4の公開情報境界契約を受領した。packetには未保存の接続案と失敗した2回の実行結果がある。保存済み基線は72のsource 8fe9bcc21225であり、未保存案の実行集合とは区別する。60のfailを維持する。
+
+## Findings
+
+### 保存変更
+
+今回の成果はrepo/bots.pyとrepo/tests/test_bots_boss.pyへのEDITのみ。未保存として供給された2ファイル全文は採用していない。
+
+choose_bossのescape候補を途中採択で打ち切らず、その分岐で定義されたpreferredの全候補を列挙する。壁による除外とlower-priorityを記録し、従来と同じ最初の有効方向を選ぶ。全行動・全方向を一律に評価する仕組みを完成したという意味ではない。
+
+追加試験は次の完全IDで追跡する。
+
+- test_bots_boss.PublicBoundaryAuditTest.test_all_escape_candidates_are_enumerated
+  両攻撃でdown/up両候補、有効性、後順位除外、発行予定move downをassertする。
+- test_bots_boss.PublicBoundaryAuditTest.test_adapter_rejects_forbidden_attribute_reads
+  両攻撃×approach/warning/active/recoveryについて、許可外属性参照でAssertionErrorになるfixtureを使う。warningだけaim/phase_leftを許可し、それ以外では両フィールドがNoneであることと純粋判断がボタンを返すことをassertする。
+
+既存試験のassertと対象集合は変更していない。製品表示・戦闘・実dodger・独立1〜4方針は変更していない。
+
+### 公開フィールドと監査範囲
+
+prototypeの入力対応は72と同じ。
+
+| フィールド | 対応 |
+|---|---|
+| t | 公開room time |
+| x,y,boss_x,boss_y | 既存sprites/Viewの連続位置観測 |
+| phase,attack | Output.emitのboss status/next |
+| aim,warning_left | warningのlocked方向・残時間だけ |
+| shots | 実弾spriteの位置だけ |
+| lane,attack,warning_time | warning観測の履歴 |
+
+文字セルから連続座標を復元できるとの主張はしない。今回のguard fixtureはobserve_bossとchoose_bossの限定監査である。実dodger、_dangers、_threat、_escape、_face_and_swingを含む実呼出経路の公開境界適合を証明しない。
+
+### 収録実行の識別と未採用案
+
+固定コマンドはいずれもrepo/で次のとおり。
+
+```text
+python3 -m unittest discover -s tests
+```
+
+| 対象 | source_id | 結果 |
+|---|---|---|
+| 保存済み72基線 | 8fe9bcc21225 | runtime報告157 tests OK |
+| 未保存接続案Round 1 | eddd95dd5926 | 160 tests、1 failure |
+| 未保存接続案Round 2 | 189dbf689d7e | 161 tests、1 failure |
+
+両失敗はtest_split_c.SplitCTest.test_public_normal_pause_victory_retry_death_retryのfirst["hits"] == 0に対して実測1となったもの。既存assertを削除・緩和して接続案を採用していない。危険余裕の変更でもRound 2は同じ失敗を残した。失敗を打ち消すために方針値をさらに調整していない。
+
+Round 1/2のSPLIT_C本文はそれぞれ9533/9564文字切断されている。切断部分は未確認。両集合を接合しない。未保存案は実dodgerを接続していたが、dash判断、判断番号、stunを含む統一記録、全分岐と表示証拠も未完了だった。
+
+今回のEDIT集合は上記いずれのsourceとも異なる。最終source_idとsuite結果はruntime Build checkで識別する。識別対象は6ソースとtests/*.pyの13ファイル、計19ファイルで、Handoffと設計文書は対象外。今回の予想discover件数は保存基線157件＋追加2件＝159件であり、実測件数はBuild checkを正とする。
+
+### QA配布台帳
+
+既存13ファイルの割当は71を維持し、未割当ファイル0。新規ファイルはない。
+
+変更したtest_bots_boss.pyと追加2IDはQ1主担当、Q4にも更新本文を配布する。72のPublicBoundaryPrototypeTestの3IDも引き続き配布する。test_g002_evidence.pyの配布先Q1〜Q6、test_split_c.pyのQ1/Q3/Q6、他ファイルの割当は変更しない。配布済みを基準充足とはしない。
+
+### 残作業
+
+E1は未完了である。
+
+1. 実dodgerの全ボス判断を公開観測と記憶へ接続する。
+2. warning履歴の所有・寿命、直接呼出、_Proxy、通常run、入場・retry初期化を実経路で検査する。
+3. dash待ち・stun・距離0・距離境界・端点・全壁・履歴不足各方向を両FPSで試験する。
+4. 全実判断について内部値差不変と許可外参照禁止を示す。
+5. 判断番号・grid・時刻・公開入力・記憶由来・候補と除外・選択・実発行ボタン・stun省略を記録する。
+6. 状態・判断emit_rowsアダプタ、窓helperの外側へ出す確認本文を整える。
+7. 接続案で顕在化した公開再生の被弾差を、生成・再生入力と接触条件で診断する。既存無傷assertを弱めない。
+
+今回、対象別状態・判断本文を新たに収録していない。全判断の表示範囲は未整備であり、source_idや件数で代替しない。
+
+E2突進診断、E3四条件測定、E4未丸め時刻・half-upと70の正本への完全対応、E5公開再生再生成、長時間観測、独立QAは未完了のまま保持する。D-024の歴史的確認不能一覧、限定Art Verify、独立Play、Designer判断、Reviewも残す。
+
+### Sender assessment
+
+保存済みprototypeの監査を2点進めたが、実経路接続の要求を満たせていない。未保存接続案は既存suite失敗を残すため採用しなかった。今回の限定変更やruntime成功があってもE1完了、独立QA合格、攻略可能性、Goal達成の根拠にはしない。
+
+## Decisions already made
+
+- D-019：公開情報限定、反応0.15秒、独立1〜4保持、開始3/2 hearts別FPS比較。
+- D-021/D-023：Studio内テキスト検証と供給上限内の直列継続。
+- D-022：表示・弾・長時間観測契約を維持。
+- D-024：現行検証、現行内対照、記録比較、歴史的確認不能を分離。
+- 68：E1完了確認後にStudioがE2を別Handoffで開く。
+
+## Constraints
+
+製品仕様、戦闘パラメータ、難度、秒数ゲート、表示契約、Goal範囲を変更しない。60のfailを自己確認で上書きしない。切断・未表示を確認済みにしない。既存assertを弱めて接続を成立させない。
+
+## Open questions
+
+新しい仕様質問・Ownerへの供給質問はない。実経路接続、失敗診断、全分岐検査と表示証拠が既知の残作業である。
+
+## Expected output
+
+StudioはE1 partialとして扱い、連続partial回数を照合する。3回連続ならTechnical Directorへ具体的な分割・再計画を戻す。公開境界接続と既存suite互換、記憶・全分岐、判断記録・表示本文を完了単位として整理し、E2以降を先行させない。
+
+## Load
+
+- Role: studio/roles/studio.md
+- Skills: studio/skills/implement-change.md
+- Project: repo/bots.py
+- Project: repo/tests/test_bots_boss.py
+- Project: repo/tests/test_split_c.py
+- Project: repo/tests/test_g002_evidence.py
+- Project: repo/game.py
+- Project: repo/session.py
+- Project: repo/play.py
+- Project: repo/run_driver.py
+- Project: repo/source_id.py
+- Project: design/final-boss-and-continuous-run.md
+- Project: design/g002-historical-comparison-evidence.md
+- Supporting plan: goals/G-002-final-boss/68-technical-director-to-studio.md
+- Supporting report: goals/G-002-final-boss/60-qa-to-studio.md
+- Supporting handoff: goals/G-002-final-boss/70-gameplay-engineer-to-studio.md
+- Supporting handoff: goals/G-002-final-boss/71-studio-to-gameplay-engineer.md
+- Supporting handoff: goals/G-002-final-boss/72-gameplay-engineer-to-studio.md
+- Decisions: decisions/D-019-g002-balance-criteria-applicability.md
+- Decisions: decisions/D-021-owner-authorizes-text-build.md
+- Decisions: decisions/D-022-g002-v1-supplements.md
+- Decisions: decisions/D-023-owner-confirms-verification-supply.md
+- Decisions: decisions/D-024-g002-historical-comparison-evidence.md
+- Previous handoff: goals/G-002-final-boss/73-studio-to-gameplay-engineer.md
+>>>END

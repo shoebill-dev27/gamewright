@@ -1,0 +1,162 @@
+---
+kind: handoff
+goal: G-002
+seq: 26
+from: gameplay-engineer
+to: studio
+stage: Build
+outcome: done
+---
+# 26: gameplay-engineer → studio — 終端基盤を保存し、残りのBuildを継続する
+
+## Task
+
+Studioは本Stepの終端基盤を適用し、残りのボス・連続ラン実装をGameplay Engineerへ継続ルーティングする。本成果は部分実装であり、Build完了やQA投入可能を意味しない。
+
+## Context
+
+25は現状ソース全文と承認仕様を供給し、D-021に従うBuild継続を指示した。本Stepでは計画の最初の依存であるGame終端処理と、それに必要な既存play実行ループの修正を保存する。仕様質問や追加供給要求はない。
+
+## Findings
+
+### 保存する変更
+
+- `repo/game.py`：`outcome`を追加。既発射弾を解決してから死亡優先で結果を一度だけ確定する。死亡・クリア確定時に残弾と照準を消し、以後のstepと戦闘入力で状態を変えない。
+- `repo/play.py`：終端確定後に実行ループを抜ける。凍結したゲーム時刻で表示終了を待ち続けるループを解消する。
+- `repo/tests/test_terminal.py`：両FPSで相打ち死亡優先、残弾・予兆消去、クリア後2秒の状態不変、play関数の復帰を確認する3試験を追加する。
+
+これらはパケット内の「proposed in a run round; not written」に示された変更を、最終成果として保存するもの。ボス、Session、pause、retryの実装はまだ含まない。
+
+### プレイヤー可視挙動と根拠
+
+| 変更 | 仕様根拠 |
+|---|---|
+| 最後の敵撃破と致死弾接触の同フレーム成立では死亡のみ | 最終ボス仕様§4 |
+| 確定後の残弾・予兆消去と戦闘凍結 | §4 |
+| 終端後に停止したゲーム時刻を待たずscript実行が戻る | §4〜5の終端停止を成立させる実行処理 |
+
+### 基線・実行証拠
+
+変更前基線は24から引き継ぐ69 tests、Exit 0、0.195秒。本Stepで再取得していない。
+
+パケットの`@run-results`には、同じコマンドについて次の結果がある。
+
+```text
+python3 -m unittest discover -s tests
+Round 1: timeout after 30.0 s、43個の進捗点
+Round 2: Exit 0、72 tests、0.194 s、OK
+```
+
+tests実行の入力scriptは空。Round 2に供給された提案ファイルを今回保存する。新たな実行要求は行っていない。trace・botsの実行結果は本パケットにない。
+
+### 基準対応と旧assert移行
+
+| 対象 | 今回の対応 | 残作業 |
+|---|---|---|
+| T1 | クリア時の残弾・予兆消去、操作拒否と2秒凍結を両FPSで試験 | Session境界・player表示の対照 |
+| T2 | 通常敵の致死swipe＋既発射弾による死亡優先を両FPSで試験 | ボス勝利との優先順位 |
+| T3 | クリア後の全状態不変を両FPSで試験 | 死亡・最終勝利についても明示試験 |
+| 既存69試験 | 変更せず保持 | 独立QAの共有基準別確認 |
+| 旧5番配置assert | 未移行 | B単体配置・HP12へ置換 |
+| CueGapTest旧5番 | 未移行 | 4番保持、5番をB2/B4へ置換 |
+| BotsTest旧13集計 | 未移行 | D-019に従って終了し、独立3・4報告へ接続 |
+| BotsTest14・15・16c | 現行のまま | 1〜2保持、3・4dash保持、5番を対応bot比較へ置換 |
+
+今回の72試験成功だけでR/B/T/C/V全基準を合格にしない。
+
+### 未実装・未実施
+
+ボス二攻撃と弾属性、RunSession、入場回復・初期化、両ゲーム時刻、pause/resume、先頭retry、試行別入力、長時間limit、観測字段、毎フレームtrace、player情報契約、manual/README更新、対応bots、開始hearts3/2別比較、正規敵撃破による同一試行の通常ラン計測は未実装・未実施。
+
+独立QA、限定Art Verify、独立Play、Designer実測後判断、Reviewは未実施。実機ホスト・gamepad・費用見積もりはD-021により今回の開始条件にしない。
+
+### 独立再現手順
+
+保存した3ファイルを現状repo/へ適用し、repo/で次を実行する。
+
+```text
+python3 -m unittest discover -s tests
+```
+
+新規3試験はそれぞれ30/60 FPSを内部で実行する。終端の最小scriptは以下。これは独立診断であり、通常ラン到達の証拠ではない。
+
+```text
+room empty
+fps 30
+spawn runner 9 4
+0 attack
+end 5
+```
+
+`python3 play.py --view trace SCRIPT`で実行し、fpsを60に変えて再実行する。終端確定後に処理が戻ることを確認する。後続Buildでこのscriptを通常ラン構文として扱わない。
+
+### Sender assessment
+
+自己試験結果は供給されたRound 2の72 tests成功。Round 1のtimeoutは、終端時刻を凍結した後もplayループが同じ時刻による終了条件を待つ構造と整合する。ただしtimeoutの進捗点だけから停止試験を特定したとは主張しない。
+
+Gameとplayの変更をセットで保存することで、この停止リスクへ対処する。今回の部分実装から、ボス攻略可能性、連続到達、15〜20分の体験、Goal達成は評価できない。
+
+## Decisions already made
+
+- D-015〜D-017：連続ラン、単体ボス、回復、死亡優先、先頭retry。
+- D-019：旧集計の適用終了、共有回帰保持、対応bot比較とDesigner実測後判断。
+- D-021：現状repo/とStudio内テキスト実行で進める。指定sha、実機供給、外部配員、見積もり取得を要求しない。
+
+## Constraints
+
+第1〜4部屋と共有戦闘パラメータを保持する。新戦闘入力、チェックポイント、時間合わせのHP増加・待機を追加しない。
+
+残りの実装はボス・弾属性→Session→parser・表示・説明→対応bots・測定の順で逐次進める。独立QA→限定Art Verify→独立Play→Designer判断→Reviewを維持する。
+
+## Open questions
+
+仕様・技術計画への新規質問はない。残るのは上記の実装・検証作業であり、供給不足や承認待ちではない。
+
+## Expected output
+
+Studioは部分成果を保存し、同じ仕様・計画と適用後ソース全文を用いてGameplay EngineerのBuildを継続する。次Stepは基線取得や開始許可へ戻らず、ボスと弾属性から進める。
+
+全機能と必要試験・説明更新・測定を完成させてから独立QAへ渡す。今回のoutcomeは部分成果の保存を表し、全Task完了の判定ではない。
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: project.md#vision
+- Project: project.md#constraints
+- Project: project.md#art-direction
+- Project: repo/README.md
+- Project: repo/manual.md
+- Project: repo/game.py
+- Project: repo/play.py
+- Project: repo/bots.py
+- Project: repo/tests/test_game.py
+- Project: repo/tests/test_terminal.py
+- Project: design/final-boss-and-continuous-run.md
+- Project: design/combat.md
+- Project: design/combat-cues-visual-spec.md
+- Project: design/combat-step-44-walker-limit.md
+- Project: design/combat-step-46-room3-cap.md
+- Project: design/combat-step59.md
+- Project: design/combat-step68.md
+- Project: design/combat-step72.md
+- Project: design/combat-step94.md
+- Plan: goals/G-002-final-boss/16-technical-director-to-studio.md
+- Plan: goals/G-002-final-boss/20-technical-director-to-studio.md
+- Decisions: decisions/D-001-one-button-combat.md
+- Decisions: decisions/D-002-contact-edge-graze-accepted.md
+- Decisions: decisions/D-003-contact-edge-exact-reach-and-lunge-band.md
+- Decisions: decisions/D-004-spitter-cue-gap-brute-no-cancel-room2-spitter-deferred.md
+- Decisions: decisions/D-005-blocked-contact-consumes-shot-and-spends-lunge.md
+- Decisions: decisions/D-006-walker-limit-rooms-3-5-structural-ceiling.md
+- Decisions: decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md
+- Decisions: decisions/D-011-variant-named-messages-accepted.md
+- Decisions: decisions/D-012-room3-standard-grub-and-closer-spitter.md
+- Decisions: decisions/D-015-owner-approves-continuous-run-and-final-boss.md
+- Decisions: decisions/D-016-final-boss-experience-direction.md
+- Decisions: decisions/D-017-final-boss-and-run-contract.md
+- Decisions: decisions/D-018-legacy-balance-gate-transition-direction.md
+- Decisions: decisions/D-019-g002-balance-criteria-applicability.md
+- Decisions: decisions/D-021-owner-authorizes-text-build.md
+- Previous handoff: goals/G-002-final-boss/25-studio-to-gameplay-engineer.md
+- Execution evidence: @run-results Round 1、Round 2

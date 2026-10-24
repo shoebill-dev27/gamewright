@@ -1,0 +1,138 @@
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-11
+---
+# G-001: 戦闘の単調さの改善
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): a player on the project's player profile (action players who like dodging and spacing) plays the combat in the prototype and no longer experiences it as monotonous. Combat feels varied through positioning, timing and enemy behavior, and stays within the vision. Numeric thresholds belong to Design (acceptance criteria) and the final verdict to Review.
+
+Out of scope:
+- New input buttons (D-001: attack, dash and pause only, without Owner approval).
+- Changes to run length and to non-combat systems.
+- New biomes or large content expansion.
+
+Constraints that apply: the one-button combat pillar (D-001), readable threats, correct play at 30 and 60 FPS, and reuse of existing systems where possible.
+
+Escalation check: the Goal does not need reinterpretation and does not conflict with the vision or D-001, as long as the improvement stays within one-button combat. No immediate escalation. If the diagnosis shows that fixing the monotony would require breaking D-001 (a new button), that is an escalation trigger.
+
+## Unknowns
+
+Entry questions the Project Context cannot answer:
+- Observe: Has the monotony been observed first-hand? What exactly feels monotonous (which fights, which enemies, which moments)? The Project Context only has the Owner's one-line impression. This is an experience problem (works as specified, feels wrong), so the playtester observes.
+- Diagnose: The cause is unknown (enemy behavior, lack of player options, room design, pacing, feedback, and so on).
+- Decide: Likely a real choice of direction once causes and options are known. Tentative.
+- Design: The intended changed behavior is not specified. It will be, once a direction is chosen.
+- Plan: Unknown until the design exists. Tentative (needed if the change is cross-system, risky or parallelizable).
+- Build: The game must change. Planned.
+- Verify: Always after Build.
+- Play: The Goal is about how the game feels.
+- Review: This is an experience Goal.
+
+Skipped: none. Nothing in the Project Context answers any of these questions yet. `design/combat.md` exists, and the first Role that needs it will read it.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | open | 01-studio-to-playtester.md |
+| 2 | Diagnose | game-designer | diagnose-experience | planned | — |
+| 3 | Decide | game-director | make-decision | tentative | — |
+| 4 | Design | game-designer | write-design-spec | planned | — |
+| 4b | Design | art-director | write-design-spec | tentative | — |
+| 5 | Plan | technical-director | technical-plan | tentative | — |
+| 6 | Build | gameplay-engineer | implement-change | planned | — |
+| 7 | Verify | qa | verify-change | planned | — |
+| 7b | Verify | art-director | visual-review | tentative | — |
+| 8 | Play | playtester | playtest-session | planned | — |
+| 9 | Review | game-director | review-outcome | planned | — |
+
+Tentative conditions:
+- 3 Decide: needed only if the diagnosis offers several viable directions, or implies a direction or priority change. If a single option is clearly within the game-designer's authority and the vision, it is dropped. If an option would break D-001 or the vision, escalate to the Owner.
+- 4b Design (art-director): needed only if the diagnosis finds a visual cause or the chosen change alters what the player sees (threat readability).
+- 5 Plan: needed only if the spec is cross-system, risky, or could be parallelized. Dropped if the change is local and obvious.
+- 7b Verify (art-director): runs in parallel with 7 only if the built change affects visuals.
+
+Stage 8 Play must be composed by the Studio from permitted information only (build and player profile). So the Handoff that routes work to the Verify step addresses its result to `studio`.
+
+## Route changes
+
+None yet.
+
+## Next action
+
+Start step 1 with `01-studio-to-playtester.md`: the playtester plays the build's combat and reports observable experience, addressed to `studio`. After that the Studio runs Route and sends the report to `game-designer` for Diagnose.
+
+At close (after step 9, or earlier if the route ends), the Studio writes the Outcome in Japanese (owner_language: ja).
+
+## Outcome
+
+(Filled at close.)
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/01-studio-to-playtester.md
+---
+kind: handoff
+goal: G-001
+seq: 1
+from: studio
+to: playtester
+stage: Observe
+outcome: routed
+---
+# 01: studio → playtester — Play the combat of build 0.3 and report your experience
+
+## Task
+
+Play the build as a player and report what you observe and experience in its combat, from observable experience only. Pay attention to combat.
+
+## Context
+
+This is a first-hand observation session for a combat-focused Goal. No prior observations exist. This Handoff deliberately contains nothing about implementation, history or expected results.
+
+## Findings
+
+None. This is the first observation.
+
+## Decisions already made
+
+None.
+
+## Constraints
+
+- This is a dry-run project: "running the build" means reading `sim/build-0.3.md`, which is the player-visible build.
+- Report only what a player could observe or feel. Do not speculate about code, causes or fixes.
+- Play as the player profile describes (see Load).
+- Cover the player's moment-to-moment experience in fights across the rooms and enemy types available, and describe how it changes (or not) over a run. Quote or point to the specific room, enemy or moment for each observation.
+
+## Open questions
+
+None. Report what you find.
+
+## Expected output
+
+An observation report (following the `playtest-session` skill). Concretely, for each observation: what the player does, what happens, how it feels, and where in the build it happens. Include anything that works well as well as anything that feels off.
+
+Address the report to `studio`, so that the Studio can route it onward. Write it as the outgoing Handoff (`outcome: done`, `to: studio`).
+
+## Sender assessment
+
+Not applicable. This Handoff is written by the Studio, so it is routing only.
+
+## Load
+
+- Role: studio/roles/playtester.md
+- Skills: studio/skills/playtest-session.md
+- Project: project.md#player-profile, sim/build-0.3.md
+- Decisions: none
+- Previous handoff: none
+>>>END

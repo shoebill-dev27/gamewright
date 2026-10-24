@@ -1,0 +1,123 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "be5e0045-77a6-4ee3-a21e-413a1b0d0565",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 27326,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 3811,
+    "output_tokens_details": {
+     "thinking_tokens": 1257
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 27326,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 3811,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 27326,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 27326
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.147418,
+   "attempt": 1,
+   "started": "2026-10-17T04:01:37",
+   "seconds": 27.7,
+   "errors": [
+    "@none: not on the write list",
+    "goal.md: ## Unknowns has 3038 characters (limit 3000); keep what is still unknown and why each stage exists, not the story of earlier passes (log.md and the Handoffs keep it)"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "bd7f2e45-890d-4614-9ce5-ef4e4b3eebc6",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 27450,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 7741,
+    "output_tokens_details": {
+     "thinking_tokens": 1089
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 27450,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 7741,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 27450,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 27450
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.187214,
+   "attempt": 2,
+   "started": "2026-10-17T04:02:05",
+   "seconds": 45.2,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-combat-monotony/103-studio-to-qa.md": "b630ee1e7dd0348b586ef74b5812d379ae73866edba93499926b0a496a9c1384",
+  "goals/G-001-combat-monotony/goal.md": "0cc4bdc73157e9db9cba63274af13d61af0d39606c4604e816abe0dcbc05a30f"
+ },
+ "decision": {
+  "new": [
+   "qa",
+   "Verify (manual line, marker grep, suite)"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "qa",
+    "Verify (manual line, marker search, suite, W1 doc check)"
+   ]
+  ]
+ },
+ "seen_through_seq": 103
+}

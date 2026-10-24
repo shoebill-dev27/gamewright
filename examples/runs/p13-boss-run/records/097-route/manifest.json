@@ -1,0 +1,112 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "studio/README.md",
+  "sha256": "47846604f59124562b83f1a16c51b342f3a2e5088e49268840e108ef3faaff4e",
+  "bytes": 6379
+ },
+ {
+  "path": "studio/orchestration.md",
+  "sha256": "f5950058cd296fde4e5a11fcfbb78393d089f2931d8957e677322d7ad4eb24eb",
+  "bytes": 13766
+ },
+ {
+  "path": "studio/workflows/development-loop.md",
+  "sha256": "a7128fc40c3130fa05a137ca54e3cbf0322de2cb4806ed0dbf872f7cedb35c9c",
+  "bytes": 5047
+ },
+ {
+  "path": "studio/roles/art-director.md#works-from",
+  "sha256": "1a9b4ea463ac85d107625d79994080052da5b1d784f3692ad9a104f2424ad56d",
+  "bytes": 172
+ },
+ {
+  "path": "studio/roles/game-designer.md#works-from",
+  "sha256": "fe60f9d4900dea1514aa0fb524d2c69dad547e7cc71ff3139183e3d2d86aca3b",
+  "bytes": 171
+ },
+ {
+  "path": "studio/roles/game-director.md#works-from",
+  "sha256": "fde4d1b3c02d9abaf3a00f5287e4c8d23694df2027a9f960fedbc1f27c63ff31",
+  "bytes": 203
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md#works-from",
+  "sha256": "a0ebe4d4866fa859cecd40ffd4c98b6aaf79f44403a965e3376d00b52f50293a",
+  "bytes": 175
+ },
+ {
+  "path": "studio/roles/playtester.md#works-from",
+  "sha256": "6025c9d1ca754ba86f61996472c6d3a5e308f23d81479849e1e3a01b60eb4f2d",
+  "bytes": 371
+ },
+ {
+  "path": "studio/roles/playtester.md#independence",
+  "sha256": "29e2c5b25cb9b8b16d1b40109c2ecca745024349a2b4062a24545d4643ff3d25",
+  "bytes": 232
+ },
+ {
+  "path": "studio/roles/qa.md#works-from",
+  "sha256": "e4e9de4a0c4f5b40f4c41edc771780fe53f19c1573cee671f22dcdff410f2fa8",
+  "bytes": 355
+ },
+ {
+  "path": "studio/roles/qa.md#independence",
+  "sha256": "c8090d5136ea02384fb4e96585cf1be7935428e4dac0331a52709f305dcff2f3",
+  "bytes": 208
+ },
+ {
+  "path": "studio/roles/technical-director.md#works-from",
+  "sha256": "5571f0fcf5ac14950e226c1f713d5c058a27e2649fd7ac18df4e783978323621",
+  "bytes": 160
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ },
+ {
+  "path": "studio/templates/escalation.md",
+  "sha256": "6e505880bdef28223c7275a4bb19c8f245577964d14c28d48e04561e7a5c7b90",
+  "bytes": 975
+ },
+ {
+  "path": "studio/templates/goal.md",
+  "sha256": "f798a99b06412b183b8418b65607332d31c350003a7320abb6517e7dc6c51211",
+  "bytes": 1761
+ },
+ {
+  "path": "project.md",
+  "sha256": "8a32edee44b970d2c1a5a0a76e19b3235e61b1786bb24c06583400cfa0924712",
+  "bytes": 2102
+ },
+ {
+  "path": "@project-files",
+  "sha256": "e03b3f59b7a2701d37a2537d55c82eef0b64f3edbdcc11eb3b477d408b0ecd42",
+  "bytes": 12525
+ },
+ {
+  "path": "@decision-titles",
+  "sha256": "ad6bd94d5353960bd2c2f4c35190c0652047f4bbbbe08f2aeda8673ddb3441a3",
+  "bytes": 4036
+ },
+ {
+  "path": "goals/G-002-final-boss/goal.md",
+  "sha256": "4ff625659265d6bd7d902b5277e5eb4ef2195ab20652b28e073d462cb08d46c9",
+  "bytes": 15549
+ },
+ {
+  "path": "@log-recent",
+  "sha256": "1914d179d31eaef21ecedd268a8ac4e448b9bada8062a0bcd36f4c14e2431ecb",
+  "bytes": 1996
+ },
+ {
+  "path": "goals/G-002-final-boss/78-game-director-to-owner.md",
+  "sha256": "9b59c5071accbd78adaee504c3a951b0b39992ae6480e2f90b1979f71941c905",
+  "bytes": 4851
+ }
+]

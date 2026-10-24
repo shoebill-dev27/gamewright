@@ -1,0 +1,10 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-002",
+ "attempts": [],
+ "status": "error",
+ "errors": [
+  "codex run failed: {\"type\":\"error\",\"message\":\"You’ve hit your usage limit. Upgrade to Pro (https://chatgpt.com/explore/pro), visit https://chatgpt.com/settings/usage to purchase more credits or try again at 6:08 PM.\"}"
+ ]
+}

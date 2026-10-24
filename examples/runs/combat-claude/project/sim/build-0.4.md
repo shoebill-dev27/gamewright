@@ -1,0 +1,79 @@
+# Simulated build 0.4 — what playing it looks like
+
+Dry-run stand-in for a real build: a player-observable description only. Lengths are in seconds, distances in tiles. Everything below holds the same at 30 FPS and 60 FPS unless a difference is stated.
+
+## Rooms and waves
+
+- Every room now sends its enemies in two waves. The first wave appears when the room starts. The second wave appears when the number of living enemies drops to the room's threshold, or when the timer runs out, whichever happens first.
+- Enemies that are fading in count as living. Enemies still waiting to appear do not count.
+- Room 1: wave 1 is two ordinary Grubs, left and right. Wave 2 is one ordinary Grub at the far side. It comes when one or fewer Grubs are alive, or 10 s after the last wave-1 Grub finished fading in. 3 enemies in total, at most 2 at once.
+- Room 2: wave 1 is one charging Grub at the far side. Wave 2 is two ordinary Grubs (left, right) and one more charging Grub (far). It comes when the wave-1 Grub is dead, or 15 s after it finished fading in. 4 enemies in total, at most 3 at once.
+- Room 3: wave 1 is a Spitter at the far side and an ordinary Grub on the left. Wave 2 is a Spitter in whichever far corner is farther from you at the moment the wave is triggered, and an ordinary Grub on the right. It comes at one or fewer alive, or 12 s. 4 enemies in total, at most 3 at once. Spitters fire every 2.0 s, and Grubs move slightly faster than in rooms 1–2.
+- Room 4: wave 1 is a Spitter in the far-left corner, a charging Grub at the far side and an ordinary Grub on the left. Wave 2 is a Spitter in the far-right corner and a charging Grub on the right. It comes at one or fewer alive, or 12 s. 5 enemies in total, at most 3 at once. Spitters fire every 1.8 s.
+- Room 5: wave 1 is a Spitter at the far side and two ordinary Grubs, left and right. Wave 2 is a Spitter in the farther far corner and two charging Grubs, left and right. It comes at one or fewer alive, or 12 s. 6 enemies in total, at most 4 at once. Spitters fire every 1.6 s, and Grubs are the fastest here.
+- A room ends when every wave has appeared and every enemy is dead.
+- The spot a farther-corner Spitter picks is decided when the wave is triggered. If you move while the wave waits, it does not change.
+
+### Standing near a spawn point
+
+- If you are closer than 4 tiles to the spot where an enemy would appear, that enemy does not appear yet. It appears as soon as you are 4 tiles or farther away, or after 2.0 s of waiting, whichever comes first. Each spot waits on its own. A spot that has finished waiting does not wait again if you walk back to it. You are not pushed away from a spot, and the enemy can appear on top of you.
+- While some enemies of a wave are still waiting, the next wave's threshold and timer are not running. They start counting only once every enemy in the wave has begun fading in.
+  - Room 1: stand near the left spot only. The right Grub appears, and the second wave does not come while the left spot waits. If you kill the right Grub during the wait, the moment the left Grub begins fading in only one enemy is alive, so the Grub from wave 2 comes immediately. If you did not kill it, two are alive, and the second wave comes after one is killed or 10 s after the later one finished fading in.
+  - Room 2: the charging Grub waiting at the far side blocks the second wave entirely until it starts fading in. After that, the second wave comes when it is dead, or 15 s after it finished fading in. It cannot be hit during the first 0.8 s of fading in, so the earliest kill is after that.
+  - Waves with no waiting spots start counting the moment they appear.
+
+## Enemies appearing
+
+- Every enemy fades in for 0.8 s: from 40% to full opacity, with a pale blue ring at its feet. During this time it does not move, does not attack, does not hurt you, and your swipes do nothing to it (no damage, no flinch).
+- A Spitter fires its first shot 1.0 s after it finishes fading in, then at the room's interval. A Spitter shot travels at 4 tiles/s straight at where you stood when it fired, costs 1 heart, vanishes on walls, and passes through enemies without hurting them. Spitters flinch for 0.2 s when hit, as before.
+
+## Charging Grubs
+
+Charging Grubs (rooms 2, 4, 5) look like ordinary Grubs with a dark ember-colored ridge on the back, visible from the moment they fade in. Ordinary Grubs have no ridge. They have 2 HP and walk and bite like ordinary Grubs. In Chase they flinch for 0.2 s when hit.
+
+A charging Grub starts a charge only when all of the following hold:
+- at least 1.5 s have passed since it finished fading in, and at least 2.5 s since its last charge ended;
+- you are 3.0 to 6.0 tiles away;
+- no other living charging Grub is currently winding up or charging.
+
+Flinching does not reset these waits. If two charging Grubs qualify in the same moment (room 5, wave 2, left and right), one of them goes first, and which one is not predictable. The other waits until the first has finished charging.
+
+The sequence:
+1. **Wind-up, 0.7 s.** The Grub stops where it stands and its walking animation stops. A red-orange lane appears on the floor from the Grub toward where you were when the wind-up began. The lane is as long as the charge will be, 7 tiles or less if a wall is in the way, and about as wide as the Grub's body. It has a bright edge, a dark underline and a chevron every tile pointing along the lane, and it stays lit regardless of floor darkness. Spitter shots, fading-in enemies and other enemies are drawn on top of it. The lane fades from 35% to full brightness over the wind-up. The Grub squashes to 80% height, widens a little and leans back from the lane. The ridge and eyes warm from dark to red-orange, turning pale-yellow in the final 0.1 s. The direction is fixed; moving afterwards does not turn the lane. The Grub does no damage during the wind-up.
+2. **Charge.** The Grub rushes along the lane at 8 tiles/s for up to 7 tiles, or until it hits a wall, and stretches long and thin with a bright core and red-orange edge. The lane flashes extra bright once at the start, stays at full brightness, and disappears behind the Grub as it passes. The part in front stays until the charge ends, then everything fades out over 0.1 s. Afterimages appear every half tile and fade over 0.2 s, with dust at its feet. It passes through other enemies without hurting them. Charge time is about 0.9 s for a full-length run.
+3. **Recovery, 0.8 s.** The Grub stands still, sunk to 90% height and tinted a dull grey-blue, with thin steam rising from its feet every 0.3 s. Ridge and eyes go dark. It returns to normal in the last 0.2 s and goes back to chasing.
+
+### Getting hit by a charge
+
+- A charge can hurt you at most once. The first time the Grub's body overlaps you during a charge decides it. If it was already overlapping you as the charge began, that counts as the first moment.
+  - If you are invulnerable at that moment (for example, mid-dash), you take nothing. A thin pale white-blue ring appears around you for 0.15 s, and the Grub keeps running through you. The Grub's core dims to a darker red-orange for the rest of the charge. Staying inside it afterward, or the dash ending while it still overlaps you, does not hurt you.
+  - If you are not invulnerable, you lose 1 heart, with the normal hit reaction and the normal invulnerability afterward. The core dims in the same way. No ring appears.
+- Overlap during the wind-up or recovery does nothing. A new charge starts the count again.
+- The invulnerability check reads the state shown at that frame. At 30 FPS the edge of the dash's 0.25 s protection can differ from 60 FPS by up to one frame (about 0.034 s).
+
+### Hitting a charging Grub
+
+- During the wind-up, charge and recovery, your swipes lower its HP only. It does not flinch, is not pushed back, and does not change direction, speed or timing. It flashes white for 0.1 s with small sparks at the point of impact. The lane and ridge do not change.
+- With 1 HP left, a small crack mark appears on its body.
+- At 0 HP it dies immediately in any state. A dying winder or charger removes its lane within 0.1 s, and another charging Grub may then start its own wind-up.
+- Charging Grubs, ordinary Grubs and Spitters not in these three states flinch 0.2 s as before.
+
+## Timing at 30 and 60 FPS
+
+- Fade-in, wind-up, charge distance, recovery, wave timers and waiting are all counted in real time. Durations at 30 FPS are within about 0.034 s of those at 60 FPS.
+- Whether a charge touches you does not depend on the frame rate.
+- Pausing freezes all timers and animations, including lanes, steam and rings. Resuming after a long pause does not skip ahead more than a short step.
+- Nothing flashes more than three times per second, apart from single flashes.
+
+## What play feels like now
+
+- Rooms 1 and 3 behave like before but with two waves, so there is a second arrival to deal with.
+- In rooms 2, 4 and 5, standing still in a corner and swiping no longer works: a lane appears, and about 0.7 s later a Grub runs the length of it. Moving off the lane or dashing through the Grub avoids damage. Swiping the Grub during the run only chips it and does not stop it.
+- Only one charging Grub is ever winding up or charging at a time.
+- No new sounds. No new buttons.
+- As before, occasionally, if you dash right after being hit, you take damage partway through the dash. This also applies to a charge that reaches you at that moment.
+
+## Development build only
+
+- A tester can pick room 1–5, switch charging Grubs on or off per room (off turns every charging Grub into an ordinary Grub, with no ridge and no charge), and switch between 30 and 60 FPS.
+- A log lists state changes with game time, enemy and type, charge direction, contact result (unresolved, slipped through, hit), wave arrivals with spots, which corner was chosen, the distance to you when a wind-up began, and the moment all enemies of a wave have begun fading in.

@@ -1,0 +1,28 @@
+The existing runs show that a refused dash prints only `(nothing happens)`, and they leave one question open: whether the 0.6 s cooldown counts from the dash start or the dash end. Both readings fit the data so far. These three probes settle that before I write the spec, because the cue wording needs the exact "usable again at X".
+
+<<<FILE @run/play/cd-start-or-end-60
+room empty
+fps 60
+end 3
+player 4 4
+0 dash right
+0.7 dash left
+>>>END
+
+<<<FILE @run/play/cd-start-or-end-30
+room empty
+fps 30
+end 3
+player 4 4
+0 dash right
+0.7 dash left
+>>>END
+
+<<<FILE @run/play/cd-exact-boundary-60
+room empty
+fps 60
+end 3
+player 4 4
+0 dash right
+0.6 dash left
+>>>END

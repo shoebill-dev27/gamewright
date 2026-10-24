@@ -1,0 +1,92 @@
+Round 1: I'm starting with the test suite, the brute scenario in the player view and the trace, real-room traces for rooms 3, 4 and 5 at both frame rates, and the bots at both rates.
+
+<<<FILE @run/tests
+>>>END
+
+<<<FILE @run/play/brute30
+room empty
+fps 30
+spawn brute 9 4
+player 8 4
+0.1 attack
+0.5 attack
+end 4
+>>>END
+
+<<<FILE @run/play/brute60
+room empty
+fps 60
+spawn brute 9 4
+player 8 4
+0.1 attack
+0.5 attack
+end 4
+>>>END
+
+<<<FILE @run/trace/brute30
+room empty
+fps 30
+spawn brute 9 4
+player 8 4
+0.1 attack
+0.5 attack
+end 4
+>>>END
+
+<<<FILE @run/trace/brute60
+room empty
+fps 60
+spawn brute 9 4
+player 8 4
+0.1 attack
+0.5 attack
+end 4
+>>>END
+
+<<<FILE @run/trace/room3-30
+room 3
+fps 30
+end 15
+>>>END
+
+<<<FILE @run/trace/room3-60
+room 3
+fps 60
+end 15
+>>>END
+
+<<<FILE @run/trace/room4-30
+room 4
+fps 30
+end 15
+>>>END
+
+<<<FILE @run/trace/room4-60
+room 4
+fps 60
+end 15
+>>>END
+
+<<<FILE @run/trace/room5-30
+room 5
+fps 30
+end 15
+>>>END
+
+<<<FILE @run/trace/room5-60
+room 5
+fps 60
+end 15
+>>>END
+
+<<<FILE @run/bots/fps30
+bots camper,walker,dodger
+rooms 1-5
+fps 30
+>>>END
+
+<<<FILE @run/bots/fps60
+bots camper,walker,dodger
+rooms 1-5
+fps 60
+>>>END

@@ -1,0 +1,37 @@
+I need trace evidence before I can write the handoff, so this is round 1: a stationary player in rooms 3, 4 and 5 at 30 and 60 FPS.
+
+<<<FILE @run/trace/r3-30-still
+room 3
+fps 30
+end 16
+>>>END
+
+<<<FILE @run/trace/r3-60-still
+room 3
+fps 60
+end 16
+>>>END
+
+<<<FILE @run/trace/r4-30-still
+room 4
+fps 30
+end 20
+>>>END
+
+<<<FILE @run/trace/r4-60-still
+room 4
+fps 60
+end 20
+>>>END
+
+<<<FILE @run/trace/r5-30-still
+room 5
+fps 30
+end 20
+>>>END
+
+<<<FILE @run/trace/r5-60-still
+room 5
+fps 60
+end 20
+>>>END

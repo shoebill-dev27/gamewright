@@ -1,0 +1,249 @@
+<<<FILE design/onboarding.md
+# Onboarding (build 0.2, level 1 spec targets the next build)
+
+## Teaching plan
+
+Teaching intent: each level introduces exactly one idea, discovered by touching. No level depends on reading text. Level 1 teaches "a tide pool can be dragged to the home" through look, motion and touch feedback only.
+
+- **Level 1:** see the spec below.
+- **Level 2:** two pools; the crab must pass through both. (Unchanged. Out of scope for G-001.)
+- **Level 3:** introduces a starfish that only moves when a pool touches it. (Unchanged. Out of scope for G-001.)
+
+## Level 1 spec (G-001, for the build after 0.2)
+
+"Build 0.3" in the earlier header and "build 0.2" in Handoff 08 mean the same thing: the next build after 0.2, level 1 only (Q6).
+
+### Experience intent
+
+A child aged 7–10 looks at the scene and their eye goes to the pool. They touch it within a few seconds, drag it to the home and finish without reading anything. A touch on any other object never feels ignored: it answers and points the child back to the pool. Nothing can be lost, there are no timers, and every move can be undone (D-001).
+
+### Scene content
+
+The scene has one pool, one crab, one home and sand. It uses the existing sprite sheet only. Tint, recolor, scale, rotation, flip and brightness changes on existing sprites count as within the "no new art" constraint (confirmed). No hand, arrow or other new sprite is used.
+
+### Rules and parameters
+
+All numbers are tunable after re-playtest.
+
+**1. Pool (the only draggable)**
+- Outline: the same weight and darkness the crab has in build 0.2.
+- Idle motion: a continuous scale pulse, 1.00 to 1.06, period 2.0 s, ease-in-out, looping. It never stops while the pool is idle.
+- Color: recolor the pool to a more saturated pastel water blue/teal.
+  - In grayscale, the luminance contrast ratio between the pool fill and the surrounding sand is at least 1.5:1.
+  - Verify in grayscale, not by eye in color.
+- Touch-down on the pool: the idle pulse stops, the pool scales to 1.10 within 0.1 s, and a soft shadow appears. On release it returns to scale 1.00 over 0.15 s and the idle pulse resumes.
+  - If a redirect pulse is running at touch-down, the touch-down wins: the pulse is cancelled and the 1.10 lift applies from the current scale (Q5).
+- Drag: the pool follows the finger 1:1. On release away from the home it stays where it was dropped, and undo restores the previous position (D-001).
+- Drop on the home: the level completes (unchanged).
+
+**2. Start-of-level intro motion (the non-text teaching cue)**
+- When level 1 loads, the pool slides 25% of the distance toward the home over 0.8 s, then back over 0.8 s, once. The idle pulse starts after that.
+- The motion is made only of position changes of the existing pool sprite.
+- **Visual offset only (Q2).** The intro never pushes an undo history entry. The pool's logical position is the authored start position from load until a real drag is dropped. Undo after the first real drag returns the pool to the authored start position, never to a mid-intro position.
+- **The pool's hit area follows its drawn position during the intro**, so a touch on the visible pool always grabs it.
+- **Touch-down on the pool during the intro:** the intro is cancelled at once and the pool follows the finger from its current position. On release away from the home, the pool stays where it was dropped.
+- **Touch-down on the crab, the home or the sand during the intro (Q1, Option B):**
+  1. The intro is cancelled at once.
+  2. The pool eases back to its authored start position over a fixed 0.15 s, ease-out, whatever its current distance. The idle pulse starts when the ease-back ends.
+  3. The touched object's own response (crab wiggle, home glow) starts at once, within 0.1 s, and plays during the ease-back.
+  4. The redirect pulse (rule 5) starts when the ease-back ends, which is 0.15 s after touch-down. This is inside the existing 0.2 s window, so the criterion does not change.
+  5. If the child touches the pool during the ease-back, the ease-back is cancelled and the pool follows the finger from its current position.
+  6. A touch that lands during the ease-back on another non-pool object plays that object's response. The redirect rate limit (rule 5) still applies.
+- It plays once per level load, including a level restart.
+- It is not tied to inactivity. There is no countdown, no repeat and no consequence. This is why it is not the idle hint (Option C), and it does not need a timer.
+
+**3. Crab (responds to touch, not draggable, styling demoted)**
+- Decision: the crab responds to touch. This is Option B and it removes the dead end. To keep the pool the only "touch me" signal, the crab's styling is demoted. This differs slightly from art-director direction 3, which allowed keeping the styling if the crab responds.
+- Idle: no bob. The outline is lightened to the same weight as other scenery, so the crab does not look draggable. The pool is then the only element with a darker outline plus idle motion, which satisfies pillar 3.
+- Tap: the crab turns to face the pool and wiggles (rotation ±8°, 0.4 s). The pool then gives a "look here" double pulse (see rule 5).
+  - "Turns to face" (Q3): a horizontal flip (scale x of −1 or +1) of the existing sprite so it faces the side the pool is on, as seen from the crab's center, plus the wiggle. If the pool is on the same side the crab already faces, no flip. The flip is instant, and the wiggle starts at the same time.
+- Drag attempt on the crab: the crab does not move from its place. It leans about 10° toward the pool while the finger is down and springs back on release. The pool gives one double pulse at touch-down.
+- While the pool is being dragged, the crab keeps facing the pool.
+- On level completion the crab goes to the home (existing behavior, unchanged).
+
+**4. Home (responds to touch, not interactive)**
+- Idle: no darker outline and no idle motion, the same as the sand and scenery. Build 0.2 does not show the home's styling. A capture is required, and any interactive styling found is removed.
+- Tap: a soft brightness glow (+20% brightness for 0.6 s, fading out). The pool then gives a double pulse (rule 5).
+- While the pool is dragged within 1.5 pool-widths of the home, the home glows steadily. This shows where the pool is meant to go. The glow ends when the pool moves away or on drop.
+  - Distance (Q4): measured center to center, using the pool's at-rest width (not the pulsing or lifted size).
+  - The glow applies only while the pool is being dragged. It never applies to a pool at rest, so the intro and its ease-back never trigger it.
+
+**5. Redirect pulse ("look here")**
+- Used by touches on the crab, the home and empty sand.
+- The pool scales 1.00 to 1.15 and back, twice, over 0.6 s in total.
+- It starts within 0.2 s of the touch-down. The visible response itself (crab wiggle, home glow) starts within 0.1 s. In the intro-cancel case the pulse starts at the end of the 0.15 s ease-back (rule 2).
+- Rate limit: at most one redirect pulse per 1.5 s, so repeated tapping does not stack animations. The crab or home reaction still plays on every tap.
+- A tap on empty sand triggers only the redirect pulse.
+- A touch-down on the pool cancels a running redirect pulse (rule 1).
+
+**6. Text bubble**
+- It may stay as a supplement. No part of level 1 depends on it, and it is not changed in this spec.
+- It must not carry information that is not also shown by the look and motion above.
+
+### Edge cases
+
+- **Multi-touch:** only the first touch that lands on the pool drags it. A second finger on the crab, home or sand gets its normal response. A second finger on the pool while it is already held is ignored.
+- **Touch during the intro:** see rule 2 (pool touch, non-pool touch and touch during the ease-back are all defined).
+- **Undo and the intro:** the intro is never in the history. Undo does not replay it and never returns to a mid-intro position (rule 2).
+- **Pool dropped on the crab:** treated as a drop away from the home. The pool stays and the crab does not react. Nothing is lost, and undo works.
+- **Pool dragged off screen:** the pool is clamped to the play area.
+- **Touch on a moving or pulsing object:** hit areas are those of the sprite at rest, not the pulsing size, so the pulse does not change what counts as a hit. The one exception is the intro slide, where the pool's hit area follows its drawn position (rule 2).
+- **Touch-down on the pool during a redirect pulse:** the touch-down wins (rule 1).
+- **Level restart:** the intro plays again, because the level reloads.
+- **Reduced-motion OS setting:** if it is on, the idle pulse, redirect pulse, wiggle and intro are replaced by static brightness changes of about 0.4 s.
+  - The outline and the color/value separation still carry the affordance.
+  - The intro is skipped, so the intro-cancel case does not arise.
+  - The engineer reads the OS flag where it exists and adds no in-game toggle. The Studio handles the platform availability check outside Design. If a platform has no such setting, this case is unreachable there.
+- **Orientation change:** layout and rules are unchanged, the intro does not replay, and the idle pulse continues.
+- **Color-vision differences:** the pool is separated by value (grayscale check), not hue alone.
+
+### Acceptance criteria
+
+**Verification checks (for QA on the built level 1):**
+1. A capture at level start (after the intro) shows the pool as the only element with a darker outline plus idle motion.
+2. In grayscale, the pool fill and the sand have a luminance contrast ratio of at least 1.5:1.
+3. The crab has no idle bob. The home has no interactive styling. No non-interactive element has an outline darker than scenery.
+4. Touch-down on the crab, the home, the sand and the pool each produces a visible response within 0.2 s. Tapping each 10 times leaves no silent touches.
+5. Dragging the crab does not move it. It leans and springs back, and the pool gives a redirect pulse.
+6. The redirect pulse does not start more than once per 1.5 s of rapid tapping.
+7. The intro runs once on level load. A touch-down on the pool cancels it, and the pool follows the finger from its current position.
+8. Level 1 can be completed with the text bubble hidden.
+9. D-001 holds: no failure state, no timer, and undo restores the pool position.
+10. No sprite outside the existing sprite sheet is used.
+11. Intro-cancel by a non-pool touch: touch the crab, the home and the sand in turn during the intro (separate loads). In each case the intro stops, the pool is back at its authored start position within 0.15 s, the touched object responds within 0.1 s, the redirect pulse starts no later than 0.2 s after touch-down, and the idle pulse then runs.
+12. Undo after the intro: after any intro-cancel, drag the pool away and drop it, then undo. The pool returns to the authored start position, and no extra undo step exists for the intro.
+
+**Experience signals (for the playtest and Review):**
+Test with children aged 7–10, no adult help and no adult explanation. Include at least one early reader and one child who does not read the bubble.
+1. The first touch-down on the pool comes within about 10 s of level start for every child. Baseline: the age 9 child needed 10 s with the bubble.
+2. No pause longer than about 8 s with no touch interaction before the first pool drag. Looking to a parent for help counts as a pause.
+3. A first touch on the crab or home leads to the pool within about 5 s, without parent help.
+4. Children complete level 1 without reading aloud or being told what to do, and show no sign of "my touch did not work".
+
+These numbers come from three simulated sessions and are tunable. If the re-playtest still shows a stall, raise the matter as an open question and hand back. See below.
+
+### Plan or Build
+
+This change is local. It covers parameters, a tint/recolor, existing sprite animations (scale, rotation, flip, position, brightness) and a per-object touch response in level 1. It touches no cross-system structure. **A Plan is not needed. The Studio can route Build.**
+
+### Settled spec questions (Handoff 09)
+
+- Q1: Option B with a fixed 0.15 s ease-back. The redirect pulse starts at the end of it. The 0.2 s criterion is unchanged (D-002).
+- Q2: the intro is a visual offset only and never enters the undo history (D-002).
+- Q3: horizontal flip plus wiggle (rule 3).
+- Q4: center to center, at-rest width (rule 4).
+- Q5: touch-down on the pool wins over a running redirect pulse (rule 1).
+- Q6: "build 0.3" means the next build after 0.2, level 1 only.
+
+### Open questions
+
+- Whether the reduced-motion setting is available on target platforms (iOS "Reduce Motion", Android "Remove animations"). The Studio decides who checks it. It does not block Build.
+- The home's current styling is not known from the packet. The engineer sets the scenery outline style and no idle animation. A real capture is needed at Verify (check 3).
+- If the re-playtest still shows a stall, an idle hint (Option C) would need a Director reading of D-001. It is not in this spec and is not needed for it.
+>>>END
+
+<<<FILE decisions/D-002-intro-cancel-and-undo.md
+---
+kind: decision
+id: D-002
+status: accepted
+decided_by: game-designer
+goal: G-001
+date: 2026-10-12
+supersedes: none
+---
+# D-002: Intro cancel eases the pool back; the intro is never in undo history
+
+## Decision
+
+- A touch-down on the crab, the home or the sand during the level 1 intro cancels the intro. The pool eases back to its authored start position over a fixed 0.15 s, and the idle pulse starts there. The touched object responds at once. The redirect pulse starts when the ease-back ends.
+- A touch-down on the pool during the intro cancels it, and the pool follows the finger from its current position.
+- The intro is a visual offset only. It never pushes an undo history entry. The pool's logical position is the authored start until a real drag is dropped, and undo returns to that.
+
+Limits: level 1 only. It does not add a timer or an irreversible step (D-001).
+
+## Rationale
+
+- Children are likely to tap the crab first, and the case will occur in the re-playtest. Option B makes every child see the same scene afterwards, with the pool at its authored place and pulsing.
+- A fixed 0.15 s ease-back keeps the pulse inside the existing "within 0.2 s" criterion. The acceptance criteria stay unchanged and no case needs an exception.
+- Keeping the intro out of the history means undo is predictable and does not depend on when the child touched.
+
+## Alternatives considered
+
+- Option A (pool stays mid-slide): simpler, but the pool rests off its authored position and the first undo state would be ambiguous.
+- Option C (ignore non-pool touches during the intro): contradicts "every touch gets a visible response within 0.2 s".
+- A 0.2 s ease-back with the pulse after it (the engineer's proposal): it would stretch the pulse window to 0.2 s after the ease-back and change the criterion for no benefit.
+
+## Revisit when
+
+The re-playtest shows children confused by the pool snapping back, or the intro is changed in length or distance.
+>>>END
+
+<<<FILE goals/G-001-first-puzzle-stall/10-game-designer-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 10
+from: game-designer
+to: studio
+stage: Build
+outcome: done
+---
+# 10: game-designer → studio — level 1 spec gaps settled; route Build again
+
+## Task
+
+Route Build for the level 1 opening spec to the gameplay-engineer again. Q1–Q6 from Handoff 09 are settled in `design/onboarding.md`, so the spec has no blocking gap left.
+
+## Context
+
+Goal G-001 (first-puzzle-stall). The gameplay-engineer held Build (Handoff 09) because the spec did not say what happens when a touch that is not on the pool cancels the intro, or how the intro relates to undo. I settled both and the four minor gaps. I did not change the Goal's scope or direction.
+
+## Findings
+
+Answers, all now in the Level 1 spec in `design/onboarding.md` and recorded in `decisions/D-002-intro-cancel-and-undo.md`:
+
+- **Q1 (intro cancelled by a touch on the crab, home or sand):** the engineer's Option B, with one change. The ease-back is a fixed 0.15 s (not 0.2 s). The pool returns to its authored start position and the idle pulse starts there. The touched object responds at once (within 0.1 s). The redirect pulse starts when the ease-back ends, 0.15 s after touch-down. So the "within 0.2 s" criterion does **not** change.
+  - A touch on the pool during the ease-back cancels it and the pool follows the finger from its current position.
+  - A touch on the pool during the intro behaves as before: the intro is cancelled and the pool follows the finger from where it is. The pool's hit area follows its drawn position during the intro.
+- **Q2 (intro and undo):** the intro is a visual offset only and never enters the history. The logical position is the authored start until a real drag is dropped. Undo returns to the authored start.
+- **Q3:** accepted. The crab flips horizontally to face the pool side, plus the ±8° wiggle. No flip if it already faces that side.
+- **Q4:** accepted. The distance is measured center to center, with the pool's at-rest width. The home glow only applies while the pool is dragged, so a pool at rest after the intro or ease-back never triggers it.
+- **Q5:** accepted. Touch-down on the pool cancels a running redirect pulse, and the 1.10 lift applies from the current scale.
+- **Q6:** accepted. "Build 0.3" means the next build after 0.2, level 1 only.
+- **Reduced-motion:** the spec keeps the static-brightness fallback, and the intro is skipped there, so the intro-cancel case does not arise. The engineer reads the OS flag where it exists and adds no toggle (agreed with the engineer's answer). Whether platforms offer the setting is not a design question. The Studio decides who checks it (iOS "Reduce Motion", Android "Remove animations"). It does not block Build.
+- **Home styling:** the engineer's plan (scenery outline style, no idle animation) satisfies rule 4. A real capture is still needed at Verify (check 3).
+
+New acceptance criteria for QA: check 11 (intro cancelled by a non-pool touch, with timings) and check 12 (undo after an intro-cancel returns to the authored start and adds no extra step). Check 7 is reworded to the pool-touch cancel case.
+
+## Decisions already made
+
+- D-001 (no failure, no timers, every move undoable) still applies. None of the answers add a timer or an irreversible step.
+- D-002 (new): intro cancel eases the pool back in 0.15 s; the intro is never in the undo history.
+
+## Constraints
+
+- Level 1 only. Existing sprite sheet only (tint, recolor, flip, scale, rotation, position and brightness changes are allowed). Touch only. No dependence on reading text. No timers or inactivity triggers. No idle hint (Option C).
+- The Build handoff that follows must say its result is addressed to `studio`, so Verify and a fresh Playtester handoff can be composed.
+
+## Open questions
+
+- Platform reduced-motion availability: needs someone with platform access. The Studio decides who. It does not block Build.
+- Home's current styling: capture at Verify.
+
+## Expected output
+
+Route Build: the gameplay-engineer implements the whole Level 1 spec (all rules, edge cases and the settled answers), states the change exactly in the outgoing Handoff with `outcome: done`, addressed to `studio`. Then Verify runs the 12 checks, and a fresh Playtester handoff follows for the experience signals.
+
+## Sender assessment
+
+Confidence is high that the spec is now complete for level 1. The one judgment call was the ease-back length: 0.15 s keeps the pulse inside the existing 0.2 s window, so QA and the playtest criteria stay unchanged. Residual risk is low: the pool snapping back could surprise a child, but it moves in 0.15 s and then pulses, which points at the pool. If the re-playtest shows confusion, D-002 says when to revisit.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: project.md#constraints, project.md#art-direction, design/onboarding.md, sim/build-0.2.md, sim/repo-notes.md
+- Decisions: decisions/D-001-no-fail-states.md, decisions/D-002-intro-cancel-and-undo.md
+- Previous handoff: goals/G-001-first-puzzle-stall/09-gameplay-engineer-to-game-designer.md
+>>>END

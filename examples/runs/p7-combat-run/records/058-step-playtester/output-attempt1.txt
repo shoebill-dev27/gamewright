@@ -1,0 +1,45 @@
+Round 1: I'm playing rooms 1, 2 and 3, each with separate rules per enemy mark. Room 1 is a fast clear, room 2 is a deliberate run, and room 3 is played at 30 FPS.
+
+<<<FILE @run/play/room1-fast
+room 1
+fps 60
+when see * coming within 1.5 then dash aside
+when text "rears back" then move aside
+when see r within 1.4 then attack
+when see g within 1.4 then attack
+when see g within 6 then move toward
+when see r within 6 then move toward
+end 40
+>>>END
+
+<<<FILE @run/play/room2-slow
+room 2
+fps 60
+when see * coming within 2 then move aside
+when text "rears back" then move aside
+when see g within 1.4 then attack
+when see r within 1.4 then attack
+when see G within 1.5 then attack
+when see s within 1.5 then attack
+when see g within 4 then face
+when see r within 4 then face
+when nothing within 3 then stop
+end 50
+>>>END
+
+<<<FILE @run/play/room3-30fps
+room 3
+fps 30
+when see * coming within 2 then dash aside
+when text "rears back" then dash aside
+when see G coming within 2.5 then move away
+when see r within 1.4 then attack
+when see g within 1.4 then attack
+when see G within 1.4 then attack
+when see s within 1.4 then attack
+when see s within 8 then move toward
+when see r within 8 then move toward
+when see g within 8 then move toward
+when see G within 8 then move toward
+end 50
+>>>END

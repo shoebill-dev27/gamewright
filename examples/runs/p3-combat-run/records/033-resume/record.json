@@ -1,0 +1,107 @@
+{
+ "op": "Resume",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "fcc16f22-0574-4107-87c9-f509d1b7ce55",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 24040,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 14108,
+    "output_tokens_details": {
+     "thinking_tokens": 1251
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 24040,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 14108,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 24040,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 24040
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.237244,
+   "attempt": 1,
+   "started": "2026-10-11T11:01:49",
+   "seconds": 77.4,
+   "errors": [
+    "the Owner's words must appear verbatim in the Decision and the resolved Escalation",
+    "goal.md: an active Goal needs its next step marked `open` with its Handoff"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "15ea8c7e-8a14-48d7-8af3-7bbaf2b41d8a",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 24143,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 12878,
+    "output_tokens_details": {
+     "thinking_tokens": 776
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 24143,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 12878,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 24143,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 24143
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.225356,
+   "attempt": 2,
+   "started": "2026-10-11T11:03:07",
+   "seconds": 67.5,
+   "errors": [
+    "goal.md: an active Goal needs its next step marked `open` with its Handoff"
+   ]
+  }
+ ],
+ "status": "rejected"
+}

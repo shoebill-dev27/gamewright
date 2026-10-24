@@ -1,0 +1,44 @@
+<<<FILE goals/G-001-combat-monotony/104-qa-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 104
+from: qa
+to: studio
+stage: Verify (manual line, marker grep, suite)
+outcome: pass
+---
+# 104: qa → studio — Verification of the manual fix, marker search and suite
+
+## Task
+
+Verify the wording-only change from handoff 103: the stray marker in `repo/manual.md`, the marker search over the listed files, the test suite, and the corrected W1 and W5 text in `design/combat-step94.md`.
+
+## Verdict: pass (V1–V5)
+
+No defect found. No code, test or parameter was touched by QA.
+
+## Per-criterion results
+
+- **V1: pass.** I read the whole of `repo/manual.md` as supplied. No line starts with `>>>`, `<<<` or `=======`. `REPLACE_PLACEHOLDER` and `SEARCH` do not occur (case-sensitive). The Warnings section has no stray edit residue.
+- **V2: pass.** In Warnings, the hit-message bullet and the stagger bullet are two separate bullets. The hit-message bullet begins "Being hit shows `YOU ARE HIT by a grub`…" and ends "…showed before the shot)." The stagger bullet reads: "A swipe that interrupts the warning of a grub or runner staggers it for 0.4 s; a brute is not interrupted." The source wraps that sentence over two lines, but it is one bullet with the exact wording required. Both bullets are well formed.
+- **V3: pass.** I read `repo/game.py`, `repo/tests/test_game.py`, `repo/bots.py`, `repo/play.py` and `design/combat-step94.md` for the V1 patterns. None of them has a line starting with `>>>`, `<<<` or `=======`, and none contains `REPLACE_PLACEHOLDER` or `SEARCH`. The design note's `<direction>` placeholders are inline text, not line-start markers. No `=======` appears anywhere, so there is no ordinary-text use to explain.
+- **V4: pass.** `python3 -m unittest discover -s tests` exited 0 with "Ran 69 tests … OK", the same count as the previous result.
+- **V5: pass.**
+  - In `design/combat-step94.md`, W1 for the spitter at (15,7) is labelled `from the south-east`.
+  - The bullet is internally consistent: travel vector about (-0.92,-0.39), reversed (0.92,0.39), ratio 3/7 = 0.43, above 0.4142, so the diagonal applies.
+  - W5 states "for the brute, after its 0.7 s wind-up", which matches `GRUBS["brute"]["windup"] = 0.7` in `game.py`.
+  - Build check: I ran `run_play` (player view, not trace) at 60 FPS with `room empty`, spitter at (15,7), player at (8,4). The cue line shows aim (-0.92,-0.39). Both hits print `YOU ARE HIT by a shot from the south-east — hearts 2/3` (at 4.2 s) and `… hearts 1/3` (at 6.6 s). This agrees with the design note and with the `ShotSourceTest` case `((15, 7), "south-east")` in the suite.
+
+## What I did not check
+
+- I did not run `grep`. The marker search (V1, V3) is a read-through of the file contents in the packet, not a tool search.
+- I did not run `run_trace`. The south-east check used the player view instead.
+- The south-east build check ran at 60 FPS only. The 30 FPS case is covered only by the suite's `ShotSourceTest`, which runs both rates.
+- I did not run a W5 brute late-swipe play. I only compared the 0.7 s wind-up in the text with the code.
+- I did not re-verify W1–W8 in full, the 30/60 FPS combat behavior, or the bots. No bots run was used. The items already reported as unshown stay unshown.
+
+## Next
+
+Per D-013 item 4, the suite is green and no code or parameter changed this round. Review pass 4 can be a paper check of this result.
+>>>END

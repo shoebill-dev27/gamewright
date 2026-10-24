@@ -1,0 +1,85 @@
+<<<FILE goals/G-001-dash-damage/06-qa-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 6
+from: qa
+to: studio
+stage: Close
+outcome: pass
+---
+# 06: qa → studio — Verification of G-001 fix: PASS on all five criteria; one non-blocking spec gap (the exact frame a dash ends)
+
+## Task
+
+Receive the verification verdict for G-001 (no damage during a dash, at 30 and 60 FPS). The verdict is pass, so the Goal goes to Close. Decide whether to route the spec gap under Open questions to `game-designer`.
+
+## Context
+
+The Owner reported taking damage while dashing. QA's defect report (02) reproduced it: a dash started with less than 0.25 s of the 0.8 s post-hit invulnerability left, so the invulnerability dropped mid-dash and a Spitter shot hit. The gameplay engineer fixed `repo/game.py` and added regression tests (05). I verified from the acceptance criteria in 02, `design/combat.md` and the runtime's tests and traces, not from the engineer's explanation. All run rounds are used; the results below are everything the build showed.
+
+## Findings
+
+### Verdict: pass
+
+| # | Criterion | 60 FPS | 30 FPS | Result |
+|---|---|---|---|---|
+| 1 | Script A: no hit during or at the dash; hearts stay 2 | Dash at 2.017 (`hurt_left` 0.067); the post-hit window runs out mid-dash. No `hurt` event until `dash_end` at 2.250. Hearts 2. The next hit is the Grub at 3.483, outside any dash or window. | Dash at 2.033 (`hurt_left` 0.033), `dash_end` at 2.267, hearts 2. The next hit is the Grub at 3.500. | Pass |
+| 1b | Script B: no hit, and the flag no longer drops mid-dash | Dash at 1.917 (`hurt_left` 0.167), `dash_end` at 2.150. No `invulnerable False` event before `dash_end`. Hearts 2. | Dash at 1.933 (`hurt_left` 0.133), `dash_end` at 2.167, hearts 2. | Pass |
+| 2 | A dash started anywhere in the post-hit window is invulnerable for its full duration | Starts with `hurt_left` 0.067, 0.117, 0.167 and 0.450 were all invulnerable throughout. The Grub overlapped the player the whole time in the 0.117 and 0.450 runs, with no hit during the dash. | Starts with `hurt_left` 0.033, 0.100, 0.133 and 0.433 were all invulnerable throughout. The Grub overlapped the player in the 0.100 and 0.433 runs, with no hit during the dash. | Pass for the values sampled (not a full sweep) |
+| 3 | Invulnerability persists after the dash until the post-hit window ends | C3: `dash_end` at 1.300 with `invulnerable=True` and `hurt_left` 0.217. The Grub was overlapping, yet the first hit came at 1.517, exactly when the window expired (0.717 + 0.800). | C3: `dash_end` at 1.333 with `invulnerable=True` and `hurt_left` 0.200. The hit came at 1.533. | Pass |
+| 4 | Unchanged behaviors | See below. | See below. | Pass |
+| 5 | Suite passes; regression test covers both frame rates | `python3 -m unittest discover -s tests`: 10 tests, OK, exit 0. `DashInvulnerabilityTest` loops over fps 30 and 60. | Same. | Pass |
+
+Criterion 4 evidence:
+- **Plain hit:** Grub contact outside any window costs 1 heart with `stun_left=0.300` and `hurt_left=0.800` (C3 at 0.717 and 0.733; A at 1.283 and 1.267).
+- **Window length:** the post-hit window ends 0.800 s after the hit (C3 at 60 FPS: hit 0.717, next hit 1.517).
+- **Plain dash:** the first dash in Script A is invulnerable (`why: dash`) until `dash_end`, with no window involved. It lasts 0.25 s at 60 FPS (0.2→0.450) and 8 frames at 30 FPS (0.2→0.467).
+- **Cooldown:** the dash at 1.0 s is still ignored ("dash not ready") at both frame rates.
+
+### Observation: the frame on which a dash ends (spec gap)
+
+The LATE runs (dash started with `hurt_left` ≈0.1, Grub overlapping, wall at x 15) show the player hit on the same frame as `dash_end`:
+- 60 FPS: frame 98, t=1.633. The trace shows `invulnerable False (dash timer ended); dash_end; invulnerable True (hurt); hurt`. The dash started at frame 83, so frame 98 is the 15th step of the 15-frame (0.25 s) dash.
+- 30 FPS: frame 50, t=1.667, same pattern, 8th step.
+
+Every earlier dash frame was protected. In these runs the post-hit window had already expired, so only the dash protected the player.
+
+`design/combat.md` says "invulnerable for the full dash duration" but does not say whether the frame where the timer reaches 0 counts as inside the dash. I can't judge this from the document. It is also not clearly the Owner's reported defect, which was a hit with 0.167 s of dash left.
+
+The regression test `test_dash_begun_late_in_hurt_window_is_invulnerable_throughout` only asserts invulnerability when `dash_left > 0` after the step, and it removes shots on the final frame. It therefore does not cover this frame. I'm noting that as coverage, not as an assertion weakened.
+
+### Not checked
+
+- I did not see `repo/game.py`; no source was in the packet. Everything above comes from traces and test output.
+- I did not run the `--view player` output; trace lines carried the same events.
+- No run covered a Spitter shot arriving on the dash-end frame, or the dash-end frame in a plain dash with no post-hit window. Both would behave per the same rule, but this is unobserved.
+- I did not sweep every `hurt_left` offset. I sampled 0.033–0.450, and the unit test samples about 0.1.
+- No fixed-frame comparison of the plain-dash end frame against the pre-fix build was possible.
+
+## Decisions already made
+
+- D-001: one attack button plus dash. No inputs were added.
+
+## Constraints
+
+- Verified at both 30 and 60 FPS (`project.md#constraints`).
+- `design/combat.md` is the reference for intended behavior, and I did not change it. I decided no intended behavior myself; the dash-end-frame question stays open for the designer.
+- Production code was not modified.
+
+## Open questions
+
+- **Spec gap (non-blocking, for `game-designer`):** does "invulnerable for the full dash duration" include the frame on which the dash timer reaches 0? Currently a hit in contact on that frame lands, in the same frame as `dash_end`. If the intent is that this frame is still protected, that is a separate change and Goal. If it is not protected, the spec should say so. The Studio decides whether to route this or close G-001 without it.
+
+## Expected output
+
+The Studio closes G-001 (Review is not part of this defect Goal) and decides whether to open a follow-up question to `game-designer` about the dash-end frame.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: project.md#constraints, design/combat.md
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-001-dash-damage/05-gameplay-engineer-to-qa.md
+>>>END

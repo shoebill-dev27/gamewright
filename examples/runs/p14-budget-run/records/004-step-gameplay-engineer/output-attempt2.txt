@@ -1,0 +1,314 @@
+<<<EDIT repo/game.py
+<<<<<<< SEARCH
+DIRECTIONS = {"left": (-1, 0), "right": (1, 0), "up": (0, -1), "down": (0, 1)}
+=======
+DIRECTIONS = {"left": (-1, 0), "right": (1, 0), "up": (0, -1), "down": (0, 1)}
+
+
+def round_up_2(seconds):
+    """Seconds rounded UP to 0.01 s; never 0.00 while some time is still left (G-003)."""
+    if seconds <= 0:
+        return 0.0
+    return max(0.01, math.ceil(seconds * 100 - 1e-6) / 100)
+>>>>>>> REPLACE
+>>>END
+<<<EDIT repo/game.py
+<<<<<<< SEARCH
+        elif self.dash_left > 0 or self.dash_cooldown > 0:
+            self.log("ignored", action=action, reason="dash not ready")
+=======
+        elif not self.dash_usable():
+            self.log(
+                "ignored", action=action, reason="dash not ready",
+                left=round_up_2(self.dash_ready_in()),
+            )
+>>>>>>> REPLACE
+>>>END
+<<<EDIT repo/game.py
+<<<<<<< SEARCH
+            self.log("dash", direction=direction or _name(self.facing))
+=======
+            self.log("dash", direction=direction or _name(self.facing))
+            self.log("dash_recharge", total=DASH_TIME + DASH_COOLDOWN)
+>>>>>>> REPLACE
+>>>END
+<<<EDIT repo/game.py
+<<<<<<< SEARCH
+    def step(self):
+        if self.outcome is not None:
+            return
+        dt = self.dt
+=======
+    def dash_usable(self):
+        """The one state that decides whether a dash input is accepted or refused."""
+        return not (self.dash_left > 0 or self.dash_cooldown > 0)
+
+    def dash_ready_in(self):
+        """Seconds until a dash can be used (0 when usable now): dash time left plus the recharge."""
+        if self.dash_left > 0:
+            return self.dash_left + DASH_COOLDOWN
+        return self.dash_cooldown
+
+    def dash_status(self):
+        """Header text for the player view (G-003)."""
+        if self.dash_usable():
+            return "dash: ready"
+        return f"dash: recharging {round_up_2(self.dash_ready_in()):.2f} s"
+
+    def step(self):
+        if self.outcome is not None:
+            return
+        dt = self.dt
+>>>>>>> REPLACE
+>>>END
+<<<EDIT repo/game.py
+<<<<<<< SEARCH
+        self.dash_cooldown = max(0.0, self.dash_cooldown - dt)
+=======
+        was_recharging = self.dash_cooldown > 0
+        self.dash_cooldown = max(0.0, self.dash_cooldown - dt)
+        recharged = was_recharging and self.dash_cooldown <= 0
+>>>>>>> REPLACE
+>>>END
+<<<EDIT repo/game.py
+<<<<<<< SEARCH
+        self._update_shots(dt)
+        self._resolve_result()
+=======
+        self._update_shots(dt)
+        if recharged and self.hearts > 0:
+            # Logged after warnings and hits of this frame, so they print first (G-003).
+            self.log("dash_ready")
+        self._resolve_result()
+>>>>>>> REPLACE
+>>>END
+<<<EDIT repo/play.py
+<<<<<<< SEARCH
+        if kind == "ignored" and not details.get("quiet"):
+            return "(nothing happens)"
+=======
+        if kind == "dash_recharge":
+            return f"dash recharging: ready again in {details['total']:.2f} s"
+        if kind == "dash_ready":
+            return "dash ready"
+        if kind == "ignored" and not details.get("quiet"):
+            if details.get("reason") == "dash not ready":
+                return f"dash not ready: {details['left']:.2f} s left"
+            return "(nothing happens)"
+>>>>>>> REPLACE
+>>>END
+<<<EDIT repo/play.py
+<<<<<<< SEARCH
+        print(f"   [{g.t:.2f} s] hearts {g.hearts}/{HEARTS}")
+=======
+        print(f"   [{g.t:.2f} s] hearts {g.hearts}/{HEARTS}  {g.dash_status()}")
+>>>>>>> REPLACE
+>>>END
+<<<EDIT repo/play.py
+<<<<<<< SEARCH
+            f"hurt_left={g.hurt_left:.3f} stun_left={g.stun_left:.3f}"
+=======
+            f"hurt_left={g.hurt_left:.3f} stun_left={g.stun_left:.3f} "
+            f"dash_ready_in={g.dash_ready_in():.3f}"
+>>>>>>> REPLACE
+>>>END
+<<<EDIT repo/run_driver.py
+<<<<<<< SEARCH
+                    "run_time": s.t, "room_time": g.t, "frame": g.frame,
+=======
+                    "run_time": s.t, "room_time": g.t, "frame": g.frame,
+                    "dash_ready_in": round(g.dash_ready_in(), 6),
+>>>>>>> REPLACE
+>>>END
+<<<EDIT repo/run_driver.py
+<<<<<<< SEARCH
+                immediate = True
+        periodic = s.t >= self.next_picture - EPS
+=======
+                # Dash lines add no picture (G-003).
+                dash_line = event["kind"] in ("dash_recharge", "dash_ready") or (
+                    event["kind"] == "ignored"
+                    and event["details"].get("reason") == "dash not ready"
+                )
+                if not dash_line:
+                    immediate = True
+        periodic = s.t >= self.next_picture - EPS
+>>>>>>> REPLACE
+>>>END
+<<<EDIT repo/run_driver.py
+<<<<<<< SEARCH
+              f"— {s.state}{' — paused' if s.paused else ''}")
+=======
+              f"— {s.state}{' — paused' if s.paused else ''}  {g.dash_status()}")
+>>>>>>> REPLACE
+>>>END
+<<<EDIT repo/manual.md
+<<<<<<< SEARCH
+- **Dash**: a quick burst in a direction (or the way you face). You cannot be hurt while dashing.
+=======
+- **Dash**: a quick burst in a direction (or the way you face). You cannot be hurt while dashing. A dash lasts 0.25 s, then it recharges for 0.6 s, so you can dash again 0.85 s after the start of the last one. You cannot dash during the dash or the recharge, and a dash pressed too early is not saved for later.
+
+## Dash readiness
+
+The line above the room tells you about your dash: `dash: ready` means a dash will work now; `dash: recharging 0.35 s` means it will work in 0.35 s. When you dash, the game prints `dash recharging: ready again in 0.85 s`. If you press dash too early it prints `dash not ready: 0.35 s left` and nothing happens. When the dash comes back, the game prints `dash ready`.
+>>>>>>> REPLACE
+>>>END
+<<<EDIT repo/manual.md
+<<<<<<< SEARCH
+Example:
+
+```text
+room 2
+=======
+`text "dash ready"` holds when the game has just said `dash ready`. For example:
+
+```text
+when text "dash ready" then dash away
+```
+
+Example:
+
+```text
+room 2
+>>>>>>> REPLACE
+>>>END
+<<<FILE repo/tests/test_dash_readiness.py
+import re
+import sys
+import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from game import DASH_COOLDOWN, DASH_TIME, Game  # noqa: E402
+
+
+def times(game, kind):
+    return [t for t, k, _ in game.events if k == kind]
+
+
+class DashReadinessTest(unittest.TestCase):
+    def test_ready_time_is_dash_end_plus_cooldown(self):
+        for fps in (30, 60):
+            game = Game(fps=fps, room="empty")
+            self.assertTrue(game.dash_usable())
+            self.assertEqual(game.dash_ready_in(), 0)
+            game.press("dash", "right")
+            self.assertAlmostEqual(game.dash_ready_in(), DASH_TIME + DASH_COOLDOWN)
+            for _ in range(2 * fps):
+                game.step()
+            ready = times(game, "dash_ready")
+            self.assertEqual(len(ready), 1, fps)
+            self.assertAlmostEqual(ready[0], 0.85, delta=1.0 / fps + 1e-9, msg=fps)
+            self.assertTrue(game.dash_usable())
+
+    def test_refusal_names_the_time_left_and_state_matches_decision(self):
+        for fps in (30, 60):
+            game = Game(fps=fps, room="empty")
+            game.press("dash", "right")
+            for _ in range(round(0.5 * fps)):
+                game.step()
+            self.assertFalse(game.dash_usable())
+            game.press("dash", "right")
+            kind, details = game.events[-1][1], game.events[-1][2]
+            self.assertEqual(kind, "ignored")
+            self.assertEqual(details["reason"], "dash not ready")
+            self.assertAlmostEqual(details["left"], 0.35, delta=0.04)
+            self.assertTrue(game.dash_status().startswith("dash: recharging"))
+
+    def test_no_ready_line_at_start(self):
+        game = Game(room="empty")
+        for _ in range(60):
+            game.step()
+        self.assertEqual(times(game, "dash_ready"), [])
+        self.assertEqual(game.dash_status(), "dash: ready")
+
+    def test_player_view_lines(self):
+        from test_game import ReactionTest
+
+        out = ReactionTest.session(self, "room empty\n0 dash right\n0.5 dash right\nend 1.2\n")
+        self.assertIn("you dash right", out)
+        self.assertIn("dash recharging: ready again in 0.85 s", out)
+        self.assertRegex(out, r"dash not ready: 0\.3\d s left")
+        self.assertEqual(out.count("dash ready"), 1)
+        self.assertNotIn("(nothing happens)", out)
+        self.assertTrue(re.search(r"\[0\.50 s\] hearts 3/3  dash: recharging 0\.\d\d s", out))
+        self.assertIn("[1.00 s] hearts 3/3  dash: ready", out)
+
+
+if __name__ == "__main__":
+    unittest.main()
+>>>END
+<<<FILE goals/G-003-dash-readiness/03-gameplay-engineer-to-studio.md
+---
+kind: handoff
+goal: G-003
+seq: 3
+from: gameplay-engineer
+to: studio
+stage: Verify
+outcome: done
+---
+# 03: gameplay-engineer → studio — dash readiness display built; ready for independent verification
+
+## Task
+
+Route independent verification of the dash readiness display (header status, use message, refusal with time left, `dash ready` line) against `design/dash-readiness.md` DR1–DR13 at 30 and 60 FPS.
+
+## Context
+
+G-003. Owner request (verbatim): 「ダッシュがいつまた使えるのか分かりにくい。分かるようにしてほしい」. The display from the spec was built on the existing header, message log and `text` reaction. No dash rule or number was changed.
+
+## Findings
+
+What changed (files in `repo/`):
+- `game.py`: new events `dash_recharge` (logged right after `dash`) and `dash_ready` (logged once at the frame the recharge ends, after that frame's warnings and hits). A refused dash now logs `left` (R, rounded up to 0.01 s). Helpers `dash_usable()` (the same state that accepts or refuses a dash), `dash_ready_in()`, `dash_status()`.
+- `play.py`: header line gets `  dash: ready` or `  dash: recharging R s`; messages `dash recharging: ready again in 0.85 s`, `dash not ready: R s left`, `dash ready`; the trace line carries `dash_ready_in`.
+- `run_driver.py`: the same header suffix (after all other items, so after the boss/paused items); the trace record carries `dash_ready_in`; the three dash lines do not cause an extra picture.
+- `manual.md`: Dash bullet, new "Dash readiness" section, and the `text "dash ready"` note and example, as in the spec, with the real values (same as the spec's).
+- `tests/test_dash_readiness.py`: new tests (ready time, refusal text, no ready line at start, player view lines).
+
+Open questions, answers:
+1. Ready time (from the source, not from a run): the recharge timer is set to 0.6 s when the dash ends (0.25 s) and counts down on accumulated time. A dash is refused while the dash or the timer is above 0. So the ready time is the dash start plus 0.85 s, as expected. The spec's rule section and the manual are correct. `design/combat.md` still says "Cooldown 0.6 s" without a start and is not mine to edit; the designer may add "from the end of the dash".
+2. Causes for which a dash input does nothing: (a) dash or recharge active → now `dash not ready: R s left`; (b) hit-stun (first 0.3 s after a hit) → existing `(nothing happens)` kept; (c) pause, room-clear screen, terminal or stopped session → the session rejects the input silently (`input_rejected` event, no player message, unchanged); (d) player down or run over → dropped silently, unchanged. A refusal produced by a `when` reaction rule stays hidden, as before.
+3. Room entry and retry: every entry makes a new `Game`, so the dash timers start at 0. The header shows `dash: ready` and no `dash ready` line is printed.
+
+Known deviations and gaps:
+- During hit-stun the header follows the dash timer and can say `dash: ready` while a dash would be refused for stun (text `(nothing happens)`). The spec's rule "ready iff accepted" and its edge case "display follows the timer" differ here. I followed the timer and did not choose; the designer should rule.
+- The build number was not changed (still 0.6, banner and `BUILD`): existing tests check the banner, and the spec leaves the number to the engineer. Say if a new number is wanted.
+- In the public driver, a refused dash used to cause a picture (as every message did); it no longer does, as the spec says dash lines add no picture. The `you dash <dir>` line is unchanged.
+
+Not run in this step (no runs were made): DR1–DR13 at 30 and 60 FPS, the DR9 old-versus-new diff, the four DR8 probe scripts, the full existing test suite. The runtime's Build check below is the only test result. Nothing here shows how a human reads the wording.
+
+## Decisions already made
+
+- D-001: Combat uses one attack button plus dash. No new input buttons (none added; a too-early dash is not buffered).
+
+## Constraints
+
+- Verification should cover both 30 and 60 FPS, times ±1 frame.
+- The Playtester must receive only player-visible behavior: the manual's "Dash readiness" section and the lines above. No design experience signals and no implementation detail.
+
+## Open questions
+
+- Hit-stun case above (header says ready, dash refused): designer ruling needed.
+- `design/combat.md` wording of the cooldown start (designer).
+- Build number: keep 0.6 or bump.
+
+## Expected output
+
+1. QA verifies DR1–DR13 independently at both rates, including the DR9 diff against an unchanged build and the DR8 probe scripts, and says which checks it could not run.
+2. The Studio routes the hit-stun question to `game-designer`.
+3. A later Playtester gets only the manual and player-visible lines.
+
+## Sender assessment
+
+Confidence is medium-high on the logic: the header, messages and refusal all read the same state, and the ready line is logged at the end of the frame after warnings. Risks: (a) existing tests that compare full player or trace output or event lists could fail because of the new header suffix, trace key and `dash_recharge` events; check the Build check result; (b) the 1e-6 tolerance in the round-up to 0.01 s keeps exact values like 0.35 from rounding to 0.36, which is checked only by the new tests; (c) the 0.5 s picture value R≈0.35 at 30 FPS was not measured.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: design/dash-readiness.md, repo/manual.md, the build in `repo/` (run commands in project.md)
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-003-dash-readiness/02-game-designer-to-gameplay-engineer.md
+>>>END

@@ -1,0 +1,15 @@
+<<<FILE @run/bots/room1
+room 1
+>>>END
+
+<<<FILE @run/bots/room3
+room 3
+>>>END
+
+<<<FILE @run/bots/room4
+room 4
+>>>END
+
+<<<FILE @run/bots/room5
+room 5
+>>>END

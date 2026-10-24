@@ -1,0 +1,16 @@
+<<<FILE @run/play/r5-idle
+room 5
+end 8
+>>>END
+
+<<<FILE @run/play/r4-fight
+room 4
+0.2 move left
+1.5 stop
+1.6 attack
+2.0 attack
+2.4 attack
+2.8 attack
+3.2 dash right
+end 8
+>>>END

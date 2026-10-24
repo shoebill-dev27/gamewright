@@ -1,0 +1,76 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "codex",
+   "session_id": "01a12a81-96bc-7c22-aae6-16a2eef28657",
+   "model": "gpt-6-astra",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 26431,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 2266,
+    "reasoning_output_tokens": 86
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 1,
+   "started": "2026-10-11T19:28:17",
+   "seconds": 51.9,
+   "errors": [
+    "blocked-on-owner needs an open Escalation; while a Role prepares the brief, keep the Goal active with that Role's step open"
+   ]
+  },
+  {
+   "runtime": "codex",
+   "session_id": "01a12a82-5de2-7fd1-b96a-c89da608d5d9",
+   "model": "gpt-6-astra",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 26487,
+    "cached_input_tokens": 2688,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 4199,
+    "reasoning_output_tokens": 30
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 2,
+   "started": "2026-10-11T19:29:09",
+   "seconds": 82.5,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-dash-damage/goal.md": "8f7ca47484da224c9fbf355a27fc8a28fff80b2d4a3f32f60d93d50951328b72",
+  "goals/G-001-dash-damage/22-studio-to-technical-director.md": "2a697dabcee819e6c0a9eb5eb7b87a6bdfa82cffd60a13714ea7225881999e71"
+ },
+ "decision": {
+  "status": "active",
+  "open": [
+   [
+    "technical-director",
+    "Owner escalation 準備"
+   ]
+  ],
+  "new": [
+   "technical-director",
+   "Owner escalation 準備"
+  ]
+ },
+ "seen_through_seq": 22
+}

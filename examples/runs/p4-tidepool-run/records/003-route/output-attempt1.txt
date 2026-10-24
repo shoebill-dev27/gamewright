@@ -1,0 +1,216 @@
+Both Diagnose steps are done and their outcomes fit the plan, so the route goes on to Design. I've written the Design handoff and updated the Goal record. The Studio stops here and does not run Design itself.
+
+<<<FILE goals/G-001-first-puzzle-stall/06-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-001
+seq: 6
+from: studio
+to: game-designer
+stage: Design
+outcome: routed
+---
+# 06: studio → game-designer — specify the fixed level 1 opening (pool affordance, touch response, non-text teaching)
+
+## Task
+
+Write the design spec (`write-design-spec`) for the level 1 opening in build 0.2 and update `design/onboarding.md` accordingly. Cover what the player sees and can do, parameters, edge cases and final player-observable acceptance criteria. Reconcile your diagnosis with the art-director's visual review (both summarized below).
+
+## Context
+
+Goal G-001. Owner's words, verbatim: 「最初のパズルで子どもが手を止めてしまう。直したい」
+
+Success condition: children aged 7–10 begin purposeful touch interaction with level 1 on their own, with no long pause and no adult explanation.
+
+Out of scope:
+- Levels 2 and later (propose a new Goal if the problem shows up there).
+- Changing a pillar or D-001.
+- New art beyond the existing sprite sheet.
+
+Steps 1, 2 and 2b are done (observation, your diagnosis, the visual review).
+
+## Findings
+
+**Observation (3 simulated children).** Ages 7 and 8 stalled for about 20 s and 35 s. Both went to the crab first, tapped and dragged it, got no response, and the 7-year-old then looked to the parent. The 9-year-old read the bubble and dragged the pool in 10 s. Levels 2–3 were fine once the mechanic was known.
+
+**Diagnosis (game-designer, handoff 04).**
+- C1: the pool looks like sand while the non-interactive crab looks interactive (outline plus bob).
+- C2: touches on the crab and home get no response at all.
+- C3: level 1 teaches only through a text bubble, which breaks pillar 2 and the text constraint.
+- C4: nothing in the scene demonstrates the rule.
+- Recommended A + B: make the pool obvious and teach without text (A), and give every touch a visible response that redirects toward the pool (B).
+- Option C (an idle demonstration hint after inactivity) is held in reserve. It touches D-001 by interpretation only, and is not needed if A + B are used.
+- Draft acceptance criteria:
+  1. First pool touch-down within about 10 s of level start.
+  2. No touch-free gap over about 8 s before the first pool drag.
+  3. Every touch on the crab, home or pool gets a visible response.
+  4. Level 1 is completable without reading the bubble.
+  The numbers are tentative, from three data points.
+
+**Visual review (art-director, handoff 05).**
+- Readability fails: the pool is the same pastel as the sand.
+- The crab has a false affordance, and the home is possibly styled as interactive (unconfirmed; check `sim/build-0.2.md`).
+- Proposed visual direction, using the existing sprite sheet only:
+  1. Give the pool the outline weight and an idle motion (slow pulse or ripple) that the crab has now.
+  2. Separate the pool from the sand by value and hue, with a more saturated pastel blue or teal. It must still separate in grayscale.
+  3. Make interactivity exclusive. If the crab stays non-interactive, remove its interactive styling. If it responds to touch, keep the styling and match the response to it.
+  4. The text bubble may stay as a supplement only.
+  5. A hand or arrow cue would be new art and is out of scope. Any cue must come from existing sprites.
+- The art-director reads a tint or recolor of an existing sprite as within the constraint. You confirm that in the spec.
+- Proposed visual criteria:
+  - At level start, only the pool has an outline plus idle motion, and it is distinct from the sand in grayscale.
+  - No non-interactive element has interactive styling.
+
+**Points to settle in the spec (your authority, not the Studio's).**
+- Should the crab respond to touch? Your Option B says yes, which means its styling can stay. Make the styling and the response consistent with each other.
+- Is the home interactable?
+- Whether a looping non-text cue shown from level start is a design choice you can make. It is not an idle timer.
+- Do not add the idle hint (Option C) to this spec. If you conclude it is needed, hand back to the Studio so `game-director` can decide the D-001 reading.
+
+**Not routed to `qa`.** Your suggested check that taps register is skipped as a separate step. The spec requires a visible response to every touch, so Build implements it and Verify checks it. If you see evidence in `sim/build-0.2.md` or `sim/repo-notes.md` that input is genuinely not received, say so in your output so a defect can be reported.
+
+## Decisions already made
+
+- D-001 (no fail states, no timers, every move undoable): respected. Any fix must stay inside it.
+- No new Decision yet. If you commit to A + B and reject Option C as a real alternative, record that with `make-decision` (a new D-NNN in `decisions/`), since it constrains later work.
+
+## Constraints
+
+- Touch only; no mechanic may depend on reading text.
+- Existing sprite sheet only. Tints, outlines and animation on existing sprites are acceptable unless you judge otherwise.
+- Keep it inside level 1 for now.
+- Keep it calm: no fail state, no timer pressure.
+- Acceptance criteria must be player-observable (a playtest with children aged 7–10 and no adult help). State thresholds as tunable and mark them provisional.
+
+## Open questions
+
+- Items listed under "Points to settle in the spec" above.
+- Does the Studio need to add a Plan step? Say whether the change is local and obvious (parameters, tint and outline, small reactions on existing sprites) or cross-system or risky.
+
+## Expected output
+
+1. Update `design/onboarding.md` with the level 1 spec: the layout and look of pool, crab and home, the touch response for every object, the non-text teaching cue, edge cases and acceptance criteria. Add a Decision file if you record one.
+2. Write the outgoing Handoff **addressed to `studio`** (handoff template, `stage: Route`). It should state whether Plan is needed, whether Decide is needed (only if you hit a direction, priority or scope question or want Option C), and the acceptance criteria, so Verify and the later Play step can use them. Put the Build-relevant detail in Findings.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: project.md#vision, project.md#player-profile, project.md#constraints, project.md#art-direction, design/onboarding.md, sim/build-0.2.md, sim/repo-notes.md
+- Decisions: decisions/D-001-no-fail-states.md
+- Previous handoff: goals/G-001-first-puzzle-stall/04-game-designer-to-studio.md; the art-director's result is in goals/G-001-first-puzzle-stall/05-art-director-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-first-puzzle-stall/goal.md
+---
+kind: goal
+id: G-001
+project: tidepool-garden
+status: active
+created: 2026-10-10
+---
+# G-001: Children stall at the first puzzle
+
+## Owner request
+
+> 最初のパズルで子どもが手を止めてしまう。直したい
+
+## Interpretation
+
+Success condition: when children in the target group (ages 7–10) play the first puzzle (level 1 in
+build 0.2), they begin purposeful touch interaction with the puzzle on their own, without a long
+pause and without an adult having to explain what to do. How long a pause counts as "a stall" is
+not set here; Observe reports what actually happens and Design turns it into a player-observable
+acceptance criterion.
+
+Out of scope:
+
+- Levels 2 and later. If the same problem shows up there, it becomes a proposed new Goal.
+- Changing a vision pillar or Decision D-001 (no failure, no timers). Any fix must stay inside them.
+- New art beyond the existing sprite sheet (project constraint).
+
+## Unknowns
+
+Entry questions (`studio/workflows/development-loop.md`) the Project Context cannot answer:
+
+- **Observe** — Has the stall been observed first-hand? No: the Project Context holds only the
+  Owner's report. It is an experience problem, not a reproducible defect, so the Role is
+  `playtester` (not `qa`). Creates stage 1.
+- **Diagnose** — Is the cause understood? No. Creates stage 2 (`game-designer`). `art-director` is
+  not added now; it is added at Route if the observation points to something visual.
+- **Design** — Is the intended behavior of the fixed first puzzle specified? No:
+  `design/onboarding.md` specifies the current level 1 and its teaching intent, not a fix. Creates
+  stage 3. If Diagnose finds an ordinary defect against the existing spec, Route drops this stage.
+- **Build** — Must the game change? The Owner wants it fixed, so yes. Creates stage 4.
+- **Verify** — Always after Build. Stage 5.
+- **Play** — Is the Goal about how the game plays or feels? Yes. Stage 6, in a fresh context
+  without the implementation history.
+- **Review** — Is it an experience Goal? Yes. Stage 7 (`game-director`).
+- **Next** — Always. Stage 8.
+
+Skipped for now:
+
+- **Decide** — Is there a real choice of direction, priority or scope? Not at this point. Choosing
+  among fixes for player-facing behavior inside the approved direction is `game-designer`
+  authority. Route adds Decide if Diagnose or Design produces options that change direction,
+  priority or scope, and escalates if a trigger fires.
+- **Plan** — Is the technical approach non-obvious, risky, cross-system or parallelizable? Not
+  knowable until a fix is specified; a level 1 teaching change is expected to be local. Route
+  re-asks this after Design and adds Plan if the answer is yes.
+
+Flag for Diagnose (not a conclusion): `project.md` lists "No mechanic may depend on reading text"
+as a constraint and says level 1 teaches with a text bubble, for players some of whom are early
+readers.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 01-studio-to-playtester.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 04-game-designer-to-studio.md |
+| 2b | Diagnose | art-director | visual-review | done | 05-art-director-to-studio.md |
+| 3 | Design | game-designer | write-design-spec | open | 06-studio-to-game-designer.md |
+| 3b | Decide | game-director | make-decision | tentative: only if Design wants idle hint | — |
+| 3c | Plan | technical-director | technical-plan | tentative: only if Design says non-local | — |
+| 4 | Build | gameplay-engineer | implement-change | planned | — |
+| 5 | Verify | qa | verify-change | planned | — |
+| 5b | Verify | art-director | visual-review | planned (parallel with 5) | — |
+| 6 | Play | playtester | playtest-session | planned | — |
+| 7 | Review | game-director | review-outcome | planned | — |
+| 8 | Next | studio | — | planned | — |
+
+Status: planned | tentative | open | done | skipped. The route is a plan; the Route operation
+revises it.
+
+## Route changes
+
+- After steps 2 and 2b: both outcomes fit the plan and no escalation trigger fires. The designer
+  recommends A + B (pool affordance, non-text cue, a response to every touch), which is within
+  `game-designer` authority; the idle hint (Option C, near D-001) is held in reserve. Opened
+  Design (06) with both results merged. Added tentative Decide (only if Design wants Option C)
+  and Plan (only if Design finds the change non-local), and added art-director Verify 5b, parallel
+  with QA, because the change is visual. No separate qa Observe: the "every touch responds"
+  criterion covers the input question in Build and Verify.
+
+## Next action
+
+Run step 3 (Step operation): `game-designer` on `06-studio-to-game-designer.md`, with its output
+addressed to `studio`. Then Route, which decides whether Decide or Plan is needed before Build.
+Phase 1: the Studio stops after every Route and states the next action.
+
+## Outcome
+
+<!-- Filled at close, for the Owner, in owner_language (ja). -->
+>>>END
+
+Route is done. The next action is to run step 3: `game-designer` on `06-studio-to-game-designer.md`, with the result addressed to `studio`, then Route again.
+
+- **Merged inputs:** the designer's diagnosis (04) and the art director's review (05) agree on the cause. The pool looks like sand while the non-interactive crab looks touchable, and touches get no response. Level 1 also teaches only through text.
+- **Escalation:** no trigger fires. The recommended fix (A + B) is within the designer's authority and stays inside the pillars and D-001.
+- **Handoff 06:** it carries both results, the Owner's words and the constraints. It tells the designer not to add the idle hint (Option C) and to hand back to the Studio if they conclude it is needed.
+- **Route changes:**
+  - Decide (`game-director`) is tentative, only if Design wants Option C.
+  - Plan (`technical-director`) is tentative, only if Design finds the change non-local.
+  - An `art-director` visual review is planned in parallel with QA at Verify.
+  - I did not add a separate `qa` check on touch registration, because the "every touch responds" criterion covers it in Build and Verify.
+- **Not done here:** I did not append to `log.md`, since it is not among the files I may write.

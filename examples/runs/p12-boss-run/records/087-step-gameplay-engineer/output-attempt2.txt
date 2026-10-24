@@ -1,0 +1,226 @@
+<<<EDIT repo/bots.py
+<<<<<<< SEARCH
+import math
+import sys
+import time
+=======
+import math
+import sys
+import time
+from dataclasses import dataclass
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+BOTS = {"camper": camper, "walker": walker, "dodger": dodger}
+=======
+@dataclass(frozen=True, slots=True)
+class BossObservation:
+    """E1 boundary: visible sprites/status and the room clock only.
+
+    x/y and boss_x/boss_y correspond to play.sprites, as used by existing
+    public reactions. phase/attack correspond to Output.emit's boss status.
+    aim/warning_left are available only on the displayed warning.
+    No Game, Enemy, active timer, contact flag or callable crosses here.
+    """
+    t: float
+    x: float
+    y: float
+    boss_x: float
+    boss_y: float
+    phase: str
+    attack: str
+    aim: tuple | None
+    warning_left: float | None
+    shots: tuple
+
+
+@dataclass(frozen=True, slots=True)
+class BossMemory:
+    lane: tuple | None = None
+    attack: str | None = None
+    warning_time: float | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class BossChoice:
+    memory: BossMemory
+    provenance: str
+    candidates: tuple
+    excluded: tuple
+    selected: str
+    buttons: tuple
+
+
+def observe_boss(game):
+    """Read adapter only; warning fields are gated before reading them.
+
+    Shot positions are public sprites. Velocity, age, lifetime, source and ID
+    are deliberately omitted. This adapter does not change player output.
+    """
+    boss = next((e for e in game.enemies
+                 if e.kind == "boss" and e.hp > 0), None)
+    if boss is None:
+        return None
+    warning = boss.phase == "warning"
+    return BossObservation(
+        game.t, game.x, game.y, boss.x, boss.y, boss.phase,
+        boss.attack_name, tuple(boss.aim) if warning and boss.aim else None,
+        boss.phase_left if warning else None,
+        tuple((s[0], s[1]) for s in game.shots),
+    )
+
+
+def choose_boss(observation, memory):
+    """Pure conservative policy prototype; not yet installed in dodger.
+
+    The complete warning lane is retained during active, never shortened by
+    elapsed time. With no matching warning, the maximum radial envelope is
+    used because the active locked direction is not displayed.
+    """
+    o = observation
+    candidates, excluded = [], []
+    provenance = "none"
+    if o.phase == "warning" and o.aim is not None:
+        length = 2.4 if o.attack == "charge" else 3.0
+        memory = BossMemory(
+            (o.boss_x, o.boss_y, *o.aim, length),
+            o.attack, o.t,
+        )
+        provenance = "warning"
+    elif o.phase == "active":
+        if memory.lane is not None and memory.attack == o.attack:
+            provenance = "warning-history"
+        else:
+            memory = BossMemory()
+            provenance = "missing-warning-history"
+    else:
+        memory = BossMemory()
+
+    dangerous = False
+    if o.phase in ("warning", "active"):
+        if memory.lane is not None:
+            ox, oy, ux, uy, length = memory.lane
+            # Rounded ends of the full fixed path.
+            along = max(0.0, min(length,
+                                (o.x - ox) * ux + (o.y - oy) * uy))
+            radius = 0.6 if o.attack == "charge" else 0.4
+            dangerous = math.hypot(
+                o.x - ox - along * ux, o.y - oy - along * uy,
+            ) <= radius + 0.3
+        else:
+            radius = 3.0 if o.attack == "charge" else 3.4
+            dangerous = math.hypot(
+                o.x - o.boss_x, o.y - o.boss_y,
+            ) <= radius + 0.3
+        excluded.append(("attack", "warning-or-active"))
+
+    # Public shot positions only: do not predict from hidden velocity.
+    dangerous = dangerous or any(
+        math.hypot(o.x - x, o.y - y) <= 1.1 for x, y in o.shots
+    )
+    if dangerous:
+        if memory.lane is not None:
+            _, _, ux, uy, _ = memory.lane
+            preferred = ("down", "up") if abs(ux) >= abs(uy) else ("right", "left")
+        else:
+            preferred = ("up", "down", "left", "right")
+        for direction in preferred:
+            dx, dy = DIRECTIONS[direction]
+            inside = (0 <= o.x + dx * 1.5 <= ROOM_W - 1
+                      and 0 <= o.y + dy * 1.5 <= ROOM_H - 1)
+            candidates.append(("move", direction, inside))
+            if inside:
+                return BossChoice(memory, provenance, tuple(candidates),
+                                  tuple(excluded), "escape",
+                                  (("move", direction),))
+            excluded.append((direction, "wall"))
+        return BossChoice(memory, provenance, tuple(candidates),
+                          tuple(excluded), "hold", (("stop", None),))
+    if o.phase in ("warning", "active"):
+        return BossChoice(memory, provenance, (("hold",),),
+                          tuple(excluded), "hold", (("stop", None),))
+    dx, dy = o.boss_x - o.x, o.boss_y - o.y
+    if math.hypot(dx, dy) > 1.1:
+        return BossChoice(memory, provenance, (("approach",),), (),
+                          "approach", (("move", _toward(dx, dy)),))
+    # Attack recovery is enforced by the input authority; it is not read here.
+    return BossChoice(memory, provenance, (("swipe",),), (), "swipe",
+                      (("move", _toward(dx, dy)), ("stop", None),
+                       ("attack", None)))
+
+
+BOTS = {"camper": camper, "walker": walker, "dodger": dodger}
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/tests/test_bots_boss.py
+<<<<<<< SEARCH
+class OutcomeTest(unittest.TestCase):
+=======
+class PublicBoundaryPrototypeTest(unittest.TestCase):
+    def test_active_internal_values_do_not_cross_boundary(self):
+        from dataclasses import fields
+        names = {field.name for field in fields(bots.BossObservation)}
+        self.assertFalse(names & {"phase_left", "struck", "spent", "game", "enemy"})
+        for attack in ("charge", "short shot"):
+            game = boss_warning(attack, (8, 4))
+            warning = bots.observe_boss(game)
+            remembered = bots.choose_boss(warning, bots.BossMemory()).memory
+            boss = game.enemies[0]
+            boss.phase = "active"
+            observations, choices = [], []
+            for left, struck, spent, aim in (
+                (0.001, False, False, (-1, 0)),
+                (99.0, True, True, (0, 1)),
+            ):
+                boss.phase_left, boss.struck, boss.spent = left, struck, spent
+                boss.aim = aim
+                observation = bots.observe_boss(game)
+                observations.append(observation)
+                choices.append(bots.choose_boss(observation, remembered))
+                self.assertIsNone(observation.aim)
+                self.assertIsNone(observation.warning_left)
+            self.assertEqual(observations[0], observations[1])
+            self.assertEqual(choices[0], choices[1])
+
+    def test_warning_memory_active_and_recovery(self):
+        from dataclasses import replace
+        game = boss_warning("charge", (8, 4))
+        warning = bots.observe_boss(game)
+        first = bots.choose_boss(warning, bots.BossMemory())
+        active = replace(warning, phase="active", aim=None, warning_left=None,
+                         boss_x=8.5)
+        second = bots.choose_boss(active, first.memory)
+        self.assertEqual(second.memory, first.memory)
+        self.assertEqual(second.provenance, "warning-history")
+        self.assertEqual(second.selected, "escape")
+        recovery = bots.choose_boss(replace(active, phase="recovery"), second.memory)
+        self.assertEqual(recovery.memory, bots.BossMemory())
+        missing = bots.choose_boss(active, bots.BossMemory())
+        self.assertEqual(missing.provenance, "missing-warning-history")
+        self.assertEqual(missing.selected, "escape")
+
+    def test_slots_only_input_and_visible_branches(self):
+        from dataclasses import replace
+        o = bots.BossObservation(0, 8, 4, 10, 4, "recovery",
+                                 "charge", None, None, ())
+        self.assertFalse(hasattr(o, "__dict__"))
+        self.assertEqual(bots.choose_boss(o, bots.BossMemory()).selected, "approach")
+        close = replace(o, boss_x=8)
+        self.assertEqual(bots.choose_boss(close, bots.BossMemory()).selected, "swipe")
+        warning = replace(o, phase="warning", aim=(-1, 0), warning_left=0.5)
+        off = replace(warning, y=7)
+        self.assertEqual(bots.choose_boss(off, bots.BossMemory()).selected, "hold")
+        wall = replace(warning, y=8, boss_y=8)
+        choice = bots.choose_boss(wall, bots.BossMemory())
+        self.assertIn(("down", "wall"), choice.excluded)
+        self.assertEqual(choice.buttons, (("move", "up"),))
+        shot = replace(o, shots=((8, 4),))
+        self.assertEqual(bots.choose_boss(shot, bots.BossMemory()).selected, "escape")
+
+
+class OutcomeTest(unittest.TestCase):
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE @run/tests
+>>>END

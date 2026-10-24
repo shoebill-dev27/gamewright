@@ -1,0 +1,109 @@
+Round 1 of runs: the suite, dash probes at both rates, and the hit-stun case.
+
+<<<FILE @run/tests
+>>>END
+
+<<<FILE @run/play/probe60
+room empty
+fps 60
+end 2.5
+0 dash right
+0.3 dash left
+0.5 dash left
+0.6 dash left
+0.7 dash left
+0.9 dash left
+1.2 dash left
+>>>END
+
+<<<FILE @run/play/probe30
+room empty
+fps 30
+end 2.5
+0 dash right
+0.3 dash left
+0.5 dash left
+0.6 dash left
+0.7 dash left
+0.9 dash left
+1.2 dash left
+>>>END
+
+<<<FILE @run/play/fine60
+room empty
+fps 60
+end 2
+0 dash right
+0.80 dash left
+0.84 dash left
+0.85 dash left
+0.86 dash left
+0.87 dash left
+0.88 dash left
+0.89 dash left
+0.90 dash left
+>>>END
+
+<<<FILE @run/play/fine30
+room empty
+fps 30
+end 2
+0 dash right
+0.80 dash left
+0.84 dash left
+0.85 dash left
+0.87 dash left
+0.90 dash left
+0.93 dash left
+0.97 dash left
+>>>END
+
+<<<FILE @run/trace/basic60
+room empty
+fps 60
+end 3
+0 dash right
+>>>END
+
+<<<FILE @run/trace/basic30
+room empty
+fps 30
+end 3
+0 dash right
+>>>END
+
+<<<FILE @run/play/hit60
+room empty
+fps 60
+end 2.5
+spawn grub 8.5 4
+0.6 dash right
+0.7 dash right
+0.8 dash right
+0.9 dash right
+1.0 dash right
+>>>END
+
+<<<FILE @run/play/hit30
+room empty
+fps 30
+end 2.5
+spawn grub 8.5 4
+0.6 dash right
+0.7 dash right
+0.8 dash right
+0.9 dash right
+1.0 dash right
+>>>END
+
+<<<FILE @run/trace/hit60
+room empty
+fps 60
+end 2.5
+spawn grub 8.5 4
+0.6 dash right
+0.7 dash right
+0.8 dash right
+0.9 dash right
+1.0 dash right
+>>>END

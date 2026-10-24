@@ -1,0 +1,158 @@
+<<<EDIT repo/game.py
+<<<<<<< SEARCH
+                    self.shots.append(Shot(
+                        e.x, e.y, e.aim[0] * SHOT_SPEED,
+                        e.aim[1] * SHOT_SPEED, "boss", 1.0,
+                    ))
+=======
+                    shot = Shot(
+                        e.x, e.y, e.aim[0] * SHOT_SPEED,
+                        e.aim[1] * SHOT_SPEED, "boss", 1.0,
+                    )
+                    shot.born_frame = self.frame
+                    self.shots.append(shot)
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        for shot in self.shots:
+            shot[0] += shot[2] * dt
+=======
+        for shot in self.shots:
+            # A boss shot starts its one-second active interval at emission.
+            # Its first movement belongs to the following combat frame.
+            if getattr(shot, "born_frame", None) == self.frame:
+                kept.append(shot)
+                continue
+            shot[0] += shot[2] * dt
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE repo/tests/test_boss_contract.py
+"""Additional G-002 probes; controlled fixtures do not prove run reachability."""
+
+import math
+import unittest
+
+from game import Game
+
+
+class BossContractTest(unittest.TestCase):
+    def advance(self, game, seconds):
+        for _ in range(round(seconds * game.fps)):
+            game.step()
+
+    def warning(self, fps, attack):
+        game = Game(fps=fps, room="5")
+        boss = game.enemies[0]
+        boss.x, boss.y = 10.0, 4.0
+        boss.phase = "warning"
+        boss.attack_name = attack
+        boss.aim = (-1.0, 0.0)
+        boss.phase_left = 0.7 if attack == "charge" else 0.8
+        return game, boss
+
+    def test_uncontacted_shot_lives_until_recovery_and_moves_three_tiles(self):
+        for fps in (30, 60):
+            game, boss = self.warning(fps, "short shot")
+            game.place_player(0, 0)
+            self.advance(game, 0.8)
+            self.assertEqual(boss.phase, "active")
+            self.assertEqual(len(game.shots), 1)
+            shot = game.shots[0]
+            self.assertEqual(shot[:2], [10.0, 4.0])
+            self.assertEqual(shot[4], 0.0)
+            fired = game.t
+            self.advance(game, 1.0 - game.dt)
+            self.assertEqual(len(game.shots), 1)
+            self.assertEqual(boss.phase, "active")
+            game.step()
+            self.assertEqual(game.shots, [])
+            self.assertEqual(boss.phase, "recovery")
+            self.assertAlmostEqual(game.t - fired, 1.0)
+            self.assertAlmostEqual(shot[0], 7.0)
+            self.assertAlmostEqual(shot[4], 1.0)
+            removed = [
+                (t, d) for t, k, d in game.events
+                if k == "shot_removed"
+            ]
+            self.assertEqual(len(removed), 1)
+            self.assertEqual(removed[0][1]["reason"], "lifetime")
+            self.assertAlmostEqual(removed[0][0], game.t)
+
+    def test_one_tile_sidestep_during_each_warning_is_safe(self):
+        for fps in (30, 60):
+            for attack in ("charge", "short shot"):
+                game, boss = self.warning(fps, attack)
+                game.press("move", "up")
+                # 30 FPS rounds a quarter second upward to eight frames.
+                for _ in range(math.ceil(0.25 * fps)):
+                    game.step()
+                game.press("stop")
+                self.assertGreaterEqual(4.0 - game.y, 1.0 - 1e-9)
+                self.advance(game, 2.0)
+                self.assertEqual(game.hearts, 3, (fps, attack))
+
+    def test_zero_distance_warning_aims_right(self):
+        for fps in (30, 60):
+            for attack in ("charge", "short shot"):
+                game = Game(fps=fps, room="5")
+                boss = game.enemies[0]
+                boss.x, boss.y = game.x, game.y
+                boss.attack_name = attack
+                game.step()
+                self.assertEqual(boss.phase, "warning")
+                self.assertEqual(boss.aim, (1.0, 0.0))
+
+    def test_low_hp_keeps_alternating_attack_order(self):
+        for fps in (30, 60):
+            game = Game(fps=fps, room="5")
+            boss = game.enemies[0]
+            boss.hp = 6
+            for _ in range(60 * fps):
+                # Controlled protection isolates attack sequencing from mortality.
+                game.hurt_left = 2.0
+                game.invulnerable = True
+                game.step()
+                attacks = [
+                    d["attack"] for _, k, d in game.events
+                    if k == "boss_warning"
+                ]
+                if len(attacks) >= 6:
+                    break
+            self.assertEqual(
+                attacks[:6],
+                ["charge", "short shot"] * 3,
+                fps,
+            )
+
+    def test_nonlethal_swipe_preserves_every_phase(self):
+        for fps in (30, 60):
+            for phase in ("approach", "warning", "active", "recovery"):
+                for attack in ("charge", "short shot"):
+                    game, boss = self.warning(fps, attack)
+                    boss.x = 9.0
+                    boss.phase = phase
+                    before = boss.__dict__.copy()
+                    game.press("attack")
+                    after = boss.__dict__.copy()
+                    self.assertEqual(after.pop("hp"), before.pop("hp") - 1)
+                    self.assertEqual(after, before, (fps, phase, attack))
+
+    def test_lethal_warning_swipe_prevents_new_activation(self):
+        for fps in (30, 60):
+            for attack in ("charge", "short shot"):
+                game, boss = self.warning(fps, attack)
+                boss.x, boss.hp = 9.0, 1
+                game.press("attack")
+                game.step()
+                self.assertEqual(game.outcome, "cleared")
+                self.assertFalse(any(k == "boss_active" for _, k, _ in game.events))
+                self.assertEqual(game.shots, [])
+                self.assertIsNone(boss.aim)
+
+
+if __name__ == "__main__":
+    unittest.main()
+>>>END
+
+<<<FILE @run/tests
+>>>END

@@ -1,0 +1,141 @@
+<<<FILE goals/G-001-combat-monotony/03-game-designer-to-game-director.md
+---
+kind: handoff
+goal: G-001
+seq: 3
+from: game-designer
+to: game-director
+stage: Decide
+outcome: done
+---
+# 03: game-designer → game-director — Choose the response to combat sameness (diagnosis and options)
+
+## Task
+
+Read the diagnosis below and choose the scope and priority of the response to the combat sameness. The choice is between tuning and extending existing enemy behavior, and adding new enemy types. Also decide whether another play round on rooms 4 and 5 is needed first.
+
+## Context
+
+G-001: combat feels monotonous. The playtester (seq 02) ran three blind, pre-scripted sessions of rooms 1–3 on build 0.4. The designer compared the report with `design/combat.md`, the vision, the player profile and D-001. Rooms 4 and 5 were not played.
+
+## Findings
+
+### Reading the evidence
+
+The scripts could not react to the screen, so "0 kills" and "0 of 17 swipes landed" mostly reflect the script, not the difficulty. The design-relevant evidence is what the enemies did. They are fully predictable and do not change behavior within a fight or between rooms.
+
+### Spec check: most "odd" observations are the specified behavior
+
+| Observation | Spec (`design/combat.md`) | Verdict |
+|---|---|---|
+| Input swallowed after a hit, about 0.1–0.3 s | 0.3 s hit-stun, no input | As designed. The problem is that it is not communicated. |
+| A grub bit about every 0.8 s while adjacent | Invulnerability until 0.8 s after a hit | As designed. This is the grub's effective damage rhythm. |
+| The grub hit in room 2 did not die | Grub HP 2, swipe damage 1 | As designed. A grub needs two hits and gave no visible feedback. |
+| Spitters stationary, fire every 2 s | Same | As designed. The spec does not say whether the spitters are in sync. |
+| Spitter shots in one fixed loop | Same | Consistent with the spec. |
+
+### Symptoms and causes (design terms)
+
+**S1. Grub fights are the same every time (rooms 1 and 2 felt identical).**
+Causes:
+- The grub has one state: walk straight at the player and bite. The spec says "No telegraph" and gives it no timing, so there is nothing to read and no decision to make.
+- The fight is a pure damage race. Killing a grub takes 2 swipes (at least 0.35 s recovery between them), and an adjacent grub bites every 0.8 s. Hit-stun (0.3 s) then costs the player part of the window they would use to answer.
+- Nothing separates the player from an adjacent grub. There is no knockback, no grub recovery after a bite and no grub hesitation. Once the grub is adjacent, the player's only way out is the dash, which the evidence suggests was not available in time.
+- Room 2 only raises the count. A count does not change what the player has to do.
+
+**S2. No clear feedback on the player's own attacks.**
+Causes: there is no hit reaction (flash, knockback, sound cue) and no visible damage state on a 2 HP enemy. The player cannot tell whether a swipe worked. This hides whatever depth the system has and adds to the sameness.
+
+**S3. Spitters are a pattern to thread, not an opponent.**
+Causes:
+- The spitters are stationary, all fire together and fire on a fixed 2.0 s period. After one volley the player has seen everything the room will do.
+- The spec lists no way to approach a spitter, and the report found no safe moment to close in. That is a possible gap, but the evidence cannot settle it.
+
+**S4. Little variety across rooms.**
+Causes: the observed rooms are homogeneous (grubs only, spitters only). The spec says rooms are "mixed Grubs and Spitters", so this is either a content shortfall or a spec/build gap (see the defect list). With two single-state enemy types, even a mixed room offers only two lessons.
+
+**Shared root cause:** each enemy has one behavior with no state change, no timing variation and no player-readable cue. The player has little to decide, so the fights are monotonous. This also touches pillar 3, because a threat that arrives with no telegraph is visible but not readable.
+
+### Solution options
+
+**Option A: Give existing enemies two-phase behavior and legible timing (tuning, no new inputs, no new enemies).**
+- Grub: add a short visible wind-up (about 0.4 s) before the bite and a recovery pause (about 0.5 s) after a bite or a miss. Add a slight knockback on any hit it takes. Possibly add a lunge, with a pause before it, instead of a constant walk. This creates spacing decisions, which the player profile favors.
+- Spitter: stagger the volleys (offset each spitter's timer), and add a visible charge-up before each shot.
+- Add hit feedback: a flash and knockback on a landed swipe, and a visible damaged state at 1 HP.
+- Addresses S1, S2 and S3. Partly addresses S4 through varied volley timing.
+- Cost: low to medium. It reuses the existing enemy and projectile systems and adds timers, one animation or flash and a knockback rule. The art cost is small (telegraph poses).
+- Risk: low. The main risk is tuning that makes grubs trivial, so they would need a playtest after the change. There is a performance and fairness risk at 30 FPS, so timers should be defined in seconds and acceptance criteria checked at both 30 and 60 FPS.
+- Fit: strong. It supports pillar 1 (depth from positioning, timing and enemy behavior) and pillar 3, and it touches neither D-001 nor the constraints.
+
+**Option B: Make rooms vary through composition and light movement (modest content).**
+- Guarantee the mixed rooms in the spec: 1 spitter plus grubs, with spitters moving between a few anchor points, and grubs arriving from different sides at staggered times.
+- Addresses S4 and part of S1 and S3, but leaves S2 unsolved and leaves each individual enemy as shallow as it is now.
+- Cost: medium (room data, spawn scheduling, simple spitter repositioning). Risk: medium. Mixed rooms can get hectic quickly, and without Option A the fights are only busier.
+- Fit: good. It works within the vision. It is better as a complement to A than as a replacement.
+
+**Option C: Add one or two new enemy types (for example a charger and a shielded or armored enemy).**
+- The new behaviors give real variety quickly and show the room-to-room change the playtester asked for.
+- Addresses S4 most strongly. Does not repair the existing enemies.
+- Cost: high (design, art, tuning, QA for each enemy). Risk: scope growth in a small team, with a risk to the "prefer changes that reuse existing systems" constraint. The result may still feel samey if the existing enemies stay flat.
+- Fit: good with the vision if the enemies stay inside attack and dash. This is a scope and priority choice, so it is not mine to make.
+
+### Recommendation
+
+Do **A first**, then **B** if a playtest still shows sameness, and hold **C** until A and B have been playtested. A addresses the most symptoms for the lowest cost and risk, and it fits both pillars. The designer's plan after the Director's answer is to write a design spec for A (timings, knockback, feedback and player-observable acceptance criteria at 30 and 60 FPS).
+
+A is within the designer's authority (rules and tuning of existing enemies). The Director's decision is needed on the scope question (C, and how far to go with B), the priority against other goals, and whether to play rooms 4 and 5 before the spec is written.
+
+### Unknowns the evidence cannot settle
+
+- Rooms 4 and 5, and the practice room, were not played. They may already contain the variety that rooms 1–3 lack.
+- Whether the grub's speed or the swipe range and recovery make the grub fight winnable in live play. Blind scripts cannot say.
+- Whether the dash would let a live player avoid grub contact reliably. The scripts' dashes were generic and the report does not record them as effective.
+- Whether the player has a reasonable way to approach a spitter between volleys.
+- How many hearts the player has. Three hits ended the run in the observations, so it looks like 3, but that is not stated in the files provided.
+
+### Possible defects (kept apart from the design diagnosis; for `qa` (Observe))
+
+1. **Room composition does not match the spec.** `design/combat.md` says rooms are "mixed Grubs and Spitters" with 3–6 enemies. Observed rooms 1–3 were grubs only (3 and 4) and spitters only (3). Rooms 1 and 3 have 3 enemies and room 2 has 4, which is within the 3–6 range, but the mix does not match. This may be a build defect or a loose spec wording; the designer can fix the wording once QA confirms what the build does.
+2. **No game-over, restart or end state after the player dies.** The session ran on with enemies standing still. This is not covered in the spec. It may only be a feature of scripted play, so QA should check live behavior. If it is real, the designer will add the missing rule (death, restart and room-clear behavior) to the spec.
+3. **Hit-stun not communicated.** This follows the spec, so it is not a defect, but it is a feedback gap included in Option A.
+
+### Rooms 4 and 5
+
+Another play round on rooms 4 and 5 is **recommended before the spec is finalized**, but it does not block starting on Option A. Because the sample (rooms 1–3) is homogeneous, rooms 4 and 5 are the main place where the spec's "mixed" claim can be checked. The next play round should use scripts that can react or that cover the first contact with each enemy, to test whether the dash gives a live player any answer to the grubs.
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no new combat inputs without Owner approval. All options above stay inside it.
+- No new Decision is written at this step. Nothing here changes a pillar or D-001.
+
+## Constraints
+
+- No new input buttons beyond attack, dash and pause (D-001).
+- Must play correctly at 30 and 60 FPS, so all new timings must be specified in seconds.
+- Small team: prefer changes that reuse existing systems.
+- Pillar 3 (readable threats) requires telegraphs to be visible before damage is possible.
+
+## Open questions
+
+1. Approve Option A as the first response? (Recommended.)
+2. Is Option B in scope for this Goal, or should it wait until A has been playtested?
+3. Is Option C out of scope for G-001 for now?
+4. Should another play round of rooms 4 and 5 run before the spec, or in parallel with it?
+5. Route the two possible defects to `qa` (Observe), ahead of or in parallel with the spec?
+
+## Expected output
+
+A Director decision on the open questions, addressed to `game-designer` for the design spec (`write-design-spec`) if A is approved. Separately, a QA (Observe) request on the possible defects, and a play round on rooms 4 and 5 if the Director agrees.
+
+## Sender assessment
+
+Confidence: medium-high that the shared cause is single-state, untelegraphed enemy behavior, since the spec itself defines the enemies that way. Confidence is medium on the effect size of Option A until a live (reactive) playtest. The blind-script bias means the report understates how winnable the grub fights are.
+
+## Load
+
+- Role: studio/roles/game-director.md
+- Skills: studio/skills/diagnose-experience.md
+- Project: project.md#vision, project.md#player-profile, project.md#constraints, design/combat.md
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-001-combat-monotony/02-playtester-to-game-designer.md
+>>>END

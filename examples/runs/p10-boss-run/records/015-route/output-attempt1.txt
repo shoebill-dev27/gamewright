@@ -1,0 +1,8 @@
+<<<FILE @need
+design/final-boss-and-continuous-run.md
+decisions/D-006-walker-limit-rooms-3-5-structural-ceiling.md
+decisions/D-015-owner-approves-continuous-run-and-final-boss.md
+decisions/D-016-final-boss-experience-direction.md
+decisions/D-017-final-boss-and-run-contract.md
+studio/roles/game-director.md
+>>>END

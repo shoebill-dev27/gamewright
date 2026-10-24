@@ -1,0 +1,57 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/52-studio-to-game-designer.md",
+  "sha256": "f4dc3ddbecf2dac5ba7635b49970d667c664db29a764548d97c05764918859fd",
+  "bytes": 2549
+ },
+ {
+  "path": "studio/roles/game-designer.md",
+  "sha256": "802be90dc84142d0a16436d842f1da18d7c7b34500089a91a617a10dde90e7fb",
+  "bytes": 1595
+ },
+ {
+  "path": "studio/skills/write-design-spec.md",
+  "sha256": "f60b4ce8c6e89c2dc27ff87184c54b91452c45db8422fc378ca9253b45a0efd2",
+  "bytes": 1367
+ },
+ {
+  "path": "design/combat-step-46-room3-cap.md",
+  "sha256": "ef58d4b8d26b9e1efa903474545529d473558db0636ff3b710bcf05f85e85b6c",
+  "bytes": 7136
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "8ee4bdbaeb36c69a4446cb6db9dac13f103c24b0b3e2ffc044b8088c805b0d3f",
+  "bytes": 47741
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "0714d607b828069bf90d552d952510c7f36804dec57f9597b426786442b3890c",
+  "bytes": 5175
+ },
+ {
+  "path": "decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md",
+  "sha256": "70283fc2cfe5f66068caf7216d4f43567af8e4e9f10dbb963c0368a6faf55ee5",
+  "bytes": 3083
+ },
+ {
+  "path": "goals/G-001-combat-monotony/50-qa-to-studio.md",
+  "sha256": "a3d6affcda210cd99cd882295deb6a093c063ec43b3024568bb655c32b26c6fd",
+  "bytes": 17265
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

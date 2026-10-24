@@ -1,0 +1,28 @@
+Nothing has been run yet, so I'm requesting a first round: the test suite, plus trace runs of script A at 60 and 30 FPS.
+
+<<<FILE @run/tests
+>>>END
+
+<<<FILE @run/trace/A60
+room empty
+fps 60
+end 4
+player 8 4
+spawn grub 10 4
+spawn spitter 14 4
+0.2 dash right
+1.0 dash left
+2.0 dash right
+>>>END
+
+<<<FILE @run/trace/A30
+room empty
+fps 30
+end 4
+player 8 4
+spawn grub 10 4
+spawn spitter 14 4
+0.2 dash right
+1.0 dash left
+2.0 dash right
+>>>END

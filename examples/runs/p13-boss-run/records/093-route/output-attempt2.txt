@@ -1,0 +1,126 @@
+<<<EDIT goals/G-002-final-boss/goal.md
+<<<<<<< SEARCH
+- Build（試験道具・再測定）：open。74はE1の連続partial 2回目（72・74）。70は別作業E0のため加算しない。保存済みsource b0770a4180c9は159件OKだが実dodger未接続。未保存接続案2集合は公開再生の無傷assertに失敗し不採用。75で実経路接続・被弾差診断・記憶初期化・全分岐試験・判断出力を継続する。13ファイル配布台帳と追加5IDのQ1/Q4割当を保持する。切断部分は未確認。次もE1 partialならTechnical Directorへ分割・再計画を戻す。E2以降は未着手。
+=======
+- Build（試験道具・再測定）：未完了。76でE1連続partialが3回（72・74・76）となった。保存済みsource e99408d647c7は160 tests OKだが、実dodgerは旧経路で公開情報限定未成立。再生互換診断とhelper本文露出を保存したが、接続案の被弾差の原因・必要診断本文は未確認。E2以降は未着手。
+- Plan（E1再分割）：open。77でTechnical Directorへ戻す。実接続、互換診断、実経路監査、証拠出力の依存と完了条件を再計画する。既存13ファイル配布台帳・追加ID割当・60のfailを保持する。予算79/40につき新規工程を追加せず、既存作業の分割に限定する。範囲の取捨選択が必要ならGame Directorへ返す。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| 7b-e1b | Build | gameplay-engineer | implement-change | open | 75-studio-to-gameplay-engineer.md |
+=======
+| 7b-e1b | Build | gameplay-engineer | implement-change | done | 75-studio-to-gameplay-engineer.md → 結果: 76-gameplay-engineer-to-studio.md（E1 partial 3回目） |
+| 7b-e1-plan | Plan | technical-director | technical-plan | open | 77-studio-to-technical-director.md |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+逐次実行する。68に従いE0→E1→E2→E3群→E4群→E5群→独立Q1〜Q6を進める。
+=======
+逐次実行する。E1は77の再計画を先行し、完了条件が成立するまでE2以降と独立QAを開かない。残りは68のE2→E3群→E4群→E5群→独立Q1〜Q6を維持する。予算超過につき新規工程は追加しない。既存工程の省略・範囲選択はGame Directorの判断とし、StudioやTechnical Directorが基準を免除しない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+74をE1の連続partial 2回目（72・74）として受領し、75で同Roleへ継続する。70はE0であり同じE1の回数に含めない。保存済み159件成功と未保存接続案の失敗を区別し、E2は開かない。次もE1 partialならTechnical Directorへ分割・再計画を戻す。
+=======
+76をE1連続partial3回目として受領し、ループ制限により77でTechnical Directorへ既存E1の分割・再計画を戻す。保存済み160件成功と実接続未成立を区別し、E2以降は開かない。予算79/40につき新規工程を追加せず、範囲の取捨選択が必要ならGame Directorへ返す。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Gameplay Engineerが75-studio-to-gameplay-engineer.mdでE1を継続する。公開再生の被弾差を診断し、既存assertを保持して実dodger接続・記憶・全分岐・判断本文を整える。未保存案を保存済み基線へ混同しない。次のE1結果もpartialならTechnical Directorへ戻し、E1完了確認まではE2を開かない。
+=======
+Technical Directorが77-studio-to-technical-director.mdで既存E1を再分割する。実接続・互換診断・監査・証拠出力の完了条件と供給上限内の実行単位を定める。新規工程を追加しない。必要範囲の選択や費用判断が残る場合はGame Directorへ返し、Engineerへの第四の同一partial継続は開かない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+未完了。公開境界prototypeの限定監査を受領したが、実dodger接続は未完了。保存済みsource b0770a4180c9の159件成功は独立QAや基準充足を示さない。未保存接続案は公開再生の無傷assertに失敗し不採用。同じE1のpartialは2回であり同Roleへ継続し、次もpartialなら再計画へ戻す。未表示・切断・未対応を合格にしない。歴史的確認不能、記録精度に限定した比較、試験道具対応・再測定、独立QA、後続工程条件判断、限定Art Verify・独立Play・Designer判断・Reviewを残す。戦闘本体の不具合・難度・時間Visionとの差は未判定。project.mdは変更しない。
+=======
+未完了。76の診断道具追加を受領し、runtimeはsource e99408d647c7で160 tests OKを報告した。実dodgerの公開境界接続と被弾差の原因確定は未完了であり、必要本文の欠落を成功件数で代替しない。E1連続partial3回によりTechnical Directorへ再計画を戻す。予算79/40のまま新規工程を追加しない。独立QA、歴史的確認不能を保持した後続条件判断、限定Art Verify・独立Play・Designer判断・Reviewは未完了。Goal達成・戦闘本体の不具合・難度・時間Visionとの差は未判定。project.mdは変更しない。
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-002-final-boss/77-studio-to-technical-director.md
+---
+kind: handoff
+goal: G-002
+seq: 77
+from: studio
+to: technical-director
+stage: Plan
+outcome: routed
+---
+# 77: studio → technical-director — E1連続partial3回を受けた既存作業の再分割
+
+## Task
+
+既存E1を、実接続・互換診断・実経路監査・証拠出力の依存と完了条件が明確な単位へ再計画する。実装は行わず、供給上限内で完結できる次のEngineer作業と後続への引渡し条件を定める。
+
+## Context
+
+72・74・76が同じE1の連続partial3回となったため、ループ制限により再計画へ戻す。70は別作業E0であり数えない。60のfailを維持し、E2以降と独立QAはまだ開かない。
+
+Goalは79/40 operationsで予算超過。これは既存Build作業の再分割であり、新しい検証目的や工程を追加する依頼ではない。予算は変更しない。
+
+## Findings
+
+76で保存された変更はtest_split_c.pyの生成入力再生診断と、test_g002_evidence.pyのhelper自己試験本文の再表示。runtimeはsource e99408d647c7で160 tests OKを報告した。必要な診断行の完全な収録は未確認であり、成功件数で補わない。
+
+実dodgerは旧経路を使い、active chargeのphase_leftを読む。prototypeの限定監査成功は実経路の公開情報限定を証明しない。未保存接続案は不採用で、被弾差の原因は未確定。
+
+76が提示した分割候補は次のとおり。
+
+1. 直接呼出・_Proxy・play_room・play_runの実接続と、warning記憶の所有・寿命・入場/retry初期化。
+2. 接続後の生成／公開再生の全フレーム対照と、必要な制御前後・被弾接触条件の診断。
+3. 接続済み全経路の許可外参照禁止、不変性、記憶、全分岐のassert。
+4. 判断番号・grid・公開入力・記憶由来・候補／除外・選択・実発行ボタンと、状態／判断の出力整備。
+
+接続が後続診断・監査・証拠の前提となる。計画責任者としてこの依存を検証し、既存assertを維持した完了単位を定める。詳細な未完了項目、全13試験ファイルのQA配布台帳、新規1IDと既存追加5IDの割当は76を参照する。
+
+## Decisions already made
+
+- D-019：公開情報限定、反応0.15秒、独立1〜4保持、開始3/2 hearts別FPS比較。
+- D-021・D-023：Studio内テキスト検証。個別Load、@need一度最大8件、@run最大3回、各出力最大2万字。全文保存先・変更前ビルドは存在しない。
+- D-022：表示・弾・長時間観測契約を維持。
+- D-024：現行検証・現行内対照・記録比較・歴史的確認不能を分離。
+- 68：既存の直列計画。今回置き換える範囲と保持する範囲を明示する。
+
+## Constraints
+
+製品仕様、戦闘パラメータ、難度、秒数ゲート、Goalの解釈を変更しない。既存assertを弱めず、歴史的確認不能・切断・未表示をpassや免除にしない。
+
+新規工程を追加しない。既存作業を省略する範囲判断はGame Directorの権限である。必要な費用・範囲が既存計画を超えるなら、技術上の理由と選択肢をGame Directorへ返す。Ownerへの同じ供給質問を繰り返さない。
+
+実装者の自己試験を独立QAに置き換えない。E1完了前にE2以降やQAを先行させない。共有repoと証拠の依存により直列を維持する。
+
+## Open questions
+
+- 各単位の具体的な入力、変更対象、assert、表示本文、完了条件は何か。
+- 次のEngineer Stepを最大3回・各2万字以内で閉じられる範囲はどこか。
+- 既存計画内で成立するか。成立しない場合、Game Directorが判断すべき最小の範囲・費用問題は何か。
+
+## Expected output
+
+結果をstudio宛てHandoffで返す。既存E1の再計画として、順序、依存、各単位の完了条件、実在する個別Load案、実行・出力配分、失敗時の戻し先、68の保持範囲を示す。次のEngineer作業を一つ具体化し、13ファイル配布台帳と追加IDを維持する。
+
+範囲・費用判断が必要なら、Game Directorへ渡す判断材料を示してstudioへ返す。新しい工程の追加や基準免除で解決しない。
+
+## Load
+
+- Role: studio/roles/technical-director.md
+- Skills: studio/skills/technical-plan.md
+- Project: project.md
+- Project: goals/G-002-final-boss/goal.md
+- Project: design/final-boss-and-continuous-run.md
+- Project: design/g002-historical-comparison-evidence.md
+- Project: repo/bots.py
+- Project: repo/game.py
+- Project: repo/session.py
+- Project: repo/play.py
+- Project: repo/run_driver.py
+- Project: repo/source_id.py
+- Project: repo/tests/test_bots_boss.py
+- Project: repo/tests/test_split_c.py
+- Project: repo/tests/test_g002_evidence.py
+- Supporting plan: goals/G-002-final-boss/68-technical-director-to-studio.md
+- Supporting report: goals/G-002-final-boss/60-qa-to-studio.md
+- Decisions: decisions/D-019-g002-balance-criteria-applicability.md
+- Decisions: decisions/D-021-owner-authorizes-text-build.md
+- Decisions: decisions/D-022-g002-v1-supplements.md
+- Decisions: decisions/D-023-owner-confirms-verification-supply.md
+- Decisions: decisions/D-024-g002-historical-comparison-evidence.md
+- Previous handoff: goals/G-002-final-boss/76-gameplay-engineer-to-studio.md
+>>>END

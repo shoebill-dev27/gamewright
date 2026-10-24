@@ -1,0 +1,247 @@
+<<<FILE goals/G-002-final-boss/20-technical-director-to-studio.md
+---
+kind: handoff
+goal: G-002
+seq: 20
+from: technical-director
+to: studio
+stage: Plan
+outcome: question
+---
+# 20: technical-director → studio — 回帰対応を補完し、実行・供給・費用承認の不足を返す
+
+## Task
+
+Studioは本報告を受け、Game Directorへ「必要な供給・費用を伴う現行仕様の継続」の判断準備をルーティングする。実行可能なcheckout、desktop実機環境、独立検証枠、費用承認の根拠が揃うまでBuildを保留する。
+
+## Context
+
+D-015〜D-019で連続ラン・単体ボス・先頭retryと詳細契約・基準適用は確定している。D-020は最小実機ホストをPlan対象に含める一方、実装・依存導入・購入を許可せず、五条件の解決までBuildを保留した。
+
+本Stepでは提供された回帰正本と実テスト本文を照合した。実行環境への確認経路を試したが利用できず、実ファイル・git・Python・機器の確認には至っていない。調査報告の提出とBuild開始条件の充足は別である。
+
+## Findings
+
+### 1. 取得できた証拠と取得不能の範囲
+
+環境確認に使えるshell・ファイル読取等のツールを探すため、`functions.exec`から利用可能ツールのメタデータ取得を試した。応答は`code-mode host is disabled`であり、ツール列挙自体が実行されなかった。shellコマンド、ファイル読取、Python実行は開始できていない。これは本executorの経路の制約であり、プロジェクト全体の資源不存在や供給不能を示さない。
+
+実行環境の権限設定はread-only、ネットワーク制限、権限昇格不可である。read-only自体がPython実行不能を意味するとは判断しない。今回の直接の障害は利用できる実行ツールを取得できなかったことである。ゲーム変更、依存導入、購入、外部連絡は行っていない。
+
+| 調査項目 | 確認済み | 残る不足・影響 |
+|---|---|---|
+| 実行対象 | パケットの対象表記は`repo/`、指定shaは`27fe16268ac8` | gitルート、HEAD、指定shaとの一致・祖先関係、差分の有無は未確認。実行結果を特定commitへ帰属できない |
+| Python・依存 | 提供ソースのimportは標準ライブラリとローカルモジュール | Python版、インストール済み依存、追加の依存定義は未確認。新ホスト用ライブラリの導入済み証拠はない |
+| tests | `repo/tests/test_game.py`の全文を静的照合 | 実行未着手。成功件数・失敗件数・実行時間は取得していない |
+| player／trace | README・manual・play.pyから既存実行方法と60秒上限を確認 | 両viewとも未実行。終了後の挙動を不具合として再現確認していない |
+| bots | 全bot、30/60 FPS、独立部屋・3 hearts・既定limit60の経路を確認 | 全bot×全室×両FPSは未実行。clear／death／unfinished、秒数、損失等の新測定値はない |
+| 版表記 | project.mdは0.4、README・manual・game.py・player bannerは0.6 | combat.mdは0.4以降の変更経緯を記す。ただし対象checkoutの履歴を確認できず、表記差の原因・修正漏れは確定できない |
+| desktop・機器 | 既存要件とV2を確認 | OS、表示サーバー、keyboard、gamepad、ドライバー、利用条件は未確認 |
+| 独立検証 | QA→Art→Play→Designer→Reviewの必要性を確認 | 担当供給元、機器利用枠、費用、独立性を保つ実施条件は未確保 |
+
+過去DecisionのQA成功記録や旧bot値は履歴として保持するが、今回の実行基線には転記しない。環境コンテキストにある作業ディレクトリもgitルートの確認済み証拠にはしない。
+
+### 2. 実行基線を取得する具体的な経路
+
+Studioはまず実行基盤の管理者またはrepository管理担当へ、次を供給する経路を確認する。人物名・供給権限者はパケットにないため特定できない。Studioが担当を割り当て、Role内で確保できなければGame DirectorがOwnerへまとめる。
+
+1. 読取・実行可能な`repo/`のcheckoutとshell、Python3。指定shaのobjectと、差分確認可能なgit情報を含める。
+2. 対象commitと指定shaの一致／差異、作業差分の有無を記録する。差分本文・remote URL・環境変数値を一括出力しない。秘密情報を含み得るファイルは内容を開かない。
+3. READMEどおり、`repo/`で`python3 -m unittest discover -s tests`を実施する。read-only環境ではbytecode生成を抑止する等、ソースを変更しない実行方法を選ぶ。
+4. manualの既存構文だけで、両FPSのplayer／traceを実行する。最小例は`room empty`、`spawn grub 10 4`、`spawn spitter 1 1`、`end 5`にFPS指定を加えたものとする。CLIは既存`play.py --view player|trace SCRIPT`に従う。scriptを保存できなければ既存parserとplay関数へメモリ上で同じ文字列を渡し、その経路を明記する。
+5. botsは既存`bots.py`のscriptで全bot・rooms1-5・limit60を両FPSで実行する。出力の`NOT cleared`だけでは死亡とlimitを区別できないため、既存`play_room`の戻り値の損失から終了heartsを確認し、clear／death／unfinishedを別に記録する。観測用呼出しとCLI実行を区別する。
+6. 失敗、実行不能、未着手を分ける。commit、FPS、script、limit、終了理由、結果を対応付ける。必要時は既存`log on`で判断・被弾を診断する。
+
+この順序は将来の実施手順であり、実行済み記録ではない。基線取得後に予想外の既存失敗があれば影響と見積もりを更新する。
+
+### 3. 回帰正本と実テストの対応
+
+今回、combat.md、step44・46・68・72・94、D-001〜D-007、D-011〜D-020、および提供test_game.pyを読んだ。16の「回帰正本未読」は解消した。基準の適用関係に新たな仕様衝突は認めないが、既存suiteは全基準を網羅していない。
+
+| 正本・Decision | 実テスト本文との照合 | G-002での保持・終了・置換と試験先 |
+|---|---|---|
+| combat1〜10、19〜21、D-001／004／005 | CombatTest、GrubTest、BruteTest、SpitterTest、DashTest、InvulnerabilityTest、ShotContactTest、LungeContactTestが関連 | 共有ルールを保持。既存試験が片FPSだけの箇所や限定条件は独立QAで補完。ボスはB5〜B9へ明示適用 |
+| combat12、Rooms、step72 R3-1、D-012 | `test_rooms_match_the_spec`は2・3・4番と旧5番brute位置を確認。1番の完全配置assertはない | 1〜4番を完全照合するR2へ補完。旧5番assertはB(12,4)、HP12、1体のB1へ置換 |
+| combat11／18、step46、D-007 | CueGapTestに4・5番の実部屋、強制同時、取消、cap遅延。room3静止12秒は最大3をassert | 4番・共有試験を保持。新5番にspitter試験を空適用せずB2／B4へ置換。room3一般上限5とcap遅延は別試験 |
+| step46の11d、step68の訂正 | 静止12秒試験はplayer印＋spitイベントの算定検証ではない | 7.5秒・12.0秒の表示と直近0.3秒のspitを記録する経路を保持。D-007の11.7秒表記は正本補足に従う |
+| combat17／16e、D-002／003 | 提供suiteに帯内外・上端の軌道比較を網羅する試験はない | 共有接触回帰を補完し、新ボスはB10。帯は命中・消費だけに適用 |
+| step44の13a〜f、D-006 | BotsTestに旧下限、clear数、dodger比、camper比較が残存。コメントは旧上限6 | 新構成への適用終了。関連assertを単に削除せず、独立3・4のFPS別報告と新5番比較へ接続。過去記録は保存 |
+| combat14、D-019 | 同BotsTest内に1〜2番のwalker損失、dodger損失・clearを確認するassert | 両FPSで保持。旧13の撤去に巻き込まない |
+| combat15、D-019 | 同BotsTestは旧3〜5番のdodger dash回数を確認 | 独立3・4を保持、0回はDesigner報告。新5番は実接触を伴うB6、横移動B5へ |
+| combat16c、D-019 | dodger比較は旧1〜5番を同列処理 | 独立1〜4を保持。新5番は対応確認済みbot、同条件、開始3／2 hearts別のFPS比較へ置換 |
+| その他BotsTest | 終了、ログ有無の結果一致、観測字段、walker比較距離、brute方針を確認 | 保持。新5番とSession経路でもログが結果を変えないことを追加確認 |
+| step68、D-011 | VariantMessageTestとReactionTestにvariant・共通prefix・manualの確認 | V-a〜V-eを保持。runner通常HPのswipeはkill。HPを増やしたrunner試験は共有cancel機構の試験であり通常個体の証拠とは区別 |
+| step72 R3-1〜R3-10、D-012 | 配置と全敵死亡によるclearは明示試験あり。他は共有試験との組合せ | teaching schedule、初回grub cue≥4秒、cap遅延、最後のspitterへの経路等を個別追跡。共有suiteのgreenだけで全R3合格にしない |
+| step94 W1〜W8 | ShotSourceTest、LateSwipeTest等は方向・一部表示・順序・非表示を確認 | 全文言とprefixを保持。W2旧5番spitter経路は4番・practiceへ、新5番はボス短射V1へ。未網羅のW3・W6・W7等は補完 |
+| D-013／D-014 | 過去Goalの限定検証・既知ギャップを記録 | 過去判断は維持。新機能への検証免除に拡張しない。比較用の旧ビルドがない場合、byte比較を実施済みにしない |
+| 新仕様R／B／T／C／V | 連続ラン、ボス、pause、retry、実機ホストの既存実装・試験は提供されていない | 16の全ID対応を維持し、新設する。R1の正規連続到達と境界fixtureを別証拠にする |
+
+実装担当は変更報告に「正本・基準ID→旧assert→保持／終了／置換→新試験」を付ける。QAは両FPSで個別に判定する。未実施・既知ギャップも記録し、難度・体験の判断は独立PlayとDesignerへ返す。
+
+### 4. 最小ホストの技術方式と供給条件
+
+技術構造は16を維持し、共通Sessionへ接続する単一のdesktopウィンドウホストを採る。ホストは入力正規化、固定刻み駆動、公開player表示、操作・時刻記録に限定する。ゲーム規則をホストへ複製しない。
+
+入力・表示基盤の第一候補はpygame／SDL系とする。ただし対象OS・Python・既存依存の互換性が未確認であり、ライブラリの確定・導入は保留する。新規依存の追加は本Stepで行わない。無条件に後続を拘束するライブラリDecisionは作成しない。
+
+- 表示は既存の文字盤面と§6の情報をウィンドウに描画する。新しい素材制作は含めない。
+- keyboardとgamepadの移動・attack・dash・pause・終端retryを共通actionへ渡す。軸閾値、対応機器、具体mappingは供給された機器で確定しmanualへ記す。
+- 押下・解放、軸状態、正規化action、受理／拒否、Session通番を対応付ける。機器識別は検証に必要な非個人的情報に限定し、serialや利用者情報は記録しない。
+- 境界・retry時は現在保持中の操作を遮断し、解放・軸neutral後の再入力で解除する。pause突入では保持移動を解除し、予約攻撃はSession内で凍結する。
+- focus喪失・機器切断で保持移動を解除する。自動pause等の新たなplayer-facing behaviorが必要ならDesignerへ確認し、暗黙に追加しない。
+- シミュレーションは30または60 FPSの固定刻み。実機の単調増加時計をdriver時刻に使い、pause中も入力イベントとresumeを処理する。処理遅延や追いつき実行は記録し、危険表示を見せずにゲーム時刻だけを進める挙動を合格にしない。
+- C2は実時間2秒を挟んだ前後のSession状態で確認する。V2は独立QAが両入力・両FPSで実機操作記録と状態遷移を照合する。
+
+供給に必要なのは、対象desktop OSと表示環境、対応Python、依存利用・導入権限、keyboard、実gamepadとドライバー、独立QA／Art／Playの利用枠である。OS・機器の種類や利用期間は未確認であり、全OS対応を約束しない。
+
+既存desktop資源が見つかればその環境を優先する。pygame／SDLが利用できない場合は既存の別入力・表示基盤を調べるが、機器対応・保守費用を比較してから再選択する。terminalのみ、模擬イベントのみ、headlessのみではV2を充足しない。独自OS別gamepad層の新設は複数入力経路の保守・検証を増やすため第一候補にしない。
+
+### 5. 順序・リスク・検証への引継ぎ
+
+実装順は16の順序を維持する。
+
+実行基線・資源確定→Game終端と観測→ボスと弾属性→Session境界・両時刻・pause・retry→parser／player表示／長時間trace／manual→対応botsと測定→実機ホスト→統合基線と独立検証資料。
+
+コード作業は逐次とする。Game、play、bots、ホストが種別・時刻・観測契約を共有し、独立して変更できる境界がまだない。並列コード作業や隔離workspaceは開かない。
+
+主要リスクと対処は次のとおり。
+
+| リスク | 対処 |
+|---|---|
+| 既存の「grub以外はspitter」という分岐へボスが混入 | 種別を明示し、共有回帰とB試験を分ける |
+| ボス突進に既存grubの命中時短縮が混入 | 通常命中・保護吸収・壁の全active時間をB3／B7で確認 |
+| 境界とretryで入力・反応記憶が再発火 | Session入場処理を共通化し、R4／R5／T4と実機解放記録を照合 |
+| pause後に止まったゲーム時刻のresumeが発火しない | 16の独立driver時刻を維持し、C2で実時間確認 |
+| 長時間traceがメモリを圧迫 | 逐次出力と毎フレームtraceの選択。1200秒は初期測定limitであり合格閾値ではない |
+| 未知のOS・機器・依存でホスト工数が増加 | Build前に対象と権限を限定し、互換性不足なら見積もりを戻す |
+| bot一致を攻略・体験合格と誤認 | clear／death／unfinished、開始hearts、方針を分け、独立PlayとDesigner判断を必須にする |
+
+統合後は独立QA→限定Art Verify→独立Play→Designer実測後判断→Reviewの順とする。明白な対処不能・到達不能はPlay前にDesignerへ戻す。Playtesterへの資料はStudioが起動・操作・記録方法から新規作成し、本報告の設計意図・期待結果・実装情報を転記しない。
+
+### 6. 更新見積もりと承認根拠
+
+環境・実行基線が未確認のため、16の作業見積もりを実測で精密化できない。以下は未算入部分を可視化するための計画用の幅であり、調達見積書・確約・承認済み予算ではない。
+
+| 項目 | 人日 | 根拠・条件 |
+|---|---:|---|
+| Build準備〜統合 | 11.5〜20 | 16を維持。ホスト2〜4を含む。未知の環境対応は確定していない |
+| 独立QA | 2〜3 | 既提示枠。対象desktopと実機が利用可能であることが前提 |
+| 限定Art Verify | 0.5〜1 | テキスト表示の限定確認 |
+| 独立Play | 1〜2 | 実施枠と記録条件の確保が必要 |
+| 提示済み部分の小計 | 15〜26 | 総費用・承認額ではない |
+| Designer実測後判断 | 0.5〜1.5 | 本Stepで追加した暫定計画枠。新規大幅設計を含まない |
+| 修正・再検証の予備枠 | 2〜5 | 本Stepで追加した暫定枠。障害件数の予測や無制限修正の保証ではない |
+| Review・引継ぎ整理 | 0.5〜1 | 本Stepで追加した暫定計画枠 |
+| 計画上の合計 | 18〜33.5 | 上記仮定下のみ。供給確認後に再見積もりが必要 |
+
+本Stepは経過作業時間を計測していない。既に消化した工数と残工数の精算も未確認である。
+
+人日単価、通貨、税、機器・OS・ライセンス・外部担当の料金、配送や待ち時間は不明である。金銭総額や完了日を算出できない。既存資源の無償利用も確認していない。大幅な仕様再設計、追加OS対応、素材制作、予備枠を超える反復は上の合計に含めない。
+
+D-015は範囲承認、D-020はPlan対象の整理であり、今回の人日・金銭・供給条件の費用承認ではない。既存承認との照合に使える予算上限・単価・配員枠がパケットにないため、承認内とも超過とも認定できない。費用承認根拠を取得できないという不足は具体化した。
+
+### 7. D-020の五条件とBuild判断
+
+| 条件 | 状況 | 解決担当・経路 |
+|---|---|---|
+| 1. commit・sha・Python・依存・基線・版表記 | 未充足。静的な表記差のみ確認 | Studioが実行基盤／repository管理担当を割当て、§2の実行証拠を取得。供給できなければGame DirectorからOwnerへ |
+| 2. 回帰正本の読込みと試験対応 | Plan上は充足。本Step§3で未読を解消し対応を補完 | Buildがassert移行表を成果に含め、独立QAが検証。これは実行合格ではない |
+| 3. 実機環境・方式・導入権限・機器・独立検証供給 | 一部のみ。方式を提示したが供給条件は未確認 | Studioがdesktop／機器管理担当と独立検証担当を確保。権限者不明・Roleで供給不可ならGame Directorへ |
+| 4. 全費用・リスクを確定／未確定で分離 | 整理は実施。供給条件と金銭費用が残り、総費用確定には未充足 | Technical Directorが資源情報で更新、Game Directorが費用判断を準備 |
+| 5. 承認内の根拠または必要Owner承認 | 未充足。根拠資料がなく承認内と判断できない | Game Directorが下記briefと予算・供給条件をまとめ、必要ならOwnerへ一問として提示 |
+
+Build開始不可。本StepでBuildは開かない。追加難度ゲート未設定は阻害理由に含めない。
+
+### 8. Game Directorへ戻すbrief
+
+**判断対象：必要な実行・実機供給と費用を伴う現行仕様の継続を、どの条件で認めるか。**
+
+orchestration.mdの「Roleで生成できない情報・資材による停止」と費用承認境界を照合した。ソース本文からcommit証拠、機器の利用権、独立担当の稼働枠、予算承認を生成することはできない。一方、既存資源の不存在や承認超過そのものは未確定である。
+
+16と本Stepは同じ依存を未解決で返す形になるが、今回は回帰正本の読込みと利用可能経路の失敗という新情報がある。単純な「新情報なしのquestion二回」とは断定しない。ただし、同じパケットのまま三度目のPlan確認へ戻す経路は作らない。Studioは供給責任者の割当て、またはGame Directorによる具体的な供給・承認判断準備へ進める。
+
+| 案 | 必要物・費用幅・未確定部分 | 後続ルート |
+|---|---|---|
+| A. 既存資源を指定して現行仕様を継続 | checkoutと実行経路、対象desktop、両入力機器、依存利用権限、独立検証枠、予算責任者の承認根拠。計画18〜33.5人日、金銭額・稼働日程は未算定 | 供給確認→基線・見積もり更新→五条件確認→Build。既存資源だけで足りると確認されるまで購入不要とは断定しない |
+| B. 不足分の調達・権限付与を含めて継続 | Aの不足分について供給者、価格、導入権限、QA／Play条件を取得。18〜33.5人日に環境対応の増分が生じ得る。増分・調達金額は未確定 | Game Directorが具体的見積もり・上限・条件をOwner承認へまとめる。承認前は購入・導入・Buildを行わない |
+| C. 供給・費用の確約までGoalを停止 | 実装費用を新たに確約しない。再開調査の工数・時期は別途必要 | Owner判断で停止・再開条件を記録。範囲縮小を望む場合はOwnerによるInterpretation判断後にDesign／Planへ戻す |
+
+推奨はAの必要資源と承認根拠を具体的な責任者に割り当てて確認し、既存資源で不足する項目だけBへまとめること。これは実装開始の推奨ではない。供給者や費用根拠をRole内で得られない場合、Game Directorは「供給して継続／不足分を承認して継続／停止」を一つのOwner判断へまとめる。
+
+推奨の再検討条件は、必要資源の調達価格・権限・利用枠が得られない、未知のOS対応で暫定工数を超える、またはOwnerが費用を受け入れない場合である。headlessだけへの縮小、V2任意化、独立検証省略はこのRoleで選べない。仕様変更の要望が出た場合はOwner／Game Director判断を経てDesignerへ戻す。
+
+## Decisions already made
+
+- D-001：戦闘入力はattackとdash。追加入力を設けない。
+- D-002／D-003：既存接触方式と帯。ボスへの限定適用はD-017による。
+- D-004／D-005／D-007：既存敵のgap・非中断・保護中接触消費とroom3境界を保持。
+- D-006：旧構成の履歴として保持。新構成への適用はD-019に従う。
+- D-011／D-012：variant文言とroom3構成を保持。
+- D-013／D-014：過去Goalの判断・既知ギャップを保存し、新機能への検証免除にしない。
+- D-015／D-016：連続ラン、第5部屋単体ボス、先頭retryと体験方向。
+- D-017／D-019：詳細契約、回帰適用、対応bot比較、Designer実測後判断。
+- D-020：最小ホストをPlan対象に含め、五条件解決までBuild保留。
+- D-021は作成しない。ライブラリの環境適合性と供給条件が未確認であり、最終選択を記録できる段階ではない。
+
+## Constraints
+
+ゲーム・ホスト実装、依存導入、購入、外部費用の確約は行わない。Owner request、Interpretation、仕様、過去Decision、project.mdは変更しない。
+
+秘密情報、環境変数値、個人情報を記録しない。実行ツールの不在をプロジェクト資源の不存在へ一般化しない。未実行を成功・失敗・再現済みと扱わず、headlessや模擬入力をV2の代用にしない。
+
+逐次実装と独立QA→限定Art Verify→独立Play→Designer判断→Reviewを維持する。QAによる計画結果の独立検証を省略しない。
+
+## Open questions
+
+1. Studio／実行基盤・repository管理担当：指定shaを含むcheckoutと実行経路を供給できるか。§2の基線を取得する担当と条件は何か。
+2. Studio／desktop・機器管理担当：対象OS、表示環境、keyboard／gamepad、依存権限、独立検証の供給元・利用枠は何か。
+3. Game Director／予算権限者：暫定18〜33.5人日と未算定の金銭費用を照合する既存承認資料はあるか。なければ、どの供給・上限・条件をOwnerへ求めるか。
+4. Game Director：既存資源確認で解けない場合、briefの継続条件または停止をOwner判断へまとめる。現時点でDesignerへの新規仕様質問はない。
+
+## Expected output
+
+Studioは本Stepの回帰対応補完を記録し、Build保留を維持する。次はGame Directorへ本briefを渡し、供給・費用承認の責任者と取得経路、必要なら一つのOwner Escalationを具体化する。
+
+同じ不足だけを記したPlan質問を再発行しない。新しいcheckout・実行権限・資源情報・承認資料が揃った場合に限り、残条件の確認をTechnical Directorへ戻す。五条件がすべて解決した後、StudioがBuildを開く。
+
+## Load
+
+- Role: studio/roles/technical-director.md
+- Skills: studio/skills/technical-plan.md
+- Project: studio/orchestration.md
+- Project: project.md
+- Project: goals/G-002-final-boss/goal.md
+- Project: design/final-boss-and-continuous-run.md
+- Project: design/combat.md
+- Project: design/combat-step-44-walker-limit.md
+- Project: design/combat-step-46-room3-cap.md
+- Project: design/combat-step68.md
+- Project: design/combat-step72.md
+- Project: design/combat-step94.md
+- Project: repo/README.md
+- Project: repo/manual.md
+- Project: repo/game.py
+- Project: repo/play.py
+- Project: repo/bots.py
+- Project: repo/tests/test_game.py
+- Project: goals/G-002-final-boss/16-technical-director-to-studio.md
+- Project: goals/G-002-final-boss/18-game-director-to-studio.md
+- Decisions: decisions/D-001-one-button-combat.md
+- Decisions: decisions/D-002-contact-edge-graze-accepted.md
+- Decisions: decisions/D-003-contact-edge-exact-reach-and-lunge-band.md
+- Decisions: decisions/D-004-spitter-cue-gap-brute-no-cancel-room2-spitter-deferred.md
+- Decisions: decisions/D-005-blocked-contact-consumes-shot-and-spends-lunge.md
+- Decisions: decisions/D-006-walker-limit-rooms-3-5-structural-ceiling.md
+- Decisions: decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md
+- Decisions: decisions/D-011-variant-named-messages-accepted.md
+- Decisions: decisions/D-012-room3-standard-grub-and-closer-spitter.md
+- Decisions: decisions/D-013-review-pass-3-readability-wording-then-close.md
+- Decisions: decisions/D-014-review-pass-4-goal-met.md
+- Decisions: decisions/D-015-owner-approves-continuous-run-and-final-boss.md
+- Decisions: decisions/D-016-final-boss-experience-direction.md
+- Decisions: decisions/D-017-final-boss-and-run-contract.md
+- Decisions: decisions/D-018-legacy-balance-gate-transition-direction.md
+- Decisions: decisions/D-019-g002-balance-criteria-applicability.md
+- Decisions: decisions/D-020-g002-host-scope-and-plan-entry-conditions.md
+- Previous handoff: goals/G-002-final-boss/19-studio-to-technical-director.md
+>>>END

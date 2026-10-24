@@ -1,0 +1,70 @@
+<<<FILE goals/G-001-combat-monotony/104-qa-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 104
+from: qa
+to: studio
+stage: Review (paper check of QA result, per D-013 item 4)
+outcome: pass
+---
+# 104: qa → studio — Verification of the manual fix, marker search and suite: all of V1–V5 pass
+
+## Task
+
+Take the QA verification result for the wording-only round (handoff 103). Route it to Review pass 4 as the paper check that D-013 item 4 pre-committed.
+
+## Context
+
+Goal G-001 (combat feels monotonous). An earlier QA report found a stray edit marker in the Warnings section of `repo/manual.md`. The manual was cleaned and `design/combat-step94.md` got a wording correction. No code, test or parameter changed in this round. This report checks only the narrow criteria V1–V5 of handoff 103, not a full W1–W8 re-verification.
+
+## Findings
+
+**Verdict: pass.** All five criteria pass. I found no defect.
+
+How I checked: I read the files exactly as supplied in the packet. I used the one run the packet already held (the test suite) and one `play.py --view player` session. I used no further runs.
+
+| Criterion | Result | Evidence |
+|---|---|---|
+| V1 | Pass | `repo/manual.md` has no line starting with `>>>`, `<<<` or `=======`. It has no `REPLACE_PLACEHOLDER` and no `SEARCH` (case-sensitive). The only table separators are `|---|---|`. |
+| V2 | Pass | The Warnings section has two separate bullets. The first is "Being hit shows `YOU ARE HIT by a grub`, `by a runner`, `by a brute` or `by a shot from the <direction>` (north … north-west: …)". The second is "A swipe that interrupts the warning of a grub or runner staggers it for 0.4 s; a brute is not interrupted." The stagger sentence is word for word as required. It wraps across two source lines but is one bullet. Both bullets are well formed. |
+| V3 | Pass | The same patterns find nothing in `repo/game.py`, `repo/tests/test_game.py`, `repo/bots.py`, `repo/play.py` or `design/combat-step94.md`. There is no `=======` anywhere in these files, so no ordinary-text exception was needed. |
+| V4 | Pass | `python3 -m unittest discover -s tests`: Ran 69 tests, OK, exit 0. This equals the previous result of 69 OK. |
+| V5 | Pass | In `design/combat-step94.md`, W1 for the spitter at (15,7) reads `from the south-east`. The vector is consistent: travel about (-0.92,-0.39), reversed (0.92,0.39), ratio 3/7 = 0.43 > 0.4142. The W5 text says "for the brute, after its 0.7 s wind-up". This also matches `GRUBS["brute"]["windup"] = 0.7` in `game.py`. |
+
+V5 build check: I ran `play.py --view player` rather than `run_trace`, because the player view prints the hit line and the cue direction. The script was room empty, spitter at (15,7), player at (8,4), 60 FPS, end 7. The `cue:` line shows aim (-0.92,-0.39). The hit lines read `YOU ARE HIT by a shot from the south-east — hearts 2/3` at 4.200 s and `… hearts 1/3` at 6.600 s. This agrees with the design note. The suite's `ShotSourceTest` also covers (15,7) → south-east at 30 and 60 FPS, and it passed.
+
+**Not checked:**
+- I did not run `run_trace` or `run_bots`.
+- I ran the (15,7) south-east case in the player view only at 60 FPS. The 30 FPS case is covered by the unit test only.
+- I did not re-verify W1 for the other placements, W2–W8, or the late-swipe lines by play. Only the passing suite stands behind them.
+- I did not re-check the 30/60 FPS items already reported as unshown: R3-8 at 60 FPS, the room 3 pure 1-tile sidestep, and the 30 FPS cancel and recovery swipe in room 3. They stay unshown (D-013 item 5).
+- I checked the files as supplied in the packet. I cannot see how they are stored on disk.
+
+## Decisions already made
+
+- D-011: variant names appear in wind-up and hit messages (accepted).
+- D-013: one wording-only round, then Close. If QA passes with the suite green and bots unchanged, Review pass 4 is a paper check with a goal-met verdict. Bots were not changed (`bots.py` has no marker and no edit), and the suite is green. I did not run the bots myself.
+
+## Constraints
+
+- Verification is from the files and the build only.
+- No full 30/60 FPS re-verification.
+- QA did not edit any production file.
+
+## Open questions
+
+None.
+
+## Expected output
+
+Route this result to Review pass 4 (paper check per D-013 item 4). Review should confirm that the pass result and the accepted gaps meet the pre-commitment, then give the verdict.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: repo/manual.md, design/combat-step94.md, project.md#current-state
+- Decisions: decisions/D-011-variant-named-messages-accepted.md, decisions/D-013-review-pass-3-readability-wording-then-close.md
+- Previous handoff: goals/G-001-combat-monotony/103-studio-to-qa.md
+>>>END

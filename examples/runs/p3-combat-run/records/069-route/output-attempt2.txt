@@ -1,0 +1,204 @@
+Route for step 7i: the wording-only build update is done, and the playtest (step 8) is next. I opened it with a fresh Handoff 56 for the Playtester, composed from permitted information only: the newest build `sim/build-0.8.md`, the player profile and the Designer's record sheet pasted unchanged.
+
+I left handoff 55 untouched. I did not need to edit it in place.
+
+<<<FILE goals/G-001-combat-monotony/56-studio-to-playtester.md
+---
+kind: handoff
+goal: G-001
+seq: 56
+from: studio
+to: playtester
+stage: Play
+outcome: routed
+---
+# 56: studio → playtester — Play the current build, rooms 1 to 5, and fill in the record sheet
+
+## Task
+
+Play the build as a player from the profile below and report what you observe. Fill in the record sheet in Expected output. Report only what you saw, did and counted.
+
+## Context
+
+You are evaluating a short-session top-down action roguelite prototype, "Lantern Depths". This is a dry run: "running the build" means reading `sim/build-0.8.md`, the description of what playing it looks like, and playing it in your head and in your notes as a player would. Play rooms 1 to 5 in order.
+
+Player profile: action players who want short, intense runs. They are comfortable with dodging and spacing and are not interested in memorizing combo lists. They mostly play with a gamepad. The controls are attack, dash and pause. The game runs on desktop at 30 or 60 FPS.
+
+## Findings
+
+Not applicable. You receive no implementation information.
+
+## Decisions already made
+
+None that concern you.
+
+## Constraints
+
+- Work from the build description and the player profile only. Do not open design documents, earlier handoffs, decisions or other builds.
+- Report observable experience only. Do not guess at causes or at how the game is built.
+- Where a number exists, give it. Where you cannot give it, write "not available". Do not estimate a number you did not count.
+- Play focus: pay attention to combat, to where enemies come from and to what you do in response.
+
+## Open questions
+
+None.
+
+## Expected output
+
+An observation report addressed to `studio`, written as a new Handoff. In it, fill in the sheet below and add any other observations about how the play felt. Put the whole sheet in Findings.
+
+### PLAYTEST RECORD SHEET (paste as is)
+
+You play the build and fill in this sheet. Report what happened, in your own words where asked. Where a number exists, give the number. Where you cannot give it, write "not available". Do not estimate a number you did not count.
+
+**Part A. Held positions, rooms 4 and 5**
+
+Positions (defined from what you see on the floor):
+- NW corner: the north-west corner of the walkable floor of the room, standing within 1 tile of both walls.
+- NE corner, SW corner, SE corner: the same for the other three corners.
+- Centre: the middle of the room, equally far from all four walls as best you can judge.
+
+How to hold a position: begin each attempt at the start of the room, move to the position before the first arrival appears or as soon as you can, and stay there. You may turn to face the nearest arrival or enemy and swipe. Do not walk off the position and do not dash. An attempt ends when every enemy in the room is dead or you die.
+
+Do 5 attempts per position in room 4 and 5 attempts per position in room 5 (50 attempts in all). If you cannot do all of them, do as many as you can and say which are missing.
+
+For each attempt record:
+- Room, position, attempt number (1 to 5)
+- Hits taken (a number)
+- Died: yes or no
+- If you could not hold the position for the whole attempt, say so.
+
+**Part B. Free play, rooms 1 to 5**
+
+Play each room normally, with no position restriction. For each room record:
+- F1. Did you dash in combat? yes or no. How many times? Why, in your words, each time.
+- F2. For each arrival, say when you first noticed it and what drew your attention to it. (P1)
+- F3. When more than one arrival was on the floor at the same time, say how many you saw and where each one was. (P2)
+- F4. For each arrival, say where you were, whether you moved before the enemy appeared, and where to. Also describe what you did in that time, step by step.
+- F5. Did you leave the spot you were standing on during the room? How often, and what made you move, in your words?
+- Hits taken in the room and whether you died.
+
+**Part C. Records and measurements**
+
+- The number of `SPAWN_FALLBACK` lines in the log, per room (rooms 1 to 5). Write "not available" if you have no log.
+- For each pair of enemies that arrived "at the same time", the time between the two enemies appearing, in seconds, and how you obtained it.
+- Real elapsed time for a full run (rooms 1 to 5), and the clear time of each room, from when you gained control to when the last enemy died. Use a clock, not a guess.
+- Values you can measure or read from the build: Grub speed, player speed, projectile speed and range, player hearts, room size (width by height, in tiles), and the Grub, player and Spitter hitbox sizes. Give how you measured each. Write "not available" for any you could not measure.
+- Anything that surprised you, or any damage that seemed to come from nowhere, in your words.
+
+### END OF RECORD SHEET
+
+## Load
+
+- Role: studio/roles/playtester.md
+- Skills: studio/skills/playtest-session.md
+- Project: project.md#player-profile; sim/build-0.8.md (the build to play)
+- Decisions: none
+- Previous handoff: none (a fresh Handoff without implementation history)
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-11
+---
+# G-001: Improve monotonous combat
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): a player from the project's player profile experiences combat in the current build as varied and engaging rather than repetitive. Playing a run involves meaningful moment-to-moment variation in how the player positions, times and responds to enemies. Numeric thresholds belong to Design; the final verdict belongs to Review.
+
+Constraints that shape any solution:
+- Pillar 1 and D-001: combat stays one-button (attack + dash). No new input buttons without Owner approval. Variety must come from positioning, timing and enemy behavior.
+- Readable threats (pillar 3) and 30/60 FPS correctness must be preserved.
+- Small team: prefer reusing existing systems.
+
+Out of scope: new input buttons or a larger player kit, changes to run length, new biomes or rooms unrelated to combat variety, and non-combat systems.
+
+Not an immediate escalation: the Goal does not conflict with the vision or D-001. It must be solved inside them. If Diagnose finds that the only viable fixes need a new button or change a pillar, that triggers an Owner escalation then.
+
+## Unknowns
+
+Entry questions from `development-loop.md`:
+- Observe: experience problem, so `playtester` observed (done). A possible dash-damage defect was confirmed by QA against `design/combat.md` (handoff 05).
+- Diagnose: done (handoff 04): three options.
+- Decide: done. D-002 chose B (encounter escalation) first, then A (enemy behaviors); C in reserve.
+- Design: done for Phase 1 and Phase 2 (handoffs 11, 22, 25, 35, 44, 53; D-005, D-006, D-008, D-009). Settled since: Phase 1 spec gaps (D-008), the judging basis for criteria 1 and 2 (D-009), and spec 3.3 wording plus the neutral playtest record sheet (handoff 53, no rule change). One Phase 2 data value (`committed_start`, provisional 0.45 s) is still to be confirmed after Build's report.
+- Plan: done (handoff 16, D-004). Phase 1 needs no separate Plan.
+- Build: done for the dash-damage fix (08), hit-stun input (20), Phase 1 (37), the narrow Phase 1 follow-up (47) and the wording-only update (55; `sim/build-0.8.md` is the newest build). Phase 2 is tentative.
+- Verify: Phase 1 verified with criteria 1 and 2 open (QA pass in handoff 50, Art Director pass in handoff 51). Always after Build.
+- Play: the Goal is about feel, so a Playtester evaluates after each phase (fresh Handoff without implementation history). Phase 1 playtest is open (handoff 56).
+- Review: experience Goal, so the Game Director judges the outcome. Planned.
+
+Skipped: none.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | [01](01-studio-to-playtester.md) → [02](02-playtester-to-game-designer.md) |
+| 2a | Diagnose | game-designer | diagnose-experience | done | [02](02-playtester-to-game-designer.md) → [04](04-game-designer-to-game-director.md) |
+| 2b | Observe (possible defect: damage during dash) | qa | reproduce-defect | done | [03](03-studio-to-qa.md) → [05](05-qa-to-studio.md) |
+| 3a | Decide | game-director | make-decision | done (D-002) | [04](04-game-designer-to-game-director.md) → [07](07-game-director-to-game-designer.md) |
+| 3b | Build (fix dash-damage defect) | gameplay-engineer | implement-change | done | [06](06-studio-to-gameplay-engineer.md) → [08](08-gameplay-engineer-to-studio.md) |
+| 3c | Build (hit-stun input observable, consistent with D-003) | gameplay-engineer | implement-change | done | [18](18-studio-to-gameplay-engineer.md) → [20](20-gameplay-engineer-to-studio.md) |
+| 4a–4a″ | Verify (dash-damage fix), attempts 1 to 4 | qa | verify-change | done, no verdict (`question` each time: build file missing, hit-stun not observable, outdated build description, criteria text missing from Load); superseded by 4a‴ | [09](09-studio-to-qa.md), [12](12-studio-to-qa.md), [23](23-studio-to-qa.md), [28](28-studio-to-qa.md); reports [10](10-qa-to-studio.md), [15](15-qa-to-studio.md), [21](21-qa-to-studio.md), [26](26-qa-to-studio.md), [29](29-qa-to-studio.md) |
+| 4c | Verify decision (which build description is current) | owner | — | done (D-007: `sim/build-0.5.md`) | [27](27-studio-to-owner.md) |
+| 4a‴ | Verify (attempt 5, against `sim/build-0.5.md`) | qa | verify-change | done: **pass** ([31](31-qa-to-studio.md)); criteria 1–6 at 30 and 60 FPS, no regression against 0.3 | [30](30-studio-to-qa.md) |
+| 4b | Design (Phase 1 in full; Phase 2 as proposed behaviors) | game-designer | write-design-spec | done | [07](07-game-director-to-game-designer.md) → [11](11-game-designer-to-studio.md) |
+| 5a | Plan (Phase 2 feasibility and cost) | technical-director | technical-plan | done (D-004) | [13](13-studio-to-technical-director.md) → [16](16-technical-director-to-studio.md) |
+| 5b | Design (spawn marker and Phase 2 telegraph visuals) | art-director | write-design-spec | done | [14](14-studio-to-art-director.md) → [17](17-art-director-to-studio.md) |
+| 5c | Design (adjust Phase 2 spec) | game-designer | write-design-spec | done (D-005) | [19](19-studio-to-game-designer.md) → [22](22-game-designer-to-studio.md) |
+| 5d | Design (realign Lunge Grub visual; hit feedback for flinch-immune enemies) | art-director | write-design-spec | done (D-006) | [24](24-studio-to-art-director.md) → [25](25-art-director-to-studio.md) |
+| 6, 6b, 6c | Build Phase 1 (attempt 1 `question`; Design resolved gaps, D-008; attempt 2 done) | gameplay-engineer / game-designer | implement-change / write-design-spec | done | [32](32-studio-to-gameplay-engineer.md) → [33](33-gameplay-engineer-to-studio.md); [34](34-studio-to-game-designer.md) → [35](35-game-designer-to-studio.md); [36](36-studio-to-gameplay-engineer.md) → [37](37-gameplay-engineer-to-studio.md) |
+| 7a | Verify (Phase 1, `sim/build-0.6.md`) | qa | verify-change | done, `question` ([40](40-qa-to-studio.md)): criteria 3, 4, 5, 10 pass; criteria 1 and 2 need counted runs | [38](38-studio-to-qa.md) |
+| 7b | Verify (visual review of the spawn marker ring) | art-director | visual-review | done: pass on the described look ([41](41-art-director-to-studio.md)); dot colour row later corrected | [39](39-studio-to-art-director.md) |
+| 7c | Design (judging basis for criteria 1 and 2; items D1–D6) | game-designer | write-design-spec | done (D-009): criteria 1 and 2 judged at the playtest from counts | [42](42-studio-to-game-designer.md) → [44](44-game-designer-to-studio.md) |
+| 7d | Verify (visual follow-up: dot colour, capture checks) | art-director | visual-review | done: dot `#FFC14D`, statements S0–S3 | [43](43-studio-to-art-director.md) → [45](45-art-director-to-studio.md) |
+| 7f | Build (narrow: ring dot, S0–S3, spec points (a)–(d)) | gameplay-engineer | implement-change | done | [46](46-studio-to-gameplay-engineer.md) → [47](47-gameplay-engineer-to-studio.md) |
+| 7e | Verify (narrow re-verify, `sim/build-0.7.md`) | qa | verify-change | done: **pass** ([50](50-qa-to-studio.md)); criteria 1 and 2 recorded "deferred to playtest" | [48](48-studio-to-qa.md) |
+| 7g | Verify (re-review of ring dot and S0–S3) | art-director | visual-review | done: **pass** ([51](51-art-director-to-studio.md)) | [49](49-studio-to-art-director.md) |
+| 7h | Design (spec 3.3 wording items; neutral playtest record sheet) | game-designer | write-design-spec | done ([53](53-game-designer-to-studio.md)): wording only, no new Decision | [52](52-studio-to-game-designer.md) |
+| 7i | Build (wording only: seven build description items) | gameplay-engineer | implement-change | done ([55](55-gameplay-engineer-to-studio.md)): all seven items and the "linear in game time" option stated; "solid" not changed (no wording given); no behavior changed. `sim/build-0.8.md` is the newest build. | [54](54-studio-to-gameplay-engineer.md) |
+| 8 | Play (Phase 1) | playtester | playtest-session | open | [56-studio-to-playtester.md](56-studio-to-playtester.md) |
+| 9 | Build (Phase 2: behavior variants) | gameplay-engineer | implement-change | tentative (after the Phase 1 playtest, only if combat is still monotonous, per D-002 "B then A"; its Handoff must carry the "confirm after the report" values from spec section 7 (`committed_start`, default 0.45 s, clamped to [0, 0.60 s], clamp reported), the 5d Build-report items, an update of `design/combat.md` for Flinch and the Phase 2 enemies, and the Designer's "first overlap uses up the lunge's single hit" note from handoff 22) | — |
+| 9b | Design (confirm Phase 2 dash-window figures and `committed_start`; 2 HP damage-marker question) | game-designer | write-design-spec | tentative (after 9's report) | — |
+| 10a | Verify (Phase 2; criteria 2, 4, 5, 7–9) | qa | verify-change | tentative (after 9 and 9b) | — |
+| 10b | Verify (Phase 2 visuals; criteria A1–A13) | art-director | visual-review | tentative (after 9; parallel with 10a) | — |
+| 11 | Play (Phase 2) | playtester | playtest-session | tentative (readability of the 0.15 s committed stage at 30 FPS, learnability of the late-dash cue, whether hits on flinch-immune enemies are noticed) | — |
+| 12 | Review | game-director | review-outcome | planned (Phase 1 recorded as "verified, with criteria 1 and 2 open until counts exist"; never as met without counts) | — |
+
+Status: planned | tentative | open | done | skipped.
+
+## Route changes
+
+Earlier Route changes (steps 1 to 7h) are summarized here; the Handoffs carry the details.
+
+- Step 1 found a possible defect, so QA ran in parallel (2b). Diagnose gave three options and D-002 chose B then A.
+- Verify of the dash-damage fix took five attempts. The hand-backs came from build-description gaps and Load gaps, not from a failed criterion. The Owner settled which description is current (D-007), and the fix passed (31).
+- Phase 1 Build handed back once on spec contradictions. Design resolved them (D-008), and Build then succeeded (37).
+- Phase 1 Verify raised that criteria 1 and 2 need counted runs. Design moved them to the playtest (D-009). The narrow Build (47) fixed the ring dot colour, and both re-verifications passed (50, 51).
+- Design closed spec 3.3 wording items as wording only and wrote the neutral record sheet (53). Tentative 7i was confirmed and became a wording-only Build.
+- After step 7i (handoff 55, gameplay-engineer `done`):
+  - **Fits the plan.** Wording only, and no escalation trigger fires. The engineer stated the seven items. `sim/build-0.8.md` (the newest build, the file the update was applied to) shows all seven and "linear in game time". Its heading says 0.8, so the label matches the file. The engineer's own text predicted "0.7", which is a slip and changes nothing. The Designer classified the change as wording only, so QA does not re-verify.
+  - **Reported, not routed now.** Two sentences are unqualified but true only for rooms 3 to 5 ("For Spitters the second point is the other end of the same wall"; "A Spitter near a held corner appears at the far end of its wall"). Handoff 53 told Build to keep the first one, and the Designer holds the rule. Both stay as playtest and Review notes. `sim/repo-notes.md` still says the latest description is headed 0.3.3. It is a note, not a build description, and does not reach the Playtester.
+  - **Step 8 is opened as handoff 56**, composed by the Studio for `playtester` from permitted information only. The Load list names the Playtester Role, the skill, `project.md#player-profile` and `sim/build-0.8.md`. There is no previous handoff, and nothing from handoffs 44 to 55 (Sender assessments, QA and Art Director findings, wording lists) goes to the Playtester. The Designer's record sheet (handoff 53) is pasted unchanged. The play focus is "combat, where enemies come from and what you do", and it states no expected result. The result is addressed to `studio` so Route can check counts before Review.
+  - **Counts rule.** Review must not take criteria 1 and 2 as met without counted attempts. If the playtest returns without counts (it is a description in this dry run), the Studio escalates to the Owner: accept "not judged" for the dry run, or stop. Not triggered now, because the playtest has not run.
+
+## Next action
+
+`playtester` runs step 8 from [56-studio-to-playtester.md](56-studio-to-playtester.md): play rooms 1 to 5 of `sim/build-0.8.md`, fill in the record sheet, and address the result to `studio`.
+
+After it (Route): check whether counts exist for the Part A attempts and the Part C measurements. If they do, route to `game-director` for Review (step 12), and open Phase 2 (steps 9 onward) only if combat is still monotonous (D-002). A defect found by the Playtester goes to `qa`. A design or experience issue goes to `game-designer`. A "white" or "pale" ring centre in the notes goes to the Art Director. If no counted attempts exist, escalate to the Owner.
+
+## Outcome
+
+(To be filled at close, in Japanese.)
+>>>END

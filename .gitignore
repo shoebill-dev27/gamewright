@@ -1,0 +1,23 @@
+.env
+.env.*
+!.env.example
+
+*.pem
+*.key
+*.p12
+*.pfx
+
+node_modules/
+.venv/
+__pycache__/
+.pytest_cache/
+
+# Local tool state. The Claude Code entry point under .claude/skills/ is committed.
+.claude/*
+!.claude/skills/
+.serena/
+.cursor/
+.vscode/
+
+# Dry-run driver logs
+examples/runs/*.log

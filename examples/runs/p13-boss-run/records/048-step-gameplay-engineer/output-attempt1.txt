@@ -1,0 +1,582 @@
+Everything below is untested: I did not use the three run rounds. The bot code, tests and new module are submitted for the first time, and no tests, trace or bots have been run on them. The handoff to studio sets out the stored state, the open items and the exact commands for the next run.
+
+<<<FILE repo/source_id.py
+"""Source identification for measurements: a short hash over the executed source set."""
+
+import hashlib
+from pathlib import Path
+
+_NAMES = ("game.py", "session.py", "play.py", "run_driver.py", "bots.py", "source_id.py")
+
+
+def source_id():
+    """12 hex digits over game, session, play, run_driver, bots, source_id and tests/*.py.
+
+    Reads files only. The BUILD string alone does not identify a source set.
+    """
+    root = Path(__file__).resolve().parent
+    digest = hashlib.sha256()
+    files = [root / name for name in _NAMES] + sorted((root / "tests").glob("*.py"))
+    for path in files:
+        digest.update(str(path.relative_to(root)).encode())
+        digest.update(b"\0")
+        try:
+            digest.update(path.read_bytes())
+        except OSError:
+            digest.update(b"<missing>")
+        digest.update(b"\0")
+    return digest.hexdigest()[:12]
+>>>END
+
+<<<EDIT repo/run_driver.py
+<<<<<<< SEARCH
+from session import RunSession
+=======
+from session import RunSession
+from source_id import source_id
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/run_driver.py
+<<<<<<< SEARCH
+        "build": BUILD, "driver_seconds": tick / s.fps,
+=======
+        "build": BUILD, "source_id": source_id(), "driver_seconds": tick / s.fps,
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/bots.py
+<<<<<<< SEARCH
+import math
+import sys
+
+from game import (
+=======
+import math
+import sys
+import time
+
+from game import (
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/bots.py
+<<<<<<< SEARCH
+    Game,
+)
+
+REACTION = 0.15
+=======
+    Game,
+)
+from session import RunSession
+from source_id import source_id
+
+REACTION = 0.15
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/bots.py
+<<<<<<< SEARCH
+        elif e.kind == "spitter" and e.cueing and e.aim:
+            out.append((e.x, e.y, e.aim[0], e.aim[1], 40.0, e.fire_in, SHOT_SPEED, "aim"))
+=======
+        elif e.kind == "spitter" and e.cueing and e.aim:
+            out.append((e.x, e.y, e.aim[0], e.aim[1], 40.0, e.fire_in, SHOT_SPEED, "aim"))
+        elif e.kind == "boss" and e.aim and e.phase == "warning":
+            # Displayed: locked direction, seconds left, lane size (charge 2.4 + 0.6; shot 3.0 + 0.4).
+            charge = e.attack_name == "charge"
+            out.append((
+                e.x, e.y, e.aim[0], e.aim[1], 3.0 if charge else 3.4,
+                e.phase_left, LUNGE_SPEED if charge else SHOT_SPEED, e.attack_name,
+            ))
+        elif e.kind == "boss" and e.aim and e.phase == "active" and e.attack_name == "charge":
+            out.append((
+                e.x, e.y, e.aim[0], e.aim[1], e.phase_left * LUNGE_SPEED + 0.6,
+                0.0, LUNGE_SPEED, "charge",
+            ))
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/bots.py
+<<<<<<< SEARCH
+    if any(e.hp > 0 and e.is_grub and e.phase in ("windup", "lunge") for e in game.enemies):
+        note("hold while a grub lunges")
+=======
+    boss = next((e for e in game.enemies if e.hp > 0 and e.kind == "boss"), None)
+    if boss and boss.phase in ("warning", "active"):
+        # Boss policy v1: only displayed fields (B, attack name, locked direction, seconds left,
+        # phase, shots) are read. Never swipe to stop a warning; swipe only while it recovers.
+        note(f"hold off the boss's locked {boss.attack_name} line")
+        game.press("stop")
+        return
+    if any(e.hp > 0 and e.is_grub and e.phase in ("windup", "lunge") for e in game.enemies):
+        note("hold while a grub lunges")
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/bots.py
+<<<<<<< SEARCH
+def play_room(bot, room, fps, limit, log=None):
+    game = Game(fps=fps, room=room)
+=======
+def play_room(bot, room, fps, limit, log=None, hearts=HEARTS):
+    game = Game(fps=fps, room=room)
+    game.hearts = hearts  # start hearts: 3 standard; 2 is the run-boundary case (D-019)
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/bots.py
+<<<<<<< SEARCH
+        "hearts_lost": HEARTS - game.hearts,
+=======
+        "hearts_lost": hearts - game.hearts,
+        "hearts_start": hearts,
+        "hearts_end": game.hearts,
+        "outcome": "clear" if game.cleared else ("death" if game.hearts <= 0 else "unfinished"),
+        "limit": limit,
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/bots.py
+<<<<<<< SEARCH
+def read_script(text):
+    setup = {
+=======
+class _Proxy:
+    """Lets a bot act on a RunSession: reads come from the current room, presses go through the
+    session (so they are logged, rejected during clear screens and attributed to the run)."""
+
+    def __init__(self, session):
+        self._s = session
+
+    def press(self, action, direction=None):
+        return self._s.press(action, direction)
+
+    def __getattr__(self, name):
+        return getattr(self._s.game, name)
+
+
+def play_run(bot, fps, limit, log=False):
+    """One normal run from room 1 (3 hearts), regular enemies only, one attempt, no pause/retry.
+
+    Returns run/room times from the session clocks, driver seconds (ticks / fps) and processing
+    seconds (wall clock) separately. Terminal waiting and pause are never added to combat time.
+    """
+    s = RunSession(fps)
+    lines = [] if log else None
+    brain, generation, ticks = Brain(lines), s.generation, 0
+    proxy = _Proxy(s)
+    started = time.perf_counter()
+    while not s.stop_reason and s.state not in ("won", "dead"):
+        if s.generation != generation:  # new room: reaction memory resets
+            generation = s.generation
+            brain = Brain(lines)
+        if s.state == "combat" and not s.paused:
+            game = s.game
+            if game.stun_left <= 0:
+                if brain.due(game.t):
+                    bot(proxy, lambda text, g=game, b=brain: b.note(g, text))
+            else:
+                brain.skip(game)
+        s.step(limit=limit)
+        ticks += 1
+    processing = time.perf_counter() - started
+    rooms, sources = {}, {}
+    for e in s.events:
+        d = rooms.setdefault(e["room"], {
+            "entry_hearts": None, "entry_run": None, "end": None, "end_run": None,
+            "room_time": None, "hurts": 0, "attacks": 0, "boss_hits": 0, "dashes": 0,
+        })
+        kind = e["kind"]
+        if kind == "entry":
+            d["entry_hearts"], d["entry_run"] = e["details"]["hearts"], e["run_time"]
+        elif kind == "hurt":
+            d["hurts"] += 1
+            src = e["details"]["source"]
+            sources[src] = sources.get(src, 0) + 1
+        elif kind == "attack":
+            d["attacks"] += 1
+            d["boss_hits"] += sum(1 for hit in e["details"]["hits"] if hit[0] == "boss")
+        elif kind == "dash":
+            d["dashes"] += 1
+        elif kind in ("room_clear", "run_won", "run_dead"):
+            d["end"], d["room_time"], d["end_run"] = kind, e["room_time"], e["run_time"]
+    current = rooms.get(s.game.room)
+    if current is not None and current["end"] is None:
+        current["end"], current["room_time"], current["end_run"] = "limit", s.room_t, s.t
+    transitions = []
+    for n in range(1, 5):
+        a, b = rooms.get(str(n)), rooms.get(str(n + 1))
+        if a and b and a["end"] == "room_clear":
+            transitions.append(round(b["entry_run"] - a["end_run"], 3))
+    outcome = {"won": "won", "dead": "dead"}.get(s.state, "unfinished")
+    return {
+        "outcome": outcome, "stop_reason": s.stop_reason, "attempt": s.attempt,
+        "run_seconds": s.t, "driver_seconds": ticks / fps, "processing_seconds": processing,
+        "pause_seconds": 0.0, "retries": 0, "rooms": rooms, "transitions": transitions,
+        "boss_entry_hearts": rooms.get("5", {}).get("entry_hearts"),
+        "hurt_sources": sources, "limit": limit, "log": lines or [],
+    }
+
+
+def read_script(text):
+    setup = {
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/bots.py
+<<<<<<< SEARCH
+        "limit": 60.0,
+        "log": False,
+    }
+=======
+        "limit": 60.0,
+        "limit_given": False,
+        "hearts": [HEARTS],
+        "mode": "room",
+        "log": False,
+    }
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/bots.py
+<<<<<<< SEARCH
+            elif key == "limit":
+                setup["limit"] = float(value)
+=======
+            elif key == "limit":
+                setup["limit"] = float(value)
+                setup["limit_given"] = True
+            elif key == "hearts":
+                setup["hearts"] = [int(v) for v in value.split(",")]
+                assert all(1 <= h <= HEARTS for h in setup["hearts"])
+            elif key == "mode":
+                assert value in ("run", "room")
+                setup["mode"] = value
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/bots.py
+<<<<<<< SEARCH
+                "fps 30|60 | limit <seconds per room> | log on"
+=======
+                "fps 30|60 | limit <seconds per room> | hearts 3,2 | mode run|room | log on"
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/bots.py
+<<<<<<< SEARCH
+def main():
+    with open(sys.argv[1], encoding="utf-8") as f:
+        setup = read_script(f.read())
+    print(f"bots at {setup['fps']} FPS, up to {setup['limit']:.0f} s per room, {HEARTS} hearts each")
+    for name in setup["bots"]:
+=======
+def _main_run(setup):
+    limit = setup["limit"] if setup["limit_given"] else 1200.0
+    print(f"mode run: normal run from room 1, {setup['fps']} FPS, game-time limit {limit:.0f} s, "
+          "start hearts 3, one attempt, no pause, no retry")
+    for name in setup["bots"]:
+        r = play_run(BOTS[name], setup["fps"], limit, log=setup["log"])
+        print(
+            f"{name:7} run: {r['outcome']} (stop: {r['stop_reason'] or 'terminal'}); "
+            f"run {r['run_seconds']:.3f} s, driver {r['driver_seconds']:.3f} s, "
+            f"processing {r['processing_seconds']:.2f} s (wall clock, not play time), "
+            f"pause {r['pause_seconds']:.1f} s, retries {r['retries']}, attempt {r['attempt']}"
+        )
+        print(f"          boss entry hearts {r['boss_entry_hearts']}; transitions (run s) "
+              f"{r['transitions']}; hurt by {r['hurt_sources'] or 'none'}")
+        for room, d in sorted(r["rooms"].items()):
+            print(
+                f"          room {room}: entry hearts {d['entry_hearts']}, end {d['end']}, "
+                f"room time {d['room_time']}, hurts {d['hurts']}, attacks {d['attacks']} "
+                f"(boss hits {d['boss_hits']}), dashes {d['dashes']}"
+            )
+        for entry in r["log"]:
+            print("          " + entry)
+
+
+def main():
+    with open(sys.argv[1], encoding="utf-8") as f:
+        setup = read_script(f.read())
+    print(f"source {source_id()}; policy: dodger with boss policy v1 (displayed boss fields only), "
+          f"reaction {REACTION} s, start (8, 4) facing right; camper/walker unchanged")
+    if setup["mode"] == "run":
+        _main_run(setup)
+        return
+    for start in setup["hearts"]:
+        _main_rooms(setup, start)
+
+
+def _main_rooms(setup, start):
+    print(f"bots at {setup['fps']} FPS, up to {setup['limit']:.0f} s per room, {start} hearts at start")
+    for name in setup["bots"]:
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/bots.py
+<<<<<<< SEARCH
+            r = play_room(BOTS[name], room, setup["fps"], setup["limit"], log=setup["log"])
+=======
+            r = play_room(BOTS[name], room, setup["fps"], setup["limit"], log=setup["log"], hearts=start)
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/bots.py
+<<<<<<< SEARCH
+                f"attacks {r['attacks']}, dashes {r['dashes']}"
+=======
+                f"attacks {r['attacks']}, dashes {r['dashes']}; "
+                f"start hearts {r['hearts_start']}, end {r['hearts_end']}, outcome {r['outcome']}"
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE repo/tests/test_bots_boss.py
+"""Boss-aware dodger, start hearts, outcomes and the normal-run bot driver.
+
+These tests check mechanics and reporting only. They do not claim the boss can be beaten.
+"""
+
+import sys
+import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+import bots  # noqa: E402
+from game import Game  # noqa: E402
+from source_id import source_id  # noqa: E402
+
+
+def boss_warning(attack, player):
+    game = Game(room="5")
+    boss = game.enemies[0]
+    boss.x, boss.y = 10.0, 4.0
+    boss.phase, boss.attack_name = "warning", attack
+    boss.aim, boss.phase_left = (-1.0, 0.0), 0.5
+    game.place_player(*player)
+    return game
+
+
+class BossPolicyTest(unittest.TestCase):
+    def test_threat_follows_the_displayed_locked_lane(self):
+        for attack in ("charge", "short shot"):
+            threat = bots._threat(boss_warning(attack, (8, 4)))
+            self.assertIsNotNone(threat, attack)
+            self.assertEqual(threat[6], attack)
+            self.assertGreaterEqual(threat[0], 0.5)
+            self.assertIsNone(bots._threat(boss_warning(attack, (8, 5.5))), attack)
+
+    def test_dodger_in_the_lane_holds_or_dodges_and_never_swipes(self):
+        for attack in ("charge", "short shot"):
+            game = boss_warning(attack, (8, 4))
+            notes = []
+            bots.dodger(game, notes.append)
+            self.assertTrue(notes, attack)
+            self.assertFalse(any("swipe" in n for n in notes), notes)
+            self.assertFalse(any(k == "attack" for _, k, _ in game.events))
+
+    def test_dodger_off_the_lane_holds_during_the_warning(self):
+        game = boss_warning("charge", (8, 5.5))
+        notes = []
+        bots.dodger(game, notes.append)
+        self.assertTrue(any("hold off" in n for n in notes), notes)
+        self.assertFalse(any(k == "attack" for _, k, _ in game.events))
+
+
+class OutcomeTest(unittest.TestCase):
+    def test_start_hearts_and_outcome_fields(self):
+        for fps in (30, 60):
+            for hearts in (3, 2):
+                r = bots.play_room(bots.BOTS["dodger"], "5", fps, 5, hearts=hearts)
+                self.assertEqual(r["hearts_start"], hearts)
+                self.assertIn(r["outcome"], ("clear", "death", "unfinished"))
+                self.assertEqual(r["hearts_lost"], hearts - r["hearts_end"])
+
+    def test_unfinished_is_reported_at_the_limit(self):
+        r = bots.play_room(bots.BOTS["dodger"], "1", 60, 0.5)
+        self.assertEqual(r["outcome"], "unfinished")
+        self.assertFalse(r["cleared"])
+
+    def test_log_changes_no_result_in_the_boss_room(self):
+        for fps in (30, 60):
+            quiet = bots.play_room(bots.BOTS["dodger"], "5", fps, 20, hearts=2)
+            loud = bots.play_room(bots.BOTS["dodger"], "5", fps, 20, log=True, hearts=2)
+            for key in ("outcome", "seconds", "hearts_end", "hits_by", "attacks", "dashes"):
+                self.assertEqual(quiet[key], loud[key], (fps, key))
+
+
+class RunDriverTest(unittest.TestCase):
+    def test_play_run_smoke(self):
+        for fps in (30, 60):
+            r = bots.play_run(bots.BOTS["dodger"], fps, 2.0)
+            self.assertEqual(r["outcome"], "unfinished")
+            self.assertAlmostEqual(r["run_seconds"], 2.0, delta=1.0 / fps + 1e-9)
+            self.assertEqual(r["retries"], 0)
+            self.assertIn("1", r["rooms"])
+
+    def test_read_script_hearts_and_mode(self):
+        setup = bots.read_script("hearts 3,2\nmode run\nlimit 10\n")
+        self.assertEqual(setup["hearts"], [3, 2])
+        self.assertEqual(setup["mode"], "run")
+        self.assertTrue(setup["limit_given"])
+        with self.assertRaises(SystemExit):
+            bots.read_script("hearts 4\n")
+
+
+class SourceIdTest(unittest.TestCase):
+    def test_source_id_is_stable_hex(self):
+        a, b = source_id(), source_id()
+        self.assertEqual(a, b)
+        self.assertEqual(len(a), 12)
+        int(a, 16)
+
+
+if __name__ == "__main__":
+    unittest.main()
+>>>END
+
+<<<EDIT repo/README.md
+<<<<<<< SEARCH
+The dodger has no boss-specific
+  policy yet; its room-5 results cannot establish the D-019 adapted-bot comparison.
+=======
+The dodger now has a boss policy
+  (v1, submitted in step 38 and not yet executed): it reads only displayed boss fields (B, attack
+  name, locked direction, seconds left, phase, shots), dodges or dashes across the locked line,
+  never swipes to stop a warning, and swipes in recovery. Rooms 1-4 behaviour is unchanged.
+  Extra script lines: `hearts 3,2` (start hearts, run once per value), `mode run` (one normal run
+  from room 1, default limit 1200 s). Output states start/end hearts and clear/death/unfinished,
+  and prints a source id (hash of the executed sources and tests). Its results are not yet a
+  D-019 comparison until the QA/measurement run has been done.
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-002-final-boss/38-gameplay-engineer-to-studio.md
+---
+kind: handoff
+goal: G-002
+seq: 38
+from: gameplay-engineer
+to: studio
+stage: Build
+outcome: question
+---
+# 38: gameplay-engineer → studio — 36の保存を確認、boss対応dodger・開始hearts・run計測道具を提出、実行は未実施
+
+## Task
+
+38の変更を保存し、保存後ソースでtests／bots（`hearts 3,2`、`mode run`）を実行できる枠を割り当てる。結果を受けて残る契約試験・観測整備を継続するか、独立QAへ送るかを判断する。
+
+## Context
+
+37は、36の保存状態確認、公開観測とboss対応bot、開始3／2 hearts指定とclear／death／unfinishedの明示、契約試験、測定の取得を要求した。D-021のBuild承認は有効。
+
+本Stepでは@runを使っていない。新規コードを走らせるには先に保存が要り、保存前の本文は走らせられないため、実装と試験を先に提出した。**今回提出した変更は一度も実行していない。** 実行結果はない。
+
+## Findings
+
+### 保存状態（37の優先1）
+
+パケット上の正規本文で次を確認した。
+
+- tests/test_boss_contract.py：34の2試験に次frame移動・加齢のassertが入っている。36の追加5試験（低HP順序、距離0、直交1 tile、全phase非致死、致死予兆）も存在する。
+- manual.md、README.md、public-driver.mdに36の文書統合がある。
+- run_driver.pyのBUILDは0.6-g002-public-32のまま。36の未保存提案（識別文字列のみの変更）は採用していない。
+
+36の変更は保存済みと判断する。ただし実ファイル読取りではなく供給された本文による確認である。保存後の実行結果はない。供給済みの98／103件は今回の保存版に帰属しない。
+
+### 今回提出した変更（未実行）
+
+| 対象 | 内容 | 根拠 |
+|---|---|---|
+| repo/source_id.py（新） | game／session／play／run_driver／bots／source_id と tests/*.py のsha256先頭12桁 | 対象ソース識別（BUILDだけでは識別できない） |
+| repo/run_driver.py | measurement辞書にsource_idを追加 | 同上 |
+| repo/bots.py `_dangers` | boss予兆（固定方向・残秒・突進3.0／短射3.4の線）と突進active中の線を危険線に追加 | V1の公開観測のみ。D-019 6 |
+| repo/bots.py `dodger` | boss予兆・active中は線上なら既存のdash／sidestep、線外なら停止して保持。予兆を止めるswipeはしない。回復中は既存の接近・swipe | D-019 6。部屋1〜4にbossはなく挙動は不変のはず（未回帰確認） |
+| repo/bots.py `play_room` | `hearts=`引数、戻り値にhearts_start／hearts_end／outcome(clear/death/unfinished)／limit。`hearts_lost`は開始hearts基準（既定3で従来と同値） | D-019 5 |
+| repo/bots.py `read_script`／`main` | `hearts 3,2`（値ごとに実行）、`mode run|room`、`limit`未指定のrunは1200秒、出力にsource id・方針・反応0.15秒・初期位置（8,4）右向きを表示 | 同上 |
+| repo/bots.py `play_run` | RunSessionを使い正規敵のみで1→5の1試行を実行。ラン時刻、部屋別戦闘時間、4遷移、ボス入場hearts、被弾源、部屋別attack／boss hit／dash、driver秒、processing秒（実時間）、pause 0、retry 0を分離して返す | 37の測定項目。fixtureや状態注入は使わない |
+| repo/tests/test_bots_boss.py（新） | 危険線の検出、予兆中にswipeしないこと、開始hearts・outcome、limitでunfinished、ログ有無で結果不変（両FPS）、play_runの煙試験、script解析、source_id | D-019 4〜6。到達や攻略の合格は主張しない |
+| repo/README.md | 上記を反映。dodger非対応の記述を差し替え | — |
+
+play_runは、各botの判断をRunSession.pressへ中継するプロキシ経由で行う。入力はセッションのログに載り、クリア表示中は拒否される。入場ごとにBrain（反応記憶）を初期化する。retryとpauseは今回の道具では行わないので、0として「未実施」と明記してある。
+
+### 実行結果
+
+| 項目 | 結果 |
+|---|---|
+| 保存後suite | 未実行。実件数なし |
+| bots／trace／run | 未実行 |
+| 独立3・4の全bot×両FPS、新5番の3／2 hearts別比較、通常ラン同一試行 | 測定値なし |
+
+実行が必要なコマンド（保存後。repo/で）：
+
+1. `python3 -m unittest discover -s tests` — 件数と失敗、出力のsource idを記録する。
+2. 独立3・4：script `rooms 3,4` / `fps 30` と `fps 60` を別実行し、`bots camper,walker,dodger`。
+3. 新5番：script `bots dodger` / `rooms 5` / `hearts 3,2` / `limit 120`（limit値は選定が必要）/ `log on` を30と60で。
+4. 保持分：`rooms 1-2`と`rooms 3,4`のdodger dash、1〜4のdodger FPS比較（`rooms 1-4`）。
+5. 通常ラン：script `mode run` / `fps 30|60` / `limit 1200`、全bot。
+6. 反応間隔と初期位置は出力ヘッダに出る。
+
+### 未完了（優先順）
+
+1. 上記の実行。特にdodgerの回帰（部屋1〜4の結果が提出前と同じか）とboss方針の効果は、実行まで不明。boss方針が戦闘に勝てない、あるいは30／60で差が出る可能性があり、その場合は判断ログで診断する。
+2. V1：旧構文（legacy route）のboss表示、弾ID・消滅理由、長時間の観測蓄積確認は未着手。`drive`はeventsを逐次処理するので蓄積は線形のはずだが、未確認。
+3. 契約試験：B3毎frame軌道、B6／B7実dash接触、B9接触無害、B10帯内外、T1〜T4・C2・C3のボス絡み、共有回帰の細目は36の表のとおり未網羅。
+4. retryとpauseを含む通常ラン計測は、公開scriptのcontrol構文でrun_driver経由が必要。botsのplay_runでは行っていない。
+5. 実機入力（V2）はD-021により対象外。
+
+### 実装上の注意・既知リスク
+
+- boss予兆中に線外で停止する方針は、予兆後の反撃位置へ戻る動きが遅れるかもしれない。判断は未測定。
+- `_threat`の長さ・eta式は既存grub／弾と同じ近似であり、突進の丸い端や短射の弾速を厳密には反映しない。
+- 仕様の不足・矛盾は見つけていない。Designerへの質問はない。
+
+## Decisions already made
+
+- D-017：二攻撃、境界回復、死亡優先、先頭retry、時計・表示契約。
+- D-019：旧集計の適用終了、共有回帰、対応bot比較、実測後Designer判断。
+- D-021：現状repoとStudio内テキスト検証でBuildを進める。
+
+## Constraints
+
+第1〜4部屋、共有戦闘ルール、既存botの独立1〜4方針を保持する。新戦闘入力、checkpoint、時間合わせのHP増加・待機、購入・外部委託を加えない。未実行を成功としない。fixtureや独立部屋の時間合算を通常ラン到達の証拠にしない。独立QA→限定Art Verify→独立Play→Designer実測後判断→Reviewを維持する。完成前に独立QAへ送らない。
+
+## Open questions
+
+- 保存後のtests／botsを走らせる@run枠をどのStepに割り当てるか（Owner承認の再取得は不要）。
+- 新規の仕様質問はない。同じ入力不足だけで再返却する場合は、その旨をStudioが明示する。
+
+## Expected output
+
+Studioは38のファイルを保存し、次のGameplay Engineer Step（またはqa運用が許す実行付きStep）に、上記コマンドの実行を指示する。結果を受けて、失敗の修正、残る契約試験とV1の補完、完成資料を作成してから独立QAへ送る。
+
+## Sender assessment
+
+実行ゼロのため、構文・回帰の確信度は低い。`_Proxy.__getattr__`は読み取り専用の使い方で、botは位置・hearts・敵・弾・stunを読むだけにしてある。play_roomの終了条件は従来のまま。リスクは、dodgerの変更が部屋1〜4へ漏れていないか（bossがなければ分岐は発火しない設計）の実行確認。
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: project.md#vision
+- Project: project.md#constraints
+- Project: repo/game.py
+- Project: repo/session.py
+- Project: repo/play.py
+- Project: repo/run_driver.py
+- Project: repo/bots.py
+- Project: repo/source_id.py
+- Project: repo/README.md
+- Project: repo/manual.md
+- Project: repo/public-driver.md
+- Project: repo/tests/test_bots_boss.py
+- Project: repo/tests/test_game.py
+- Project: repo/tests/test_boss_contract.py
+- Project: design/final-boss-and-continuous-run.md
+- Decisions: decisions/D-017-final-boss-and-run-contract.md
+- Decisions: decisions/D-019-g002-balance-criteria-applicability.md
+- Decisions: decisions/D-021-owner-authorizes-text-build.md
+- Previous handoff: goals/G-002-final-boss/37-studio-to-gameplay-engineer.md
+>>>END

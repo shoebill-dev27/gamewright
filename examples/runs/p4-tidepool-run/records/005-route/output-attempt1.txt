@@ -1,0 +1,183 @@
+Route for steps 2 and 2b is done. Step 3 (Design) is now open, and `goal.md` and the new handoff 06 are written below. I did not edit handoffs 04 and 05. I also did not append to `log.md`, because it is not among the paths I may write. The Goal log entry for this Route has to be added separately.
+
+<<<FILE goals/G-001-first-puzzle-stall/06-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-001
+seq: 6
+from: studio
+to: game-designer
+stage: Design
+outcome: routed
+---
+# 06: studio → game-designer — specify the fixed level 1 opening (affordance, touch feedback, non-text teaching)
+
+## Task
+
+Write the design spec (`write-design-spec`) for the level 1 opening of build 0.2. It must cover the pool's affordance, the crab's and home's styling and touch response, a non-text teaching cue, and player-observable acceptance criteria. It also updates `design/onboarding.md`. Address the result to `studio`.
+
+## Context
+
+Goal G-001. Owner's words, verbatim: 「最初のパズルで子どもが手を止めてしまう。直したい」
+
+Success condition: children aged 7–10 begin purposeful touch interaction with level 1 on their own, with no long pause and no adult explanation.
+
+Out of scope:
+- Levels 2 and later.
+- Any change to a pillar or to D-001.
+- New art beyond the existing sprite sheet.
+
+Steps 1, 2 and 2b are done: the playtest observation, your diagnosis (04) and the art-director's visual review (05). Route merged 04 and 05; they agree and do not conflict.
+
+## Findings
+
+Merged diagnosis (from 04 and 05):
+
+- **Symptom:** two of three children (ages 7 and 8) stalled 20–35 s at the start of level 1. They went to the crab first, and the pool was found only after the parent read the bubble aloud (age 7) or by chance (age 8). Taps on the crab and home got no response.
+- **Visual cause (art-director):**
+  - The pool has the same pastel tone as the sand and no outline or idle motion.
+  - The crab has an outline and a bob but is not interactive, which is a false affordance.
+  - The home's styling is unknown.
+  - The text bubble does not work as an affordance.
+- **Rules and feedback cause (game-designer):**
+  - A touch on a non-target object gets no response, which is a dead end.
+  - Level 1 teaches only through text, which conflicts with pillar 2 and the no-text constraint.
+- **Direction recommended in 04:** Options A + B (pool affordance plus non-text cue, and every touch gets a visible response). Option C (idle hint) is held in reserve.
+- **Art-director's proposed visual direction (05):**
+  1. Give the pool the crab's outline weight and a gentle idle pulse.
+  2. Make the pool separate from the sand in value and hue, checked in grayscale.
+  3. Only the pool carries outline plus idle motion. If the crab stays non-interactive, remove its interactive styling. If the crab responds, keep it and match the response to it.
+  4. Do not rely on the bubble.
+  5. Apply the same rule to the home.
+- **Draft acceptance criteria (04 and 05):**
+  - Time to first pool touch within about 10 s.
+  - No pause longer than about 8 s before the first pool drag.
+  - Every touch gets a visible response.
+  - Level 1 is completable without reading.
+  - In a capture at level start, the pool is the only element with outline plus idle motion and is distinguishable from the sand in grayscale.
+
+## Decisions already made
+
+- D-001 (no failure, no timers, every move undoable) applies. No new Decision exists for this Goal.
+
+## Constraints
+
+- Existing sprite sheet only. Per the art-director, a tint or recolor of an existing sprite counts as within the constraint; you confirm this in the spec. A hand or arrow cue would be new art, so any cue must reuse existing sprites (check `sim/build-0.2.md`) or be built from motion on the pool.
+- No mechanic may depend on reading text. The bubble may remain only as a supplement.
+- Do not include Option C (idle hint timer) in the spec. D-001 is an Owner Decision, and whether a hint timer fits "no timers" is a direction question outside Design. If you think C is needed, say so in Open questions and hand back, and the Studio will route Decide (`game-director`). Option A + B does not need it.
+- Keep the spec level 1 only.
+
+## Open questions
+
+Decide these in the spec (they are in your authority):
+- Does the crab respond to touch? Option B says it does, and then its styling stays.
+- Is the home interactable, and what styling does it get? Check `sim/build-0.2.md` for what it currently shows.
+- Final acceptance-criteria numbers. The draft values come from three simulated sessions, so state them as tunable.
+- Does the spec need a Plan? Say whether the change is local (parameters, tint, existing animations, per-object touch response) or cross-system.
+
+Not routed to `qa` now. Whether touches on the crab and home register, or there is only no handler, does not change the spec, because the criterion "every touch gets a visible response" covers both. The Verify step after Build checks it.
+
+## Expected output
+
+- The spec, written into `design/onboarding.md` (update the level 1 section and the teaching plan). It contains the behavior and parameters, the visual part adopted from the art-director's direction, player-observable acceptance criteria, edge cases, and the open points above answered.
+- An outgoing handoff to `studio` (outcome `done`) summarizing the spec and answering whether Plan is needed. The Studio then routes Plan or Build.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: project.md#vision, project.md#player-profile, project.md#constraints, project.md#art-direction, design/onboarding.md, sim/build-0.2.md
+- Decisions: decisions/D-001-no-fail-states.md
+- Previous handoff: goals/G-001-first-puzzle-stall/04-game-designer-to-studio.md, goals/G-001-first-puzzle-stall/05-art-director-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-first-puzzle-stall/goal.md
+---
+kind: goal
+id: G-001
+project: tidepool-garden
+status: active
+created: 2026-10-10
+---
+# G-001: Children stall at the first puzzle
+
+## Owner request
+
+> 最初のパズルで子どもが手を止めてしまう。直したい
+
+## Interpretation
+
+Success condition: when children in the target group (ages 7–10) play the first puzzle (level 1 in
+build 0.2), they begin purposeful touch interaction with the puzzle on their own, without a long
+pause and without an adult having to explain what to do. How long a pause counts as "a stall" is
+not set here; Observe reports what actually happens and Design turns it into a player-observable
+acceptance criterion.
+
+Out of scope:
+
+- Levels 2 and later. If the same problem shows up there, it becomes a proposed new Goal.
+- Changing a vision pillar or Decision D-001 (no failure, no timers). Any fix must stay inside them.
+- New art beyond the existing sprite sheet (project constraint).
+
+## Unknowns
+
+Entry questions (`studio/workflows/development-loop.md`) the Project Context cannot answer:
+
+- **Observe** — Has the stall been observed first-hand? No: the Project Context holds only the
+  Owner's report. It is an experience problem, not a reproducible defect, so the Role is
+  `playtester` (not `qa`). Creates stage 1.
+- **Diagnose** — Is the cause understood? No. Creates stage 2 (`game-designer`). `art-director` is
+  not added now; it is added at Route if the observation points to something visual.
+- **Design** — Is the intended behavior of the fixed first puzzle specified? No:
+  `design/onboarding.md` specifies the current level 1 and its teaching intent, not a fix. Creates
+  stage 3. If Diagnose finds an ordinary defect against the existing spec, Route drops this stage.
+- **Build** — Must the game change? The Owner wants it fixed, so yes. Creates stage 4.
+- **Verify** — Always after Build. Stage 5.
+- **Play** — Is the Goal about how the game plays or feels? Yes. Stage 6, in a fresh context
+  without the implementation history.
+- **Review** — Is it an experience Goal? Yes. Stage 7 (`game-director`).
+- **Next** — Always. Stage 8.
+
+Skipped for now:
+
+- **Decide** — Is there a real choice of direction, priority or scope? Not at this point. Choosing
+  among fixes for player-facing behavior inside the approved direction is `game-designer`
+  authority. Route adds Decide if Diagnose or Design produces options that change direction,
+  priority or scope, and escalates if a trigger fires.
+- **Plan** — Is the technical approach non-obvious, risky, cross-system or parallelizable? Not
+  knowable until a fix is specified; a level 1 teaching change is expected to be local. Route
+  re-asks this after Design and adds Plan if the answer is yes.
+
+Flag for Diagnose (not a conclusion): `project.md` lists "No mechanic may depend on reading text"
+as a constraint and says level 1 teaches with a text bubble, for players some of whom are early
+readers.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 01-studio-to-playtester.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 02-playtester-to-game-designer.md |
+| 2b | Diagnose | art-director | visual-review | done | 03-studio-to-art-director.md |
+| 3 | Design | game-designer | write-design-spec | open | 06-studio-to-game-designer.md |
+| 4 | Build | gameplay-engineer | implement-change | planned | — |
+| 5 | Verify | qa | verify-change | planned | — |
+| 6 | Play | playtester | playtest-session | planned | — |
+| 7 | Review | game-director | review-outcome | planned | — |
+| 8 | Next | studio | — | planned | — |
+
+Status: planned | tentative | open | done | skipped. The route is a plan; the Route operation
+revises it.
+
+## Route changes
+
+After steps 2 and 2b: the diagnoses agree (pool lacks affordance, crab is a false affordance, silent touches, text-only teaching), so the plan holds. Design (3) is open for `game-designer`, who adopts the art-director's visual direction. Idle hint (Option C) is barred from the spec because it touches D-001; if wanted, route Decide. Plan is re-asked after Design. No `qa` Observe: Verify covers touch response.
+
+## Next action
+
+Run step 3 (Step operation): `game-designer` on `06-studio-to-game-designer.md`, writing the spec into `design/onboarding.md` and handing back to `studio` with `outcome: done`. Then Route, which re-asks whether Plan is needed before Build. Phase 1: the Studio stops after every Route.
+
+## Outcome
+
+<!-- Filled at close, for the Owner, in owner_language (ja). -->
+>>>END

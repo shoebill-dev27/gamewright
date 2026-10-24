@@ -1,0 +1,22 @@
+{
+ "op": "Run",
+ "goal": "G-003",
+ "operations": [
+  "002-step-game-designer",
+  "003-route",
+  "004-step-gameplay-engineer",
+  "005-route",
+  "006-step-game-designer",
+  "007-route",
+  "008-step-gameplay-engineer",
+  "009-route",
+  "010-step-qa",
+  "011-route",
+  "012-step-playtester",
+  "013-route"
+ ],
+ "stop_reason": "done",
+ "status": "done",
+ "owner_reads": "goals/G-003-dash-readiness/goal.md#outcome",
+ "next": null
+}

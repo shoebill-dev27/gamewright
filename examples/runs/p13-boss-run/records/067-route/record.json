@@ -1,0 +1,83 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-002",
+ "attempts": [
+  {
+   "runtime": "codex",
+   "session_id": "01a15e6d-8235-7d42-8365-de2de5b1ce0a",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 28881,
+    "cached_input_tokens": 9600,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 207,
+    "reasoning_output_tokens": 48
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 1,
+   "started": "2026-10-21T21:26:37",
+   "seconds": 9.6,
+   "errors": [],
+   "need": [
+    "goals/G-002-final-boss/40-gameplay-engineer-to-studio.md",
+    "goals/G-002-final-boss/53-studio-to-gameplay-engineer.md",
+    "decisions/D-019-g002-balance-criteria-applicability.md",
+    "decisions/D-021-owner-authorizes-text-build.md",
+    "design/final-boss-and-continuous-run.md",
+    "repo/public-driver.md",
+    "repo/bots.py"
+   ]
+  },
+  {
+   "runtime": "codex",
+   "session_id": "01a15e6d-a7c0-72b2-a963-1515b29d860f",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 56434,
+    "cached_input_tokens": 7552,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 2872,
+    "reasoning_output_tokens": 31
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 2,
+   "started": "2026-10-21T21:26:47",
+   "seconds": 75.2,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-002-final-boss/55-studio-to-gameplay-engineer.md": "4887cfd39b778b8270a505f760011770472bd05c2de73d326e818bcfbc8e3322",
+  "goals/G-002-final-boss/goal.md": "24920ec527d6a10786efad3a435432892f87777da5efd9aabb37fb1a0f8a7e76"
+ },
+ "decision": {
+  "new": [
+   "gameplay-engineer",
+   "Build"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "gameplay-engineer",
+    "Build"
+   ]
+  ]
+ },
+ "seen_through_seq": 55
+}

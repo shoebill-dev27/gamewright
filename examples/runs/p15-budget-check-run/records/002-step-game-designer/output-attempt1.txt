@@ -1,0 +1,14 @@
+Whether the player view shows dash state at all is the open question, so I'm observing it first. The script dashes, then tries again inside the 0.6 s cooldown, just after it, and later.
+
+<<<FILE @run/play/dash-cooldown-probe
+room empty
+fps 60
+end 4
+player 3 4
+0.5 dash right
+0.8 dash right
+1.2 dash right
+1.5 dash right
+2.5 dash right
+2.6 dash right
+>>>END

@@ -1,0 +1,63 @@
+I'll start with the play runs for both cases at 30 and 60 FPS, and write the report once the results come back.
+
+- **Defeat case:** the grub is hit at 0.2 s, lunges back onto the player, and the second hit lands at 1.6 s while it is open and on the player.
+- **Dash-off case A:** a dash up at 0.3 s while the grub is winding up on the player.
+- **Dash-off case B:** a dash left at 1.6 s while the damaged grub is open on the player.
+
+<<<FILE @run/play/defeat30
+fps 30
+room empty
+player 8 4
+spawn grub 8 4
+0.2 attack
+1.6 attack
+end 2.6
+>>>END
+
+<<<FILE @run/play/defeat60
+fps 60
+room empty
+player 8 4
+spawn grub 8 4
+0.2 attack
+1.6 attack
+end 2.6
+>>>END
+
+<<<FILE @run/play/dashA30
+fps 30
+room empty
+player 8 4
+spawn grub 8 4
+0.3 dash up
+end 1.5
+>>>END
+
+<<<FILE @run/play/dashA60
+fps 60
+room empty
+player 8 4
+spawn grub 8 4
+0.3 dash up
+end 1.5
+>>>END
+
+<<<FILE @run/play/dashB30
+fps 30
+room empty
+player 8 4
+spawn grub 8 4
+0.2 attack
+1.6 dash left
+end 2.6
+>>>END
+
+<<<FILE @run/play/dashB60
+fps 60
+room empty
+player 8 4
+spawn grub 8 4
+0.2 attack
+1.6 dash left
+end 2.6
+>>>END

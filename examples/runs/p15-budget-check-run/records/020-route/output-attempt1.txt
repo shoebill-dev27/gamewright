@@ -1,0 +1,104 @@
+G-003 を `goal-met` で Close します。確認できた範囲に限る達成です。
+
+<<<FILE goals/G-003-dash-availability-clarity/goal.md
+---
+kind: goal
+id: G-003
+project: lantern-depths
+status: done
+created: 2026-10-23
+budget: 17
+---
+# G-003: Make it clear when dash can be used again
+
+## Owner request
+
+> ダッシュがいつまた使えるのか分かりにくい。分かるようにしてほしい
+
+## Interpretation
+
+Success condition (qualitative): a player using only what the build shows them (text player view and `repo/manual.md`) can tell, at any moment, whether dash is available now, and when it is not, when it will be available again. They no longer have to guess or press dash to find out.
+
+This is an experience (readability) Goal. The dash rules themselves (recovery length, invulnerability, input set) are assumed to stay as they are. Changing them would be a different Goal.
+
+Out of scope:
+- Rebalancing dash or combat.
+- New input buttons (D-001).
+- Reopening G-002 (stopped by D-027) or its unfinished verification.
+- Any other readability issue the work happens to find (these become proposed Goals).
+
+## Unknowns
+
+- Observe, Diagnose, Decide, Design, Plan, Build, Verify, Play: done or skipped (see Route). The cause was missing information, not rules; no dash timing or rule change was made.
+- Review: done (20, `goal-met`, limited to what was observed; D-030 scope cut).
+- Not observed, now `skipped`: Q5, Q7, P12 via public replay scripts, P8/P9/P11, attack-refusal half of P13, Q3/Q4/Q6/Q10/Q11, Q9 gaps.
+- Unverifiable (no baseline build): baseline-dependent parts of Q8/Q12 and "timing unchanged".
+- Build identity: ids seen are `b62005468da6`, `aa28af2ce710`, `3951a3656940`; QA saw only `3951a3656940`. Unreconciled.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Diagnose | game-designer | diagnose-experience | done | 02-game-designer-to-studio.md |
+| 2 | Decide | game-director | make-decision | skipped (no option changes dash rules or direction) | — |
+| 3 | Design | game-designer | write-design-spec | done | 04-game-designer-to-studio.md |
+| 4 | Build | gameplay-engineer | implement-change | done | 08-gameplay-engineer-to-studio.md |
+| 5 | Verify | qa | verify-change | done (fail at 30 FPS; spec questions) | 10-qa-to-studio.md |
+| 6 | Design (return) | game-designer | write-design-spec | done (D-029) | 12-game-designer-to-studio.md |
+| 7 | Build (fixes) | gameplay-engineer | implement-change | done (partial; comparison not possible) | 14-gameplay-engineer-to-studio.md |
+| 8 | Verify (re-check) | qa | verify-change | done (no failure; not a pass) | 17-qa-to-studio.md |
+| 9 | Play | playtester | playtest-session | done | 18-playtester-to-studio.md |
+| 10 | Review + scope cut | game-director | review-outcome | done (goal-met, limited; D-030) | 20-game-director-to-studio.md |
+
+## Route changes
+
+After Review (20, goal-met): the Goal is Closed. Unobserved verification items are `skipped` under the D-030 scope cut. Hit-stun reason display, `(nothing happens)`, grub warning countdowns and optional verification become proposed Goals. No Owner cost escalation was needed.
+
+## Next action
+
+None for G-003 (closed). Waiting for the Owner to decide which proposed Goals to open.
+
+## Outcome
+
+結果（ゲームディレクターのレビュー: 達成。ただし確認できた範囲に限る）:
+- 各画面の `dash:` 欄が `ready` / `active` / `N s` を示し、早押しは `dash not ready — N s left`、再使用可能になった瞬間に `dash ready` が出ます。ダッシュの可否と再使用までの時間は、確認できた範囲（第1部屋、60/30 FPS、スクリプトによるプレイ）で、画面から読み取れました。
+- ダッシュの速度・無敵・入力などのルールとタイミングは変えていません。30 FPSでは0.90秒までの許容です（D-029）。単体試験は180件OKです。
+- 判断記録: D-028（旧経路にも表示）、D-029（仕様の裁定）、D-030（レビューの範囲判断）。
+
+未確認・確認不能（合格とは扱いません）:
+- QA未確認: 部屋移動でのリセット、bot整合、被弾・硬直中の押下、攻撃拒否側の一部、公開再生スクリプトでの確認など。
+- 変更前ビルドがないため、「タイミング不変」と変更前との比較は確認できません。
+- 人による確認は、1人・非適応スクリプト・第1部屋のみです。実機・ゲームパッド・ダッシュでの回避プレイ、他の部屋やボスは見ていません。
+- ビルドIDの表記（`b62005468da6`、`aa28af2ce710`、`3951a3656940`）が食い違ったままです。QAは `3951a3656940` のみ確認しました。
+- 公開ドライバの定期表示は、イベント表示の後に周期が再開します（`public-driver.md` の記載どおり。D-030で容認）。仕様書側の文言は次回の編集時に直します。
+
+次のGoal候補:
+1. 被弾後にダッシュが使えない理由を画面に出す（文言のみ、ルール変更なし）。
+2. 被弾後に出る `(nothing happens)` の原因診断（不具合ならQAへ）。
+3. グラブの警告カウントダウンが画面間で古く見える件（ダッシュ以外）。
+4. 未確認項目の追加検証と、他の部屋での実機・適応プレイ（強い保証が必要な場合のみ）。
+
+Ownerへのお願い: 上記1・2を開くか、4の追加検証が必要かをご判断ください。G-003の完了には影響しません。
+>>>END
+
+<<<EDIT project.md
+<<<<<<< SEARCH
+テキスト表示・入力スクリプトで遊ぶビルドは`repo/`（今回のsha: dc0138c2b6d1）。既存第1〜4部屋から進む連続ラン、第5部屋の単体ボス、終端・再挑戦が実装報告済み。入力はattackとdash。操作・スクリプト形式は`repo/manual.md`、公開ドライバは`repo/public-driver.md`を参照。
+
+repo/で実行：試験は`python3 -m unittest discover -s tests`、プレイは`python3 play.py --view player {script}`、状態表示は`python3 play.py --view trace {script}`、botは`python3 bots.py {script}`。source fc07c7db6383で161 tests OKの記録がある。今回のshaでの再試験は本Resumeでは未実施。
+
+G-002はD-027により費用を理由に未達・検証未完了で打切り。実装は保持する。公開情報限定botの実接続・記憶、被弾差の原因確定、経路監査、接触診断全体、ボス4条件・保持回帰の再測定、公開再生の証拠確認が未完了。独立QAの再検証、限定Art Verify、独立Play、実測後Designer判断、最終Reviewも未実施。試験成功は体験Goal達成を示さない。
+
+変更前ビルド不在による歴史的一致の確認不能は別途残る。通常ラン勝利時間のBuild報告は約87〜104秒で、15〜20分Visionとの整合は未評価。再開の必要性は別GoalとしてOwnerが判断する。
+=======
+テキスト表示・入力スクリプトで遊ぶビルドは`repo/`（G-003時のsha: 660c1787ff32）。第1〜4部屋から進む連続ラン、第5部屋の単体ボス、終端・再挑戦が実装済み。入力はattackとdash。操作・スクリプト形式は`repo/manual.md`、公開ドライバは`repo/public-driver.md`を参照。
+
+repo/で実行：試験は`python3 -m unittest discover -s tests`、プレイは`python3 play.py --view player {script}`、状態表示は`--view trace`、botは`python3 bots.py {script}`。G-003のBuild報告で180 tests OK。
+
+G-003（ダッシュの再使用可否）は達成（確認範囲に限る）。各画面に`dash: ready/active/N s`欄、早押しは`dash not ready — N s left`、再使用可能時に`dash ready`を表示（30 FPSは0.90秒まで許容、D-029）。第1部屋・60/30 FPS・スクリプトで読み取れた。未確認: 部屋移動リセット、bot整合、被弾・硬直中の押下、実機・適応プレイ、他部屋。変更前ビルドがなくタイミング不変は確認不能。ビルドID表記（b62005468da6等）の食い違いは未整理。
+
+G-002はD-027により未達・検証未完了で打切り。実装は保持。ボス・公開情報限定botの検証、独立QA/Play/Reviewは未完了。試験成功は体験達成を示さない。通常ラン勝利時間は約87〜104秒で、15〜20分Visionとの整合は未評価。
+
+候補Goal: 被弾時のダッシュ不可理由表示、`(nothing happens)`の診断、グラブ警告の古いカウントダウン、未確認項目の検証。
+>>>>>>> REPLACE
+>>>END

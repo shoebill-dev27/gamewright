@@ -1,0 +1,5 @@
+<<<FILE @run/play/room1-still
+room 1
+fps 60
+end 8
+>>>END

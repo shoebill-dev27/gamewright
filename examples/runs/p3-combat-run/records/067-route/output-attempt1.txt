@@ -1,0 +1,7 @@
+@need
+goals/G-001-combat-monotony/53-game-designer-to-studio.md
+goals/G-001-combat-monotony/54-studio-to-gameplay-engineer.md
+sim/build-0.8.md
+sim/repo-notes.md
+design/g001-combat-escalation.md
+project.md

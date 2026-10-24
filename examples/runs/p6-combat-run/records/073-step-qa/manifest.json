@@ -1,0 +1,77 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/68-studio-to-qa.md",
+  "sha256": "90f0a74146d85ed29370bdbb52958f1b7fe1f7b7bcd953730d523f1087c21ac9",
+  "bytes": 4566
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "381742c8f2afe2e1a2a6af9d031dcc91f98f490ada7c90e2a990d6a1aaf27639",
+  "bytes": 1765
+ },
+ {
+  "path": "studio/skills/verify-change.md",
+  "sha256": "da40d2c0030e078ac6d085ea06b17bb9b452495f4e2f412a9e1bd723ac72ddf5",
+  "bytes": 1281
+ },
+ {
+  "path": "project.md",
+  "sha256": "ee6eb546e89d58288cd973fec203d4067f49bb3732222a7d2007909d050aa4d8",
+  "bytes": 2047
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "28516da8cd02e4366dd57a2f078e3ceefce4dd257d048792129ac7ce0f208e93",
+  "bytes": 34420
+ },
+ {
+  "path": "design/combat-visuals.md",
+  "sha256": "791350d615b55b03d026b3f74c63a6b178f2ecd5a8a2d1562a1a6f7c0bd976f2",
+  "bytes": 15516
+ },
+ {
+  "path": "manual.md",
+  "sha256": "fc06710951221dbee76cc6aa69fd5cf82b94b7d64d640b910800bea6be5d6034",
+  "bytes": 4128
+ },
+ {
+  "path": "project.md",
+  "sha256": "ee6eb546e89d58288cd973fec203d4067f49bb3732222a7d2007909d050aa4d8",
+  "bytes": 2047
+ },
+ {
+  "path": "decisions/D-009-manualtest-phrase-check-ignores-line-wraps.md",
+  "sha256": "edda481ff8a7c911414c9ab7b4decac6af949cd3d24716287433cfbee39544b4",
+  "bytes": 1411
+ },
+ {
+  "path": "decisions/D-010-owner-ran-suite-ac15-passes.md",
+  "sha256": "95462cf0dc0d9a014ea059fa5bf977fdae2bfac4aee0709e698392c5fb43b140",
+  "bytes": 1652
+ },
+ {
+  "path": "decisions/D-011-grub-turns-stun-body-hit-dash-facing.md",
+  "sha256": "b5e0a7a0dfa3b77038204e2f4f0c827cbd13212967f886555e0a139091bdb551",
+  "bytes": 5528
+ },
+ {
+  "path": "decisions/D-012-on-you-line-for-displaced-enemies.md",
+  "sha256": "12836ed5c581c097d1e801ce55cb3b7a46ecb7a377b362a54a90f5e6368ed66b",
+  "bytes": 2879
+ },
+ {
+  "path": "decisions/D-013-knockback-of-grub-on-players-tile.md",
+  "sha256": "e737794c44eff8e0174dc877da99e538170e9708e639d2468948ba68a4a29f1b",
+  "bytes": 3167
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ }
+]

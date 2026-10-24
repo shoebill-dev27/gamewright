@@ -1,0 +1,72 @@
+<<<FILE @run/tests
+>>>END
+
+<<<FILE @run/bots/b30
+bots camper,walker,dodger
+rooms 1-5
+fps 30
+>>>END
+
+<<<FILE @run/bots/b60
+bots camper,walker,dodger
+rooms 1-5
+fps 60
+>>>END
+
+<<<FILE @run/play/f2_30
+room empty
+fps 30
+spawn brute 9 4
+player 8 4
+0.1 attack
+0.5 attack
+end 4
+>>>END
+
+<<<FILE @run/play/f2_60
+room empty
+fps 60
+spawn brute 9 4
+player 8 4
+0.1 attack
+0.5 attack
+end 4
+>>>END
+
+<<<FILE @run/play/f2kill_30
+room empty
+fps 30
+spawn brute 9 4
+player 8 4
+0.1 attack
+1.0 attack
+1.3 attack
+2.3 attack
+end 4
+>>>END
+
+<<<FILE @run/play/f2kill_60
+room empty
+fps 60
+spawn brute 9 4
+player 8 4
+0.1 attack
+1.0 attack
+1.3 attack
+2.3 attack
+end 4
+>>>END
+
+<<<FILE @run/play/r3_30
+room 3
+fps 30
+when see * coming within 2 then dash aside
+end 15
+>>>END
+
+<<<FILE @run/play/r3_60
+room 3
+fps 60
+when see * coming within 2 then dash aside
+end 15
+>>>END

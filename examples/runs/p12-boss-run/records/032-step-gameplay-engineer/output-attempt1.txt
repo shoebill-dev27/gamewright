@@ -1,0 +1,167 @@
+<<<EDIT repo/game.py
+<<<<<<< SEARCH
+        self.cleared = False
+        for spec in ROOMS[room]:
+=======
+        self.cleared = False
+        self.outcome = None  # None | cleared | dead; resolved once at the frame boundary
+        for spec in ROOMS[room]:
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        if self.hearts <= 0:
+            return
+        if self.stun_left > 0:
+=======
+        if self.outcome is not None or self.hearts <= 0:
+            return
+        if self.stun_left > 0:
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    def step(self):
+        dt = self.dt
+=======
+    def step(self):
+        if self.outcome is not None:
+            return
+        dt = self.dt
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        if not self.cleared and self.enemies and all(e.hp <= 0 for e in self.enemies):
+            self.cleared = True
+            self.log("cleared")
+
+    def _attack(self):
+=======
+        self._resolve_result()
+
+    def _resolve_result(self):
+        """Resolve after actions, living attackers and already-fired projectiles.
+
+        A lethal swipe disables its enemy immediately through hp, but existing projectiles
+        remain independent hazards until this boundary. Death therefore wins a simultaneous
+        last-enemy kill. Empty practice rooms do not automatically end.
+        """
+        if self.outcome is not None:
+            return
+        if self.hearts <= 0:
+            self.outcome = "dead"
+        elif self.enemies and all(e.hp <= 0 for e in self.enemies):
+            self.outcome = "cleared"
+            self.cleared = True
+            self.log("cleared")
+        else:
+            return
+        self.shots.clear()
+        for enemy in self.enemies:
+            enemy.aim = None
+            if enemy.kind == "spitter":
+                enemy.cueing = False
+
+    def _attack(self):
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE repo/tests/test_terminal.py
+"""Frame-boundary termination foundation for G-002; run at both supported rates."""
+
+import copy
+import sys
+import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from game import Game
+
+
+class TerminalTest(unittest.TestCase):
+    def last_enemy(self, fps):
+        game = Game(fps=fps, room="empty")
+        game.spawn("spitter", 9, 4)
+        game.enemies[0].hp = 1
+        return game
+
+    def test_existing_projectile_can_make_last_enemy_kill_a_death(self):
+        for fps in (30, 60):
+            with self.subTest(fps=fps):
+                game = self.last_enemy(fps)
+                game.hearts = 1
+                game.shots.append([8.2, 4, 0, 0, 0])
+                game.press("attack")
+                game.step()
+                self.assertEqual(game.outcome, "dead")
+                self.assertFalse(game.cleared)
+                self.assertEqual(game.shots, [])
+                self.assertEqual(
+                    [k for _, k, _ in game.events if k in ("down", "cleared")],
+                    ["down"],
+                )
+
+    def test_surviving_last_enemy_kill_clears_after_projectile_damage(self):
+        for fps in (30, 60):
+            with self.subTest(fps=fps):
+                game = self.last_enemy(fps)
+                game.shots.append([8.2, 4, 0, 0, 0])
+                game.press("attack")
+                game.step()
+                self.assertEqual(game.hearts, 2)
+                self.assertEqual(game.outcome, "cleared")
+                kinds = [k for _, k, _ in game.events]
+                self.assertLess(kinds.index("hurt"), kinds.index("cleared"))
+
+    def test_clear_removes_remaining_projectiles_and_warning(self):
+        for fps in (30, 60):
+            with self.subTest(fps=fps):
+                game = self.last_enemy(fps)
+                enemy = game.enemies[0]
+                enemy.cueing, enemy.aim = True, (-1, 0)
+                game.shots.append([1, 1, 3, 0, 0])
+                game.press("attack")
+                game.step()
+                self.assertTrue(game.cleared)
+                self.assertEqual(game.shots, [])
+                self.assertIsNone(enemy.aim)
+                self.assertFalse(enemy.cueing)
+
+    def test_terminal_inputs_and_two_seconds_of_steps_change_nothing(self):
+        for fps in (30, 60):
+            for dead in (False, True):
+                with self.subTest(fps=fps, dead=dead):
+                    game = self.last_enemy(fps)
+                    if dead:
+                        game.hearts = 1
+                        game.shots.append([8.2, 4, 0, 0, 0])
+                    game.press("dash", "up")
+                    game.press("attack")  # exercise a queued attack in the clear case
+                    if dead:
+                        # Deterministic lethal contact after dash protection is removed.
+                        game.dash_left = 0
+                        game.invulnerable = False
+                    else:
+                        game.enemies[0].hp = 0
+                    game.step()
+                    self.assertIsNotNone(game.outcome)
+                    before = copy.deepcopy(game.__dict__)
+                    for _ in range(2 * fps):
+                        for action, direction in (
+                            ("move", "right"), ("attack", None),
+                            ("dash", "left"), ("stop", None),
+                        ):
+                            game.press(action, direction)
+                        game.step()
+                    # Enemy object identity is irrelevant; compare its fields separately.
+                    after = copy.deepcopy(game.__dict__)
+                    before_enemies = before.pop("enemies")
+                    after_enemies = after.pop("enemies")
+                    self.assertEqual(before, after)
+                    self.assertEqual(
+                        [e.__dict__ for e in before_enemies],
+                        [e.__dict__ for e in after_enemies],
+                    )
+
+
+if __name__ == "__main__":
+    unittest.main()
+>>>END
+
+<<<FILE @run/tests
+>>>END

@@ -1,0 +1,10 @@
+<<<FILE @need
+studio/roles/technical-director.md
+studio/skills/prepare-owner-escalation.md
+goals/G-001-dash-damage/19-technical-director-to-studio.md
+sim/repo-notes.md
+design/combat.md
+decisions/D-001-one-button-combat.md
+decisions/D-002-resume-with-owner-observations.md
+decisions/D-003-independent-invulnerability.md
+>>>END

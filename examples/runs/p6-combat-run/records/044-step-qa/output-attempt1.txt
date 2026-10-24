@@ -1,0 +1,46 @@
+Round 1 of the AC-15 checks follows. I have not run anything yet, so the results come back in the next round. In the packet's `manual.md`, the practice-room paragraph is the last item in `## On screen`, before `## What you hear and read`, and I read it as matching the handoff text.
+
+<<<FILE @run/tests
+>>>END
+
+<<<FILE @run/play/grub-d4
+room empty
+fps 60
+player 8 4
+spawn grub 12 4
+end 5.5
+>>>END
+
+<<<FILE @run/trace/grub-d4
+room empty
+fps 60
+player 8 4
+spawn grub 12 4
+end 5.5
+>>>END
+
+<<<FILE @run/play/spitter-on-tile
+room empty
+fps 30
+player 8 4
+spawn spitter 8.2 4
+end 3.5
+>>>END
+
+<<<FILE @run/trace/clear-practice
+room empty
+fps 60
+player 8 4
+spawn grub 9 4
+0.9 attack
+1.3 attack
+end 6
+>>>END
+
+<<<FILE @run/play/down-practice
+room empty
+fps 60
+player 8 4
+spawn grub 8.2 4
+end 20
+>>>END

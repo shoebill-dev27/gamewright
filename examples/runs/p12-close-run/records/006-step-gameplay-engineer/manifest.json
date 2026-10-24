@@ -1,0 +1,72 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-001-dash-damage/02-qa-to-gameplay-engineer.md",
+  "sha256": "8d7f9588b2b724b6ff06f49d6ca5970e3f59b89531a4521dca1a36d546e8571a",
+  "bytes": 9143
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md",
+  "sha256": "8a447e66877cd14dfff47ac1b8482ba77c850159c8fb43ec2780e91064869351",
+  "bytes": 1742
+ },
+ {
+  "path": "studio/skills/implement-change.md",
+  "sha256": "a9befd7f1d9e09eb94c51a066f030db88c5061ad1b522d9795e62bc2c242964a",
+  "bytes": 1823
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "05a33c6f8e50caa20ddf4f3844885137c4261ad4a3e5f3db3eb1b5312b129a9f",
+  "bytes": 237
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "b67a8b97eaf78370e06b07dd9143f1c92991e97db5d0326ebbdf7d4784a43cec",
+  "bytes": 854
+ },
+ {
+  "path": "manual.md",
+  "sha256": "e7fd4c697f8da5564a22a2dd3427da0c33d078a1772e739bdc8f62b2c5ce789f",
+  "bytes": 1266
+ },
+ {
+  "path": "repo/README.md",
+  "sha256": "f27cca1e84d296a71cd528e938857f9c099b6eb8a526a4a17126c47f251271bf",
+  "bytes": 231
+ },
+ {
+  "path": "repo/game.py",
+  "sha256": "6e2ea35ca833e692b080c77f0920eeca4264a29a643c33e642436f78788022e6",
+  "bytes": 9021
+ },
+ {
+  "path": "repo/play.py",
+  "sha256": "88ac989a0e36c22767be8cc2e283e38e66356972a3a9d9b1aa571124a3c9d211",
+  "bytes": 6582
+ },
+ {
+  "path": "repo/tests/test_game.py",
+  "sha256": "e704e6fc5711d9babab7777ab29aa69bd099dd5a37520a71d895b2232b797eb0",
+  "bytes": 2296
+ },
+ {
+  "path": "decisions/D-001-one-button-combat.md",
+  "sha256": "c7fe9ca23a369707a5ab439e44789a25a0a8544efce4703a676f8fd180f82ec1",
+  "bytes": 798
+ },
+ {
+  "path": "goals/G-001-dash-damage/01-studio-to-qa.md",
+  "sha256": "fb694c13927b210731fd1b8b795471d77307a1210a0ade1a869e4824406737d2",
+  "bytes": 3165
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ }
+]

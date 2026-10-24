@@ -1,0 +1,42 @@
+[
+ {
+  "run": "@run/tests",
+  "command": "python3 -m unittest discover -s tests",
+  "script": "\n",
+  "exit": 0,
+  "seconds": 0.3,
+  "output": "................................................................................................................\n----------------------------------------------------------------------\nRan 112 tests in 0.208s\n\nOK\n"
+ },
+ {
+  "run": "@run/bots/ind34-fps30",
+  "command": "python3 bots.py {script}",
+  "script": "bots camper,walker,dodger\nrooms 3,4\nfps 30\n",
+  "exit": 0,
+  "seconds": 0.0,
+  "output": "source 5145454ab956; policy: dodger with boss policy v1 (displayed boss fields only), reaction 0.15 s, start (8, 4) facing right; camper/walker unchanged\nbots at 30 FPS, up to 60 s per room, 3 hearts at start\ncamper  room 3: NOT cleared (6.3 s); hearts lost 3 (hit by: shot 3); attacks 0, dashes 0; start hearts 3, end 0, outcome death\ncamper  room 4: NOT cleared (6.7 s); hearts lost 3 (hit by: shot 3); attacks 1, dashes 0; start hearts 3, end 0, outcome death\ncamper  total: cleared 0/2, hearts lost 6, dashes 0\nwalker  room 3: cleared in 8.9 s; hearts lost 1 (hit by: grub 1); attacks 8, dashes 0; start hearts 3, end 2, outcome clear\nwalker  room 4: cleared in 9.9 s; hearts lost 1 (hit by: grub 1); attacks 7, dashes 0; start hearts 3, end 2, outcome clear\nwalker  total: cleared 2/2, hearts lost 2, dashes 0\ndodger  room 3: cleared in 15.6 s; hearts lost 0 (hit by: none); attacks 8, dashes 6; start hearts 3, end 3, outcome clear\ndodger  room 4: cleared in 18.3 s; hearts lost 0 (hit by: none); attacks 7, dashes 7; start hearts 3, end 3, outcome clear\ndodger  total: cleared 2/2, hearts lost 0, dashes 13\n"
+ },
+ {
+  "run": "@run/bots/ind34-fps60",
+  "command": "python3 bots.py {script}",
+  "script": "bots camper,walker,dodger\nrooms 3,4\nfps 60\n",
+  "exit": 0,
+  "seconds": 0.0,
+  "output": "source 5145454ab956; policy: dodger with boss policy v1 (displayed boss fields only), reaction 0.15 s, start (8, 4) facing right; camper/walker unchanged\nbots at 60 FPS, up to 60 s per room, 3 hearts at start\ncamper  room 3: NOT cleared (6.3 s); hearts lost 3 (hit by: shot 3); attacks 0, dashes 0; start hearts 3, end 0, outcome death\ncamper  room 4: NOT cleared (6.8 s); hearts lost 3 (hit by: shot 3); attacks 1, dashes 0; start hearts 3, end 0, outcome death\ncamper  total: cleared 0/2, hearts lost 6, dashes 0\nwalker  room 3: cleared in 9.2 s; hearts lost 1 (hit by: grub 1); attacks 8, dashes 0; start hearts 3, end 2, outcome clear\nwalker  room 4: cleared in 9.8 s; hearts lost 1 (hit by: grub 1); attacks 7, dashes 0; start hearts 3, end 2, outcome clear\nwalker  total: cleared 2/2, hearts lost 2, dashes 0\ndodger  room 3: cleared in 15.0 s; hearts lost 0 (hit by: none); attacks 8, dashes 6; start hearts 3, end 3, outcome clear\ndodger  room 4: cleared in 17.0 s; hearts lost 0 (hit by: none); attacks 7, dashes 8; start hearts 3, end 3, outcome clear\ndodger  total: cleared 2/2, hearts lost 0, dashes 14\n"
+ },
+ {
+  "run": "@run/bots/boss-fps30",
+  "command": "python3 bots.py {script}",
+  "script": "bots dodger\nrooms 5\nhearts 3,2\nlimit 120\nfps 30\n",
+  "exit": 0,
+  "seconds": 0.0,
+  "output": "source 5145454ab956; policy: dodger with boss policy v1 (displayed boss fields only), reaction 0.15 s, start (8, 4) facing right; camper/walker unchanged\nbots at 30 FPS, up to 120 s per room, 3 hearts at start\ndodger  room 5: cleared in 21.6 s; hearts lost 0 (hit by: none); attacks 12, dashes 8; start hearts 3, end 3, outcome clear\ndodger  total: cleared 1/1, hearts lost 0, dashes 8\nbots at 30 FPS, up to 120 s per room, 2 hearts at start\ndodger  room 5: cleared in 21.6 s; hearts lost 0 (hit by: none); attacks 12, dashes 8; start hearts 2, end 2, outcome clear\ndodger  total: cleared 1/1, hearts lost 0, dashes 8\n"
+ },
+ {
+  "run": "@run/bots/boss-fps60",
+  "command": "python3 bots.py {script}",
+  "script": "bots dodger\nrooms 5\nhearts 3,2\nlimit 120\nfps 60\n",
+  "exit": 0,
+  "seconds": 0.0,
+  "output": "source 5145454ab956; policy: dodger with boss policy v1 (displayed boss fields only), reaction 0.15 s, start (8, 4) facing right; camper/walker unchanged\nbots at 60 FPS, up to 120 s per room, 3 hearts at start\ndodger  room 5: cleared in 32.9 s; hearts lost 0 (hit by: none); attacks 12, dashes 12; start hearts 3, end 3, outcome clear\ndodger  total: cleared 1/1, hearts lost 0, dashes 12\nbots at 60 FPS, up to 120 s per room, 2 hearts at start\ndodger  room 5: cleared in 32.9 s; hearts lost 0 (hit by: none); attacks 12, dashes 12; start hearts 2, end 2, outcome clear\ndodger  total: cleared 1/1, hearts lost 0, dashes 12\n"
+ }
+]

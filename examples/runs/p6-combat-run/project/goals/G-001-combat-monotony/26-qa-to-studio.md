@@ -1,0 +1,121 @@
+---
+kind: handoff
+goal: G-001
+seq: 26
+from: qa
+to: studio
+stage: Verify
+outcome: question
+---
+# 26: qa → studio — Build 0.5 verification: no failures found, but not complete (ManualTest blocked on the Owner; pause not verifiable)
+
+## Task
+
+Report the verification of Build 0.5 against AC-1…AC-17, with the `run_tests` totals, regressions, and items not verifiable.
+
+## Context
+
+Handoff 24 asked for independent verification of `repo/` against `design/combat.md`, at 30 and 60 FPS. One round of runs was used (tests, 2 traces, 1 player-view play). Two rounds remain, but the main gap needs an Owner action, so no further runs were requested.
+
+## Findings
+
+### Verdict: no failures found, but not a `pass`
+
+I cannot give `pass` because two criteria are not fully judged:
+
+- **AC-15** is unresolved because `ManualTest` has no valid result (see "Blocked").
+- **AC-17** depends on the same layout fix for its "AC-1…AC-14" part, and I observed only part of it myself.
+
+Pause (F11) is out of scope and marked not verifiable.
+
+### run_tests totals
+
+- Command: `python3 -m unittest discover -s tests`. Exit 1. 34 tests ran: **33 passed, 0 failed, 1 error**.
+- The one error is `ManualTest.test_manual_lists_glyphs_and_lines`: `FileNotFoundError: /manual.md`.
+- **The error comes from the workspace layout, not from the build.** The tests ran from `/work`, so `repo/` resolved to `/work` and the test looked for `manual.md` in `/`.
+- **ManualTest result: no valid result (blocked on the Owner).** I do not mark it pass or fail.
+
+### Blocked: manual.md placement
+
+I cannot write `manual.md` next to `repo/` in my workspace. My allowed write paths contain only the handoff file and `@run` blocks, and none lets me write `repo/` or its parent.
+
+- **Needed:** `manual.md` (the Owner's draft per D-005, unchanged) placed in the directory above `repo/`, then `run_tests` rerun.
+- **Reading check only, not a test result:** I read `manual.md` as provided in the packet.
+  - It lists the marks `P x g G w W s S z Z * ) ( ^ v`.
+  - It mentions the practice room (`room empty`) and the `x` marker.
+  - It includes the phrases the test requires: "rears back", "is open", "charges", "spits", "run over", "press attack to start again", "(miss)", "(too soon)", "(stunned)", "(down)", "room cleared".
+  - I cannot see `play.GLYPHS`, so I cannot confirm the manual covers every glyph the build defines. That is exactly what the test checks.
+
+### Per-criterion results
+
+"Observed" means I read the evidence directly in the traces or player view from this run. "Suite" means a repo test that passed at both `fps 30` and `fps 60` (the tests loop over both). The suite is the implementer's side's test code, so I label it separately from my own observation.
+
+| AC | Result | Evidence |
+|---|---|---|
+| AC-1 grub telegraph | pass | Observed, 30 FPS trace (`grub 12 4`, player 8 4): windup at 1.400, first heart lost at 1.967, so 0.567 s of warning (≥0.45). On the second bite, windup at 2.967 and hurt at 3.467 give 0.50 s. Hearts were lost only during Strike. Observed, player view, room 4: "a grub rears back (left)" with `G` before "YOU ARE HIT". Suite: `test_telegraph_and_timing`, `test_grub_glyph_telegraph_before_first_hit`. |
+| AC-2 grub timing | pass | Observed, 30 FPS: windup→strike 0.500; strike→recover 0.167 (spec 0.15, tolerance 0.04); recover→next windup 0.900. Observed, 60 FPS room 5: strike 2.717 → recover 2.867 = 0.150. Suite: `test_telegraph_and_timing`. |
+| AC-3 grub dodge | pass (suite only) | `test_dash_away_during_windup_avoids_the_strike` at offsets 0 / 0.25 / 0.45 s, both FPS. Not observed independently. |
+| AC-4 grub counter | pass (suite + partial observation) | Observed: bites by a still player came 1.5 s apart (hurt 1.967 → 3.467 at 30 FPS). Suite: `test_swipe_in_recovery_hits_and_next_bite_is_late`. The "swipe in Recovery shows a damaged state" part is suite only. |
+| AC-5 interrupt | pass (suite only) | `test_swipe_interrupts_windup`: HP 1, state recovery, timer 0.6, no heart lost, cause "interrupted". |
+| AC-6 attack limit | pass | Observed, 60 FPS room 5: in every sampled row at most 2 grubs were in windup/strike (e.g. 3.683, 3.833, 4.000). Suite: `test_at_most_two_grubs_attack_at_once` checks every frame and reaches a peak of exactly 2. |
+| AC-7 spitter stagger | pass | Observed, 60 FPS room 5: first charges at 1.000 and 1.800; repeats at 3.500 and 4.300 (2.5 s period). Spits at 1.800, 2.600, 4.300, never within 0.5 s of each other. Observed, 30 FPS room 4 player view: charges at 1.000 / 1.800 / 3.500 / 4.300. Suite: `test_volleys_are_staggered_and_regular` for rooms 3, 4, 5. |
+| AC-8 spitter telegraph and spit line | pass | Observed, room 4 player view: "spitter (top right) charges" at 1.000 with `S`, and its spit at 1.800 (0.8 s later). At 1.800 two different lines print: "spitter (top right) spits" and "spitter (bottom right) charges". No identical duplicate lines at one timestamp. Suite: `test_charge_lines_and_spit_lines_name_the_spitter`, plus `test_two_spitters_in_one_spot_get_numbers` (two spitters at the same position are numbered). |
+| AC-9 projectile dodge | pass (suite only) | `test_projectile_dodge` covers a still player (hit for 1 heart), a sidestep, and a dash through, both FPS. |
+| AC-10 spitter approach | pass (suite only) | `test_walk_up_and_defeat_a_spitter` (2 swipes defeat it) and `test_hit_during_charge_cancels_the_shot` (no spit, next charge at 2.2 s). |
+| AC-11 hit feedback | pass (suite only) | Suite: miss, too soon, hit (1 left), stunned, down; no "nothing happens" string in `play.py`; the four glyph variants differ. Observed (partial): the `g`/`G` glyphs differ in the player view. |
+| AC-12 multi-hit | pass (suite only) | `test_multi_hit` gives two "grub hit (1 left)" lines from one swipe. |
+| AC-13 zero hearts | pass | Observed, room 4 player view (30 FPS): "YOU ARE HIT … 0/3" and "you went down" at 5.067; `x` replaces `P`; enemies reset to harmless glyphs; shots gone. Observed, room 5 trace (60 FPS): down at 4.533, shots=0, enemies idle/approach, `run_over` at 6.533 = exactly 2.0 s. Suite: `test_zero_hearts` (attack prints "(down)", the 1.9 s / 2.1 s boundary, attack restarts room 1 with 3 hearts) and `test_down_screen_in_the_player_view`. The run-over text and the restart by attack were not seen in my own player-view run (the script ended first). |
+| AC-14 room clear | pass (suite only) | `test_room_clear`: clearing swipe on the same tick as a would-be strike leaves no hurt event, hearts 2→3, shots cleared, next room at 1.5 s with 4 enemies, start position. `test_clearing_room_5_completes_the_run` covers "run complete". |
+| AC-15 practice room and manual | **blocked** | Practice room behavior was exercised in all `room empty` runs and works as described, including the same down rules (suite: `test_practice_room_session_ends_after_down`). The manual content check is the blocked `ManualTest`. |
+| AC-16 room mix | pass | Observed: room 5 trace setup row = 3 grubs + 2 spitters at the expected positions. Suite: `test_layouts` for rooms 1–5. |
+| AC-17 frame rate | partial | Observed at both frame rates: grub timing within tolerance (30 FPS and 60 FPS traces), and spitter timestamps match the spec at both. Suite: `test_same_events_within_0_07_s` (30 vs 60 FPS event kinds and counts equal, timestamps within 0.07 s), the dash distance test, and the Strike ≥4 frames at 30 FPS test, all passing. The comparison needs a rerun once `ManualTest` has a valid result; nothing observed contradicts it. |
+
+### Regressions checked
+
+- Dash: covers 4 tiles at both frame rates, has a cooldown ("dash not ready"), and an attack during a dash fires when it ends. All pass.
+- Invulnerability: a dash right after a hit keeps both protections; hurt events were ≥0.8 s apart (observed 0.8 s in room 4). Pass.
+- Moving while attacking works (suite).
+- Balance bots finish room 1, and the dodger bot runs room 5 at both frame rates (suite). Not independently exercised through `run_bots` this round.
+- No regression found.
+
+### Observations (not failures; the spec is silent)
+
+- In the 30 FPS grub trace the grub ends up at the player's position (`side: on you`, grub at 8.00,4.00) after a few bites on a still player. The spec does not say whether enemies may overlap the player. Flagged for the game-designer, not a defect.
+- With the spec's Recovery of 0.9 s and wind-up of 0.5 s, a still player is bitten every 1.5 s. The 3 hearts were lost in about 3.5 s in room 4 and about 4.5 s in room 5 with no player input. This is an experience-tuning matter for the playtest (the spec marks these values [tune]).
+
+### Not verifiable
+
+- **Pause (F11):** not implemented, a known scope limit. Not verifiable, not a failure.
+- **Run-over screen and restart by attack in my own player-view run:** the script ended before 2.0 s after going down. Covered only by the suite.
+
+## Decisions already made
+
+- D-001: one attack button plus dash. No new inputs were seen in the manual or script format.
+- D-002: Option A.
+- D-003: room mix across rooms, zero hearts ends the run, +1 heart per room clear. Consistent with what I observed.
+- D-004: one sequential change set.
+- D-005: the Owner placed the draft `manual.md` unchanged.
+
+## Constraints
+
+- Verified at both 30 and 60 FPS as described above.
+- I did not edit the build.
+
+## Open questions
+
+1. **Blocked on the Owner:** place `manual.md` in the directory above `repo/` (D-005) and rerun `run_tests`. Until then `ManualTest` and the AC-15 manual check have no valid result. I mark neither pass nor fail.
+2. After that rerun, the studio can decide whether to route to the playtester or to request a second QA round. A second QA round would add independent scripts for the "suite only" rows (AC-3, 5, 9, 10, 11, 12, 14). No failure has been found, so there is nothing to return to `gameplay-engineer`.
+
+## Expected output
+
+The studio takes this report, resolves the `manual.md` placement with the Owner, and reruns `run_tests`. If `ManualTest` then passes and the studio accepts the suite-only evidence, the verdict becomes `pass` and the playtester's Handoff can be composed without implementation history. If it fails, the failure goes to `gameplay-engineer` (with the missing glyph or phrase from the test output).
+
+Reproduction for the blocker: run `python3 -m unittest discover -s tests` in a layout without `manual.md` next to `repo/`. It yields the `FileNotFoundError` above.
+
+## Load
+
+- Role: studio/roles/studio.md
+- Skills: none
+- Project: project.md, design/combat.md, manual.md
+- Decisions: decisions/D-003-run-end-and-room-rules.md
+- Previous handoff: goals/G-001-combat-monotony/24-studio-to-qa.md

@@ -1,0 +1,139 @@
+---
+kind: handoff
+goal: G-001
+seq: 8
+from: playtester
+to: game-designer
+stage: Diagnose
+outcome: done
+---
+# 08: playtester → game-designer — Observation report: rooms 4 and 5
+
+## Task
+
+Read the observations below on rooms 4 and 5 and diagnose the combat experience. Nothing here is a cause or a fix.
+
+## Context
+
+G-001: the Owner finds combat monotonous. This is first-hand play evidence for rooms 4 and 5, taken with the player view only and `manual.md`.
+
+## Findings
+
+### Method
+
+- Input-script automation with `python3 play.py --view player`. I did not play live and did not read source.
+- Three runs in total:
+  - room 4 idle (8 s)
+  - room 5 idle (8 s)
+  - room 4 with a short fight script: walk left, stop, four attacks, one dash right (8 s)
+- The run budget ended there. **I did not play a fight in room 5** and I **never approached a spitter**. I did not run any further script to test dodging.
+- Claims about room 5 come from the idle run only.
+
+### Enemies, counts and behaviour over time
+
+**Room 4**
+- 2 grubs start on the left, at about (0,1) and (1,4).
+- 2 spitters sit in the right-hand corners, at (15,0) and (15,8).
+- The grubs walk steadily toward me, about 1 tile per half second. They reach me at about 5 s when I stand still.
+- Spitters did not move at all during 8 s.
+- Both spitters spit at the same moment, every 2 s (2.0, 4.0, 6.0, 8.0 s). Each spit is one `*` and the two always come as a mirrored pair.
+- The projectiles drift leftward and toward the middle rows, closing on my row. In the idle run they passed above and below me, then bunched around my tile.
+- **I was never hit by a projectile in any run.** All damage I saw came from grubs.
+- Over time nothing changed except the grubs closing in. The spit rhythm was identical from the first spit to the last.
+
+**Room 5**
+- 3 grubs start on the left and bottom-left, at about (1,1), (0,6) and (4,8).
+- 2 spitters sit in the right-hand corners, at the same spots as in room 4.
+- Spit timing and look are the same as in room 4: a mirrored pair every 2 s.
+- Idle, the grubs surrounded me and the first hit came at 4.2 s. I went down at 5.8 s.
+
+### Do the rooms feel different?
+
+- On paper, room 5 is room 4 plus one more grub, arriving from more directions. That is the only difference I could see.
+- The spitters, the layout of the right edge and the spit pattern looked identical.
+- In the idle runs, room 5 killed me about 1.1 s sooner (5.8 s against 6.95 s).
+- I could not tell the two rooms apart by feel. I expect the same loop: grubs close in while the spitters repeat the same pair of shots on the same beat.
+
+### First contact with each enemy type
+
+**Grub**
+- Visible from the start, walking at me in the open. There was no damage before I could see it coming.
+- My responses are to hit it or dash away.
+- In the fight run, the first hit on me came at 1.4 s. I was still walking left into the grubs, so it was my own approach.
+
+**Spitter**
+- Visible from the start in a corner. A text line "a spitter spits" appears at the moment of each shot.
+- The `*` projectiles are visible and slow, a few tiles per second.
+- I never got hit by one, so I cannot say what it feels like to take one or what it does.
+- I could see the pattern, but I had no occasion to dodge it.
+
+### How my choices affected the outcome
+
+- Standing still ended in a loss in both rooms: down at 6.95 s in room 4 and at 5.8 s in room 5. I took no action in those runs.
+- The grubs hit about every 0.8 s while next to me. Hits came at 5.35, 6.15 and 6.95 s in room 4, so a 3-heart bar lasts about 1.6 s once they are on me.
+- In the room 4 fight script:
+  - Walking toward the grubs cost me a heart straight away, at 1.4 s.
+  - Swipes at 1.5 and 1.6 s showed "(nothing happens)".
+  - The swipe at 2.0 s landed: "grub hit".
+  - I took another hit at 2.2 s.
+  - The swipe at 2.4 s showed "(nothing happens)".
+  - The swipe at 2.8 s showed "grub defeated, grub hit".
+  - The dash right at 3.2 s carried me about 3 tiles away and got me clear.
+  - The remaining grub caught up by about 5.5 s while I stood still after the dash, and took my last heart at 6.4 s.
+- Moving while shooting was never tested.
+- Most of the fight I did nothing but wait. The dash bought me a few seconds of quiet and I did nothing with them. That was my choice in the script, not something the game asked of me.
+- The projectiles gave me nothing to react to in these runs. Both rooms felt like "kill the grubs and ignore everything else."
+
+### What I see when my attack lands
+
+- The only feedback is a line of text: "you swipe: grub hit" or "grub defeated".
+- On the room map nothing changes visually when a grub is hit.
+- I cannot say from the screen how many hits a grub takes. In the room 4 fight, one grub was hit at 2.0 s and a "grub defeated" came at 2.8 s, so it looks like two swipes for one grub. The 2.8 s swipe also listed a second "grub hit", so that swipe seemed to hit two. I am not sure which grub was which.
+- Swipes seem to have a gap: two of my four swipes did nothing. I could not tell whether they missed because of range or timing, or were blocked by a cooldown.
+- Spitter hits to defeat: not observed.
+
+### Can I approach a spitter?
+
+- Not tested. They stay in the far corners and I never reached the right side.
+
+### How many hits can I take
+
+- 3 hearts. Each grub hit costs 1 heart.
+- No projectile damage was observed.
+
+### After going down
+
+- The text says "you went down" and my `P` becomes `x`.
+- The room keeps running. The grubs stay beside me and the spitters keep firing, with no game-over screen and no restart in the output.
+- Clearing a room was never reached, so I have no observation of it.
+
+### Confusing or odd
+
+- "(nothing happens)" on attacks at 1.5, 1.6 and 2.4 s, with no stated reason.
+- The "a spitter spits" line appears twice at each spit time. This looks like one line per spitter.
+- "enemies left" at the end was 4 and 5 in the idle runs (every enemy still alive). It was 3 after the fight run (one grub killed).
+- The same mirrored spit pair on the same 2 s beat made the spitters read as scenery. That is how it felt, not a measurement.
+
+## Decisions already made
+
+None.
+
+## Constraints
+
+- Observations are what a player could see in the player view and read in `manual.md`. Not tested: room 5 combat, approaching spitters, being hit by a projectile, clearing a room, and any dash used for dodging.
+
+## Open questions
+
+None.
+
+## Expected output
+
+The game-designer diagnoses from these observations (stage Diagnose).
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: none specified
+- Project: project.md#player-profile
+- Decisions: none
+- Previous handoff: goals/G-001-combat-monotony/07-studio-to-playtester.md

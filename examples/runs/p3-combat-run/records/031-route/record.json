@@ -1,0 +1,122 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "7efab5ce-7b7a-46e5-8047-0cf1e5291d6a",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 23804,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 605,
+    "output_tokens_details": {
+     "thinking_tokens": 520
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 23804,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 605,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 23804,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 23804
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.10127,
+   "attempt": 1,
+   "started": "2026-10-11T10:59:37",
+   "seconds": 7.9,
+   "errors": [
+    "goal.md must be written"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "45a45e76-293e-492b-9479-c7aa4bcdb965",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 23842,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 11400,
+    "output_tokens_details": {
+     "thinking_tokens": 1513
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 23842,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 11400,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 23842,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 23842
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.209372,
+   "attempt": 2,
+   "started": "2026-10-11T10:59:45",
+   "seconds": 71.0,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-combat-monotony/27-studio-to-owner.md": "5272a514a1b8a6faac162b96015b1392872db351b81d40e9a485bba474bd73bf",
+  "goals/G-001-combat-monotony/goal.md": "121a0730e44e9d9f26400bc49427f87158e59e6c28d9290a6956b08cfb053647"
+ },
+ "decision": {
+  "new": [
+   "owner",
+   null
+  ],
+  "status": "blocked-on-owner",
+  "open": [
+   [
+    "owner",
+    "Verify decision (how to resolve the missing hit-stun statements in the build description)"
+   ]
+  ]
+ },
+ "seen_through_seq": 27
+}

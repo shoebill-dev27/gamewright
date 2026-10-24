@@ -1,0 +1,46 @@
+
+<<<EDIT goals/G-003-dash-readiness/05-game-designer-to-gameplay-engineer.md
+<<<<<<< SEARCH
+- Skills: (Studio fills when routing)
+- Project: design/dash-readiness.md, design/combat.md, repo/manual.md, the build in `repo/`, tests/test_dash_readiness.py
+=======
+- Skills: studio/skills/implement-change.md
+- Project: design/dash-readiness.md, design/combat.md, repo/manual.md, the build in `repo/` (game.py, play.py, run_driver.py), repo/tests/test_dash_readiness.py
+>>>END
+
+<<<EDIT goals/G-003-dash-readiness/goal.md
+<<<<<<< SEARCH
+- Design: reopened for three small points from Build: header during hit-stun versus "ready iff accepted"; the ready-time tolerance at 30 FPS (build gave 0.9 s vs 0.85 s, one own test fails); cooldown-start wording in `combat.md`.
+=======
+- Design: done (rulings in Handoff 05, D-028): ready-time bound of 2 frames over 0.85 s, hit-stun shown as recharging, cooldown counted from dash end. No rule or number change.
+>>>END
+
+<<<EDIT goals/G-003-dash-readiness/goal.md
+<<<<<<< SEARCH
+- Build: built once (Handoff 03); one own test fails, so a fix pass follows the ruling. Not yet verified.
+=======
+- Build: built once (Handoff 03); one own test failed. The fix pass applies the rulings (Handoff 05). Not yet verified.
+>>>END
+
+<<<EDIT goals/G-003-dash-readiness/goal.md
+<<<<<<< SEARCH
+| 3 | Design (rulings) | game-designer | write-design-spec, make-decision | open | 04-studio-to-game-designer.md |
+| 4 | Build (fix) | gameplay-engineer | implement-change | planned | — |
+=======
+| 3 | Design (rulings) | game-designer | write-design-spec, make-decision | done | 04-studio-to-game-designer.md (result: 05-game-designer-to-gameplay-engineer.md) |
+| 4 | Build (fix) | gameplay-engineer | implement-change | open | 05-game-designer-to-gameplay-engineer.md |
+>>>END
+
+<<<EDIT goals/G-003-dash-readiness/goal.md
+<<<<<<< SEARCH
+After step 2: Build reported done, but the runtime's test run failed on its own ready-time test (0.9 s vs 0.85 s at 30 FPS), and the hit-stun header conflicts with the spec. Verify is held; a Design ruling (3) and a Build fix (4) come first. The budget is tight; after step 3's Route, add nothing beyond what is listed.
+=======
+After step 3: the rulings settle the three points without a rule or number change, so no Decide or Plan is needed. Build fix (4) opens with Handoff 05, fixed to load the test file at repo/tests/. Its result goes to `studio` for Verify. Budget is tight: add nothing beyond the listed stages.
+>>>END
+
+<<<EDIT goals/G-003-dash-readiness/goal.md
+<<<<<<< SEARCH
+Start step 3 with `04-studio-to-game-designer.md` (game-designer, write-design-spec). Its result goes to gameplay-engineer for the fix, whose result is addressed to `studio` for Verify.
+=======
+Start step 4 with `05-game-designer-to-gameplay-engineer.md` (gameplay-engineer, implement-change). Its result is addressed to `studio`, which then routes Verify (qa) with a clean Handoff.
+>>>END

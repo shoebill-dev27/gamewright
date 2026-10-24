@@ -1,0 +1,154 @@
+<<<FILE goals/G-001-combat-monotony/46-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-001
+seq: 46
+from: studio
+to: gameplay-engineer
+stage: Build
+outcome: routed
+---
+# 46: studio → gameplay-engineer — make the `ManualTest` phrase check ignore line wraps (test change only)
+
+## Task
+
+In `repo/tests/test_game.py`, change only `ManualTest.test_manual_lists_glyphs_and_lines` so the phrase check ignores hard line wraps in `manual.md`. Do not change `manual.md`, the phrase list, the glyph check, any other test, or any game code.
+
+## Context
+
+G-001 (combat feels monotonous). The combat rework is built and verified except AC-15. The Owner ran the suite (D-008) and got 39 of 40 passing. The one failure is `'run over' not found` at `tests/test_game.py` line 631. The designer's ruling (45, D-009) is that `manual.md` is correct: it quotes the run-over lines with the right wording, but a hard line wrap splits `run` and `over`. The test is too literal. The manual stays unchanged.
+
+## Findings
+
+The designer specified the change (45):
+
+```python
+text = MANUAL.read_text(encoding="utf-8")
+flat = " ".join(text.split())   # a hard-wrapped Markdown line must not hide a phrase
+for key, (char, _) in play.GLYPHS.items():
+    self.assertIn(f"`{char}`", text, key)
+for phrase in (...same list, unchanged...):
+    self.assertIn(phrase, flat, phrase)
+```
+
+- Only the phrase loop uses the whitespace-collapsed `flat`. The glyph loop keeps `text`.
+- Leave `test_on_screen_section_lists_x_and_the_practice_room` alone; its strings are on single lines.
+- If the designer's snippet does not fit the actual code (names, structure), apply the same idea with the smallest edit. If something is ambiguous or a different phrase turns out to be missing, stop and hand back as `question`. Do not rule on manual wording yourself.
+
+## Decisions already made
+
+- D-009: the `ManualTest` phrase check ignores line wraps; `manual.md` stays unchanged.
+- D-007, D-008: the manual paragraph was placed by the Owner; no Role edits `manual.md`.
+- D-001: no new inputs.
+
+## Constraints
+
+- Edit only the one test method.
+- Do not edit `manual.md`, `design/combat.md` or any game code.
+- The change must keep working at the same suite entry point: `python3 -m unittest discover -s tests`.
+
+## Open questions
+
+None.
+
+## Expected output
+
+A short build note in a Handoff to `studio` (outcome `done`, or `question` if blocked):
+
+- The exact diff of the test method.
+- The suite result in your workspace, saying plainly whether `ManualTest` actually ran against the Owner's `manual.md` or could not find it. A skipped or unreadable `manual.md` is not a pass.
+- Confirmation that you changed nothing else.
+
+The Studio then arranges the AC-15 rerun with the unchanged `manual.md` (expected 40/40).
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: repo/tests/test_game.py; design/combat.md (AC-15 only); repo/README.md
+- Decisions: decisions/D-009-manualtest-phrase-check-ignores-line-wraps.md; decisions/D-008-manualtest-run-by-owner-one-failure.md
+- Previous handoff: goals/G-001-combat-monotony/45-game-designer-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-15
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): when an action player from the project's player profile plays through combat encounters, the fights feel varied and engaging, and the player's moment-to-moment choices (positioning, timing, enemy behavior) visibly matter. The player no longer experiences the fights as the same repeated pattern.
+
+Out of scope: adding input buttons beyond attack, dash and pause (D-001, Owner approval needed); changes to the run length or the non-combat systems; numeric targets (these belong to Design as acceptance criteria, and the final verdict to Review).
+
+No immediate escalation: the Goal does not conflict with the vision or D-001, and it needs no reinterpretation. Improving depth through positioning, timing and enemy behavior is what pillar 1 asks for.
+
+## Unknowns
+
+- Observe (playtester, qa): done (02, 08, 06, 15). Not observed: room 5 fight, approaching a spitter, projectile hits, room clear, dash dodging; Play covers them.
+- Diagnose, Decide: done (03; D-002, D-005, D-006). Cause: single-state, untelegraphed enemy behavior; Option A.
+- Design: done (10, 16, 33, 45). Spec `design/combat.md` (AC-1…AC-18), D-003, D-006, `design/combat-visuals.md` (V-1…V-8), D-009 (test ruling).
+- Plan: done (14, D-004). Gap defaults F1–F11; the designer confirms them at Review, F1 (grub speed) matters most.
+- Build: code and render done (18, 22, 23, 35; manual paragraph placed by the Owner, D-007). One test fix open (46): `ManualTest` phrase check must ignore line wraps (D-009). F2 is cosmetic.
+- Verify, behavior: 7g (39) passed. AC-17 and AC-18 hold, no AC failing. Pause (F11) not implemented.
+- Verify, AC-15: paragraph and behavior fine (40). The Owner's run (D-008) was 39/40; the one failure is a test too literal about a line wrap in "run over" (45, D-009). `manual.md` is unchanged. AC-15 passes only on 40/40 with the unchanged `manual.md` beside `repo/`. QA's workspace has no `manual.md` (29, 40), so how the rerun gets it is decided at the Route after Build.
+- Verify, visuals: done (44). V-1, V-2, V-3, V-8 and the displaced cell pass; V-4 `z/Z` and V-6 are from code only. V-5 follows AC-15. V-7 (two spitters, room 4) not observed: Play watches it. F4 (a shot hidden under a glyph on the same tile) is optional polish, left for Review. D-006 revisit trigger (displaced glyph misread) not triggered.
+- Play: `playtester`, live and reactive, from a Handoff composed by the Studio from permitted information. Watch slot starvation and two-spitter readability. Planned, after Verify passes (including AC-15).
+- Review: `game-director` with `review-outcome`. Planned. Open: run progression after "run over"; F1, F4, F6, F7; numbering of same-type enemies in one cell; a still player going down in about 5 s.
+- Skipped: none.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 02-playtester-to-game-designer.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-game-designer-to-game-director.md |
+| 3a | Decide | game-director | make-decision | done | 05-game-director-to-studio.md |
+| 3b | Observe (defects) | qa | reproduce-defect | done | 06-qa-to-game-designer.md |
+| 3c | Observe (rooms 4–5) | playtester | playtest-session | done | 08-playtester-to-game-designer.md |
+| 4 | Design | game-designer | write-design-spec | done | 10-game-designer-to-studio.md |
+| 5a | Plan | technical-director | technical-plan | done | 14-technical-director-to-studio.md |
+| 5b | Observe (spit line) | qa | reproduce-defect | done | 15-qa-to-studio.md |
+| 5c | Design (visuals) | art-director | visual-review, write-design-spec | done | 16-art-director-to-studio.md |
+| 6a | Build (code) | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md |
+| 6b | Build (`run_tests` check, manual placed) | gameplay-engineer | implement-change | done | 23-gameplay-engineer-to-studio.md |
+| 7a | Verify | qa | verify-change | done (question, no AC failed) | 26-qa-to-studio.md |
+| 7b | Verify (visuals) | art-director | visual-review | done (question, no build output) | 27-art-director-to-studio.md |
+| 7c | Verify (rerun: manual, runs, captures) | qa | verify-change | done (question, no AC failed) | 29-qa-to-studio.md |
+| 7d | Verify (visuals, from captures) | art-director | visual-review | done (fail: V-1, F3) | 32-art-director-to-studio.md |
+| 7e | Design (F1 overlap, AC-15 wording) | game-designer | write-design-spec | done | 33-game-designer-to-studio.md |
+| 7f | Build (F1/F3 render, manual paragraph) | gameplay-engineer | implement-change | done (render built) | 35-gameplay-engineer-to-studio.md |
+| 7f-O | Owner: place the manual paragraph | owner | — | done (Option A, D-007) | 36-studio-to-owner.md |
+| 7g | Verify (all but AC-15) | qa | verify-change | done (pass) | 37-studio-to-qa.md |
+| 7i | Verify (AC-15, `ManualTest`) | qa | verify-change | done (question: ManualTest blocked) | 38-studio-to-qa.md |
+| 7i-O | Owner: `ManualTest` result | owner | — | done (Option A, D-008: 39/40) | 42-studio-to-owner.md |
+| 7h | Verify (visuals) | art-director | visual-review | done (pass; V-6 from code, V-7 not seen) | 41-studio-to-art-director.md |
+| 7j | Design (`run over` manual test failure) | game-designer | write-design-spec | done (test too literal, D-009) | 43-studio-to-game-designer.md |
+| 7k | Build (test fix, line wraps) | gameplay-engineer | implement-change | open | 46-studio-to-gameplay-engineer.md |
+| 7k-O | Owner: place manual text | owner | — | skipped (manual unchanged, D-009) | — |
+| 7l | Verify (AC-15 rerun, 40/40) | qa | verify-change | planned (needs unchanged `manual.md` beside `repo/`) | — |
+| 8 | Play | playtester | playtest-session | planned | — |
+| 9 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+After 7h/7j (44 pass; 45 done): visuals accepted (V-6 from code; V-7 and F4 left to Play and Review). The designer ruled the manual is right and the test too literal (D-009), so 7k opens (46), test only; 7k-O is dropped and 7l is planned. 7l needs `manual.md` beside `repo/`; the next Route decides how.
+
+## Next action
+
+- Run `46-studio-to-gameplay-engineer.md` (7k; result addressed to `studio`).
+- Then Route: arrange the AC-15 rerun (7l). QA's workspace has no `manual.md`, so do not send QA in blind. Either `manual.md` is placed there, or the Owner reruns the suite as in D-008 (escalating if needed). When AC-15 passes at 40/40, open Play (8) with a Handoff composed from permitted information only.
+
+## Outcome
+
+(Filled at Close.)
+>>>END

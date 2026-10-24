@@ -1,0 +1,94 @@
+---
+kind: handoff
+goal: G-001
+seq: 10
+from: qa
+to: studio
+stage: Verify
+outcome: question
+---
+# 10: qa → studio — Verification of the dash/hit invulnerability fix could not be done: the 0.3.1 build was not in the packet
+
+## Task
+
+Re-route the verification to QA with the build that is actually player-visible (`sim/build-0.3.1.md` or the latest `sim/build-*.md`). Verification is blocked, and no pass/fail verdict is given.
+
+## Context
+
+Goal G-001 (combat monotony). Handoff 09 asked QA to verify the 0.3 → 0.3.1 fix for "damage during a dash shortly after a hit" against the six acceptance criteria in `05-qa-to-studio.md`, at 30 and 60 FPS.
+
+The Load list of handoff 09 names "the latest build under sim/ (`sim/build-*.md`)". No `sim/` file was supplied to this step. The inputs were:
+
+- the handoff;
+- the QA role and the `verify-change` skill;
+- `design/combat.md`;
+- project.md;
+- D-001;
+- handoff 05.
+
+The role and skill require QA to observe behavior in the build, not to rely on the engineer's explanation. The only description of the change is the "What changed" text in handoff 09. That is a description of intent. It is not observed behavior, and it must not stand in for evidence. Passing or failing any criterion from it would be invented evidence.
+
+## Findings
+
+### Verdict
+
+No verdict (`pass` or `fail`). Verification is **blocked** for lack of the build. Nothing was observed, so nothing is reported as passing.
+
+### Per-criterion status (all from handoff 05)
+
+| # | Criterion | 30 FPS | 60 FPS | Evidence |
+|---|---|---|---|---|
+| 1 | Dash at the earliest moment (~0.3 s after the hit): no damage during the 0.25 s dash, at least 20 repeats, Grub contact or Spitter projectile | not verified | not verified | no build available |
+| 2 | Dash presses at varied delays after the hit (including during hit-stun, and just before, at and after 0.8 s): no damage during an active dash | not verified | not verified | no build available |
+| 3 | Different dash directions (towards and away from the source), rooms 1–5, Grubs and Spitters | not verified | not verified | no build available |
+| 4 | Dash with no preceding hit: full 0.25 s invulnerability, no regression | not verified | not verified | no build available |
+| 5 | Existing rules hold: hit-stun 0.3 s with no input, hit invulnerability to 0.8 s, dash cooldown 0.6 s, attack queued during a dash fires at its end | not verified | not verified | no build available |
+| 6 | Previously mid-dash damage is not delayed to land right after the dash ends; damage after the windows expire is normal | not verified | not verified | no build available |
+
+### Regressions checked
+
+None. I could not check the flicker or sound cues that may have depended on the old shared invulnerability state, because there is no build to observe.
+
+### Undefined-behavior cases
+
+- A dash pressed during hit-stun (ignored or buffered) is unspecified in `design/combat.md`. Handoff 09 says the handling is unchanged. I could not observe it, so I have no observation to report. It stays an open, non-blocking question for `game-designer`, as already noted in handoff 05.
+- Handoff 09 expects a one-frame difference for damage landing exactly on a 0.8 s or 0.25 s boundary (`now < expiry`). Once the build is available, I will record boundary results at 0.8 s and 0.85 s with the frame at 30 FPS (about 33 ms) and 60 FPS (about 17 ms) in view. The one-frame tolerance will not hide a failure of more than one frame.
+
+### Plan once the build is available
+
+1. Run the matrix from handoff 09 at 30 and 60 FPS. Use dash delays of 0.3, 0.4, 0.5, 0.55, 0.6, 0.7, 0.79, 0.8 and 0.85 s after the hit. Keep a damage source present through the dash and until at least 0.8 s after the hit.
+2. For each run, record whether damage landed:
+   - during the dash;
+   - between the dash end and 0.8 s after the hit;
+   - after 0.8 s with no dash active.
+3. Run the no-hit dash.
+4. Cover both dash directions, rooms 1–5, and both enemy types.
+5. Repeat the earliest-dash case at least 20 times per frame rate.
+6. Check the cooldown, hit-stun, queued attack, and flicker/sound cues.
+
+## Decisions already made
+
+- D-001: Combat uses one attack button plus dash. No new input is involved.
+
+## Constraints
+
+- Verify from `design/combat.md`, the acceptance criteria and the build.
+- Do not change the spec or the build.
+- Must be verified at both 30 and 60 FPS.
+
+## Open questions
+
+- Please supply `sim/build-0.3.1.md` (the latest `sim/build-*.md`). Without it QA cannot verify the change.
+- Non-blocking, for `game-designer`: how should a dash pressed during hit-stun be handled?
+
+## Expected output
+
+Studio re-routes to `qa` with the 0.3.1 build included in the Load. QA then returns a `pass` or `fail` verification report with per-criterion evidence at 30 and 60 FPS. If the build still cannot be supplied, Studio should say so and not count the fix as verified.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: design/combat.md; project.md#constraints; the latest `sim/build-*.md` (must be included this time)
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-001-combat-monotony/09-studio-to-qa.md

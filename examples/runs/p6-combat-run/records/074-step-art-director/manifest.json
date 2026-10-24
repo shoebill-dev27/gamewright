@@ -1,0 +1,62 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/69-studio-to-art-director.md",
+  "sha256": "761d4973c1a714877e5b09d0399dc694e3e99c6c223dd3d5b9c347b870173c71",
+  "bytes": 2837
+ },
+ {
+  "path": "studio/roles/art-director.md",
+  "sha256": "0a782e71d7d5344b9f3701549fa91d3ea4243ec75a6816a68dbcbf56ac5c71df",
+  "bytes": 1139
+ },
+ {
+  "path": "studio/skills/visual-review.md",
+  "sha256": "a4c0a2bc09a91a5af5765901e80bae9296517858e7d87341f54a53f006c1a263",
+  "bytes": 1066
+ },
+ {
+  "path": "project.md#art-direction",
+  "sha256": "8ef4190e8e145d993682898fbb7fe0ca8bd81e86b7a123e263644b95ce51119b",
+  "bytes": 158
+ },
+ {
+  "path": "design/combat-visuals.md",
+  "sha256": "791350d615b55b03d026b3f74c63a6b178f2ecd5a8a2d1562a1a6f7c0bd976f2",
+  "bytes": 15516
+ },
+ {
+  "path": "manual.md",
+  "sha256": "fc06710951221dbee76cc6aa69fd5cf82b94b7d64d640b910800bea6be5d6034",
+  "bytes": 4128
+ },
+ {
+  "path": "decisions/D-006-overlap-display-and-practice-room-manual.md",
+  "sha256": "6855ad2e98922bb21e91d4f879556408dd288bbdfb88576baeb99ebbd75a5656",
+  "bytes": 2280
+ },
+ {
+  "path": "decisions/D-012-on-you-line-for-displaced-enemies.md",
+  "sha256": "12836ed5c581c097d1e801ce55cb3b7a46ecb7a377b362a54a90f5e6368ed66b",
+  "bytes": 2879
+ },
+ {
+  "path": "goals/G-001-combat-monotony/60-art-director-to-studio.md",
+  "sha256": "cb56b10b6722d9c70037e73dc17cd6fa89e29efaf6ca52676a064b0a1b2d0bee",
+  "bytes": 5410
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

@@ -1,0 +1,226 @@
+<<<FILE goals/G-003-dash-readiness/06-gameplay-engineer-to-studio.md
+---
+kind: handoff
+goal: G-003
+seq: 6
+from: gameplay-engineer
+to: studio
+stage: Verify
+outcome: done
+---
+# 06: gameplay-engineer → studio — dash readiness fix list applied; ready for Verify
+
+## Task
+
+Route to `qa` (Verify), then Play. Check DR2, DR4, DR5, DR6, DR7, DR12, DR13 and the new DR14 at 30 and 60 FPS, plus the unchanged criteria DR1, DR3 and DR8–DR11.
+
+## Context
+
+G-003 (Owner: 「ダッシュがいつまた使えるのか分かりにくい。分かるようにしてほしい」). Handoff 05 ruled on three spec points (D-028) and gave a fix list. This step applies that list. No dash rule or number was changed.
+
+## Findings
+
+What changed and where:
+- `repo/game.py`
+  - `dash_usable()` now also requires `stun_left <= 0`. It is still the only state that decides whether a dash is accepted.
+  - `dash_ready_in()` returns the larger of the recharge-based time and `stun_left`. `dash_status()`, the refusal text and the trace `dash_ready_in` all read it, so header, refusal and acceptance share one state.
+  - `press()`: a dash input during hit-stun now logs `ignored` with reason `dash not ready` and `left` (rounded up 0.01 s). It prints `dash not ready: R s left` instead of `(nothing happens)`. Other inputs in stun still log `stunned`.
+  - The `dash_ready` event is driven by a new flag, `dash_pending`. It is set when a dash is accepted. It is cleared, with the line logged, at the first frame where `dash_usable()` is true. So the line prints at the stun end if the stun outlasts the recharge. A stun alone prints no line.
+  - The dash timers and the stun length are untouched.
+- `repo/tests/test_dash_readiness.py`
+  - The ready-time assertion is now `0.85 - 1e-6 <= ready <= 0.85 + 2/fps + 1e-6` at fps 30 and 60. The message carries the fps.
+  - New hit-stun tests (DR14): header and refusal state during the stun, `dash_ready_in` equal to the displayed R, refusal text, no `dash ready` line, and the dash is usable after the stun.
+  - New test for the exact text printed for a stun refusal.
+- `repo/manual.md`: the Dash bullet now says "about 0.85 s" and "the dash, the recharge or the moment after you are hit". "Dash readiness" has the new hit-stun sentence.
+
+How to exercise: practice room, spawn a grub at 8.5 4 (lunge hit), then a `dash` input within 0.3 s of the hit. Expected: header `dash: recharging R s`, `dash not ready: R s left`, no `dash ready` line afterwards.
+
+Not run in this step: I made no `@run`. The runtime's Build check follows this handoff. Nothing here is measured. The 0.9 s at 30 FPS ready time is accepted by the ruling; I did not look for an off-by-one cause.
+
+Known risks for QA:
+- `stun_left` is not snapped to 0 at the end. A float residual could keep the stun, and so the "recharging 0.01 s" display, one frame longer. Header and acceptance stay consistent, because both read the same state. Only the exact stun-end frame could differ by one.
+- The `dash ready` line is now logged only when the dash is usable. If a hit lands in the same frame as the recharge end, the line moves to the stun end. That is the ruled behavior.
+- Hit-stun refusals made by reaction rules are marked quiet (the existing rule for held buttons). So the refusal text is not printed for a rule-driven dash.
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no buffering.
+- D-028: the ready-time bound (0.85 s to 0.85 s + 2 frames), the hit-stun display, the cooldown wording, build number 0.6 kept.
+
+## Constraints
+
+- No change to 0.25 s, 0.6 s or the hit-stun length.
+- Works at 30 and 60 FPS.
+- Header, messages and manual agree.
+
+## Open questions
+
+None.
+
+## Expected output
+
+A `qa` Verify handoff covering DR numbers 2, 4, 5, 6, 7, 12, 13 and 14 (changed or new), plus DR1, 3 and 8–11 as regression. Then Play.
+
+## Sender assessment
+
+The root cause of the 0.9 s reading is not established; it is consistent with frame rounding of the dash end and the recharge end. Confidence is moderate, because I did not run the code. The edits are small and the paths are shared.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: design/dash-readiness.md, design/combat.md, repo/manual.md, repo/game.py, repo/play.py, repo/run_driver.py, repo/tests/test_dash_readiness.py
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-028-dash-readiness-rulings.md
+- Previous handoff: goals/G-003-dash-readiness/05-game-designer-to-gameplay-engineer.md
+>>>END
+
+<<<EDIT repo/game.py
+<<<<<<< SEARCH
+        self.dash_left = self.dash_cooldown = 0.0
+=======
+        self.dash_left = self.dash_cooldown = 0.0
+        self.dash_pending = False  # a "dash ready" line is owed (set when a dash is accepted)
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/game.py
+<<<<<<< SEARCH
+        if self.stun_left > 0:
+            self.log("ignored", action=action, reason="stunned")
+            return
+=======
+        if self.stun_left > 0:
+            if action == "dash":
+                self.log(
+                    "ignored", action=action, reason="dash not ready",
+                    left=round_up_2(self.dash_ready_in()),
+                )
+            else:
+                self.log("ignored", action=action, reason="stunned")
+            return
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/game.py
+<<<<<<< SEARCH
+            self.dash_left = DASH_TIME
+=======
+            self.dash_left = DASH_TIME
+            self.dash_pending = True
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/game.py
+<<<<<<< SEARCH
+        return not (self.dash_left > 0 or self.dash_cooldown > 0)
+=======
+        return not (self.dash_left > 0 or self.dash_cooldown > 0 or self.stun_left > 0)
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/game.py
+<<<<<<< SEARCH
+        """Seconds until a dash can be used (0 when usable now): dash time left plus the recharge."""
+        if self.dash_left > 0:
+            return self.dash_left + DASH_COOLDOWN
+        return self.dash_cooldown
+=======
+        """Seconds until a dash can be used (0 when usable now): the dash time left plus the
+        recharge, or the hit-stun left if that is longer (G-003, D-028)."""
+        if self.dash_left > 0:
+            base = self.dash_left + DASH_COOLDOWN
+        else:
+            base = self.dash_cooldown
+        return max(base, self.stun_left)
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/game.py
+<<<<<<< SEARCH
+        was_recharging = self.dash_cooldown > 0
+        self.dash_cooldown = max(0.0, self.dash_cooldown - dt)
+        recharged = was_recharging and self.dash_cooldown <= 0
+=======
+        self.dash_cooldown = max(0.0, self.dash_cooldown - dt)
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/game.py
+<<<<<<< SEARCH
+        if recharged and self.hearts > 0:
+=======
+        if self.dash_pending and self.dash_usable() and self.hearts > 0:
+            self.dash_pending = False
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/tests/test_dash_readiness.py
+<<<<<<< SEARCH
+            self.assertAlmostEqual(ready[0], 0.85, delta=1.0 / fps + 1e-9, msg=fps)
+=======
+            self.assertTrue(0.85 - 1e-6 <= ready[0] <= 0.85 + 2.0 / fps + 1e-6, (fps, ready[0]))
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/tests/test_dash_readiness.py
+<<<<<<< SEARCH
+    def test_no_ready_line_at_start(self):
+=======
+    def test_hit_stun_header_and_refusal(self):
+        from game import HIT_STUN, round_up_2
+
+        for fps in (30, 60):
+            game = Game(fps=fps, room="empty")
+            game.spawn("grub", 8.5, 4)
+            for _ in range(5 * fps):
+                game.step()
+                if times(game, "hurt"):
+                    break
+            self.assertTrue(times(game, "hurt"), fps)
+            self.assertGreater(game.stun_left, 0)
+            self.assertFalse(game.dash_usable())
+            self.assertTrue(game.dash_status().startswith("dash: recharging"), fps)
+            self.assertAlmostEqual(game.dash_ready_in(), game.stun_left)
+            self.assertEqual(
+                game.dash_status(), f"dash: recharging {round_up_2(game.stun_left):.2f} s"
+            )
+            game.press("dash", "right")
+            kind, details = game.events[-1][1], game.events[-1][2]
+            self.assertEqual(kind, "ignored")
+            self.assertEqual(details["reason"], "dash not ready")
+            self.assertEqual(details["left"], round_up_2(game.stun_left))
+            self.assertEqual(game.dash_left, 0)
+            for _ in range(round((HIT_STUN + 0.05) * fps)):
+                game.step()
+            self.assertTrue(game.dash_usable(), fps)
+            self.assertEqual(game.dash_ready_in(), 0)
+            self.assertEqual(game.dash_status(), "dash: ready")
+            self.assertEqual(times(game, "dash_ready"), [], fps)
+
+    def test_stun_refusal_text(self):
+        import play
+
+        self.assertEqual(
+            play.Player.describe("ignored", {"reason": "dash not ready", "left": 0.21}),
+            "dash not ready: 0.21 s left",
+        )
+
+    def test_no_ready_line_at_start(self):
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/manual.md
+<<<<<<< SEARCH
+so you can dash again 0.85 s after the start of the last one. You cannot dash during the dash or the recharge, and
+=======
+so you can dash again about 0.85 s after the start of the last one. You cannot dash during the dash, the recharge or the moment after you are hit, and
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/manual.md
+<<<<<<< SEARCH
+When the dash comes back, the game prints `dash ready`.
+=======
+When the dash comes back, the game prints `dash ready`. After you are hit you cannot dash for a moment; the line shows `recharging` for that time too.
+>>>>>>> REPLACE
+>>>END

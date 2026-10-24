@@ -1,0 +1,148 @@
+<<<FILE goals/G-003-dash-availability-clarity/goal.md
+---
+kind: goal
+id: G-003
+project: lantern-depths
+status: active
+created: 2026-10-23
+budget: 17
+---
+# G-003: Make it clear when dash can be used again
+
+## Owner request
+
+> ダッシュがいつまた使えるのか分かりにくい。分かるようにしてほしい
+
+## Interpretation
+
+Success condition (qualitative): a player using only what the build shows them (text player view and `repo/manual.md`) can tell, at any moment, whether dash is available now, and when it is not, when it will be available again. They no longer have to guess or press dash to find out.
+
+This is an experience (readability) Goal. The dash rules themselves (recovery length, invulnerability, input set) are assumed to stay as they are. Changing them would be a different Goal.
+
+Out of scope:
+- Rebalancing dash or combat.
+- New input buttons (D-001).
+- Reopening G-002 (stopped by D-027) or its unfinished verification.
+- Any other readability issue the work happens to find (these become proposed Goals).
+
+## Unknowns
+
+- Observe: skipped. The Owner's report is the first-hand observation. What the build currently shows about dash can be read from the player-visible output and the manual by the Designer in Diagnose. If the Designer cannot establish the cause from that, add a `playtester` Observe.
+- Diagnose (open): what does the build currently tell the player about dash availability (player view, messages, manual)? Which gap makes the "when again" unclear: no indicator, a late one, or ambiguous wording? What options exist in player-observable terms?
+- Decide: tentative. Needed only if Diagnose finds that the clear options require changing dash timing or rules, or a choice between materially different directions. Then `game-director` decides within the vision, and the Owner is asked if an escalation trigger fires.
+- Design: planned. The player-facing indicator is not yet specified, and it needs player-observable acceptance criteria. It must hold at both 30 and 60 FPS, so the criteria are in time, not frames.
+- Plan: skipped. The expected change is a display and message change that reuses the existing text view. Becomes tentative if Design or Build shows it touches simulation or timing across systems.
+- Build, Verify: planned (Verify is always after Build).
+- Play: planned. This is an experience Goal, and an independent playtester judges whether the availability can be read in play.
+- Review: planned. `game-director` judges whether the intent was met.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Diagnose | game-designer | diagnose-experience | open | 01-studio-to-game-designer.md |
+| 2 | Decide | game-director | make-decision | tentative (only if options change dash rules or direction) | — |
+| 3 | Design | game-designer | write-design-spec | planned | — |
+| 4 | Build | gameplay-engineer | implement-change | planned | — |
+| 5 | Verify | qa | verify-change | planned | — |
+| 6 | Play | playtester | playtest-session | planned | — |
+| 7 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+Intake: initial route. Observe and Plan are skipped (reasons under Unknowns); Decide is tentative.
+
+## Next action
+
+Start Step 1: `game-designer` runs Diagnose from `01-studio-to-game-designer.md`. The Studio Route follows it.
+
+Message to the Owner (ja): ダッシュの再使用タイミングの分かりにくさを体験Goal（G-003）として受け付けました。まず、現状のビルドがダッシュの使用可否をどう見せているかをゲームデザイナーが診断し、続いて仕様化、実装、QA検証、独立プレイ、Reviewの順で進めます。ダッシュの性能やルールの変更は対象外で、選択肢がそこに及ぶ場合のみ判断段階を挟み、Owner判断が必要なら確認します。
+
+## Outcome
+
+(open)
+>>>END
+
+<<<FILE goals/G-003-dash-availability-clarity/01-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-003
+seq: 1
+from: studio
+to: game-designer
+stage: Diagnose
+outcome: routed
+---
+# 01: studio → game-designer — Diagnose why "when dash is usable again" is unclear
+
+## Task
+
+Find out what the build currently tells the player about dash availability and why the player still cannot tell when dash can be used again. Write a diagnosis with options, in player-observable terms (skill `diagnose-experience`).
+
+## Context
+
+The Owner's report (verbatim): 「ダッシュがいつまた使えるのか分かりにくい。分かるようにしてほしい」
+
+Goal G-003: a player using only what the build shows can tell whether dash is available now and, when it is not, when it will be again. The Owner's report is the first-hand observation, so there is no separate Observe step. The cause is not yet known, and the Project Context does not say whether the build shows dash state at all.
+
+The project is a headless text build, played through input scripts. Commands, run from `repo/`:
+
+- Play (player view): `python3 play.py --view player {script}`
+- Trace (state view): `python3 play.py --view trace {script}`
+- Tests: `python3 -m unittest discover -s tests`
+
+The script format is in `repo/manual.md`. The current build sha is dc0138c2b6d1. The tests have not been re-run at this sha.
+
+## Findings
+
+Nothing yet. This is the first step. The Studio did not open design documents or the repository (Intake loads only the project overview). Establish the facts yourself:
+
+- What the player view and messages show about dash: use, recovery, readiness, and any indicator.
+- What `design/combat.md` and `repo/manual.md` say about dash recovery and readiness.
+- Whether the player view tells the player the recovery time or the moment of readiness. Compare what the trace view knows with what the player view shows.
+
+## Decisions already made
+
+- D-001: Combat uses one attack button plus dash. No new input buttons beyond attack, dash and pause without Owner approval.
+
+## Constraints
+
+- Work only from player-visible output for the experience finding. The trace view may confirm the cause but is not what the player sees.
+- Keep the dash rules as they are (recovery length, invulnerability). If every workable option needs changed dash timing or rules, say so as a direction question for `game-director` and do not choose it yourself.
+- No new input buttons (D-001).
+- The solution must work at both 30 and 60 FPS, so describe timing in time, not frames.
+- Reuse the existing text view and message system where possible (small team).
+- Do not edit the build or the design documents in this step.
+- No numeric thresholds or acceptance criteria yet. Those belong to Design.
+- Record anything unrelated that you notice as a proposed future Goal, not as scope.
+
+## Open questions
+
+- Is the problem missing information, late information, or ambiguous wording or placement?
+- Is it the same in every situation (just after a dash, during enemy wind-ups, after a room transition or a hit), or only in some?
+- Does the manual explain the dash recovery, and is it consistent with what the player view shows?
+
+## Expected output
+
+A diagnosis, in Findings of your outgoing Handoff:
+
+- The cause or causes of the unclarity, each tied to the player-visible output it comes from.
+- Two to three solution options in player-observable terms, with the trade-offs of each.
+- Your recommended option.
+- Whether any option needs a `game-director` decision. State this explicitly: it determines whether the tentative Decide stage runs.
+- Whether you need a first-hand play observation to settle the cause.
+
+Address the result to `studio`, so the Studio can route it.
+
+## Sender assessment
+
+The Studio expects this to be a display or message change, not a rules change. It has not read the repository, so this is a guess; the diagnosis may overturn it.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/diagnose-experience.md
+- Project: project.md#vision, project.md#player-profile, project.md#constraints, project.md#current-state, design/combat.md, repo/manual.md, repo/public-driver.md
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: none
+>>>END

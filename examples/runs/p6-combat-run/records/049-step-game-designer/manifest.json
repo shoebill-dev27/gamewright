@@ -1,0 +1,87 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/43-studio-to-game-designer.md",
+  "sha256": "d3d4679e6399b5bd77e5ddbbf79b11974e62192f055a4bbe61d602c1061c7067",
+  "bytes": 5174
+ },
+ {
+  "path": "studio/roles/game-designer.md",
+  "sha256": "802be90dc84142d0a16436d842f1da18d7c7b34500089a91a617a10dde90e7fb",
+  "bytes": 1595
+ },
+ {
+  "path": "studio/skills/write-design-spec.md",
+  "sha256": "f60b4ce8c6e89c2dc27ff87184c54b91452c45db8422fc378ca9253b45a0efd2",
+  "bytes": 1367
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "6f926dd3d101acce253f39e0f642d62749ff6675386942c23809b9c516bddd84",
+  "bytes": 17692
+ },
+ {
+  "path": "manual.md",
+  "sha256": "fc06710951221dbee76cc6aa69fd5cf82b94b7d64d640b910800bea6be5d6034",
+  "bytes": 4128
+ },
+ {
+  "path": "repo/tests/test_game.py",
+  "sha256": "76a7fbccce02834ef55155199961247049eabbbcdb289c6649df1160c1444f54",
+  "bytes": 26140
+ },
+ {
+  "path": "repo/game.py",
+  "sha256": "c7d498623a684620d24020a3a043e91be7d6a1e619f65e58b743f2eeacca3c7f",
+  "bytes": 22267
+ },
+ {
+  "path": "repo/play.py",
+  "sha256": "5416d7aec7fe6c734e9a88d88f0f74d9ac2ce28dafe257ff51ec37bab0a02636",
+  "bytes": 14346
+ },
+ {
+  "path": "decisions/D-003-run-end-and-room-rules.md",
+  "sha256": "ce599ae20a298a8465a7dd1d5326e8b79a59efaeedc346b61d4c7823f3529b4a",
+  "bytes": 2046
+ },
+ {
+  "path": "decisions/D-005-owner-places-manual-draft.md",
+  "sha256": "8761e9ad769db4c760c905fce26b38d4f06cee5d28e3fa8af7d4e026bd6608d1",
+  "bytes": 1879
+ },
+ {
+  "path": "decisions/D-006-overlap-display-and-practice-room-manual.md",
+  "sha256": "6855ad2e98922bb21e91d4f879556408dd288bbdfb88576baeb99ebbd75a5656",
+  "bytes": 2280
+ },
+ {
+  "path": "decisions/D-007-practice-room-paragraph-placed-by-owner.md",
+  "sha256": "162a441532b46be13c5667d482c398fafda54a741ec335237c7c40c507fe32cb",
+  "bytes": 2239
+ },
+ {
+  "path": "decisions/D-008-manualtest-run-by-owner-one-failure.md",
+  "sha256": "142a50dbb49f739694ff3bea4f04a565d55fea3b997a50c9f17dbb8c317c1d5c",
+  "bytes": 2280
+ },
+ {
+  "path": "goals/G-001-combat-monotony/42-studio-to-owner.md",
+  "sha256": "d4dcf4c288bdbad9ed0d6ec6cfd8d4ab1ab885dedbbf7a72e9235bb99a536663",
+  "bytes": 4844
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

@@ -1,0 +1,60 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "8d75e384-3190-4629-8fab-835639e499d8",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 35602,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 21542,
+    "output_tokens_details": {
+     "thinking_tokens": 2335
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 35602,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 21542,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 35602,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 35602
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.35783200000000004,
+   "attempt": 1,
+   "started": "2026-10-11T11:31:48",
+   "seconds": 111.1,
+   "errors": [
+    "goals/G-001-combat-monotony/46-studio-to-gameplay-engineer.md: Load entry missing: 45-art-director-to-studio.md (existing files there: project.md)"
+   ]
+  }
+ ],
+ "status": "error",
+ "errors": [
+  "claude run failed: You've hit your session limit · resets 3:10pm (Asia/Tokyo)"
+ ]
+}

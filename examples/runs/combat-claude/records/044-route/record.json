@@ -1,0 +1,72 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "2ab7985e-1acb-4b2d-83bd-88888a1980f4",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 48503,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 27079,
+    "output_tokens_details": {
+     "thinking_tokens": 957
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 48503,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 27079,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 48503,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 48503
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.46480599999999994,
+   "attempt": 1,
+   "started": "2026-10-10T15:19:49",
+   "seconds": 141.6,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-combat-monotony/37-studio-to-qa.md": "e9985df00aaf9a135e76aeb7fcbfe214c3ef7be491bf40fac786aee1f493da0e",
+  "goals/G-001-combat-monotony/goal.md": "7868e0400f40173cde4065928c92ed8c7157ced4e5b2fc9b96b4de8812a7784a"
+ },
+ "decision": {
+  "new": [
+   "qa",
+   "Verify"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "qa",
+    "Verify(再確認: V7 の同距離の規則だけ。他の基準が変わっていないことの確認)"
+   ]
+  ]
+ }
+}

@@ -1,0 +1,4 @@
+<<<FILE @need
+goals/G-001-combat-monotony/53-game-designer-to-studio.md
+sim/build-0.8.md
+>>>END

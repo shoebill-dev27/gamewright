@@ -1,0 +1,86 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "47bafaea-fbe0-4207-a4f1-deddd493b6e4",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 25296,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 8885,
+    "output_tokens_details": {
+     "thinking_tokens": 2432
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 25296,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 8885,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 25296,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 25296
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.190038,
+   "attempt": 1,
+   "started": "2026-10-16T02:38:15",
+   "seconds": 64.2,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-combat-monotony/81-studio-to-playtester.md": "717758f6d133125a848b4ace7aa97c23ab66b9a0f10b2570aabd92bd3a887677",
+  "goals/G-001-combat-monotony/82-studio-to-qa.md": "9f44fc34722180522132a2f12732296753b79763e778144125c88d4497386307",
+  "goals/G-001-combat-monotony/goal.md": "7293691e451178df182522169f21a7509620a00485167846c5985dbc2fb32b17"
+ },
+ "decision": {
+  "new": [
+   "qa",
+   "Verify (V-17 defeat and dash-off draws, verbatim captures)"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "owner",
+    "Owner: place manual draft (59) and V-15 text"
+   ],
+   [
+    "owner",
+    "Owner: run suite with manual.md (AC-15)"
+   ],
+   [
+    "qa",
+    "Verify (V-17 defeat and dash-off captures)"
+   ],
+   [
+    "playtester",
+    "Play (rooms 1–5, fresh playtester)"
+   ]
+  ]
+ },
+ "seen_through_seq": 82
+}

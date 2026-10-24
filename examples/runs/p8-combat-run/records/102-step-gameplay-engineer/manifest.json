@@ -1,0 +1,47 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "b7fb7a3d85a62bcd564a33ee20caf62b355a7ef99ce6d8cfb6df0d5adb83abc2",
+  "bytes": 1304
+ },
+ {
+  "path": "goals/G-001-combat-monotony/99-studio-to-gameplay-engineer.md",
+  "sha256": "0f31fccc11b2d912e84512128eb9d372b5c7139c030a2b4286d47aeb775c191f",
+  "bytes": 2890
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md",
+  "sha256": "18ecbace72fe54a14efe4897ffa4e7456facff677234c671d8841408747cb7d0",
+  "bytes": 1609
+ },
+ {
+  "path": "studio/skills/implement-change.md",
+  "sha256": "a9befd7f1d9e09eb94c51a066f030db88c5061ad1b522d9795e62bc2c242964a",
+  "bytes": 1823
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "9ed7c86a71bfa808543396f85d376e15109cfdf7e85250f26b956f4625d1de7c",
+  "bytes": 6059
+ },
+ {
+  "path": "design/combat-step94.md",
+  "sha256": "5f9ad26466f0346b2bf53bcd866034d92f04e5919002192f87022535569680bb",
+  "bytes": 8250
+ },
+ {
+  "path": "decisions/D-011-variant-named-messages-accepted.md",
+  "sha256": "bf29d86bb781ad0221fb0e0f20906afb352af9441735a73b8867a2ed71d13605",
+  "bytes": 2498
+ },
+ {
+  "path": "goals/G-001-combat-monotony/98-qa-to-studio.md",
+  "sha256": "9796d56c5e2cc47645412eb36aec39b2a7301cd3e4d830f52298ef67d1cff3de",
+  "bytes": 10391
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ }
+]

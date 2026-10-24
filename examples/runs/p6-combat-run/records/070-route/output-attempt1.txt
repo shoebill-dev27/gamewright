@@ -1,0 +1,168 @@
+The Route is done. 12a is marked done, and the Build is re-issued as 12b with the `repo/` files named in Load. I did not append to `log.md`, because it is not in my writable list.
+
+<<<FILE goals/G-001-combat-monotony/66-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-001
+seq: 66
+from: studio
+to: gameplay-engineer
+stage: Build
+outcome: routed
+---
+# 66: studio → gameplay-engineer — Build the combat response change set (re-issue of 61, with repo files and the Q1 answer)
+
+## Task
+
+Implement the approved spec in `design/combat.md` (AC-19…AC-28 and the parameters and rules they cover) and `design/combat-visuals.md` (V-9…V-17) on the existing simulation in `repo/`. Add tests, run the suite (`run_tests`), and report build notes.
+
+## Context
+
+G-001 (combat feels monotonous), Option A (D-002, D-004): rework existing enemy behavior as one sequential change set. Build 61 came back as a question (63) for two reasons: its packet had no `repo/` files, and the spec lacked the knockback direction of a grub at distance 0. The designer closed the gap in 65 (rule in D-013, criterion AC-28) and cleaned three passages (dash and walls, Waiting positions, AC-23). This packet names the repo files in Load. Read them directly.
+
+## Findings
+
+From 65, the points that change what you build:
+
+- **Knockback (D-013, AC-28):** the first hit knocks a grub back 1 tile over 0.2 s. A grub 0.05 tile or more from the player is pushed straight away. A grub on the player's tile goes toward its display side (D-006): the side it last approached or struck from, otherwise right, left, above, below. That side needs 1 tile of clear room; if not, use the next side in that order. A push toward an edge is clamped at the edge, like the dash. Knockback does not change state or timers. A grub knocked back from distance 0 ends about 1.0 tile away and keeps its cap slot. A grub hit from 0.5 tile or more ends 1.5 tiles or more away and frees a slot.
+- **Swipe result line** stays "you swipe: grub hit (1 left)" for every grub. An on-tile grub's position comes from the `on you:` line (AC-28(e)).
+- **Dash and walls:** a dash always lasts 0.25 s with invulnerability for all of it, even when a wall shortens it. It is never cancelled by a wall. AC-25 checks 0.25 s on a 2-tile wall dash.
+- **Waiting positions:** a cap-blocked grub holds at 2.0 tiles or more, backs off if the player approaches, follows to stay at about 2.0 tiles, and resumes Approach when a slot frees. A spacing-blocked grub approaches until within 1.25 tiles, then stands still until the window ends. If it is already inside 1.5 tiles, it stands where it is and counts toward the cap of 2.
+- **AC-23** is split into (a) on tile at 0.2, (b) 0.4 tile behind, (c) 0.8 tile behind ("(miss) not in front"), with explicit scripts.
+- No parameter value changed in this round.
+- If the current code differs from any rule above (the on-tile knockback, the Waiting-follow behavior), report it in the build notes. The spec stands.
+
+## Decisions already made
+
+- D-001: no new input buttons.
+- D-002, D-004: Option A, one sequential change set.
+- D-005, D-007: the Owner places `manual.md` text. Do not edit `manual.md`.
+- D-006: overlap display, and the display side used by the on-tile knockback.
+- D-009: the `ManualTest` phrase check ignores line wraps.
+- D-011: grubs take turns and crowd two deep; hit-stun 0.15 s; body hit; dash sets facing.
+- D-012: the `on you:` line and the attacker's position in hit lines.
+- D-013: knockback of a grub on the player's tile.
+
+## Constraints
+
+- Must play correctly at 30 and 60 FPS. Timers run on elapsed seconds, including the 0.2 s knockback.
+- Prefer changes that reuse existing systems. If the Waiting behavior of a blocked grub is not local to existing systems, stop and report; a Plan step (11) may follow.
+- Stop on spec ambiguity and hand back; do not decide.
+- `manual.md` is Owner-placed. If `ManualTest` fails only because manual text from 59 or V-15 is not yet placed, report which phrases, and do not edit the manual.
+
+## Open questions
+
+None.
+
+## Expected output
+
+An outgoing Handoff addressed to `studio` (so the Studio can compose the QA and art-director Verify packets), with:
+
+- the code and test changes in `repo/`, and the `run_tests` result;
+- build notes: any spec/code mismatches found, the root cause of any defect, and anything you could not verify;
+- a Sender assessment, which will be removed before QA receives it.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: project.md#constraints, design/combat.md, design/combat-visuals.md, manual.md (read only), repo/README.md, repo/game.py, repo/play.py, repo/bots.py, repo/tests/test_game.py
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-004-option-a-single-change-set.md, decisions/D-006-overlap-display-and-practice-room-manual.md, decisions/D-009-manualtest-phrase-check-ignores-line-wraps.md, decisions/D-011-grub-turns-stun-body-hit-dash-facing.md, decisions/D-012-on-you-line-for-displaced-enemies.md, decisions/D-013-knockback-of-grub-on-players-tile.md
+- Previous handoff: goals/G-001-combat-monotony/65-game-designer-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-15
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): when an action player from the project's player profile plays through combat encounters, the fights feel varied and engaging, and the player's moment-to-moment choices (positioning, timing, enemy behavior) visibly matter. The player no longer experiences the fights as the same repeated pattern.
+
+Out of scope: adding input buttons beyond attack, dash and pause (D-001, Owner approval needed); changes to the run length or the non-combat systems; numeric targets (these belong to Design as acceptance criteria, and the final verdict to Review).
+
+No immediate escalation: the Goal does not conflict with the vision or D-001, and it needs no reinterpretation. Improving depth through positioning, timing and enemy behavior is what pillar 1 asks for.
+
+## Unknowns
+
+- Observe (playtester, qa): done (02, 08, 06, 15, 58). Not settled by QA: "(miss)" text first-hand, knockback of an on-you grub in open floor, D-58-1 at 30 FPS. These go to Verify against the new spec.
+- Diagnose, Decide: done (03, 53; D-002, D-005, D-006, D-011). A4 (120° cone), D1 (facing mechanic) and D2 (room 1 composition) are held with revisit triggers in 59.
+- Design: done (59, 60, 65; `design/combat.md`, `design/combat-visuals.md`, D-011, D-012, D-013, AC-19…AC-28, V-9…V-17). The knockback gap (Q1) is closed by D-013 and AC-28; Q2 and the three passages are clarified.
+- Plan: done (14, D-004). Tentative: a new Plan only if the Waiting behavior of a blocked grub is not local to existing systems (the engineer reports this at Build).
+- Build: 12b open (66) with the repo files named in Load and the Q1 answer. Manual changes are placed by the Owner (D-005, D-007); 10-O is open in parallel.
+- Verify: the next build needs its own Verify (qa, AC-1…AC-28 at both frame rates, V-9…V-17; art-director for the changed view). The full suite is re-run with the manual draft in place (D-008, D-009).
+- Play: earlier sessions saw only rooms 1 and 2 by script (50, 54), with defeats. Rooms 3–5, the spitter, projectile hits, room clear, the dash and a survived run are unobserved, so monotony itself is unjudged. Next Play follows the rebuild: fresh playtester, rooms 1–5, reactive play; judged against the retest guideline, which is not forwarded.
+- Review: `game-director` with `review-outcome`, planned after the rebuild and the next Play. Open: run progression after "run over"; F1, F4, F6, F7; numbering of same-type enemies in one cell; A4, D1, D2.
+- Skipped: none.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 02-playtester-to-game-designer.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-game-designer-to-game-director.md |
+| 3a | Decide | game-director | make-decision | done | 05-game-director-to-studio.md |
+| 3b | Observe (defects) | qa | reproduce-defect | done | 06-qa-to-game-designer.md |
+| 3c | Observe (rooms 4–5) | playtester | playtest-session | done | 08-playtester-to-game-designer.md |
+| 4 | Design | game-designer | write-design-spec | done | 10-game-designer-to-studio.md |
+| 5a | Plan | technical-director | technical-plan | done | 14-technical-director-to-studio.md |
+| 5b | Observe (spit line) | qa | reproduce-defect | done | 15-qa-to-studio.md |
+| 5c | Design (visuals) | art-director | visual-review, write-design-spec | done | 16-art-director-to-studio.md |
+| 6a | Build (code) | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md |
+| 6b | Build (`run_tests` check, manual placed) | gameplay-engineer | implement-change | done | 23-gameplay-engineer-to-studio.md |
+| 7a | Verify | qa | verify-change | done (question, no AC failed) | 26-qa-to-studio.md |
+| 7b | Verify (visuals) | art-director | visual-review | done (question, no build output) | 27-art-director-to-studio.md |
+| 7c | Verify (rerun: manual, runs, captures) | qa | verify-change | done (question, no AC failed) | 29-qa-to-studio.md |
+| 7d | Verify (visuals, from captures) | art-director | visual-review | done (fail: V-1, F3) | 32-art-director-to-studio.md |
+| 7e | Design (F1 overlap, AC-15 wording) | game-designer | write-design-spec | done | 33-game-designer-to-studio.md |
+| 7f | Build (F1/F3 render, manual paragraph) | gameplay-engineer | implement-change | done (render built) | 35-gameplay-engineer-to-studio.md |
+| 7f-O | Owner: place the manual paragraph | owner | — | done (Option A, D-007) | 36-studio-to-owner.md |
+| 7g | Verify (all but AC-15) | qa | verify-change | done (pass) | 37-studio-to-qa.md |
+| 7i | Verify (AC-15, `ManualTest`) | qa | verify-change | done (question: ManualTest blocked) | 38-studio-to-qa.md |
+| 7i-O | Owner: `ManualTest` result | owner | — | done (Option A, D-008: 39/40) | 42-studio-to-owner.md |
+| 7h | Verify (visuals) | art-director | visual-review | done (pass; V-6 from code, V-7 not seen) | 41-studio-to-art-director.md |
+| 7j | Design (`run over` manual test failure) | game-designer | write-design-spec | done (test too literal, D-009) | 43-studio-to-game-designer.md |
+| 7k | Build (test fix, line wraps) | gameplay-engineer | implement-change | done (test changed, suite not run) | 46-studio-to-gameplay-engineer.md |
+| 7k-O | Owner: place manual text | owner | — | skipped (manual unchanged, D-009) | — |
+| 7l-O | Owner: AC-15 rerun | owner | — | done (Option A, D-010: 40/40) | 48-studio-to-owner.md |
+| 7l | Verify (AC-15 rerun by QA) | qa | verify-change | skipped (Owner's 40/40 run, D-010) | — |
+| 8 | Play (room 1) | playtester | playtest-session | done (room 1 only, scripted, 2 defeats) | 49-studio-to-playtester.md |
+| 9a | Diagnose (Play findings) | game-designer | diagnose-experience | done (A1–A3, A5, B, C, D held) | 51-studio-to-game-designer.md |
+| 9b | Play (parts not yet seen) | playtester | playtest-session | done (thin: room 2 only, 1 script) | 52-studio-to-playtester.md |
+| 10a | Observe (open facts, bots) | qa | reproduce-defect | done (6 facts settled, 2 partly; D-58-1 ruled in 59) | 55-studio-to-qa.md |
+| 10b | Design (A1–A3, A5, manual draft) | game-designer | write-design-spec, make-decision | done (spec, D-011, manual draft) | 56-studio-to-game-designer.md |
+| 10c | Design (visuals: "on you", hit source) | art-director | visual-review, write-design-spec | done (V-9…V-17, D-012) | 57-studio-to-art-director.md |
+| 10-O | Owner: place manual draft (59) and V-15 text | owner | — | open | 62-studio-to-owner.md |
+| 11 | Plan | technical-director | technical-plan | tentative (only if Waiting behavior is not local) | — |
+| 12 | Build (first attempt) | gameplay-engineer | implement-change | done (question: no repo files; Q1 gap) | 61-studio-to-gameplay-engineer.md |
+| 12a | Design (Q1 knockback at distance 0, Q2, 3 passages) | game-designer | write-design-spec | done (D-013, AC-28) | 64-studio-to-game-designer.md |
+| 12b | Build (re-issue with repo files) | gameplay-engineer | implement-change | open | 66-studio-to-gameplay-engineer.md |
+| 13a | Verify | qa | verify-change | planned | — |
+| 13b | Verify (visuals) | art-director | visual-review | planned (10c changes the view) | — |
+| 14 | Play (rooms 1–5, fresh playtester) | playtester | playtest-session | planned | — |
+| 15 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+After 12a (65): done. Q1 is settled by D-013 and AC-28; Q2 and three passages are clarified. No parameter, input or direction change, so no Decide and no escalation. Build re-issued as 12b (66) with the repo files in Load. 11 stays tentative.
+
+## Next action
+
+- `gameplay-engineer` runs 12b from `66-studio-to-gameplay-engineer.md`; the result is addressed to `studio`.
+- Owner answers `62-studio-to-owner.md` (A recommended: place the manual text now). 65 adds one suggested On-screen line for `manual.md` (knockback of a grub on top of you, near the `on you:` text); it can be placed with the 62 text. This does not block 12b.
+- Then Route: compose the Verify packets from the Build output. QA receives them without the Sender assessment; art-director runs in parallel (13a, 13b).
+
+## Outcome
+
+(Filled at Close.)
+>>>END

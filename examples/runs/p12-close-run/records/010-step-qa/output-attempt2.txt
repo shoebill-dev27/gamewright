@@ -1,0 +1,28 @@
+I'm using the remaining runs to check what the existing traces don't cover: script B, the criterion 3 case, and a Grub contact during a late dash. Script A at 30 and 60 FPS is already in the results, and I'll compare them against the criteria after the next round.
+
+<<<FILE @run/trace/C3_60
+room empty
+fps 60
+end 3
+player 15 4
+spawn grub 13 4
+1.05 dash right
+>>>END
+<<<FILE @run/trace/LATE_60
+room empty
+fps 60
+end 3
+player 15 4
+spawn grub 13 4
+1.38 dash right
+>>>END
+<<<FILE @run/trace/B60
+room empty
+fps 60
+end 4
+player 8 4
+spawn grub 10 4
+0.2 dash right
+1.0 dash left
+1.9 dash left
+>>>END

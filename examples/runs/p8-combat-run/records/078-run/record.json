@@ -1,0 +1,17 @@
+{
+ "op": "Run",
+ "goal": "G-001",
+ "operations": [
+  "071-step-gameplay-engineer",
+  "072-step-game-designer",
+  "073-route",
+  "074-step-gameplay-engineer",
+  "075-route",
+  "076-step-qa",
+  "077-route"
+ ],
+ "stop_reason": "rejected: 077-route: output rejected after 2 attempts",
+ "status": "active",
+ "owner_reads": null,
+ "next": "run examples/runs/p8-combat-run"
+}

@@ -1,0 +1,79 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-002",
+ "attempts": [
+  {
+   "runtime": "codex",
+   "session_id": "01a15970-c136-7070-9dd4-209df3ad7671",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 33459,
+    "cached_input_tokens": 7680,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 78,
+    "reasoning_output_tokens": 22
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 1,
+   "started": "2026-10-20T22:12:04",
+   "seconds": 7.6,
+   "errors": [],
+   "need": [
+    "studio/roles/game-director.md",
+    "decisions/D-020-g002-host-scope-and-plan-entry-conditions.md",
+    "goals/G-002-final-boss/18-game-director-to-studio.md"
+   ]
+  },
+  {
+   "runtime": "codex",
+   "session_id": "01a15970-df03-7fd1-a9d9-286f26ab1fa8",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 37554,
+    "cached_input_tokens": 7680,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 3484,
+    "reasoning_output_tokens": 54
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 2,
+   "started": "2026-10-20T22:12:11",
+   "seconds": 73.1,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-002-final-boss/21-studio-to-game-director.md": "1d78dde53075879384f5d76f5ef3f0596c715f701c38d92c1fd8e735c9644e00",
+  "goals/G-002-final-boss/goal.md": "fc64346142306068179fd5b4629eef9539bf02e0a36a8f4aec7bfa1cd72a0f60"
+ },
+ "decision": {
+  "new": [
+   "game-director",
+   "Decide"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "game-director",
+    "Decide"
+   ]
+  ]
+ },
+ "seen_through_seq": 21
+}

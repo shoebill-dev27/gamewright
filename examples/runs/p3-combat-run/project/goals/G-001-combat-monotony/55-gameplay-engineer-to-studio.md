@@ -1,0 +1,107 @@
+---
+kind: handoff
+goal: G-001
+seq: 55
+from: gameplay-engineer
+to: studio
+stage: Build
+outcome: done
+---
+# 55: gameplay-engineer → studio — Wording-only update of `sim/build-0.7.md`: items 1–7 stated exactly; optional items; no behavior changed
+
+## Task
+
+Report the wording-only update of the Phase 1 build description (`sim/build-0.7.md`) for the seven findings of handoff 54, then route the playtest.
+
+## Context
+
+G-001 Phase 1. This is a dry run. In this step I may write only this handoff, so the build file itself was not rewritten. Each change below is stated as "where / sentence now / sentence after". The Studio can apply them to `sim/build-0.7.md` as listed, or treat them as the content of the updated description. Every quoted "now" sentence was found in the file as written (see "Differences found").
+
+## Findings
+
+### The seven items
+
+**1. Same-start order** (section "Choice of arrival point", second bullet, first sentence).
+- Now: "Enemies whose rings start at the same moment are handled one after another in a fixed order."
+- After: "Enemies whose rings start at the same moment are handled one after another in the order they are listed in the room's arrival data (rows in room order, and within a row in the order the row gives)."
+- The rest of that bullet is unchanged: "A ring started by an earlier one counts as occupying its point when the next is chosen."
+
+**2. Spitter position** (section "What a room looks like", the paragraph after the arrival-edges list).
+- Now: "Spitters appear about 1.5 tiles along the wall from a corner."
+- After: "In rooms 1 and 2 the Spitter appears on the east edge at mid-height (the other two east points are alternatives). In rooms 3 to 5 each Spitter appears about 1.5 tiles along its wall from a corner."
+- The neighbouring sentences ("Enemies on an edge appear about 1 tile in from the wall. Grubs appear a quarter, half or three quarters of the way along the edge.") are unchanged.
+
+**3. Covered corners named** (section "What a room looks like", the room bullets under "Arrival edges and timing, by room"). The corners follow handoff 54 and spec 3.4.
+- Room 3. Now: "with a Spitter at the north edge near a corner." After: "with a Spitter at the north edge near the north-east corner."
+- Room 4, wave 1. Now: "a Spitter at the north edge near the west corner." After: "a Spitter at the north edge near the north-west corner."
+- Room 4, wave 2. Now: "a Spitter at the south edge near the east corner." After: "a Spitter at the south edge near the south-east corner."
+- Room 5, wave 1. Now: "one Spitter at the south edge near the west corner and one Spitter at the north edge near the east corner." After: "one Spitter at the south edge near the south-west corner and one Spitter at the north edge near the north-east corner."
+- Kept as written, in "Choice of arrival point": "For Spitters the second point is the other end of the same wall. A player standing in the covered corner makes the Spitter appear at the far end of that wall."
+
+**4. Ring overlap examples** (section "The arrival ring", the overlap bullet, last sentence).
+- Now: "Rooms 3 (wave 2) and 5 (wave 1, west edge) have rings at the same moment."
+- After: "Rooms 3 (wave 2), 4 (wave 1, west edge) and 5 (wave 1, west edge) have rings at the same moment."
+
+**5. Sampling caveat** (section "Choice of arrival point", the bullet "Your position and the occupancy of the points are read …").
+- Now: "… so a very fast move across a 5-tile boundary in that gap can change the point at one frame rate and not the other."
+- After: "… so a very fast move across a 5-tile boundary, or an enemy moving across a 1.5-tile occupancy boundary, in that gap can change the point at one frame rate and not the other."
+- The text before "so a very fast move" is unchanged.
+
+**6. Log basis** (section "Test output", first bullet).
+- Now: "… It has timestamped lines for each ring start, each appearance, each wave start and each Spitter shot. A Spitter shot line carries the scheduled shot time."
+- After: the same, followed by: "Each ring start line and each appearance line carries the scheduled time (the frame time may also be given), as the Spitter shot line already carries the scheduled shot time."
+- This states the log content that spec 3.3 ("Log basis") requires. The log is diagnostic only and affects no play. I changed no code or timing.
+
+**7. Heading.**
+- Now: "# Simulated build 0.3.3: what playing it looks like"
+- After: "# Simulated build 0.7: what playing it looks like"
+- The update is applied to the file `sim/build-0.7.md`, so the label 0.7 matches the file name. It no longer repeats 0.6's heading "0.3.3". I did not invent a new file name. If the Studio wants the updated description to be a separate file (for example `build-0.8.md`), the heading must carry that file's number instead.
+
+### Optional items
+
+- **"linear in game time" for the ring brightness ramp: done.** Handoff 51 quotes "linear in game time" as wording Build may add. Location: section "The arrival ring", bullet "Brightness rises steadily from 0.0 s." After: "Brightness rises linearly in game time from 0.0 s." The 40% start, full brightness at 0.6 s, and the colours are unchanged. `sim/repo-notes.md` already records the ramp as linear in game time, so this describes the existing look.
+- **The word "solid" for the ring's solid stage: not done.** Handoff 50 only asks the Art Director to confirm what it means. Handoff 51 gives no replacement wording. I did not invent one. The two uses ("the ring is solid at full brightness" in the last 0.2 s, and "an outline with no fill") stay as they are.
+
+### Differences found
+
+All seven quoted "now" sentences exist in the file as written. No item was blocked, and none contradicts the spec.
+
+### Still contradicting the spec (reported, not fixed)
+
+1. **Spitter's second point, rooms 1–2.** The bullet "For Spitters the second point is the other end of the same wall" is unqualified. Under spec 3.4 and 3.2a it holds only for the corner-covering Spitters of rooms 3–5. In rooms 1–2 the Spitter's list is E2, E1, E3. Item 3 told me to keep the sentence, so I did. The Game Designer may want "(rooms 3 to 5)" added.
+2. **"A Spitter near a held corner appears at the far end of its wall"** (section "What it plays like"). It has the same scope: true for rooms 3–5 only.
+3. **`sim/repo-notes.md`** still says the latest description is headed 0.3.3 ("this file is the current notes; the latest build description is `sim/build-0.7.md`, headed 0.3.3"). It is out of date after item 7. I could not change it in this step. It is a note, not a build description.
+
+## Decisions already made
+
+- D-008: Phase 1 spawn and wave rules.
+- D-009: criteria 1 and 2 judged at the playtest.
+- D-001, D-003: unchanged.
+
+## Constraints
+
+- Nothing but wording changed. No rule, timing, data value, wave, spawn point, dash, hit-stun, invulnerability, input or ring look (dot `#FFC14D`, 40% ramp, overlap cap) was touched.
+- The description still behaves identically at 30 and 60 FPS.
+- No Phase 2 content.
+
+## Open questions
+
+None blocking. For the Studio:
+- Whether the updated description stays in `sim/build-0.7.md` (heading "0.7") or becomes a new file (heading must match its name).
+- Whether the Game Designer should qualify the two rooms 3–5 sentences listed under "Still contradicting the spec".
+
+## Expected output
+
+The Studio applies or accepts the wording above and routes the playtest as a fresh Handoff for the Playtester (record sheet from handoff 53). QA does not re-verify, because behavior did not change.
+
+## Sender assessment
+
+Confidence is high that nothing but wording changed. Each edit restates text already in the spec (3.3, 3.4) or in handoff 54. The one judgment call is the "linear in game time" option. I applied it because handoff 51 gives the phrase and `sim/repo-notes.md` confirms it is the existing behavior.
+
+## Load
+
+- Role: studio/roles/studio.md
+- Skills: none
+- Project: sim/build-0.7.md; design/g001-combat-escalation.md (3.3, 3.4); sim/repo-notes.md
+- Decisions: decisions/D-008-phase-1-spawn-and-wave-rules.md; decisions/D-009-judging-basis-criteria-1-and-2.md
+- Previous handoff: goals/G-001-combat-monotony/54-studio-to-gameplay-engineer.md

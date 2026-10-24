@@ -1,0 +1,52 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-first-puzzle-stall/13-studio-to-qa.md",
+  "sha256": "28c939919a191cf3fbbe0d6d9286b5e2114d269b2da067971641dd96c190f0b0",
+  "bytes": 4218
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "e65b1378195da3373e0b30e3a5fc9a454a2aedebe1ce953fd80da8237e4e641c",
+  "bytes": 1734
+ },
+ {
+  "path": "studio/skills/verify-change.md",
+  "sha256": "da40d2c0030e078ac6d085ea06b17bb9b452495f4e2f412a9e1bd723ac72ddf5",
+  "bytes": 1281
+ },
+ {
+  "path": "design/onboarding.md",
+  "sha256": "252ffd609c38e453d5710ac1dc289cb277d57e80ed7c7d3069fbf49da3969229",
+  "bytes": 13082
+ },
+ {
+  "path": "sim/build-0.3.md",
+  "sha256": "23988d5d60202292cda3e1c2239d3e74c9709f3347dd174f4a5f294d898778d5",
+  "bytes": 6074
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "53351d1620ff2ecebedb3bc15243f68f6dbdee48df5382cc16e2eae8b09bbaf7",
+  "bytes": 488
+ },
+ {
+  "path": "decisions/D-001-no-fail-states.md",
+  "sha256": "99362efd3625e792d862dcbec7744a761cee478a97eae271621290daff508b4e",
+  "bytes": 505
+ },
+ {
+  "path": "decisions/D-002-intro-cancel-and-undo.md",
+  "sha256": "5f412d0a7512397658d74382c84055ca1fb1159b52df5cc705e1e23a687f5cd2",
+  "bytes": 1949
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ }
+]

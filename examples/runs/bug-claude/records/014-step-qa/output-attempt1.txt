@@ -1,0 +1,91 @@
+<<<FILE goals/G-001-damage-during-dash/10-qa-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 10
+from: qa
+to: studio
+stage: Verify
+outcome: pass
+---
+# 10: qa → studio — Final verification of G-001 on build 0.4: criteria 1–6 pass, overall verdict PASS
+
+## Task
+
+Record the overall verdict for G-001: **pass**. Criteria 1–5 stand as recorded in `06-qa-to-studio.md`. Criterion 6 is now settled under D-002 and passes. Studio can route to Review.
+
+## Context
+
+Goal G-001: the player sometimes took damage partway through a dash started shortly after a hit. Build 0.4 is the fix. In `06` criterion 6 ("same results at 30 and 60 FPS") was undecided because no tolerance was defined at protection-expiry boundaries. The Game Designer ruled in D-002 and `design/combat.md` ("Protection expiry and frame rate"). I verified from the criteria, the design and the build text in `sim/build-0.4.md`, not from any explanation of why the fix works. I did not redefine any criterion.
+
+Caveat, unchanged from 06: the build is the dry-run description. Its last bullet says the fix "has not been run or tested in this simulation". The Studio accepted this as the project's way of running the build, so every result below is limited to what the build text states.
+
+## Findings
+
+### Per-criterion result
+
+| # | Criterion | 30 FPS | 60 FPS | Evidence |
+|---|---|---|---|---|
+| 1 | No damage during a dash started right after hit-stun (~0.3 s), Grub and Spitter | pass | pass | Build: "You cannot be hurt at any moment from the start of a dash to its end… once input returns (about 0.3 s after the hit). A Grub touching you or a Spitter projectile reaching you during the dash does nothing, for both enemy types." |
+| 2 | No damage for dashes at several delays in the 0.8 s window | pass | pass | Build states dashes at ~0.3 s and ~0.5 s (protected through the dash, then through the rest of the 0.8 s window) and at 0.6–0.75 s (protected through the whole dash; protection ends when the dash ends). |
+| 3 | Regression: dash with no recent hit takes no damage | pass | pass | Build: the dash protection holds "whether the dash begins with no recent hit or any time after a hit". |
+| 4 | Regression: undashed hit = 1 heart, 0.3 s hit-stun, invulnerable until 0.8 s | pass | pass | Build: "Taking a hit still costs 1 heart, locks out input for 0.3 s…" and "A hit taken without dashing behaves as before". |
+| 5 | Regression: dash 4 tiles / 0.25 s, cooldown 0.6 s, queued attack fires at dash end | pass | pass | Build: "A dash still covers 4 tiles in 0.25 s, has a 0.6 s cooldown, and an attack pressed during the dash still fires when the dash ends." |
+| 6 | Same results at 30 and 60 FPS, under D-002 | pass | pass | See below. |
+
+The original reproduction (hit, then dash as soon as input returns) causes no mid-dash damage at any delay, for Grub or Spitter. The defect no longer appears.
+
+### Criterion 6 under D-002
+
+The build's only stated frame-rate difference is its edge-timing bullet: "protection ends on the first frame at or after its end time. At 30 FPS that can be up to about 33 ms late, and at 60 FPS up to about 17 ms late." It states that behavior is otherwise the same at 30 and 60 FPS.
+
+| Check | Boundary | Result | Reasoning from the build |
+|---|---|---|---|
+| 1. Contact at or before the end time → no damage | Dash end (0.25 s) and 0.8 s post-hit mark | pass at 30 and 60 FPS | Protection ends on the first frame at or after the end time, so it can only be late and never early. Contact before the end time is always protected. |
+| 2. Contact later than end time + one frame (34 ms at 30 FPS, 17 ms at 60 FPS) → 1 heart | Same two boundaries | pass at 30 and 60 FPS | The maximum lateness is about 33 ms at 30 FPS (under 34 ms) and about 17 ms at 60 FPS (one frame is 16.7 ms, under 17 ms). Protection is therefore over before the contact. |
+| 3. Contact inside the trailing frame → either result | Same two boundaries | pass | The build says this "can go either way depending on frame rate". D-002 accepts that. |
+| 4. No other frame-rate difference in damage, dash or hit-stun | n/a | pass | The build states identical behavior apart from the edge timing. Damage (1 heart), hit-stun (0.3 s), dash distance and duration, cooldown and queued attack are all stated without a frame-rate qualifier. |
+
+Enemy types: the dash bullets name both Grub contact and Spitter projectile. The edge-timing rule is stated generally for protection end times, with no enemy-specific exception. It therefore applies to both enemies at both boundaries. The early-dash case (dash ends before 0.8 s, protection continues to the mark) is stated explicitly: "The dash ending does not make you vulnerable early." The late-dash case (0.8 s runs out mid-dash, protection ends when the dash ends) is also stated explicitly.
+
+No early expiry and no expiry later than one frame is described at either frame rate, so criterion 6 passes.
+
+### Regressions checked
+
+Undashed hit, dash with no recent hit, dash distance, duration and cooldown, the queued attack, and hit-stun. None regressed. D-001: the build implies no new inputs.
+
+### Residual note (not a failure, not a blocker)
+
+The build text does not separately say whether a contact at exactly the end-time instant is protected on a frame that lands exactly on the end time. The text says the error is lateness only, and an exact-instant contact is a zero-width case. I read it as protected, consistent with "never early". If the Studio wants this pinned down, it would be a design wording clarification only. It does not change the verdict.
+
+### Overall verdict
+
+**pass.** Criteria 1–6 all pass at 30 and 60 FPS, and no regression was found. This is the first verification result for criterion 6, so the technical-director escalation does not apply.
+
+## Decisions already made
+
+- D-001: one attack button plus dash. Not affected.
+- D-002: protection expiry may be late by up to one frame, never early. Applied to criterion 6.
+
+## Constraints
+
+- Must play correctly at 30 and 60 FPS.
+- Dash and damage rules unchanged: full-duration dash invulnerability, 1 heart per hit, 0.3 s hit-stun, invulnerable until 0.8 s after a hit.
+- QA does not modify production code or redefine criteria.
+
+## Open questions
+
+None blocking. Optional: the exact-instant wording noted under "Residual note".
+
+## Expected output
+
+The Studio takes the overall `pass` for G-001 on build 0.4 and routes to the next stage (Review) per the Studio process. Nothing goes back to `gameplay-engineer` or `game-designer`.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: project.md#constraints, design/combat.md, sim/build-0.4.md, goals/G-001-damage-during-dash/02-qa-to-gameplay-engineer.md
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-002-protection-expiry-frame-tolerance.md
+- Previous handoff: goals/G-001-damage-during-dash/09-studio-to-qa.md
+>>>END

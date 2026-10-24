@@ -1,0 +1,67 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-003-dash-readiness/02-game-designer-to-gameplay-engineer.md",
+  "sha256": "f5e4570293c94ae85ed1f12c0a226e4f70bc2796726d7a3b63b5218c32298699",
+  "bytes": 5719
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md",
+  "sha256": "8a447e66877cd14dfff47ac1b8482ba77c850159c8fb43ec2780e91064869351",
+  "bytes": 1742
+ },
+ {
+  "path": "studio/skills/implement-change.md",
+  "sha256": "a9befd7f1d9e09eb94c51a066f030db88c5061ad1b522d9795e62bc2c242964a",
+  "bytes": 1823
+ },
+ {
+  "path": "design/dash-readiness.md",
+  "sha256": "8253e05175ef2c4d0a5aa9ba2fd2ac3b66ebefb54d02d73a5c007aeec2135ba5",
+  "bytes": 14596
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "c4ca7a42de90eb6a46e5df67c118442887cb6a1a0d2a35c0f0f9d824a0bdc749",
+  "bytes": 12081
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "a1afd9e6c44f4e467d38466e19af2a30f1c8c981ca7ad409da94ddf539bcbe97",
+  "bytes": 50393
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "05a33c6f8e50caa20ddf4f3844885137c4261ad4a3e5f3db3eb1b5312b129a9f",
+  "bytes": 237
+ },
+ {
+  "path": "project.md",
+  "sha256": "d1fa7eb21a269a68ec399471b2db7941d2ebb51b9b0372ce0e945ef475eea2d6",
+  "bytes": 3042
+ },
+ {
+  "path": "decisions/D-001-one-button-combat.md",
+  "sha256": "c7fe9ca23a369707a5ab439e44789a25a0a8544efce4703a676f8fd180f82ec1",
+  "bytes": 798
+ },
+ {
+  "path": "goals/G-003-dash-readiness/01-studio-to-game-designer.md",
+  "sha256": "2ea0c410a237e7c54e717abcc2909384d8f21b219c8fe95ca42c08d0d9db9c0f",
+  "bytes": 3438
+ },
+ {
+  "path": "@files/repo",
+  "sha256": "30e757e122e1436fa92e721fac203a488dda97e3dea2be2448fc0b8f1d4dd2cf",
+  "bytes": 693
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ }
+]

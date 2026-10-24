@@ -1,0 +1,69 @@
+---
+kind: handoff
+goal: G-001
+seq: 23
+from: gameplay-engineer
+to: studio
+stage: Build
+outcome: question
+---
+# 23: gameplay-engineer → studio — `run_tests` is still 33/34: the run workspace has no `manual.md`, so the placed file is untested
+
+## Task
+
+Decide how to get a real `run_tests` result for the placed `manual.md`, then compose QA's Handoff. I cannot confirm 34/34 from this packet.
+
+## Context
+
+Goal G-001, Build 0.5. Handoff 22 asked me to run `run_tests` and report whether all 34 tests pass, including `ManualTest`, now that the Owner has placed `manual.md` unchanged (D-005). I changed no files.
+
+## Findings
+
+- **Command:** `python3 -m unittest discover -s tests`.
+- **Result:** 34 tests ran, 33 passed, 1 error: `ManualTest.test_manual_lists_glyphs_and_lines`. This is the same result as before the placement.
+- **Error:** `FileNotFoundError: [Errno 2] No such file or directory: '/manual.md'`, raised at `MANUAL.read_text(...)`. It is not a failed assertion about the text of `manual.md`.
+- **Why:**
+  - In the run workspace the repo is at `/work`, so `REPO.parent` is `/` and the test looks for `/manual.md`.
+  - The workspace did not contain the Owner's placed file. I can only write `repo/` files and my handoff, so I cannot supply `manual.md` at that location. A copy under `repo/` would not satisfy the test.
+  - So this run does not show whether the placed draft passes.
+- **Static check of the placed `manual.md`** (read, not run):
+  - Every `GLYPHS` character from handoff 18 appears backticked: `P`, `x`, `g`, `G`, `w`, `W`, `s`, `S`, `z`, `Z`, `*`, `)`, `(`, `^`, `v`.
+  - Every test phrase appears: "room empty", "rears back", "is open", "charges", "spits", "run over", "press attack to start again", "(miss)", "(too soon)", "(stunned)", "(down)", "room cleared".
+  - I found no contradiction with the implementation, and no text change is needed.
+  - I could not read `play.py` in this packet, so I took the glyph set from the handoff 18 table.
+- **No code, test or `manual.md` changes were made.**
+
+## Decisions already made
+
+- D-004: item 5 puts the manual with the gameplay-engineer.
+- D-005: the Owner placed the draft unchanged; this was a one-time placement.
+
+## Constraints
+
+- `manual.md` must be at the directory above `repo/`, where `ManualTest` reads it.
+- I did not spend a further run: the workspace would be the same and the result would be the same error.
+
+## Open questions
+
+- Run `run_tests` in a workspace that contains the placed `manual.md` next to `repo/`, for example the Owner's real project directory or a workspace built from it.
+- If that run shows 34/34, open Verify (QA and art-director in parallel, with fresh Handoffs without Sender assessment).
+- If `ManualTest` fails on the text, return it to me with the failing assertion. I would report the line and suggested corrected text, and not edit `manual.md`.
+- If no such workspace is possible, the Studio can proceed to QA with `ManualTest` marked "not confirmed in the run workspace; the static check passes". This is a Studio call, not mine.
+
+## Expected output
+
+The Studio gets a `run_tests` result from a layout that includes `manual.md`, then composes QA's Handoff. The result for this step is 33/34, with the one error a missing file, not a test failure of the draft's text.
+
+## Sender assessment
+
+- High confidence (about 90%) that `ManualTest` passes on the placed file, from the static comparison. It is not demonstrated.
+- The earlier failure and this one share the same cause, a missing file in the workspace, so this step adds no new information about the draft.
+- Pause (F11) is not implemented, as already known. QA should mark it not verifiable.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: manual.md, repo/tests/test_game.py, goals/G-001-combat-monotony/18-gameplay-engineer-to-studio.md
+- Decisions: decisions/D-004-option-a-single-change-set.md, decisions/D-005-owner-places-manual-draft.md
+- Previous handoff: goals/G-001-combat-monotony/22-studio-to-gameplay-engineer.md

@@ -1,0 +1,163 @@
+<<<FILE @run/play/room1-60
+room 1
+fps 60
+when see * coming within 1.5 then move aside
+when text "rears back" then move aside
+when see g within 1.4 then attack
+when see g within 3 then face
+>>>END
+
+<<<FILE @run/play/room2-60
+room 2
+fps 60
+when see * coming within 1.5 then move aside
+when text "rears back" then move aside
+when see r within 1.4 then attack
+when see g within 1.4 then attack
+when see G within 1.4 then attack
+when see r within 3 then face
+when see G within 3 then face
+>>>END
+
+<<<FILE @run/play/room3-60
+room 3
+fps 60
+end 12
+when see * coming within 1.5 then move aside
+when text "takes aim" then move aside
+when see s within 1.4 then attack
+>>>END
+
+<<<FILE @run/play/room4-60
+room 4
+fps 60
+end 15
+when see * coming within 1.5 then move aside
+when text "takes aim" then move aside
+when text "rears back" then move aside
+when see g within 1.4 then attack
+when see r within 1.4 then attack
+when see s within 1.4 then attack
+>>>END
+
+<<<FILE @run/play/room5-60
+room 5
+fps 60
+end 15
+when see * coming within 1.5 then move aside
+when text "takes aim" then move aside
+when text "rears back" then move aside
+when see g within 1.4 then attack
+when see G within 1.4 then attack
+when see s within 1.4 then attack
+>>>END
+
+<<<FILE @run/trace/grub-inreach-60
+room empty
+fps 60
+spawn grub 9.3 4
+player 8 4
+0.40 attack
+end 2
+>>>END
+
+<<<FILE @run/trace/grub-late-60
+room empty
+fps 60
+spawn grub 9.3 4
+player 8 4
+0.60 attack
+end 2
+>>>END
+
+<<<FILE @run/trace/grub-outofreach-60
+room empty
+fps 60
+spawn grub 10 4
+player 8 4
+0.30 attack
+end 2
+>>>END
+
+<<<FILE @run/trace/runner-inreach-60
+room empty
+fps 60
+spawn runner 9.3 4
+player 8 4
+0.20 attack
+end 2
+>>>END
+
+<<<FILE @run/trace/runner-late-60
+room empty
+fps 60
+spawn runner 9.3 4
+player 8 4
+0.43 attack
+end 2
+>>>END
+
+<<<FILE @run/trace/runner-outofreach-60
+room empty
+fps 60
+spawn runner 10 4
+player 8 4
+0.20 attack
+end 2
+>>>END
+
+<<<FILE @run/trace/grub-edge50-30
+room empty
+fps 30
+spawn grub 9.3 4
+player 8 4
+0.50 attack
+end 2
+>>>END
+
+<<<FILE @run/trace/grub-edge52-30
+room empty
+fps 30
+spawn grub 9.3 4
+player 8 4
+0.52 attack
+end 2
+>>>END
+
+<<<FILE @run/trace/grub-edge50-60
+room empty
+fps 60
+spawn grub 9.3 4
+player 8 4
+0.50 attack
+end 2
+>>>END
+
+<<<FILE @run/trace/grub-edge52-60
+room empty
+fps 60
+spawn grub 9.3 4
+player 8 4
+0.52 attack
+end 2
+>>>END
+
+<<<FILE @run/trace/room1-reaction-30
+room 1
+fps 30
+end 4
+when see * coming within 1.5 then move aside
+when text "rears back" then move aside
+when see g within 1.4 then attack
+when see g within 3 then face
+>>>END
+
+<<<FILE @run/trace/room1-reaction-60
+room 1
+fps 60
+end 4
+when see * coming within 1.5 then move aside
+when text "rears back" then move aside
+when see g within 1.4 then attack
+when see g within 3 then face
+>>>END

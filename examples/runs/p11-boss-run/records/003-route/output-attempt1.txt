@@ -1,0 +1,148 @@
+<<<FILE goals/G-002-final-boss/goal.md
+---
+kind: goal
+id: G-002
+project: lantern-depths
+status: active
+created: 2026-10-20
+---
+# G-002: 最後に手応えのあるボス戦
+
+## Owner request
+
+> 最後に手応えのあるボス戦がほしい
+
+## Interpretation
+
+ランの最後に、プレイヤーが位置取り、攻撃とダッシュのタイミング、敵の挙動への対応を通じて手応えを感じられるボス戦がある。短いランと、被害を受ける前に脅威を読み取れる体験を維持する。
+
+具体的なボスの仕組み、配置、難度、数値基準は担当Roleが定める。新しい入力ボタン、ゲームの基本コンセプト変更、ボス戦に必要のない既存部屋の全面改修は対象外。ラン構成や作業規模を大きく変える必要が生じた場合はOwnerに判断を戻す。
+
+## Unknowns
+
+- Observe：既存の不具合報告ではないため skipped。現行終端の実態確認はTechnical Directorの技術調査で行う。
+- Diagnose：体験問題の原因診断は skipped。ラン終端・遷移・再挑戦とボス実現範囲の技術的な不明点を確認するため、Technical Directorの調査を開く。
+- Decide：配置候補A/B/C、既存第5部屋の扱い、実装する終端の範囲に実質的な選択があるため planned。技術調査後にGame Directorが判断する。Goalの再解釈や大幅な範囲変更が必要ならOwnerへ戻す。
+- Design：初回は方向判断と現行終端の不足情報を返した。方向確定後、攻撃構成、予兆と対処、時間配分、勝敗・再挑戦、受け入れ基準を仕様化するため planned。
+- Plan：設計後の実装計画は tentative。技術調査と確定仕様から、非自明・高リスク・複数システムの変更が必要と判明した場合に開く。
+- Build：仕様確定後のゲーム変更が必要なので planned。
+- Verify：Build後の独立確認は planned。Art Directorによる表現確認は、設計・実装で生じる表示上の依存が確定するまで tentative。
+- Play：最終戦の手応えを独立したプレイヤー観察で評価するため planned。実装内容や期待結果は渡さない。
+- Review：体験Goalの達成判断が必要なので planned。
+- Next：結果と残課題をOwnerへ返すため planned。
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Design | game-designer | write-design-spec | done | 01-studio-to-game-designer.md → 結果: 02-game-designer-to-studio.md |
+| 2 | Diagnose | technical-director | technical-plan | open | 03-studio-to-technical-director.md |
+| 3 | Decide | game-director | make-decision, prepare-owner-escalation | planned | — |
+| 4 | Design | game-designer | write-design-spec | planned | — |
+| 5 | Plan | technical-director | technical-plan | tentative | — |
+| 6 | Build | gameplay-engineer | implement-change | planned | — |
+| 7 | Verify | qa | verify-change | planned | — |
+| 8 | Verify | art-director | visual-review | tentative | — |
+| 9 | Play | playtester | playtest-session | planned | — |
+| 10 | Review | game-director | review-outcome | planned | — |
+| 11 | Next | studio | — | planned | — |
+
+原則として逐次実行する。配置・範囲の判断は現行終端と実現費用の確認に依存するため、技術調査を先行し、Game Directorはその結果を受けて開始する。Art DirectorのVerifyが必要になった場合は、同じビルドに対するQAのVerifyと独立に並行できる。
+
+## Route changes
+
+Designは仕様未確定のquestionで完了。配置と到達範囲の判断に必要な終端・再挑戦・実現範囲をTechnical Directorが先に調査する。Decideを確定し、その後にDesignへ戻す。実装計画と表現確認は引き続き条件付き。
+
+## Next action
+
+Technical Directorが `03-studio-to-technical-director.md` から現行ビルドの終端と実現範囲を調査し、Studioへ返す。次の操作はこのDiagnose Step。調査後、StudioがGame Directorへ配置・範囲の判断をルーティングする。
+
+## Outcome
+
+未完了。初回Designで配置候補と不足情報を整理した。配置・範囲の決定、仕様確定、実装、検証、体験評価は未実施。
+>>>END
+
+<<<FILE goals/G-002-final-boss/03-studio-to-technical-director.md
+---
+kind: handoff
+goal: G-002
+seq: 3
+from: studio
+to: technical-director
+stage: Diagnose
+outcome: routed
+---
+# 03: studio → technical-director — 現行終端とボス戦の実現範囲を確認する
+
+## Task
+
+現行ビルドの部屋選択・遷移・終端・死亡・再挑戦の実態を確認し、ボス戦の配置候補ごとの技術的な変更範囲とリスクを整理する。Game Directorが配置と今回の到達範囲を判断できる材料をStudioへ返す。
+
+## Context
+
+Owner要望は「最後に手応えのあるボス戦がほしい」。初回Designでは、資料から連続ランの有無や終端の契約を確定できず、仕様化を保留した。
+
+Game Designerは、A：第5部屋を単体ボス戦へ置換、B：第5部屋の後にボス戦を追加、C：第5部屋の混成戦にボスを同居、を提示し、Aを第一候補として推奨している。どの案も未承認。配置と到達範囲の判断は今回の技術調査後にGame Directorへ渡す。
+
+## Findings
+
+- 資料では5部屋が定義され、manualは部屋を選択するセッションを説明している。連続ランが存在しないとはまだ確認されていない。
+- 資料に自動遷移、最終勝利、死亡後の再開地点、部屋間の状態継承の具体的説明がない。
+- 反応ルールを使うセッションの最大60秒という説明がある。実際の制約と変更の必要性は未確認。
+- `project.md`のCurrent stateと戦闘資料のビルド表記に差がある。調査対象は現在の `repo/`、sha `27fe16268ac8`。
+- 単体敵の複数攻撃切替、状態・HP・危険範囲の識別表示を既存基盤でどこまで実現できるかは未確認。
+- 初回Designでは実行調査をしていない。資料の記述と実行結果を区別して報告すること。
+
+## Decisions already made
+
+- D-001：追加の戦闘入力にはOwner承認が必要。
+- D-002/D-003：既存接触判定の限定的な接触端例外。新しい攻撃形状への自動適用はしない。
+- D-004/D-005：既存の予兆中断、cue gap、無敵接触時の消費規則を参照する。
+- G-002の配置・攻撃構成・難度・終端範囲に承認済みDecisionはない。
+
+## Constraints
+
+- 調査のみ。コード、仕様、既存Decisionを変更しない。
+- 配置、既存第5部屋の存廃、Goalの達成範囲は決めない。技術上の選択肢と影響を提示する。
+- Desktop、キーボードとゲームパッド、30/60 FPS。新しい入力は追加しない。
+- 小規模チームとして既存システムの再利用を優先する。既存部屋の全面改修を前提にしない。
+- 15〜20分はVision上の目標であり、現行ランの実測値とは扱わない。
+- プレイヤー向け表示は現行のテキストビルドを前提とする。
+- 秘密情報・個人情報を出力やハンドオフに含めない。
+
+## Open questions
+
+1. 個別部屋のセッションと連続ランのどちらが実装されているか。入場、クリア、死亡、再開始時の表示、遷移、状態リセット・継承はどうなっているか。
+2. 第5部屋または追加部屋を「最後」として扱うために必要な仕組みは何か。選択可能な最終部屋と、連続ランから最終勝利まででは変更範囲がどう違うか。
+3. A/B/Cそれぞれで変更するシステム、既存第5部屋固有の挙動や検証への影響、主なリスクは何か。現段階で確定できない点は何か。
+4. 単体ボスの攻撃切替、固定照準、予兆・回復・HP表示をどこまで再利用できるか。表現仕様をArt Directorへ依頼すべき具体的な不足はあるか。
+5. 60秒上限はどの実行経路に適用されるか。戦闘時間の設計・計測・独立検証に与える制約は何か。
+6. 現在の実行手段で所要時間について何が測れるか。15〜20分のラン目標と比較する際に不足する情報は何か。
+
+## Expected output
+
+確認した実行コマンドと結果、根拠となるファイル、現行終端の事実、候補別の変更範囲・リスク・未確定事項を整理する。実行不能な項目は理由と必要な材料を明記し、推測で補わない。
+
+結果は `04-technical-director-to-studio.md` として `to: studio` で返す。これは確定仕様に対する実装計画ではない。Studioは調査結果と初回Designの選択肢をGame Directorへ渡し、配置・範囲の判断後にGame Designerへ仕様化を戻す。Goalの再解釈や大幅な範囲変更が必要と判明した場合は、その根拠を明記する。
+
+## Load
+
+- Role: studio/roles/technical-director.md
+- Skills: studio/skills/technical-plan.md
+- Project: project.md
+- Project: goals/G-002-final-boss/goal.md
+- Project: design/combat.md
+- Project: repo/README.md
+- Project: repo/manual.md
+- Project: repo/game.py
+- Project: repo/play.py
+- Project: repo/bots.py
+- Project: repo/tests/test_game.py
+- Build: repo/ (sha 27fe16268ac8)。repo/を作業ディレクトリとして、`python3 -m unittest discover -s tests`、`python3 play.py --view player {script}`、`python3 play.py --view trace {script}`、必要なら `python3 bots.py {script}`。スクリプト形式はmanualで確認する。
+- Decisions: decisions/D-001-one-button-combat.md
+- Decisions: decisions/D-002-contact-edge-graze-accepted.md
+- Decisions: decisions/D-003-contact-edge-exact-reach-and-lunge-band.md
+- Decisions: decisions/D-004-spitter-cue-gap-brute-no-cancel-room2-spitter-deferred.md
+- Decisions: decisions/D-005-blocked-contact-consumes-shot-and-spends-lunge.md
+- Previous handoff: goals/G-002-final-boss/02-game-designer-to-studio.md
+>>>END

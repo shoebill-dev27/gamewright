@@ -1,0 +1,127 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "b7fb7a3d85a62bcd564a33ee20caf62b355a7ef99ce6d8cfb6df0d5adb83abc2",
+  "bytes": 1304
+ },
+ {
+  "path": "goals/G-002-final-boss/59-studio-to-qa.md",
+  "sha256": "b7b7aeb0f355857c0578ed30315ee386f6dfe850920ccf996f3ea5537b336397",
+  "bytes": 6455
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "381742c8f2afe2e1a2a6af9d031dcc91f98f490ada7c90e2a990d6a1aaf27639",
+  "bytes": 1765
+ },
+ {
+  "path": "studio/skills/verify-change.md",
+  "sha256": "da40d2c0030e078ac6d085ea06b17bb9b452495f4e2f412a9e1bd723ac72ddf5",
+  "bytes": 1281
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "05a33c6f8e50caa20ddf4f3844885137c4261ad4a3e5f3db3eb1b5312b129a9f",
+  "bytes": 237
+ },
+ {
+  "path": "design/final-boss-and-continuous-run.md",
+  "sha256": "71c26a7d706bc6e7d532026d605475bb738b84d741222ca656be7ec1d500ff28",
+  "bytes": 39605
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "a1afd9e6c44f4e467d38466e19af2a30f1c8c981ca7ad409da94ddf539bcbe97",
+  "bytes": 50393
+ },
+ {
+  "path": "design/combat-step68.md",
+  "sha256": "2c52b20718d8c1f6cc68035b1151e3b1680f05dc39e26d735c99004014f792c9",
+  "bytes": 4304
+ },
+ {
+  "path": "design/combat-step72.md",
+  "sha256": "0e504d1ebcfb8dc391a82e725a11645a5670b9f52ceaff1152ead0130aa69215",
+  "bytes": 11550
+ },
+ {
+  "path": "design/combat-step94.md",
+  "sha256": "43cc96d0ed3560a009ac740f46d6f2098ac69c9e26a8c873accc11de9c431bbe",
+  "bytes": 8338
+ },
+ {
+  "path": "repo/README.md",
+  "sha256": "fddbf220eb654d035dc3cbceb8f589bfe9f3a1cdfb26a3e21a0de930c93dacde",
+  "bytes": 3065
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "c4ca7a42de90eb6a46e5df67c118442887cb6a1a0d2a35c0f0f9d824a0bdc749",
+  "bytes": 12081
+ },
+ {
+  "path": "repo/public-driver.md",
+  "sha256": "365e4978670f0137716ca49086e9be1a75ed70e832063afe7178b1c245e86e3a",
+  "bytes": 5108
+ },
+ {
+  "path": "repo/game.py",
+  "sha256": "fb96333674d709e400f66c163a266b2d4e6c2b95b4abc5314c160b59cde28b90",
+  "bytes": 21537
+ },
+ {
+  "path": "repo/session.py",
+  "sha256": "2ab7d96e541a5c6ba02d865a480140ef950d49ed58af0825062143f866ea7db8",
+  "bytes": 5013
+ },
+ {
+  "path": "repo/play.py",
+  "sha256": "b7bd9637300a58d22bb0ccf5f1d50367f7f9a30c5b2e8e5898dc09afb6275772",
+  "bytes": 16944
+ },
+ {
+  "path": "repo/run_driver.py",
+  "sha256": "ffc879bd3b324dd1420954a0fe1e32ff43eff1e0e143d393cd797b1d896475d1",
+  "bytes": 15526
+ },
+ {
+  "path": "repo/bots.py",
+  "sha256": "712ccb8f80cebf224c67460de877dc92ac573aac13e4e2afc94502b8f8d58c78",
+  "bytes": 24944
+ },
+ {
+  "path": "repo/source_id.py",
+  "sha256": "9923feba4aef0281e4dd952dbdc5595dfee118d00d8dee61cdd70257472aedfa",
+  "bytes": 873
+ },
+ {
+  "path": "decisions/D-017-final-boss-and-run-contract.md",
+  "sha256": "48adbb02a672e45434a1b0f61c77b8c1747c437124e183b1a849e34c705f4283",
+  "bytes": 3341
+ },
+ {
+  "path": "decisions/D-019-g002-balance-criteria-applicability.md",
+  "sha256": "db369f14df8125734146c8b7feb643e58a4ce8c2780fc211e23a9f59a85c62c7",
+  "bytes": 5895
+ },
+ {
+  "path": "decisions/D-021-owner-authorizes-text-build.md",
+  "sha256": "9df4329db4178c6d573c6121007e0dbe1109abca068e1c303386eb94cbbd3575",
+  "bytes": 3514
+ },
+ {
+  "path": "decisions/D-022-g002-v1-supplements.md",
+  "sha256": "8a721e0d0eb480ad361b9c9e0d80bb07362e455d9f71a553cacc0946e774682e",
+  "bytes": 2306
+ },
+ {
+  "path": "goals/G-002-final-boss/58-qa-to-studio.md",
+  "sha256": "3c0b05c5b9740a38b7d2aa7269569caa24e2e17e99d39bb1c9601224bf2a9d8c",
+  "bytes": 14756
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ }
+]

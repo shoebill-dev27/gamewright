@@ -1,0 +1,283 @@
+The spec, the combat.md edit and a decision are below. I wrote everything from the two probe runs and ran nothing further. The runs confirm that the cooldown starts at the dash end. The after-hit case was not confirmed, so the spec carries a QA check for it.
+
+`repo/manual.md` is not on my write list. I therefore put the exact manual text in the spec as a drop-in section for the Build step to apply.
+
+<<<FILE design/dash-availability.md
+# Dash availability display (G-003, step 04)
+
+Status: specified, not built. Display and wording only. Dash length (0.25 s), distance (4 tiles), invulnerability (full dash), cooldown (0.6 s) and the input set (D-001) do not change. Governs the player-view text for dash. `design/combat.md` "Player kit" carries the documented timing (edited in the same step).
+
+## 1. Intent
+
+A player who has only the screen and the manual can tell, at any moment, whether a dash would work now. If it would not, the player can tell how long until it does. The exact moment dash returns is announced, so the player does not have to poll with failed presses.
+
+## 2. Documented behavior (what the build does today; not a rule change)
+
+Evidence: play runs `cd-start` (60 FPS, practice room, legacy route) and the earlier dash-cooldown probe. Both used the player view only; trace view not run.
+
+| Fact | Evidence |
+|---|---|
+| A dash lasts 0.25 s. | Rule in combat.md. |
+| The 0.6 s cooldown starts when the dash ENDS, not when it starts. A dash is refused until `dash start + 0.25 + 0.6 = start + 0.85 s`. | `cd-start`: dash at 0.500 accepted. Presses at 1.300 and 1.333 refused. Press at 1.350 accepted (= 0.5 + 0.85). Probe 1: refused at 0.7 s, accepted 1.0 s after start. |
+| A dash press during the dash itself is refused. | Probe 1 (0.3 s after start). Run 2: press at 1.400 refused (dash 1.2–1.45). |
+| An enemy wind-up does not block a dash and does not change the cooldown. | Run 2: dash accepted at 0.050 while a grub was winding up (started 0.017). Next dash accepted at 1.200 (start + 1.15 s). |
+| Hit-stun (0.3 s after a hit) ignores all input, so a dash press there is refused. | Run 2: hit at 2.150, press at 2.200 refused although the cooldown had ended at 2.05. This run does NOT show whether a hit changes the cooldown. |
+| Entering a room clears the cooldown. | `design/final-boss-and-continuous-run.md` §2 ("攻撃回復、ダッシュ待ち時間 → 0"). Specified there; not re-observed in this step. |
+
+Not confirmed with the means of this step (QA checks them, see section 6):
+- Whether a hit changes the cooldown. The rule below says it does not.
+- Whether the 0.35 s attack recovery blocks a dash press. The rule below says that anything that makes the build refuse a dash counts as unavailable time, whichever it is.
+- The exact ready time at 30 FPS. The probe ran at 60 FPS only.
+
+The escalation condition (a cooldown that differs between situations in a way that cannot be documented) did NOT fire on the evidence available. If QA finds it does (for example a hit resets or extends the cooldown), QA reports and the Studio routes a `game-director` question. The rule below is then not applied.
+
+## 3. Rules
+
+### 3.1 Dash state
+
+At any moment the dash is in exactly one state:
+
+- **active**: from the accepted press until 0.25 s later.
+- **unavailable**: not active, and the build would refuse a press. Reasons: cooldown (until dash end + 0.6 s), hit-stun (until 0.3 s after the hit), or any other condition under which the build refuses a dash (the attack recovery, if QA finds that it blocks).
+- **ready**: not active and a press would be accepted.
+
+**Time to usable** (`R`): the seconds until the state becomes ready, assuming no new dash and no new hit. While active, `R` = rest of the dash + 0.6 s. Otherwise `R` = the longest remaining unavailable reason. All displayed times use `R` shown to one decimal, rounded UP with a 1 ms tolerance: `ceil((R − 0.001) × 10) / 10`. The display therefore never shows ready, or less time, early. Examples: R = 0.45 shows `0.5 s`; R = 0.600 shows `0.6 s`; R = 0.85 shows `0.9 s`.
+
+The cooldown runs on game time. It is frozen by pause and stays in seconds, so 30 and 60 FPS behave the same (±1 frame on the ready moment).
+
+### 3.2 Persistent status (A)
+
+Every player-view picture of live play (periodic and event pictures, and the pictures printed in a pause) ends its hearts/status line with one dash field:
+
+| State | Field |
+|---|---|
+| ready | `dash: ready` |
+| active | `dash: active` |
+| unavailable | `dash: <R> s` (for example `dash: 0.4 s`) |
+
+Example: `[1.00 s] hearts 3/3 — dash: 0.5 s`. In public-driver run/room mode the field goes at the end of the existing `run — room n/5 — hearts h/3 …` status line, or on the line that carries hearts; the words and format above are fixed, the placement within that line is the Build step's. Clear screens and terminal (win/death) screens carry no dash field.
+
+A picture shows the state at the time printed in its own header. Between pictures the number goes stale. That is stated in the manual, and the `dash ready` message (3.3) is the exact signal.
+
+### 3.3 Messages (B)
+
+- **Accepted dash.** `you dash <dir> — usable again in 0.9 s`. The prefix `you dash <dir>` is unchanged, so `text "you dash"` rules still match. The 0.9 is the rounded 0.85 s. No extra picture.
+- **Refused dash** (replaces `(nothing happens)` for a dash press): `dash not ready — <R> s left`, with a reason suffix when it is not the cooldown: ` (dashing)` while the dash is active, ` (hit-stun)` while hit-stun is the longest reason, and the engineer's equivalent only if the attack recovery is found to block. No extra picture. `(nothing happens)` stays for any non-dash input that does nothing.
+- **Ready.** `dash ready`, printed at the moment `R` reaches 0, followed by an event picture whose field reads `dash: ready`. It is printed only if a dash has been used since the previous `dash ready` or since room entry. It is printed at most once per dash. If hit-stun or another reason outlasts the cooldown, it is printed when the last reason ends. A hit that never involved a dash prints nothing at stun end; the field still counts down.
+- Order inside a frame: `dash ready` is emitted before that frame's input is processed, so a press at exactly the ready time is accepted and the `dash ready` line comes first. If the ready moment coincides with other events in one frame, one picture is printed and no message is lost.
+- No `dash ready` after death, after the room is cleared, or while paused. Room entry resets the state to ready without a message; the entry picture shows `dash: ready`.
+
+### 3.4 Where it applies (D-028)
+
+- Legacy route (scripts without new directives), including `room empty` and rooms 1–5: yes. The `room 5` note line stays as it is.
+- Public driver (`mode run`, `mode room`), including the boss room: yes.
+- Trace view: adds developer records `dash_start`, `dash_end` and `dash_ready` (with ids and run/room times) so QA can check section 2. Names are the Build step's choice.
+- Reaction rules: `text "dash ready"` and `text "not ready"` become usable like any message. Rules such as `hearts <= n` and `see <mark>` read game state, not the new field; the Build step checks that the extra field cannot break them.
+
+### 3.5 What does not change
+
+Game results are unchanged: hearts, hit times, events, summary numbers, the periodic picture grid (every 0.5 s on the fixed grid), and `view-every`. The only new output is the dash field, the changed dash/refusal message text and the `dash ready` message with its event picture. The `dash ready` pictures are event pictures: they count as event output, bounded by one per 0.85 s of play, and not as periodic lines.
+
+### 3.6 Edge cases
+
+- Press at the exact ready time: accepted (probe: ready = 1.350 accepted, 1.333 refused at 60 FPS). At 30 FPS ±1 frame (0.033 s).
+- Press while a dash is queued or while an attack is queued: queued-input display is out of scope.
+- Dash into a room transition: the state resets at entry (section 2).
+- Pause: the field and `R` are frozen; resuming continues.
+- Hit while active: the dash continues (dash is invulnerable, so this occurs only by a blocked contact); no state change.
+- Hit during cooldown: cooldown end unchanged; `R` = max(cooldown remaining, stun remaining).
+- Death: the final picture carries no field.
+- Dash pressed during the first frame after resume or entry: handled as any input.
+
+## 4. Open questions
+
+- Hit during cooldown, and attack recovery vs dash: unconfirmed, QA checks (Q3, Q4). Neither changes the display rules, which follow whatever the build does.
+- Whether a human finds one decimal and the `dash:` words clear: for the independent playtest.
+- Dash invulnerability display and queued inputs: out of scope (proposed Goals from diagnose).
+
+## 5. Acceptance criteria: player-visible (QA and the independent playtester)
+
+Use the player view only, `room empty`, `fps 30` and `fps 60`. All times ±1 frame (0.033 s at 30 FPS, 0.017 s at 60 FPS); displayed numbers equal the exact value rounded as in 3.1, or the neighbouring value when the exact value is within 1 frame of a rounding boundary.
+
+Script P (a dash at 0.6 s, then presses at 0.7, 1.0, 1.4, 1.5 s, `end 3`):
+
+- **P1.** Every picture before the first dash shows `dash: ready`.
+- **P2.** At 0.6 s the message is `you dash right — usable again in 0.9 s`.
+- **P3.** The press at 0.7 s prints `dash not ready — 0.8 s left (dashing)`.
+- **P4.** The periodic picture at 1.00 s ends with `dash: 0.5 s`. The press at 1.0 s prints `dash not ready — 0.5 s left`.
+- **P5.** The press at 1.4 s prints `dash not ready — 0.1 s left`.
+- **P6.** `dash ready` is printed at 1.45 s, followed by a picture ending with `dash: ready`. The picture at 1.50 s also shows `dash: ready`, and the press at 1.5 s prints `you dash …`.
+- **P7.** Total: the second dash can start no earlier than 0.85 s after the first one started, and one that starts 0.85 s later is accepted.
+- **P8.** Script with only a dash at 0.6 s and no later presses: `dash ready` appears once, at 1.45 s. Script with no dash and a hit: no `dash ready` appears.
+- **P9.** A press during hit-stun while the cooldown has ended prints `dash not ready — <R> s left (hit-stun)` with `R` ≤ 0.3 s.
+- **P10.** Reading rule: at no time does a picture or message say ready (or a time of 0.0) when the next dash press is refused, nor refuse/show a time when the dash press would be accepted (±1 frame).
+- **P11.** The same checks hold with a grub in wind-up near the player (the cooldown is not changed by wind-ups).
+- **P12.** A dodger-bot or scripted run of room 3 and of the boss room (`mode room`, `room 5`) shows the field in every live picture and `dash ready` after each dash that is not followed by death or room clear.
+
+## 6. Acceptance criteria: QA with trace and bots
+
+- **Q1 (cooldown start).** Trace shows `dash_ready` = `dash_end + 0.6 s` ±1 frame at 30 and 60 FPS. A press 1 frame before is refused, a press at ready is accepted. Start-to-start is 0.85 s.
+- **Q2 (rates).** Q1 and P1–P10 hold at both rates.
+- **Q3 (after hit).** Hit during the cooldown (after the dash ended, before ready): the ready time is unchanged, and the first accepted press is at max(ready, hit + 0.3 s). If the build differs, QA reports `outcome: question`; it is not a defect to patch.
+- **Q4 (attack recovery).** A press during the 0.35 s attack recovery after a swipe: record accept/refuse. If refused, the refusal shows an `R` that covers it and the field is not `ready`.
+- **Q5 (room entry).** In `mode run`, a dash used just before a room clear: the next room's entry picture shows `dash: ready` and a press at entry time is accepted; no `dash ready` message at entry.
+- **Q6 (pause).** Pause during the cooldown: the field and the ready time shift by the paused time; `dash ready` is not printed during the pause.
+- **Q7 (consistency).** In a 60 s dodger-bot run per rate (rooms 3 and 4) and a `mode room` `room 5` run: every dash input is accepted iff the build's last announced `R` was 0; no refusal while the field says ready.
+- **Q8 (no side effects).** The same scripts, before and after, give identical hearts, hit times, events, summary numbers, and the same periodic picture times. Comparison strips the dash field, the dash/refusal message text, and `dash ready` lines and their event pictures.
+- **Q9 (modes).** The field appears in legacy `room empty` and rooms 1–5, and in `mode run`/`mode room` including the boss room. Legacy room 5 keeps its note line. Clear/terminal screens have no field.
+- **Q10 (output bound).** O1 of `final-boss-and-continuous-run.md` §11.3 holds: periodic lines stay within `ceil(limit/interval)+1`; `dash ready` pictures are event output.
+- **Q11 (rules).** `text "dash ready"` fires a reaction rule once per ready moment.
+- **Q12 (G-002 L1 rebased).** L1 is evaluated with the note line, the dash field, dash/refusal text and `dash ready` lines stripped (D-028).
+
+## 7. Experience signals (playtest and Review; not for the Playtester's handoff)
+
+- A player can say, without trying a press, whether they can dash now.
+- A player who presses too early says they got a number and waited, rather than guessing.
+- A player can say when dash returns after a dash ("about a second later") and plans the next dash.
+- A player does not report dash as "sometimes ignored" or "invisible".
+- The extra field and `dash ready` lines are not described as clutter in busy fights (rooms 4–5, boss).
+
+## 8. Drop-in text for `repo/manual.md` (Build step applies; not on the designer's write list)
+
+Replace the Dash line in "Controls" with:
+
+> - **Dash**: a quick burst in a direction (or the way you face), 0.25 s. You cannot be hurt while dashing. After a dash it needs 0.6 s before you can dash again, counted from the moment the dash ends. So the next dash can start 0.85 s after the previous one started.
+
+Add a new section after "Warnings":
+
+> ## Dash status
+>
+> Every picture shows the dash at the end of the status line (`hearts 3/3 — dash: ready`):
+>
+> | Shown | Meaning |
+> |---|---|
+> | `dash: ready` | A dash will work now. |
+> | `dash: active` | You are dashing right now. |
+> | `dash: 0.4 s` | A dash will work in about 0.4 s, rounded up to a tenth. |
+>
+> A picture shows the state at the time written in its header; pictures come every half second, so the number can be older than the moment you act. The exact moment is announced: when the dash returns the game prints `dash ready` and a picture. A dash prints `you dash right — usable again in 0.9 s`. A dash that cannot happen prints `dash not ready — 0.3 s left`, with `(dashing)` or `(hit-stun)` if that is the reason. Being hit stops all input for 0.3 s, and a dash pressed then is refused. Entering a room makes the dash ready. `dash ready` is printed only when a dash was used before it. Reaction rules can use `text "dash ready"`.
+
+Also add to the Reactions table or the example list: `text "dash ready"` is an example of a message condition. In the "Script" table nothing changes.
+
+## 9. Changed documents
+
+- `design/combat.md`: Dash line in "Player kit" (cooldown start point, availability display, pointer to this document).
+- `repo/manual.md`: section 8 above (Build applies).
+- `decisions/D-028-dash-indicator-on-legacy-route.md`.
+>>>END
+
+<<<EDIT design/combat.md
+<<<<<<< SEARCH
+- **Dash**: 4 tiles over 0.25 s. The player is invulnerable for the full dash duration. Cooldown 0.6 s. An attack pressed during a dash is queued and fires when the dash ends.
+=======
+- **Dash**: 4 tiles over 0.25 s. The player is invulnerable for the full dash duration. Cooldown 0.6 s. An attack pressed during a dash is queued and fires when the dash ends. **G-003:** the 0.6 s cooldown starts when the dash ends, so the next dash can start 0.85 s after the previous one started (measured at 60 FPS: refused at start + 0.833 s, accepted at start + 0.85 s). It is not changed by an enemy wind-up. The room entry clears it. A dash press during hit-stun is refused (input is ignored for 0.3 s). The player view shows the dash state, the time to usable, `dash ready` and the refusal reason; exact rules and acceptance criteria are in `design/dash-availability.md` (no timing or rule change).
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE decisions/D-028-dash-indicator-on-legacy-route.md
+---
+kind: decision
+id: D-028
+status: accepted
+decided_by: game-designer
+goal: G-003
+date: 2026-10-23
+supersedes: none
+---
+# D-028: The dash indicator is shown on the legacy route too (including room 5)
+
+## Decision
+
+The dash field, the dash and refusal messages and the `dash ready` message and event picture (`design/dash-availability.md`) appear in every player view: the legacy route (`room empty`, rooms 1–5) and the public driver (`mode run`, `mode room`, boss room). They are display-only. Game results, timing and the periodic picture grid do not change.
+
+G-002 criterion L1 (legacy `room 5` output identical apart from the note line) is rebased: it is compared with the note line, the dash field, the dash and refusal text and the `dash ready` lines and pictures stripped. The legacy route stays otherwise limited (D-022): no delegation to the public driver, 60 s maximum unchanged.
+
+## Rationale
+
+Plain scripts without new directives, such as the probes, use the legacy route, and that is where players and testers meet the dash. Excluding it would leave the problem in place on the route most often used. The field sits in the existing hearts header and the messages use the existing message system, so the cost is small. Legacy room 5 shares that header; excluding it only would make one room inconsistent.
+
+## Alternatives considered
+
+- Public driver only: leaves the legacy route, the one used by the probes, without the indicator.
+- Legacy rooms 1–4 and practice only, room 5 excluded to keep L1 byte-identical: inconsistent, and L1 only protects the boss display, which the indicator does not touch.
+
+## Revisit when
+
+QA finds that the added field changes legacy results or breaks reaction rules, or the legacy route is retired.
+>>>END
+
+<<<FILE goals/G-003-dash-availability-clarity/04-game-designer-to-studio.md
+---
+kind: handoff
+goal: G-003
+seq: 4
+from: game-designer
+to: studio
+stage: Design
+outcome: done
+---
+# 04: game-designer → studio — Dash availability spec (A+B+C) ready for Build
+
+## Task
+
+Route Build to `gameplay-engineer` from `design/dash-availability.md`, then QA and an independent playtest. The spec covers the persistent status (A), the messages (B) and the manual and spec text (C), with player-observable acceptance criteria in seconds.
+
+## Context
+
+Goal G-003 (Owner: 「ダッシュがいつまた使えるのか分かりにくい。分かるようにしてほしい」). Diagnose (02) found missing information. Handoff 03 asked for the spec and for the cooldown start point to be confirmed. Dash rules, inputs and timing stay as they are.
+
+## Findings
+
+My report:
+
+- **Cooldown start point (confirmed at 60 FPS, player view):** the 0.6 s cooldown starts when the dash ends. In run `cd-start` a dash at 0.500 was accepted, presses at 1.300 and 1.333 were refused, and 1.350 was accepted. That is start + 0.25 + 0.6 = 0.85 s. This is now documented in `design/combat.md` (edited) and the spec.
+- **Wind-up:** a dash is accepted during an enemy wind-up (run `cd-after-hit`, press at 0.050), and the following dash timing fits the same rule. Wind-ups do not change the cooldown.
+- **After a hit: NOT confirmed.** The one refusal after a hit (2.200) fell inside hit-stun (hit at 2.150, input ignored for 0.3 s) after the cooldown had already ended, so it does not show whether a hit changes the cooldown. The spec's rule is that it does not; QA criterion Q3 checks it. If the build differs, QA hands back with `outcome: question` and a `game-director` question follows, as the escalation condition in 03 says. Nothing observed so far triggers it.
+- **Room transition:** the cooldown clears at entry per `final-boss-and-continuous-run.md` §2; not re-observed. QA criterion Q5 checks it.
+- **Attack recovery vs dash:** not tested. The spec counts anything that makes the build refuse a dash as unavailable time, so the display follows the build; QA criterion Q4 records which it is.
+- **30 FPS:** not run; the 0.85 s start-to-start is expected, checked by Q1/Q2.
+- **Spec content (A, B, C):**
+  - A: every live picture ends with `dash: ready`, `dash: active` or `dash: <R> s`, where R is the time to usable, rounded UP to a tenth (never shows ready early).
+  - B: an accepted dash prints `you dash <dir> — usable again in 0.9 s`. A refused dash prints `dash not ready — <R> s left`, with `(dashing)` or `(hit-stun)` as the reason when it applies. `dash ready` is printed at the exact ready moment, with an event picture, and only after a dash was used.
+  - C: drop-in manual text is in section 8 of the spec, because `repo/manual.md` is not on my write list. The Dash line in `design/combat.md` is edited directly.
+  - Pictures and results otherwise unchanged; the periodic grid and `view-every` are unaffected.
+- **Decision D-028:** the indicator is also shown on the legacy route, including room 5, because the probes and most scripts use that route. G-002 criterion L1 is therefore rebased to ignore the dash field, dash text and `dash ready` lines. This touches an accepted G-002 criterion, so the Studio should confirm it for the QA plan.
+- **Boss room and legacy route:** both show the same indicator (see D-028).
+- **Not examined:** whether a human finds the one-decimal display clear (playtest); dash invulnerability display and queued inputs (out of scope, proposed Goals).
+
+## Decisions already made
+
+- D-001: no new input buttons. Respected.
+- D-022: legacy route stays limited; only the display is added (D-028).
+- D-028 (new, this step): dash indicator on the legacy route including room 5; L1 rebased.
+
+## Constraints
+
+- No change to dash length, distance, invulnerability, cooldown value or inputs.
+- All timing in seconds; criteria hold at 30 and 60 FPS (±1 frame).
+- Reuse the existing text view and message system. No new input.
+- Dash invulnerability display and queued inputs are out of scope.
+- Existing player-view comparisons and golden outputs will differ by the new field and text; compare with them stripped (Q8). Game results must not change.
+- Applying `repo/manual.md` text (spec section 8) belongs to the Build step.
+
+## Open questions
+
+- Hit during cooldown (Q3) and attack recovery vs dash (Q4): unconfirmed; QA records them from the build. A cooldown that differs by situation in an undocumentable way returns to the Studio as `question` for `game-director`.
+- Whether the Build step finds the extra field breaks reaction-rule parsing; if so it reports back to the designer.
+- Whether the human playtest finds the display clear and not cluttered in rooms 4–5 and the boss (experience signals, section 7 of the spec; not for the Playtester's handoff).
+
+## Expected output
+
+- Build: dash field, messages, `dash ready` with event picture, trace records (`dash_start`, `dash_end`, `dash_ready`) and the manual text, with no change to game results.
+- QA: criteria P1–P12 and Q1–Q12 in `design/dash-availability.md` at 30 and 60 FPS, including the unconfirmed cases Q3–Q5.
+- Independent playtest from player-visible output only, using section 5 (player-visible criteria) of the spec and the manual. Do not pass section 7 to the Playtester.
+- The result goes back to `game-designer` if Q3 or Q4 show behavior the spec does not describe.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: none specified by the designer; per Studio routing for Build
+- Project: design/dash-availability.md, design/combat.md, repo/manual.md, repo/public-driver.md, design/final-boss-and-continuous-run.md#2-ランと入場
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-022-g002-v1-supplements.md, decisions/D-028-dash-indicator-on-legacy-route.md
+- Previous handoff: goals/G-003-dash-availability-clarity/03-studio-to-game-designer.md
+>>>END

@@ -1,0 +1,193 @@
+Route after step 38: the playtest report fits the plan, so Review (7) is open for `game-director` in handoff 39. Below are the updated goal record and the new handoff. I did not append the Goal log entry, because `log.md` is not among the paths I may write.
+
+<<<FILE goals/G-001-first-puzzle-stall/goal.md
+---
+kind: goal
+id: G-001
+project: tidepool-garden
+status: active
+created: 2026-10-10
+---
+# G-001: Children stall at the first puzzle
+
+## Owner request
+
+> 最初のパズルで子どもが手を止めてしまう。直したい
+
+## Interpretation
+
+Success condition: when children in the target group (ages 7–10) play the first puzzle (level 1 in
+build 0.2), they begin purposeful touch interaction with the puzzle on their own, without a long
+pause and without an adult having to explain what to do. How long a pause counts as "a stall" is
+not set here; Observe reports what actually happens and Design turns it into a player-observable
+acceptance criterion.
+
+Out of scope:
+
+- Levels 2 and later. If the same problem shows up there, it becomes a proposed new Goal.
+- Changing a vision pillar or Decision D-001 (no failure, no timers). Any fix must stay inside them.
+- New art beyond the existing sprite sheet (project constraint).
+
+## Unknowns
+
+Entry questions (`studio/workflows/development-loop.md`) the Project Context cannot answer:
+
+- **Observe** — done (stage 1, playtester; an experience problem, not a defect).
+- **Diagnose** — done (2 game-designer, 2b art-director).
+- **Design** — done. Spec revision 5 is settled (3h; D-006). Earlier gaps are closed in revisions 2–4 and D-003 to D-005.
+- **Build** — done. Build 0.6 implements revision 5. The code change counts as made only through the simulated build record.
+- **Verify** — done. 5d passed checks 4, 13, 18, 19, 20, 21 on the build record (36). No blocking gap.
+- **Play** — done (38). The playtester read the build record, no device. Path A (pool first) is clear and responsive. Issues are secondary: faint sand-tap flash, silent dead-end drops, solved state not observable, undo trigger not seen.
+- **Review** — Experience Goal: yes. Stage 7 is open (39, `game-director`): is the Goal met, and which issues become proposed Goals?
+- **Next** — Always. Stage 8.
+
+Skipped:
+
+- **Decide** — The fix choices are player-facing behavior inside the approved direction
+  (`game-designer` authority). Option C (idle hint) is excluded; if wanted later, route Decide
+  because it touches D-001.
+- **Plan** — The change is local to level 1; no Build step found otherwise.
+
+Flag for Review: the start-of-level intro motion is judged by the designer to be outside D-001
+(one-time, no timer, no inactivity trigger). `game-director` should confirm. Also watch whether a
+child reads the post-cancel pool blip as an error (D-006 revisit trigger); the playtest called the
+sand-tap blip the faintest response in the level (unverified on a device).
+
+Open items (non-blocking, carry to Review / Close):
+
+- Whether iOS "Reduce Motion" / Android "Remove animations" are readable on target platforms is
+  unconfirmed. The spec's fallback works either way. An item for the Owner.
+- No device: checks 2, 3, 11, 17–21 rest on the build record's stated values, and the playtest was a
+  read-through, not live play. A 60 fps capture is needed for the reduce-motion single frame between
+  beats, the 0.55–0.6 s pulse tail, and the 0.1 s and 0.3 s flash timings.
+- Levels 2 and 3 were not run by QA (stated unchanged). Checks 1–3, 5–12, 14–17 were not re-run on 0.6.
+- Build record wording (low severity, from 36): the reduce-motion crab brightening should read
+  "about 0.4 s in total, peak at 0.2 s"; the default-mode "Touching the pool" line should mention
+  ending a running flash (spec rule 5), or confirm it on a capture.
+- From 38, for Review to place: solved-state feedback and how undo is triggered are not visible in
+  the build record; silent drops on the crab or open sand; no extra cue after waiting.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 01-studio-to-playtester.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 02-playtester-to-game-designer.md |
+| 2b | Diagnose | art-director | visual-review | done | 03-studio-to-art-director.md |
+| 3 | Design | game-designer | write-design-spec | done | 06-studio-to-game-designer.md |
+| 3c | Plan | technical-director | technical-plan | skipped | — |
+| 4 | Build | gameplay-engineer | implement-change | done | 08-studio-to-gameplay-engineer.md (held: question, no change made) |
+| 3d | Design | game-designer | write-design-spec | done | 09-gameplay-engineer-to-game-designer.md (answered in 10) |
+| 4b | Build | gameplay-engineer | implement-change | done | 11-studio-to-gameplay-engineer.md (result: 12) |
+| 5 | Verify | qa | verify-change | done | 13-studio-to-qa.md (pass, 12/12; report: 14) |
+| 3e | Design | game-designer | write-design-spec | done | 15-studio-to-game-designer.md (result: 16) |
+| 4c | Build | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md (held: question 18, no build 0.4) |
+| 3f | Design | game-designer | write-design-spec | done | 19-studio-to-game-designer.md (result: 20) |
+| 4d | Build | gameplay-engineer | implement-change | done | 21-studio-to-gameplay-engineer.md (result: 22, build 0.4) |
+| 5b | Verify | qa | verify-change | done | 23-studio-to-qa.md (fail: check 4 under reduce-motion; report: 24) |
+| 3g | Design | game-designer | write-design-spec | done | 25-studio-to-game-designer.md (result: 26, spec rev 4, D-005) |
+| 4e | Build | gameplay-engineer | implement-change | done | 27-studio-to-gameplay-engineer.md (result: 28, build 0.5) |
+| 5c | Verify | qa | verify-change | done | 29-studio-to-qa.md (pass 20/20 on record; SG-1, O1; report: 30) |
+| 3h | Design | game-designer | write-design-spec | done | 31-studio-to-game-designer.md (result: 32, spec rev 5, D-006) |
+| 4f | Build | gameplay-engineer | implement-change | done | 33-studio-to-gameplay-engineer.md (result: 34, build 0.6) |
+| 5d | Verify | qa | verify-change | done | 35-studio-to-qa.md (pass; report: 36) |
+| 6 | Play | playtester | playtest-session | done | 37-studio-to-playtester.md (report: 38) |
+| 7 | Review | game-director | review-outcome | open | 39-studio-to-game-director.md |
+| 8 | Next | studio | — | planned | — |
+
+Status: planned | tentative | open | done | skipped. The route is a plan; the Route operation
+revises it.
+
+## Route changes
+
+After step 6 (38): the playtester found the main path (touch the pool) clear and responsive. The issues named are secondary and no defect was reported, so there is no return to Diagnose or Observe. Review 7 is open for `game-director` (39) with the report, QA results and open items. No escalation.
+
+## Next action
+
+Run step 7 (Step operation): `game-director` on `39-studio-to-game-director.md`, reporting to `studio`. Then Route: goal-met leads to Close (8) with new issues as proposed Goals; goal-not-met leads back to Diagnose with the Review's findings; a direction question goes to an Owner escalation. Phase 1: the Studio stops after every Route.
+
+## Outcome
+
+<!-- Filled at close, for the Owner, in owner_language (ja). -->
+>>>END
+
+<<<FILE goals/G-001-first-puzzle-stall/39-studio-to-game-director.md
+---
+kind: handoff
+goal: G-001
+seq: 39
+from: studio
+to: game-director
+stage: Review
+outcome: routed
+---
+# 39: studio → game-director — Review: is the "stall at the first puzzle" Goal met?
+
+## Task
+
+Judge whether Goal G-001 is met for level 1 of build 0.6, and name the next issues. Use the playtest observation report, the QA results and the carried open items below.
+
+## Context
+
+Owner request (verbatim): 「最初のパズルで子どもが手を止めてしまう。直したい」. Success condition: children aged 7–10 begin purposeful touch interaction with the first puzzle on their own, without a long pause and without an adult explaining. Out of scope: levels 2+, any change to a vision pillar or D-001, new art beyond the sprite sheet.
+
+The route so far was Observe, Diagnose, Design (spec revision 5), Build (build 0.6) and Verify. QA passed on the build record (report 36). The Play step is now done (report 38). Plan and Decide were skipped. This is a dry-run project: there is no device, and builds exist only as `sim/build-*.md`.
+
+## Findings
+
+**Playtest (38, playtester, fresh context)** — The playtester read `sim/build-0.6.md` as a 7–10 year old and stepped through level 1 by touch. This was not live play, so real visibility, timing and attention could not be judged.
+
+- Path A (touches the pool first, the likely path) is clear and responsive. The pool is the odd one out (darker outline, bluer, gentle pulse). Grabbing it feels good: it grows about 10% within 0.1 s, gets a shadow and follows the finger 1:1. A steady home glow appears when the pool is near. The playtester did not need the text bubble.
+- The opening slide (0–1.6 s) shows motion without a touch, but the playtester could not tell whether a child would connect it to "the pool goes to the house". Under reduce-motion the slide is skipped and the cues are subtler (not played in detail).
+- Path B (taps crab, home or sand first): every tap gets some response within 0.2 s. The crab wiggle plus pool pulse reads as a friendly hint. The 1.5 s pulse limit makes later taps less rewarding than the first.
+- Issues the playtester raised:
+  1. The solved state could not be observed, so whether the end is rewarding is unknown.
+  2. The sand-tap pool flash (+15%, about 0.3 s, when a pulse is blocked) is the faintest response in the level and may read as no response (medium if as subtle as it sounds; not verified).
+  3. Dropping the pool on the crab or on open sand gives no response (medium for a child who gets stuck there).
+  4. After waiting or wandering, only the gentle pulse remains (low to medium).
+  5. The build record does not show how a player triggers undo.
+
+**QA (36)** — Checks 4, 13, 18, 19, 20, 21 passed on build 0.6 with no failure, regression or blocking spec gap. Checks 2, 3, 11 and 17–21 rest on the build record's stated values. Levels 2 and 3 were not run.
+
+**Carried items (goal.md)**
+
+- Confirm that the start-of-level intro motion is outside D-001 (the designer judged it one-time, with no timer and no inactivity trigger).
+- D-006 revisit trigger: does a child read the post-cancel pool blip as an error?
+- Whether iOS "Reduce Motion" / Android "Remove animations" are readable on target platforms is unconfirmed. This is an Owner item.
+- A 60 fps device capture is needed for the reduce-motion single frame between beats, the pulse tail and the flash timings.
+- Low-severity build record wording: the reduce-motion crab brightening should read "about 0.4 s in total, peak at 0.2 s"; the default-mode "Touching the pool" line should mention ending a running flash.
+
+## Decisions already made
+
+- D-001: no fail states and no timers.
+- D-002: intro cancel eases the pool back; the intro is never in undo history.
+- D-003: rate-limited sand taps show a pool brightness blip; the pool's hit area follows its drawn size.
+- D-004: taps during the ease-back, the 1.5 s window origin, and second-finger taps on a held pool.
+- D-005: under reduce-motion the redirect pulse is a 0.6 s two-beat brightness pulse.
+- D-006: a pulse cancelled by a pool touch stops being the response; the reduce-motion beats are contiguous.
+
+## Constraints
+
+- Stay inside the vision pillars and D-001. An idle hint (Option C) touches D-001 and would need a Decide step.
+- No mechanic may depend on reading text. Touch only. Reuse the existing sprite sheet.
+- New issues become proposed Goals, not scope growth for G-001.
+- Evidence is a read-through of the build record, not device play. Say plainly what the verdict rests on.
+
+## Open questions
+
+- Is the Goal met, given the evidence is simulated and the main path was judged clear? State which parts of the verdict need device confirmation.
+- Is the intro motion outside D-001? (flagged for confirmation)
+- Which of the playtest issues (solved-state feedback, undo access, silent drops, faint sand-tap blip, no cue after waiting) belong to G-001 and need Diagnose again, and which become proposed new Goals? Does any imply a direction or priority change that should escalate to the Owner?
+
+## Expected output
+
+A Review verdict: `outcome: goal-met` or `goal-not-met`. Name the next issues and any Decision you record. If goal-not-met, name what Diagnose must examine. If a direction question needs the Owner, prepare the brief with `prepare-owner-escalation`. Address the result to `studio`.
+
+## Load
+
+- Role: studio/roles/game-director.md
+- Skills: studio/skills/review-outcome.md
+- Project: project.md#vision, project.md#player-profile, project.md#constraints, design/onboarding.md, sim/build-0.6.md, goals/G-001-first-puzzle-stall/goal.md, goals/G-001-first-puzzle-stall/36-qa-to-studio.md
+- Decisions: decisions/D-001-no-fail-states.md, decisions/D-002-intro-cancel-and-undo.md, decisions/D-003-sand-tap-blip-and-pool-hit-area.md, decisions/D-004-ease-back-taps-window-origin-held-pool.md, decisions/D-005-reduce-motion-pulse-fills-window.md, decisions/D-006-cancelled-pulse-and-reduce-motion-beats.md
+- Previous handoff: goals/G-001-first-puzzle-stall/38-playtester-to-studio.md
+>>>END

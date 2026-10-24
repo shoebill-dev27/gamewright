@@ -1,0 +1,150 @@
+Route for step 10: QA's Verify fails, so the route goes back to Design with `game-designer`. Play stays planned but is held until the designer's rulings are in.
+
+<<<FILE goals/G-003-dash-availability-clarity/11-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-003
+seq: 11
+from: studio
+to: game-designer
+stage: Design (return from Verify)
+outcome: routed
+---
+# 11: studio → game-designer — Rule on the 30 FPS tolerance, public-driver pictures and rule-driven refusals
+
+## Task
+
+Settle the open spec questions QA found, in `design/dash-availability.md`. For each answer, say whether the build or only the manual and criteria change. Do not change dash rules (recovery length, invulnerability, input set).
+
+## Context
+
+Goal G-003: the Owner said it is unclear when dash can be used again. Design (04) specified a ready/cooldown field and messages. Build (08) implemented them. QA verified (10): the display is truthful, and the 60 FPS timings are within spec. Verify failed on the criteria below because the spec is silent or cannot be met as written.
+
+## Findings
+
+Read the QA report, `10-qa-to-studio.md`, for the evidence. The questions it raises:
+
+1. **30 FPS tolerance (fails P6, P7, Q2 literally).**
+   - At 30 FPS the first accepted press after a dash is 0.9 s after the previous start, not 0.85 s. Ready is shown at 1.500, not 1.45.
+   - The cause is frame quantization of the dash length and cooldown. The display agrees with the build.
+   - The spec's section 2 says the 30 FPS ready time was "not confirmed".
+   - Is the ±1 frame tolerance measured against the nominal 0.85 s (which fails), or against the frame-quantized value? What should the manual line "0.85 s after the previous one started" say for 30 FPS?
+   - Changing the timing itself would break Q8 and is outside this Goal.
+2. **Public-driver pictures.** Spec 3.3 says no extra picture for the accepted-dash and refusal messages. The public driver prints one event picture after each such message, as it does after swipe-miss and `(nothing happens)`. Amend the spec, or require suppression? Note the cost: one picture per refused press counts as event output under Q10.
+3. **Rule-driven refusals.**
+   - Scripted presses and a public-driver rule print `dash not ready — …`.
+   - A legacy held rule (`when nothing within 20 then dash right`) is refused silently, and `text "not ready"` never fired.
+   - Two issues are mixed in this observation: legacy vs public, and action type. The spec (3.4) and the manual are silent.
+   - Should a rule-driven refusal print, and may `text "not ready"` fire on it?
+4. **Q8 and Q12 have no baseline.** There is no earlier build and no strip tool, so "identical to before" cannot be byte-compared. Say what evidence the criterion should accept. D-024 handled the same problem for G-002 and is a precedent to look at, not a rule.
+5. **Recorded as observed, no change asked unless you want one:** Q3 (a hit does not change the cooldown) and Q4 (attack recovery does not block dash).
+
+Items QA could not verify (Q5 room-entry reset, Q7 across bot runs, the 1-frame-before press at 60 FPS, P12 for dodger bots) stay open for a later QA round. In your output, say which of them need a Build change and which need only a better script or evidence method.
+
+Build identity: QA's runs report source id `b62005468da6`, and the packet names sha `aa28af2ce710`. `project.md#current-state` also lists a sha and a source id with different values. They are probably two kinds of id, but this is not confirmed. Treat QA's findings as applying to the build QA ran.
+
+## Decisions already made
+
+- D-001: no new inputs.
+- D-028: the dash indicator is shown on the legacy route too, including room 5.
+- D-027: G-002 is stopped; its verification stays out of scope.
+
+## Constraints
+
+- Both 30 and 60 FPS apply (`project.md#constraints`).
+- Dash rules stay as they are (goal.md Interpretation). If the only way to satisfy a criterion is to change dash timing or rules, do not decide it. Hand back to `studio` saying so, and the Studio will route it to `game-director` or the Owner.
+- Prefer changes that reuse existing systems. Where a wording or criteria change suffices, choose it over a code change.
+- Budget is tight: 11 of 17 operations are used after this Route. Keep the remaining Build and Verify scope to what the Owner request needs.
+
+## Open questions
+
+Questions 1–4 above.
+
+## Expected output
+
+An updated `design/dash-availability.md` and an outgoing Handoff addressed to `studio` (the Studio then composes the next Handoff, including the Playtester's from player-visible information only). The Handoff must contain:
+
+- the answer to each of questions 1–4;
+- the list of changes needed in build, in manual, and in criteria;
+- the criteria QA must re-check, with a script idea for the Q5 discrimination;
+- whether any Decision is needed.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: design/dash-availability.md, design/combat.md, repo/manual.md, repo/public-driver.md, project.md#constraints
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-028-dash-indicator-on-legacy-route.md, decisions/D-024-g002-historical-comparison-evidence.md
+- Previous handoff: goals/G-003-dash-availability-clarity/10-qa-to-studio.md
+>>>END
+
+<<<FILE goals/G-003-dash-availability-clarity/goal.md
+---
+kind: goal
+id: G-003
+project: lantern-depths
+status: active
+created: 2026-10-23
+budget: 17
+---
+# G-003: Make it clear when dash can be used again
+
+## Owner request
+
+> ダッシュがいつまた使えるのか分かりにくい。分かるようにしてほしい
+
+## Interpretation
+
+Success condition (qualitative): a player using only what the build shows them (text player view and `repo/manual.md`) can tell, at any moment, whether dash is available now, and when it is not, when it will be available again. They no longer have to guess or press dash to find out.
+
+This is an experience (readability) Goal. The dash rules themselves (recovery length, invulnerability, input set) are assumed to stay as they are. Changing them would be a different Goal.
+
+Out of scope:
+- Rebalancing dash or combat.
+- New input buttons (D-001).
+- Reopening G-002 (stopped by D-027) or its unfinished verification.
+- Any other readability issue the work happens to find (these become proposed Goals).
+
+## Unknowns
+
+- Observe: skipped. The Owner's report is the first-hand observation, and Diagnose established the cause from the player-view output.
+- Diagnose: done (02). The cause is missing information, not rules.
+- Decide: skipped. A+B+C change display and wording only. It reopens if Design finds that a criterion can be met only by changing dash timing or rules.
+- Design: open again (11). Verify (10) found the spec silent or unmeetable on: the 30 FPS tolerance (first accepted press 0.9 s after the previous start vs the nominal 0.85 s), public-driver pictures after dash messages (spec 3.3 says none), rule-driven refusals (silent in legacy), and the evidence for Q8/Q12 (no baseline build).
+- Plan: skipped. It becomes tentative only if a change touches timing or simulation across systems.
+- Build: tentative. Needed only if Design's rulings require a build change. A manual-only change may be small enough to go with it.
+- Verify: tentative re-check after any Build. The 60 FPS timings and the display's truthfulness passed. Still unverified: Q5 (room-entry reset), Q7 across bot runs, a press one frame before ready at 60 FPS, P12 for dodger bots, Q8 and Q12.
+- Play: planned, held until Design's rulings are in. They may change player-visible output, and Play on the current build would then be repeated. It uses player-visible output only and cannot judge the 30 FPS timing.
+- Review: planned. `game-director` judges whether the intent was met.
+- Build identity: QA's runs report source id `b62005468da6`, the packet sha is `aa28af2ce710`. Probably two kinds of id, not confirmed.
+- Budget: 11 of 17 used after this Route. If it runs out, only a `game-director` scope cut or an Owner cost escalation may be added.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Diagnose | game-designer | diagnose-experience | done | 02-game-designer-to-studio.md |
+| 2 | Decide | game-director | make-decision | skipped (no option changes dash rules or direction) | — |
+| 3 | Design | game-designer | write-design-spec | done | 04-game-designer-to-studio.md |
+| 4 | Build | gameplay-engineer | implement-change | done | 08-gameplay-engineer-to-studio.md |
+| 5 | Verify | qa | verify-change | done (fail at 30 FPS; spec questions) | 10-qa-to-studio.md |
+| 6 | Design (return) | game-designer | write-design-spec | open | 11-studio-to-game-designer.md |
+| 7 | Build (fixes) | gameplay-engineer | implement-change | tentative (if Design requires a build change) | — |
+| 8 | Verify (re-check) | qa | verify-change | tentative (after any Build; Q5, Q7, Q8 gaps) | — |
+| 9 | Play | playtester | playtest-session | planned (after Design's rulings) | — |
+| 10 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+After Verify (10, fail): the failures come from an ambiguous spec, not a build defect, so the return rule sends it to Design, not Build. Design is reopened for the 30 FPS tolerance, public-driver pictures, rule-driven refusals and the Q8/Q12 evidence. Build and re-Verify are tentative, and Play is held until the rulings are in.
+
+## Next action
+
+Start Step 11: `game-designer` runs Design from `11-studio-to-game-designer.md`, addressing the result to `studio`. The Studio Route that follows decides whether Build is needed, and composes the Playtester Handoff from player-visible information only.
+
+Message to the Owner (ja): QAの確認で、表示そのものは正しく動いていますが、30FPSではダッシュが再び使えるまで約0.9秒かかり、仕様の0.85秒とずれることが分かりました。ダッシュの性能は変えず、仕様の読み方と表示・説明文をどうするかをデザイナーに決めてもらいます。
+
+## Outcome
+
+(open)
+>>>END

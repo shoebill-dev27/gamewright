@@ -1,0 +1,72 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/19-studio-to-gameplay-engineer.md",
+  "sha256": "87a748387ed6fdc1826d1b6ea3a0f308af51e70c6965e626d2a8ab8e761425e9",
+  "bytes": 2864
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md",
+  "sha256": "18ecbace72fe54a14efe4897ffa4e7456facff677234c671d8841408747cb7d0",
+  "bytes": 1609
+ },
+ {
+  "path": "studio/skills/implement-change.md",
+  "sha256": "a9befd7f1d9e09eb94c51a066f030db88c5061ad1b522d9795e62bc2c242964a",
+  "bytes": 1823
+ },
+ {
+  "path": "manual.md",
+  "sha256": "4ec9f212cc2c7d9680ba630a7c496167031350638c74291b07db68b744c5822b",
+  "bytes": 1266
+ },
+ {
+  "path": "design/combat-visuals.md",
+  "sha256": "da6dfdf9ba7f8a8dec270a75cd8136d21952b4c90b62cee9a1fd35818e6a8419",
+  "bytes": 6739
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "8cc6f664f6db174e1501214e4f87b3e86706a62816667fc6cead10f7863d58c4",
+  "bytes": 14270
+ },
+ {
+  "path": "repo/play.py",
+  "sha256": "4d26f0bf0f95ad9bca7257f2df52dfd2711f443d37ef108151c151158e5c9af3",
+  "bytes": 11331
+ },
+ {
+  "path": "repo/tests/test_game.py",
+  "sha256": "80b49301c500831b1024e9ae0bed82a86ccebb86b38c12f15dc3e488f5d937f7",
+  "bytes": 21258
+ },
+ {
+  "path": "decisions/D-001-one-button-combat.md",
+  "sha256": "c7fe9ca23a369707a5ab439e44789a25a0a8544efce4703a676f8fd180f82ec1",
+  "bytes": 798
+ },
+ {
+  "path": "decisions/D-003-run-end-and-room-rules.md",
+  "sha256": "ce599ae20a298a8465a7dd1d5326e8b79a59efaeedc346b61d4c7823f3529b4a",
+  "bytes": 2046
+ },
+ {
+  "path": "decisions/D-004-option-a-single-change-set.md",
+  "sha256": "1e118edfdfbcb59a9457184d84d30fd07131dbed55cfe31bc2a3fcf561a8863d",
+  "bytes": 2463
+ },
+ {
+  "path": "goals/G-001-combat-monotony/18-gameplay-engineer-to-studio.md",
+  "sha256": "ed44a9f4ec3094361e689d2142244b9ae67632ec1ebac2e0bc829f10fac4fd79",
+  "bytes": 12907
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ }
+]

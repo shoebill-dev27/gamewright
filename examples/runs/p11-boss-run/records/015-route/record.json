@@ -1,0 +1,82 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-002",
+ "attempts": [
+  {
+   "runtime": "codex",
+   "session_id": "01a15960-6340-7ae2-947f-4f1a68b8d302",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 26814,
+    "cached_input_tokens": 7680,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 191,
+    "reasoning_output_tokens": 92
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 1,
+   "started": "2026-10-20T21:54:11",
+   "seconds": 12.0,
+   "errors": [],
+   "need": [
+    "design/final-boss-and-continuous-run.md",
+    "decisions/D-006-walker-limit-rooms-3-5-structural-ceiling.md",
+    "decisions/D-015-owner-approves-continuous-run-and-final-boss.md",
+    "decisions/D-016-final-boss-experience-direction.md",
+    "decisions/D-017-final-boss-and-run-contract.md",
+    "studio/roles/game-director.md"
+   ]
+  },
+  {
+   "runtime": "codex",
+   "session_id": "01a15960-9150-7f31-a689-528a040f4ae9",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 39459,
+    "cached_input_tokens": 3456,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 2963,
+    "reasoning_output_tokens": 128
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 2,
+   "started": "2026-10-20T21:54:23",
+   "seconds": 66.6,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-002-final-boss/11-studio-to-game-director.md": "ebe578b91c1057ae7b767d90092e48a52b5cc3a37ac893ae55a4312337237d7e",
+  "goals/G-002-final-boss/goal.md": "89a893dce9f4760697ba948de09e41f9f17777118e44ab0370342c7dc1871ce5"
+ },
+ "decision": {
+  "new": [
+   "game-director",
+   "Decide"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "game-director",
+    "Decide"
+   ]
+  ]
+ },
+ "seen_through_seq": 11
+}

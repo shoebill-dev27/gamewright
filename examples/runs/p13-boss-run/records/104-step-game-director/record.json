@@ -1,0 +1,36 @@
+{
+ "op": "Step",
+ "role": "game-director",
+ "goal": "G-002",
+ "attempts": [
+  {
+   "runtime": "codex",
+   "session_id": "01a16661-a6b2-7890-9783-b71951363166",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 42222,
+    "cached_input_tokens": 9600,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 2941,
+    "reasoning_output_tokens": 148
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 1,
+   "started": "2026-10-23T10:30:38",
+   "seconds": 74.8,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-002-final-boss/84-game-director-to-studio.md": "19f61193f3f7d59892cd47656742850eceaa1c67dab05bf32e14ef0ddecc9d03"
+ },
+ "decision": {}
+}

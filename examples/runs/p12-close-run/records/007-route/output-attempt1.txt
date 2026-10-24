@@ -1,0 +1,122 @@
+The engineer's own regression test fails at 30 FPS (`1 != 2` at t≈0.967), so I'm not sending this build to QA. I'm routing it back to Build with the failure details.
+
+<<<FILE goals/G-001-dash-damage/04-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-001
+seq: 4
+from: studio
+to: gameplay-engineer
+stage: Build
+outcome: routed
+---
+# 04: studio → gameplay-engineer — Fix the failing regression test / remaining damage during the dash at 30 FPS
+
+## Task
+
+Your fix from handoff 03 did not pass the runtime's test run. Find out why `test_dash_begun_late_in_hurt_window_is_invulnerable_throughout` fails at 30 FPS, fix the cause, and run the whole suite until it is green at 30 and 60 FPS. Use `implement-change`.
+
+## Context
+
+Goal G-001: the player takes damage during a dash (QA's defect report is `02-qa-to-gameplay-engineer.md`, with the acceptance criteria). You replaced `_set_invulnerable` with `_refresh_invulnerable`, which derives the flag from `dash_left` and `hurt_left`, and added `DashInvulnerabilityTest`. The runtime then ran `python3 -m unittest discover -s tests` on your build: exit 1, 10 tests run, 1 failure:
+
+```text
+FAIL: test_dash_begun_late_in_hurt_window_is_invulnerable_throughout (test_game.DashInvulnerabilityTest)
+  File "/work/tests/test_game.py", line 93, in test_dash_begun_late_in_hurt_window_is_invulnerable_throughout
+    self.assertEqual(game.hearts, hearts, f"fps {fps} t={game.t}")
+AssertionError: 1 != 2 : fps 30 t=0.9666666666666667
+```
+
+The failing case is fps 30. The test expects hearts to stay at 2, but they are 1, so the player took one more hit at t≈0.967 s (hearts only dropped because a shot or contact landed).
+
+## Findings
+
+Nothing beyond the failure above. Whether the cause is the fix (the player is still vulnerable at some frame of the dash at 30 FPS, e.g. a frame-ordering or timer-boundary case) or the test (setup, shot placement, which frame is checked) is for you to determine; root cause is your call. The test also skipped the dash's final frame by design; check that the skip is justified by `design/combat.md` and not hiding a real gap.
+
+## Decisions already made
+
+- D-001: one attack button plus dash. No inputs were added.
+
+## Constraints
+
+- Do not change `design/combat.md` or the dash's design values (duration, cooldown, distance, invulnerability length). If the spec turns out ambiguous or missing a case, hand back instead of deciding.
+- Must play correctly at both 30 and 60 FPS.
+- Do not weaken the test to make it pass unless you show the assertion was wrong against the spec.
+- Run the tests yourself this time (`run_tests`) and report the actual result. Also run scripts A and B from 03 with `run_trace` at 30 and 60 FPS.
+
+## Open questions
+
+None.
+
+## Expected output
+
+A fixed build and green test suite, and a handoff addressed to `qa` for Verify (stage Verify, acceptance criteria from 02, how to exercise, actual test and trace results). Put your root-cause reasoning in `## Sender assessment`.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: design/combat.md, project.md#constraints, repo/game.py, repo/tests/test_game.py, goals/G-001-dash-damage/02-qa-to-gameplay-engineer.md
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-001-dash-damage/03-gameplay-engineer-to-qa.md
+>>>END
+
+<<<FILE goals/G-001-dash-damage/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-23
+---
+# G-001: Damage taken while dashing
+
+## Owner request
+
+> ダッシュ中なのにダメージを受けることがある。再現できるので直してほしい。
+
+## Interpretation
+
+The Owner reports a defect: the player sometimes takes damage while dashing. The Owner says it is reproducible but gave no steps.
+
+Success condition: in the situations where the Owner sees it, the player no longer takes damage during a dash, to whatever extent the design documents (`design/combat.md` invulnerability rules) say a dash protects the player. It must hold at both 30 and 60 FPS.
+
+Out of scope:
+- Changing the dash's design (duration, cooldown, distance, whether it is invulnerable) unless the design documents turn out not to define the case. That would be a Design question, not part of this fix.
+- New input buttons (D-001).
+- Other combat tuning.
+
+## Unknowns
+
+- Observe: settled. QA reproduced the defect at 30 and 60 FPS (a dash started with under 0.25 s of post-hit invulnerability left; the flag drops mid-dash and a shot hurts).
+- Diagnose: skipped. Root cause is the engineer's call.
+- Decide: skipped. No choice of direction, priority or scope is open.
+- Design: skipped. `design/combat.md` says the player is invulnerable for the full dash, so the intended behavior is defined. Becomes a step again only if the engineer finds the combination of the two invulnerability sources undefined for criterion 3 (invulnerable until 0.8 s after the hit, even after the dash ends).
+- Plan (`technical-director`, tentative): needed only if the fix is non-local or FPS-dependent, or if the same criterion fails verification twice. The 30 FPS test failure is a Build-check failure, not a Verify failure, so it does not count yet.
+- Build (`gameplay-engineer`, open): fix is written but its own regression test fails at 30 FPS; engineer to resolve and run the suite.
+- Verify (`qa`, planned): after Build is green, at 30 and 60 FPS, with scripts A and B.
+- Play and Review: skipped. This is a defect, not an experience Goal.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | qa | reproduce-defect | done | 01-studio-to-qa.md |
+| 2 | Design | game-designer | write-design-spec | skipped (spec defines full-dash invulnerability) | — |
+| 3 | Plan | technical-director | technical-plan | tentative (if the fix is non-local or FPS-dependent) | — |
+| 4 | Build | gameplay-engineer | implement-change | done (test run failed) | 02-qa-to-gameplay-engineer.md |
+| 4b | Build (fix test failure) | gameplay-engineer | implement-change | open | 04-studio-to-gameplay-engineer.md |
+| 5 | Verify | qa | verify-change | planned | — |
+
+## Route changes
+
+After Build (03): the runtime's test run failed (1 of 10, the new dash test at 30 FPS, hearts 1 != 2), so the build is not sent to QA. Routed back to the engineer with the failure to resolve and run the suite; Verify follows once green.
+
+## Next action
+
+Run the Step for `04-studio-to-gameplay-engineer.md`: the `gameplay-engineer` fixes the failure, runs the tests, and hands to `qa` for Verify. Then run Route.
+
+## Outcome
+
+(Written at close, in Japanese.)
+>>>END

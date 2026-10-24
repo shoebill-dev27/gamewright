@@ -1,0 +1,170 @@
+The two reviewable observations are accepted, so I'm writing the verdict handoff, a decision and a short rulings file.
+
+<<<FILE decisions/D-015-lunge-draws-and-shot-at-spawn-accepted.md
+---
+kind: decision
+id: D-015
+status: accepted
+decided_by: art-director
+goal: G-001
+date: 2026-10-16
+supersedes: none
+---
+# D-015: Accept lunge draws with the Strike-start hit word, and accept the spit shot sharing the spitter's cell at spawn
+
+## Decision
+
+1. **Lunge draws.** The draw made at the moment of a grub hit may show the grub already lunged into a cell nearer than the one named in the hit line. This is accepted. The hit line names the position fixed at Strike start (D-014), which is the position the player was shown in the telegraph. The hit line is excluded from V-18's word-versus-picture comparison, and its own check is V-14. The same event may fall in different cells at 30 and 60 FPS in this draw only, because the draw happens at a different point of a 0.15 s lunge. Resting positions, "rears back" lines, "is open" lines and the `on you:` line stay under V-16 and V-18 unchanged.
+2. **Shot at spawn.** In the draw made at "spitter (...) spits", the projectile starts in the spitter's own cell, and the spitter glyph (already lowercase `s`, Recovery) is drawn there. No `*` is visible in that one draw. This is accepted. The `*` is required from the first draw after spawn until removal. No cell is added and no glyph changes.
+3. Wording is in `design/combat-visuals-verify-rulings.md`. No rule, number, input, timing or build change is needed.
+
+## Rationale
+
+- The lunge draw is a moving state, not a resting one. The cell shown is on the line from the telegraphed cell to the player, so the glyph moves toward the player and never to a side the player was not shown. The hit line repeats the word the player already read in "rears back" and saw as the `G`. Pillar 3 holds, because the threat was visible before it could hurt. A one-cell difference during 0.15 s does not mislead.
+- Freezing the drawn cell of a striking grub was rejected in D-014 as a display lie of up to 1 tile. Nothing in the captures changes that.
+- The shot at spawn is never the first warning. The spitter glyph is `S` for the whole 0.8 s charge, the charge line prints at its start, and the "spits" line prints at the spawn. The draw one frame later (0.2 s at 3 tiles/s) shows the `*` clear of the spitter. Showing the `*` in the spawn draw would mean giving up the spitter glyph or adding a second mark per cell. That costs more than it gains.
+
+## Alternatives considered
+
+- **Draw the strike at the Strike-start cell until the hit:** rejected, see D-014.
+- **Make the hit line use the lunged cell's word:** rejected. It differs between 30 and 60 FPS, which is the defect D-014 removed.
+- **Print `*` over the spitter at spawn:** rejected. It hides the state change `S` to `s`, which is the cue that the shot has left.
+- **Offset the spawn `*` by one cell toward the target:** rejected. It is a position the shot does not have, and it breaks word-matches-picture for any line naming the spitter.
+
+## Revisit when
+
+- A playtest shows a tester misreading which grub hit them because of a lunged draw, or a tester says a shot "came from nowhere".
+- A color or two-cells-per-tile view makes a second mark on the spitter's cell possible.
+- Spitters or shots change speed or range (Option B), so the first draw after spawn could come after the hit.
+>>>END
+
+<<<FILE design/combat-visuals-verify-rulings.md
+# Combat visuals: rulings at Verify (G-001, build cf0f0ee63752)
+
+Status: art-director rulings on `design/combat-visuals.md`, made from QA's verbatim captures (77, Appendices A and B). It changes no rule, number, input or timing and needs no build change. Where it differs from the wording in `combat-visuals.md`, this file applies. D-015 is the decision.
+
+## 1. Draws made during a Strike (replaces the "Not checked" bullet on lunged draws)
+
+- The draw made at the moment of a grub hit, and any other draw made inside the 0.15 s Strike, may show the grub in a cell nearer to `P` than the one named in the hit line. This reads acceptably and is intended.
+- The hit line names the Strike-start position (D-014). The lunged glyph is on the path from that position toward the player and never on a side the player had not been shown.
+- The same event may be drawn in different cells at 30 and 60 FPS in such a draw (room 2, 4.300 against 4.283). That is not a V-16 failure.
+- Hit lines are excluded from the word comparison in V-18. V-14 is their check.
+
+## 2. V-18 wording (replaces the V-18 sentence)
+
+- **V-18** In every draw, the side word of every text line that names an enemy, except hit lines ("YOU ARE HIT by ..."), equals the side or corner of `P` on which that enemy's glyph is drawn in the same draw (for lines printed at that moment). The hit line's word is checked by V-14 and does not depend on the draw. An enemy exactly on a half-tile boundary is drawn in the same cell at 30 and 60 FPS (for instance a grub resting at x 13.5 with the player at x 14.5 is always drawn left of `P`).
+
+## 3. Projectile visibility (replaces "Visible from spawn to removal" in the glyph table)
+
+- `*`: visible from the first draw after the shot is spawned until removal. In the draw made at the spawn itself, the `*` shares the spitter's cell and the spitter glyph is shown there (lowercase `s`, Recovery). The "spits" line and the `s` mark the spawn. This is intended.
+- The projectile still has to be saturated orange/red and the brightest mark on the map once visible. V-6 is unaffected.
+
+## 4. Minor, not criteria
+
+- When the `on you:` line appears or disappears, the room frame moves down or up by one line. This is acceptable in the text view. Revisit it if the view is ever drawn in place.
+- The `on you:` line is not indented like the other lines. It is cosmetic.
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/80-art-director-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 80
+from: art-director
+to: studio
+stage: Verify (visual verdict on V-9…V-18 from QA's captures, build cf0f0ee63752)
+outcome: pass
+---
+# 80: art-director → studio — Visual review of V-9…V-18 from the verbatim captures: pass for everything assessable; V-6, V-15 and V-17 (defeat and dash-off) stay open
+
+## Task
+
+Report the visual verdict on the D-014 rebuild, from the captures in Appendices A and B of 77 (30 and 60 FPS), per item V-9…V-18 and on the two observations in 78.
+
+## Context
+
+G-001, Option A. QA (77) found no failing criterion. Report 71 was a question because the build could not be run. This review uses the captures as the live material. I did not run the build. I did not edit the repo or `manual.md`.
+
+## Findings
+
+### Verdict
+
+- **No V-item fails** in the captures at either rate. V-9…V-14, V-16 and V-18 pass.
+- Two ruling-sized points came out of the review, and neither is a defect (D-015).
+  - Lunge draws are accepted.
+  - The `*` sharing the spitter's cell at spawn is accepted.
+- V-18 read literally conflicted with the hit line in the lunge draw. I clarified the wording (see "Observation 1"). That is a spec fix, not a build change.
+- **Not assessable from captures:** V-6 (colour), the reverse-video cell, the `z/Z` glyphs, and V-17 for the defeat and dash-off draws.
+- **Not mine to close:** V-15 (the manual text is not placed, Owner step).
+
+### Per item (30 / 60 FPS, identical unless stated)
+
+| ID | Verdict | Evidence |
+|---|---|---|
+| V-9 | pass / pass | The `on you:` line sits directly under the hearts line, for example A1 0.00 s and A2 0.03 s. It is absent in every draw with nothing on you: A5 0.00 to 3.00 s, A1 0.50 s. |
+| V-10 | pass / pass | A2 0.03 s: `on you: G biting soon (shown left)` with `GPg`. A5 4.40 s (60 FPS 4.38 s): `g walking (shown left); g open (shown right)` with `gPg`. A1 0.23 s: `w open (shown right)` with `Pw`. Case matches state in every draw. No enemy with an entry is given a side word in a line, and no "(on you)" appears without an entry. |
+| V-11 | pass / pass | A2: `gPg`, a single entry `(shown left)`. The real neighbour on the right has none. The text alone says which grub is on the tile. |
+| V-12 | pass / pass | A1 0.033 / 0.017 s: "rears back (on you)" with `G … biting soon` in the same draw. A1 0.200 s, A5 3.383 and 4.383 s: "the grub is open (on you)" with the entry `g/w … open`. No "(left)" or "(right)" appears for these grubs. |
+| V-13 | pass / pass | Every grub hit line has a word: A1 "(right)", A2 "(on you)", A3 "(right)", A5 "(top left)", "(top right)", "(on you)", B1 "(left)". The shot hit reads "from spitter (right)" (A4 3.367 / 3.333). |
+| V-14 | pass / pass | A3: only the right grub strikes, and the hit line reads "(right)" at 0.600 / 0.567. A5: each hit word equals its "rears back" word. "top left" (wind-up 2.733, `G` top left in the draw) hits at 3.300 / 3.283. "top right" (wind-up 3.733, `G` top right) hits at 4.300 / 4.283. The swap case ("(left)") is in QA's trace summary only, not in the verbatim captures. I take it as reported. |
+| V-15 | not assessable | The manual text is not placed (Owner). |
+| V-16 | pass / pass | The paired captures A1, A2, A3, A4, A6, B1 and B2 are identical apart from the frame-aligned times (0.033 / 0.017 and so on). Half-tile cells are the same: `wP` / `WP` in column 14 for the grub at 13.5, and `gP` at 13.5. No draw is added at one rate and missing at the other. The one cell difference is the lunge draw at 4.300 / 4.283 (Observation 1). |
+| V-17 | not assessable (partial) | Not captured: the "grub defeated" draw and the dash-off draw. Seen: the overlap ends at the first hit. A1 and B1 at 0.50 s show the knocked grub beside `P` with no entry. |
+| V-18 | pass / pass (with clarified wording) | Every "rears back" and "is open" line matches the glyph's side or corner in its draw, including A5 2.733 (`G` top left), 3.733 (`G` top right), A3 1.033 (left `G`) and A6b ("below"). The hit line in a lunge draw is excluded (D-015). |
+
+### Observation 1: lunge draws and the hit-line word (accept)
+
+- Room 2, 3.300 / 3.283: the line says "(top left)" and `G` is drawn left of `P`.
+- Room 2, 4.300 (30 FPS): the line says "(top right)" and `G` is drawn right of `P`. At 4.283 (60 FPS) `G` is drawn top right.
+- This reads acceptably. The word is the one the player was shown in "rears back" and in the `G` at wind-up start. The lunged glyph sits on the path from that cell toward `P`. It is one cell off for 0.15 s, in the direction of the attack, and never on a side the player had not been shown.
+- The two rates differ only because the draw falls at a different point of the lunge. This is a moving state, not a resting position. Cells at rest are identical, which is what V-16 and AC-29 protect.
+- Wording change: V-18 read literally ("every text line that names an enemy") would fail the hit line in this draw, while V-14 and D-014 say it is not compared. I made the carve-out explicit in `design/combat-visuals-verify-rulings.md` §1–2, with the decision in D-015.
+- The designer may want the same sentence in AC-17 and rule 6 of "Cells, sides and 'on you'". That is a spec edit for the designer and not a visual one.
+
+### Observation 3: shot at spawn (accept; wording changed)
+
+- In the spawn draw (A4, 1.800 and 4.300) the shot is in the spitter's cell, and the spitter shows lowercase `s`. The `*` first shows at 2.00 s and 4.50 s, clear of the spitter.
+- The shot is never the first warning. The charge `S` is held for 0.8 s with its own line, and the spawn draw shows the spitter dropping to `s` with the "spits" line.
+- The spec is met in practice. The glyph table row is reworded from "visible from spawn" to "visible from the first draw after spawn" (rulings file §3). No build change.
+
+### Notes (not failures)
+
+- The room frame shifts by one line when `on you:` appears or disappears, and the line is not indented like the others. Acceptable in the text view (rulings §4).
+- QA noted that `test_line_words_match_the_next_draw` is weaker than AC-30(c). I agree. That is a QA and Engineer matter and not visual.
+
+### Not assessable from captures, per item
+
+- **V-6, colour, the reverse-video cell:** a text view cannot show them. I have no evidence either way. Colour is a reinforcement only (principle 1), and the meaning is carried by letters and lines, which pass.
+- **`z/Z`:** not seen.
+- **V-17 defeat and dash-off draws:** not captured.
+
+## Decisions already made
+
+- D-001, D-011, D-012, D-013, D-014.
+- New: D-015 (lunge draws and shot at spawn).
+
+## Constraints
+
+- I changed no rule, number or input. The rulings change wording within visuals only.
+- No edit to the repo or `manual.md`.
+
+## Open questions
+
+1. **Studio:** the open Verify items are not visual findings.
+   - V-15 and the AC-15 suite run (Owner).
+   - V-17 defeat and dash-off draws. QA can capture them in a short script (kill an on-you grub; dash off the tile). I can then check them against the captures.
+   - Colour, V-6 and the reverse-video cell: only a colour build can show them. Route it to the Owner if one exists. Otherwise record it as not checked. It is a reinforcement, so I would not hold the goal on it.
+2. **Game-designer (optional):** mirror the lunge-draw sentence in AC-17 and rule 6. Mirror the "after the knockback ends" reading of AC-28(b) (QA 77 §5 item 2).
+
+## Expected output
+
+The Studio routes the V-15 Owner step and, if wanted, a short QA capture for V-17, and records colour as not checked or Owner-checked. If those come back clean, the visual side of Verify can be closed.
+
+## Load
+
+- Role: studio/roles/art-director.md
+- Skills: studio/skills/visual-review.md
+- Project: design/combat-visuals.md, design/combat-visuals-verify-rulings.md, design/combat.md, manual.md
+- Decisions: decisions/D-012-on-you-line-for-displaced-enemies.md, decisions/D-014-one-rule-for-cells-on-you-and-hit-line-word.md, decisions/D-015-lunge-draws-and-shot-at-spawn-accepted.md
+- Previous handoff: goals/G-001-combat-monotony/78-studio-to-art-director.md
+>>>END

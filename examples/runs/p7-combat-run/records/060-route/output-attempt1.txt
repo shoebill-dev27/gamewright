@@ -1,0 +1,240 @@
+Route for steps 63 and 64:
+
+- **Playtest 20a (63)** gave experience findings, not defects. Rooms 4–5 felt varied. Room 3 and the slow-run brute dance felt repetitive. The brute and runner warnings read "a grub rears back".
+- **QA 20b (64)** closed both 30 FPS gaps with no defect. Its one question, shots in flight in room 3, may already be settled by D-007, so I route it to Design as a check rather than a defect.
+- **Review (pass 2)** is next, as planned, now with the playtest and QA evidence. Design runs in parallel and does not block it.
+- **Build 21** waits for both results.
+
+<<<FILE goals/G-001-combat-monotony/65-studio-to-game-director.md
+---
+kind: handoff
+goal: G-001
+seq: 65
+from: studio
+to: game-director
+stage: Review
+outcome: routed
+---
+# 65: studio → game-director — Review pass 2: is combat now varied and engaging? (variant-aware playtest 63 and QA 64)
+
+## Task
+
+Judge whether the Goal's intent is met on build 0.6.1, using the variant-aware playtest (63) and the QA 30 FPS result (64). Give a verdict (`goal-met` or `goal-not-met`), name the next issues, and say whether the Owner escalation named in D-009 is now needed.
+
+## Context
+
+Goal G-001, "戦闘が単調なので改善したい": the Owner finds combat monotonous. Review pass 1 (60, D-009) found the goal not met with moderate confidence, because the earlier playtests used one rule for all lungers and did not test the differences the build was changed to create. D-009 asked for a variant-aware playtest instead of a third Diagnose. That playtest (63) and a QA coverage step (64) are done. Build 0.6.1 was not changed in between.
+
+## Findings
+
+Read both reports in full (Load). Summary only:
+
+**Playtest 63** (fresh playtester, player view only, six scripted sessions, rooms 1–5, per-mark reaction rules):
+- Rules did differ by enemy type: grub and runner "step aside or swipe first"; brute "step aside, a swipe will not stop it"; spitter "cross or dash the aim line, or close in".
+- Felt varied and engaging: the brute (first time a swipe cannot stop the warning), spitters (first ranged threat with a line to read), and rooms 4–5, where several asks overlap and attention stayed high. Warnings always came before damage.
+- Felt repetitive: room 3 (spitters only), where the same dodge repeated for about 20 s; the slow-run brute loop in room 2 (partly the scripting, per the tester); room 1 offers one kind of ask (low impact, as a first room).
+- The tester's summary: rooms 3 → 4 → 5 differ mostly in how many things overlap, not in what each thing asks.
+- Clarity: brute and runner warnings and hits read "a grub rears back" and "hit by a grub" in the message line. Only the `cue:` line names the enemy. This is the case D-008 proposes to fix (still `proposed`, not built).
+- Limits: scripted play, not a human; three outputs were cut at about 19–27 s; the 30 FPS run was room 3 only; no frame-rate difference was seen.
+
+**QA 64:** player view at 30 FPS for rooms 1–5 and the late-swipe boundary at 30 FPS match the design, the manual and 60 FPS to within one frame. No defect. One spec question on room 3 shots in flight has gone to Design (66, non-blocking). The manual text on late swipes (59) is still not applied.
+
+## Decisions already made
+
+- D-001: one-button combat (attack and dash only). No new buttons without Owner approval.
+- D-004 to D-007: Design rulings on the cue gap, the brute, the cap, and the walker limit. Not reopened here.
+- D-008 (proposed): variant-named wind-up message. Not built.
+- D-009: next pass is a variant-aware playtest; no Owner escalation yet. Escalate (via your own `prepare-owner-escalation`) if this pass still shows the melee reading as one fight.
+
+## Constraints
+
+- Stay inside the vision pillars and D-001. Judge the experience Goal, not the numeric criteria (QA has passed those).
+- The evidence is scripted play; state your confidence and what a human check would add.
+- One Owner question at a time. If you escalate, write the brief instead of a verdict-only handoff.
+- Do not ask for another Diagnose pass without a new cause. The loop limit already bars a third pass without progress.
+
+## Open questions
+
+1. Is the Goal met, partly met, or not met, and why?
+2. If not met, is the gap a design-content gap (for example, too few distinct asks outside rooms 4–5, room 3's single ask) inside D-001, or does it call for a direction or scope choice that belongs to the Owner?
+3. Should the D-008 message change and the manual text (59) be built now (Build 21), or wait?
+
+## Expected output
+
+A Review handoff addressed to `studio`: verdict (`goal-met` or `goal-not-met`), evidence, confidence, next issues, and an answer to question 3. If an Owner decision is needed, a draft Escalation (templates/escalation.md) in owner_language. Do not route to a Role yourself; address the result to `studio`.
+
+## Load
+
+- Role: studio/roles/game-director.md
+- Skills: studio/skills/review-outcome.md
+- Project: project.md#vision, project.md#player-profile, project.md#constraints, goals/G-001-combat-monotony/goal.md, goals/G-001-combat-monotony/63-playtester-to-studio.md (playtest, build 0.6.1), design/combat.md, repo/manual.md
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-008-cue-message-names-variant-proposed.md, decisions/D-009-review-next-pass-variant-aware-playtest.md
+- Previous handoff: goals/G-001-combat-monotony/64-qa-to-studio.md (also read goals/G-001-combat-monotony/60-game-director-to-studio.md, the pass 1 Review)
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/66-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-001
+seq: 66
+from: studio
+to: game-designer
+stage: Design
+outcome: routed
+---
+# 66: studio → game-designer — Room 3 shots in flight vs D-007; is D-008 ready to build?
+
+## Task
+
+Answer two small Design questions in writing: (1) QA's room 3 shots-in-flight conflict, checking it against D-007 and the room 3 cap spec; (2) whether the variant-named wind-up message (D-008) is specified well enough to build, given a new playtest finding. This is non-blocking for the Review running in parallel (65).
+
+## Context
+
+Goal G-001 (combat monotony). Build 0.6.1 is unchanged. QA (64) found no defect in a 30 FPS pass of rooms 1–5, and raised one spec question. A variant-aware playtest (63) reported a clarity issue with the message line.
+
+## Findings
+
+**1. QA's room 3 question (from 64):**
+- In room 3 reaction runs (same at 30 and 60 FPS), all three spitters started a cue together at about 5.8 s and again at about 10 s (9.8 s at 60 FPS), then fired together 0.6 s later. QA saw at least 4 `*` on screen at 7.0–8.0 s and could not say if the count was 4 or 5 (pictures only, no trace).
+- QA reads criterion 11 as "never more than 3 shots in flight in rooms 1–5" and the cap section as allowing up to 2 plus the number of living spitters, which is 5 for room 3. QA asks whether simultaneous starts after a cap delay are still accepted (D-005) and which bound applies.
+- The Studio's project record has D-007, "simultaneous cue starts in room 3 after a cap delay stay accepted; criterion 11 is reworded to the real in-flight bound". QA did not load D-007 or `design/combat-step-46-room3-cap.md`. Check whether the conflict QA describes is already resolved there. If it is, say so and name the exact wording; if the spec text still contradicts itself, fix it.
+- Reproduction script, from QA:
+  ```text
+  room 3
+  fps 30
+  end 12
+  when see * coming within 1.5 then move aside
+  when text "takes aim" then move aside
+  when see s within 1.4 then attack
+  ```
+
+**2. Other QA notes (64, open questions 2 and 3):**
+- Manual wording on late swipes (59) is specified but not applied to `repo/manual.md`. Confirm 59 still stands.
+- For a 1-hp runner, a swipe in reach kills it, so "cancel" cannot be told from "kill". State in the spec, if useful, that no separate runner cancel rule is intended.
+
+**3. Playtest finding (63), clarity only:**
+- Brute and runner wind-ups print "a grub rears back" and hits print "YOU ARE HIT by a grub". Only the `cue:` line names the enemy. The tester was confused for a moment and said a player without the cue line would not know. The playtester gives this medium impact.
+- D-008 proposes naming the variant in the text-view message and makes no swipe-timing change. Decide whether D-008 is complete (message strings for grub, runner, brute, hit message, and which views it applies to) and whether it stays inside the "readable threats" pillar and D-001. If it is ready, say so in a form the engineer can build from, with player-observable acceptance criteria.
+
+## Decisions already made
+
+- D-005: blocked contact consumes the shot; simultaneous cue starts outside rooms 4–5 accepted.
+- D-007: simultaneous cue starts in room 3 after a cap delay stay accepted; criterion 11 reworded.
+- D-008 (proposed): variant-named wind-up message; no swipe-timing change.
+- D-009: next pass was a variant-aware playtest; the Director is judging it in 65.
+
+## Constraints
+
+- No new input buttons; no changes to enemy timings, room layouts or hearts from this step. Message wording only for item 3.
+- Do not reopen D-004 to D-007 unless the spec text truly contradicts itself.
+- Do not design new content to fix monotony here; that question belongs to the Director's Review (65).
+- If D-008 needs a Decision to become `accepted`, record it yourself if it is within your authority (player-facing wording), or hand back with the question if it is not.
+
+## Open questions
+
+1. Is QA's room 3 conflict already resolved by D-007? If not, which bound applies, and what is the exact criterion wording?
+2. Is D-008 ready to build, and what is its acceptance criterion?
+
+## Expected output
+
+A handoff addressed to `studio` with the answers and any spec or Decision file changes named in Findings. If anything is ready to build, say exactly what (manual text from 59, D-008 message) so the Studio can open a Build after Review. No Build is requested yet.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: design/combat.md, design/combat-step-46-room3-cap.md, design/combat-step59.md, design/combat-cues-visual-spec.md, project.md#constraints, repo/manual.md
+- Decisions: decisions/D-005-blocked-contact-consumes-shot-and-spends-lunge.md, decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md, decisions/D-008-cue-message-names-variant-proposed.md, decisions/D-009-review-next-pass-variant-aware-playtest.md
+- Previous handoff: goals/G-001-combat-monotony/64-qa-to-studio.md (also goals/G-001-combat-monotony/63-playtester-to-studio.md for the clarity finding only)
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-16
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): a player playing the current build's combat experiences it as varied and engaging instead of monotonous. Different situations call for noticeably different play (positioning, timing, use of attack and dash), and the player can tell why. The improvement stays inside the vision pillars: one-button combat (attack + dash only, D-001), short runs, readable threats. Numeric thresholds belong to Design; the final verdict belongs to Review.
+
+Out of scope: new input buttons (needs Owner approval per D-001), changing run length, new biomes or content unrelated to combat variety, and any change to the core concept. Not a defect report: nothing in the request says combat is broken.
+
+## Unknowns
+
+- Observe: done (02; QA 16, 20, 32, 36, 56, 64). Contact-edge graze accepted (D-002, D-003). 30 FPS player view and late-swipe boundary closed: match the design and 60 FPS (64). No open defect.
+- Diagnose: two passes done (04, 31); a third without progress is barred by the loop limit. Review (60, D-009) chose a variant-aware playtest instead.
+- Decide: skipped. All options so far are inside D-001 and the pillars. Tentative (`game-director`, Owner escalation) per D-009 if Review pass 2 says the melee still reads as one fight.
+- Design: complete (D-004 to D-007). Open, non-blocking (66): QA's room 3 in-flight question vs D-007, and whether D-008 (variant-named cue message, `proposed`) is ready to build. Manual late-swipe wording (59) not yet applied to `repo/manual.md`.
+- Plan: skipped (approach local). Returns if the same criterion fails verification twice.
+- Build: 0.6.1 done (48). A later Build is for the manual text and, if Design/Director take it, the D-008 message.
+- Verify (QA): pass on 0.6.1 at 30 and 60 FPS (50, 64). Visual V1–V11 need a graphical build, a proposed new Goal at Close; V12 open.
+- Play: three passes done (27, 53, 63). The variant-aware pass (63): rooms 4–5 varied and engaging; room 3 and the slow-run brute loop repetitive; brute/runner messages read "a grub". Scripted play only; a human check is not done.
+- Review: pass 1 done (60): goal-not-met. Pass 2 open (65) with playtest 63 and QA 64.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 01-studio-to-playtester.md (report: 02-playtester-to-studio.md) |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-studio-to-game-designer.md (result: 04-game-designer-to-studio.md) |
+| 3 | Decide | game-director | make-decision | skipped (no real choice; see Unknowns) | — |
+| 4a | Design | game-designer | write-design-spec | done | 05-studio-to-game-designer.md (result: 07-game-designer-to-studio.md) |
+| 4b | Observe (FPS divergence) | qa | reproduce-defect | done | 06-studio-to-qa.md (result: 08-qa-to-studio.md) |
+| 5 | Plan | technical-director | technical-plan | skipped (approach local; see Unknowns) | — |
+| 6 | Build | gameplay-engineer | implement-change | done | 09-studio-to-gameplay-engineer.md (result: 10-gameplay-engineer-to-studio.md) |
+| 7a | Design (criterion 14, spec gaps) | game-designer | write-design-spec | done | 11-studio-to-game-designer.md (result: 14-game-designer-to-studio.md) |
+| 7b | Verify (visual) | art-director | visual-review | done | 12-studio-to-art-director.md (result: 15-art-director-to-studio.md) |
+| 7c | Observe (walker 30/60 divergence) | qa | reproduce-defect | done | 13-studio-to-qa.md (result: 16-qa-to-studio.md) |
+| 7d | Build (bot log data, walker test) | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md (result: 18-gameplay-engineer-to-studio.md) |
+| 8 | Verify (criteria 1–16, V12) | qa | verify-change | done (question: graze) | 19-studio-to-qa.md (result: 20-qa-to-studio.md) |
+| 8b | Design (graze, cap, margin, doc conflicts) | game-designer | write-design-spec | done | 21-studio-to-game-designer.md (result: 22-game-designer-to-studio.md) |
+| 8c | Build (contact test / cap) | gameplay-engineer | implement-change | skipped (graze and cap accepted as built) | — |
+| 8d | Verify (criteria 1–17; close 30 FPS gaps) | qa | verify-change | done (pass) | 23-studio-to-qa.md (result: 24-qa-to-studio.md) |
+| 9a | Play | playtester | playtest-session | done | 25-studio-to-playtester.md (report: 27-playtester-to-studio.md) |
+| 9b | Design (QA notes: exact-reach miss, lunge band) | game-designer | write-design-spec | done | 26-studio-to-game-designer.md (result: 30-game-designer-to-studio.md) |
+| 10a | Diagnose (playtest issues 1–4) | game-designer | diagnose-experience | done | 28-studio-to-game-designer.md (result: 31-game-designer-to-studio.md) |
+| 10b | Observe (room 2 grub hit after swipe) | qa | reproduce-defect | done (not a defect) | 29-studio-to-qa.md (result: 32-qa-to-studio.md) |
+| 11 | Decide (Owner escalation if the melee still reads as one fight, D-009) | game-director | prepare-owner-escalation | tentative (only if Review pass 2 says so) | — |
+| 12a | Design (Options 1–2, manual wording) | game-designer | write-design-spec | done | 33-studio-to-game-designer.md (result: 35-game-designer-to-studio.md) |
+| 12b | Observe (spitter fire times, rooms 3–4) | qa | reproduce-defect | done (no defect) | 34-studio-to-qa.md (result: 36-qa-to-studio.md) |
+| 12c | Design (invulnerable contact, room 3 cue overlap) | game-designer | write-design-spec | done | 37-studio-to-game-designer.md (result: 38-game-designer-to-studio.md) |
+| 13 | Build (build 0.6 per Design 35 and 38) | gameplay-engineer | implement-change | done | 39-studio-to-gameplay-engineer.md (result: 40-gameplay-engineer-to-studio.md) |
+| 14a | Verify (0.6, 30 and 60 FPS) | qa | verify-change | done (fail: F2, F3, 13@60, room 3) | 41-studio-to-qa.md (result: 43-qa-to-studio.md) |
+| 14b | Design (criterion 13 walker limit, 60 FPS) | game-designer | write-design-spec | done (D-006, no build change) | 42-studio-to-game-designer.md (result: 44-game-designer-to-studio.md) |
+| 15 | Design (room 3 cap vs criterion 11) | game-designer | write-design-spec | done (D-007, accepted as built) | 45-studio-to-game-designer.md (result: 46-game-designer-to-studio.md) |
+| 16 | Build (F2, F3 only) | gameplay-engineer | implement-change | done | 47-studio-to-gameplay-engineer.md (result: 48-gameplay-engineer-to-studio.md) |
+| 17 | Verify (re-verify, incl. "not run" list, criterion 11 a–e) | qa | verify-change | done (pass) | 49-studio-to-qa.md (result: 50-qa-to-studio.md) |
+| 18a | Play (fresh, hand-timed rooms 2–5) | playtester | playtest-session | done | 51-studio-to-playtester.md (report: 53-playtester-to-studio.md) |
+| 18b | Design (criterion 11d wording, non-blocking) | game-designer | write-design-spec | done (no build change) | 52-studio-to-game-designer.md (result: 54-game-designer-to-studio.md) |
+| 18c | Observe (late swipe vs lunge; hit with no cue; message wording) | qa | reproduce-defect | done (not a defect) | 55-studio-to-qa.md (result: 56-qa-to-studio.md) |
+| 18d | Design (manual wording on late swipes; variant cue message) | game-designer | write-design-spec | done (manual text pending; D-008 proposed) | 58-studio-to-game-designer.md (result: 59-game-designer-to-studio.md) |
+| 19 | Review (pass 1) | game-director | review-outcome | done (goal-not-met; D-009) | 57-studio-to-game-director.md (result: 60-game-director-to-studio.md) |
+| 20a | Play (variant-aware, fresh, build 0.6.1 unchanged) | playtester | playtest-session | done | 61-studio-to-playtester.md (report: 63-playtester-to-studio.md) |
+| 20b | Observe (30 FPS player view, late-swipe boundary) | qa | verify-change | done (no defect) | 62-studio-to-qa.md (result: 64-qa-to-studio.md) |
+| 21a | Review (pass 2) | game-director | review-outcome | open | 65-studio-to-game-director.md |
+| 21b | Design (room 3 in-flight vs D-007; D-008 readiness) | game-designer | write-design-spec | open (non-blocking) | 66-studio-to-game-designer.md |
+| 22 | Build (manual late-swipe text from 59; D-008 message if ready) | gameplay-engineer | implement-change | tentative (after 21a and 21b; only if Review/Design call for it) | — |
+| 23 | Verify (22) | qa | verify-change | tentative (only if 22 runs) | — |
+| 24 | Next | studio | — | planned | — |
+
+## Route changes
+
+After 20a and 20b (63, 64): playtest shows rooms 4–5 varied, room 3 and brute loop repetitive, brute/runner messages read "a grub". QA closed the 30 FPS gaps with no defect. Opened Review pass 2 (65) and, in parallel, a non-blocking Design check (66: room 3 in-flight vs D-007; D-008 readiness). Build waits for both.
+
+## Next action
+
+Run in parallel: `game-director` with 65-studio-to-game-director.md and `game-designer` with 66-studio-to-game-designer.md (both address the result to `studio`). Then Route: if Review is goal-not-met and says the melee still reads as one fight, open the Owner escalation (11) per D-009 instead of a Diagnose. Otherwise decide Build 22 (manual text, D-008 message) from 66 and the Review, and Verify it; if goal-met, Close.
+
+## Outcome
+
+(open)
+>>>END

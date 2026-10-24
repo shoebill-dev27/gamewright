@@ -1,0 +1,5 @@
+I'll check room 1 with the bots first, so the diagnosis rests on measured behavior rather than on the spec alone.
+
+<<<FILE @run/bots/room1-reference
+room 1
+>>>END

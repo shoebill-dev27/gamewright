@@ -1,0 +1,194 @@
+<<<FILE goals/G-001-combat-monotony/37-gameplay-engineer-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 37
+from: gameplay-engineer
+to: studio
+stage: Build
+outcome: done
+---
+# 37: gameplay-engineer → studio — Phase 1 (encounter escalation) built per the amended spec; compose the QA handoff
+
+## Task
+
+Compose the QA handoff for Phase 1 from "Findings" (everything above `## Sender assessment`). QA verifies against criteria 1–5 and 10 of `design/g001-combat-escalation.md`. `sim/build-0.5.md` stays the baseline for the dash, hit-stun and invulnerability behavior, which this change does not touch.
+
+## Context
+
+G-001 (combat monotony). D-002 chose encounter escalation first. My first attempt (handoff 33) stopped on spec gaps. The Designer resolved all six points in the amended spec (handoff 35, D-008). This is attempt 2. Phase 2 content (Lunge Grub, Fan Spitter, Flinch changes) is not part of this change.
+
+## Findings
+
+### Change statement (Phase 1, sections 1–3 of the amended spec)
+
+**A. Room data (new data table, gameplay numbers are data per D-004)**
+
+Coordinates are room-relative. The floor area is W×H tiles, measured from the wall faces, x to the east and y to the south. No absolute room size is stored.
+
+- Edge points sit 1 tile inside the wall face, at 25%, 50% and 75% of the edge length.
+  - W1, W2, W3 = (1, 0.25H), (1, 0.50H), (1, 0.75H).
+  - E1, E2, E3 = (W−1, 0.25H), (W−1, 0.50H), (W−1, 0.75H).
+  - N1, N2, N3 = (0.25W, 1), (0.50W, 1), (0.75W, 1).
+  - S1, S2, S3 = (0.25W, H−1), (0.50W, H−1), (0.75W, H−1).
+- `SP(wall, corner)` is 1 tile inside the wall face and 1.5 tiles along the wall from the named corner. The corner is the wall-face corner of the floor area.
+  - SP(N,NW) = (1.5, 1) and SP(N,NE) = (W−1.5, 1).
+  - SP(S,SW) = (1.5, H−1) and SP(S,SE) = (W−1.5, H−1).
+- Each enemy entry holds: type, wave, marker offset from the wave start, and an ordered candidate list. The entries are in the order of the spec table 3.2a. Enemies with the same marker start are processed in that order.
+- Tuning values stored as data: marker duration 0.8 s, wave timeout 8.0 s, minimum spawn distance 5 tiles, occupancy radius 1.5 tiles, Spitter offset 1.5 tiles, Grub marker gap 1.0 s, Spitter first-shot delay 1.0 s.
+
+| Room | Wave | Enemy (marker offset) | Candidate list |
+|---|---|---|---|
+| 1 | 1 | G (0) | W1, W2, W3 |
+| 1 | 1 | G (+1.0 s) | W3, W2, W1 |
+| 1 | 1 | S (0) | E2, E1, E3 |
+| 2 | 1 | same three as room 1 | same as room 1 |
+| 2 | 2 | G (0) | E3, E1, E2 |
+| 3 | 1 | G (0) / G (+1.0 s) | W1, W2, W3 / W3, W2, W1 |
+| 3 | 1 | S (0) | SP(N,NE), SP(N,NW) |
+| 3 | 2 | G (0) / G (0) | E1, E2, E3 / E3, E2, E1 |
+| 4 | 1 | G (0) / G (0) from W | W1, W2, W3 / W3, W2, W1 |
+| 4 | 1 | G (0) from E | E2, E1, E3 |
+| 4 | 1 | S (0) | SP(N,NW), SP(N,NE) |
+| 4 | 2 | G (0) from N | N2, N1, N3 |
+| 4 | 2 | S (0) | SP(S,SE), SP(S,SW) |
+| 5 | 1 | G (0) / G (0) from W | W1, W2, W3 / W3, W2, W1 |
+| 5 | 1 | G (0) from E | E2, E1, E3 |
+| 5 | 1 | S-a (0) | SP(S,SW), SP(S,SE) |
+| 5 | 1 | S-b (0) | SP(N,NE), SP(N,NW) |
+| 5 | 2 | G (0) from N / G (0) from S | N2, N1, N3 / S2, S1, S3 |
+
+Room totals: 3, 4, 5, 6 and 7 enemies. Room 5 is the only room with 7, so the room-count range in `combat.md` is 3–7 as the spec says.
+
+**B. Wave scheduler (new small module, game-clock timestamps only)**
+
+- `T0` is the game-clock time of the first logic frame on which the player has control in the room. Wave 1's start is `T0`.
+- Each enemy's marker start is `waveStart + markerOffset`. It is a scheduled timestamp. When a frame processes it, the marker's end is `markerStart + 0.8` (the scheduled value, not the frame time).
+- Unresolved count = enemies of the current and earlier waves that are not dead. This includes enemies whose marker has not started, enemies in a marker phase, and enemies on the field.
+- Wave N+1's start is the earlier of two moments, and it is set once.
+  - The kill that makes the unresolved count 1 or fewer. The wave start is the clock time of that kill's logic frame. It is checked on each kill event.
+  - `firstMarkerStart(wave N) + 8.0 s`, as a scheduled timestamp.
+- Wave 2 can therefore start while a Grub of wave 1 is still pending. That is intended (D-008).
+- The room ends when every enemy of every wave is dead (unchanged).
+
+**C. Spawn point choice and occupancy (new routine, no RNG)**
+
+- It runs once per enemy, at the enemy's marker start, using the player's position on the logic frame that processes that start.
+- It walks the enemy's candidate list in order and takes the first point that passes both tests.
+  - Distance: at least 5 tiles from the player, centre to centre.
+  - Occupancy: no active marker at the point, and no living enemy within 1.5 tiles of it.
+- If no candidate passes, it takes the farthest unoccupied candidate. If all candidates are occupied, it takes the farthest overall.
+- Spitters have no exemption from the 5-tile rule. The second point in each Spitter list is the far end of the same wall.
+- Every use of the fallback writes one line to the debug log: `SPAWN_FALLBACK room wave enemy chosenPoint playerDistance clockTime`. Normal choices write `SPAWN_POINT room wave enemy chosenPoint clockTime`. Each marker start, spawn, wave start and Spitter shot also writes a timestamped line. These lines are diagnostic only and change no gameplay.
+
+**D. Enemy creation timing**
+
+- No enemy object exists, moves or attacks before its marker ends. The enemy is created at `markerStart + 0.8` at the chosen point.
+- Pending enemies (marker not yet started) do not count toward occupancy. Active markers do.
+
+**E. Spawn marker visual**
+
+- No existing spawn, summon or ground-ring effect is named anywhere in the material I worked from. I did not reuse one. I built the minimal ring from `design/g001-telegraph-visuals.md` section 3.
+- It is flagged for `art-director` review.
+- Shape and timing:
+  - A flat, non-directional ground ring, 1.5 tiles across, with a dim ember dot at its centre.
+  - From 0.0 to 0.8 s the ring contracts linearly to about 0.75 tiles while its brightness rises.
+  - From 0.6 to 0.8 s it is solid at full brightness, with the ember dot in hot-core colour.
+  - At 0.8 s there is one burst of at most 0.15 s, and it does not hide the new enemy.
+  - It has no fill larger than the ring and does no damage.
+- It is drawn on the ground under characters and under walls.
+- Animation is a function of elapsed game time, so it is identical at 30 and 60 FPS.
+- The marker is the same for Grub and Spitter.
+- Palette: `#FF5A1F` for the ring and `#FFC14D` for the ember dot, as proposed in the visuals spec.
+- The ring is 1.5 tiles across and the points are 1 tile inside the wall, so it fits on the floor.
+
+**F. Spitter first shot**
+
+- A Spitter's first shot is at `appearTime + 1.0 s` (data value). After that the existing 2 s interval applies. A Spitter never fires on the frame it appears.
+
+**G. Not changed**
+
+- Dash, hit-stun, hit and dash invulnerability, the 0.2 s Flinch, enemy speeds and HP, and attack/dash input are untouched. There is no new input. No Phase 2 content is included.
+
+### How to exercise it
+
+Scripted runs use a simulated clock at 1/30 s, 1/60 s and variable delta time. The input script and the player positions are identical at both frame rates. Compare the log lines.
+
+1. **Criterion 10(a), first markers:** start each room. Wave 1 first markers start at `T0`. In rooms 1–3 the second Grub marker starts at `T0 + 1.0 s`. A Spitter's marker starts at `T0`.
+2. **Criterion 10(b), wave trigger:** in room 2, with no kills, wave 2's marker starts at `T0 + 8.0 s` (±1 frame). With kills, wave 2 starts on the frame of the kill that leaves 1 unresolved wave 1 enemy. Kill the first Grub, then the Spitter, while the second Grub's marker has not started. Wave 2 starts at the second kill, before that Grub appears. Wave 2 does not start while 2 or more wave 1 enemies are unresolved before 8 s.
+3. **Criterion 10(c), point choice:** place the player at least 5 tiles from the first list point and check that the enemy uses it. Place the player within 5 tiles of it and check that the next qualifying point is used. Place the player within 5 tiles of all points and check for the farthest unoccupied point and a `SPAWN_FALLBACK` line.
+4. **Criterion 10(d), occupancy:** with a marker active at a list's first point, check that the next point is used. Place a living enemy within 1.5 tiles of a point and check that it is skipped.
+5. **Criterion 10(e), Spitters:** in rooms 3–5, with the player at least 5 tiles from the covered-corner point, the Spitter uses it. With the player holding the covered corner, the Spitter uses the far end of the same wall.
+6. **Criterion 10(f) and criterion 5:** run the same input script twice and at 30 and 60 FPS. Points are identical. Marker starts, spawn times, wave starts and shot times match within 1 frame at 30 FPS (±0.034 s).
+7. **Criterion 4:** no enemy exists or damages before its 0.8 s marker ends. Each spawn is at least 5 tiles from the player, except where a `SPAWN_FALLBACK` line is logged. Spawns are on screen. A Spitter's first shot is at least 1.0 s after it appears.
+8. **Criterion 1:** a player holds each of 5 positions (4 corners, centre), faces the nearest spawn side and only attacks. Count hits taken in rooms 4 and 5. At least 4 of 5 attempts per position should take 2 or more hits or die.
+9. **Criterion 2 (Phase 1 part):** record dashes taken in combat across the 5 rooms.
+10. **Criterion 3:** compare rooms against the room table (count, mix, spawn edges, wave count).
+11. **Marker visual (A1–A3):** with the player at least 8 tiles away, the marker is visible for its whole 0.8 s. The enemy appears 0.8 s ±1 frame after the marker starts. Standing in a marker does not hurt.
+12. **Regression:** the dash/hit-invulnerability and hit-stun input checks of `sim/build-0.5.md` still hold.
+
+Tests to add alongside the existing `isInvulnerable` tests, using the same simulated-clock pattern: marker timing, wave trigger (timeout and kill), point choice and the fallback, occupancy, the Spitter lists, the Spitter first-shot delay, and equal results at 1/30 s, 1/60 s and variable delta time.
+
+### Values used
+
+All tuning values are the spec's: 0.8 s marker, 1.0 s Grub marker gap, 8.0 s timeout, 5-tile minimum distance, 1.5-tile occupancy radius, 1.5-tile Spitter offset, 1.0 s first-shot delay, and a 2 s Spitter interval after the first shot. They are stored as data.
+
+### Answers to the open questions
+
+- **Was an existing spawn effect reused?** No. None is named in the material I had (`sim/repo-notes.md` lists none), so I built the minimal ring described in E. It is flagged for `art-director`. A1–A3 apply to this ring.
+- **Which of the five existing values could I read?** None. Grub speed, player speed, projectile speed, projectile range, heart count and room size are all **not available** to me. I did not invent them. The hitbox sizes are also not available. Phase 1 does not use any of them. QA, in its first Phase 1 verification, and then the playtest record them (spec 3.8).
+- **Does the room size support the point lists?** I cannot say. Room size is not available and I have no run results, so I have seen no fallback. QA should count `SPAWN_FALLBACK` lines in normal scripted play. If most Spitter or Grub choices fall back, report it to the Game Designer. The data is not changed (spec 3.8).
+
+### Readings of the spec I took (not blocking, for the Designer's awareness)
+
+None of these needed a hand-back, and each follows the spec text literally:
+1. The corner for `SP(wall, corner)` is the wall-face corner of the floor area, and 1.5 tiles is measured along the wall from it. (Spec 3.2a.)
+2. The Spitter's first shot is at appear + 1.0 s, then every 2 s. The spec says "no sooner than 1.0 s" and "after that, the existing 2 s interval". (Spec 3.3.)
+3. The player's position for the 5-tile test is sampled on the logic frame that processes the scheduled marker start. A start that falls between frames at 30 FPS therefore uses the position on the next frame. Scripted checks with fixed positions are unaffected. (Spec 3.3, criterion 5.)
+
+If the Designer wants any of these different, it is a data or one-line change.
+
+## Decisions already made
+
+- D-001: one-button combat, no new input.
+- D-002: encounter escalation (Phase 1) before enemy behaviors (Phase 2).
+- D-004: Phase 1 is one serial Build with no separate Plan. Gameplay numbers are data. Timers are timestamps on the accumulated game clock.
+- D-008: Phase 1 spawn and wave rules (ordered candidate lists, unresolved-count wave trigger, Spitter far-end alternative, no RNG).
+
+## Constraints
+
+- Phase 1 only. No Phase 2 content.
+- Do not change the verified dash, hit-stun or invulnerability behavior.
+- Correct at 30 and 60 FPS. Spawn choice has no RNG.
+- No new input.
+
+## Open questions
+
+None blocking. QA and the playtest should record the existing values (spec 3.8), count any `SPAWN_FALLBACK` lines, and report the arrival gaps of "simul." Grubs (spec section 7).
+
+Known risks for QA:
+- The marker ring is a new placeholder and has not been reviewed by the Art Director.
+- The wave trigger is the most timing-sensitive part: check it at 30 and 60 FPS.
+- Whether the real room size supports the point lists is unverified.
+
+## Expected output
+
+The Studio composes the QA handoff from the Findings above (QA does not receive `## Sender assessment`). QA verifies criteria 1–5 and 10, plus A1–A3 for the marker.
+
+## Sender assessment
+
+- This step had no way to run the game or its tests. The change is stated in full as the handoff directs, and the project constraints say it counts as made. I did not run anything, so I report no test results. Nothing above should be read as a passing run.
+- Confidence that the statement matches the amended spec: high. I checked the room totals (3, 4, 5, 6, 7), every candidate list against 3.2a, and the marker, wave and first-shot rules against 3.3 and 3.4.
+- Confidence about real behavior: low until QA runs it. The three risk areas are the wave trigger on kill frames, the position sampled at a scheduled marker start, and whether the room is big enough for the 5-tile rule.
+- I considered handing back on the three readings listed above. I did not, because each is the literal reading of the spec text and none changes which stance works. If the Studio disagrees, they can go to the Designer.
+- The debug log lines are my addition so that criteria 5 and 10 can be checked without screen reading. They have no gameplay effect.
+- No Owner or Director escalation is needed.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: (Studio to settle when routing; the QA skill file was not in my packet)
+- Project: design/g001-combat-escalation.md (sections 1–3, 7, 8 and the acceptance criteria 1–5 and 10), design/g001-telegraph-visuals.md (spawn marker and A1–A3), design/combat.md, sim/build-0.5.md
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-002-combat-variety-direction.md, decisions/D-004-phase-2-technical-approach.md, decisions/D-008-phase-1-spawn-and-wave-rules.md
+- Previous handoff: goals/G-001-combat-monotony/36-studio-to-gameplay-engineer.md
+>>>END

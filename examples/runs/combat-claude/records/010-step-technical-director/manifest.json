@@ -1,0 +1,77 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/07-studio-to-technical-director.md",
+  "sha256": "b8ed9f54b35dd7821834c29fe1d040ed30a6148e910f67f78c5904829d3d81e0",
+  "bytes": 5341
+ },
+ {
+  "path": "studio/roles/technical-director.md",
+  "sha256": "ed92f0e83566076b084fda3312efaafc5ec12b3246001ffbc0c86522a2f7ee80",
+  "bytes": 1420
+ },
+ {
+  "path": "studio/skills/technical-plan.md",
+  "sha256": "8e140abc942d3eaa8838fc766938a7b25b9813b799108f75112ad82f20e46c92",
+  "bytes": 1264
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "7d0fce4fe04454f3013abf97b01beddc7cf3689b4a9f589bbd0cf94cf8088c84",
+  "bytes": 17680
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "05a33c6f8e50caa20ddf4f3844885137c4261ad4a3e5f3db3eb1b5312b129a9f",
+  "bytes": 237
+ },
+ {
+  "path": "sim/repo-notes.md",
+  "sha256": "9d2a0c8d3c25a33a3a305e1fe5f3a6d4ed024bb20db9e161c4cde5d2237c7f0e",
+  "bytes": 1203
+ },
+ {
+  "path": "sim/build-0.3.md",
+  "sha256": "3159bf3f32d15e24e59b3276d1b8618ee3b0d65f884c8681aa7b2b85f4eb6d64",
+  "bytes": 851
+ },
+ {
+  "path": "decisions/D-001-one-button-combat.md",
+  "sha256": "c7fe9ca23a369707a5ab439e44789a25a0a8544efce4703a676f8fd180f82ec1",
+  "bytes": 798
+ },
+ {
+  "path": "decisions/D-002-combat-direction-rooms-and-grub-charge.md",
+  "sha256": "5b57fe5f9c1c8abb81f10f593c5926997255382e9bba9e0f1fc764289a50bab2",
+  "bytes": 4969
+ },
+ {
+  "path": "decisions/D-003-grub-charge-and-room-rules.md",
+  "sha256": "ec13f8620784000f21125c3b999a018e405da2c2f3a59749e4559687a0818ec2",
+  "bytes": 2323
+ },
+ {
+  "path": "goals/G-001-combat-monotony/06-game-designer-to-studio.md",
+  "sha256": "e521b7bcfc014363de41df5e672d20b9fa222957dc442eb85a558054cf6f6042",
+  "bytes": 6280
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "00e93d3ba6b07e002008b83fe12ca37f6d6ed529640a08ac48b1e7c3cb3ec0de",
+  "bytes": 2053
+ },
+ {
+  "path": "studio/templates/escalation.md",
+  "sha256": "6e505880bdef28223c7275a4bb19c8f245577964d14c28d48e04561e7a5c7b90",
+  "bytes": 975
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

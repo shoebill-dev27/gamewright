@@ -1,0 +1,57 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-001-dash-damage/01-studio-to-qa.md",
+  "sha256": "fb694c13927b210731fd1b8b795471d77307a1210a0ade1a869e4824406737d2",
+  "bytes": 3165
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "381742c8f2afe2e1a2a6af9d031dcc91f98f490ada7c90e2a990d6a1aaf27639",
+  "bytes": 1765
+ },
+ {
+  "path": "studio/skills/reproduce-defect.md",
+  "sha256": "aa7e161cc1fcb38fd92ede1719446f05eee1c7ac431a28a04d570ce451a2291d",
+  "bytes": 1407
+ },
+ {
+  "path": "project.md",
+  "sha256": "efa98c9416790f1c8416ea9771b96a726cc7d522ff9d6e75ec85b8addbff829e",
+  "bytes": 1851
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "b67a8b97eaf78370e06b07dd9143f1c92991e97db5d0326ebbdf7d4784a43cec",
+  "bytes": 854
+ },
+ {
+  "path": "manual.md",
+  "sha256": "e7fd4c697f8da5564a22a2dd3427da0c33d078a1772e739bdc8f62b2c5ce789f",
+  "bytes": 1266
+ },
+ {
+  "path": "repo/README.md",
+  "sha256": "f27cca1e84d296a71cd528e938857f9c099b6eb8a526a4a17126c47f251271bf",
+  "bytes": 231
+ },
+ {
+  "path": "decisions/D-001-one-button-combat.md",
+  "sha256": "c7fe9ca23a369707a5ab439e44789a25a0a8544efce4703a676f8fd180f82ec1",
+  "bytes": 798
+ },
+ {
+  "path": "@files/repo",
+  "sha256": "25ff199491ea0479b6cb733c4b5d1d0e12ace01ce6fe484479d4a641a7df01a8",
+  "bytes": 170
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ }
+]

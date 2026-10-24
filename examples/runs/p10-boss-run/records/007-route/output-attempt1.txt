@@ -1,0 +1,38 @@
+<<<EDIT goals/G-002-final-boss/goal.md
+<<<<<<< SEARCH
+status: active
+=======
+status: blocked-on-owner
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+- Decide：open。配置A/B/C、既存第5部屋の扱い、終端・再挑戦の範囲をGame Directorが判断する。選択可能なボス部屋だけでは現Interpretationの達成を実証できず、連続ラン新設は配置変更とは別の規模となる。Goalの再解釈や大幅な範囲変更が必要ならOwnerへ戻す。
+=======
+- Decide：Owner回答待ち。Game Directorが06で範囲判断をエスカレーションした。案Aは連続ラン・最終勝利・ラン先頭からの再挑戦を含め、案Bは今回のGoalを選択式の単体ボス戦へ変更する。配置・詳細仕様は未確定。現InterpretationはOwner回答後のResumeまで変更しない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| 3 | Decide | game-director | make-decision, prepare-owner-escalation | open | 05-studio-to-game-director.md |
+=======
+| 3 | Decide | game-director | make-decision, prepare-owner-escalation | done | 05-studio-to-game-director.md → 結果: 06-game-director-to-owner.md |
+| 3a | Decide | owner | — | open | 06-game-director-to-owner.md |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+原則として逐次実行する。Game Directorの方向判断後にDesign、Planへ進む。Owner判断が必要になった場合は依存する後続Stepを停止する。Art DirectorのVerifyが必要になった場合は、同じビルドに対するQAのVerifyと独立に並行できる。
+=======
+原則として逐次実行する。現在はOwner回答待ちのため、後続のDesign・Plan・Build・Verify・Play・Review・Nextを停止する。plannedは回答後に再計画する候補を示し、開始を許可しない。Art DirectorのVerifyは依存が未確定のためtentativeを維持する。独立して継続するStepはない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Technical Directorの静的調査を完了し、予定どおりGame Directorの配置・範囲判断を開く。連続ラン不在と実行未確認を明示し、Goal再解釈・大幅な範囲変更はOwner判断へ戻す。攻撃切替・表示・終端の複数システムへの影響から、設計後のPlanをplannedに確定した。
+=======
+Game DirectorのDecideを06のEscalationで完了。連続ラン新設による大幅な範囲拡大、または選択式ボスへのGoal再解釈が必要なためblocked-on-ownerとし、Owner判断を開く。依存する後続Stepを停止し、Interpretationと実装範囲は未変更のまま回答を待つ。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Game Directorが `05-studio-to-game-director.md` から配置・既存第5部屋・終端と再挑戦の範囲を判断する。権限内ならDecisionとStudio宛Handoffを、Owner判断が必要ならEscalationを作成する。次の操作はこのDecide Step。
+=======
+Ownerが `06-game-director-to-owner.md` に回答する。Aは連続ラン・最終勝利・ラン先頭からの再挑戦まで含める案、Bは今回のGoalを選択式の単体ボス戦へ変更する案。Studio推薦はA。回答後のResumeでOwner Decisionを記録し、Escalationをresolvedにして、選択内容に沿って再計画する。方向DecisionのためGame Directorへ戻し、その後Design・Planへ進む。今回のRouteでは新しいRole Stepを開かない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+未完了。初回Designと技術的な静的調査を完了した。配置・範囲の決定、仕様確定、実装、検証、体験評価は未実施。技術調査は実行成功やQA合格を示さない。
+=======
+未完了・Owner判断待ち。初回Design、技術的な静的調査、Game Directorによる範囲判断のEscalation準備を完了した。06で案Aを推奨しているが、Owner承認と方向Decisionは未確定。仕様確定、実装、検証、体験評価は未実施。指定shaとの一致や実行挙動も未確認であり、技術調査は実行成功やQA合格を示さない。Goalは閉じず、project.mdのCurrent stateは変更しない。
+>>>>>>> REPLACE
+>>>END

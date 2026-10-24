@@ -1,0 +1,45 @@
+<<<EDIT goals/G-003-dash-readiness/02-game-designer-to-gameplay-engineer.md
+<<<<<<< SEARCH
+- Skills: as listed in the Role's typical skills (the Studio settles them when routing)
+=======
+- Skills: studio/skills/implement-change.md
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+- Project: design/dash-readiness.md, repo/manual.md, design/combat.md (Player kit, Timing rule), the build in `repo/`
+=======
+- Project: design/dash-readiness.md, repo/manual.md, design/combat.md (Player kit, Timing rule), project.md#constraints, the build in `repo/` (run commands in project.md: tests `python3 -m unittest discover -s tests`, play `python3 play.py --view player {script}`, trace `python3 play.py --view trace {script}`)
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT goals/G-003-dash-readiness/goal.md
+<<<<<<< SEARCH
+- Diagnose: open. What does the player view show about dash availability today, and what rule governs it? → Design step (diagnosis kept brief, inside the spec).
+=======
+- Diagnose: done (inside the Design step). The player view shows no dash state and refusals print one generic message; the documented rule is ambiguous (recharge start). No rule change needed.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+- Design: open. The display is not specified, and acceptance criteria are needed.
+=======
+- Design: done. `design/dash-readiness.md` specifies the display with criteria DR1–DR13. Open for Build to confirm: the real cooldown start/ready time, all refusal causes, and whether room entry or retry resets the timer.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| 1 | Diagnose + Design | game-designer | diagnose-experience, write-design-spec | open | 01-studio-to-game-designer.md |
+| 2 | Build | gameplay-engineer | implement-change | planned | — |
+=======
+| 1 | Diagnose + Design | game-designer | diagnose-experience, write-design-spec | done | 01-studio-to-game-designer.md (result: 02-game-designer-to-gameplay-engineer.md) |
+| 2 | Build | gameplay-engineer | implement-change | open | 02-game-designer-to-gameplay-engineer.md |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Intake: first route written. No changes yet.
+
+## Next action
+
+Start step 1 with `01-studio-to-game-designer.md` (game-designer).
+=======
+After step 1: spec complete, no rule change or direction choice needed, so Decide and Plan stay skipped. Build opens. Build's result goes to `studio` so Verify and Play can get clean Handoffs.
+
+## Next action
+
+Start step 2 with `02-game-designer-to-gameplay-engineer.md` (gameplay-engineer, implement-change).
+>>>>>>> REPLACE
+>>>END

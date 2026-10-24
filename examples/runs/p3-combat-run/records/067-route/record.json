@@ -1,0 +1,106 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "31ec8866-f33d-4c3d-87f9-3507438afb0e",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 38691,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 1942,
+    "output_tokens_details": {
+     "thinking_tokens": 1838
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 38691,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 1942,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 38691,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 38691
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.174188,
+   "attempt": 1,
+   "started": "2026-10-11T15:31:51",
+   "seconds": 21.0,
+   "errors": [
+    "goal.md must be written"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "b90c44d0-3ea0-4255-bb0f-e64125564363",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 38742,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 21040,
+    "output_tokens_details": {
+     "thinking_tokens": 2285
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 38742,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 21040,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 38742,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 38742
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.36537200000000003,
+   "attempt": 2,
+   "started": "2026-10-11T15:32:12",
+   "seconds": 111.1,
+   "errors": [
+    "goals/G-001-combat-monotony/56-studio-to-playtester.md: playtester may not load goals/G-001-combat-monotony/53-game-designer-to-studio.md"
+   ]
+  }
+ ],
+ "status": "rejected"
+}

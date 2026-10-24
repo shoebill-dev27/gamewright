@@ -1,0 +1,121 @@
+<<<FILE goals/G-001-combat-monotony/57-playtester-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 57
+from: playtester
+to: studio
+stage: Play
+outcome: done
+---
+# 57: playtester → studio — Observation report for build 0.8, rooms 1 to 5: record sheet mostly not available
+
+## Task
+
+Report what I observed playing build 0.8, rooms 1 to 5, using the record sheet from handoff 56.
+
+## Context
+
+This is a dry run. The only thing I could "run" was the text description `sim/build-0.8.md`. I did not play live, I had no clock, no log, no controller input and no recorded session. I could not count hits, deaths, clear times or log lines. Where the sheet asks for something I did not count or measure, I write "not available". Anything marked **(read)** comes from the build description. It is not something I saw or counted in play.
+
+Player profile used: an action player who wants short, intense runs, is comfortable with dodging and spacing, and plays on a gamepad.
+
+## Findings
+
+### Method actually used
+
+- I read the build description once and walked each room through in my head and in notes.
+- I did not play live, use input automation, or watch a recorded session.
+- I have no numbers from play. Nothing below is a measurement.
+
+### PLAYTEST RECORD SHEET
+
+**Part A. Held positions, rooms 4 and 5**
+
+I did not do any of the 50 attempts (room 4 and room 5, NW/NE/SW/SE/Centre, attempts 1 to 5). All 50 are missing.
+
+For every one of them:
+- Hits taken: not available
+- Died: not available
+- Held the position the whole attempt: not available
+
+The description says whether you take hits depends on room size and speeds, and it does not state those. I therefore did not guess hit counts.
+
+What the description says about holding a corner **(read, not observed)**:
+- A player in a corner sees arrivals on the other edges, 5 or more tiles away, unless the fallback applies.
+- A Spitter whose home corner is covered appears at the far end of its wall.
+- Grubs from opposite edges can reach you at about the same time.
+
+**Part B. Free play, rooms 1 to 5**
+
+I did not play the rooms. For every room, the following are therefore not available:
+- F1 (dashes in combat and why): 0 dashes made by me, because I did not play. I have no combat reason to report.
+- F4 (where I was, whether and where I moved before the enemy appeared, step-by-step actions): not available.
+- F5 (leaving my spot, how often, why): not available.
+- Hits taken and died: not available.
+
+F2 and F3 below describe what the description says the player would see **(read)**.
+
+| Room | Arrivals and edges (read) | F2: what draws attention (read) | F3: simultaneous arrivals on the floor (read) |
+|---|---|---|---|
+| 1 | Grub at the west edge at the start. A second Grub 1.0 s later, also west, further along the wall. A Spitter at the east edge, mid-height, at the start. No wave 2. | An orange-red ring with an amber dot on the floor, 0.8 s before the enemy appears. | At the start, 2 rings: a west Grub and the east Spitter. The second Grub's ring follows 1.0 s later. |
+| 2 | Same as room 1. Wave 2 is 1 Grub at the east edge. | Same ring. | Same as room 1. Wave 2 may begin while wave 1 enemies are alive. |
+| 3 | Wave 1 has 2 west Grubs and a Spitter at the north edge near the NE corner. Wave 2 has 2 Grubs on the east edge, one nearer the north and one nearer the south, ringing together. | Same ring. | Wave 2 shows 2 rings at the same moment on the east edge. |
+| 4 | Wave 1 has 2 west Grubs ringing together, 1 east Grub, and a Spitter at the north edge near the NW corner. Wave 2 has a north Grub and a south Spitter near the SE corner. | Same ring. | Wave 1 has at least 2 rings together on the west edge. I did not see the exact count on the floor. |
+| 5 | Wave 1 has 2 west Grubs, 1 east Grub, a south Spitter near the SW corner and a north Spitter near the NE corner. Wave 2 has a north Grub and a south Grub ringing together. | Same ring. | Wave 1 has rings on the west, east, south and north edges. Wave 2 has 2 rings together, north and south. |
+
+I never actually noticed any arrival. The "when I first noticed it" part of F2 is not available. The description says the ring is visible for its whole 0.8 s from 8 or more tiles away, including outside the lantern's light.
+
+**Part C. Records and measurements**
+
+- `SPAWN_FALLBACK` lines per room (rooms 1 to 5): not available. I have no log.
+- Time between the two enemies of each "at the same time" pair:
+  - Measured by me: not available.
+  - From the description **(read, scheduled time, not measured)**: 0 s between ring starts and appearances for room 3 wave 2, room 4 wave 1 west edge, room 5 wave 1 west edge, and room 5 wave 2. The description allows up to about 0.034 s of frame difference at 30 FPS.
+  - The +1.0 s Grub in rooms 1 to 3 is scheduled 1.0 s after the first Grub (read).
+- Real elapsed time for a full run and clear time per room: not available. I had no clock and did not play.
+- Values:
+  - Grub speed: not available
+  - Player speed: not available
+  - Projectile speed: not available
+  - Projectile range: not available
+  - Player hearts: not available
+  - Room size (width by height): not available
+  - Grub, player and Spitter hitbox sizes: not available
+  - The description states that these are not given, and I could not measure them.
+  - Read from the description, not measured: a Grub takes two swipes, the dash lasts 0.25 s, the dash cooldown is 0.6 s, and the post-hit protection is 0.8 s with a 0.3 s stun.
+- Surprises or damage from nowhere: none. I took no damage because I did not play.
+
+### Other observations (from reading, not from play)
+
+- A room no longer starts with enemies on the floor. A ring warns of each arrival 0.8 s ahead, so arrivals should be readable and not feel unfair.
+- A Spitter does not fire for 1.0 s after appearing, which gives time to react.
+- Wave 2 can start early after a kill, before the room looks nearly empty. A player could find that sudden. I cannot say how it felt.
+- I cannot say whether standing still is still a good answer in rooms 4 and 5. That needs live play and the room size.
+- The ring is described as a placeholder. I could not judge how it looks.
+
+## Decisions already made
+
+None that concern me.
+
+## Constraints
+
+- I worked only from the build description and the player profile. I opened no design documents, earlier handoffs, decisions or other builds.
+- I reported no cause or implementation guesses.
+
+## Open questions
+
+- The sheet needs real play (live, automated or human) to produce Part A, Part B and the measured parts of Part C. Please route it to an executor that can run the build, with a clock and the debug log.
+
+## Expected output
+
+This report goes to `studio`. Part A, Part B and most of Part C are not available from this dry run.
+
+## Load
+
+- Role: studio/roles/playtester.md
+- Skills: studio/skills/playtest-session.md
+- Project: project.md#player-profile; sim/build-0.8.md
+- Decisions: none
+- Previous handoff: none
+>>>END

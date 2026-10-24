@@ -1,0 +1,157 @@
+---
+kind: handoff
+goal: G-001
+seq: 50
+from: qa
+to: studio
+stage: Verify
+outcome: pass
+---
+# 50: qa → studio — Narrow re-verify of Phase 1 against `sim/build-0.7.md`: criteria 3, 4 (first-shot basis), 5, 10 (c, d, g) pass; criteria 1 and 2 deferred to playtest; no regression; wording items listed
+
+## Task
+
+Record the verdicts below. All in-scope criteria pass at 30 and 60 FPS. Criteria 1 and 2 (Phase 1 part) are recorded as **deferred to playtest** (D-009), not as pass or fail. The result is "verified, with 1 and 2 open" (spec 6a). It must not be counted as criteria 1 and 2 met. Route the wording items under "Open questions" as stated. None of them fails a criterion.
+
+## Context
+
+G-001 Phase 1. Build under test is `sim/build-0.7.md`. The regression baseline for unchanged behavior is `sim/build-0.5.md`, the same method as handoff 40. The amended spec `design/g001-combat-escalation.md` (3.3, 3.8, 6, 6a, criteria 1–5 and 10) and D-003, D-008 and D-009 were read. Evidence form: **build description against spec text**. This is not a counted or scripted run. Every "pass" means "the description states the required behavior at both frame rates", not "observed N times". The statements in handoff 48 were used only to know what to check, not as evidence.
+
+## Findings
+
+### Verdicts
+
+| # | Scope | 30 FPS | 60 FPS | Evidence |
+|---|---|---|---|---|
+| 1 | Phase 1 | deferred to playtest | deferred to playtest | D-009 and spec 6a. No counts exist, and build 0.7 states room size and speeds are not available. Not passed, not failed. |
+| 2 | Phase 1 part | deferred to playtest | deferred to playtest | Playtest signal only (D6). Build 0.7: "This build does not change what [dash] does." Not passed, not failed. The P2 part is out of scope. |
+| 3 | Room differences | pass | pass | Table below. |
+| 4 | First-shot basis (P1) | pass | pass | See "Criterion 4". |
+| 5 | Same points, times within 1 frame, 1-tile margin rule | pass | pass | See "Criterion 5". |
+| 10 | (c) point choice | pass | pass | Build "Choice of arrival point" steps 1–3. |
+| 10 | (d) occupancy | pass | pass | Build step 1 and its occupancy definition. |
+| 10 | (g) mixed case | pass | pass | Build step 2 and step 3. |
+| Regression | Dash, hit-stun, invulnerability vs 0.5 | no change | no change | See "Regression". |
+
+I did not re-check sub-items (a), (b), (e) and (f) or criterion 4's other parts as scope items. Their build text has the same content as in handoff 40 and is unchanged in wording. (e) is covered by the room 3 and room 5 notes below.
+
+### Criterion 10 (c), (d), (g)
+
+- **(c)** "The first point on the list that is at least 5 tiles from you and free is used." The build decides once per enemy "at the moment its ring starts". If none passes both tests, "the farthest free point is used, even if it is closer than 5 tiles". This matches spec 3.3 steps A and B.
+- **(d)** "A point is not free if a ring is active there or a living enemy is within 1.5 tiles of it." Matches 3.3 occupancy. "Enemies that have not yet started their ring do not count as occupying a point." This is consistent with the spec's occupancy definition (active marker or living enemy).
+- **(g)** Step 2: "A near free point is therefore chosen over a far occupied one." Step 3: "If every point is occupied, the farthest point overall is used." Step 4: "if two points are equally far, the one earlier in the enemy's list is used", for steps 2 and 3. This matches 3.3 steps B and C, the case table, the tie rule, and 10(g).
+- **Logging:** each step 2 or 3 choice writes `SPAWN_FALLBACK` (the spec requires a line for every step B or C choice). A normal choice writes `SPAWN_POINT`.
+- **Same-start order:** the build says "handled one after another in a fixed order. A ring started by an earlier one counts as occupying its point when the next is chosen." This matches spec 3.2a ("table order") in effect. It does not name "table order" (see Open questions).
+- **30 vs 60 FPS:** the choice is read "at the first game update at or after the scheduled ring start". This is the same as spec 3.3. The only stated difference is the up-to-one-frame (about 0.034 s) later sample.
+
+### Criterion 4: first-shot basis
+
+- Build: "A Spitter does not fire when it appears. Its first shot comes 1.0 s after its scheduled appearance, and then one every 2 s. The shot times follow the schedule, not the frame on which they are noticed." The spec basis is scheduled appear + 1.0 s, no tolerance, on logged scheduled timestamps. This matches.
+- The shot log line "carries the scheduled shot time". The build does not say whether the **appearance** log line carries the scheduled time or the frame time. The no-tolerance check needs both scheduled values (see Open questions).
+- A visible-frame gap up to one frame under 1.0 s at 30 FPS is the allowed frame effect (spec 3.3 and criterion 4). The build states the appearance "can land up to one frame … later". I did not treat that as a failure.
+- Other criterion 4 P1 parts (nothing exists or damages before the ring ends, the 5-tile rule with a logged fallback, on screen) are stated unchanged: "No enemy exists, moves or attacks while its ring is on the floor"; "Standing in a ring does nothing to you"; "Arrivals are inside the room and on screen."
+
+### Criterion 5: sampling and margin rule
+
+- The marker end and appearance use scheduled timestamps: "The enemy appears at the ring's centre 0.8 s after the ring's scheduled start." Spitter shots follow the schedule. Ring starts, appearances, wave starts and shots match "within one frame at 30 FPS (0.034 s)".
+- Points are identical except the stated boundary case: a fast move across a 5-tile boundary in the sampling gap. Under the spec's script rule (every relevant mover at least 1 tile clear of the 5-tile and 1.5-tile thresholds at each marker start; the larger margin once speeds are known), the one-frame sampling difference cannot change a point. So points must match exactly and the description supports that.
+- Speeds are not shown, so the larger margin (twice the fastest mover's distance per 30 FPS frame) cannot be computed. The 1-tile margin applies for now. A stationary player and stationary Spitters are the safest script.
+- No difference beyond one logic frame between 30 and 60 FPS is stated or implied. The point difference is stated only for threshold-adjacent cases, which the margin rule excludes from scripts.
+- Spawn choice has no RNG: "nothing about the choice is random."
+
+### Criterion 3: room comparison (build 0.7 table and edge text)
+
+| Room | Count | Mix | Edges | Waves | Differs from previous |
+|---|---|---|---|---|---|
+| 1 | 3 | 2G 1S | W, E | 1 | n/a |
+| 2 | 4 | 3G 1S | W, E | 2 | count, mix, waves (3) |
+| 3 | 5 | 4G 1S | W, E, N | 2 | count, mix, edges (3) |
+| 4 | 6 | 4G 2S | W, E, N, S | 2 | count, mix, edges (3) |
+| 5 | 7 | 5G 2S | W, E, N, S | 2 | count, mix (2) |
+
+Totals and wave splits in the build table are the same as the spec table 3.2: room 4 is 3G+1S then 1G+1S, room 5 is 3G+2S then 2G. Room 5 differs from room 1 in all four (count, mix, edges, waves). Pass.
+
+### Ring change: checked against the build text
+
+The visual spec (`design/g001-telegraph-visuals.md`, A1–A3) was not in this packet. I did not judge the ring look against it. The look stays with the Art Director. The statements in 48 were compared with the build text:
+
+| Statement | Build 0.7 text | Result |
+|---|---|---|
+| Solid phase 0.6–0.8 s, dot `#FFC14D` full brightness, no white or blue tint, no white bloom | "the ring is solid at full brightness and the dot is amber `#FFC14D` at full brightness. The dot does not turn white or blue-tinted. Any glow … is only `#FFC14D` or `#FF5A1F`." | matches |
+| Dim amber dot before 0.6 s | "Before 0.6 s the dot is a dimmer amber." | matches |
+| Self-lit, independent of the lantern | "lit by themselves, not by the lantern. They look the same inside and outside the lantern's light." | matches |
+| 40% at 0.0 s, 100% at 0.6 s, 100% to 0.8 s | "At 0.0 s the ring is at 40% … full brightness at 0.6 s", then solid at full brightness to 0.8 s | matches. The build says "steadily", not "linearly in game time". It is compatible, and look and timing are stated the same at 30 and 60 FPS. |
+| Burst only `#FF5A1F` and `#FFC14D`, at most 0.15 s | stated exactly | matches |
+| Outline, no fill. Overlap no brighter than one ring's peak, each ring keeps its dot | stated | matches |
+| Unchanged: colour `#FF5A1F`, about 1.5 tiles shrinking to about 0.75, solid from 0.6 s, burst and appearance at 0.8 s | stated | consistent. I did not compare against 0.6 (not in the packet). |
+
+Timings are confirmed: the ring lasts 0.8 s from its scheduled start, the solid phase is 0.6–0.8 s, and the appearance is at 0.8 s.
+
+### Regression against `sim/build-0.5.md` (handoff 05 criteria 1–6)
+
+Result: **no regression found.** This is description against description, and the "20 repeats per frame rate" were not run.
+
+- Dash with no hit gives 0.25 s of protection. A hit gives 0.8 s of protection and 0.3 s of stun. The three dash-after-hit windows (0.3–0.55 s, 0.55 s to just under 0.8 s, 0.8 s or later) match 0.5. Grub and Spitter sources, toward or away, and the boundary rule (a damage event at exactly 0.8 s or 0.25 s counts as after protection) are unchanged.
+- Hit-stun input matches 0.5 and D-003:
+  - presses in the first 0.3 s do nothing and nothing fires when the stun ends;
+  - a held button needs a fresh press;
+  - a press exactly at 0.3 s may differ by one frame between rates;
+  - a swipe pressed during a dash fires when the dash ends;
+  - a hit cancels waiting requests.
+- Dash distance, duration and the 0.6 s cooldown are unchanged. There is no new input (D-001). Enemy health, speeds and attacks are "as before".
+- Wording omissions against 0.5 that I did not treat as changes:
+  - 0.5 says "the dash cooldown does not start" for a dash pressed in stun, and 0.7 does not repeat it;
+  - 0.5 says a hit cannot land during a dash, so a queued swipe never overlaps the stun, and 0.7 does not repeat it.
+  The behavior is still covered by "does nothing" and "unchanged from the previous build".
+
+### Carried requests
+
+1. **Existing values (spec 3.8):** **not shown.** Build 0.7 says Grub speed, player speed, projectile speed and range, player hearts, room size (width by height), and Grub, player and Spitter hitbox sizes are "not available from this build". The only qualitative facts are that a Grub takes two swipes and the Spitter projectile is slow with one sidestep avoiding it.
+2. **`SPAWN_FALLBACK` count per room:** **not available.** There is no log excerpt and no run. The build says a tester can count it.
+3. **Heading vs file name:** `sim/build-0.7.md` has the heading "Simulated build 0.3.3". My handoff 40 recorded the same heading for 0.6, so the heading does not distinguish 0.6 from 0.7. `sim/build-0.5.md` has "0.3.2". This is a labeling mismatch only. I treated the file name as the version.
+
+## Decisions already made
+
+- D-001 (no new input), D-003 (input in hit-stun ignored), D-004 (numbers as data), D-007 (verify against the newest description), D-008 (Phase 1 spawn and wave rules), D-009 (criteria 1 and 2 deferred to playtest).
+- Nothing here changes a decision.
+
+## Constraints
+
+- I did not pass criteria 1 or 2 and did not lower thresholds. I did not decide design values.
+- Verdicts rest on the description only. Any later counted run supersedes them.
+
+## Open questions
+
+Answers to the open questions in handoff 48:
+
+1. **Tie-break and same-start order vs the amended spec.**
+   - Tie-break "earlier list entry wins on equal distance" (steps B and C): consistent with spec 3.3, criterion 10(g) and D-009.
+   - "Same-start enemies in table order": spec 3.2a states it ("Process enemies of the same marker start in table order"). Spec 3.3 and the criteria do not repeat it.
+   - The sentences "an earlier enemy's new marker is active when the next is evaluated" and "pending enemies do not count as occupancy" are in the build but not stated as such in the spec. They follow from the 3.3 definition of occupancy (active marker or living enemy within 1.5 tiles).
+   - **Design item for `game-designer` (not a failure):** add these two sentences, and the "same logic frame" wording, to 3.3 so that spec and build match word for word.
+   - **Build wording item:** the build says "a fixed order", not "table order". Determinism (10(f)) is satisfied. The build should name the order, or the spec should state that table order is the intended fixed order.
+2. **Leftover wording in `sim/build-0.7.md`.**
+   - **No "near-white" leftover.** The word appears only in the negation: "No part of it is white, near-white or cold-white."
+   - **Rooms 1–2 Spitter position (wording conflict).** The build says generally "Spitters appear about 1.5 tiles along the wall from a corner". Spec 3.4 puts the rooms 1–2 Spitter at E2 (mid-height), with E1 and E3 as alternatives. E1 and E3 are 0.25H from the corners, so that sentence is true only for the rooms 3–5 corner-covering Spitters. Build 0.7 says only "east edge" for room 1. Not changed by this Build and not part of the ring change, so it is not a fail. The Build should limit that sentence to rooms 3–5, and `game-designer` should confirm.
+   - **Room 3 Spitter corner not named.** It says "north edge near a corner" (compatible with NE, not confirmed). The `SPAWN_POINT` line in a run would show it.
+   - **Simultaneous-ring examples incomplete.** The overlap sentence names only room 3 wave 2 and room 5 wave 1 (west edge). Room 4 wave 1 also has two Grubs on the west edge at once, and a fallback can place them 0.25H apart. The general overlap rule applies there too. Wording only.
+   - **Sampling caveat is partial.** It names only a fast move across a 5-tile boundary. The 1.5-tile occupancy threshold against a moving Grub is not mentioned. The spec's margin rule covers both.
+   - **"Solid" ring.** The build says "the ring is solid" in 0.6–0.8 s and also "an outline with no fill". I read "solid" as line style at full brightness, not a fill. Art Director to confirm.
+   - **Log basis.** The build does not say whether the appearance log line carries the scheduled time or the frame time. The shot line carries the scheduled time. The criterion 4 no-tolerance check needs both scheduled values. This is a request for the Build's log description or the next playtest log, not a fail.
+3. **Local loop limit.** No numbered criterion text or needed input is missing for the in-scope criteria. For criteria 1 and 2, the playtest counts named in spec 6a (hits per attempt and death per position in rooms 4 and 5, 5 attempts each; dash in combat per room 1–5 with reasons) do not exist. They are by design deferred to the playtest. The visual spec A1–A3 was not in the packet.
+
+## Expected output
+
+For `studio`:
+1. Record criteria 3, 4 (first-shot basis), 5 and 10 (c, d, g) as pass at 30 and 60 FPS, with the evidence form above (build description, not a counted run). Record the regression check as no change.
+2. Record criteria 1 and 2 (Phase 1 part) as **deferred to playtest**. The Phase 1 status is "verified, with 1 and 2 open". The playtest must supply the 6a counts, the existing values, the `SPAWN_FALLBACK` counts per room, the arrival gaps of simul. Grubs, and the real run time.
+3. Route the design item (record the order and occupancy sentences in spec 3.3) to `game-designer`. Route the build wording items (naming "table order", limiting the 1.5-tile Spitter sentence to rooms 3–5, the appearance log basis, and the heading 0.3.3) to `gameplay-engineer` for the next build description. These do not reopen the verdict. The ring look and the "solid" wording go to `art-director`.
+4. No failure, so no return to Build. If a later check fails, `gameplay-engineer` gets the failure report. A second failure of the same criterion goes to `technical-director`.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: design/g001-combat-escalation.md (sections 3.3, 3.8, 6, 6a, criteria 1–5 and 10); goals/G-001-combat-monotony/05-qa-to-studio.md; sim/build-0.7.md; sim/build-0.5.md; project.md#constraints
+- Decisions: decisions/D-003-input-during-hit-stun.md; decisions/D-008-phase-1-spawn-and-wave-rules.md; decisions/D-009-judging-basis-criteria-1-and-2.md
+- Previous handoff: goals/G-001-combat-monotony/48-studio-to-qa.md

@@ -1,0 +1,4 @@
+<<<FILE @run/play/r4-idle
+room 4
+end 8
+>>>END

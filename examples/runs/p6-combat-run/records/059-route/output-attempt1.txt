@@ -1,0 +1,278 @@
+Routing: 53 and 54 are both done. Neither triggers an escalation. The designer's fixes (A1–A3, A5) are tuning and rules within Option A, and the facing question (D1) is held back. Three steps open in parallel: QA checks the open facts, the designer updates the spec, and the art director handles the "on you" display. Build, Verify, Play and Review follow.
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-15
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): when an action player from the project's player profile plays through combat encounters, the fights feel varied and engaging, and the player's moment-to-moment choices (positioning, timing, enemy behavior) visibly matter. The player no longer experiences the fights as the same repeated pattern.
+
+Out of scope: adding input buttons beyond attack, dash and pause (D-001, Owner approval needed); changes to the run length or the non-combat systems; numeric targets (these belong to Design as acceptance criteria, and the final verdict to Review).
+
+No immediate escalation: the Goal does not conflict with the vision or D-001, and it needs no reinterpretation. Improving depth through positioning, timing and enemy behavior is what pillar 1 asks for.
+
+## Unknowns
+
+- Observe (playtester, qa): done (02, 08, 06, 15). Open again for qa (55): short bite warning seen at about 11.9 s (54), real dash distance, swipe during Strike or adjacent Recovery, dash and facing, "on you" swipe, knockback distance, bots script format and bot data.
+- Diagnose, Decide: first pass done (03; D-002, D-005, D-006). Second Diagnose pass done (53): room 1 and room 2 are harsh (grubs arrive together, 0.3 s stun blocks the counter, interrupt and knockback not taught, facing and dash edge cases unspecified). Remedies A1 wind-up spacing, A2 shorter stun, A3 body-hit rule, A5 spec gaps are the designer's. D1 (facing) and D2 (room 1 composition) are held for a retest, not routed to the director now. Causes came from scripted play and reasoning only; no bot or trace data.
+- Design: done for the spec (10, 16, 33, 45; `design/combat.md`, D-003, D-006, `design/combat-visuals.md`, D-009). Open again: A1/A2/A3/A5 spec update and manual draft (56); "on you" and "which grub hit you" display (57).
+- Plan: done (14, D-004). Tentative: a new Plan only if A1 is not local to existing systems.
+- Build: done for the previous change set; a new Build follows Design (and QA results if they show defects). Manual changes are placed by the Owner (D-005, D-007 pattern).
+- Verify: done for the previous build (AC-1…AC-18 hold, D-010). The next build needs its own Verify (qa, plus art-director if visuals change).
+- Play: two sessions saw only rooms 1 and 2 by script (50, 54), with defeats. Rooms 3–5, the spitter, projectile hits, room clear, the dash and a survived run are still unobserved, so monotony itself is still unjudged. Next Play follows the rebuild, with a fresh playtester, told to cover rooms 3–5 and to react.
+- Review: `game-director` with `review-outcome`. Planned, after the rebuild and the next Play. Open: run progression after "run over"; F1, F4, F6, F7; numbering of same-type enemies in one cell; D1, D2.
+- Skipped: none.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 02-playtester-to-game-designer.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-game-designer-to-game-director.md |
+| 3a | Decide | game-director | make-decision | done | 05-game-director-to-studio.md |
+| 3b | Observe (defects) | qa | reproduce-defect | done | 06-qa-to-game-designer.md |
+| 3c | Observe (rooms 4–5) | playtester | playtest-session | done | 08-playtester-to-game-designer.md |
+| 4 | Design | game-designer | write-design-spec | done | 10-game-designer-to-studio.md |
+| 5a | Plan | technical-director | technical-plan | done | 14-technical-director-to-studio.md |
+| 5b | Observe (spit line) | qa | reproduce-defect | done | 15-qa-to-studio.md |
+| 5c | Design (visuals) | art-director | visual-review, write-design-spec | done | 16-art-director-to-studio.md |
+| 6a | Build (code) | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md |
+| 6b | Build (`run_tests` check, manual placed) | gameplay-engineer | implement-change | done | 23-gameplay-engineer-to-studio.md |
+| 7a | Verify | qa | verify-change | done (question, no AC failed) | 26-qa-to-studio.md |
+| 7b | Verify (visuals) | art-director | visual-review | done (question, no build output) | 27-art-director-to-studio.md |
+| 7c | Verify (rerun: manual, runs, captures) | qa | verify-change | done (question, no AC failed) | 29-qa-to-studio.md |
+| 7d | Verify (visuals, from captures) | art-director | visual-review | done (fail: V-1, F3) | 32-art-director-to-studio.md |
+| 7e | Design (F1 overlap, AC-15 wording) | game-designer | write-design-spec | done | 33-game-designer-to-studio.md |
+| 7f | Build (F1/F3 render, manual paragraph) | gameplay-engineer | implement-change | done (render built) | 35-gameplay-engineer-to-studio.md |
+| 7f-O | Owner: place the manual paragraph | owner | — | done (Option A, D-007) | 36-studio-to-owner.md |
+| 7g | Verify (all but AC-15) | qa | verify-change | done (pass) | 37-studio-to-qa.md |
+| 7i | Verify (AC-15, `ManualTest`) | qa | verify-change | done (question: ManualTest blocked) | 38-studio-to-qa.md |
+| 7i-O | Owner: `ManualTest` result | owner | — | done (Option A, D-008: 39/40) | 42-studio-to-owner.md |
+| 7h | Verify (visuals) | art-director | visual-review | done (pass; V-6 from code, V-7 not seen) | 41-studio-to-art-director.md |
+| 7j | Design (`run over` manual test failure) | game-designer | write-design-spec | done (test too literal, D-009) | 43-studio-to-game-designer.md |
+| 7k | Build (test fix, line wraps) | gameplay-engineer | implement-change | done (test changed, suite not run) | 46-studio-to-gameplay-engineer.md |
+| 7k-O | Owner: place manual text | owner | — | skipped (manual unchanged, D-009) | — |
+| 7l-O | Owner: AC-15 rerun | owner | — | done (Option A, D-010: 40/40) | 48-studio-to-owner.md |
+| 7l | Verify (AC-15 rerun by QA) | qa | verify-change | skipped (Owner's 40/40 run, D-010) | — |
+| 8 | Play (room 1) | playtester | playtest-session | done (room 1 only, scripted, 2 defeats) | 49-studio-to-playtester.md |
+| 9a | Diagnose (Play findings) | game-designer | diagnose-experience | done (A1–A3, A5, B, C, D held) | 51-studio-to-game-designer.md |
+| 9b | Play (parts not yet seen) | playtester | playtest-session | done (thin: room 2 only, 1 script) | 52-studio-to-playtester.md |
+| 10a | Observe (open facts, bots) | qa | reproduce-defect | open | 55-studio-to-qa.md |
+| 10b | Design (A1–A3, A5, manual draft) | game-designer | write-design-spec, make-decision | open | 56-studio-to-game-designer.md |
+| 10c | Design (visuals: "on you", hit source) | art-director | visual-review, write-design-spec | open | 57-studio-to-art-director.md |
+| 10-O | Owner: place manual changes | owner | — | tentative (if the draft changes manual.md) | — |
+| 11 | Plan | technical-director | technical-plan | tentative (only if A1 is not local) | — |
+| 12 | Build | gameplay-engineer | implement-change | planned | — |
+| 13a | Verify | qa | verify-change | planned | — |
+| 13b | Verify (visuals) | art-director | visual-review | tentative (if 10c changes the view) | — |
+| 14 | Play (rooms 1–5, fresh playtester) | playtester | playtest-session | planned | — |
+| 15 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+After 9a/9b (53, 54): both done. The room 1–2 findings are tuning, rules and clarity within Option A, so no Decide now (D1/D2 held for a retest). 54 saw only room 2. Opened in parallel: QA fact checks and bots (10a), designer spec update (10b), art display (10c). Build, Verify, Play, Review follow.
+
+## Next action
+
+- `qa` starts 10a from `55-studio-to-qa.md`; the result is addressed to `studio`.
+- `game-designer` starts 10b from `56-studio-to-game-designer.md`; the result is addressed to `studio`.
+- `art-director` starts 10c from `57-studio-to-art-director.md`; the result is addressed to `studio`.
+- Then Route, waiting for all three. QA defects or a spec change go to Build; a QA finding that contradicts the spec's intent goes back to the designer; if the designer or the art director finds the cheap fixes insufficient or a facing change necessary, Decide (`game-director`).
+
+## Outcome
+
+(Filled at Close.)
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/55-studio-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 55
+from: studio
+to: qa
+stage: Observe
+outcome: routed
+---
+# 55: studio → qa — Check six open facts about the combat build and get bot reference data
+
+## Task
+
+Reproduce or settle the open facts below using `run_play`, `run_trace` and `run_bots`, and report each as it behaves in the build compared with `design/combat.md` and `manual.md`. Write a defect report with acceptance criteria for anything that contradicts the spec.
+
+## Context
+
+G-001 (combat feels monotonous). Two playtest sessions (room 1 in handoff 50; room 2 in 54) ended in quick defeats by scripted play, so the later combat has not been judged. Some of what the playtesters reported cannot be explained from the player view alone. Behavior that the spec does not cover is not a defect; report what happens so the designer can specify it.
+
+## Findings
+
+Facts to settle (the playtester's report, 54, is the previous Handoff):
+
+1. **Possibly short bite warning.** In the room 2 session the run restarted in room 1 after defeat. The log showed "a grub rears back (left)" at 11.90 s and a heart lost at 11.97 s (30 fps), about 0.07 s later. Other bites came about 0.5–0.65 s after their "rears back" line. Use `run_trace` to tell whether any grub strikes sooner than the spec's wind-up allows, or whether the line belonged to a different grub. Repeat at 30 and 60 FPS.
+2. **Dash distance.** How many tiles does a dash move in open floor, and next to a wall? A playtester judged it 2–3 tiles; the manual does not say. Compare with the spec.
+3. **Facing.** Does a dash change the player's facing? After a dash, does a swipe hit enemies in the original facing, or the dash direction? (The spec may be silent; report what happens.)
+4. **Swipe timing against grubs.** Does a swipe hit a grub that is (a) in Strike, (b) in Recovery while adjacent, (c) just after a first hit and knocked back? How many tiles does the knockback move it, and does the swipe print "(miss)" in the case where the grub is out of reach?
+5. **Grub "on you".** When a grub shares the player's tile, does a swipe hit it regardless of facing? Report for each of the four facings.
+6. **Bot reference data.** `run_bots` failed once with `script line 1: cannot read 'room 1'`: its script format differs from the play-script format. Find the right format (`repo/bots.py`, `repo/README.md`). Run a passive (idle) bot and, if available, a reactive bot on room 1, and on rooms 2–5 if possible. Report clear times, hearts lost and actions used, as numbers; do not judge balance.
+
+## Decisions already made
+
+- D-001: one attack button plus dash.
+- D-003: zero hearts ends the run; a room clear heals one heart.
+- D-006: enemies may overlap the player and are never hidden.
+
+## Constraints
+
+- Everything must hold at both 30 and 60 FPS.
+- Do not change the build. Report only.
+- Run at most the rounds you need; say clearly which of the six items you could not settle.
+
+## Open questions
+
+- Which of the six facts contradict `design/combat.md` or `manual.md`, and which are simply unspecified?
+
+## Expected output
+
+A report in a Handoff addressed to `studio`, with: for each of the six items the observed behavior (with the script or trace you used), whether it matches the spec, and for each contradiction a defect with severity and acceptance criteria. Bot data as a table.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/reproduce-defect.md
+- Project: design/combat.md, manual.md, project.md#constraints, the build `repo/` (`repo/README.md`, `repo/bots.py`)
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-003-run-end-and-room-rules.md, decisions/D-006-overlap-display-and-practice-room-manual.md
+- Previous handoff: goals/G-001-combat-monotony/54-playtester-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/56-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-001
+seq: 56
+from: studio
+to: game-designer
+stage: Design
+outcome: routed
+---
+# 56: studio → game-designer — Update the spec with A1, A2, A3, A5 and draft the manual changes
+
+## Task
+
+Specify the cheap fixes from your diagnosis (53) in `design/combat.md`: A1 wind-up spacing, A2 shorter stun, A3 body-hit rule, and the A5 gaps (dash and facing; the distance-0 swipe rule if A3 is not taken). Give each player-observable acceptance criteria that hold at 30 and 60 FPS. Also draft the group B manual changes.
+
+## Context
+
+G-001 (combat monotony), Option A (D-002). Your diagnosis (53) put the harshness of rooms 1–2 down to rules and tuning that your authority covers. The second playtest (54) agrees: in room 2, four grubs arrived together, reared back about 0.3 s apart, ended up in a ring around the player and bit in turns; the player was down in about 6 s and one swipe hit one of three adjacent grubs. Grubs on the player's tile were also hard to read (see handoff 57 for the display side). QA is checking the dash distance, facing and swipe cases in parallel (55); its results arrive after this step and may add defects, so settle the unspecified cases by rule, not by what the build happens to do.
+
+Studio decision on routing: D1 (facing change) and D2 (room 1 composition) are not routed to the director now, as you recommended.
+
+## Findings
+
+Points to cover beyond 53:
+
+- Check A1 against the room 2 ring: with four grubs, does spacing plus A3 let a player escape or counter, or should some limit on grubs adjacent to the player also be considered? Decide within your authority.
+- A4 (cone width) stays held back. State what result of a retest would bring it in.
+- Manual draft (group B): the interrupt, the knockback, the dash distance, the hit stun, and clearer wording for a swipe that is too far. Draft it as text in your outgoing Handoff for the Owner to place (D-005, D-007 pattern); do not edit `manual.md`. Keep the phrases that `ManualTest` checks (D-009).
+- A guideline for the retest: say what a skilled player should be able to do in room 1 and room 2, qualitatively, so the next Play and Review have something to judge against. Numeric thresholds only as acceptance criteria.
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no new input without the Owner.
+- D-002: Option A first; staggered arrival (part of B) deferred.
+- D-003: room mix across rooms; zero hearts ends the run; clear heals one heart.
+- D-006: enemies may overlap the player and are never hidden.
+
+## Constraints
+
+- All timings in seconds; hold at 30 and 60 FPS.
+- Reuse existing systems (small team).
+- Record a Decision (`make-decision`) for the A1–A3 package, since it constrains the build and Verify, including the alternatives you rejected (A4, D1, D2) and when to revisit.
+- If you conclude the cheap fixes cannot work without a facing mechanic or a room composition change, hand back to `studio` with the reason; that goes to `game-director`.
+
+## Open questions
+
+- Does A1 alone handle the ring of grubs in room 2, or is a second rule needed?
+- What should the dash do to facing?
+
+## Expected output
+
+An updated `design/combat.md` (new acceptance criteria numbered after AC-18), a Decision, the manual draft and a retest guideline. Outgoing Handoff addressed to `studio` (it routes to Build, and to the Owner if the manual changes).
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md, studio/skills/make-decision.md
+- Project: design/combat.md, design/combat-visuals.md, manual.md, project.md#constraints, goals/G-001-combat-monotony/54-playtester-to-studio.md (the second playtest report)
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-002-combat-response-scope.md, decisions/D-003-run-end-and-room-rules.md, decisions/D-006-overlap-display-and-practice-room-manual.md, decisions/D-009-manualtest-phrase-check-ignores-line-wraps.md
+- Previous handoff: goals/G-001-combat-monotony/53-game-designer-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/57-studio-to-art-director.md
+---
+kind: handoff
+goal: G-001
+seq: 57
+from: studio
+to: art-director
+stage: Design
+outcome: routed
+---
+# 57: studio → art-director — Make "grub on you" and "which grub hit you" readable
+
+## Task
+
+Review the player view's treatment of enemies on the player's tile and of hit messages, and specify improvements in `design/combat-visuals.md` (new V-items numbered after V-8) with player-observable acceptance criteria.
+
+## Context
+
+G-001 (combat monotony), Option A. Two playtesters in two sessions (rooms 1 and 2) reported the same confusion. When a grub shares the player's tile (D-006), the text lines read "the grub is open (on you)" or "rears back (on you)" and the glyph is drawn beside the player. The player could not tell which side the bite would come from or where to swing. The hit line "YOU ARE HIT by a grub" does not say which grub, when several are around, and the rooms often have two to four grubs close together. Threat readability is pillar 3.
+
+## Findings
+
+Observations (from the playtester reports; nothing about implementation):
+
+- "On you" lines appear several times per room-2 run. The playtester reported "the screen then draws them beside me" and could not tell the side of the bite.
+- With grubs both left and right, the player could not tell which one is the attacker in a hit line or which is open to a swipe.
+- The capital/lowercase glyph marks and "rears back (left)" lines were praised as easy to follow; keep them.
+
+The designer is separately adding a rule so a swipe always hits a grub on the player's tile (spec change in 56). The display must stay valid for that.
+
+## Decisions already made
+
+- D-006: enemies may overlap the player but are never hidden. This stands; improve how the overlap is shown, do not reverse it.
+
+## Constraints
+
+- Art direction: dark caves, warm light, saturated orange/red for threats.
+- The view is a text and glyph rendering; changes must fit it and must hold at 30 and 60 FPS.
+- Visual and text changes only. A rule or timing change belongs to the designer: hand back to `studio` if you need one.
+- Reuse the existing display where possible (small team).
+
+## Open questions
+
+- How to mark a displaced glyph (the "drawn beside you" case) so the player knows it is on their tile?
+- Should the hit line name the attacker's position (e.g., left/above/on you), and how does that fit the existing lines?
+
+## Expected output
+
+An updated `design/combat-visuals.md` with new V-items and acceptance criteria, and an outgoing Handoff addressed to `studio` (it routes to Build and Verify with the designer's spec).
+
+## Load
+
+- Role: studio/roles/art-director.md
+- Skills: studio/skills/visual-review.md, studio/skills/write-design-spec.md
+- Project: project.md#art-direction, design/combat-visuals.md, manual.md, goals/G-001-combat-monotony/54-playtester-to-studio.md (the playtest report)
+- Decisions: decisions/D-006-overlap-display-and-practice-room-manual.md
+- Previous handoff: goals/G-001-combat-monotony/54-playtester-to-studio.md
+>>>END

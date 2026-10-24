@@ -1,0 +1,18 @@
+{
+ "op": "Run",
+ "goal": "G-002",
+ "operations": [
+  "069-step-gameplay-engineer",
+  "070-route",
+  "071-step-qa",
+  "072-route",
+  "073-step-qa",
+  "074-route",
+  "075-step-technical-director",
+  "076-route"
+ ],
+ "stop_reason": "blocked-on-owner",
+ "status": "blocked-on-owner",
+ "owner_reads": "goals/G-002-final-boss/63-studio-to-owner.md",
+ "next": "decide examples/runs/p11-boss-run \"<answer>\""
+}

@@ -1,0 +1,13 @@
+{
+ "op": "Run",
+ "goal": "G-001",
+ "operations": [
+  "001-step-game-designer",
+  "002-step-art-director",
+  "003-route"
+ ],
+ "stop_reason": "rejected: 003-route: output rejected after 2 attempts",
+ "status": "active",
+ "owner_reads": null,
+ "next": "run examples/runs/p4-tidepool-run"
+}

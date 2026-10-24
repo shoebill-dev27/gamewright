@@ -1,0 +1,31 @@
+{
+ "op": "Run",
+ "goal": "G-001",
+ "operations": [
+  "015-route",
+  "016-step-qa",
+  "017-route",
+  "018-step-game-designer",
+  "019-route",
+  "020-step-gameplay-engineer",
+  "021-route",
+  "022-step-game-designer",
+  "023-route",
+  "024-step-gameplay-engineer",
+  "025-simulate-simulator",
+  "026-route",
+  "027-step-qa",
+  "028-route",
+  "029-step-game-designer",
+  "030-route",
+  "031-step-gameplay-engineer",
+  "032-simulate-simulator",
+  "033-route",
+  "034-step-qa",
+  "035-route"
+ ],
+ "stop_reason": "no progress: game-designer would be opened a 4th time in this run",
+ "status": "active",
+ "owner_reads": null,
+ "next": "run examples/runs/p4-tidepool-run"
+}

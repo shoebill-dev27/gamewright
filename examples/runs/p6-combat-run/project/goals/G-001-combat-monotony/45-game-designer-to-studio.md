@@ -1,0 +1,110 @@
+---
+kind: handoff
+goal: G-001
+seq: 45
+from: game-designer
+to: studio
+stage: Design
+outcome: done
+---
+# 45: game-designer → studio — ruling on `run over`: the manual is right, the test is too literal (fix b)
+
+## Task
+
+Ruling on why `test_manual_lists_glyphs_and_lines` fails, and which fix applies.
+
+## Context
+
+Owner's run (D-008): 39 of 40 pass. The failure is `'run over' not found in manual.md` at `tests/test_game.py` line 631.
+
+## Findings
+
+**Cause.** `manual.md` does contain the run-end text, but a hard line wrap splits the phrase. In "Rooms and runs":
+
+```
+- At zero hearts you are down: ... A moment later the screen reads "run
+  over — rooms cleared: N" and "press attack to start again". ...
+```
+
+The text is `run`, then a newline and two spaces, then `over`. The test does a plain `assertIn("run over", text)`, which cannot match across a line break. This is a test that is too literal about Markdown line wrapping. It is not a manual content gap and not a build wording problem.
+
+**Q1. Is `run over` shown to the player, and does the manual mention it?**
+- Yes. `play.py` prints `run over — rooms cleared: {rooms}` (`LINES["run_over"]`), followed by `press attack to start again`.
+- The manual quotes both lines, with the same wording and the same dash. D-003 and AC-13 are matched.
+- Nothing about the run end is missing from the manual.
+
+**Q2. Full phrase list and which are missing.** The test first checks every `play.GLYPHS` character in backticks. Then it checks these phrases:
+
+| Phrase | In `manual.md`? |
+|---|---|
+| `room empty` | yes (Script table, practice-room text) |
+| `rears back` | yes ("a grub rears back (left)") |
+| `is open` | yes ("the grub is open") |
+| `charges` | yes |
+| `spits` | yes |
+| `run over` | **no as a literal string**: split by a line break after `run` |
+| `press attack to start again` | yes, on one line |
+| `(miss)` | yes |
+| `(too soon)` | yes |
+| `(stunned)` | yes |
+| `(down)` | yes |
+| `room cleared` | yes ("room cleared" in quotes, one line) |
+
+- The glyph loop runs before the phrase loop and did not fail. Every glyph is present in backticks, including the swipe marks `)` `(` `^` `v`, as the table shows.
+- `run over` is the only missing phrase. The test stops at the first failure, but my reading of the manual shows no other phrase missing.
+- The list is not stricter than AC-15 requires. It checks that the manual names the glyphs and the lines the player sees, which is what AC-15 and V-5 intend.
+
+**Q3. Chosen fix: (b).** The manual needs no change, and the Owner does not have to place anything.
+
+Change for the Engineer, in `ManualTest.test_manual_lists_glyphs_and_lines` only:
+
+```python
+text = MANUAL.read_text(encoding="utf-8")
+flat = " ".join(text.split())   # a hard-wrapped Markdown line must not hide a phrase
+for key, (char, _) in play.GLYPHS.items():
+    self.assertIn(f"`{char}`", text, key)
+for phrase in (...same list, unchanged...):
+    self.assertIn(phrase, flat, phrase)
+```
+
+- Only the phrase check uses the whitespace-collapsed `flat`. The glyph check keeps `text`.
+- Do not change the phrase list. Do not touch `test_on_screen_section_lists_x_and_the_practice_room`; its strings are on single lines.
+- Do not change any code or build wording.
+
+Why (b) over (a): the manual reads correctly, and hard-wrapping is normal for Markdown. Changing the test removes a fragile dependency on where the Owner or a later editor wraps lines. With (a), a one-character Owner edit would fix this run, but the same break could reappear on any rewrap. (c) is unnecessary because the build wording already matches the manual.
+
+**Acceptance check.**
+1. The Engineer applies the test change above (Build).
+2. Run the full suite, `python3 -m unittest discover -s tests`, in an environment where the **unchanged** `manual.md` sits next to `repo/`. The expected result is 40/40.
+3. QA cannot run it in its own workspace because `manual.md` is absent there (29, 40). Either:
+   - the Owner (or their stand-in) reruns it as in D-008 and reports the result, or
+   - the Owner places the current `manual.md` beside `repo/` in the QA workspace, and QA runs `ManualTest` and the full suite.
+4. QA also confirms that `manual.md` still contains the D-007 paragraph and the "Rooms and runs" text above, with no edits. AC-15 passes only on 40/40.
+
+If the rerun fails on some other phrase, read the new failure message and rule on it from this table.
+
+No change to `design/combat.md`. AC-15 already requires `x` and the practice room in `manual.md#on-screen`, and the test does not check beyond it. The ruling is recorded in D-009. No change to D-001, D-003, or the pillars.
+
+## Decisions already made
+
+D-003, D-005, D-006, D-007, D-008 (all respected; `manual.md` is not edited).
+
+## Constraints
+
+Do not edit `manual.md`. The Engineer edits only the one test method.
+
+## Open questions
+
+None.
+
+## Expected output
+
+Studio routes the test change to `gameplay-engineer` (Build). After that, the Owner or QA runs the suite as in point 3 above and reports the 40/40 result (Verify, AC-15).
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: design/combat.md; manual.md; repo/tests/test_game.py
+- Decisions: decisions/D-009-manualtest-phrase-check-ignores-line-wraps.md
+- Previous handoff: goals/G-001-combat-monotony/43-studio-to-game-designer.md

@@ -1,0 +1,208 @@
+Route after step 7c (QA's handoff 29, `question`): no criterion failed. Two things are still open: a design ruling on F1 (the threat glyph is hidden when a grub stands on the player's tile) and on the AC-15 wording, and the art director's review from QA's captures. I'm opening these as two parallel steps.
+
+I did not escalate `ManualTest`. QA did a static check this time and found no difference, so the loop-limit trigger written into the goal's Next action ("no valid result and no static check either") is not met. If a later round again has no valid `ManualTest` result and nothing new supplied, that would be a third hand-back and goes to the Owner.
+
+I did not rewrite 29 in place, because neither recipient needs it changed. I also did not append to `log.md`, since it is not in the writable list for this operation.
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-15
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): when an action player from the project's player profile plays through combat encounters, the fights feel varied and engaging, and the player's moment-to-moment choices (positioning, timing, enemy behavior) visibly matter. The player no longer experiences the fights as the same repeated pattern.
+
+Out of scope: adding input buttons beyond attack, dash and pause (D-001, Owner approval needed); changes to the run length or the non-combat systems; numeric targets (these belong to Design as acceptance criteria, and the final verdict to Review).
+
+No immediate escalation: the Goal does not conflict with the vision or D-001, and it needs no reinterpretation. Improving depth through positioning, timing and enemy behavior is what pillar 1 asks for.
+
+## Unknowns
+
+- Observe (playtester): done (02 rooms 1–3, 08 rooms 4–5). Not observed: room 5 fight, approaching a spitter, projectile hits, room clear, dash dodging; the Play step after Build covers them.
+- Observe (qa): done (06, 15). The doubled spit line is a presentation defect covered by AC-8 and a Build requirement.
+- Diagnose: done (03). Cause: single-state, untelegraphed enemy behavior. Option A chosen (D-002); B deferred; C out of scope.
+- Decide: done (D-002, D-005).
+- Design: done (10, 16). Spec in `design/combat.md` (AC-1…AC-17), run/room rules in D-003, visual spec in `design/combat-visuals.md` (V-1…V-8). Reopened for two rulings (30): F1 (can a grub stand on the player's tile, and how does the telegraph read there) and the AC-15 wording (is the practice room required in the On screen section).
+- Plan: done (14, D-004). Gap defaults F1–F11 set by the technical-director; the designer confirms them at Review, F1 (grub speed) matters most.
+- Build: done (18, 22, 23). Build 0.5; `manual.md` placed by the Owner (D-005). Tentative: a further Build only if the designer's ruling on the grub-on-player overlap needs a build change.
+- Verify, 7a–7c (26, 27, 29): no AC observed failing. Most ACs now observed by QA at 30 and 60 FPS. Suite-only: AC-14 (room clear), AC-10 2-swipe kill, "(too soon)" and "(down)" lines. Pause (F11) not implemented, not verifiable. `ManualTest` has still no valid result (QA's workspace cannot have `manual.md` beside `repo/`); static check found no difference. A third hand-back for this with nothing new supplied goes to the Owner. Player view is plain text without `--color`; color known from code only.
+- Verify, visuals (7d): open. Art director reviews V-1…V-8 from QA's captures (29). V-6 may stay "specified, not verified".
+- Play: `playtester` replays the changed build, live and reactive, from a Handoff composed by the Studio from permitted information. Watch slot starvation. Planned, after the designer's ruling and any rebuild.
+- Review: experience Goal. `game-director` with `review-outcome`. Planned. Open for the designer/Review: run progression after "run over"; F1, F6, F7; numbering of same-type enemies in one cell; a still player going down in about 5 s (QA 29, tuning).
+- Skipped: none.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 02-playtester-to-game-designer.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-game-designer-to-game-director.md |
+| 3a | Decide | game-director | make-decision | done | 05-game-director-to-studio.md |
+| 3b | Observe (defects) | qa | reproduce-defect | done | 06-qa-to-game-designer.md |
+| 3c | Observe (rooms 4–5) | playtester | playtest-session | done | 08-playtester-to-game-designer.md |
+| 4 | Design | game-designer | write-design-spec | done | 10-game-designer-to-studio.md |
+| 5a | Plan | technical-director | technical-plan | done | 14-technical-director-to-studio.md |
+| 5b | Observe (spit line) | qa | reproduce-defect | done | 15-qa-to-studio.md |
+| 5c | Design (visuals) | art-director | visual-review, write-design-spec | done | 16-art-director-to-studio.md |
+| 6a | Build (code) | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md |
+| 6b | Build (`run_tests` check, manual placed) | gameplay-engineer | implement-change | done | 23-gameplay-engineer-to-studio.md |
+| 7a | Verify | qa | verify-change | done (question, no AC failed) | 26-qa-to-studio.md |
+| 7b | Verify (visuals) | art-director | visual-review | done (question, no build output) | 27-art-director-to-studio.md |
+| 7c | Verify (rerun: manual, runs, captures) | qa | verify-change | done (question, no AC failed) | 29-qa-to-studio.md |
+| 7d | Verify (visuals, from captures) | art-director | visual-review | open | 31-studio-to-art-director.md |
+| 7e | Design (F1 overlap, AC-15 wording) | game-designer | write-design-spec | open | 30-studio-to-game-designer.md |
+| 7f | Build (only if 7e needs it) | gameplay-engineer | implement-change | tentative | — |
+| 7g | Verify (only after 7f) | qa | verify-change | tentative | — |
+| 8 | Play | playtester | playtest-session | planned | — |
+| 9 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+After 7c (29, question): no AC failed. Open as parallel steps: 7d (art director, V-1…V-8 from QA's captures) and 7e (designer rules on F1, grub on the player's tile, and the AC-15 wording). 7f/7g are tentative: only if 7e needs a build change. `ManualTest` stays not run; static check clean, not escalated.
+
+## Next action
+
+Run `30-studio-to-game-designer.md` and `31-studio-to-art-director.md` (parallel; results addressed to `studio`). Then Route when both are in:
+- If 7e needs no build change and 7d finds no visual failure, compose the playtester's Handoff from permitted information only (Play).
+- If 7e requires a build change, open 7f (gameplay-engineer), then 7g (QA).
+- If 7d fails a V-item, return to Build with the failure report.
+- If `ManualTest` again has no valid result with nothing new supplied, escalate to the Owner for that input.
+
+## Outcome
+
+(Filled at Close.)
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/30-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-001
+seq: 30
+from: studio
+to: game-designer
+stage: Design
+outcome: routed
+---
+# 30: studio → game-designer — rule on grub-on-player overlap (F1) and the AC-15 wording
+
+## Task
+
+Rule on two spec questions raised by QA's second verification round, and update `design/combat.md` if the rulings change the spec. Say explicitly whether your ruling requires a build change.
+
+## Context
+
+Goal G-001 (combat feels monotonous). Option A (D-002) was built as Build 0.5. QA verified it at 30 and 60 FPS (handoff 29): no acceptance criterion was observed failing. Two questions need a designer's ruling before the route can continue to Play or Review.
+
+## Findings
+
+From QA (29), with evidence in its captures C1, C4 and C7:
+
+1. **F1: threat glyph hidden when a grub stands on the player's tile.**
+   - After a few bites a grub ends up on the player's position (the text says "(on you)"). The player is drawn last, so the map shows only `P`.
+   - Idle player, 30 FPS: "a grub rears back (on you)" at 4.500, map shows only `P`, the hit lands at 5.033.
+   - The spec's Conventions define a telegraph as at least one on-map change plus a text line. Here the on-map change is missing. Pillar 3 says every threat is visible before it can hurt.
+   - AC-1 itself (first bite from distance 4) is met. The spec is silent on whether enemies may overlap the player.
+   - Question: may a grub occupy the player's tile? If yes, how must the telegraph read there? If no, what keeps them apart? (A grub ending on the player's cell is already on the Review list.)
+2. **AC-15 wording vs Practice room (Q4) body text.**
+   - AC-15: "`x` and the practice room are in the manual". The body text says both must be listed in `manual.md#on-screen`.
+   - The practice room (`room empty`) is currently in the Script table and in "Rooms and runs", not in the On screen section. The `x` marker is in the On screen table.
+   - QA judged AC-15 met by its wording. Question: which is binding? If the body text, `manual.md` needs one change.
+
+Observation for context, no ruling asked: with an idle player, one grub in a practice room took the player to zero hearts at about 5.0 s, and three grubs in room 1 at about 4.97 s.
+
+## Decisions already made
+
+- D-001: attack, dash and pause only; no new inputs.
+- D-002: respond to combat sameness by reworking existing enemy behavior first (Option A).
+- D-003: room mix across rooms; zero hearts ends the run; room clear heals one heart.
+- D-005: `manual.md` was placed by the Owner; the draft stands unless you rule otherwise.
+
+## Constraints
+
+- Stay within the vision and D-001 (no new buttons). Prefer changes that reuse existing systems (small team).
+- Must play correctly at 30 and 60 FPS.
+- Rulings must keep AC-1…AC-17 verifiable. If a ruling changes player-observable behavior, give it a player-observable acceptance criterion.
+- A direction or scope change goes to `game-director` through the Studio, not decided here.
+
+## Open questions
+
+- F1 ruling and whether it needs a build change.
+- AC-15 / Q4 binding wording, and whether `manual.md` needs a change (an edit to `manual.md` is a Build action unless you only state the required text).
+
+## Expected output
+
+Updated `design/combat.md` where the rulings change it, and a handoff addressed to `studio` stating each ruling, whether a build change is needed (and what the criterion for it is), and whether a `manual.md` change is needed. Set `outcome: done`, or `question` if a ruling needs a direction decision.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md, studio/skills/diagnose-experience.md
+- Project: project.md#vision, project.md#constraints, design/combat.md, design/combat-visuals.md, manual.md
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-003-run-end-and-room-rules.md
+- Previous handoff: goals/G-001-combat-monotony/29-qa-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/31-studio-to-art-director.md
+---
+kind: handoff
+goal: G-001
+seq: 31
+from: studio
+to: art-director
+stage: Verify
+outcome: routed
+---
+# 31: studio → art-director — review V-1…V-8 of Build 0.5 from QA's raw captures
+
+## Task
+
+Review what the player sees in Build 0.5 against `design/combat-visuals.md` (V-1…V-8), using the raw `run_play` / `run_trace` captures in QA's handoff 29. Give a verdict per V-item.
+
+## Context
+
+Goal G-001 (combat feels monotonous), Option A built as Build 0.5. In the first verification round (27) you had no build output and could only check V-5. QA has now captured verbatim player-view output at 30 and 60 FPS (29, captures C1–C8).
+
+## Findings
+
+- The captures are in 29, sections C1 to C8: idle grub (telegraph, hit, recovery), interrupt, counter, room 4 with a dash, room 3 walking up to a spitter, room 1 down and restart, and independent AC checks. Cuts are marked `[cut: …]`; every text line is kept in order.
+- **Color.** The run command as given produces plain text (no `--color`, no terminal). QA did not capture a colored run. From reading `play.py` only: with `--color` or on a terminal each glyph is wrapped in ANSI 256-color codes (lantern yellow for the player, bold orange for alert enemies, bold red for shots). Glyphs alone carry every state without color.
+- **Possible visual gap (F1 in 29).** When a grub stands on the player's tile, the map shows only `P` while the text says "a grub rears back (on you)". Whether this is a visual defect is for you to judge from the art direction; the rule on whether grubs may overlap the player is the game-designer's (handoff 30, in parallel).
+- Cosmetic (F2 in 29): a few text lines print out of timestamp order at 30 FPS in room 4.
+- QA also notes that the manual's On screen table omits nothing the build draws except that the practice room sits under Script; that is QA's and the designer's concern, not a V-item unless your spec says otherwise.
+
+## Decisions already made
+
+- Art direction in `project.md`: dark caves lit by the lantern, warm light against cold blue-black, threats in saturated orange/red.
+- D-001: no new inputs.
+
+## Constraints
+
+- Judge only what the captures show. If a V-item needs color or timing the captures cannot show, mark it "specified, not verified" and say what capture would settle it. V-6 may stay "specified, not verified" if the view has no color; that is your call.
+- Do not edit the build; any change needed goes to Build through the Studio.
+
+## Open questions
+
+- Does the hidden-threat case (F1) count as a failure of any V-item, or only a readability note?
+
+## Expected output
+
+A handoff addressed to `studio` with a verdict per V-item (pass / fail / not verified, with the capture that supports it), the answer on F1 from the visual side, and `outcome: pass`, `fail` or `question`.
+
+## Load
+
+- Role: studio/roles/art-director.md
+- Skills: studio/skills/visual-review.md
+- Project: project.md#art-direction, design/combat-visuals.md
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-001-combat-monotony/29-qa-to-studio.md
+>>>END

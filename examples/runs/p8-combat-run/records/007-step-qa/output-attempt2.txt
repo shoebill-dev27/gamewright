@@ -1,0 +1,27 @@
+Round 1 left one gap: the shot trace only dodged by geometry, so it never tested dash invulnerability against a shot. I'm running a dash straight through a shot at both rates, plus a no-dash control.
+
+<<<FILE @run/trace/dash-through-shot-60
+room empty
+fps 60
+player 8 4
+spawn spitter 4 4
+4.1 dash left
+end 5
+>>>END
+
+<<<FILE @run/trace/dash-through-shot-30
+room empty
+fps 30
+player 8 4
+spawn spitter 4 4
+4.1 dash left
+end 5
+>>>END
+
+<<<FILE @run/trace/control-shot-60
+room empty
+fps 60
+player 8 4
+spawn spitter 4 4
+end 5
+>>>END

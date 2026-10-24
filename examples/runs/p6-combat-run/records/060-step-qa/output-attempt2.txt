@@ -1,0 +1,157 @@
+I'm using a second run round to settle items 2–5 and to get 30 FPS data. Item 1 and the bot format are already settled by round 1, so I'm not re-running them.
+
+<<<FILE @run/trace/dash30
+room empty
+fps 30
+player 8 4
+end 7
+1 dash right
+2 dash right
+3 dash left
+3.3 dash left
+4 dash down
+5 dash down
+>>>END
+
+<<<FILE @run/play/facing-default
+room empty
+fps 60
+player 8 4
+spawn spitter 7.2 4
+spawn spitter 8.8 4
+end 0.8
+0.1 attack
+>>>END
+
+<<<FILE @run/play/facing-dash60
+room empty
+fps 60
+player 8 4
+spawn spitter 11 4
+spawn spitter 13 4
+end 1
+0.1 move left
+0.15 stop
+0.3 dash right
+0.8 attack
+>>>END
+
+<<<FILE @run/play/facing-dash30
+room empty
+fps 30
+player 8 4
+spawn spitter 11 4
+spawn spitter 13 4
+end 1
+0.1 move left
+0.15 stop
+0.3 dash right
+0.8 attack
+>>>END
+
+<<<FILE @run/play/onyou-right
+room empty
+fps 60
+player 15 4
+spawn grub 15 4
+end 1
+0.01 move right
+0.2 attack
+>>>END
+
+<<<FILE @run/play/onyou-left
+room empty
+fps 60
+player 0 4
+spawn grub 0 4
+end 1
+0.01 move left
+0.2 attack
+>>>END
+
+<<<FILE @run/play/onyou-up
+room empty
+fps 60
+player 8 0
+spawn grub 8 0
+end 1
+0.01 move up
+0.2 attack
+>>>END
+
+<<<FILE @run/play/onyou-down
+room empty
+fps 60
+player 8 8
+spawn grub 8 8
+end 1
+0.01 move down
+0.2 attack
+>>>END
+
+<<<FILE @run/trace/strike-a
+room empty
+fps 60
+player 8 4
+spawn grub 9.24 4
+end 1.5
+0.0 move right
+0.02 stop
+0.51 attack
+>>>END
+
+<<<FILE @run/trace/strike-b
+room empty
+fps 60
+player 8 4
+spawn grub 9.24 4
+end 1.5
+0.0 move right
+0.02 stop
+0.54 attack
+>>>END
+
+<<<FILE @run/trace/recovery-knock
+room empty
+fps 60
+player 8 4
+spawn grub 9.24 4
+end 3
+0.0 move right
+0.02 stop
+1.0 attack
+1.4 attack
+1.8 attack
+2.2 attack
+>>>END
+
+<<<FILE @run/trace/idle-room2-60
+room 2
+fps 60
+end 10
+>>>END
+
+<<<FILE @run/trace/idle-room3-60
+room 3
+fps 60
+end 12
+>>>END
+
+<<<FILE @run/trace/idle-room4-60
+room 4
+fps 60
+end 12
+>>>END
+
+<<<FILE @run/trace/idle-room5-60
+room 5
+fps 60
+end 12
+>>>END
+
+<<<FILE @run/bots/ref30
+bots camper,walker,dodger,reactive
+rooms 1-5
+fps 30
+limit 60
+>>>END

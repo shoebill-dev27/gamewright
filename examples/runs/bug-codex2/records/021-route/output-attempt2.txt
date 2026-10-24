@@ -1,0 +1,184 @@
+<<<FILE goals/G-001-dash-damage/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-10
+---
+# G-001: ダッシュ中の被ダメージ不具合を修正する
+
+## Owner request
+
+> ダッシュ中なのにダメージを受けることがある。再現できるので直してほしい。
+
+## Interpretation
+
+報告された被ダメージを再現し、仕様に反する挙動を修正して、ダッシュ時のダメージ判定が既存の仕様どおりに動くことを独立した検証で確認する。
+
+戦闘の方向性変更、新しい入力の追加、無関係なバランス調整は対象外。
+
+## Unknowns
+
+- Observe: QA は既存仕様と模擬ビルドの記述から仕様不一致を確認し、不具合報告と AC-1〜AC-6 を作成した。Owner の詳細条件を独立した試行で再現したわけではない。追加 Observe は現時点では不要。
+- Diagnose / Plan: technical-director が共有無敵フラグの解除競合を診断し、発生源別に保護を管理する計画を作成した。結果は `13-technical-director-to-studio.md`。現在は、利用可能な dry-run 資料で検証計画が成立するかが未解決であり、追加 Plan を設ける。
+- Decide: 既存仕様への修正に方向選択は不要。D-002 は不足入力を補完して継続する Owner の決定。D-003 は既存仕様を維持する技術方式の決定。
+- Design: QA によれば期待挙動と受け入れ条件は明確。ただし既存クールダウン起点を資料から回復できるかは未解決。新規の仕様判断が必要と判明した場合は game-designer に戻す。入力不能中の予約入力や完全同時の境界処理は今回新たに定義しない。
+- Build: `15-gameplay-engineer-to-studio.md` に模擬実装変更を定義済み。`17-gameplay-engineer-to-studio.md` の照合結果に基づき、`sim/build-0.4.md` を変更識別子 `0.3-G001-15` の模擬ビルドとして扱う。ファイル名を合わせるための再生成は不要。
+- Verify: Build 後は必須。条件別試行資料と既存動作の情報が不足している。PC・30 / 60 FPS・キーボード / ゲームパッドの全4組合せ、AC-1〜AC-6 と必要な回帰の検証方法を technical-director が整理した後、独立 QA に渡す。未生成資料を Load に指定しない。
+- Play: 体験や感触の改善依頼ではないため省略。
+- Review: 体験 Goal やゲームの方向 Decision を伴わないため省略。
+- Next: 検証後に Studio が Owner 向けの結果と残件をまとめる。
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | qa | reproduce-defect | done | 01-studio-to-qa.md |
+| 1b | Observe | qa | reproduce-defect | done | 03-studio-to-qa.md |
+| 1c | Observe | qa | reproduce-defect | done | 05-studio-to-qa.md |
+| 1d | Observe | qa | reproduce-defect | done | 07-studio-to-qa.md |
+| 1e | Observe | qa | reproduce-defect | done | 10-studio-to-qa.md |
+| 2 | Diagnose / Plan | technical-director | technical-plan | done | 12-studio-to-technical-director.md |
+| 3 | Decide | game-director | make-decision, prepare-owner-escalation | skipped | — |
+| 4 | Design | game-designer | write-design-spec | skipped | — |
+| 5 | Plan | technical-director | technical-plan | skipped | — |
+| 6 | Build | gameplay-engineer | implement-change | done | 14-studio-to-gameplay-engineer.md |
+| 6b | Build 資料照合・補完 | gameplay-engineer | implement-change | done | 16-studio-to-gameplay-engineer.md |
+| 6c | Plan 検証成立性の再検討 | technical-director | technical-plan | open | 18-studio-to-technical-director.md |
+| 7 | Verify | qa | verify-change | planned | — |
+| 8 | Play | playtester | playtest-session | skipped | — |
+| 9 | Review | game-director | review-outcome | skipped | — |
+| 10 | Next | studio | — | planned | — |
+
+過去の Observe の done は入力確認作業の終了を表し、再現確認の成功を表さない。1d の結果は `08-qa-to-studio.md`。1e の結果は `11-qa-to-studio.md`（done）であり、仕様不一致の照合と受け入れ条件の作成が完了した。行 2 の結果は `13-technical-director-to-studio.md`（done）。独立した Plan 行 5 は行 2 に統合したため skipped。
+
+行 6 の結果は `15-gameplay-engineer-to-studio.md`（done）。変更記述を模擬実装とするプロジェクト規約に従う完了であり、simulator の資料生成や独立 Verify の合格を意味しない。
+
+行 6b の結果は `17-gameplay-engineer-to-studio.md`（question）。done は照合と不足の報告が終了したことを示し、検証入力の完成を意味しない。
+
+## Route changes
+
+2026-10-10 — `02-qa-to-studio.md`（question）を受領し、1 を done とした。再現条件不足により追加 Observe を設けた。期待挙動の仕様不足ではないという QA の報告を受け、Design を skipped とした。
+
+2026-10-10 — `04-qa-to-studio.md`（question）を受領し、1b を done とした。補足資料が未提供のため、資料受領を開始条件とする 1c を設けた。
+
+2026-10-10 — `06-qa-to-studio.md`（question）を受領し、1c を done とした。資料受領を開始条件とする 1d を設け、実行環境側の補完を待つ方針とした。当時は Owner escalation を行わなかった。
+
+2026-10-10 — `08-qa-to-studio.md`（question）を受領し、1d を done とした。同じ不足入力について新しい該当資料がないまま question が二回以上返ったため、loop limits を適用した。`09-studio-to-owner.md` に必要入力と選択肢をまとめ、Goal を blocked-on-owner とした。
+
+2026-10-10 — Owner が Option A を選び、新しい観察を提供した。選択と回答原文を D-002 に記録し、09 を resolved、Goal を active とした。Observe 1e を追加した。体感による時刻や頻度を計測値とせず、部分資料から判断可能な範囲を QA に委ねた。
+
+2026-10-10 — `11-qa-to-studio.md`（done）を受領し、1e を done とした。QA は不具合報告と AC-1〜AC-6 を作成し、追加の Owner 計測を必須とせず技術調査へ進めると報告した。Diagnose と Plan を行 2 に統合し、行 5 は skipped とした。Build と Verify は維持した。
+
+2026-10-10 — `13-technical-director-to-studio.md`（done）を受領し、行 2 を done、行 6 を open とした。D-003 に基づく方式と実装順序を technical-director の判断として引き継いだ。実装は逐次、完了後に独立 QA の Verify を行う。視覚変更は計画にないため art-director の追加は不要。
+
+2026-10-11 — `15-gameplay-engineer-to-studio.md`（done）を受領し、行 6 を done とした。模擬実装の定義は完了したが、指定生成先 `sim/build-0.3-G001-15.md` と `sim/qa-G001-15.md` は存在一覧になく、検証入力が揃ったとは判断できなかった。一方、一覧には `sim/build-0.4.md` があったため、行 6b を追加して既存資料の照合・補完を依頼した。Verify は planned のまま維持した。
+
+2026-10-11 — `17-gameplay-engineer-to-studio.md`（question）を受領し、行 6b を done とした。工程担当の照合報告に基づき、build-0.4 と変更識別子 `0.3-G001-15` の対応を採用する。ファイル名の違いは解消済みとして扱う。一方、条件別試行記録、試行生成用の既存モデル、クールダウン起点は不足している。実装への同じ補完要求を繰り返さず、Build の計画不成立に対する return rule を適用し、行 6c を追加して technical-director に検証成立性を戻す。これは QA の fail や同一 AC の二回目の失敗ではない。
+
+本 Route の packet には runtime の simulator に問い合わせる手段や、そのモデルを確認できる資料がない。利用不能と断定せず、利用可能性と不足の解消方法を技術問題として渡す。新しいビルド対応情報と具体的な不足表が提供されており、同じ不足入力への question を無変更で反復する段階ではない。どの Role も解消できない外部入力が必要と確定した場合は Owner escalation とし、同じ照会を繰り返さない。
+
+Studio は元資料の本文を独自に確認したとは扱わず、Handoff 17 の報告を出典として引き継ぐ。今回、仕様・AC・証拠要件の変更や Verify の判定は行わない。
+
+## Next action
+
+technical-director が `18-studio-to-technical-director.md` から、現在の dry-run 資料で成立する検証方法、必要な追加入力と取得元、残る不明点を整理して Studio に返す。既存モデルが使えるという前提で試行生成を約束しない。
+
+Studio は結果に応じて資料補完、QA との証拠要件の確認、必要な仕様判断、または Owner escalation を手配する。独立 Verify は必須のまま保持し、QA に渡す資料から実装理由と自己評価を除外する。
+
+## Outcome
+
+未完了。仕様不一致の確認、受け入れ条件、技術計画、模擬実装変更の定義、および更新ビルドの識別が完了した。D-002 に基づき継続し、D-003 の発生源別無敵管理が反映されたとの照合報告を受領した。条件別観察資料と検証計画の成立性の整理、独立 QA の検証が残っている。現時点で Owner に新たな判断を求める事項はない。
+>>>END
+
+<<<FILE goals/G-001-dash-damage/18-studio-to-technical-director.md
+---
+kind: handoff
+goal: G-001
+seq: 18
+from: studio
+to: technical-director
+stage: Plan
+outcome: routed
+---
+# 18: studio → technical-director — dry-run の検証成立性と不足入力を整理する
+
+## Task
+
+Handoff 17 が報告した検証入力の不足について、現在の dry-run 制約で成立する検証計画と、必要な追加入力・取得元を具体化する。既存モデルの利用可能性が確認できない場合は、その不確実性を残したまま実行可能な次の手順と阻害要因を Studio に返す。
+
+## Context
+
+Owner は「ダッシュ中なのにダメージを受けることがある。再現できるので直してほしい。」と依頼した。仕様への修正と独立検証が目的であり、戦闘の方向やバランスの変更は対象外。
+
+本作は実リポジトリのない模擬プロジェクト。Build は変更を Handoff に正確に記述することで実装と数え、runtime の simulator が `sim/` を更新する。ゲームの実行は模擬ビルド文書を読むことを意味する。
+
+Handoff 17 は変更反映の文書照合を完了したが、条件別試行資料と既存動作情報が足りず outcome: question を返した。Studio は、同じ資料生成要求を engineering に繰り返す代わりに、検証計画の成立性を技術責任者へ戻す。
+
+## Findings
+
+以下は Handoff 17 の報告であり、本 Route による独立検証ではない。
+
+- `sim/build-0.4.md` と `sim/repo-notes.md` は変更識別子 `0.3-G001-15` を明示している。Studio はこのビルド対応を採用した。ファイル名を揃えるための再生成は不要。
+- 更新ビルドには期待する挙動の模擬記述があるが、環境別・試行別ログはない。全4環境への適用宣言を4件の観察に数えることはできない。
+- QA 用資料 `sim/qa-G001-15.md` は存在一覧にない。未生成資料を本 Handoff の Load に入れない。
+- repo-notes は、具体的な配置、実時刻・処理順序、初期ハート、有効試行総数を提供資料から復元できず、実行済み記録もないと報告されている。
+- 既存クールダウン起点が特定されていない。「0.6秒を維持」という記述だけでは起点を決められない。
+- Handoff 17 の「AC・回帰の資料充足」に全4環境と必要な枝の不足表、「補完する資料の変更記述」に必要情報がある。これらは未確認事項であり、QA の fail 判定ではない。
+
+必要な検証対象として報告されているのは、AC-1〜AC-6、両保護終了順序での通常被害への復帰、複数命中による保護の延長防止、ダッシュ単独保護の解除である。対象環境は30 / 60 FPS × キーボード / ゲームパッド。命中源と枝ごとの詳細は Handoff 17 を参照する。
+
+本 packet には simulator の既存モデルや照会手段が提示されていない。Studio はモデルの存在も不存在も確認していない。
+
+## Decisions already made
+
+Handoff 17 が報告した既存決定の要約：
+
+- D-001: 攻撃・ダッシュ・ポーズ以外の入力を追加しない。
+- D-002: 部分的な Owner 観察を使って元の修正 Goal を継続する。追加計測を開始条件にしない。
+- D-003: 発生源別の保護を論理和で判定し、防いだ命中で保護を開始・延長しない。
+
+今回これらの変更は求めない。Decision 原文はこの Route packet に含まれておらず、上記要約以上の解釈が必要な判断は不足入力として明示する。
+
+## Constraints
+
+- Desktop、キーボードとゲームパッド、30 / 60 FPS を対象とする。
+- 模擬挙動の記述、生成した観察、実測、期待値を区別する。未提示の試行数・発生数をゼロに変換しない。
+- 不足モデルやフレーム順序を創作してログを生成しない。既存モデルの取得元と利用可能性を確認事項として扱う。
+- 仕様・AC の変更、QA の pass / fail 判定は行わない。技術上の検証方法を提案し、証拠の十分性は独立 QA の判断に残す。
+- クールダウン起点や同時イベント処理など、プレイヤー向け挙動を新しく決める必要があれば game-designer へ戻す。
+- Goal の再解釈や重大な範囲変更、どの Role も生成できない外部入力が必要と確定した場合は、Owner escalation が必要であると具体的な根拠を添えて返す。
+- 本 Step は技術問題の整理である。ゲームの追加実装、条件別検証の実施、Goal 完了の宣言は依頼しない。
+
+## Open questions
+
+1. 現在の模擬ビルド文書と、従来計画の条件別試行要件はどの点で両立し、どの点で不足するか。
+2. simulator の既存モデルについて、確認・取得すべき情報、取得元、担当は何か。現資料で分からない項目はどれか。
+3. 既存モデルが得られる場合と得られない場合、それぞれどの検証方法を提案でき、何が未確認として残るか。
+4. クールダウン起点は既存情報の回復で解決できるか。新規仕様判断が必要なら、その判断を求める具体的な問いは何か。
+5. 不足は Role の作業で解消できるか、それとも Owner にしか提供できない情報・材料を必要とするか。
+
+## Expected output
+
+Studio 宛ての Handoff に以下をまとめる。
+
+- 現資料から判断できることと、取得できていない入力の一覧。
+- 実行可能な検証計画、または計画が成立しない具体的理由。各提案の入力、取得元、担当、証拠の限界を明示する。
+- Handoff 17 の各不足項目を、資料補完・QA の判断・仕様判断・外部入力のいずれで解消するか。
+- 次に必要な Role と、その Role が始められる具体的な入力。
+- Owner escalation が必要な場合は、何が必要で、なぜどの Role も生成できないか。
+
+参照原文がないため判断できない項目は、その原文と必要な節を具体的に指定する。計画を提案できれば outcome: done、必須入力や他の権限の判断で止まる場合は outcome: question とし、いずれも `to: studio` で返す。独立 Verify は完了扱いしない。
+
+## Load
+
+- Role: studio/roles/technical-director.md
+- Skills: studio/skills/technical-plan.md
+- Project: project.md#vision
+- Project: project.md#constraints
+- Decisions: 原文の追加 Load なし。本 Handoff と前 Handoff の決定要約を用い、原文が不可欠な判断は不足として返す。
+- Previous handoff: goals/G-001-dash-damage/17-gameplay-engineer-to-studio.md
+
+前 Handoff の Load に列挙されたファイルを再帰的に読み込む指示ではない。本 Step は、提供された技術問題と不足表から検証成立性を整理する。
+>>>END

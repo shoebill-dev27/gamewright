@@ -1,0 +1,64 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "5968a19c-27c7-4ff9-b6e9-8ca5484dbeb1",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 18500,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 2781,
+    "output_tokens_details": {
+     "thinking_tokens": 571
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 18500,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 2781,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 18500,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 18500
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.101814,
+   "attempt": 1,
+   "started": "2026-10-23T02:52:05",
+   "seconds": 27.2,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-dash-damage/goal.md": "431a8d6c6c012385fc64d57511b7e5f66d799f7a7781f4f6191d5254b4552dee",
+  "project.md": "6a9e63ffa263e7a282beaca510209af19b9887ff03bd730543784ed3789f35b7"
+ },
+ "decision": {
+  "status": "done",
+  "open": []
+ },
+ "seen_through_seq": 6
+}

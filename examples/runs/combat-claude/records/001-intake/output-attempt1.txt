@@ -1,0 +1,134 @@
+Intake の結果を、goal.md と最初の Handoff にまとめました。
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-10
+---
+# G-001: 戦闘の単調さの改善
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+体験上の Goal。ビルド 0.3 の戦闘が、想定プレイヤー(短時間で濃いランを求め、回避と間合いに慣れたアクション好き)にとって単調に感じられない状態にする。
+成功条件は質的なもので、プレイヤーが戦闘中に、ほぼ同じ行動の繰り返しではなく、状況に応じた位置取り・タイミング・敵の挙動への対応といった判断を実感できること。数値基準は Design の受け入れ基準で、最終判定は Review で決める。
+
+範囲外:
+- 新しい入力ボタンの追加(D-001 により Owner 承認なしでは不可)。
+- 戦闘以外のシステムの変更。
+- ラン長(15–20分)やビジョンの柱の変更。
+- 原因の特定前に解決策を決めること。
+
+## Unknowns
+
+Project Context の確認結果:
+- ビジョンの柱 1「ワンボタン戦闘」(D-001)は、攻撃とダッシュだけのキットで、深みは位置取り・タイミング・敵の挙動から生むと定めている。「単調」の解決策はこの枠内に収める必要がある。
+- 現状はビルド 0.3(5部屋、敵2種、攻撃とダッシュ)。単調さの原因候補(敵の種類・挙動、部屋構成、プレイヤーキットの幅など)は Project Context には書かれていない。
+- 即時エスカレーションは不要。Goal は再解釈を要さず、ビジョンや既存の Decision と衝突しない。ただし診断で D-001 の変更や新ボタンが必要と分かれば、その時点でエスカレーションする。
+
+各ステージの入口の問い:
+- Observe: 単調さを実際にプレイして観察したか → していない。`playtester` による観察が必要(体験の問題であり欠陥ではない)。
+- Diagnose: 原因は分かっているか → 不明。
+- Decide: 方向・優先度・スコープの本当の選択があるか → 診断の選択肢次第。
+- Design: 意図する挙動は仕様化済みか → 変更が決まれば未仕様。
+- Plan: 技術的アプローチは非自明か → 変更内容次第。
+- Build: ゲームを変更する必要があるか → 診断次第。
+- Verify: Build の後は常に必要。
+- Play: Goal は遊び心地に関する → 変更後に必要。
+- Review: 体験の Goal → 必要。
+
+スキップしたステージ: なし。Project Context はどの問いにも答えていないため。ただし後続は結果に依存するので tentative とした。
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | open | [01-studio-to-playtester.md](01-studio-to-playtester.md) |
+| 2 | Diagnose | game-designer | diagnose-experience | planned | — |
+| 3 | Decide | game-director | make-decision, prepare-owner-escalation | tentative(診断が方向・優先度・スコープの実質的な選択肢を示す場合。D-001 に触れる案ならエスカレーション) | — |
+| 4 | Design | game-designer | write-design-spec | tentative(変更が決まり、仕様が未整備の場合) | — |
+| 5 | Plan | technical-director | technical-plan | tentative(変更が非自明・複数システムにまたがる・並列化可能な場合) | — |
+| 6 | Build | gameplay-engineer | implement-change | tentative(ゲーム変更が決まった場合) | — |
+| 7 | Verify | qa | verify-change | tentative(Build が行われた場合は必須) | — |
+| 8 | Play | playtester | playtest-session | tentative(Build が行われた場合。新しい実行コンテキストで) | — |
+| 9 | Review | game-director | review-outcome | tentative(変更が入った場合、または方向 Decision があった場合) | — |
+
+Status: planned | tentative | open | done | skipped.
+
+## Route changes
+
+なし。
+
+## Next action
+
+Studio は Intake を終えて停止する。次は、人間が Handoff `goals/G-001-combat-monotony/01-studio-to-playtester.md` から `playtester`(Observe、`playtest-session`)のステップを新しい実行コンテキストで開始する。
+プレイテスターには「戦闘に注目して」という中立的な観点だけを渡し、Owner の「単調」という所見や仮説は伝えていない(確証バイアス防止)。結果は `studio` 宛てに出力され、Route 後に `game-designer`(Diagnose)へ渡る。
+
+Owner への報告(日本語):
+- ルート: 観察(プレイテスター)→ 診断(ゲームデザイナー)を確定。以降(決定・設計・計画・実装・検証・再プレイ・レビュー)は、診断結果次第の暫定ステージ。
+- 戦闘が体験上の問題であり原因が不明なため、まず実プレイで観察し、原因を診断してから解決策を決める。
+- 解決策は D-001(攻撃+ダッシュのみ、新ボタン不可)の枠内で検討する。枠を超える案が必要になった場合のみ、Owner に判断をお願いする。
+- スキップしたステージはなし。
+
+## Outcome
+
+(未完了)
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/01-studio-to-playtester.md
+---
+kind: handoff
+goal: G-001
+seq: 1
+from: studio
+to: playtester
+stage: Observe
+outcome: routed
+---
+# 01: studio → playtester — ビルド 0.3 をプレイし、戦闘体験を観察報告する
+
+## Task
+
+ビルド 0.3 をプレイヤーとして遊び、戦闘に注目して、観察できた体験を報告する。
+
+## Context
+
+プレイヤー視点の体験観察が必要な Goal の最初のステップ。プレイヤーに見えるものと感じたことだけを報告する。
+
+## Findings
+
+該当なし(実装に関する情報は渡さない)。
+
+## Decisions already made
+
+None
+
+## Constraints
+
+- プレイヤーとして観察できる内容のみに基づく。内部実装や設計意図を推測して書かない。
+- ビルドは `sim/build-0.3.md`(ドライランでは、このファイルを読むことが「ビルドを実行する」ことに相当する)。
+- 対象は全5部屋を通したプレイ。
+
+## Open questions
+
+None
+
+## Expected output
+
+観察報告(`playtest-session` の形式)。プレイした内容、戦闘中に感じたこと(印象的だった点、退屈・緊張・迷いなど)、その根拠となる具体的な場面を含める。
+結果は `studio` 宛てとして、この Goal の `02-playtester-to-studio.md` に書く。
+
+## Load
+
+- Role: studio/roles/playtester.md
+- Skills: studio/skills/playtest-session.md
+- Project: project.md#player-profile, sim/build-0.3.md
+- Decisions: none
+- Previous handoff: none
+>>>END

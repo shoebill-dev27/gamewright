@@ -1,0 +1,169 @@
+<<<FILE design/combat-visuals.md
+# Combat visuals (build 0.5 target, Option A, G-001)
+
+Status: visual spec and review rulings from the art-director for `design/combat.md`. It changes no rules, timings or parameters. Wherever it names a glyph or color, it covers what `combat.md` leaves to "chosen in Build". Build may change a glyph only if it keeps the rules in this file and documents the change in `manual.md`.
+
+## Intent
+
+The player must be able to tell, from one frame of `run_play` and its text lines, what can hurt them now, what is about to hurt them, and what is open to a counter. Pillar 3: every threat is visible before it can hurt.
+
+## Principles
+
+1. **Glyph first, color second.** The view is text, so every state difference must show in the character or in a text line. Color only reinforces it. Nothing may depend on color alone.
+2. **Uppercase means danger.** An uppercase enemy glyph in saturated orange/red means it is committed to hurting the player (Wind-up, Charge, Strike). A lowercase glyph means it is harmless right now.
+3. **Orange/red is reserved for threats.** Use it only for telegraphed enemy glyphs and projectiles. The player, the swipe arc and the downed marker never use it. The lantern's warm light and the cold blue-black are the rest of the palette.
+4. **The view must catch short telegraphs.** The room is drawn every 0.5 s. The grub Wind-up is exactly 0.5 s, so a frame could fall just before it starts and just after it ends. Draw the room immediately on each of these events, as it already does after a hit:
+   - grub Wind-up start
+   - spitter Charge start
+   - projectile spawn
+   - every swipe, including a miss
+   - grub Recovery start
+   - player down
+   These extra draws do not change timing. If Build cannot do this cheaply, report it as an open question to `game-designer`; do not lengthen the telegraphs.
+
+## Glyph table (player view, one cell per tile)
+
+| Thing | State | Glyph | Color | Notes |
+|---|---|---|---|---|
+| Player | normal | `P` | warm lantern yellow-white | Never orange/red. |
+| Player | down | `x` | desaturated cold gray-blue | Replaces `P`. It reads as "out", not as a threat. |
+| Grub | Approach / Recovery, full HP | `g` | muted, desaturated warm gray | Harmless. Muted on purpose so the alarming color is saved for the telegraph. |
+| Grub | Wind-up / Strike, full HP | `G` | saturated orange/red | The 0.5 s cue. |
+| Grub | harmless, damaged (1 HP) | `w` | muted, with a visible tint change from `g` | |
+| Grub | Wind-up / Strike, damaged | `W` | saturated orange/red | |
+| Spitter | Idle / Recovery / staggered, full HP | `s` | muted, desaturated warm gray | Harmless. |
+| Spitter | Charge, full HP | `S` | saturated orange/red | Held for the whole 0.8 s. |
+| Spitter | harmless, damaged | `z` | muted, tinted | |
+| Spitter | Charge, damaged | `Z` | saturated orange/red | |
+| Projectile | in flight | `*` | saturated orange/red, brightest on the map | Visible from spawn to removal. |
+| Swipe arc | 0.15 s | `)` facing right, `(` left, `^` up, `v` down, drawn on the tiles in reach | lantern yellow-white | See "Swipe arc". |
+
+Rules:
+- Case is the harmless/danger signal and the letter family is the enemy type, so a player learns two things: `g/w` are grubs, `s/z` are spitters.
+- A hit on a winding-up grub cancels the wind-up. The glyph must drop to lowercase `w` in the same draw as the hit line.
+- A defeated enemy disappears in the draw that prints "defeated".
+
+## Text lines (telegraph and feedback)
+
+- Every telegraph prints a line at the moment the uppercase glyph appears. The line must say which enemy when more than one can act:
+  - grub: "a grub rears back (left)" or "(above)", relative to the player. If two grubs wind up on the same draw, print two lines.
+  - spitter: "spitter (top right) charges" and "spitter (bottom right) charges", as in the spec.
+- Spit lines name the spitter ("spitter (top right) spits"). There are never two identical lines.
+- Grub Recovery start prints "the grub is open". The 0.9 s counter window is the point of the rework, and in a still frame lowercase `g` looks the same as Approach.
+- Hit lines follow the spec: "you swipe: grub hit (1 left)", "grub defeated", and the "(miss)", "(too soon)", "(stunned)", "(down)" reasons.
+- Spitter stagger after a hit prints "spitter (top right) is staggered".
+
+## Swipe arc
+
+- It is drawn on every swipe, hit or miss, for the 0.15 s of the spec, plus the immediate draw required by principle 4. Without that draw a 0.15 s arc would almost never appear in a 0.5 s frame.
+- It covers the tiles inside reach (1.5 tiles, 90° cone) in the facing direction.
+- It is lantern-colored, never orange/red, so it is not confused with a threat.
+- A miss shows the same arc with "(miss)", so the player sees how far the swipe reached.
+
+## Run-over, down and clear
+
+- **Down:** `x` in the cold gray-blue replaces `P`. The line "you went down" prints. Projectiles disappear in the same draw.
+- **Run-over screen:** plain, with nothing else on the map. Lines: "run over — rooms cleared: N", then "press attack to start again". The second line tells the player the restart input and does not change the rule.
+- **Room cleared:** "room cleared" prints, projectiles disappear in the same draw, and the hearts line updates. In a scripted session the heal must be visible in the hearts line.
+- **Run complete** uses the same screen layout as run-over, with "run complete" instead.
+
+## Visual acceptance criteria
+
+- **V-1** In every draw after a Wind-up or Charge begins, the committed enemy is an uppercase glyph (`G`, `W`, `S`, `Z`). In every harmless state it is lowercase.
+- **V-2** The Wind-up start, the Charge start and each swipe have their own draw at that moment, at both 30 and 60 FPS.
+- **V-3** At least one draw shows the grub's uppercase glyph before the first heart is lost to it (supports AC-1).
+- **V-4** A full-HP and a damaged enemy of the same type can be told apart by glyph in the same state (`g`/`w`, `G`/`W`, `s`/`z`, `S`/`Z`).
+- **V-5** `x`, the arc characters and the glyph table are listed in `manual.md#on-screen`.
+- **V-6** No color besides the telegraphed enemy glyphs and `*` is saturated orange/red.
+- **V-7** The two spitters can be told apart on the screen: each has its own named charge line and its own position.
+- **V-8** The run-over screen shows the restart prompt.
+
+## Not checked
+
+- Actual colors cannot be assessed from the text view. This spec fixes the intent and the glyph rules. A review of the built player view is still needed.
+- Whether the player's hit-invulnerability (0.8 s) and dash invulnerability need a visible cue is left open. Suggestion: `p` (lowercase) for `P` during invulnerability. This needs no rule change, but it is optional and is not in the acceptance criteria.
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/16-art-director-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 16
+from: art-director
+to: studio
+stage: Design
+outcome: done
+---
+# 16: art-director → studio — Visual review of the Option A spec: rulings and visual spec for Build
+
+## Task
+
+Route the visual spec in `design/combat-visuals.md` to Build alongside `design/combat.md`. Route the manual change and the one question below.
+
+## Context
+
+G-001: combat monotony. D-002 chose Option A. The game-designer's spec (`design/combat.md`) leaves glyphs and colors to Build and to my review. The rooms 4–5 playtest (08) found that spitters read as scenery and their shots were never reacted to. This was a spec review against `project.md#art-direction` and pillar 3. There is no build yet, so nothing could be checked against actual output. I changed no rules, timings or parameters.
+
+## Findings
+
+### Verdicts
+
+| Question | Verdict | Evidence |
+|---|---|---|
+| Are Wind-up, Charge and Recovery distinguishable from idle and harmless states? | **Fail as specified, fixed by rulings below.** | The spec says only "glyph and color change". The view is text, so a color-only change would be invisible. A Recovery that "returns to the normal glyph" is identical to Approach in a still frame. |
+| Can the player see the telegraph in time? | **Fail as specified.** | The room is drawn every 0.5 s, and the grub Wind-up lasts 0.5 s. A frame can miss it entirely. The swipe arc lasts 0.15 s and would almost never be drawn. |
+| Do threat colors read against the dark? | **Pass in principle.** | Saturated orange/red against cold blue-black matches the art direction. Not verifiable until the build exists. |
+| Are damaged states and the downed marker clear? | **Pass with changes.** | The spec requires a distinct glyph and color but gives none. Rulings fix them. `x` was unstyled. |
+
+### Rulings (what to keep, what to change)
+
+**Keep:**
+- Saturated orange/red for committed threats and projectiles.
+- The swipe arc, the damaged state, the remaining-HP hit lines and the explicit "(miss)" reasons.
+- The `x` downed marker and the run-over text.
+
+**Change** (full detail in `design/combat-visuals.md`):
+1. **Glyph carries the state, not color alone.** Uppercase means committed to hurting (`G`, `W`, `S`, `Z`). Lowercase means harmless (`g`, `w`, `s`, `z`). A damaged enemy uses the `w/z` family.
+2. **Harmless enemies are muted.** Orange/red is reserved for telegraphed enemies and `*`. The player, the swipe arc and `x` never use it. This makes the telegraph the loudest thing on the map, and it is what makes the spitter stop looking like scenery.
+3. **Extra draws on telegraph events.** The room is drawn at Wind-up start, Charge start, projectile spawn, every swipe, grub Recovery start and player down. Otherwise short telegraphs fall between 0.5 s frames. Timings are untouched.
+4. **Text lines name the enemy and its position.** Grub: "a grub rears back (left)". Spitter lines are named by position. A new "the grub is open" line marks the start of Recovery, the counter window. A stagger line is added for spitters.
+5. **Swipe arc glyphs** `) ( ^ v` in lantern color on the tiles in reach.
+6. **Run-over screen** adds the line "press attack to start again", because the spec's restart rule is otherwise undiscoverable.
+
+### Handoff items
+
+- **`manual.md` must be updated** (not on my write list): the glyph table, the `x` marker, the arc, the practice room, the new lines and the run-over screen (V-5). Route to whoever owns the manual, after Build fixes the final glyphs.
+- **Acceptance:** V-1…V-8 in `design/combat-visuals.md` join AC-1…AC-17 for Verify. After Build, I should review the actual player view for color and legibility.
+- `design/combat.md` is unchanged. Its line "chosen in Build and documented in the manual" now means: follow `design/combat-visuals.md` and document any change in `manual.md`.
+
+## Decisions already made
+
+- D-001: one attack button plus dash.
+- D-002: Option A, reuse existing enemy behavior.
+- No new decision recorded; nothing here changes a style pillar.
+
+## Constraints
+
+- No rule, timing or parameter changed. No new inputs. Reuse existing systems.
+
+## Open questions
+
+- **For Build / Plan:** can the extra draws on events (principle 4) be added cheaply? If not, tell `game-designer`: a 0.5 s Wind-up cannot be guaranteed visible with only a 0.5 s draw cadence.
+- **Optional, for game-designer:** should the player's invulnerability (hit and dash) be visible? Suggested `p` for `P`. This needs no rule change.
+
+## Expected output
+
+The Studio routes Build (`gameplay-engineer`) with `design/combat.md` plus `design/combat-visuals.md`, then Verify (`qa`) with AC-1…AC-17 and V-1…V-8, then a visual review of the built player view by the art-director.
+
+## Sender assessment
+
+Confidence high on glyph, case and event-draw rulings: they follow from the text view and the 0.5 s draw cadence. Confidence medium on colors: they cannot be judged until a build exists.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: none specified
+- Project: design/combat.md, design/combat-visuals.md, manual.md
+- Decisions: decisions/D-002-combat-response-scope.md
+- Previous handoff: goals/G-001-combat-monotony/13-studio-to-art-director.md
+>>>END

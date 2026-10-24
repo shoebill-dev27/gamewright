@@ -1,0 +1,72 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "b7fb7a3d85a62bcd564a33ee20caf62b355a7ef99ce6d8cfb6df0d5adb83abc2",
+  "bytes": 1304
+ },
+ {
+  "path": "goals/G-001-combat-monotony/103-studio-to-qa.md",
+  "sha256": "b630ee1e7dd0348b586ef74b5812d379ae73866edba93499926b0a496a9c1384",
+  "bytes": 3023
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "381742c8f2afe2e1a2a6af9d031dcc91f98f490ada7c90e2a990d6a1aaf27639",
+  "bytes": 1765
+ },
+ {
+  "path": "studio/skills/verify-change.md",
+  "sha256": "da40d2c0030e078ac6d085ea06b17bb9b452495f4e2f412a9e1bd723ac72ddf5",
+  "bytes": 1281
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "9b475785214db05d78537a8d2e3dcf6e6299987703a8c1c54174464a360332ef",
+  "bytes": 6038
+ },
+ {
+  "path": "repo/game.py",
+  "sha256": "7702659c02f76ba9b59294e97d28d267fc2a9ec393f3ba6b5c80ea0a64da0af0",
+  "bytes": 15672
+ },
+ {
+  "path": "repo/tests/test_game.py",
+  "sha256": "1841f1834362267cbbfa70ee8ddce4ceddb71c94cec3ff9e94264fad17a4e28a",
+  "bytes": 36840
+ },
+ {
+  "path": "repo/bots.py",
+  "sha256": "44e205f03e3151a7538c15ca517b8ba1980b76886a7693992541bf8c24067488",
+  "bytes": 15466
+ },
+ {
+  "path": "repo/play.py",
+  "sha256": "4a09a79d70115d87b3277cdde7a5e02950a4b2539ceceb4119f071a49295f45d",
+  "bytes": 15894
+ },
+ {
+  "path": "design/combat-step94.md",
+  "sha256": "43cc96d0ed3560a009ac740f46d6f2098ac69c9e26a8c873accc11de9c431bbe",
+  "bytes": 8338
+ },
+ {
+  "path": "project.md#current-state",
+  "sha256": "b96ec805922ecf6b95bdde2b4fc7e91325aeb19b0d39915692d8f505a467e183",
+  "bytes": 465
+ },
+ {
+  "path": "decisions/D-011-variant-named-messages-accepted.md",
+  "sha256": "bf29d86bb781ad0221fb0e0f20906afb352af9441735a73b8867a2ed71d13605",
+  "bytes": 2498
+ },
+ {
+  "path": "decisions/D-013-review-pass-3-readability-wording-then-close.md",
+  "sha256": "1c482ac6affe0ad407d78f12aa982a525ada2d3f6152293bc2088d46ca1bd303",
+  "bytes": 3766
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ }
+]

@@ -1,0 +1,102 @@
+<<<FILE goals/G-001-combat-monotony/26-qa-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 26
+from: qa
+to: studio
+stage: Verify
+outcome: question
+---
+# 26: qa → studio — Verification of the dash/hit invulnerability fix (attempt 3): still no verdict, because `sim/build-0.4.md` does not contain the hit-stun press statements
+
+## Task
+
+Get the hit-stun press behavior written into `sim/build-0.4.md` (or its successor), then re-route to QA for a final verdict. Everything else in the build meets the acceptance criteria. I cannot give `pass` while criteria 2 and 5 are unobservable in the build. I am not giving `fail` either, because nothing in the build contradicts the spec.
+
+## Context
+
+Goal G-001 (combat monotony). This is the third verification attempt. Handoff 23 says the build was changed so that dash and attack presses during hit-stun are discarded, and that `sim/build-0.4.md` is the updated description. I read `sim/build-0.4.md` as supplied in this packet. It does not contain that change. Its last section still says: "A dash pressed during hit-stun behaves as it did in 0.3." `sim/build-0.3.md` does not describe hit-stun presses at all.
+
+My role says to verify from the spec, the criteria and the build, not from the sender's explanation. Handoff 23's Findings are a statement of what was changed. They are not an observation of the build. I did not treat them as evidence. `project.md#constraints` says the runtime's simulator updates `sim/` from a Build handoff. In the file I received, that update is not present.
+
+## Findings
+
+### Build-file naming mismatch (labeling only, not a verification matter)
+
+The file is `sim/build-0.4.md`, but its heading says "Simulated build 0.3.1". I treated the two as one build, the latest, with `build-0.3.md` as the baseline.
+
+### Missing statements (exactly what the build description lacks)
+
+The build description needs to state each of the following as observable behavior:
+
+1. A dash press during the 0.3 s hit-stun (for example at about 0.05, 0.15 and 0.28 s) starts no dash, and the dash cooldown does not start.
+2. An attack press during hit-stun produces no swipe. It does not enter the "attack queued during a dash" slot.
+3. Neither press fires or is stored when hit-stun ends at 0.3 s.
+4. A button held through the end of hit-stun does not fire. A fresh press afterwards works.
+5. A press at or after 0.3 s is accepted normally. A press exactly on the edge may differ by one frame between 30 and 60 FPS.
+6. The hit-stun length is the same at 30 and 60 FPS.
+
+Without these, the current description allows "ignored" (D-003), "buffered" or "starts a dash". The phrase "behaves as it did in 0.3" points at a baseline that is silent on the case. Inferring "ignored" from "stunned with no input" would be inference from intent, so I did not do it.
+
+Whether the behavior matches D-003: not yet determinable. D-003 and `design/combat.md` are clear and are not the gap.
+
+### Per-criterion results (from `sim/build-0.4.md` as supplied)
+
+The build says behavior is the same at 30 and 60 FPS, apart from the exact frame at which an edge lands. It gives no separate per-rate observations, so both columns carry the same evidence.
+
+| # | Criterion | 30 FPS | 60 FPS | Evidence |
+|---|---|---|---|---|
+| 1 | Earliest dash (~0.3 s after hit): no damage during the 0.25 s dash, Grub and Spitter | pass (per description) | pass (per description) | "Dash started between 0.3 s and 0.55 s after a hit: no damage during the dash, and none after the dash ends." "Holds for Grub contact and Spitter projectiles alike." A 20-repeat count cannot be shown by a description. |
+| 2 | Varied delays, including a press during hit-stun, and just before, at and after 0.8 s | **not judgeable** | **not judgeable** | The matrix is described. 0.3–0.55 s and 0.55–<0.8 s: no damage mid-dash ("Damage cannot land partway through the dash"). At 0.8 s or later: the dash gives its own 0.25 s. The press-during-hit-stun case is missing (statements 1 and 3–6 above). |
+| 3 | Directions (toward and away), rooms 1–5, Grubs and Spitters | pass (per description) | pass (per description) | "for dashes toward or away from the damage source." "No other changes to enemies, rooms or attacks." Rooms are not named per case. |
+| 4 | Dash with no preceding hit: full 0.25 s invulnerability | pass | pass | "you cannot be damaged for the full 0.25 s of the dash. Damage can land immediately after it ends." |
+| 5 | Hit-stun 0.3 s with no input, hit invulnerability to 0.8 s, cooldown 0.6 s, attack queued in dash fires at its end | **hit-stun input part not judgeable**; the rest passes | same | "Stunned with no input for the first 0.3 s." "cannot be damaged for 0.8 s after the hit." "0.6 s dash cooldown are unchanged." "An attack pressed during a dash still fires when the dash ends." Missing: statements 1–6 above. |
+| 6 | Mid-dash damage is not deferred to just after the dash. Damage after the windows is normal. | pass (thin evidence) | pass (thin evidence) | For a dash with no preceding hit, damage can land immediately after the dash ends (normal). For a dash after a hit, protection continues to at least 0.8 s after the hit. Nothing describes damage being stored and released. The frame right after the dash ends with a source still in contact is not described explicitly. |
+
+### Boundaries (frame length in view)
+
+- A damage event exactly on 0.25 s or 0.8 s counts as after protection.
+- The one-frame difference is about 33 ms at 30 FPS and about 17 ms at 60 FPS. Nothing in the description shows a larger difference.
+- The description gives no timestamps at 0.79, 0.8 or 0.85 s. I checked against its rules.
+
+### Regressions checked
+
+- Dash distance, duration (0.25 s) and the 0.6 s cooldown: unchanged per the build.
+- Attack queued during a dash fires at the dash's end: unchanged per the build.
+- Enemies, rooms and attacks: unchanged per the build.
+- Flicker and sound cues: none described, not checked.
+
+### Overall
+
+No verdict (`question`). No criterion fails on the evidence. Criteria 2 and 5 cannot be judged until the hit-stun press behavior is in the build description. Criteria 1, 3, 4 and 6 are consistent with pass.
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no new input.
+- D-003: input during hit-stun is ignored, not buffered. Hit and dash invulnerability are independent timers.
+
+## Constraints
+
+- Verify from the criteria, D-003 and the build. Do not change the spec or the build.
+- Both 30 and 60 FPS must be covered.
+- Do not infer behavior from intent.
+
+## Open questions
+
+1. Please make sure `sim/build-0.4.md` (or its successor) actually contains the six statements listed under "Missing statements". The file supplied in this packet still has the old line "behaves as it did in 0.3". Check whether the simulator applied the change from handoff 23.
+2. Optional: state what happens in the frame right after a dash ends while a damage source is still in contact (criterion 6).
+3. Optional: fix the heading/file-name mismatch (0.3.1 vs 0.4).
+
+## Expected output
+
+Studio updates or re-supplies `sim/build-0.4.md` with the statements above and re-routes to `qa` with this handoff as the previous handoff. QA then returns `pass` or `fail`. If a press during hit-stun is ignored, nothing fires at 0.3 s, and the other criteria hold, the verdict will be `pass`. If a press is buffered, starts a dash, starts the cooldown, or fires at the end of hit-stun, the verdict will be `fail` against D-003 and criteria 2 and 5.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: design/combat.md; project.md#constraints; sim/build-0.4.md; sim/build-0.3.md; goals/G-001-combat-monotony/05-qa-to-studio.md
+- Decisions: decisions/D-001-one-button-combat.md; decisions/D-003-input-during-hit-stun.md
+- Previous handoff: goals/G-001-combat-monotony/23-studio-to-qa.md
+>>>END

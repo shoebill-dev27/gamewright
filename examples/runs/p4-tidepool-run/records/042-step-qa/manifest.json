@@ -1,0 +1,62 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-first-puzzle-stall/35-studio-to-qa.md",
+  "sha256": "63d40bf2ce836d856b1f063bde97865207850c27a12edd1ff32424a946cb86c8",
+  "bytes": 4980
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "e65b1378195da3373e0b30e3a5fc9a454a2aedebe1ce953fd80da8237e4e641c",
+  "bytes": 1734
+ },
+ {
+  "path": "studio/skills/verify-change.md",
+  "sha256": "da40d2c0030e078ac6d085ea06b17bb9b452495f4e2f412a9e1bd723ac72ddf5",
+  "bytes": 1281
+ },
+ {
+  "path": "design/onboarding.md",
+  "sha256": "4a0734a978bc103d169183344d5f116631b35e69b102f1d684e220071350b9b0",
+  "bytes": 36396
+ },
+ {
+  "path": "sim/build-0.6.md",
+  "sha256": "71b9658940995d3be783e1cc261934be7579c265e83a9e2b9ef02683a55dc646",
+  "bytes": 12301
+ },
+ {
+  "path": "decisions/D-001-no-fail-states.md",
+  "sha256": "99362efd3625e792d862dcbec7744a761cee478a97eae271621290daff508b4e",
+  "bytes": 505
+ },
+ {
+  "path": "decisions/D-003-sand-tap-blip-and-pool-hit-area.md",
+  "sha256": "33f6904beaa5ff202abf355b91f021c4c5bfa9f036932b5385933fb643d304e1",
+  "bytes": 2412
+ },
+ {
+  "path": "decisions/D-004-ease-back-taps-window-origin-held-pool.md",
+  "sha256": "e78d4050831064e759af427628b44ca3dd1a81e81b1b4130ef6f2c25e6d76633",
+  "bytes": 2544
+ },
+ {
+  "path": "decisions/D-005-reduce-motion-pulse-fills-window.md",
+  "sha256": "ef5c5e50142b2ee4c4d7ea26c9cfaab8a6c85df13bba7d99456074d5c88756a1",
+  "bytes": 2785
+ },
+ {
+  "path": "decisions/D-006-cancelled-pulse-and-reduce-motion-beats.md",
+  "sha256": "da28d3dfba016343a9ce38bf383f9850982dbfe6e7804d9d0be635191d09a321",
+  "bytes": 3193
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ }
+]

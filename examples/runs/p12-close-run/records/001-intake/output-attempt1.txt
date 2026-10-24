@@ -1,0 +1,147 @@
+<<<FILE goals/G-001-dash-damage/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-23
+---
+# G-001: Damage taken while dashing
+
+## Owner request
+
+> ダッシュ中なのにダメージを受けることがある。再現できるので直してほしい。
+
+## Interpretation
+
+The Owner reports a defect: the player sometimes takes damage while dashing. The Owner says it is reproducible but gave no steps.
+
+Success condition: in the situations where the Owner sees it, the player no longer takes damage during a dash, to whatever extent the design documents (`design/combat.md` invulnerability rules) say a dash protects the player. It must hold at both 30 and 60 FPS.
+
+Out of scope:
+- Changing the dash's design (duration, cooldown, distance, whether it is invulnerable) unless the design documents turn out not to define the case. That would be a Design question, not part of this fix.
+- New input buttons (D-001).
+- Other combat tuning.
+
+## Unknowns
+
+- Observe (`qa`, planned): the defect has not been reproduced first-hand and the Owner gave no steps. QA reproduces it using `run_play` and `run_trace`, finds the exact conditions, and writes a defect report with acceptance criteria.
+- Diagnose: skipped as a separate stage. Root cause of a defect is the engineer's call (orchestration.md, Decision authority), and `run_trace` shows the simulation state.
+- Decide: skipped. No choice of direction, priority or scope is open. The Goal is a fix within D-001 and the existing design.
+- Design (`game-designer`, tentative): needed only if QA finds that `design/combat.md` does not define the intended behavior for the conditions that trigger the damage (for example, the start or end of a dash, or overlapping hits). If the documents already define it, skipped.
+- Plan (`technical-director`, tentative): needed only if the engineer's fix turns out to be non-local or cross-system, or depends on frame rate (30 vs 60 FPS).
+- Build (`gameplay-engineer`, planned): the game must change.
+- Verify (`qa`, planned): always after Build. This includes checking at 30 and 60 FPS.
+- Play and Review: skipped. This is a defect, not an experience Goal, and no direction Decision is involved.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | qa | reproduce-defect | open | 01-studio-to-qa.md |
+| 2 | Design | game-designer | write-design-spec | tentative (if intended behavior is undefined) | — |
+| 3 | Plan | technical-director | technical-plan | tentative (if the fix is non-local or FPS-dependent) | — |
+| 4 | Build | gameplay-engineer | implement-change | planned | — |
+| 5 | Verify | qa | verify-change | planned | — |
+
+## Route changes
+
+Intake: initial route (pattern 1, reproducible defect), with Design and Plan tentative.
+
+## Next action
+
+Run the Step for `01-studio-to-qa.md`: the `qa` role reproduces the defect and writes the defect report. Then run Route.
+
+## Outcome
+
+(Written at close, in Japanese.)
+>>>END
+
+<<<FILE goals/G-001-dash-damage/01-studio-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 1
+from: studio
+to: qa
+stage: Observe
+outcome: routed
+---
+# 01: studio → qa — Reproduce "damage taken while dashing" and write a defect report
+
+## Task
+
+Reproduce the reported defect: the player sometimes takes damage while dashing. Find the precise conditions that trigger it and write a defect report with acceptance criteria, following `reproduce-defect`.
+
+## Context
+
+Goal G-001. The Owner reported this in Japanese (verbatim):
+
+> ダッシュ中なのにダメージを受けることがある。再現できるので直してほしい。
+
+Translation: "I sometimes take damage even while dashing. It's reproducible, so please fix it."
+
+The Owner gave no reproduction steps. Nothing has been investigated so far. The project is a small headless build in `repo/`, played through input scripts. `run_play` shows what the player sees, `run_trace` shows simulation state, and `run_tests` runs the existing tests (see `project.md` front matter and `manual.md`).
+
+## Findings
+
+None yet. This is the first step.
+
+## Decisions already made
+
+- D-001: combat uses one attack button plus dash. No new input buttons.
+
+## Constraints
+
+- The game must play correctly at both 30 and 60 FPS. Check whether the defect depends on frame rate.
+- Judge the defect against the intended behavior in `design/combat.md` (damage and invulnerability rules). Report exactly what the document says about dash and damage, and quote it.
+- Do not propose or implement a fix, and do not speculate about code causes. The root cause is the engineer's decision. You may record trace observations as evidence.
+- Do not change the design. If the documents do not define the intended behavior for the conditions you find, say so plainly.
+
+## Open questions
+
+- Under what exact conditions is damage taken during a dash (which enemy or attack, which moment of the dash, positions, frame rate)?
+- Does `design/combat.md` define the intended behavior for those conditions?
+
+## Expected output
+
+A defect report (using `reproduce-defect`) that includes:
+- the input script(s) that reproduce it, and how often it reproduces;
+- the observed behavior, with player-view and trace evidence;
+- the expected behavior, quoting the design document;
+- severity and reproducibility;
+- acceptance criteria that are player-observable and stated for both 30 and 60 FPS.
+
+Put the report in the Findings of your outgoing Handoff (templates/handoff.md) and set `to` as follows:
+- Reproduced and the intended behavior is specified: `to: gameplay-engineer`, `outcome: done`.
+- Reproduced but the design documents leave the intended behavior undefined: `to: game-designer`, `outcome: done`, with the gap stated in Open questions.
+- Cannot reproduce, or the Owner must supply details only they have: `to: studio`, `outcome: question`, stating exactly what is missing.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/reproduce-defect.md
+- Project: project.md (Vision, Constraints, Current state), design/combat.md, manual.md, repo/README.md, the build in `repo/` (run with `run_play` and `run_trace`)
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: none
+>>>END
+
+**Intake 完了(G-001)**
+
+**目標の解釈**: 「ダッシュ中にダメージを受ける」不具合を、再現したうえで直します。成功条件は、`design/combat.md` が定めるダッシュ中の無敵ルールどおりに、ダッシュ中はダメージを受けなくなることです。30FPS と 60FPS の両方で満たす必要があります。ダッシュ仕様そのものの変更や新しい入力ボタンの追加は対象外です。
+
+**ルート(パターン1: 再現可能な不具合)**
+1. **Observe(qa, `reproduce-defect`)** — 計画済み・**開始待ち**。再現手順が未提供のため、条件(敵、ダッシュ中のタイミング、FPS 依存)を QA が特定し、受け入れ基準付きの不具合報告を書きます。
+2. **Design(game-designer)** — 暫定。`design/combat.md` が該当ケースの意図を定めていないと QA が判断した場合のみ実施します。
+3. **Plan(technical-director)** — 暫定。修正が局所的でない場合や FPS に依存する場合のみ実施します。
+4. **Build(gameplay-engineer)** — 計画済み。
+5. **Verify(qa)** — 計画済み。Build の後に必ず実施します。
+
+**省略したステージ**
+- Diagnose: 原因の特定はエンジニアの権限で、`run_trace` で状態を追えるため省略しました。
+- Decide: 方向性や優先度の選択がないため省略しました。
+- Play / Review: 体験の目標ではなく不具合修正なので省略しました。
+
+**次のアクション**: `goals/G-001-dash-damage/01-studio-to-qa.md` を使って、`qa` ロールの Step を実行してください。その後に Route を実行します。
+
+なお、ログ `log.md` は書き込み許可パスに含まれていないため、今回は作成していません。

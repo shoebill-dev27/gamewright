@@ -1,0 +1,57 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/46-studio-to-gameplay-engineer.md",
+  "sha256": "9791e71fbd23f4fe760e87cfc2fc899c66d3ab83d1fe2881c46d145c2c63dd9b",
+  "bytes": 3087
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md",
+  "sha256": "18ecbace72fe54a14efe4897ffa4e7456facff677234c671d8841408747cb7d0",
+  "bytes": 1609
+ },
+ {
+  "path": "studio/skills/implement-change.md",
+  "sha256": "a9befd7f1d9e09eb94c51a066f030db88c5061ad1b522d9795e62bc2c242964a",
+  "bytes": 1823
+ },
+ {
+  "path": "repo/tests/test_game.py",
+  "sha256": "76a7fbccce02834ef55155199961247049eabbbcdb289c6649df1160c1444f54",
+  "bytes": 26140
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "6f926dd3d101acce253f39e0f642d62749ff6675386942c23809b9c516bddd84",
+  "bytes": 17692
+ },
+ {
+  "path": "repo/README.md",
+  "sha256": "ed2d47427f733e416ceeae3304620fa38f5f2a2a65e258c5add3505fe322c7e6",
+  "bytes": 331
+ },
+ {
+  "path": "decisions/D-009-manualtest-phrase-check-ignores-line-wraps.md",
+  "sha256": "edda481ff8a7c911414c9ab7b4decac6af949cd3d24716287433cfbee39544b4",
+  "bytes": 1411
+ },
+ {
+  "path": "decisions/D-008-manualtest-run-by-owner-one-failure.md",
+  "sha256": "142a50dbb49f739694ff3bea4f04a565d55fea3b997a50c9f17dbb8c317c1d5c",
+  "bytes": 2280
+ },
+ {
+  "path": "goals/G-001-combat-monotony/45-game-designer-to-studio.md",
+  "sha256": "752724643933de68246088cefe4277d61f3e468479200c4af206f79e7a2cfd38",
+  "bytes": 5358
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ }
+]

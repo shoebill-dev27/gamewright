@@ -1,0 +1,185 @@
+<<<FILE goals/G-001-dash-damage/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-10
+---
+# G-001: ダッシュ中の被ダメージ不具合を修正する
+
+## Owner request
+
+> ダッシュ中なのにダメージを受けることがある。再現できるので直してほしい。
+
+## Interpretation
+
+報告された被ダメージを再現し、仕様に反する挙動を修正して、ダッシュ時のダメージ判定が既存の仕様どおりに動くことを独立した検証で確認する。
+
+戦闘の方向性変更、新しい入力の追加、無関係なバランス調整は対象外。
+
+## Unknowns
+
+- Observe: QA は仕様不一致の照合と AC-1〜AC-6 の作成を完了した。Owner の詳細条件を独立した試行で再現したわけではない。
+- Diagnose / Plan: 発生源別保護の計画と D-003 は確定済み。Handoff 19 の条件付き検証計画に対し、モデル・記録の取得経路は依然未確保。
+- Decide: ゲームの方向選択は不要。ただし、Role が提供できない外部資料へのアクセス、または元の Goal の扱いについて Owner 向けの選択肢が必要。
+- Design: QA は AC-6 のクールダウン起点を仕様不足と判定した。combat と repo-notes の原文にも起点はない。既存原資料が得られなければ game-designer が判断する。Studio や技術側では決めない。
+- Build: 模擬実装変更の定義は完了。対象は `sim/build-0.4.md`、変更識別子 `0.3-G001-15`。資料不足を理由とする追加修正は未承認。
+- Verify: Handoff 21 は文書評価を完了したが、総合結果は question。AC-1〜AC-6、全4環境、必要な回帰の条件別証拠が不足している。具体的な仕様不一致による fail ではない。
+- Play / Review: 体験 Goal や方向 Decision を伴わないため省略。
+- Next: 独立検証の結果、または Owner による範囲変更・中止の決定を受けて結果をまとめる。
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | qa | reproduce-defect | done | 01-studio-to-qa.md |
+| 1b | Observe | qa | reproduce-defect | done | 03-studio-to-qa.md |
+| 1c | Observe | qa | reproduce-defect | done | 05-studio-to-qa.md |
+| 1d | Observe | qa | reproduce-defect | done | 07-studio-to-qa.md |
+| 1e | Observe | qa | reproduce-defect | done | 10-studio-to-qa.md |
+| 2 | Diagnose / Plan | technical-director | technical-plan | done | 12-studio-to-technical-director.md |
+| 3 | Decide | game-director | make-decision, prepare-owner-escalation | skipped | — |
+| 4 | Design | game-designer | write-design-spec | skipped | — |
+| 5 | Plan | technical-director | technical-plan | skipped | — |
+| 6 | Build | gameplay-engineer | implement-change | done | 14-studio-to-gameplay-engineer.md |
+| 6b | Build 資料照合・補完 | gameplay-engineer | implement-change | done | 16-studio-to-gameplay-engineer.md |
+| 6c | Plan 検証成立性の再検討 | technical-director | technical-plan | done | 18-studio-to-technical-director.md |
+| 7 | Verify 文書評価・証拠充足性確認 | qa | verify-change | done | 20-studio-to-qa.md |
+| 7a | Owner escalation 準備 | technical-director | prepare-owner-escalation | open | 22-studio-to-technical-director.md |
+| 7b | Design クールダウン起点 | game-designer | write-design-spec | tentative | — |
+| 7c | Verify 補完後の独立検証 | qa | verify-change | planned | — |
+| 8 | Play | playtester | playtest-session | skipped | — |
+| 9 | Review | game-director | review-outcome | skipped | — |
+| 10 | Next | studio | — | planned | — |
+
+done は各 Step の作業終了を示し、再現成功や Verify 合格を意味しない。主要な結果は Observe 1e＝`11-qa-to-studio.md`、Plan 2＝`13-technical-director-to-studio.md`、Build 6＝`15-gameplay-engineer-to-studio.md`、資料照合 6b＝`17-gameplay-engineer-to-studio.md`（question）、再計画 6c＝`19-technical-director-to-studio.md`、Verify 7＝`21-qa-to-studio.md`（question）。
+
+行 7b は修正継続時に既存起点を回復できない、または資料間の矛盾が残る場合に実施する。既存原資料で解決すれば skipped とする。行 7c は元の Goal を維持する限り必須。両行は必要入力と継続方針が整うまで開始しない。現在開いている工程は行 7a の brief 作成である。
+
+## Route changes
+
+2026-10-10 — Handoff 02・04・06 の question に対して追加 Observe を設定した。08 でも同じ不足が解消せず、loop limits により 09 で Owner に escalation した。
+
+2026-10-10 — Owner が継続と補足観察を選び、D-002 を記録。Observe 1e を再開し、11 の不具合報告・AC を受領した。Diagnose / Plan を行 2 に統合し、独立 Plan 行 5 は省略した。
+
+2026-10-10 — 13 と D-003 を受け Build を開始。方向・視覚変更は不要として、game-director・art-director は追加しなかった。
+
+2026-10-11 — 15 の模擬実装定義を受領。検証資料不足に対して資料照合 6b を追加し、17 に基づき build-0.4 と変更識別子の対応を採用した。
+
+2026-10-11 — 17 の不足報告を受け、同じ資料生成要求を反復せず Plan 6c に戻した。19 の条件付き計画を受け、照会手段未確保のまま文書評価分岐で独立 QA に 20 を渡した。モデル不存在や取得不能の確認とは扱っていない。
+
+2026-10-11 — 21 を受領し、行 7 を done とした。QA は条件別証拠を必須とし、文書整合だけでは検証未完了と判断した。fail ではないため Build への修正差し戻しや「同じ AC の二回目の失敗」は適用しない。
+
+2026-10-11 — 既存の引継ぎでは repo-notes にも起点・衝突条件・イベント記録がなく、外部照会経路も未確保である。外部入力の blocker として、アクセス提供・範囲縮小・中止の Owner 向け brief 作成を 22 で technical-director に渡す。モデル不存在・照会実施済みとは断定しない。
+
+2026-10-11 — 状態管理を訂正した。新しい open Escalation はまだないため Goal は active、行 7a は open とする。brief を受領し、Owner 宛ての open Escalation を Route する時点で blocked-on-owner に変更する。依存する実装・検証は開始しない。
+
+## Next action
+
+technical-director が `22-studio-to-technical-director.md` から Owner 向け Escalation を作成する。必要な外部入力、未確保の取得経路、影響する検証条件、選択肢と推奨案を日本語で明示する。
+
+Studio はその成果物を次の Route で確認し、Owner 宛ての open Escalation として提示するときに Goal を blocked-on-owner にする。現在は brief 作成中であり、Owner の回答待ちではない。QA・実装への同じ不足入力での再依頼は行わない。
+
+## Outcome
+
+未完了。仕様不一致の確認、受け入れ条件、D-003 に基づく模擬実装変更と対象ビルドの識別は完了した。独立 QA は文書上の整合を確認したが、全4環境の条件別証拠不足とクールダウン起点の未定義により、検証結果は question。
+
+必要資料へのアクセスを Role の作業だけでは確保できないため、technical-director が Owner 向けの選択肢を準備する。Goal はその作業中の active 状態である。修正完了・検証合格とは報告しない。追加 Owner 計測、新規 simulator 開発、検証要件の緩和は決定していない。
+>>>END
+
+<<<FILE goals/G-001-dash-damage/22-studio-to-technical-director.md
+---
+kind: handoff
+goal: G-001
+seq: 22
+from: studio
+to: technical-director
+stage: Owner escalation 準備
+outcome: routed
+---
+# 22: studio → technical-director — 検証資料へのアクセス不足を Owner 向け選択肢にする
+
+## Task
+
+`prepare-owner-escalation` を用い、必要な外部資料へのアクセスを確保できない blocker について、日本語の Owner 向け Escalation を作成する。追加の技術計画や同じ資料生成依頼ではなく、提供・範囲縮小・中止それぞれの具体的な結果と再開経路を示す。
+
+## Context
+
+Owner はダッシュ中の被ダメージ修正を依頼し、D-002 で補足観察を提供して修正継続を選択した。模擬実装の対象は `sim/build-0.4.md`、変更識別子 `0.3-G001-15`。
+
+Handoff 19 の文書評価分岐を実施した独立 QA は、Handoff 21 で文書評価完了・総合 question を返した。条件別生成観察が不足し、文書整合は全4環境の合格を代替できないと判断している。
+
+既存の引継ぎでは runtime 管理側の窓口・照会手段は確保されていない。次の Role が問い合わせや試行生成を実施できるという前提は置けない。
+
+新しい Owner 宛ての open Escalation はまだない。Goal は active のまま、この brief 作成 Step を open とする。
+
+## Findings
+
+- QA は具体的な仕様不一致を確認していない。fail や二度目の AC 失敗ではなく、必須証拠不足である。
+- 必須資料は、対象変更と対応した観察の来歴・モデル情報、全4環境の AC-1〜AC-6 と回帰のイベント記録、命中成立・入力受理・状態遷移・ハート値・移動・予約攻撃・再使用の記録、試行一覧と集計根拠である。詳細は Handoff 21 にある。
+- 既存の引継ぎによると、`sim/repo-notes.md#limits-of-available-implementation-detail` は、衝突形状・速度・座標・弾道・発射位相が得られず、フレーム別試行や試行総数を復元できないと明記している。
+- project の dry-run 規約は runtime の simulator による更新を定めるが、モデル・記録へのアクセス方法や生成能力を保証していない。
+- 取得経路の状態は「照会手段未確保」。問い合わせ実施済み、モデル不存在、永久に取得不能とは記録しない。Owner がモデルを保有するとも仮定しない。
+- QA と既存の引継ぎによると、`design/combat.md#player-kit` は “Cooldown 0.6 s.”、repo-notes は既存起点を維持するとするだけで、起点を特定できない。これは観察不足と別の仕様問題である。継続時に既存原資料を回復できなければ game-designer に返す。
+- 新規 simulator 開発・実機試験は現在の dry-run の範囲として承認されていない。必要となれば別途 scope の判断を求める。
+
+Handoff 19 が想定した runtime 管理側への確認は未実施であり、その escalation 条件がすべて成立したとは扱わない。今回の blocker は、その確認自体に必要な窓口・アクセスがなく、QA が必須と判断した証拠を現 packet 内の Role 作業では作れないことである。
+
+## Decisions already made
+
+- D-001：Owner 承認なしに戦闘入力を追加しない。
+- D-002：元の修正 Goal を継続する。部分観察は計測ログではなく、仕様や AC を変更する決定ではない。不可欠な情報を既存資料や Role の作業から得られない場合は再検討できる。
+- D-003：発生源別保護の論理和を採用する。クールダウンの時間・起点や同時イベントの優先順位は変更しない。
+
+## Constraints
+
+- Studio は routing のみを判断している。仕様、技術方式、QA の verdict を変更しない。
+- AC-1〜AC-6、30／60 FPS × キーボード／ゲームパッド、必要な命中源・回帰を維持する。
+- 文書評価・生成観察・実測を区別し、未知の件数や時刻を創作しない。
+- Owner に追加計測を当然の義務として求めない。必要なのはまず資料または取得窓口へのアクセスである。
+- 窓口がないことをモデル不存在の証明としない。
+- 新しいモデルや一般的な挙動宣言を作って検証結果に見せない。
+- クールダウン起点の新規仕様判断は game-designer の権限に残す。
+- Goal は active。この Step では brief 作成を進め、依存する実装・検証は開始しない。Studio が Owner 宛ての open Escalation を Route するときに blocked-on-owner へ変更する。
+
+## Open questions
+
+Owner が選べるよう、少なくとも次の選択肢を具体化する。
+
+1. 元の Goal を維持し、runtime 管理側の窓口・アクセス、または出典付き既存モデル・記録の提供を手配する。提供後は technical-director の計画に沿って入力照合・必要な補完を行い、独立 QA に戻す。提供だけで合格を保証しない。
+2. Goal を現資料による調査・文書評価報告へ縮小する。Owner の明示的な再解釈が必要であり、「修正の独立検証完了」とは報告しない。
+3. 未検証事項を明記して中止する。Goal を abandoned とし、検証合格を主張しない。
+
+アクセス提供による継続を推奨案の出発点とし、実行可能性・費用が不明な点と、何が判明すれば推奨を変えるかを明示する。提供期限や開発費を捏造しない。
+
+## Expected output
+
+`studio/templates/escalation.md` に従う、`from: technical-director`、`to: owner`、`status: open` の Escalation。
+
+以下を含める。
+
+- Owner が単独で読んで回答できる質問。
+- 外部入力 blocker と、範囲縮小には Owner 判断が必要である理由。
+- 必要資料・候補提供元・取得経路の未確保・影響する検証条件。
+- 2〜3 個の選択肢、各選択の範囲・費用やリスクの不確実性・次の route。
+- Studio recommendation と根拠。
+- 依存工程は開始していないこと。
+
+作成後は Studio の Route を経て Owner に提示する。その時点で Studio が Goal を blocked-on-owner にし、Owner の回答待ちを記録する。選択、資料取得、検証、仕様判断をこの Step で実施済みとしてはならない。
+
+## Load
+
+- Role: studio/roles/technical-director.md
+- Skills: studio/skills/prepare-owner-escalation.md
+- Template: studio/templates/escalation.md
+- Project: project.md#vision
+- Project: project.md#constraints
+- Project: design/combat.md#player-kit
+- Project: sim/repo-notes.md#limits-of-available-implementation-detail
+- Decisions: decisions/D-001-one-button-combat.md
+- Decisions: decisions/D-002-resume-with-owner-observations.md
+- Decisions: decisions/D-003-independent-invulnerability.md
+- Previous handoff: goals/G-001-dash-damage/21-qa-to-studio.md
+- Supporting plan: goals/G-001-dash-damage/19-technical-director-to-studio.md
+>>>END

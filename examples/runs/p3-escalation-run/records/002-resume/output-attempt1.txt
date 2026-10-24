@@ -1,0 +1,241 @@
+<<<FILE decisions/D-002-enemy-side-combat-depth.md
+---
+kind: decision
+id: D-002
+status: accepted
+decided_by: owner
+goal: G-002
+date: 2026-10-11
+supersedes: none
+---
+# D-002: 戦闘の単調さは敵側の行動で解決する（ワンボタン維持）
+
+## Decision
+
+G-002（戦闘の単調さ）は Option A で進める。入力は攻撃1ボタン＋ダッシュのまま変えず、次の内容で深みを作る。
+
+- 予兆（テレグラフ）付きの敵攻撃。
+- 新しい敵 2 種：突進する Charger と、正面をガードする Shieldbearer。
+- 部屋構成の調整（旧案 C）。Game Director の判断で A に組み込み済み。
+
+限界と条件（Owner の指定）:
+
+- **今回は、攻撃ボタンの長押しによる溜め攻撃を実装しない。** 仕様にも含めない。
+- 溜め攻撃は将来の検討候補として残す。検討する場合は、D-001 の範囲に収まるか、D-001 を置き換える Decision が必要かを、その時点で改めて判断する。
+- D-001（攻撃1ボタン＋ダッシュ）は変更しない。
+
+Owner の言葉:
+
+> Aで。ワンボタンは守りたい。ただ、同じボタンの長押しで溜め攻撃、みたいな案なら将来は検討してもいい。今回はやらない。
+
+## Rationale
+
+- 観察された単調さの主因は、敵が位置取りやタイミングを要求しないこと。A はそこに直接効く。
+- Owner は柱 1（ワンボタン戦闘）を守ることを優先した。
+- A は可逆で、将来 B や溜め攻撃を選ぶ余地を残す。
+
+## Alternatives considered
+
+- **Option B（重攻撃ボタン追加）**: D-001 を変更する必要があり、根拠はプレイヤーの 1 回の発言のみ。「同じ戦法で全部屋を突破できる」問題にも部分的にしか効かない。Owner は選ばなかった。
+- **ボタン長押しの溜め攻撃**: Owner は将来の検討対象としたが、今回はやらないと明言した。
+- **案 C（部屋構成の調整のみ）**: 単独では天井が低いため、A に組み込んだ。
+
+## Revisit when
+
+- A の実装後の再 Playtest でも、単調さの原因が「プレイヤーの取れる行動が少ないこと」だと示された場合（D-001 の再検討条件とも一致）。
+- Owner が溜め攻撃を検討したいと伝えた場合。
+>>>END
+
+<<<FILE goals/G-002-combat-monotony/04-game-director-to-owner.md
+---
+kind: escalation
+goal: G-002
+seq: 4
+from: game-director
+to: owner
+status: resolved
+decision: D-002
+---
+# 04: Owner decision needed — 戦闘の深みを「敵側」で作るか「プレイヤー側」で作るか
+
+## Question
+
+戦闘の単調さを、ワンボタンのまま敵の行動で解決しますか（A）、それとも重攻撃ボタンを追加して D-001 を変更しますか（B）？
+
+## Why this needs the Owner
+
+- **Owner が決めた Decision（D-001「攻撃1ボタン＋ダッシュ」）が変わりうる**選択肢が、証拠上も有力な方向として残っているため。
+- **大きな方向性が複数あり**、現時点の証拠（Playtest 1回分）ではどちらが正しいか決着しないため。
+
+Studio の権限内の判断は済ませています。案 C（部屋構成の調整のみ）は単独では天井が低いため、Director 判断で A に組み込みました。
+
+## Options
+
+### Option A — 敵側で深みを作る（ワンボタン維持）
+
+予兆（テレグラフ）付きの攻撃と、新しい敵 2 種（突進してくる Charger、正面をガードする Shieldbearer）を追加し、部屋ごとに「どこに立つか・いつ避けるか・どれから倒すか」を問う構成にします。
+単調さの症状 4 つのうち 3 つ（同じ戦法で全部屋を突破できる／ダッシュを戦闘で使わない／敵ごとの戦い方の差がない）に効きます。コストは中。D-001 と柱をすべて守ります。後から B を追加することも妨げません。
+If chosen: 詳細設計（Game Designer）→ 技術計画（Technical Director）→ 実装 → QA → 再 Playtest → Director レビュー。
+
+### Option B — プレイヤー側で深みを作る（重攻撃ボタン追加）
+
+2 つ目の攻撃ボタンとして重攻撃を追加します。「重い一撃が欲しい」という声には直接応えますが、「同じ戦法で全部屋を突破できる」問題には部分的にしか効きません。コストは中（入力・アニメーション・バランス調整）。
+**D-001 を変更**することになり、「コンボを覚えたくない層でも遊べる」という前提が変わります。
+If chosen: D-001 を置き換える Decision を記録 → 重攻撃の詳細設計 → 技術計画 → 実装 → QA → 再 Playtest → レビュー。
+
+## Studio recommendation
+
+Option A。
+
+## Reasoning
+
+- 観察された単調さの主因は「敵が位置取りやタイミングを要求しないこと」で、A はそこに直接効きます。
+- B を支える証拠は、プレイヤーの 1 回の発言だけです。
+- A は柱と Owner の過去の判断を守り、可逆で、B を将来選ぶ余地も残します。
+
+推奨を変える条件：A の実装後の再 Playtest でも、単調さの原因が「プレイヤーの取れる行動が少ないこと」だと示された場合。これは D-001 の「再検討条件」とも一致します。
+
+## Meanwhile
+
+なし。以降の工程はすべてこの判断に依存するため、停止しています。
+
+## Owner decision required
+
+A / B — 選んだ案と、条件があれば併せて返答してください。
+
+---
+
+**Owner response (2026-10-11):** Aで。ワンボタンは守りたい。ただ、同じボタンの長押しで溜め攻撃、みたいな案なら将来は検討してもいい。今回はやらない。
+
+**Resolution:** Option A が選ばれました。Decision は D-002 に記録しました（条件：長押し溜め攻撃は今回の範囲に含めない。将来の検討候補として残す）。
+>>>END
+
+<<<FILE goals/G-002-combat-monotony/goal.md
+---
+kind: goal
+id: G-002
+project: lantern-depths
+status: active
+created: 2026-10-10
+---
+# G-002: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success: in a playtest of the 5-room slice, the player has to make different decisions across rooms
+(where to stand, when to dash, which enemy first) instead of repeating one pattern, and the Game
+Director judges the monotony addressed on that evidence. Out of scope: new biomes,
+meta-progression, run length. Also out of scope (Owner, D-002): a hold-to-charge attack.
+
+## Unknowns
+
+All stages of route pattern 2 are open: the monotony has not been observed or diagnosed, a
+direction choice is likely (D-001 limits some options), new behavior will need a spec and a plan,
+and it is an experience Goal (Play, Review).
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 01-studio-to-playtester.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 02-playtester-to-game-designer.md |
+| 3 | Decide | game-director | make-decision, prepare-owner-escalation | done (escalated) | 03-game-designer-to-game-director.md |
+| 4 | Decide | owner | — | done (Option A, D-002) | 04-game-director-to-owner.md |
+| 5 | Design | game-designer | write-design-spec | open | 05-studio-to-game-designer.md |
+| 6 | Plan | technical-director | technical-plan | planned | — |
+| 7 | Build | gameplay-engineer | implement-change | planned | — |
+| 8 | Verify | qa | verify-change | planned | — |
+| 9 | Play | playtester | playtest-session | planned | — |
+| 10 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+- After step 3: Option B would change Owner Decision D-001 while the evidence leaves A and B both
+  viable → escalation triggers → step 4 (Owner); all later steps paused.
+- After step 4: the Owner chose Option A (D-002) with the condition that a hold-to-charge attack is
+  not part of this Goal. The remaining route matches Option A's "If chosen" (Design → Plan → Build →
+  Verify → Play → Review), so steps 5–10 are unchanged. Goal set back to `active`. Step 9 must be
+  routed to the Playtester through a fresh Studio-composed Handoff without implementation
+  knowledge.
+
+## Next action
+
+game-designer starts step 5 (Design) from `05-studio-to-game-designer.md`.
+
+## Outcome
+
+—
+>>>END
+
+<<<FILE goals/G-002-combat-monotony/05-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-002
+seq: 5
+from: studio
+to: game-designer
+stage: Design
+outcome: routed
+---
+# 05: studio → game-designer — Specify enemy-side combat depth (Option A)
+
+## Task
+
+Write a design spec for Option A of G-002, with player-observable acceptance criteria. The spec must be precise enough for the Technical Director to plan and for QA and a Playtester to verify.
+
+## Context
+
+Goal G-002: the Owner said "戦闘が単調なので改善したい". The playtest and diagnosis (steps 1–3) found that combat is monotonous. The main cause is that enemies do not demand positioning or timing. Four symptoms were recorded: one tactic clears every room, dash is not used in combat, enemies do not differ in how they must be fought, and a request for a heavier hit. The Game Director escalated the direction choice to the Owner. On 2026-10-11 the Owner chose Option A, enemy-side depth with one-button combat kept (D-002).
+
+## Findings
+
+Direction approved in D-002 and the escalation (`04-game-director-to-owner.md`). The spec must cover:
+
+- **Telegraphed enemy attacks.** Every threat is visible before it can hurt the player (pillar 3).
+- **Charger.** A new enemy that charges at the player.
+- **Shieldbearer.** A new enemy that guards the front.
+- **Room composition adjustments** across the 5-room slice (the former "Option C", folded into A by the Game Director). Rooms should ask different questions: where to stand, when to dash, which enemy first.
+
+The spec should target the symptoms Option A addresses: the one tactic that clears every room, dash unused in combat, and no difference in how each enemy is fought.
+
+The diagnosis and options are in `03-game-designer-to-game-director.md` and `02-playtester-to-game-designer.md`. They are listed in Load as background, so use them to keep the spec tied to the observed problems.
+
+## Decisions already made
+
+- D-001: Combat uses one attack button plus dash. No new input buttons without Owner approval.
+- D-002 (Owner, 2026-10-11): The monotony is solved on the enemy side with one-button combat kept. **A hold-to-charge attack is explicitly not part of this work.** The Owner may consider it in future, but it must not appear in this spec, not even as an optional extra.
+
+## Constraints
+
+- No new input buttons. Do not add hold or charge behavior to attack (D-001, D-002).
+- Must play correctly at both 30 and 60 FPS. Timings, such as telegraph durations, must be specified so they hold at both frame rates.
+- Small team: prefer reusing existing systems (see `design/combat.md` and the existing enemies).
+- Threats use saturated orange/red so they read against the dark (art direction). Tell the Art Director if a visual question arises that you cannot settle; do not decide visual direction yourself.
+- Scope stays within the 5-room slice. No new biomes, meta-progression, or run-length changes.
+- Acceptance criteria must be player-observable and must not depend on implementation detail. A numeric tuning value is fine in the spec where the Design stage needs it. The final verdict on whether the monotony is addressed belongs to Review.
+
+## Open questions
+
+- None to the Owner. If the spec needs a choice of direction, priority or scope beyond D-002, hand back to `game-director` per the return rules. Do not escalate it yourself.
+
+## Expected output
+
+- A design spec (a design document under `design/`; update `design/combat.md` or add a new file and link it from the Design index in `project.md` if your Role contract allows) covering telegraphs, Charger, Shieldbearer and per-room composition, with player-observable acceptance criteria.
+- An outgoing Handoff (templates/handoff.md) to `technical-director` (stage Plan) summarizing the spec. Record a Decision if you make a significant tuning or design choice that constrains later work.
+
+## Sender assessment
+
+Studio routing note: the route is unchanged from the original plan, because the Owner's choice matched Option A's "If chosen" path. Later, the Playtester step (9) needs a fresh Handoff composed by the Studio. Address the Plan Handoff accordingly, and tell the Verify and Build steps to address their results to `studio` when the route reaches them.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: project.md#vision, project.md#player-profile, project.md#constraints, project.md#art-direction, design/combat.md, sim/build-0.3.md (current state of the slice); background: goals/G-002-combat-monotony/02-playtester-to-game-designer.md, goals/G-002-combat-monotony/03-game-designer-to-game-director.md
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-002-enemy-side-combat-depth.md
+- Previous handoff: goals/G-002-combat-monotony/04-game-director-to-owner.md
+>>>END

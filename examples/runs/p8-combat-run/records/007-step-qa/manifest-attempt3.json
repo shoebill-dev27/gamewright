@@ -1,0 +1,72 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/06-studio-to-qa.md",
+  "sha256": "96571694d47f87224598014c5b76cf3f8f899694889ef6bafc342c8815898aa1",
+  "bytes": 2690
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "381742c8f2afe2e1a2a6af9d031dcc91f98f490ada7c90e2a990d6a1aaf27639",
+  "bytes": 1765
+ },
+ {
+  "path": "studio/skills/reproduce-defect.md",
+  "sha256": "aa7e161cc1fcb38fd92ede1719446f05eee1c7ac431a28a04d570ce451a2291d",
+  "bytes": 1407
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "05a33c6f8e50caa20ddf4f3844885137c4261ad4a3e5f3db3eb1b5312b129a9f",
+  "bytes": 237
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "2731bd3b82d159f1410a58f0747db54dc451eb3ef8a76e38ba4474295b0ea73b",
+  "bytes": 10301
+ },
+ {
+  "path": "repo/README.md",
+  "sha256": "906b7058d335b3c300955a84992491c7f0f40d83670e10cdfb80acb3c169cc1f",
+  "bytes": 578
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "3cd384dec65baa1bb2b20ad2ede35bc8750c9e605a88eb129a69d184fc771591",
+  "bytes": 2643
+ },
+ {
+  "path": "repo/bots.py",
+  "sha256": "d6ea248b753cc08014bded581cf49655c9df499a8a6ec9827369ba122bfd3706",
+  "bytes": 6235
+ },
+ {
+  "path": "repo/play.py",
+  "sha256": "5dfc20b1640cd4ce68229c5b0c01713956eb7f162658c5794aacb4a75bd220df",
+  "bytes": 13028
+ },
+ {
+  "path": "repo/game.py",
+  "sha256": "74e9778a9ba6cfede97ab5213b111ad60b3bc4b5bd7aad12b5ed987574994621",
+  "bytes": 9024
+ },
+ {
+  "path": "repo/tests/test_game.py",
+  "sha256": "5c4934fe943d51cedd815c8f53cbfe8fb1a3b4f0f2cbd43e6443298bb3441705",
+  "bytes": 5124
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "@run-results",
+  "sha256": "feeaf4c8a88cc0b5f68d47377e85d51db65564eb6d9c3d1eeccd9314427b363f",
+  "bytes": 13457
+ }
+]

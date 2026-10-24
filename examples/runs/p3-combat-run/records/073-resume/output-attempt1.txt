@@ -1,0 +1,268 @@
+<<<FILE decisions/D-010-accept-unjudged-criteria-review-without-phase-2.md
+---
+kind: decision
+id: D-010
+status: accepted
+decided_by: owner
+goal: G-001
+date: 2026-10-11
+supersedes: none
+---
+# D-010: Criteria 1 and 2 stay "not judged"; go to Review; no Phase 2 in this Goal
+
+## Decision
+
+The Owner chose Option A of escalation 58 and added two conditions.
+
+Owner's words (2026-10-11):
+
+> A。模擬専用のサンプルなので、基準1・2は未判定のまま Review に進めてください。Phase 2（挙動のバリエーション）は今回は行わず、Review の結果で Goal を閉じてください。
+
+What this means:
+
+1. Phase 1 is recorded as "verified; criteria 1 and 2 not judged". It is never recorded as met on those two criteria, because there are no counted play records (D-009 requires counts).
+2. The Goal moves to Review (`game-director`, `review-outcome`) with handoff 57 and the QA and Art Director passes as inputs.
+3. **Phase 2 (enemy behavior variants) is not built in this Goal.** Steps 9, 9b, 10a, 10b and 11 are skipped.
+4. **The Review result closes the Goal.** Whether Review finds the Goal met or not met, the Studio does not route back to Diagnose or Build. Unresolved issues become proposed new Goals in the Outcome.
+
+Limits: this applies to G-001 only. D-002 (encounter escalation first, then enemy behaviors) is not changed. Its second part (A, enemy behaviors) is deferred, not rejected. Real play records, if they ever exist, can support a later Goal or re-Review.
+
+## Rationale
+
+The project is a simulated sample. There is no real build or repository, so no Role can produce counted play records. The Owner chose to keep the record honest ("not judged") and finish the Goal, instead of building more on a basis that cannot be measured.
+
+## Alternatives considered
+
+- Option B (real play records provided by the Owner or someone with an environment): not chosen; no such environment is available.
+- Option C (stop without Review): not chosen; the Owner wanted a Review verdict.
+- Continuing into Phase 2 after Review: explicitly excluded by the Owner for this Goal.
+
+## Revisit when
+
+Real play records for criteria 1 and 2 become available, or the Owner opens a new Goal for Phase 2 enemy behaviors.
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/58-studio-to-owner.md
+---
+kind: escalation
+goal: G-001
+seq: 58
+from: studio
+to: owner
+status: resolved
+decision: D-010
+---
+# 58: Owner decision needed — 数えた記録がないまま Phase 1 をどう扱うか
+
+## Question
+
+Phase 1 のプレイテストは、このドライランでは実プレイも回数の記録もできませんでした。基準 1・2 を「未判定」として Review に進めてよいですか。それとも実プレイの記録を用意しますか。
+
+## Why this needs the Owner
+
+`orchestration.md` の escalation トリガー「どの Role も作れない情報で作業が止まっている」に当たります。必要なのは、ビルドを実際に動かして数えた記録です(Part A の 50 回の試行、Part C の測定値)。Playtester はテキストの記述 `sim/build-0.8.md` しか読めず、手元には時計もログも操作入力もありません(ハンドオフ 57)。再実行しても同じ結果になります。D-009 は基準 1・2 を「プレイテストで回数から判定する」と決めており、数えた記録なしに「達成」とは言えません。Goal の扱い(判定を保留して進むか、止めるか)を決めるのは Owner です。
+
+## Options
+
+### Option A — 基準 1・2 を「未判定」として受け入れ、Review へ進む
+
+Phase 1 は「検証済み。基準 1・2 は未判定」と記録します。Game Director が Review で、記述からの読み取りだけで足りるか、Phase 2 に進むかを判断します。リスクは、単調さが本当に減ったかを実測できないことです。判断は D-002 の「B の次に A」に従う読み取りになります。やり直しは可能です。後から実プレイの記録が出れば、再 Review できます。
+If chosen: Decision(`decided_by: owner`)を記録します。`game-director` に Review(ステップ 12)を、Phase 1 を「達成」とは扱わない条件付きで渡します。Phase 2(ステップ 9 以降)は Review の結果次第です。
+
+### Option B — 実プレイの記録を用意する
+
+Owner、または実行環境のある人が、`sim/build-0.8.md` に相当するビルドを実際に動かします。記録票(ハンドオフ 56 の Part A・B・C)を埋めて渡します。
+If chosen: 記録を受け取った後、Studio が Playtester 用の新しいハンドオフを作り直します。回数を確認して Review に進みます。
+
+### Option C — ここで止める
+
+Goal を現状のまま `abandoned` にするか、Phase 1 までの結果で閉じます。
+If chosen: Studio が Outcome に現状の結果と未解決事項を書いて Goal を閉じます。
+
+## Studio recommendation
+
+Option A。
+
+## Reasoning
+
+これはドライランで、実ビルドも実リポジトリもありません。B を満たせる環境は現状にありません。A なら、「達成」と言わずに「未判定」と記録することで、Review の正直さを保ったまま進められます。Game Director が Phase 2 の要否を判断できます。実プレイの記録が手に入る見込みが現実にある場合は、B のほうがよい推奨になります。
+
+## Meanwhile
+
+Nothing; all remaining steps (Review, Phase 2) depend on this answer.
+
+## Owner decision required
+
+A / B / C — 選んだ選択肢と条件があれば返信してください。
+
+---
+
+**Owner response (2026-10-11):** A。模擬専用のサンプルなので、基準1・2は未判定のまま Review に進めてください。Phase 2（挙動のバリエーション）は今回は行わず、Review の結果で Goal を閉じてください。
+
+**Resolution:** Recorded as [D-010](../../decisions/D-010-accept-unjudged-criteria-review-without-phase-2.md). Option A with two conditions: Phase 2 is not done in this Goal, and the Review result closes the Goal.
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-11
+---
+# G-001: Improve monotonous combat
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): a player from the project's player profile experiences combat in the current build as varied and engaging rather than repetitive. Playing a run involves meaningful moment-to-moment variation in how the player positions, times and responds to enemies. Numeric thresholds belong to Design; the final verdict belongs to Review.
+
+Constraints that shape any solution:
+- Pillar 1 and D-001: combat stays one-button (attack + dash). No new input buttons without Owner approval. Variety must come from positioning, timing and enemy behavior.
+- Readable threats (pillar 3) and 30/60 FPS correctness must be preserved.
+- Small team: prefer reusing existing systems.
+
+Out of scope: new input buttons or a larger player kit, changes to run length, new biomes or rooms unrelated to combat variety, and non-combat systems. Per D-010: Phase 2 (enemy behavior variants) is out of scope for this Goal.
+
+Not an immediate escalation: the Goal does not conflict with the vision or D-001. It must be solved inside them.
+
+## Unknowns
+
+Entry questions from `development-loop.md`:
+- Observe: done. Playtester observed (01, 02); QA confirmed a dash-damage defect (05).
+- Diagnose: done (handoff 04): three options.
+- Decide: done. D-002 chose B (encounter escalation) first, then A (enemy behaviors); C in reserve. D-010 (Owner): A is not done in this Goal.
+- Design: done for Phase 1 (handoffs 11, 35, 44, 53; D-008, D-009). Phase 2 Design work (22, 25) stays on record, unused.
+- Plan: done (16, D-004).
+- Build: done for the dash-damage fix (08), hit-stun input (20), Phase 1 (37), follow-up (47) and wording update (55; `sim/build-0.8.md` is the newest build). Phase 2 skipped (D-010).
+- Verify: Phase 1 verified; criteria 1 and 2 open (QA pass 50, Art Director pass 51).
+- Play: done (57), no counts: dry run, text description only. Criteria 1 and 2 cannot be judged. Owner accepted this as "not judged" (D-010).
+- Review: experience Goal, so the Game Director judges the outcome. Open now (handoff 59).
+
+Skipped: Phase 2 steps (9 to 11), by Owner decision D-010.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | [01](01-studio-to-playtester.md) → [02](02-playtester-to-game-designer.md) |
+| 2a | Diagnose | game-designer | diagnose-experience | done | [02](02-playtester-to-game-designer.md) → [04](04-game-designer-to-game-director.md) |
+| 2b | Observe (possible defect: damage during dash) | qa | reproduce-defect | done | [03](03-studio-to-qa.md) → [05](05-qa-to-studio.md) |
+| 3a | Decide | game-director | make-decision | done (D-002) | [04](04-game-designer-to-game-director.md) → [07](07-game-director-to-game-designer.md) |
+| 3b | Build (fix dash-damage defect) | gameplay-engineer | implement-change | done | [06](06-studio-to-gameplay-engineer.md) → [08](08-gameplay-engineer-to-studio.md) |
+| 3c | Build (hit-stun input observable, consistent with D-003) | gameplay-engineer | implement-change | done | [18](18-studio-to-gameplay-engineer.md) → [20](20-gameplay-engineer-to-studio.md) |
+| 4a–4a″ | Verify (dash-damage fix), attempts 1 to 4 | qa | verify-change | done, no verdict (`question` each time); superseded by 4a‴ | [09](09-studio-to-qa.md), [12](12-studio-to-qa.md), [23](23-studio-to-qa.md), [28](28-studio-to-qa.md); reports [10](10-qa-to-studio.md), [15](15-qa-to-studio.md), [21](21-qa-to-studio.md), [26](26-qa-to-studio.md), [29](29-qa-to-studio.md) |
+| 4c | Verify decision (which build description is current) | owner | — | done (D-007: `sim/build-0.5.md`) | [27](27-studio-to-owner.md) |
+| 4a‴ | Verify (attempt 5, against `sim/build-0.5.md`) | qa | verify-change | done: **pass** ([31](31-qa-to-studio.md)) | [30](30-studio-to-qa.md) |
+| 4b | Design (Phase 1 in full; Phase 2 as proposed behaviors) | game-designer | write-design-spec | done | [07](07-game-director-to-game-designer.md) → [11](11-game-designer-to-studio.md) |
+| 5a | Plan (Phase 2 feasibility and cost) | technical-director | technical-plan | done (D-004) | [13](13-studio-to-technical-director.md) → [16](16-technical-director-to-studio.md) |
+| 5b | Design (spawn marker and Phase 2 telegraph visuals) | art-director | write-design-spec | done | [14](14-studio-to-art-director.md) → [17](17-art-director-to-studio.md) |
+| 5c | Design (adjust Phase 2 spec) | game-designer | write-design-spec | done (D-005) | [19](19-studio-to-game-designer.md) → [22](22-game-designer-to-studio.md) |
+| 5d | Design (Lunge Grub visual; hit feedback for flinch-immune enemies) | art-director | write-design-spec | done (D-006) | [24](24-studio-to-art-director.md) → [25](25-art-director-to-studio.md) |
+| 6, 6b, 6c | Build Phase 1 | gameplay-engineer / game-designer | implement-change / write-design-spec | done | [32](32-studio-to-gameplay-engineer.md) → [33](33-gameplay-engineer-to-studio.md); [34](34-studio-to-game-designer.md) → [35](35-game-designer-to-studio.md); [36](36-studio-to-gameplay-engineer.md) → [37](37-gameplay-engineer-to-studio.md) |
+| 7a | Verify (Phase 1, `sim/build-0.6.md`) | qa | verify-change | done, `question` ([40](40-qa-to-studio.md)) | [38](38-studio-to-qa.md) |
+| 7b | Verify (visual review of the spawn marker ring) | art-director | visual-review | done: pass ([41](41-art-director-to-studio.md)) | [39](39-studio-to-art-director.md) |
+| 7c | Design (judging basis for criteria 1 and 2) | game-designer | write-design-spec | done (D-009) | [42](42-studio-to-game-designer.md) → [44](44-game-designer-to-studio.md) |
+| 7d | Verify (visual follow-up) | art-director | visual-review | done ([45](45-art-director-to-studio.md)) | [43](43-studio-to-art-director.md) |
+| 7f | Build (narrow follow-up) | gameplay-engineer | implement-change | done | [46](46-studio-to-gameplay-engineer.md) → [47](47-gameplay-engineer-to-studio.md) |
+| 7e | Verify (narrow re-verify, `sim/build-0.7.md`) | qa | verify-change | done: **pass** ([50](50-qa-to-studio.md)); criteria 1 and 2 "deferred to playtest" | [48](48-studio-to-qa.md) |
+| 7g | Verify (re-review of ring dot and S0–S3) | art-director | visual-review | done: **pass** ([51](51-art-director-to-studio.md)) | [49](49-studio-to-art-director.md) |
+| 7h | Design (spec 3.3 wording; record sheet) | game-designer | write-design-spec | done ([53](53-game-designer-to-studio.md)) | [52](52-studio-to-game-designer.md) |
+| 7i | Build (wording only) | gameplay-engineer | implement-change | done ([55](55-gameplay-engineer-to-studio.md)); `sim/build-0.8.md` newest | [54](54-studio-to-gameplay-engineer.md) |
+| 8 | Play (Phase 1) | playtester | playtest-session | done, no counts ([57](57-playtester-to-studio.md)) | [56](56-studio-to-playtester.md) |
+| 8b | Decide (Owner: criteria 1 and 2) | owner | — | done (D-010: Option A, no Phase 2, Review closes the Goal) | [58](58-studio-to-owner.md) |
+| 9 | Build (Phase 2: behavior variants) | gameplay-engineer | implement-change | skipped (D-010: Owner excluded Phase 2 from this Goal) | — |
+| 9b | Design (confirm Phase 2 figures) | game-designer | write-design-spec | skipped (D-010) | — |
+| 10a | Verify (Phase 2) | qa | verify-change | skipped (nothing built) | — |
+| 10b | Verify (Phase 2 visuals) | art-director | visual-review | skipped (nothing built) | — |
+| 11 | Play (Phase 2) | playtester | playtest-session | skipped (nothing built) | — |
+| 12 | Review | game-director | review-outcome | open; criteria 1 and 2 recorded "not judged", never as met; the result closes the Goal (D-010) | [59-studio-to-game-director.md](59-studio-to-game-director.md) |
+
+Status: planned | tentative | open | done | skipped.
+
+## Route changes
+
+Earlier Route changes (steps 1 to 8) are summarized; the Handoffs carry the details.
+
+- Step 1 found a possible defect, so QA ran in parallel (2b). D-002 chose B (encounter escalation) then A.
+- Verify of the dash-damage fix took five attempts because of build-description and Load gaps; D-007 settled it, then pass (31).
+- Phase 1 Build handed back once on spec contradictions (D-008). Criteria 1 and 2 were moved to the playtest (D-009). Narrow Build and re-verifications passed (50, 51); wording closed (53, 55).
+- Playtest (57) returned no counts. Escalation 58 was written; the Goal was `blocked-on-owner`.
+- **Resume after Owner answer (D-010):** Option A. Goal back to `active`; escalation 58 `resolved`. Phase 2 (steps 9 to 11) changed from tentative to skipped on the Owner's condition. Review (12) is open. The Review result closes the Goal: the return rule "Review, goal not met → Diagnose" does not apply here. Unresolved issues become proposed new Goals.
+
+## Next action
+
+`game-director` starts Review (step 12) from [59-studio-to-game-director.md](59-studio-to-game-director.md). Its result goes back to `studio`, which then Closes the Goal: fills the Outcome in Japanese, lists proposed new Goals (including the deferred Phase 2 and any real play records still needed for criteria 1 and 2), and sets `status: done`.
+
+## Outcome
+
+(To be filled at close, in Japanese.)
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/59-studio-to-game-director.md
+---
+kind: handoff
+goal: G-001
+seq: 59
+from: studio
+to: game-director
+stage: Review
+outcome: routed
+---
+# 59: studio → game-director — Review G-001 with criteria 1 and 2 recorded as "not judged"
+
+## Task
+
+Judge whether the intent of G-001 ("戦闘が単調なので改善したい") was met by Phase 1 as built (`sim/build-0.8.md`), using `review-outcome`. State plainly what the evidence supports and what it does not. Name the next issues.
+
+## Context
+
+G-001 is an experience Goal: combat should feel varied and engaging rather than repetitive, inside the one-button constraint (D-001). D-002 chose encounter escalation (Phase 1) first, then enemy behaviors (Phase 2). Phase 1 was designed, planned, built and verified: the dash-damage fix passed (QA, handoff 31), and Phase 1 passed the narrow re-verify (QA, handoff 50) and the visual re-review (Art Director, handoff 51). The Phase 1 playtest (handoff 57) was a dry run on text only and returned no counts. By D-009, criteria 1 and 2 are judged from counted play, so they could not be judged. The Owner accepted that (escalation 58, D-010).
+
+## Findings
+
+Inputs for the Review (read them from the Load list):
+- QA results: handoff 31 (dash-damage fix, pass), handoff 50 (Phase 1 narrow re-verify, pass; criteria 1 and 2 "deferred to playtest").
+- Art Director result: handoff 51 (pass).
+- Playtest report: handoff 57. Part A (50 attempts) is missing; Part B and the measured parts of Part C are "not available"; only description-based notes marked "read" exist.
+- Minor notes carried for Review: wave 2 can start before the room looks nearly empty, which a player might find sudden (no feel observation was possible). Two earlier notes about Spitters and walls remain as playtest/Review notes (see 57 and earlier handoffs).
+
+Owner decision D-010 (the conditions that bind this Review):
+1. Criteria 1 and 2 stay "not judged". Do not record Phase 1 as met on those criteria. You may give a reading from the build description, labelled as a reading and not a measurement.
+2. Phase 2 is not done in this Goal. Do not propose building it inside G-001.
+3. Your Review result closes the Goal. Even if you find the Goal not met, the Studio will not route to Diagnose or Build. Put unresolved issues in "next issues" as proposed new Goals.
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no new buttons without Owner approval.
+- D-002: encounter escalation first (B), then enemy behaviors (A), C in reserve.
+- D-009: criteria 1 and 2 are judged from counts at the playtest.
+- D-010 (Owner): Option A; criteria 1 and 2 not judged; no Phase 2 in this Goal; Review closes the Goal.
+- Other Decisions (D-003 to D-008) are in the Load list for reference only.
+
+## Constraints
+
+- Judge the game and the evidence. Do not invent counts or play results.
+- Stay inside the vision, pillars and D-001. A finding that would need a new button or change a pillar is an Owner matter: say so in next issues, not as a decision.
+- Do not decide routing; the Studio closes the Goal.
+
+## Open questions
+
+- Is the evidence enough to call the Goal's intent met, not met, or not judgeable? Choose one verdict and give the reason.
+- Which next issues should be proposed as new Goals (for example Phase 2 behavior variants, a real counted playtest for criteria 1 and 2, the wave-2 timing note)?
+
+## Expected output
+
+A Review report in Findings of your outgoing Handoff (`templates/handoff.md`): verdict (`outcome: goal-met` or `goal-not-met`), the reasoning, what is explicitly "not judged", and next issues as proposed Goals. Address it to `studio`, which will Close the Goal. Record a Decision (`make-decision`) only if you make a direction call that constrains later work.
+
+## Load
+
+- Role: studio/roles/game-director.md
+- Skills: studio/skills/review-outcome.md
+- Project: project.md#vision, project.md#player-profile, project.md#constraints, design/combat.md, design/g001-combat-escalation.md, sim/build-0.8.md
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-002-combat-variety-direction.md, decisions/D-009-judging-basis-criteria-1-and-2.md, decisions/D-010-accept-unjudged-criteria-review-without-phase-2.md
+- Previous handoff: goals/G-001-combat-monotony/57-playtester-to-studio.md (also read: 31-qa-to-studio.md, 50-qa-to-studio.md, 51-art-director-to-studio.md, and escalation 58-studio-to-owner.md)
+>>>END

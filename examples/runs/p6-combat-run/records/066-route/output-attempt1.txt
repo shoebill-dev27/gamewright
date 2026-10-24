@@ -1,0 +1,292 @@
+Route after 10c: I'm opening Build (61) and the Owner's manual placement (62) in parallel, and updating `goal.md` and 60.
+
+- **Result fits the plan.** 60 is text and display only, with no rule, timing or parameter change. It reinterprets nothing and conflicts with no Decision, so no escalation fires.
+- **Correction to 60.** It says Build updates `manual.md`, which contradicts D-005 and D-007, where the Owner places manual text. I fixed this in place, along with the Load role path, which pointed at a nonexistent role file.
+- **Log not appended.** I cannot write `log.md` in this packet, so no entry was added.
+
+<<<FILE goals/G-001-combat-monotony/60-art-director-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 60
+from: art-director
+to: studio
+stage: Build
+outcome: done
+---
+# 60: art-director → studio — Visual spec for "on you" and "which grub hit you" (V-9 to V-17)
+
+## Task
+
+Route the visual spec in `design/combat-visuals.md` (new items V-9 to V-17) to Build with the designer's spec change from 56, then to Verify. The display must show when a grub is on the player's tile and which grub dealt a hit.
+
+## Context
+
+G-001 (combat monotony), Option A. Two playtesters in two sessions reported the same two confusions (from 57 and the report in 54):
+- A grub on the player's tile ("the grub is open (on you)") is drawn beside the player (D-006), and the player could not tell which side the bite would come from or where to swing.
+- "YOU ARE HIT by a grub" does not say which grub when several are around. Rooms 1 and 2 often have two to four close together.
+
+The capital and lowercase marks and the "rears back (left)" lines were praised. They are kept unchanged.
+
+## Findings
+
+What the spec adds (all display and text; no rule, timing or parameter changed):
+
+1. **`on you:` line** under the hearts, present only while an enemy shares the player's tile. It lists each such enemy with its glyph, a state word (`walking`, `biting soon`, `open`, `charging`, `idle`) and the cell it is drawn in, for example `on you: G biting soon (shown right)`. It answers the first open question: the displaced glyph is marked by text, and a reverse-video cell reinforces it in a color view. No glyph changes.
+2. **Position in hit lines**: `YOU ARE HIT by a grub (left)`, `... (on you)`, or `... by a spit shot from spitter (top right)`. It answers the second open question. It uses the same position words as the existing lines. A distance in tiles is added only when two enemies of the same type would get identical words.
+3. **Same position words for the "is open" line**: "the grub is open (left)", "(on you)".
+4. **Order and timing**: no new draws beyond the existing principle 4; the on-you line and the hit position come from the state of the draw that prints them. They hold at 30 and 60 FPS.
+5. **D-012** records the choice. D-006 is not reversed.
+
+The spec's wording makes no claim about which enemies a swipe hits, so it stays valid whatever swipe rule 56 settles. Only the swipe result lines depend on that rule, and this spec leaves them unchanged.
+
+## Decisions already made
+
+- D-006: enemies may overlap the player but are never hidden; display offset only. Stands.
+- D-012: `on you:` line and attacker position in hit lines (new, art-director).
+
+## Constraints
+
+- Visual and text changes only. If Build finds that naming the attacker needs a rule or timing change, hand back to `game-designer`.
+- `manual.md` is not written by the art-director or by Build. The Owner places manual text (D-005, D-007 pattern); the Studio routes the V-15 text (`manual.md#on-screen`, `manual.md#what-you-hear-and-read`) to the Owner (62). (Corrected by the Studio at Route; the original said Build updates `manual.md`.)
+- Art direction: orange/red only for telegraphed glyphs and projectiles. The on-you line text and the hit lines are lantern-colored, not orange/red. Only the glyph letter inside the on-you line uses its glyph color.
+
+## Open questions
+
+- **For Build:** Does the hit event know which grub dealt the damage, and where it was when the hit landed? V-13 and V-14 need that. If it is only known in the trace and not in the player-view event, say so; it is a Build question, not a rule change.
+- **For Build:** Can the player view print one extra line under the hearts and give a displaced cell inverse video? If a plain view cannot, the line alone still meets V-9 to V-11.
+- **For `game-designer` (informational):** the swipe rule in 56 should be reflected in the swipe result lines only. If a swipe that hits an on-tile grub should print "(on you)" in its line, the designer should say so; the visual spec does not require it.
+- **For `qa`:** The possibly short bite warning at 11.90 s to 11.97 s in report 54 is not a visual issue. The new hit lines will help trace which grub it was.
+
+## Expected output
+
+- Build: implement V-9 to V-17 in the player view with the designer's spec. `manual.md` is placed by the Owner, not by Build.
+- Verify (`qa`): check V-9 to V-17 by scripted sessions in the practice room, for example `player 8 4` with `spawn grub 8 4`, and a grub on the left and right with only one striking, at both `fps 30` and `fps 60`.
+- Review: the experience signals at the end of the "Experience signals" section in `design/combat-visuals.md`. A visual review of the built view is still needed for the real colors.
+
+## Sender assessment
+
+I am fairly confident in the text-line approach. It is cheap, testable from the plain view and independent of the swipe rule. The least certain parts are whether a single `on you:` line stays readable with three or more enemies on the tile, and whether the hit event can name the attacker. Both are listed as open and are cheap to settle in Build.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: design/combat-visuals.md, design/combat.md, manual.md, the build `repo/`
+- Decisions: decisions/D-006-overlap-display-and-practice-room-manual.md, decisions/D-012-on-you-line-for-displaced-enemies.md
+- Previous handoff: goals/G-001-combat-monotony/57-studio-to-art-director.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/61-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-001
+seq: 61
+from: studio
+to: gameplay-engineer
+stage: Build
+outcome: routed
+---
+# 61: studio → gameplay-engineer — Build the combat spec update (AC-19…AC-27) and the "on you" / hit-source display (V-9…V-17)
+
+## Task
+
+Change the game in `repo/` per the current `design/combat.md` (designer's update in 59, with D-011) and the visual spec in `design/combat-visuals.md` (V-9…V-17, D-012). Add or update tests. Run the suite and report. Stop and hand back on any ambiguity; do not decide rules.
+
+## Context
+
+G-001 (combat monotony), Option A (D-002, D-004: reuse existing systems, one sequential change set). Earlier rounds found the fights repeat the same pattern and confusing in rooms 1 and 2. The designer's spec (59) and the art director's display spec (60) are now both ready. Build 0.4 is the current state. After you, QA verifies AC-1…AC-27 at 30 and 60 FPS.
+
+## Findings
+
+From the design (59, `design/combat.md`, D-011; read the file, it is authoritative):
+- Wind-up spacing and an engagement cap: grubs take turns and crowd two deep.
+- Hit-stun 0.15 s; a body hit rule; a dash sets facing and has an edge stop.
+- Swipe has Strike and Recovery phases; a hit in Strike cancels it (settles D-58-1).
+- Miss wording ("(miss)").
+- AC-19…AC-27 are the new acceptance criteria.
+
+From QA (58): there is no short bite warning (the "rears back" line belonged to another grub). A dash covers 4.00 tiles at 30 and 60 FPS. A dash sets facing. A grub "on you" is hit in all facings. Bot format and idle/bot reference data are in 58.
+
+From the visual spec (60, `design/combat-visuals.md`): an `on you:` line under the hearts while an enemy shares the player's tile; attacker position in hit lines (`YOU ARE HIT by a grub (left)`, `(on you)`); the same position words in "is open" lines; inverse video for a displaced cell in a color view. These are display and text only.
+
+## Decisions already made
+
+- D-001: attack, dash and pause are the only buttons.
+- D-002 / D-004: rework existing enemy behavior first; one sequential change set.
+- D-006: enemies may overlap the player but are never hidden.
+- D-011: grubs take turns and crowd two deep; hit-stun 0.15 s; body hit; dash sets facing.
+- D-012: `on you:` line and attacker position in hit lines.
+
+## Constraints
+
+- Must play correctly at 30 and 60 FPS.
+- Reuse existing systems; no new input buttons.
+- Do not edit `manual.md`. The Owner places manual text (D-005, D-007 pattern; step 62 is open in parallel). `ManualTest` (AC-15) may therefore fail or be blocked in your workspace, because the manual is not beside `repo/`. Report that result as it is; do not change the test or the manual to make it pass.
+- Orange/red only for telegraphed glyphs and projectiles; on-you and hit lines are lantern-colored.
+
+## Open questions
+
+- Does the hit event know which grub dealt the damage and where it was when the hit landed (V-13, V-14)? If only the trace knows, say so.
+- Can the player view print the extra `on you:` line and an inverse-video cell? If not, the line alone meets V-9…V-11.
+- Knockback direction of a grub exactly on the player's tile is not covered by the spec (58). If `design/combat.md` does not cover it, hand back to `game-designer` through `studio`; do not choose.
+- 59 asks for a report on the Waiting behavior of a blocked grub: is it local to existing systems? If not, say so and hand back for a technical plan (`technical-director`).
+- Does a swipe that hits an on-tile grub print "(on you)" in its result line? The spec makes no claim; if the lines are ambiguous, ask the designer.
+
+## Expected output
+
+- The changed game, tests, and build notes: what changed, how to run it, and the full `run_tests` result.
+- The answers to the open questions above and the Waiting-behavior report.
+- Address the result to `studio` (QA verifies without your reasoning; keep your self-assessment under `## Sender assessment`).
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: design/combat.md, design/combat-visuals.md, manual.md (read only), repo/ (run commands in project.md: run_tests, run_play, run_trace, run_bots)
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-006-overlap-display-and-practice-room-manual.md, decisions/D-011-grub-turns-stun-body-hit-dash-facing.md, decisions/D-012-on-you-line-for-displaced-enemies.md
+- Previous handoff: goals/G-001-combat-monotony/60-art-director-to-studio.md (also read goals/G-001-combat-monotony/58-qa-to-studio.md and goals/G-001-combat-monotony/59-game-designer-to-studio.md)
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/62-studio-to-owner.md
+---
+kind: escalation
+goal: G-001
+seq: 62
+from: studio
+to: owner
+status: open
+decision:
+---
+# 62: オーナーの判断が必要 — マニュアル更新分をいつ置くか
+
+## Question
+
+`manual.md` の更新分(デザイナーの草案とアートディレクターの V-15 文面)を、Build の完了を待たず今すぐオーナーが置いてよいですか。
+
+## Why this needs the Owner
+
+`manual.md` はオーナーが置く運用です(D-005、D-007)。Studio も各 Role もこのファイルを書きません。作業に支障はなく、どの時点で置くかはオーナーの運用上の選択です。
+
+## Options
+
+### Option A — 今すぐ置く(推奨)
+
+`goals/G-001-combat-monotony/59-game-designer-to-studio.md` のマニュアル草案と、`design/combat-visuals.md` の V-15 が指す `manual.md#on-screen`・`manual.md#what-you-hear-and-read` の文面を `manual.md` に置く。Build と並行して進むので、Verify の時点でマニュアルが揃っており、AC-15(`ManualTest`)を再度ブロックせずに済む。Build 中に仕様が変わった場合は、置いた文面を一度修正する可能性がある。
+If chosen: Build(61)は継続。Verify(13a)は、マニュアルが置かれた状態で `run_tests` を含めて走らせる。結果は D-0xx として記録する。
+
+### Option B — Build の完了後にまとめて置く
+
+Build の結果を見てから、一度で置く。文面の手戻りは減るが、Verify の開始が置くまで遅れる。
+If chosen: Build 完了後の Route で再度この依頼を出し、Verify はそのあとに開く。
+
+## Studio recommendation
+
+Option A。
+
+## Reasoning
+
+過去の経緯(D-008〜D-010)では、マニュアルが `repo/` の隣になかったために AC-15 が何度も止まりました。先に置いておけば同じ停止を避けられます。Build で仕様が変わる可能性は小さく(表示とテキストのみ)、変わっても修正は一度で済みます。
+
+## Meanwhile
+
+Build(61)は並行して進みます。マニュアル更新分には依存しません。
+
+## Owner decision required
+
+A / B — オプションを返信してください。置いたら、置いた箇所(節名)も一言添えてください。
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-15
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): when an action player from the project's player profile plays through combat encounters, the fights feel varied and engaging, and the player's moment-to-moment choices (positioning, timing, enemy behavior) visibly matter. The player no longer experiences the fights as the same repeated pattern.
+
+Out of scope: adding input buttons beyond attack, dash and pause (D-001, Owner approval needed); changes to the run length or the non-combat systems; numeric targets (these belong to Design as acceptance criteria, and the final verdict to Review).
+
+No immediate escalation: the Goal does not conflict with the vision or D-001, and it needs no reinterpretation. Improving depth through positioning, timing and enemy behavior is what pillar 1 asks for.
+
+## Unknowns
+
+- Observe (playtester, qa): done (02, 08, 06, 15, 58). 58 settled: no short bite warning (the "rears back" line belonged to another grub), dash 4.00 tiles at 30 and 60 FPS, a dash sets facing, grub "on you" is hit in all facings, bot format and idle/bot reference data. Not settled by QA: "(miss)" text first-hand, knockback of an on-you grub in open floor, D-58-1 at 30 FPS. These go to Verify against the new spec.
+- Diagnose, Decide: done (03, 53; D-002, D-005, D-006, D-011). A4 (120° cone), D1 (facing mechanic) and D2 (room 1 composition) are held with revisit triggers in 59; not routed to the director now.
+- Design: done. Spec (59; `design/combat.md`, D-011, AC-19…AC-27) and visual spec (60; `design/combat-visuals.md` V-9…V-17, D-012: `on you:` line, attacker position in hit lines). Small gap left: knockback direction of a grub exactly on the player (58); the engineer hands it back to Design if the spec does not cover it.
+- Plan: done (14, D-004). Tentative: a new Plan only if the Waiting behavior of a blocked grub is not local to existing systems (the engineer reports this in 61).
+- Build: open (12, 61). Manual changes are placed by the Owner (D-005, D-007 pattern); step 10-O (62) is open in parallel and does not block Build.
+- Verify: the next build needs its own Verify (qa, AC-1…AC-27 at both frame rates, V-9…V-17; art-director for the changed view). The full suite is re-run with the manual draft in place (D-008, D-009).
+- Play: earlier sessions saw only rooms 1 and 2 by script (50, 54), with defeats. Rooms 3–5, the spitter, projectile hits, room clear, the dash and a survived run are unobserved, so monotony itself is unjudged. Next Play follows the rebuild: fresh playtester, rooms 1–5, reactive play; judged against the retest guideline, which is not forwarded.
+- Review: `game-director` with `review-outcome`, planned after the rebuild and the next Play. Open: run progression after "run over"; F1, F4, F6, F7; numbering of same-type enemies in one cell; A4, D1, D2.
+- Skipped: none.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 02-playtester-to-game-designer.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-game-designer-to-game-director.md |
+| 3a | Decide | game-director | make-decision | done | 05-game-director-to-studio.md |
+| 3b | Observe (defects) | qa | reproduce-defect | done | 06-qa-to-game-designer.md |
+| 3c | Observe (rooms 4–5) | playtester | playtest-session | done | 08-playtester-to-game-designer.md |
+| 4 | Design | game-designer | write-design-spec | done | 10-game-designer-to-studio.md |
+| 5a | Plan | technical-director | technical-plan | done | 14-technical-director-to-studio.md |
+| 5b | Observe (spit line) | qa | reproduce-defect | done | 15-qa-to-studio.md |
+| 5c | Design (visuals) | art-director | visual-review, write-design-spec | done | 16-art-director-to-studio.md |
+| 6a | Build (code) | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md |
+| 6b | Build (`run_tests` check, manual placed) | gameplay-engineer | implement-change | done | 23-gameplay-engineer-to-studio.md |
+| 7a | Verify | qa | verify-change | done (question, no AC failed) | 26-qa-to-studio.md |
+| 7b | Verify (visuals) | art-director | visual-review | done (question, no build output) | 27-art-director-to-studio.md |
+| 7c | Verify (rerun: manual, runs, captures) | qa | verify-change | done (question, no AC failed) | 29-qa-to-studio.md |
+| 7d | Verify (visuals, from captures) | art-director | visual-review | done (fail: V-1, F3) | 32-art-director-to-studio.md |
+| 7e | Design (F1 overlap, AC-15 wording) | game-designer | write-design-spec | done | 33-game-designer-to-studio.md |
+| 7f | Build (F1/F3 render, manual paragraph) | gameplay-engineer | implement-change | done (render built) | 35-gameplay-engineer-to-studio.md |
+| 7f-O | Owner: place the manual paragraph | owner | — | done (Option A, D-007) | 36-studio-to-owner.md |
+| 7g | Verify (all but AC-15) | qa | verify-change | done (pass) | 37-studio-to-qa.md |
+| 7i | Verify (AC-15, `ManualTest`) | qa | verify-change | done (question: ManualTest blocked) | 38-studio-to-qa.md |
+| 7i-O | Owner: `ManualTest` result | owner | — | done (Option A, D-008: 39/40) | 42-studio-to-owner.md |
+| 7h | Verify (visuals) | art-director | visual-review | done (pass; V-6 from code, V-7 not seen) | 41-studio-to-art-director.md |
+| 7j | Design (`run over` manual test failure) | game-designer | write-design-spec | done (test too literal, D-009) | 43-studio-to-game-designer.md |
+| 7k | Build (test fix, line wraps) | gameplay-engineer | implement-change | done (test changed, suite not run) | 46-studio-to-gameplay-engineer.md |
+| 7k-O | Owner: place manual text | owner | — | skipped (manual unchanged, D-009) | — |
+| 7l-O | Owner: AC-15 rerun | owner | — | done (Option A, D-010: 40/40) | 48-studio-to-owner.md |
+| 7l | Verify (AC-15 rerun by QA) | qa | verify-change | skipped (Owner's 40/40 run, D-010) | — |
+| 8 | Play (room 1) | playtester | playtest-session | done (room 1 only, scripted, 2 defeats) | 49-studio-to-playtester.md |
+| 9a | Diagnose (Play findings) | game-designer | diagnose-experience | done (A1–A3, A5, B, C, D held) | 51-studio-to-game-designer.md |
+| 9b | Play (parts not yet seen) | playtester | playtest-session | done (thin: room 2 only, 1 script) | 52-studio-to-playtester.md |
+| 10a | Observe (open facts, bots) | qa | reproduce-defect | done (6 facts settled, 2 partly; D-58-1 ruled in 59) | 55-studio-to-qa.md |
+| 10b | Design (A1–A3, A5, manual draft) | game-designer | write-design-spec, make-decision | done (spec, D-011, manual draft) | 56-studio-to-game-designer.md |
+| 10c | Design (visuals: "on you", hit source) | art-director | visual-review, write-design-spec | done (V-9…V-17, D-012) | 57-studio-to-art-director.md |
+| 10-O | Owner: place manual draft (59) and V-15 text | owner | — | open | 62-studio-to-owner.md |
+| 11 | Plan | technical-director | technical-plan | tentative (only if Waiting behavior is not local) | — |
+| 12 | Build | gameplay-engineer | implement-change | open | 61-studio-to-gameplay-engineer.md |
+| 13a | Verify | qa | verify-change | planned | — |
+| 13b | Verify (visuals) | art-director | visual-review | planned (10c changes the view) | — |
+| 14 | Play (rooms 1–5, fresh playtester) | playtester | playtest-session | planned | — |
+| 15 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+After 10c (60): done. The visual spec is text/display only, so no rule change and no escalation. Opened Build (12, 61) and Owner manual placement (10-O, 62) in parallel. 60's "Build updates manual.md" corrected to the D-005 pattern (Owner places). 13b confirmed planned (the view changes).
+
+## Next action
+
+- `gameplay-engineer` runs 12 from `61-studio-to-gameplay-engineer.md`; the result is addressed to `studio`.
+- Owner answers `62-studio-to-owner.md` (A recommended: place the manual text now).
+- Then Route, waiting for both: Verify 13a (qa; fresh Handoff without the engineer's assessment, covering AC-1…AC-27, V-9…V-17, both frame rates, the unsettled items from 58) and 13b (art-director, in parallel) open once the build exists. If the engineer reports a gap (on-you knockback direction, swipe line wording), route to `game-designer`; if the Waiting behavior is not local, route to `technical-director`.
+
+## Outcome
+
+(Filled at Close.)
+>>>END

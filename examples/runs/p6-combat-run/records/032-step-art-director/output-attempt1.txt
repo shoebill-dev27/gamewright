@@ -1,0 +1,101 @@
+<<<FILE goals/G-001-combat-monotony/27-art-director-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 27
+from: art-director
+to: studio
+stage: Verify
+outcome: question
+---
+# 27: art-director → studio — visual review of Build 0.5 is blocked: no build output in this step
+
+## Task
+
+Re-route the visual review of Build 0.5 (V-1…V-8) with `run_play` and `run_trace` output available, or confirm that I should issue a spec-only verdict. I have not run the build and report no pass/fail for anything that needs the running build.
+
+## Context
+
+Handoff 25 asked me to run the build with `run_play` and `run_trace`. This step's packet contained only text files: `design/combat-visuals.md`, `design/combat.md`, `manual.md`, the art direction and D-002. It had no `repo/` content, no tool to run the build, and no captured play output. I did not guess at what the player view shows. The only item I could check is V-5, and only against the manual.
+
+## Findings
+
+### Checked from the files (manual against spec)
+
+- **V-5: pass, with a minor note.**
+  - `manual.md#on-screen` lists `P`, `x`, `g/G`, `w/W`, `s/S`, `z/Z`, `*` and the arc characters `)` `(` `^` `v`.
+  - Each entry matches the glyph table in `design/combat-visuals.md` for meaning and case rule.
+  - The manual states "Capital letters mean danger now; small letters mean harmless", and says the letters carry the meaning without color. This matches principle 1.
+  - Minor note: the manual's color sentence names enemies, shots, the player and the swipe, but not the downed `x` (spec: cold gray-blue). This is optional. I suggest adding "`x` is cold gray-blue" for completeness. It does not fail V-5.
+  - Outside V-5: `combat.md` (AC-15, Q4) also wants the practice room listed in `manual.md#on-screen`. The manual describes it only under "Script" and "Rooms and runs". QA owns AC-15; I flag it for them. It does not affect the V items.
+- **Manual wording against the spec's text lines:**
+  - It uses "a grub rears back (left)", "the grub is open", "spitter (top right) charges / spits / is staggered", and the four swipe reasons.
+  - All match `design/combat-visuals.md`.
+  - The manual's session statement (room redrawn on every swipe, hit, wind-up, charge, shot and key event) matches principle 4 in intent. I could not check that the build does it.
+
+### Not checked (needs the running build)
+
+| Item | What must be seen | Why it cannot be judged from files |
+|---|---|---|
+| V-1 | Uppercase glyph in every draw after Wind-up or Charge begins; lowercase when harmless | Behavior |
+| V-2 | Own draw at Wind-up start, Charge start and each swipe, at 30 and 60 FPS | Behavior |
+| V-3 | `G` visible before the first heart is lost to a grub | Behavior |
+| V-4 | `g/w`, `G/W`, `s/z`, `S/Z` distinguishable in the same state | Behavior |
+| V-6 | Only telegraphed enemy glyphs and `*` are saturated orange/red | Real color; the headless text view may not show it at all |
+| V-7 | The two spitters tell apart by position and named charge line | Behavior |
+| V-8 | Run-over screen shows "press attack to start again" | Behavior |
+
+- **V-6 only:** if the headless view prints no color, I can judge it only from the spec and the manual's color statements. In that case any verdict would be "intent specified, not verified". It would not be a pass.
+- **Also unverified:**
+  - Whether a hit on a winding-up grub drops `G` to `w` in the same draw as the hit line.
+  - Whether "the grub is open" prints after a cancel (the 0.6 s Recovery), not only after a normal Strike.
+  - Whether projectiles vanish in the same draw as "you went down" and "room cleared".
+
+## Decisions already made
+
+- D-001: one attack button plus dash.
+- D-002: rework existing enemy behavior first (Option A).
+- D-005: the Owner placed the draft `manual.md` unchanged.
+- No new decision from this step.
+
+## Constraints
+
+- Art direction: dark caves, warm light against cold blue-black; threats in saturated orange/red.
+- Pillar 3: threats are visible before they can hurt.
+- Prefer fixes that reuse existing systems. I change no rules or timings.
+- Pause is not implemented. Skip it.
+
+## Open questions
+
+1. For the re-run, please supply `run_play` and `run_trace` output, or the `repo/` build and a way to run it. Suggested scripts (practice room, `fps 30` and again at `fps 60`):
+   - **V-1, V-2, V-3, V-4 (grub):**
+     - `room empty`, `player 8 4`, `spawn grub 4 4`, `end 6`.
+     - The player is idle until the first bite and no heart is lost before `G` appears.
+     - Then run a variant with a `attack` during Wind-up, and one during Recovery. Look at the `g`/`w`/`G`/`W` sequence and the same-draw rule.
+   - **V-2, V-4, V-7 (spitters):**
+     - `room 4`, `end 8`, with one `move` away and one `dash` to see `S` and `*`.
+     - Also `room 3` with a walk-up and two `attack` to see `s`/`S`/`z`/`Z` and the "is staggered" line.
+   - **V-8 and the down state:**
+     - `room 1` with no inputs and `end 20`, or a practice-room grub against an idle player until three hits.
+     - Look for `x`, "you went down", the vanished projectiles and the run-over screen.
+2. Does the player view output color at all (ANSI or markup)? If not, V-6 can never be more than "specified"; the Studio should record that as a known gap. A color capture or a palette dump from the renderer would settle it.
+3. If the run cannot be supplied, say so, and I will issue a spec-only verdict. It will mark V-1…V-4 and V-6…V-8 "unverified", not "pass".
+
+## Expected output
+
+The Studio re-routes this review with build output attached, or answers open question 3. The next art-director step then produces the pass/fail report per V item with fixes, addressed to `studio`. A failed V item that turns out to be a rules problem goes to `game-designer`.
+
+## Sender assessment
+
+- Confidence: high that V-5 passes against the manual. No confidence in any other item, because I have no evidence.
+- I chose not to infer the build's behavior from the spec. The spec is the target, and the review exists to check it against what was built.
+- Risk to watch when the output arrives: the 0.5 s grub Wind-up against the 0.5 s redraw (principle 4). If V-2 fails, the fix is the immediate draw on those events, not longer telegraphs.
+
+## Load
+
+- Role: studio/roles/art-director.md
+- Skills: studio/skills/visual-review.md
+- Project: project.md#art-direction, design/combat-visuals.md, design/combat.md, manual.md, repo/ (build)
+- Decisions: decisions/D-002-combat-response-scope.md
+- Previous handoff: goals/G-001-combat-monotony/25-studio-to-art-director.md
+>>>END

@@ -1,0 +1,52 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-first-puzzle-stall/03-studio-to-art-director.md",
+  "sha256": "ffedacf9ce72f38cdecef1cfec1376bd1a19cc62b20834eeede326272adb3bf7",
+  "bytes": 3186
+ },
+ {
+  "path": "studio/roles/art-director.md",
+  "sha256": "0a782e71d7d5344b9f3701549fa91d3ea4243ec75a6816a68dbcbf56ac5c71df",
+  "bytes": 1139
+ },
+ {
+  "path": "studio/skills/visual-review.md",
+  "sha256": "a4c0a2bc09a91a5af5765901e80bae9296517858e7d87341f54a53f006c1a263",
+  "bytes": 1066
+ },
+ {
+  "path": "project.md#art-direction",
+  "sha256": "c165f5eeb2bf1388d32bde8ec04f06cef64ed458b187700a8279e2ccc1054c8d",
+  "bytes": 117
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "53351d1620ff2ecebedb3bc15243f68f6dbdee48df5382cc16e2eae8b09bbaf7",
+  "bytes": 488
+ },
+ {
+  "path": "sim/build-0.2.md",
+  "sha256": "ad6c91fd6243a41ed2b939839b7699c3dea2b49505bdcaf1d9f59a9e5543b2b4",
+  "bytes": 1084
+ },
+ {
+  "path": "goals/G-001-first-puzzle-stall/02-playtester-to-game-designer.md",
+  "sha256": "e39135f260d6938a3c673bc02cf58adb00f46a2267e7ef561212f330733b698f",
+  "bytes": 6173
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

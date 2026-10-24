@@ -1,0 +1,66 @@
+[
+ {
+  "run": "@run/tests",
+  "command": "python3 -m unittest discover -s tests",
+  "script": "\n",
+  "exit": 0,
+  "seconds": 0.0,
+  "output": "..............\n----------------------------------------------------------------------\nRan 14 tests in 0.009s\n\nOK\n"
+ },
+ {
+  "run": "@run/bots/fps60",
+  "command": "python3 bots.py {script}",
+  "script": "bots camper,walker,dodger\nrooms 1-5\nfps 60\n",
+  "exit": 0,
+  "seconds": 0.1,
+  "output": "bots at 60 FPS, up to 60 s per room, 3 hearts each\ncamper  room 1: cleared in 5.9 s; hearts lost 0 (hit by: none); attacks 6, dashes 0\ncamper  room 2: cleared in 7.4 s; hearts lost 0 (hit by: none); attacks 7, dashes 0\ncamper  room 3: NOT cleared (9.9 s); hearts lost 3 (hit by: shot 3); attacks 0, dashes 0\ncamper  room 4: NOT cleared (10.8 s); hearts lost 3 (hit by: shot 3); attacks 4, dashes 0\ncamper  room 5: NOT cleared (10.8 s); hearts lost 3 (hit by: shot 3); attacks 6, dashes 0\ncamper  total: cleared 2/5, hearts lost 9, dashes 0\nwalker  room 1: cleared in 5.1 s; hearts lost 0 (hit by: none); attacks 6, dashes 0\nwalker  room 2: cleared in 7.1 s; hearts lost 0 (hit by: none); attacks 8, dashes 0\nwalker  room 3: cleared in 9.4 s; hearts lost 1 (hit by: shot 1); attacks 6, dashes 0\nwalker  room 4: cleared in 13.5 s; hearts lost 0 (hit by: none); attacks 8, dashes 0\nwalker  room 5: cleared in 11.5 s; hearts lost 0 (hit by: none); attacks 10, dashes 0\nwalker  total: cleared 5/5, hearts lost 1, dashes 0\ndodger  room 1: cleared in 5.1 s; hearts lost 0 (hit by: none); attacks 6, dashes 0\ndodger  room 2: cleared in 7.1 s; hearts lost 0 (hit by: none); attacks 8, dashes 0\ndodger  room 3: NOT cleared (19.7 s); hearts lost 3 (hit by: shot 3); attacks 3, dashes 13\ndodger  room 4: cleared in 21.8 s; hearts lost 2 (hit by: shot 2); attacks 8, dashes 9\ndodger  room 5: cleared in 17.7 s; hearts lost 1 (hit by: shot 1); attacks 10, dashes 8\ndodger  total: cleared 4/5, hearts lost 6, dashes 30\n"
+ },
+ {
+  "run": "@run/bots/fps60-repeat",
+  "command": "python3 bots.py {script}",
+  "script": "bots camper,walker,dodger\nrooms 1-5\nfps 60\n",
+  "exit": 0,
+  "seconds": 0.1,
+  "output": "bots at 60 FPS, up to 60 s per room, 3 hearts each\ncamper  room 1: cleared in 5.9 s; hearts lost 0 (hit by: none); attacks 6, dashes 0\ncamper  room 2: cleared in 7.4 s; hearts lost 0 (hit by: none); attacks 7, dashes 0\ncamper  room 3: NOT cleared (9.9 s); hearts lost 3 (hit by: shot 3); attacks 0, dashes 0\ncamper  room 4: NOT cleared (10.8 s); hearts lost 3 (hit by: shot 3); attacks 4, dashes 0\ncamper  room 5: NOT cleared (10.8 s); hearts lost 3 (hit by: shot 3); attacks 6, dashes 0\ncamper  total: cleared 2/5, hearts lost 9, dashes 0\nwalker  room 1: cleared in 5.1 s; hearts lost 0 (hit by: none); attacks 6, dashes 0\nwalker  room 2: cleared in 7.1 s; hearts lost 0 (hit by: none); attacks 8, dashes 0\nwalker  room 3: cleared in 9.4 s; hearts lost 1 (hit by: shot 1); attacks 6, dashes 0\nwalker  room 4: cleared in 13.5 s; hearts lost 0 (hit by: none); attacks 8, dashes 0\nwalker  room 5: cleared in 11.5 s; hearts lost 0 (hit by: none); attacks 10, dashes 0\nwalker  total: cleared 5/5, hearts lost 1, dashes 0\ndodger  room 1: cleared in 5.1 s; hearts lost 0 (hit by: none); attacks 6, dashes 0\ndodger  room 2: cleared in 7.1 s; hearts lost 0 (hit by: none); attacks 8, dashes 0\ndodger  room 3: NOT cleared (19.7 s); hearts lost 3 (hit by: shot 3); attacks 3, dashes 13\ndodger  room 4: cleared in 21.8 s; hearts lost 2 (hit by: shot 2); attacks 8, dashes 9\ndodger  room 5: cleared in 17.7 s; hearts lost 1 (hit by: shot 1); attacks 10, dashes 8\ndodger  total: cleared 4/5, hearts lost 6, dashes 30\n"
+ },
+ {
+  "run": "@run/bots/fps30",
+  "command": "python3 bots.py {script}",
+  "script": "bots camper,walker,dodger\nrooms 1-5\nfps 30\n",
+  "exit": 0,
+  "seconds": 0.0,
+  "output": "bots at 30 FPS, up to 60 s per room, 3 hearts each\ncamper  room 1: cleared in 5.9 s; hearts lost 0 (hit by: none); attacks 6, dashes 0\ncamper  room 2: cleared in 7.5 s; hearts lost 0 (hit by: none); attacks 7, dashes 0\ncamper  room 3: NOT cleared (9.9 s); hearts lost 3 (hit by: shot 3); attacks 0, dashes 0\ncamper  room 4: NOT cleared (10.8 s); hearts lost 3 (hit by: shot 3); attacks 4, dashes 0\ncamper  room 5: NOT cleared (10.8 s); hearts lost 3 (hit by: shot 3); attacks 6, dashes 0\ncamper  total: cleared 2/5, hearts lost 9, dashes 0\nwalker  room 1: cleared in 5.0 s; hearts lost 0 (hit by: none); attacks 6, dashes 0\nwalker  room 2: cleared in 7.0 s; hearts lost 0 (hit by: none); attacks 8, dashes 0\nwalker  room 3: cleared in 9.4 s; hearts lost 1 (hit by: shot 1); attacks 6, dashes 0\nwalker  room 4: cleared in 13.6 s; hearts lost 0 (hit by: none); attacks 8, dashes 0\nwalker  room 5: cleared in 11.6 s; hearts lost 0 (hit by: none); attacks 10, dashes 0\nwalker  total: cleared 5/5, hearts lost 1, dashes 0\ndodger  room 1: cleared in 5.0 s; hearts lost 0 (hit by: none); attacks 6, dashes 0\ndodger  room 2: cleared in 7.0 s; hearts lost 0 (hit by: none); attacks 8, dashes 0\ndodger  room 3: cleared in 9.5 s; hearts lost 0 (hit by: none); attacks 6, dashes 4\ndodger  room 4: cleared in 17.8 s; hearts lost 2 (hit by: shot 2); attacks 8, dashes 6\ndodger  room 5: cleared in 17.8 s; hearts lost 1 (hit by: shot 1); attacks 10, dashes 8\ndodger  total: cleared 5/5, hearts lost 3, dashes 18\n"
+ },
+ {
+  "run": "@run/trace/dash-grub-60",
+  "command": "python3 play.py --view trace {script}",
+  "script": "room empty\nfps 60\nplayer 0 4\nspawn grub 0.5 4\n0.0 dash left\nend 1.2\n",
+  "exit": 0,
+  "seconds": 0.0,
+  "output": "trace: fps=60 room=empty dt=0.01667\nt=0.000 frame=0 pos=(0.00,4.00) hearts=3 invulnerable=False dash_left=0.000 hurt_left=0.000 stun_left=0.000 | grub(0.50,4.00,hp=2) | setup\nt=0.017 frame=1 pos=(0.00,4.00) hearts=3 invulnerable=True dash_left=0.233 hurt_left=0.000 stun_left=0.000 | grub(0.50,4.00,hp=2) | invulnerable {'value': True, 'why': 'dash'}; dash {'direction': 'left'}\nt=0.250 frame=15 pos=(0.00,4.00) hearts=2 invulnerable=True dash_left=0.000 hurt_left=0.800 stun_left=0.300 | grub(0.50,4.00,hp=2) | invulnerable {'value': False, 'why': 'dash timer ended'}; dash_end; invulnerable {'value': True, 'why': 'hurt'}; hurt {'source': 'grub', 'hearts': 2}\nt=1.050 frame=63 pos=(0.00,4.00) hearts=1 invulnerable=True dash_left=0.000 hurt_left=0.800 stun_left=0.300 | grub(0.50,4.00,hp=2) | invulnerable {'value': False, 'why': 'hurt timer ended'}; invulnerable {'value': True, 'why': 'hurt'}; hurt {'source': 'grub', 'hearts': 1}\nt=1.200 frame=72 pos=(0.00,4.00) hearts=1 invulnerable=True dash_left=0.000 hurt_left=0.650 stun_left=0.150 | grub(0.50,4.00,hp=2) | end\n"
+ },
+ {
+  "run": "@run/trace/dash-grub-30",
+  "command": "python3 play.py --view trace {script}",
+  "script": "room empty\nfps 30\nplayer 0 4\nspawn grub 0.5 4\n0.0 dash left\nend 1.2\n",
+  "exit": 0,
+  "seconds": 0.0,
+  "output": "trace: fps=30 room=empty dt=0.03333\nt=0.000 frame=0 pos=(0.00,4.00) hearts=3 invulnerable=False dash_left=0.000 hurt_left=0.000 stun_left=0.000 | grub(0.50,4.00,hp=2) | setup\nt=0.033 frame=1 pos=(0.00,4.00) hearts=3 invulnerable=True dash_left=0.217 hurt_left=0.000 stun_left=0.000 | grub(0.50,4.00,hp=2) | invulnerable {'value': True, 'why': 'dash'}; dash {'direction': 'left'}\nt=0.267 frame=8 pos=(0.00,4.00) hearts=2 invulnerable=True dash_left=0.000 hurt_left=0.800 stun_left=0.300 | grub(0.50,4.00,hp=2) | invulnerable {'value': False, 'why': 'dash timer ended'}; dash_end; invulnerable {'value': True, 'why': 'hurt'}; hurt {'source': 'grub', 'hearts': 2}\nt=1.067 frame=32 pos=(0.00,4.00) hearts=1 invulnerable=True dash_left=0.000 hurt_left=0.800 stun_left=0.300 | grub(0.50,4.00,hp=2) | invulnerable {'value': False, 'why': 'hurt timer ended'}; invulnerable {'value': True, 'why': 'hurt'}; hurt {'source': 'grub', 'hearts': 1}\nt=1.200 frame=36 pos=(0.00,4.00) hearts=1 invulnerable=True dash_left=0.000 hurt_left=0.667 stun_left=0.167 | grub(0.50,4.00,hp=2) | end\n"
+ },
+ {
+  "run": "@run/trace/dash-shot-60",
+  "command": "python3 play.py --view trace {script}",
+  "script": "room empty\nfps 60\nplayer 8 4\nspawn spitter 4 4\n2.0 dash up\nend 3.5\n",
+  "exit": 0,
+  "seconds": 0.0,
+  "output": "trace: fps=60 room=empty dt=0.01667\nt=0.000 frame=0 pos=(8.00,4.00) hearts=3 invulnerable=False dash_left=0.000 hurt_left=0.000 stun_left=0.000 | spitter(4.00,4.00,hp=2) | setup\nt=2.000 frame=120 pos=(8.00,4.00) hearts=3 invulnerable=False dash_left=0.000 hurt_left=0.000 stun_left=0.000 | spitter(4.00,4.00,hp=2) | spit\nt=2.017 frame=121 pos=(8.00,3.73) hearts=3 invulnerable=True dash_left=0.233 hurt_left=0.000 stun_left=0.000 | spitter(4.00,4.00,hp=2) | invulnerable {'value': True, 'why': 'dash'}; dash {'direction': 'up'}\nt=2.250 frame=135 pos=(8.00,0.00) hearts=3 invulnerable=False dash_left=0.000 hurt_left=0.000 stun_left=0.000 | spitter(4.00,4.00,hp=2) | invulnerable {'value': False, 'why': 'dash timer ended'}; dash_end\nt=3.500 frame=210 pos=(8.00,0.00) hearts=3 invulnerable=False dash_left=0.000 hurt_left=0.000 stun_left=0.000 | spitter(4.00,4.00,hp=2) | end\n"
+ },
+ {
+  "run": "@run/trace/dash-shot-30",
+  "command": "python3 play.py --view trace {script}",
+  "script": "room empty\nfps 30\nplayer 8 4\nspawn spitter 4 4\n2.0 dash up\nend 3.5\n",
+  "exit": 0,
+  "seconds": 0.0,
+  "output": "trace: fps=30 room=empty dt=0.03333\nt=0.000 frame=0 pos=(8.00,4.00) hearts=3 invulnerable=False dash_left=0.000 hurt_left=0.000 stun_left=0.000 | spitter(4.00,4.00,hp=2) | setup\nt=2.000 frame=60 pos=(8.00,4.00) hearts=3 invulnerable=False dash_left=0.000 hurt_left=0.000 stun_left=0.000 | spitter(4.00,4.00,hp=2) | spit\nt=2.033 frame=61 pos=(8.00,3.47) hearts=3 invulnerable=True dash_left=0.217 hurt_left=0.000 stun_left=0.000 | spitter(4.00,4.00,hp=2) | invulnerable {'value': True, 'why': 'dash'}; dash {'direction': 'up'}\nt=2.267 frame=68 pos=(8.00,0.00) hearts=3 invulnerable=False dash_left=0.000 hurt_left=0.000 stun_left=0.000 | spitter(4.00,4.00,hp=2) | invulnerable {'value': False, 'why': 'dash timer ended'}; dash_end\nt=3.500 frame=105 pos=(8.00,0.00) hearts=3 invulnerable=False dash_left=0.000 hurt_left=0.000 stun_left=0.000 | spitter(4.00,4.00,hp=2) | end\n"
+ }
+]

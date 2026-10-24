@@ -1,0 +1,121 @@
+---
+kind: handoff
+goal: G-001
+seq: 34
+from: gameplay-engineer
+to: studio
+stage: Route
+outcome: done
+---
+# 34: gameplay-engineer → studio — SG-1 change for level 1 (spec revision 5) stated exactly, with corrected build record wording
+
+## Task
+
+Route Verify (`qa`) for the SG-1 change in level 1 (build 0.5 plus this change), composed from the acceptance criteria. Also apply the build record wording corrections below to `sim/build-0.5.md` (or its successor). My write permission for this step covers only this Handoff, so the corrected text is given here in full and I have not edited the build record file myself.
+
+## Context
+
+Goal G-001. Handoff 33 asked for spec revision 5 (D-006) in level 1 and for correcting the build record. Spec revision 5 defines every case this change produces, so there is no open question and no hand-back. Nothing outside the SG-1 case and the build record wording changes.
+
+**Not done in this packet:** the packet contains no source code, only `sim/repo-notes.md`. I could not edit code, run the tests or capture anything. The "What changes" section below is the exact change to make or to confirm in the code. QA should treat the code change as pending until the Studio confirms it is in the build.
+
+## Findings
+
+### What changes (player-facing, both default and reduce-motion modes)
+
+**Where:** the sand-tap blip condition 2 in the level 1 input routing (`sim/repo-notes.md`, "Blip", condition 2), plus the one state flag it needs.
+
+1. Add a flag `lastPulseCancelled`. It is set to true when a pool touch-down cancels a redirect pulse that is **running** (0 ≤ now − `lastPulseStart` < 0.6 s). It is set to false whenever a new redirect pulse starts. It is never set by a pending pulse that is cancelled (that pulse never started and has no `lastPulseStart`). `lastPulseStart` is still not changed by the cancel.
+2. Blip condition 2 becomes: no pulse is running, meaning `now − lastPulseStart ≥ 0.6 s`, **or** `lastPulseCancelled` is true. Conditions 1, 3 and 4 are unchanged (the 1.5 s limit blocks a pulse, `pulsePending` is not set, no blip is running).
+3. Result for the player: after a pool touch-down cancelled a running pulse, a sand tap that the 1.5 s limit blocks gets the existing blip. The blip is pool brightness +15% within 0.1 s, fading over 0.3 s, with no scale change and no movement. This holds from the moment of the cancel, also inside the first 0.6 s after the pulse start, and also during the pool's 0.15 s release shrink. It is the same in reduce-motion mode, where the touch-down already sets the pool's brightness to 0.
+4. Unchanged:
+   - An uncancelled pulse: a sand tap in its first 0.6 s shows the pulse and no blip.
+   - The 1.5 s window counts from the pulse start. The blip does not move it. A sand tap at 1.5 s or later starts a new pulse and no blip.
+   - A crab or home tap gets its own response only.
+   - While a finger still holds the pool, the held-pool rule (check 18) applies as before.
+   - A running blip is not restarted, and at most one blip runs at a time.
+   - The pulse and blip parameters, the hit areas, the intro and the ease-back are all unchanged.
+
+**Wording only, no code change (reduce-motion):** beat 2 starts the instant beat 1 ends, with at most one frame at normal brightness between them. `repo-notes.md` already has beat 1 on [0, 0.3) and beat 2 on [0.3, 0.6), so this needs no change. The crab brightening is as built: one 0.4 s change per touch-down, within 0.1 s, not held while the finger is down, nothing extra on release.
+
+### How to exercise it
+
+In level 1, let a redirect pulse start (tap the crab, or tap the sand on a fresh load). Touch and hold the pool within the first 0.6 s after the pulse start, so the pulse is cancelled. Release it, then tap empty sand before 1.5 s from the pulse start. Expected: the pool blip within 0.1 s, fading over 0.3 s, with no new pulse and no scale change from the blip. Try it in default and in reduce-motion mode.
+
+Also try:
+- the tap during the 0.15 s release shrink;
+- a cancel at about P+0.1 s and at about P+0.4 s;
+- a sand tap at P+0.45 s;
+- a sand tap at P+1.5 s or later (new pulse, no blip);
+- a crab or home tap (own response only, no blip);
+- a sand tap while the finger still holds the pool (check 18);
+- a sand tap in the first 0.6 s of an **uncancelled** pulse (pulse only, no blip).
+
+### Criteria addressed
+
+Checks 4 and 21 (new). Checks 13 and 18 use the same blip and should be re-run as regression. Checks 19 and 20 are wording or sweep-only changes. Check 19's sweep does not cancel the pulse.
+
+### Tests to add or update (fake clock, per `repo-notes.md`)
+
+- Pulse at P, pool touch-down at P+0.1 and P+0.4, release, sand tap at several times before P+1.5 (including inside the release shrink and at P+0.45): blip, no pulse, `lastPulseStart` unchanged.
+- Sand tap at P+1.5 or later after a cancel: new pulse, no blip, and `lastPulseCancelled` is cleared.
+- Uncancelled pulse, sand tap at P+0.1 to P+0.59: no blip.
+- Cancelled pending pulse (pool touch during the ease-back): behavior unchanged. No pulse, no window.
+- Reduce-motion repeat of the cancelled-pulse cases.
+- Existing test "A pool touch-down cancels a running redirect pulse" is extended to assert the flag.
+
+These tests are designed, not run. Frame-level timing needs a 60 fps capture, and the project has no device. That stays a non-blocking item for Review and Close.
+
+### Corrected build record wording (`sim/build-0.5.md` or its successor)
+
+1. **Repeated touches**, first line. Replace:
+   "A new pool pulse starts at most 1.5 s after the start of the previous pulse. Flashes do not count and never delay a pulse."
+   with:
+   "A new pool pulse starts at least 1.5 s after the start of the previous pulse. Flashes do not count and never delay a pulse."
+2. **Touching empty sand.** Replace the line "A sand tap during the first 0.6 s of a pulse shows the pulse itself and no flash." with:
+   "A sand tap during the first 0.6 s of a pulse shows the pulse itself and no flash, unless the pulse was cancelled by a pool touch. In that case a sand tap that the 1.5 s limit blocks gets the flash within 0.1 s."
+   The earlier bullet in the same section ("If a pulse is not allowed and none is currently showing (0.6 s or more since the pulse started) …") needs the same exception. Make it read: "…and none is currently showing (0.6 s or more since the pulse started, or the pulse was cancelled by a pool touch) …".
+3. **Repeated touches**, the line on a pulse cut short. Replace:
+   "If a pulse was cut short by grabbing the pool, the 1.5 s still counts from when that pulse started. A sand tap shortly after letting go can therefore give the flash instead of a pulse."
+   with:
+   "If a pulse was cut short by grabbing the pool, the 1.5 s still counts from when that pulse started. A sand tap after that, before 1.5 s from the pulse start, gives the flash instead of a pulse. This holds from the moment of the cancel, with no 0.6 s wait, also during the pool's release shrink."
+4. **Header paragraph** (second paragraph, "With the reduce-motion setting off, the only difference from 0.4 …"). Add at the end of the paragraph: "Build 0.5 with the SG-1 change also gives the flash to a blocked sand tap after a pulse was cancelled by a pool touch, in both modes."
+5. **Devices with a reduce-motion setting turned on.** Keep "the pool is at normal brightness for only a single frame between them." No change. In the last-but-two bullet ("A sand tap at any time from the pulse start up to 1.4 s gets a visible response …") add: "If the pulse was cancelled by a pool touch, a sand tap before 1.5 s gets the flash from the moment of the cancel."
+
+### Repo notes
+
+`sim/repo-notes.md` condition 2 already says "or the pulse was cancelled". Keep it consistent with the `lastPulseCancelled` flag above, and add the flag to the redirect pulse bullet. I did not edit the file in this step.
+
+## Decisions already made
+
+- D-001: no failure, no timers, no inactivity cue. This change adds none.
+- D-003, D-004, D-005: stand. D-006 amends the "pulse is running" window of D-003 and D-004 for a cancelled pulse and clarifies the shape in D-005.
+- D-006: a cancelled pulse is no longer the response; reduce-motion beats are contiguous.
+
+## Constraints
+
+- Level 1 only. Touch only. No text dependence. Existing sprite sheet plus the procedural shadow. No new art, no new parameters.
+- Nothing else in build 0.5 changes.
+
+## Open questions
+
+None. Every behavior listed above is defined by revision 5. I found no case it does not cover.
+
+## Expected output
+
+Studio routes Verify (`qa`) on checks 4, 13, 18, 19, 20 and 21, composed from the acceptance criteria, using the "What changes" and "How to exercise it" sections and the corrected build record. Studio applies the build record corrections. If Verify passes, route to Play, with the captures (contrast, home styling, frame timing, the single frame between the beats, the 0.55–0.6 s tail, check 21 timing) and the unconfirmed reduce-motion setting availability as non-blocking items for Review and Close.
+
+## Sender assessment
+
+- Root cause: the blip condition used a pure time test ("0.6 s or more since the pulse start") as "no pulse is running". A pool touch-down stops the pulse visually but the clock test still said "running", so the tap in the 0.6 s window was silent. The fix adds the cancel state to that one shared condition. Both modes share it, so one change covers both.
+- Risk is low and local. The flag is set only on a cancel of a running pulse and cleared on any new pulse start. The held-pool path, the pending-pulse path and the 1.5 s limit do not read it.
+- Confidence: medium. I worked from the spec and the repo notes, not from source. Nothing was run, so the build is not verified by me. QA verifies independently.
+- Watch: a blip right after letting go of the pool. The revisit trigger in D-006 covers children reading it as an error.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: none
+- Project: design/onboarding.md, sim/build-0.5.md
+- Decisions: decisions/D-001-no-fail-states.md, decisions/D-003-sand-tap-blip-and-pool-hit-area.md, decisions/D-004-ease-back-taps-window-origin-held-pool.md, decisions/D-005-reduce-motion-pulse-fills-window.md, decisions/D-006-cancelled-pulse-and-reduce-motion-beats.md
+- Previous handoff: goals/G-001-first-puzzle-stall/33-studio-to-gameplay-engineer.md

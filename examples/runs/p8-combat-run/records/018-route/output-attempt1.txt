@@ -1,0 +1,169 @@
+Route is done: QA's question goes to `game-designer`, and the tentative step 8b is now confirmed and open.
+
+<<<FILE goals/G-001-combat-monotony/21-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-001
+seq: 21
+from: studio
+to: game-designer
+stage: Design
+outcome: routed
+---
+# 21: studio → game-designer — Rule on the frame-rate-dependent graze, the shot cap, the walker margin and the doc contradictions
+
+## Task
+
+Answer four spec questions raised by QA's verification of build 0.5, in a ruling written for the Studio. The main one: is a frame-rate-dependent hit/miss at the contact edge acceptable in the text build? If not, state the rule precisely enough that `gameplay-engineer` can build it and QA can verify it.
+
+## Context
+
+Goal G-001 (combat feels monotonous). Build 0.5 implements your cues, variants and rooms (criteria 1–16). QA verified it independently (handoff 20). Criteria 1–15 and 16a–d pass. For 16e, the walker's 30/60 FPS differences are caused by bot decision timing, which is not a build defect (the exact cause is a float tie at the bot's 2.5 threshold in room 1). QA did find one scripted case where the game itself gives different outcomes at 30 and 60 FPS with identical input. QA does not decide whether that is acceptable, so it is yours. The Timing rule in the spec only guarantees "no tunnelling". The answer decides whether 16e passes as ruled (the verdict becomes pass) or the Build reopens. This is the first failure of criterion 16, so no technical-director re-plan is triggered.
+
+## Findings
+
+All facts below are QA's, from runs it made in step 20. Figures marked "derived" were calculated, not run.
+
+### 1. Frame-rate-dependent graze (the main question)
+
+- Shot reach is 0.4 tile. Contact is a distance check once per frame. A shot moves 0.1 tile per frame at 30 FPS and 0.05 at 60 FPS.
+- Reproduction (`python3 play.py --view trace`, run at `fps 30` and at `fps 60`):
+
+```text
+room empty
+fps 30            # and 60
+spawn spitter 1.04 3.70
+1.3 move up
+1.4 stop
+end 5
+```
+
+| Spitter position | 30 FPS | 60 FPS |
+|---|---|---|
+| (1.04, 3.70) | no hit, 3 hearts at 5 s | hit at 4.100 s, 2 hearts |
+| (1.00, 3.70) | hit at 4.100 s | hit at 4.117 s |
+| (1.00, 3.73) | hit at 4.100 s | hit at 4.117 s |
+| (1.00, 3.76) | hit at 4.100 s | hit at 4.117 s |
+
+- Cause: the first shot is locked on the player at (8, 4.0) at the cue start (1.2 s). The player then stands at (8, 3.6). The shot line passes the player at a perpendicular distance of about 0.3996, which is 0.0004 inside the reach. A hit needs a sampled frame within about ±0.017 tile of the closest approach. That window is narrower than the frame step at both rates, so which rate catches it depends on the phase.
+- Size (derived): only a lateral miss within about 0.003 tile of the 0.4 reach is affected (the shot's step is 0.1 tile at 30 FPS and 0.05 at 60 FPS). Clearly closer always hits and clearly farther never does, at both rates. Grub lunges (reach 0.6, step up to 0.27 tile at 30 FPS) probably have a wider band, about 0.015 tile at 30 FPS. Grubs were not tested. QA rates severity low. The effect is a hit or a miss only and does not change timing.
+- 16e says a build defect is "same decision, same time, same positions, different outcome". Read literally, this matches. QA did not decide.
+
+### 2. Shot cap: limit on cue starts, or on shots in flight?
+
+Criterion 11 says "never more than 3 in flight". In the practice-room trace `cap-four-spitters-60` (four spitters, no real room has this), the cap is checked only when a cue starts. Three spitters start cues at 4.6 s, and each check sees 2 shots in flight. At 5.2 s all three fire while the shots from 2.6 s and 3.4 s are still in flight, so 5 shots are in flight (QA's count; the trace shows hits at 5.3 s and 6.1 s). Room 3 (three spitters) stays ≤ 3 in the test. Which does the spec mean?
+
+### 3. Walker margin in rooms 3–5 at 60 FPS
+
+The walker at 60 FPS loses 2+2+2 = 6 hearts in rooms 3–5, the top of criterion 13's range (3–6). At 30 FPS it loses 0+1+3 = 4 and clears 2. One more heart lost would break 13. The dodger loses 0 and the camper clears 0, at both rates. Keep the margin as it is, or retune? (A tuning change is a Build.)
+
+### 4. Contradictions between design/combat.md and design/combat-cues-visual-spec.md (QA reported them; no ruling yet)
+
+- **Lunge line.** `combat.md` says a thin orange-red line for the lunge path. The visual spec draws a lane 1.2 tiles wide.
+- **Spitter glow.** `combat.md` and the text view start the glow at 0%. The visual spec requires a floor of at least 30%.
+- **Grub cue behaviour.** `combat.md` says the grub flashes for the whole wind-up. The visual spec says a steady tint with a slight pulse (no strobe, ≤ 3 Hz), and the lane stays at full strength until the lunge starts and fades during it. The text view removes the line when the lunge starts.
+- **Text marks.** `combat.md` leaves the `r` / `G` marks open for the graphical build. The visual spec uses silhouette and size, which answers that open question.
+
+These matter for a future graphical build, not for the text build. The visual points V1–V11 are already planned as a proposed new Goal at Close. State which document governs each point, or what the visual spec's author (`art-director`) must reconcile. Do not rule on visual style.
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no new input.
+- Your rulings on criteria 13–16 and five spec defaults (handoff 14). Change them only if you say why.
+
+## Constraints
+
+- Stay within D-001, the vision pillars (one-button combat, short runs, readable threats) and the project constraints (30 and 60 FPS must both play correctly; small team, reuse existing systems).
+- If a ruling would need a new enemy type, a healing system, a new input, or a scope change, hand back instead of ruling (it goes to `game-director`).
+- Do not edit the game. A rule that you add must be checkable by QA at both frame rates, with player-observable acceptance criteria.
+- If you accept the graze (question 1), record it as a known, accepted limitation of the text build and say what, if anything, must be re-checked in a graphical build.
+
+## Open questions
+
+1. Is the graze in Finding 1 acceptable? If yes, state it as accepted and name the sampling rule. If no, state the required behaviour (for example a swept contact test between frames, with the tolerance allowed between 30 and 60 FPS) and whether it also applies to grub lunges.
+2. Is the cap a limit on cue starts (as built) or on shots in flight?
+3. Keep or retune the walker margin at 60 FPS (criterion 13)?
+4. Which document governs each contradiction in Finding 4?
+
+## Expected output
+
+A short ruling written into `design/combat.md` where it changes the spec, plus a handoff with `outcome: done`, addressed to `studio`. For each question give the ruling and, where the build must change, the acceptance criteria. Say clearly whether the build must change (Build for `gameplay-engineer`) or not (QA closes the open 30 FPS gaps and the verdict becomes pass).
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: design/combat.md, design/combat-cues-visual-spec.md, repo/manual.md, goals/G-001-combat-monotony/14-game-designer-to-studio.md
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-001-combat-monotony/20-qa-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-16
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): a player playing the current build's combat experiences it as varied and engaging instead of monotonous. Different situations call for noticeably different play (positioning, timing, use of attack and dash), and the player can tell why. The improvement stays inside the vision pillars: one-button combat (attack + dash only, D-001), short runs, readable threats. Numeric thresholds belong to Design; the final verdict belongs to Review.
+
+Out of scope: new input buttons (needs Owner approval per D-001), changing run length, new biomes or content unrelated to combat variety, and any change to the core concept. Not a defect report: nothing in the request says combat is broken.
+
+## Unknowns
+
+- Observe: done (scripted play, rooms 1–3 + practice room). Rooms 4–5 and hand-timed play are unobserved by a human; the final Play step covers them.
+- Observe (FPS divergence, qa): done (16, 20). The walker's 30/60 differences come from bot timing (a float tie at the 2.5 threshold in room 1), not the build. QA did find a frame-rate-dependent graze at the contact edge (reach 0.4, lateral miss within ~0.003).
+- Diagnose: done (04).
+- Decide: skipped. No choice of direction or scope; all options stay within D-001 and the pillars. Returns here if the Build needs a new enemy type, a healing system or a new input, or if a ruling changes scope.
+- Design: reopened (8b, handoff 21). Questions: is the graze acceptable (16e); is the shot cap on cue starts or on shots in flight; keep the walker's 60 FPS margin (6 of 3–6); which doc governs the combat.md vs visual-spec contradictions.
+- Plan: skipped. The approach reuses the enemy update loop. Returns here if the same criterion fails verification twice (16 has failed once, only if the graze is ruled a defect).
+- Build: 0.5 implemented (10), tooling 7d done (18). A contact-test change (8c) is needed only if the designer rejects the graze or the cap behavior.
+- Verify (visual): done (15). Cue forms are accepted. V1–V11 need a graphical build and become a proposed new Goal at Close; V12 holds in the text build.
+- Verify (QA, 1–16 + V12): done (20), verdict still open. Criteria 1–15 and 16a–d pass. Gaps at 30 FPS for 5, 6, 8 (tests ran at 60 only) await one more run (8d).
+- Play: planned. A fresh playtester judges the result, including rooms 4–5 and hand-timed play. Its Handoff is composed by the Studio from the build and player profile only.
+- Review: planned (`game-director`), experience Goal. Graphical cue acceptance is still open at that point.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 01-studio-to-playtester.md (report: 02-playtester-to-studio.md) |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-studio-to-game-designer.md (result: 04-game-designer-to-studio.md) |
+| 3 | Decide | game-director | make-decision | skipped (no real choice; see Unknowns) | — |
+| 4a | Design | game-designer | write-design-spec | done | 05-studio-to-game-designer.md (result: 07-game-designer-to-studio.md) |
+| 4b | Observe (FPS divergence) | qa | reproduce-defect | done | 06-studio-to-qa.md (result: 08-qa-to-studio.md) |
+| 5 | Plan | technical-director | technical-plan | skipped (approach local; see Unknowns) | — |
+| 6 | Build | gameplay-engineer | implement-change | done | 09-studio-to-gameplay-engineer.md (result: 10-gameplay-engineer-to-studio.md) |
+| 7a | Design (criterion 14, spec gaps) | game-designer | write-design-spec | done | 11-studio-to-game-designer.md (result: 14-game-designer-to-studio.md) |
+| 7b | Verify (visual) | art-director | visual-review | done | 12-studio-to-art-director.md (result: 15-art-director-to-studio.md) |
+| 7c | Observe (walker 30/60 divergence) | qa | reproduce-defect | done | 13-studio-to-qa.md (result: 16-qa-to-studio.md) |
+| 7d | Build (bot log data, walker test) | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md (result: 18-gameplay-engineer-to-studio.md) |
+| 8 | Verify (criteria 1–16, V12) | qa | verify-change | done (question: graze) | 19-studio-to-qa.md (result: 20-qa-to-studio.md) |
+| 8b | Design (graze, cap, margin, doc conflicts) | game-designer | write-design-spec | open | 21-studio-to-game-designer.md |
+| 8c | Build (contact test / cap) | gameplay-engineer | implement-change | tentative (only if 8b rejects the graze or cap) | — |
+| 8d | Verify (re-verify; close 30 FPS gaps) | qa | verify-change | planned | — |
+| 9 | Play | playtester | playtest-session | planned | — |
+| 10 | Review | game-director | review-outcome | planned | — |
+| 11 | Next | studio | — | planned | — |
+
+## Route changes
+
+After 8 (Verify): partly fits. 1–15 and 16a–d pass; the walker difference is bot timing. QA found a frame-rate-dependent graze plus a cap and margin question, which only the designer can rule. 8b is now open (handoff 21). Added 8c Build (tentative) and 8d Verify (planned).
+
+## Next action
+
+Run the game-designer step with 21-studio-to-game-designer.md (result addressed to `studio`). Then Route: if the graze and cap are accepted, open 8d (QA closes the 30 FPS gaps, then Play); if not, open 8c (gameplay-engineer) with the designer's rule and QA's reproduction, then 8d.
+
+## Outcome
+
+(open)
+>>>END

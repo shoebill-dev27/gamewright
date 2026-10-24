@@ -1,0 +1,81 @@
+<<<FILE goals/G-003-dash-availability-clarity/06-gameplay-engineer-to-studio.md
+---
+kind: handoff
+goal: G-003
+seq: 6
+from: gameplay-engineer
+to: studio
+stage: Build
+outcome: partial
+---
+# 06: gameplay-engineer → studio — Build blocked: the source files the dash display must change are not in the packet; no code written
+
+## Task
+
+Re-route the Build of `design/dash-availability.md` with the missing source files supplied (see Open questions). Nothing is ready for QA.
+
+## Context
+
+Goal G-003, step 05 asked for the dash availability display (A+B+C) in `repo/`. The packet's context request was already used, and the files that hold the dash logic and the public-driver output were not part of it. I changed no file in `repo/`, so no sha exists and QA has nothing to verify.
+
+## Findings
+
+My report:
+
+- **Cause of the block.** The packet contains `repo/play.py`, `repo/bots.py`, `repo/manual.md`, `repo/public-driver.md` and `repo/tests/test_split_c.py`. It does not contain:
+  - `repo/game.py`: the `Game` class, `press()`, the dash and cooldown logic and the event list. I see only the attribute names that `bots.py` and `play.py` use (`dash_left`, `dash_cooldown`, `stun_left`, `recovery`, `invulnerable`, `events`).
+  - `repo/run_driver.py` and `repo/session.py`: the public driver (`mode run` / `mode room`), which prints its own status line. The spec requires the field there too.
+  - The trace output of the public driver, and any `tests/` file or golden output other than `test_split_c.py`.
+- **Why I did not guess.** Several spec rules depend on code I cannot see:
+  - Which condition makes `press("dash")` refuse: cooldown, active dash, hit-stun, or attack recovery. This decides the reason suffix and Q4.
+  - Whether `dash_cooldown` is counting during the dash or only after it. The documented start point is the dash end.
+  - How `press()` reports a refusal. Today it appears to emit an `ignored` event, which `Player.describe` prints as `(nothing happens)`. I cannot tell a dash refusal from other refusals, or find the reason.
+  - Where hit-stun and room entry clear the state (Q3, Q5).
+  - How the public driver and `RunSession` print their picture and status line, and how room entry resets the state.
+  - Which existing tests and goldens compare player-view text, and so need updating for the new field.
+
+  Editing these files blind could change game results, which the constraints forbid. A partial edit of `play.py` alone would put the field on the legacy route only, break the public route, and could not be run against the unseen tests.
+- **What I could confirm from `play.py` and `bots.py` (no change made).**
+  - The legacy route prints its picture in `Player.snapshot` (`[t s] hearts n/3`), so the dash field can be appended there.
+  - Event messages come from `Player.describe`. The dash text (`you dash <dir>`) and the refusal text (`(nothing happens)` for `ignored`) can be changed there once the dash event carries the data.
+  - The ready moment can be detected per frame in `Player.frame` or in `play()`, before the next input is processed (spec 3.3 order).
+  - Reaction rules read `view.messages` and `game.hearts` only (`Rule.matches`). The extra field is not in the sprite grid, so the field itself cannot break `see`, `hearts` or `nothing` rules. A `dash ready` message needs to be added to `messages` for `text "dash ready"` to work. The same is true of the new refusal text, for `text "not ready"`.
+  - `bots.py` reads `game.dash_left` and `game.dash_cooldown` directly, never printed text. The extra text cannot affect bot input.
+  - `ready = dash_left <= 0 and dash_cooldown <= 0` in the dodger suggests that hit-stun and recovery are separate from the cooldown. This is a hint, not an observation.
+  - The manual text (spec section 8) can be applied to `repo/manual.md` as written. I did not apply it alone, so that the manual does not describe a display that does not exist yet.
+- **Not observed:** Q3, Q4, Q5 and everything else listed under Expected output in step 05. No tests were run and no sha was built.
+- **Design question.** None arises yet. I found no ambiguity in the spec; the block is missing files only.
+
+## Decisions already made
+
+- D-001: no new input buttons. Unchanged.
+- D-022: the legacy route stays limited; only the display is added. Unchanged.
+- D-028: dash indicator on the legacy route including room 5; G-002 L1 rebased (context). Unchanged.
+
+## Constraints
+
+- Nothing in `repo/` was changed, so game results, tests and goldens are exactly as before.
+- When re-routed, the constraints of step 05 stand: no change to dash rules, timing or inputs; 30 and 60 FPS; reuse the existing text view and message system; update only the tests and goldens that compare the new field or text, and name them.
+
+## Open questions
+
+- **For Studio:** the next Build step needs these files in its packet (full content, since EDIT blocks need exact matches): `repo/game.py`, `repo/run_driver.py`, `repo/session.py`, `repo/source_id.py` if it affects the sha, and every file under `repo/tests/` that compares player-view or trace output (a listing, then the relevant files). Without `game.py` and `run_driver.py` Build cannot be completed.
+- If the packet cannot include them, the Studio should decide whether to split Build (legacy route first, public driver second) with the owner of each file visible in its own step. I did not choose a split.
+
+## Expected output
+
+- Next: a Build step of `gameplay-engineer` with the files above. It produces the change in `repo/` and `repo/manual.md`, then a Handoff to `qa` through the Studio with: the new sha, files changed, tests run and results, tests or goldens edited, and what was observed for Q3, Q4 and Q5.
+- This handoff is `outcome: partial` because the work has not started on the code and nothing is wrong with the spec. QA must not be routed from it.
+
+## Sender assessment
+
+Confidence that the block is real: high. The dash state, the refusal path and the public status line live in files I was not given, and their behavior decides several spec cases. I preferred a clean hand-back to a legacy-only edit that would look complete.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: design/dash-availability.md, design/combat.md, repo/manual.md, repo/public-driver.md, repo/play.py, repo/game.py, repo/run_driver.py, repo/session.py, repo/tests/ (files that compare player-view or trace output), design/final-boss-and-continuous-run.md#2-ランと入場, project.md#constraints
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-022-g002-v1-supplements.md, decisions/D-028-dash-indicator-on-legacy-route.md
+- Previous handoff: goals/G-003-dash-availability-clarity/05-studio-to-gameplay-engineer.md
+>>>END

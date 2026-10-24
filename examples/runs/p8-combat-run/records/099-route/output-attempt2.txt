@@ -1,0 +1,223 @@
+Route: QA 98 failed on a stray edit marker in `repo/manual.md`, so I routed it to Build under the return rules. I also opened a text-only fix for the contradictory W1 bullet in parallel. I did not rewrite 98, and I could not append to `log.md` because it isn't in my writable paths.
+
+<<<FILE goals/G-001-combat-monotony/99-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-001
+seq: 99
+from: studio
+to: gameplay-engineer
+stage: Build (manual-only fix)
+outcome: routed
+---
+# 99: studio → gameplay-engineer — Remove the stray edit marker from repo/manual.md
+
+## Task
+
+Fix `repo/manual.md` only. QA reports a leftover edit marker in the Warnings section, merged into the player-facing text. Remove it and restore the separate bullet. Change no game code and no other wording.
+
+## Context
+
+G-001 wording-only round (D-013): Design `design/combat-step94.md`, Build 29b (handoff 96), Verify 29c (QA report 98). QA 98 on build sha 0f2c1f134c79 found W1 and W5 passing and found this defect in the manual text. The manual text was part of the Build task, so it blocks a pass. After this fix, a bounded QA re-check and Review pass 4 follow.
+
+## Findings
+
+From QA report 98 (defect section). QA saw only the packet's copy of the manual and did not open the repo file, so confirm it in the file first.
+
+- In the "Warnings" section, the bullet starting `Being hit shows … by a shot from the <direction> (…)` is followed by the line `>>>REPLACE_PLACEHOLDER A swipe that interrupts the warning of a`.
+- The next line continues `grub or runner staggers it for 0.4 s; …`.
+- Result: a leftover edit marker appears in player-facing text, and the hit-message bullet and the stagger sentence are merged.
+- The rest of the step-94 manual wording is present, including the late-swipe sentence and the hit wording.
+
+## Decisions already made
+
+- D-011: variant-named wind-up and hit messages (accepted).
+- D-013: wording-only round, then Close.
+
+## Constraints
+
+- Edit `repo/manual.md` only. Search the whole file for any other leftover marker text (`>>>`, `<<<`, `PLACEHOLDER`, `SEARCH`, `REPLACE`) and remove it if found.
+- Keep the hit-message bullet text as it is. Restore the stagger sentence as its own bullet: "A swipe that interrupts the warning of a grub or runner staggers it for 0.4 s; a brute is not interrupted." Match the neighbouring bullets' style, and keep any detail the original sentence carried beyond what the packet shows.
+- Do not touch game code, tests or the design documents.
+- Run `python3 -m unittest discover -s tests` after the edit and report the result.
+
+## Open questions
+
+None. If the marker is not in the repo file, report that and make no change.
+
+## Expected output
+
+An edited `repo/manual.md`. A short build note: what was found, what was changed, and the test result. Address the result to `studio` (a fresh QA re-check follows, so the handoff must not contain reasoning QA could be anchored by).
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: repo/manual.md, design/combat-step94.md (manual wording section only)
+- Decisions: decisions/D-011-variant-named-messages-accepted.md, decisions/D-013-review-pass-3-readability-wording-then-close.md
+- Previous handoff: goals/G-001-combat-monotony/98-qa-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/100-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-001
+seq: 100
+from: studio
+to: game-designer
+stage: Design (criterion text fix, documents only)
+outcome: routed
+---
+# 100: studio → game-designer — Correct the contradictory W1 bullet for the spitter at (15,7)
+
+## Task
+
+In `design/combat-step94.md`, fix the W1 bullet for the spitter at (15,7). Make the stated expected direction consistent with the direction formula. Change no thresholds and no other criterion.
+
+## Context
+
+QA report 98 verified W1 on the build. Every W1 case passes. QA flagged one ambiguity in the spec text: the (15,7) bullet labels the case `from the east` and then says the diagonal is expected. The build gives `from the south-east`. QA judged by the formula, as the bullet itself instructs. This is a documentation fix so that Review reads a consistent criterion. It runs in parallel with the manual fix (99) and does not depend on it.
+
+## Findings
+
+From QA 98, W1:
+
+- Spitter at (15,7), player at (8,4). The cue vector is (-0.92,-0.39), so the reversed vector is (0.92,0.39).
+- Ratio 0.42 is above 0.4142, so the formula gives south-east. The build prints `YOU ARE HIT by a shot from the south-east — hearts 2/3` at both 30 and 60 FPS.
+- All other W1 cases match their expected direction.
+
+## Decisions already made
+
+- D-011: variant-named wind-up and hit messages.
+- D-013: wording-only round, then Close.
+
+## Constraints
+
+- Edit `design/combat-step94.md` only. You cannot edit `repo/manual.md` or D-007; do not try.
+- The correction must follow the formula in the spec. If the formula itself looks wrong, say so in Open questions and do not change it.
+- Do not add criteria or alter W1–W8 pass conditions.
+
+## Open questions
+
+None.
+
+## Expected output
+
+The corrected `design/combat-step94.md` and a short handoff to `studio` naming the exact line changed. If you find anything beyond this text fix, state it in the handoff and do not act on it.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: design/combat-step94.md
+- Decisions: decisions/D-011-variant-named-messages-accepted.md, decisions/D-013-review-pass-3-readability-wording-then-close.md
+- Previous handoff: goals/G-001-combat-monotony/98-qa-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-16
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): a player playing the current build's combat experiences it as varied and engaging instead of monotonous. Different situations call for noticeably different play (positioning, timing, use of attack and dash), and the player can tell why. The improvement stays inside the vision pillars: one-button combat (attack + dash only, D-001), short runs, readable threats. Numeric thresholds belong to Design; the final verdict belongs to Review.
+
+Out of scope: new input buttons (needs Owner approval per D-001), changing run length, new biomes or content unrelated to combat variety, and any change to the core concept. Not a defect report: nothing in the request says combat is broken.
+
+## Unknowns
+
+- Observe: done (playtests 02, 27, 53, 63, 88; QA reports through 98). Contact-edge graze accepted (D-002, D-003). Playtest 88 readability gaps (shot hit names no source; no line explains a late swipe) are being closed by wording (D-013).
+- Diagnose: done twice (04, 31); a third is barred by the loop limit.
+- Decide: skipped. Owner escalation (row 11) did not fire in pass 3 (D-013).
+- Design: D-004 to D-007, D-011, D-012 stand. The wording spec is design/combat-step94.md (W1–W8). Open: its W1 bullet for the spitter at (15,7) contradicts itself (text fix only). The stray last line of D-007 is outside every Role's writable paths: an Owner item at Close.
+- Plan: skipped (approach local). Returns if the same criterion fails verification twice.
+- Build: wording build 29b (96) is in the repo. QA 98 found a stray edit marker in the repo/manual.md Warnings section (bullets merged). Manual-only fix open (99).
+- Verify (QA): 98 on sha 0f2c1f134c79: suite 69 OK; bots within limits at 60 FPS; W1 and W5 pass; W2 passes at 60 FPS; W3, W4, W6, W7, W8 only partly shown. A bounded re-check (manual line and a few cheap items) follows the fix; the rest, with R3-8 at 60 FPS, the room 3 sidestep and the 30 FPS cancel/recovery swipes, go to Review as known gaps. Visual V1–V11 need a graphical build (proposed Goal at Close); V12 open.
+- Play: four passes done. Open only if a live player reports them: grub encounters identical, spitter rooms mostly dodging, empty brute tail in room 5.
+- Review: passes 1–3 done, all goal-not-met. Pass 4 is a paper check after the wording round, including acceptance of the known gaps.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 01-studio-to-playtester.md (report: 02-playtester-to-studio.md) |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-studio-to-game-designer.md (result: 04-game-designer-to-studio.md) |
+| 3 | Decide | game-director | make-decision | skipped (no real choice; see Unknowns) | — |
+| 4a | Design | game-designer | write-design-spec | done | 05-studio-to-game-designer.md (result: 07-game-designer-to-studio.md) |
+| 4b | Observe (FPS divergence) | qa | reproduce-defect | done | 06-studio-to-qa.md (result: 08-qa-to-studio.md) |
+| 5 | Plan | technical-director | technical-plan | skipped (approach local; see Unknowns) | — |
+| 6 | Build | gameplay-engineer | implement-change | done | 09-studio-to-gameplay-engineer.md (result: 10-gameplay-engineer-to-studio.md) |
+| 7a | Design (criterion 14, spec gaps) | game-designer | write-design-spec | done | 11-studio-to-game-designer.md (result: 14-game-designer-to-studio.md) |
+| 7b | Verify (visual) | art-director | visual-review | done | 12-studio-to-art-director.md (result: 15-art-director-to-studio.md) |
+| 7c | Observe (walker 30/60 divergence) | qa | reproduce-defect | done | 13-studio-to-qa.md (result: 16-qa-to-studio.md) |
+| 7d | Build (bot log data, walker test) | gameplay-engineer | implement-change | done | 17-studio-to-gameplay-engineer.md (result: 18-gameplay-engineer-to-studio.md) |
+| 8 | Verify (criteria 1–16, V12) | qa | verify-change | done (question: graze) | 19-studio-to-qa.md (result: 20-qa-to-studio.md) |
+| 8b | Design (graze, cap, margin, doc conflicts) | game-designer | write-design-spec | done | 21-studio-to-game-designer.md (result: 22-game-designer-to-studio.md) |
+| 8c | Build (contact test / cap) | gameplay-engineer | implement-change | skipped (graze and cap accepted as built) | — |
+| 8d | Verify (criteria 1–17; close 30 FPS gaps) | qa | verify-change | done (pass) | 23-studio-to-qa.md (result: 24-qa-to-studio.md) |
+| 9a | Play | playtester | playtest-session | done | 25-studio-to-playtester.md (report: 27-playtester-to-studio.md) |
+| 9b | Design (QA notes: exact-reach miss, lunge band) | game-designer | write-design-spec | done | 26-studio-to-game-designer.md (result: 30-game-designer-to-studio.md) |
+| 10a | Diagnose (playtest issues 1–4) | game-designer | diagnose-experience | done | 28-studio-to-game-designer.md (result: 31-game-designer-to-studio.md) |
+| 10b | Observe (room 2 grub hit after swipe) | qa | reproduce-defect | done (not a defect) | 29-studio-to-qa.md (result: 32-qa-to-studio.md) |
+| 11 | Decide (Owner escalation if the melee still reads as one fight, D-009) | game-director | prepare-owner-escalation | skipped (not fired in pass 3, D-013) | — |
+| 12a | Design (Options 1–2, manual wording) | game-designer | write-design-spec | done | 33-studio-to-game-designer.md (result: 35-game-designer-to-studio.md) |
+| 12b | Observe (spitter fire times, rooms 3–4) | qa | reproduce-defect | done (no defect) | 34-studio-to-qa.md (result: 36-qa-to-studio.md) |
+| 12c | Design (invulnerable contact, room 3 cue overlap) | game-designer | write-design-spec | done | 37-studio-to-game-designer.md (result: 38-game-designer-to-studio.md) |
+| 13 | Build (build 0.6 per Design 35 and 38) | gameplay-engineer | implement-change | done | 39-studio-to-gameplay-engineer.md (result: 40-gameplay-engineer-to-studio.md) |
+| 14a | Verify (0.6, 30 and 60 FPS) | qa | verify-change | done (fail: F2, F3, 13@60, room 3) | 41-studio-to-qa.md (result: 43-qa-to-studio.md) |
+| 14b | Design (criterion 13 walker limit, 60 FPS) | game-designer | write-design-spec | done (D-006, no build change) | 42-studio-to-game-designer.md (result: 44-game-designer-to-studio.md) |
+| 15 | Design (room 3 cap vs criterion 11) | game-designer | write-design-spec | done (D-007, accepted as built) | 45-studio-to-game-designer.md (result: 46-game-designer-to-studio.md) |
+| 16 | Build (F2, F3 only) | gameplay-engineer | implement-change | done | 47-studio-to-gameplay-engineer.md (result: 48-gameplay-engineer-to-studio.md) |
+| 17 | Verify (re-verify, incl. "not run" list, criterion 11 a–e) | qa | verify-change | done (pass) | 49-studio-to-qa.md (result: 50-qa-to-studio.md) |
+| 18a | Play (fresh, hand-timed rooms 2–5) | playtester | playtest-session | done | 51-studio-to-playtester.md (report: 53-playtester-to-studio.md) |
+| 18b | Design (criterion 11d wording, non-blocking) | game-designer | write-design-spec | done (no build change) | 52-studio-to-game-designer.md (result: 54-game-designer-to-studio.md) |
+| 18c | Observe (late swipe vs lunge; hit with no cue; message wording) | qa | reproduce-defect | done (not a defect) | 55-studio-to-qa.md (result: 56-qa-to-studio.md) |
+| 18d | Design (manual wording on late swipes; variant cue message) | game-designer | write-design-spec | done (D-008 proposed, later D-011) | 58-studio-to-game-designer.md (result: 59-game-designer-to-studio.md) |
+| 19 | Review (pass 1) | game-director | review-outcome | done (goal-not-met; D-009) | 57-studio-to-game-director.md (result: 60-game-director-to-studio.md) |
+| 20a | Play (variant-aware, fresh, build 0.6.1 unchanged) | playtester | playtest-session | done | 61-studio-to-playtester.md (report: 63-playtester-to-studio.md) |
+| 20b | Observe (30 FPS player view, late-swipe boundary) | qa | verify-change | done (no defect) | 62-studio-to-qa.md (result: 64-qa-to-studio.md) |
+| 21a | Review (pass 2) | game-director | review-outcome | done (goal-not-met; D-010) | 65-studio-to-game-director.md (result: 67-game-director-to-studio.md) |
+| 21b | Design (room 3 in-flight vs D-007; D-008 readiness) | game-designer | write-design-spec | done (D-007 stands; D-011 accepted) | 66-studio-to-game-designer.md (result: 68-game-designer-to-studio.md) |
+| 22a | Build (D-011 messages, manual wording) | gameplay-engineer | implement-change | done | 69-studio-to-gameplay-engineer.md (result: 71-gameplay-engineer-to-studio.md) |
+| 22b | Design (room 3 variety, existing enemies) | game-designer | write-design-spec | done (D-012) | 70-studio-to-game-designer.md (result: 72-game-designer-to-studio.md) |
+| 23 | Build (room 3 change, D-012) | gameplay-engineer | implement-change | done | 73-studio-to-gameplay-engineer.md (result: 74-gameplay-engineer-to-studio.md) |
+| 24 | Verify (22a + 23; V-a..e, R3-1..10; 30 and 60 FPS) | qa | verify-change | done (fail: red test only) | 75-studio-to-qa.md (result: 76-qa-to-studio.md) |
+| 25a | Build (fix test, test code only) | gameplay-engineer | implement-change | done | 77-studio-to-gameplay-engineer.md (result: 79-gameplay-engineer-to-studio.md) |
+| 25b | Design (doc conflicts, documents only) | game-designer | write-design-spec | done (D-007 stray line left) | 78-studio-to-game-designer.md (result: 80-game-designer-to-studio.md) |
+| 26 | Verify (re-verify; close R3-8, R3-4 gaps) | qa | verify-change | done (no defect; 5 items unjudged) | 81-studio-to-qa.md (result: 82-qa-to-studio.md) |
+| 26b | Verify (R3-8 timed run, R3-4 in room 3) | qa | verify-change | done (no defect; 60 FPS items unshown) | 84-studio-to-qa.md (result: 86-qa-to-studio.md) |
+| 26c | Design (doc wording, D-007 stray line) | game-designer | write-design-spec | done (wording fixed; D-007 line is an Owner item) | 85-studio-to-game-designer.md (result: 87-game-designer-to-studio.md) |
+| 27 | Play (fresh, new build, reaction rules) | playtester | playtest-session | done | 83-studio-to-playtester.md (report: 88-playtester-to-studio.md) |
+| 27b | Observe (room 4 hits, swipe-and-still-hit; last bounded 60 FPS items) | qa | reproduce-defect | done (no defect; 2 readability gaps) | 89-studio-to-qa.md (result: 90-qa-to-studio.md) |
+| 28 | Review (pass 3) | game-director | review-outcome | done (goal-not-met; D-013) | 91-studio-to-game-director.md (result: 92-game-director-to-studio.md) |
+| 29a | Design (wording: shot-hit source, late-swipe line) | game-designer | write-design-spec | done | 93-studio-to-game-designer.md (result: 94-game-designer-to-studio.md) |
+| 29b | Build (wording only) | gameplay-engineer | implement-change | done | 95-studio-to-gameplay-engineer.md (result: 96-gameplay-engineer-to-studio.md) |
+| 29c | Verify (text appears; reaction rules, bots, suite; 30 and 60 FPS) | qa | verify-change | done (fail: manual marker; gaps) | 97-studio-to-qa.md (result: 98-qa-to-studio.md) |
+| 29d | Build (manual.md stray marker only) | gameplay-engineer | implement-change | open | 99-studio-to-gameplay-engineer.md |
+| 29e | Design (W1 (15,7) bullet text fix) | game-designer | write-design-spec | open | 100-studio-to-game-designer.md |
+| 29f | Verify (bounded re-check: manual line, cheap unshown items) | qa | verify-change | planned | — |
+| 30 | Review (pass 4, paper check; accepts known gaps or not) | game-director | review-outcome | planned | — |
+| 31 | Next | studio | — | planned | — |
+
+## Route changes
+
+After Verify 29c (98): fail on a manual defect (stray edit marker), not on gameplay; W1 and W5 pass. Return rule: Build (99, manual only) and, in parallel, a text fix of the W1 (15,7) bullet (100). Then a bounded QA re-check and Review pass 4, which also judges the unshown items as known gaps.
+
+## Next action
+
+Run `gameplay-engineer` with 99-studio-to-gameplay-engineer.md and `game-designer` with 100-studio-to-game-designer.md (independent). Then Route to Verify 29f (fresh QA, bounded scope, result addressed to `studio`), then Review pass 4 (paper). At Close, propose the visual criteria V1–V12 (graphical build), the grub-sameness/dodge-heavy-spitter and brute-tail Goals (only if a live player reports them), and list the D-007 stray line as an Owner item.
+
+## Outcome
+
+(open)
+>>>END

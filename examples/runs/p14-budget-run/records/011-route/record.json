@@ -1,0 +1,122 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-003",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "36213263-90af-451e-9555-93c01b515d58",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 29303,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 2815,
+    "output_tokens_details": {
+     "thinking_tokens": 1062
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 29303,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 2815,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 29303,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 29303
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.145366,
+   "attempt": 1,
+   "started": "2026-10-23T18:26:10",
+   "seconds": 25.0,
+   "errors": [
+    "goals/G-003-dash-readiness/09-studio-to-playtester.md: playtester may not load repo/public-driver.md"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "c1d77f7d-6385-4a98-83cd-3c89142a2e5b",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 29392,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 3308,
+    "output_tokens_details": {
+     "thinking_tokens": 1345
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 29392,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 3308,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 29392,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 29392
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.150652,
+   "attempt": 2,
+   "started": "2026-10-23T18:26:35",
+   "seconds": 28.3,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-003-dash-readiness/09-studio-to-playtester.md": "f6116c5cf376344fbb38b5120e94fe695c7ef63639a1aaefb5c74178eb95e9fc",
+  "goals/G-003-dash-readiness/goal.md": "5e3a264fc77db6a932189d460470f7169e2432ae32fa98a69f9c10b30ef707a0"
+ },
+ "decision": {
+  "new": [
+   "playtester",
+   "Play"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "playtester",
+    "Play"
+   ]
+  ]
+ },
+ "seen_through_seq": 9
+}

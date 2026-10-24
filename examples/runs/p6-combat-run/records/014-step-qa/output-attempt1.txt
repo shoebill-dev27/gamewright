@@ -1,0 +1,40 @@
+<<<FILE @run/trace/r4-fps30
+room 4
+fps 30
+end 8
+>>>END
+
+<<<FILE @run/trace/r4-fps60
+room 4
+fps 60
+end 8
+>>>END
+
+<<<FILE @run/trace/r5-fps60
+room 5
+fps 60
+end 8
+>>>END
+
+<<<FILE @run/trace/one-spitter-fps60
+room empty
+fps 60
+spawn spitter 15 0
+player 8 4
+end 6
+>>>END
+
+<<<FILE @run/trace/two-spitters-fps60
+room empty
+fps 60
+spawn spitter 15 0
+spawn spitter 15 8
+player 8 4
+end 6
+>>>END
+
+<<<FILE @run/play/r4-fps60
+room 4
+fps 60
+end 5
+>>>END

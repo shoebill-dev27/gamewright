@@ -1,0 +1,224 @@
+I've written the technical plan as a Handoff to `studio`, plus decision D-004. The packet has no room layout data, so my answer to Q2 on layout changes is provisional and ends in an audit task. The plan also finds that the existing enemy flinch contradicts the spec, and I've asked for a Game Designer ruling on that.
+
+<<<FILE goals/G-002-combat-monotony/08-technical-director-to-studio.md
+---
+kind: handoff
+goal: G-002
+seq: 8
+from: technical-director
+to: studio
+stage: Plan
+outcome: done
+---
+# 08: technical-director → studio — Technical plan for enemy-side combat depth (build 0.4)
+
+## Task
+
+Merge this plan with the Art Director's cue design (step 6b, `07-studio-to-art-director.md`) and write the Build Handoff. Pass the technical limits on cues (section "Cue system and limits for the Art Director") to the Art Director. Route the spec questions (SQ1–SQ5) to `game-designer` if the Studio's process requires an answer before Build. Each question has a default I will build to if no answer arrives, and Build must tell the reader which default it used.
+
+## Context
+
+G-002: the Owner chose enemy-side depth with one-button combat kept (D-002). The Game Designer wrote `design/combat-enemy-depth.md` and handed it to me (`06-game-designer-to-technical-director.md`) with Q2 (layout and attack cap) and Q3 (tuning easy to change). Q1 (visuals) belongs to the Art Director. I plan from the spec and `sim/repo-notes.md` only; I have not seen the room layout data or file names, and the dry-run Build must name systems, not paths I cannot confirm.
+
+## Findings
+
+### Answers to Q2 and Q3
+
+**Q2a. Do rooms 2–5 need layout changes?** Probably light ones, but I cannot confirm this from the packet because it contains no room layout data.
+- Room 1 (Grubs) and room 3 (Spitters + Shieldbearer) need no layout change for the new enemies. Room 3 benefits from one or two obstacles that serve as cover from Spitters, but this is optional.
+- Rooms 2, 4 and 5 (Chargers) need a **layout audit** against these requirements. Expect small edits (add or move 2–4 obstacle or wall segments per room):
+  1. From the Charger's likely positions there are at least two charge directions that end in a wall or solid within 8 tiles, so wall-stun is achievable.
+  2. There is open floor beside the main lanes, so the player can sidestep a 1-tile-wide lane.
+  3. There is no spot where a Charger permanently has no valid windup (edge case 5: it will not wind up toward a wall less than 1 tile away, so it repositions).
+  4. Room 4 (2 Chargers) has lanes that can cross without covering the whole room, and room 5 stays readable with 6 enemies.
+- Decision made for the plan: a charge ends at any static solid (wall or obstacle), not only walls. See SQ3.
+- A Build step can make the layout edits only once the audit has the actual layout. Put the audit first in the Build slice for rooms (task T7).
+
+**Q2b. Does the 2-attacker cap fit the existing controller?** Yes, at modest cost. The shared controller has Idle, Chase and Attack. I will not add a new top-level state per attack. I will do two things:
+- Run a **phase machine inside Attack**: Telegraph → Active → Recovery (plus Stunned, Cooldown, and a Waiting behavior when no slot is free). The phases and durations are data per enemy type. The existing per-type attack routine supplies the effect (lunge, projectile, charge, bash).
+- Add a single **attack-slot arbiter** per room: 2 slots, first-come-first-served. An enemy asks for a slot before it can start a telegraph. It holds the slot through Telegraph and Active, and releases it when Recovery starts, on death, or when the room ends. Spitter shots in flight hold no slot. D-003's revisit trigger ("cap cannot be built within the existing controller at reasonable cost") does **not** fire.
+
+**Q3. Keep tuning easy to change.** Every number in the spec goes into one per-type enemy data table, in seconds, tiles, tiles/s and degrees. That covers windup, tracking and lock times, charge speed and range, stun, turn rate, guard arc, bash cone, cooldowns, HP, and slot count. Code reads the table and never contains literals. A loader validation rejects any telegraph under 0.4 s (the D-003 floor). Tests read expected values from the table, plus the fixed invariants (the 0.4 s floor and the cap of 2), so retuning does not break them.
+
+### Technical findings that change the work
+
+1. **Existing Flinch contradicts the spec (needs a design ruling, SQ1).** Today an enemy hit by the player enters a 0.2 s Flinch that interrupts any state including Attack. That is not in `design/combat.md`. If it stays:
+   - A single swipe cancels every telegraph and the "stand still and swipe" tactic survives, which defeats the goal.
+   - It breaks the Charger rule that swipes do not interrupt windup, charge or recovery.
+   - It would shorten Shieldbearer and Grub recovery.
+   Default I will build: Flinch applies only in Chase and Waiting. It is ignored during Telegraph, Active, Recovery, Stunned and Cooldown, for every enemy type. This is the Charger rule extended to all types.
+2. **Invulnerability bug blocks the spec.** Invulnerability is one flag switched off by whichever timer ends first. The known build 0.3 symptom (damage partway through a dash right after being hit) is this bug. V4, section 2.4 and "dash invulnerability full 0.25 s" depend on it being fixed. Fix: replace the flag with an expiry time (`invulnerableUntil = max(existing, new)`), or a source counter. It is a Build prerequisite and has regression tests.
+3. **Facing and blocking do not exist.** Damage today is overlap-only. Shieldbearer needs enemy facing and a damage call that carries hit origin and kind (swipe, projectile, charge, bash). The guard check goes in that one damage entry point so swipes and projectiles use the same rule.
+4. **Variable delta time versus fast, short attacks.** Charge 12 tiles/s is 0.4 tiles per frame at 30 FPS, and a 0.1 s hitch gives 1.2 tiles. The Grub lunge is 2 tiles in 0.15 s. Without care, a 1-tile lane and the hit window can be skipped and outcomes will differ between 30 and 60 FPS. See D-004: bounded sub-stepping of the combat update, plus a per-frame time clamp.
+5. **Dash and enemy collision.** The spec requires dash to pass through a Shieldbearer, and a charge to pass through other enemies. I need to check how the existing dash and steering handle enemy–enemy and player–enemy collision (not in the notes), and add collision exceptions: no enemy–enemy collision for a charging Charger, and no player–enemy collision during dash. Walls still stop both.
+6. **No existing tests** for invulnerability or enemies. A small headless test harness is needed and counts as part of the cost.
+
+### Work breakdown (ordered; "needs" lists dependencies)
+
+| # | Task | Needs |
+|---|---|---|
+| T0.1 | Invulnerability fix (expiry-based) and tests: dash right after hit, hit during dash, hit-stun and dash overlap | none |
+| T0.2 | Combat time: per-frame dt clamp 0.1 s; bounded sub-steps ≤ 1/120 s for player, enemies, projectiles; timers carry overshoot; pause freezes all timers (D-004) | none |
+| T0.3 | Headless harness: simulated clock, scripted input, run any scenario at 30 FPS, 60 FPS and with injected hitches; reports phase times and damage events | T0.2 |
+| T1 | Enemy phase machine inside Attack; data table for all spec values; Flinch rule (SQ1); cue events (below); pause and death cancel (edge 4) | T0.2 |
+| T2 | Attack-slot arbiter (2 slots, FIFO, release rules) and Waiting behavior (keep distance/approach, do not attack) | T1 |
+| T3 | Grub (stop at 1.5 tiles, 0.5 s telegraph, lunge 2 tiles in 0.15 s, 0.6 s recovery, no walking contact damage) and Spitter (0.6 s aim telegraph, tracks then locks 0.2 s before firing, 2 s interval) | T1, T2 |
+| T4 | Enemy facing; damage entry point with hit origin and kind; guard-arc check; projectile-versus-guard | T1 |
+| T5 | Charger (see below) | T1, T2, T3 style, collision exceptions |
+| T6 | Shieldbearer (see below) | T4 |
+| T7 | Layout audit and room composition data (rooms 1–5 per section 5); layout edits for rooms 2, 4, 5 | none for data; audit needs the layout |
+| T8 | Cue hookup to the Art Director's design via the cue interface; placeholder cues first | T1 (placeholders), Art Director output (final) |
+| T9 | Automated acceptance scenarios and QA checklist | all |
+
+**Charger (T5):**
+- The lane and the hit area are the same geometry: a 1-tile-wide box swept from the Charger along its locked direction until the first static solid or 8 tiles. Windup is 0.8 s: tracking 0.5 s, locked 0.3 s.
+- Contact uses a swept test per sub-step, so it cannot tunnel.
+- On a hit, it deals 1 damage and keeps going. A touch during invulnerability does nothing, is not "used up" and the charge keeps going. A touch that did damage is not repeated in the same charge.
+- It ends at a solid (1.5 s stun with the stun cue) or after 8 tiles (0.8 s recovery). Then 1.0 s cooldown.
+- Rules: swipes never interrupt it; it passes through enemies; death cancels immediately with no damage; edge case 5 reposition.
+
+**Shieldbearer (T6):**
+- Facing turns toward the player at ≤ 90°/s. Guard arc is 120°, so ±60° from facing.
+- The guard check uses the angle from the Shieldbearer's facing to the attack origin: the player's position for a swipe, the projectile's position at impact for a shot.
+- Guard is up in every phase except Recovery. Telegraph 0.6 s, with no turning from telegraph start until the end of recovery. The bash is a 1.5-tile cone over 0.1 s. Recovery is 0.8 s with guard down. Cooldown is 0.6 s.
+- A bash starts only if the player is in the front 60° within 1.5 tiles and a slot is free.
+- A blocked swipe emits the block event, which carries both visual and sound hooks.
+
+### Cue system and limits for the Art Director
+
+The cue system is separate from the combat logic, so the Art Director's visuals can be swapped with no logic change.
+
+- **Interface.** Logic only emits events through a cue sink. It never reads anything back, and nothing in gameplay depends on cue timing or assets.
+  - `TelegraphStart` carries enemy id, attack type, shape, total duration.
+  - `TelegraphUpdate` carries shape (position and direction, which can change while tracking), progress 0–1, and a `locked` flag.
+  - `TelegraphEnd` carries completed or cancelled.
+  - There are also `BlockCue` (position, direction), `StunStart/End`, and `GuardDown` for the Shieldbearer's recovery.
+- **Shapes.** Cone (origin, direction, radius, angle), lane/line (origin, direction, length, width), aim line (origin, direction, length). The shape is the real hit geometry. A cue may be drawn larger, but never smaller than the hit area.
+- **Lane indicator.** The lane is 1 tile wide and up to 8 tiles long, with its length cut at the first solid. It updates every frame during the 0.5 s tracking phase and then holds still. The logic gives the final length each frame. A stretched sprite or quad is easy to support. Per-tile art is only possible if it tiles cleanly and can be cut at any length.
+- **Lock moment.** The `locked` flag lets the cue change when tracking ends (Charger last 0.3 s, Spitter last 0.2 s, Grub direction at end of telegraph). Players need this to dodge fairly (V4).
+- **Draw budget.** The cap bounds active telegraph cues to 2, counting Spitter aim lines. Add at most 2 stun cues (room 4 has 2 Chargers), the Shieldbearer guard-down cue, and short block cues. Draw cost is small, but the cues must be cheap sprites or quads, not full-screen effects or per-frame generated meshes.
+- **Time-driven only.** Animation must be driven by the progress value or elapsed seconds, never by frame counts or fixed frame-per-frame sprite strips. Telegraphs are as short as 0.4 s, which is 12 frames at 30 FPS.
+- **First frame.** The cue is shown from the first rendered frame after telegraph start. Any fade-in is the Art Director's call, but the telegraph timer does not wait for it. Preload cue assets so first use causes no hitch.
+- **Layering.** Cues draw above the floor and below UI. They must stay readable with up to 6 enemies and Spitter projectiles on screen.
+
+### Test strategy
+
+**Automated (headless harness, T0.3, each scenario run at 30 FPS, 60 FPS and with a hitch):**
+- Invulnerability regression: dash right after hit, hit during dash, expiry order.
+- V1/V2: phase timings for Grub, Spitter, Charger and Shieldbearer within ±0.05 s; no damage before the telegraph has run fully.
+- V3: walking Grub contact deals no damage; a lunge deals 1; a stationary player in a corner takes lunge damage.
+- V4: leaving the lane in the final 0.3 s dodges; a dash over the contact moment dodges; standing in the lane takes 1.
+- V5: wall hit gives a 1.5 s stun with 1 damage per swipe.
+- V6/V7: front swipe deals 0, side or back swipe deals 1, shot blocked at front, front vulnerable for 0.8 s after a bash.
+- V8: in room 5, a monitor asserts the count of enemies in Telegraph or Active is never above 2 across a long scripted run.
+- V9: room data matches section 5.
+- V10: input map has only attack, dash and pause.
+- V11 edge cases 1, 4, 7. For 7, a 0.1 s hitch and a larger one: no skipped telegraph, damage never in the update that starts a telegraph, at least one rendered frame of cue first.
+- Invariants: same input timing gives the same hit or miss at 30 and 60 FPS.
+
+**Manual QA (cannot be automated):** how the cues look and read (V1 visual part), block and stun cue sound and visual, feel of rooms 2–5, and a 30 versus 60 FPS side-by-side check using a frame-cap option. Add a debug option for frame cap and hitch injection if one does not exist.
+
+### Parallelization decision
+
+- **Code work is sequential.** T1–T6 all change the shared enemy controller and the damage entry point. Parallel work would produce conflicts there, and the team is small. No isolated workspaces.
+- **Safe to run in parallel with the code work:** the Art Director's cue assets (separate files, interface fixed above) and the room layout audit and data (T7, separate data). Final cue hookup (T8) waits for the art.
+- **Build slicing.** If the route allows two Build steps, split after T3: Build A = T0–T4 (foundation, Grub and Spitter, slots, facing and damage API, with tests); Build B = T5–T9 (Charger, Shieldbearer, rooms, cues). If the route has only one Build step, use one Handoff in the task order above. A reader can check that Build A needs no Charger or Shieldbearer.
+
+### Cost and risk (rough)
+
+Roughly 17–21 person-days, with high uncertainty because I have seen only the repo notes: T0 about 3, T1 2, T2 1, T3 1.5, T4 1.5, T5 2.5, T6 3, T7 1–2, T8 1.5–2, tuning and test pass about 2. This fits Option A and does not exceed what the Goal implies, so no escalation to `game-director`.
+
+| Risk | Mitigation |
+|---|---|
+| Flinch undermines telegraphs (finding 1) | SQ1 default plus a test: a swipe during a telegraph does not change timing |
+| Invulnerability bug (finding 2) | T0.1 first, with tests |
+| Tunneling and 30/60 FPS drift | Sub-steps and swept contact (D-004), harness at 30, 60 and with hitches |
+| Regression of build 0.3 enemy behavior (no tests today) | Harness first; keep the old behavior only where the spec leaves it unchanged |
+| Slot starvation in room 5 (6 enemies, 2 slots) | FIFO grant, and a test that every enemy gets a slot within a bounded time |
+| Room 5 readability and Shieldbearer flanking difficulty | Design risk, not technical. All values are in the data table to retune after playtest |
+| Collision assumptions (dash and charge pass-through) are unverified | First Build task is to check and report the existing behavior |
+| Layout unknown | T7 audit before any layout edits |
+
+### Spec questions (the Game Designer decides; I do not change the spec)
+
+- **SQ1 (flinch).** Should an enemy hit by the player ignore Flinch during Telegraph, Active, Recovery, Stunned and Cooldown? Default: yes for all types, Flinch only in Chase and Waiting. Spec 2.2 and 4.1 imply this, but 3.1, 3.2 and 4.2 are silent. If the answer is no for some types, the "stand still and swipe" tactic may return.
+- **SQ2 (slot lifetime).** The slot is held through Telegraph and Active and released at the start of Recovery. A Spitter releases when the shot is fired. Is that the intended reading of "in a telegraph or attack phase"?
+- **SQ3 (obstacles).** Does a charge ending on an obstacle (not a wall) also stun? Default: yes, any static solid.
+- **SQ4 (waiting behavior).** What should an enemy do while it waits for a slot? Default: Grub holds position about 1.5 tiles away or circles slowly (no attack); Charger repositions; Shieldbearer keeps walking toward the player but does not start a bash; Spitter stays put.
+- **SQ5 (guard reference point).** Is the guard check against the player's position at the swipe, or against the swipe hitbox's center? Default: the player's position at swipe time, so close side hits are not accidentally blocked. A shot is checked at its position when it reaches the shield.
+
+No spec item is infeasible. Everything above fits the constraints (no new inputs, 30 and 60 FPS, 5-room slice).
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no new inputs.
+- D-002 (Owner): enemy-side depth. No hold-to-charge attack in this work.
+- D-003 (Game Designer): time-based telegraphs, 0.4 s floor, 2-attacker cap. The cap fits the existing controller, so its revisit trigger is not met.
+- D-004 (Technical Director, new): bounded sub-stepped combat time with a frame-time clamp, and a central attack-slot arbiter.
+
+## Constraints
+
+- No new inputs. Spec numbers are fixed by the Game Designer; I change none. Playtester handoffs (step 9) must not include implementation details or the experience signals in spec 7.2.
+- The Build is a dry-run: state the changes exactly (what, where, how to exercise), naming systems rather than file paths I cannot confirm.
+
+## Open questions
+
+- SQ1–SQ5 above, for `game-designer`. Defaults are stated so Build can proceed.
+- Layout audit result for rooms 2–5 (T7), once the layout data is available to the Build step.
+
+## Expected output
+
+The Studio writes the Build Handoff (to `technical-director` or the Build Role per the route) with: the task list T0–T9 in order, D-004, the cue interface from this plan merged with the Art Director's cue design, the defaults for SQ1–SQ5 (or the Game Designer's answers), and the acceptance checks V1–V11 for QA. The Build Handoff should be addressed to `studio` for the result per the routing note. The Studio also passes the cue-limits section to the Art Director.
+
+## Sender assessment
+
+Confidence: high on the architecture (phase machine, arbiter, sub-stepping) and the flinch and invulnerability findings, which come directly from the repo notes. Medium on cost and layout, because I have no layout data and have not seen the code, only the notes. The biggest risk to the goal itself is SQ1: if flinch cancels telegraphs, the monotony problem returns whatever else is built.
+
+## Load
+
+- Role: studio/roles/technical-director.md
+- Skills: studio/skills/technical-plan.md
+- Project: project.md#constraints, design/combat-enemy-depth.md, design/combat.md, sim/repo-notes.md
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-002-enemy-side-combat-depth.md, decisions/D-003-time-based-telegraphs-and-attack-limit.md, decisions/D-004-combat-timing-substeps-and-attack-slots.md
+- Previous handoff: goals/G-002-combat-monotony/06-game-designer-to-technical-director.md
+>>>END
+
+<<<FILE decisions/D-004-combat-timing-substeps-and-attack-slots.md
+---
+kind: decision
+id: D-004
+status: accepted
+decided_by: technical-director
+goal: G-002
+date: 2026-10-11
+supersedes: none
+---
+# D-004: Combat time runs in bounded sub-steps, and a central arbiter grants attack slots
+
+## Decision
+
+1. **Combat time.** Each rendered frame's elapsed time is clamped to 0.1 s (the game slows during a hitch instead of skipping time). The combat update (player, enemies, projectiles, timers) is advanced in sub-steps of at most 1/120 s. Phase timers carry their overshoot into the next phase. Fast attacks (charge, lunge, projectiles) use swept contact tests per sub-step. Pause freezes all timers. Telegraph phases never complete and deal damage in the same update that started them.
+2. **Attack slots.** One arbiter per room holds 2 attack slots (the D-003 cap). An enemy must hold a slot to start a telegraph. Slots are granted first-come-first-served. A slot is released when the enemy's Active phase ends (start of Recovery), when it dies, or when the room ends. Spitter shots already fired hold no slot.
+3. **Data.** Every spec value is read from one per-type enemy data table. The loader rejects any telegraph shorter than the D-003 floor of 0.4 s.
+
+Scope: build 0.4 enemy attacks (`design/combat-enemy-depth.md`). Spec numbers and the 2-attacker cap are unchanged.
+
+## Rationale
+
+- Outcomes must be the same at 30 and 60 FPS (D-003). A 12 tiles/s charge moves 0.4 tiles per frame at 30 FPS and 1.2 tiles on a 0.1 s hitch, so frame-sized steps can skip a 1-tile lane. Sub-steps of at most 8.3 ms keep timing error well inside the ±0.05 s tolerance and make contact checks reliable.
+- A time clamp means a hitch cannot skip a telegraph (spec edge case 7).
+- A central arbiter is a single place to enforce and test the cap (V8). First-come-first-served prevents one enemy being starved forever in room 5.
+- A data table keeps tuning (spec Q3) out of code.
+
+## Alternatives considered
+
+- **Full fixed-timestep loop with render interpolation.** Gives exact reproducibility, but changes the player controller, camera and rendering path, and is a larger refactor than this goal needs for a small team.
+- **Keep variable delta time everywhere, with swept contact tests only.** Smallest change, but every system has to handle large steps correctly on its own, and timer overshoot and phase order would still differ between frame rates. Hard to test.
+- **Each enemy counts attackers itself (no arbiter).** No new object, but there is no fairness order, so waiting enemies can starve, and the cap logic is spread over every enemy type.
+
+## Revisit when
+
+- The engine or game loop moves to a fixed timestep (the sub-stepping can then be removed).
+- Profiling shows sub-stepping costs too much on target machines (at 30 FPS it is about 4 sub-steps per frame).
+- Playtest shows the slot order makes rooms feel unfair or passive; adjust the grant rule, not the cap (the cap itself belongs to D-003).
+>>>END

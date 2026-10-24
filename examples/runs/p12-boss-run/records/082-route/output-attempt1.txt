@@ -1,0 +1,10 @@
+<<<FILE @need
+studio/roles/gameplay-engineer.md
+studio/skills/implement-change.md
+design/final-boss-and-continuous-run.md
+design/g002-historical-comparison-evidence.md
+decisions/D-019-g002-balance-criteria-applicability.md
+decisions/D-022-g002-v1-supplements.md
+decisions/D-023-owner-confirms-verification-supply.md
+decisions/D-024-g002-historical-comparison-evidence.md
+>>>END

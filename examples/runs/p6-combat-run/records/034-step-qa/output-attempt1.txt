@@ -1,0 +1,163 @@
+I'm starting round 1 of the runs: the suite, the grub scenarios at both frame rates, room 4 with a move and a dash, room 1 through the run-over screen with a restart attack, and a room 3 trace so I can see the spitter positions for round 2.
+
+<<<FILE @run/tests
+>>>END
+
+<<<FILE @run/play/idle30
+room empty
+fps 30
+player 8 4
+spawn grub 12 4
+end 8
+>>>END
+
+<<<FILE @run/play/idle60
+room empty
+fps 60
+player 8 4
+spawn grub 12 4
+end 8
+>>>END
+
+<<<FILE @run/trace/idle30
+room empty
+fps 30
+player 8 4
+spawn grub 12 4
+end 8
+>>>END
+
+<<<FILE @run/trace/idle60
+room empty
+fps 60
+player 8 4
+spawn grub 12 4
+end 8
+>>>END
+
+<<<FILE @run/play/windup30
+room empty
+fps 30
+player 8 4
+spawn grub 12 4
+1.6 attack
+end 5
+>>>END
+
+<<<FILE @run/play/windup60
+room empty
+fps 60
+player 8 4
+spawn grub 12 4
+1.6 attack
+end 5
+>>>END
+
+<<<FILE @run/trace/windup30
+room empty
+fps 30
+player 8 4
+spawn grub 12 4
+1.6 attack
+end 5
+>>>END
+
+<<<FILE @run/trace/windup60
+room empty
+fps 60
+player 8 4
+spawn grub 12 4
+1.6 attack
+end 5
+>>>END
+
+<<<FILE @run/play/recovery30
+room empty
+fps 30
+player 8 4
+spawn grub 12 4
+2.5 attack
+end 6
+>>>END
+
+<<<FILE @run/play/recovery60
+room empty
+fps 60
+player 8 4
+spawn grub 12 4
+2.5 attack
+end 6
+>>>END
+
+<<<FILE @run/trace/recovery30
+room empty
+fps 30
+player 8 4
+spawn grub 12 4
+2.5 attack
+end 6
+>>>END
+
+<<<FILE @run/trace/recovery60
+room empty
+fps 60
+player 8 4
+spawn grub 12 4
+2.5 attack
+end 6
+>>>END
+
+<<<FILE @run/play/room4move30
+room 4
+fps 30
+0.5 move left
+end 8
+>>>END
+
+<<<FILE @run/play/room4move60
+room 4
+fps 60
+0.5 move left
+end 8
+>>>END
+
+<<<FILE @run/play/room4dash30
+room 4
+fps 30
+0.5 dash left
+end 8
+>>>END
+
+<<<FILE @run/play/room4dash60
+room 4
+fps 60
+0.5 dash left
+end 8
+>>>END
+
+<<<FILE @run/trace/room3setup
+room 3
+fps 60
+end 0.1
+>>>END
+
+<<<FILE @run/play/room1over30
+room 1
+fps 30
+15 attack
+end 20
+>>>END
+
+<<<FILE @run/play/room1over60
+room 1
+fps 60
+15 attack
+end 20
+>>>END
+
+<<<FILE @run/trace/room1over60
+room 1
+fps 60
+15 attack
+end 20
+>>>END

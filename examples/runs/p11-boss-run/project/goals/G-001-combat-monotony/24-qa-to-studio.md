@@ -1,0 +1,154 @@
+---
+kind: handoff
+goal: G-001
+seq: 24
+from: qa
+to: studio
+stage: Verify
+outcome: pass
+---
+# 24: qa → studio — Build 0.5 verified against criteria 1–17: pass; V12 stays open; two small notes for the designer (shot tie at exactly 0.40, lunge band)
+
+## Task
+
+Report the close-out verification of build 0.5 against `design/combat.md` criteria 1–17 (plus V12 for the text build), and give the verdict. The next step is a playtest, composed without implementation history.
+
+## Context
+
+G-001 (combat monotony). The build is unchanged since handoff 20. Handoff 23 asked for these checks: 5, 6 and 8 at 30 FPS, the "no renumber" edge case, criterion 17 with known misses, criterion 11 in its new wording, and the unit tests. All evidence below comes from runs made in this step (tests, bots, play/trace scripts). Anything not re-run is marked as carried over. The build and the spec were not changed.
+
+## Findings
+
+### A. Per-criterion result
+
+| # | Result | Evidence |
+|---|---|---|
+| 1 Telegraph | pass, 30 and 60 | Not re-traced this step. The suite checks the gap ≥ 0.5 s − 1 frame at both rates (34 tests OK). Handoff 20 trace `c1-stand` showed the lunge exactly 0.5 s after the cue. |
+| 2 Sidestep | pass, 30 and 60 | Suite (both rates). `c5-30` this step: the player steps up 1.07 tiles during the wind-up and takes no damage from the lunge. |
+| 3 Dash | pass, 30 and 60 | Suite (offsets 0, 0.25, 0.5 and 0.6 s, both rates). |
+| 4 Standing still | pass, 30 and 60 | Suite (both rates). |
+| 5 Safe window | **pass at 30 (new)** and 60 | Trace `c5-30`: the lunge ends at 0.833 s at (7.60, 4.00). The player walks back to (8.00, 3.73), 0.48 tile from the grub and inside the 0.6 reach, during the recovery from about 1.1 s. Hearts stay 3 until the end at 1.5 s, and a swipe at 1.3 s hits the grub (hp 1). The player was never hurt before this, so hurt-invulnerability cannot explain the result. |
+| 6 Cancel | **pass at 30 (new)** and 60 | `c6-two-swipes-30`: the grub (hp 2) is hit to hp 1, then defeated by the second swipe at 0.433 s, and the room clears. `c6-cancel-30`: the swipe in wind-up at 0.133 s gives stagger and no lunge by 0.9 s. The stagger lasts exactly 0.4 s, and the wind-up then restarts at 0.533 s. A kill in wind-up with no stagger and no lunge: runner, handoff 20 `c6-kill-windup` at 30 and 60, carried over, plus `c8-runner-30` this step (defeated, cleared, no stagger event). |
+| 7 One at a time | pass, 30 and 60 | Suite (maximum 1 grub in wind-up or lunge, both rates). |
+| 8 Variants | **pass at 30 (new)** and 60 | `c8-runner-30`: 1 swipe. `c8-brute-30`: 4 swipes (hp 4→3→2→1→defeated at 1.233 s). Standard grub: 2 swipes (see 6). Marks `r` and `G` are in the suite and listed in `manual.md`. |
+| 9 Aim cue | pass, 30 and 60 | `room3-30` and `room3-60`: aim at 1.200 s, spit at 1.800 s (0.600 s at both rates). The shots go along the locked line (hit traces in 17). |
+| 10 Dodge | pass, 30 and 60 | Suite. `b-miss` traces: the 1-tile-class sidestep gives no hit at either rate. |
+| 11 Stagger and cap | **pass, 30 and 60** | See section B. |
+| 12 Rooms | pass | Suite compares rooms 2, 4 and the brute in room 5. Handoff 20 read all five rooms against the table; `game.py` is unchanged. |
+| 13 | pass at each rate | See section C. |
+| 14 | pass at each rate | See section C. |
+| 15 Dash used | pass at each rate | Dodger dashes in rooms 3/4/5: 8/7/11 at 30 FPS and 10/8/14 at 60 FPS. |
+| 16a | pass | The gaps from handoff 20 (5, 6, 8 at 30 FPS) are closed. 17 is covered below. |
+| 16b | pass | Section C. |
+| 16c | pass | The dodger is identical at both rates: 0 hearts lost in every room, 5/5 cleared. |
+| 16d | acknowledged | Walker per room, 30 FPS: 3✗ 2✓ 0✓ 1✓ 3✗. At 60 FPS: 3✗ 2✓ 2✓ 2✓ 2✓. The same figures as in handoff 20. |
+| 16e | pass | No new finding. The walker differences are bot timing (handoff 20, section D). The contact-edge differences found in 17 are inside the accepted band. |
+| 17 Contact edge | **pass**, with two notes (section D) | Shot misses of about 0.39 hit at both rates and about 0.41 miss at both. Lunge misses of 0.570 hit at both rates and 0.610 miss at both. Differences between rates appear only at lateral misses of 0.40 (shot) and 0.59 (lunge). |
+| Edge: no renumber | **pass, 30 and 60** | Section E. |
+| V12 | open | There is no graphical build. The text-build timings hold at both rates (wind-up to lunge exactly 0.5 s, aim to spit 0.6 s). V12 stays open until a graphical build exists. |
+
+### B. Criterion 11 in its new wording
+
+- **Room 3, first shots.** `room3-30` and `room3-60` both spit at 1.800, 2.600 and 3.400 s. The cues start 0.6 s earlier, at 1.2, 2.0 and 2.8 s.
+- **Room 3, cap.** The suite counts the shots in flight over 12 s at both rates. The maximum is at most 3, and the suite passed.
+- **Four-spitter practice room** (`four-30` and `four-60`): spitters at (0,0), (0,3), (0,5), (0,8), player at (15,4). The results at 30 and 60 are the same, down to the printed messages and times.
+  - The first three spitters cue at 1.2, 2.0 and 2.8 s with fewer than 3 shots in flight. They spit at 1.8, 2.6 and 3.4 s.
+  - The fourth spitter's cue (due at 3.6 s) and the repeat cues of the others are blocked. At those checks the three earlier shots are in flight.
+  - The 1.8 s shot leaves at its 5 s life limit. Only then, at 6.8 s, do all four cues start together, with 2 shots in flight at each check.
+  - All four spit at 7.4 s. By my count that is the 2 older shots plus 4 new ones, so at most 6 in flight. That equals 2 + 4 living spitters, which is the limit. I derived this from the traces, the 2 older shots are still visible at 6.5 s and 7.0 s, and I did not count it directly.
+  - The player view shows "YOU ARE HIT" at 7.467 s and 8.267 s at both rates, so the shots really are in flight.
+  - Result: a cue starts only when fewer than 3 shots are in flight, the maximum stays within 2 + living spitters, and the cap delay carries forward. All of this matches the spec.
+- **Manual wording.** `manual.md` says "no more than 3 are in the air at once". This is true in rooms 1–5, which are the only rooms a player meets. The count can be higher only in a practice room with four or more spitters, which is a script feature. I do not consider the sentence misleading for a player. If the Studio wants it exact, "in the five rooms" would remove the gap. I did not edit the manual.
+
+### C. Bots and regression (bots run at 30 and 60 FPS, `log` off)
+
+| | 30 FPS | 60 FPS |
+|---|---|---|
+| Walker lost, rooms 3–5 (need 3–6) | 0+1+3 = 4 | 2+2+2 = 6 (top of range) |
+| Walker cleared, rooms 3–5 (need ≥ 2) | 2 | 3 |
+| Dodger lost / cleared, rooms 3–5 (need ≤ half the walker's loss; 3/3) | 0 / 3 | 0 / 3 |
+| Camper cleared, rooms 3–5 (must be < walker) | 0 | 0 |
+| Walker lost, rooms 1–2 (need ≥ 1) | 3+2 = 5 | 3+2 = 5 |
+| Dodger lost / cleared, rooms 1–2 (need ≤ 1; both cleared) | 0 / 2 | 0 / 2 |
+
+- These figures are identical to handoff 20. The walker at 60 FPS stays at exactly the limit of 6. Per the step 22 ruling, a result of 7 would be a tuning question and not a defect.
+- Camper room 2: cleared at 30 FPS (2 hearts lost), not cleared at 60 FPS (3 lost). No criterion covers the camper in rooms 1–2. I note it only as an observation.
+- `python3 -m unittest discover -s tests`: 34 tests, OK.
+- Nothing else regressed. All figures equal the earlier handoffs.
+
+### D. Criterion 17: contact edge
+
+Reproduction: `room empty`, one spitter or grub, the player locked on at (8, 4.0) and then moved to a final position, as in handoff 20. The lateral miss is the perpendicular distance of the player's final position from the locked line. I calculated it from the positions printed in the traces.
+
+**Shots (reach 0.4)**
+
+| Spitter at | Final player y | Lateral miss | 30 FPS | 60 FPS |
+|---|---|---|---|---|
+| (1.0, 2.4) | 3.60 | 0.390 (0.3899) | hit at 4.133 s | hit at 4.133 s |
+| (5.0, 6.5) | 3.47 | 0.407 | no hit | no hit |
+| (1.04, 3.70) | 3.60 | 0.3996 (band) | no hit | hit at 4.100 s |
+| (1.0, 4.0) | 3.60 | nominal 0.400 | hit at 4.100 s | no hit |
+
+- 17a passes (0.390 is a hit at both rates). 17b passes (0.407 is a miss at both rates).
+- The difference at 0.3996 is inside the accepted band. Only hit or miss differs. The aim and spit times are identical (1.2 s and 1.8 s).
+- **Note 1, shot at exactly 0.40 (for the designer).** The row with a nominal 0.400 miss hit at 30 FPS and not at 60 FPS.
+  - At 30 FPS a frame lands exactly on the closest approach (x = 8.0), and the code treats `distance <= 0.4` as a hit. The actual miss is 0.4 within float noise, and I cannot read the float value from the trace.
+  - 17b says "0.40 or more: no hit at both rates". The band definition says "from reach − 0.01 to reach (0.39 to 0.40)", which includes 0.40.
+  - I did not count this row as a 17b failure, because the spec is ambiguous at exactly the reach and the clean case at 0.407 passes. I treat it as a spec question: is a miss of exactly the reach inside the band (differences accepted) or a guaranteed miss? If it is a guaranteed miss, `<=` would need to become `<`, which is a Build change.
+
+**Lunges (reach 0.6), grub standing near, player at (8.0, 3.2) at lunge time**
+
+| Lateral miss | 30 FPS | 60 FPS |
+|---|---|---|
+| 0.570 | hit at 0.667 s | hit at 0.650 s |
+| 0.580 | hit at 0.667 s | hit at 0.650 s |
+| 0.590 | **no hit** | hit at 0.667 s |
+| 0.599 | hit at 0.667 s | hit at 0.650 s |
+| 0.610 | no hit | no hit |
+
+- 17c passes: 0.570 hits at both rates, and 0.610 misses at both rates.
+- In the hit cases the lunge starts at 0.533 s (30) and 0.517 s (60). The hit comes 0.133 s later at both rates, so timing, cue and message are the same. Only the hit itself differs, at 0.590.
+- **Note 2, lunge band width (for the designer).** My calculation is that a lunge hit is guaranteed up to a lateral miss of 0.585 at 30 FPS, which makes the band about 0.015 tile and not more than 0.03. That is the derivation: a frame step of 0.267 tile needs the sampled point within 0.133 tile along the line. At 60 FPS the same calculation gives about 0.004 tile.
+  - Measured with five probes only: the 30 FPS disagreement appeared only at 0.590, and no probe at 0.570 or below missed. The 0.599 probe hit again at 30 FPS because the frame phase differs between positions. I did not scan the whole range.
+  - There is no evidence that the band is wider than 0.03 tile, so I do not report this as a spec failure. The designer may want to record "about 0.015 at 30 FPS, 0.004 at 60 FPS" in D-002 as measured, with the scan limitation stated.
+
+### E. Edge case: a defeated spitter does not renumber the others
+
+Script `renum-30` and `renum-60`: three spitters in spawn order, with the first one (1,1) killed by two swipes before 0.5 s.
+
+- The next two spitters keep their own timers: aim at 2.000 s and spit at 2.600 s for the second spitter (k = 1), then aim at 2.800 s and spit at 3.400 s for the third (k = 2).
+- Renumbering would have moved the shots to 1.8 s and 2.6 s. That did not happen.
+- The second spitter fires again with its cue at 4.400 s, as it should (2.6 + 2.4 = 5.0 s).
+- The results are identical at 30 and 60 FPS.
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no new input.
+- D-002: per-frame contact sampling is kept; the graze is an accepted limitation. Notes 1 and 2 above concern the revisit condition in D-002 and the band numbers.
+
+## Constraints
+
+- The build and the spec were not changed.
+- Verified from the spec, the criteria and the build, at 30 and 60 FPS.
+- V12 is not assessable in the text build.
+
+## Open questions
+
+For `game-designer`, via the Studio. These are not blocking, and the verdict does not depend on them:
+
+1. A shot whose lateral miss is exactly the reach (0.40): inside the band (either result accepted) or a guaranteed miss? See Note 1.
+2. Please record the measured lunge band for D-002 (about 0.015 tile at 30 FPS, derived and probed at five points; not a full scan). See Note 2.
+
+## Expected output
+
+- Verdict: **pass**. Criteria 1–17 hold at 30 and 60 FPS with the figures above, and V12 is open until a graphical build exists. There is no failing criterion.
+- The Studio can route to the playtest. The Playtester gets no implementation history, and the walker margin and the notes above are not needed by the Playtester.
+- Notes 1 and 2 go to `game-designer` when convenient.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: design/combat.md, repo/manual.md, repo/game.py, repo/bots.py, repo/play.py, repo/tests/test_game.py
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-002-contact-edge-graze-accepted.md
+- Previous handoff: goals/G-001-combat-monotony/23-studio-to-qa.md

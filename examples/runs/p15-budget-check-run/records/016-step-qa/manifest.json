@@ -1,0 +1,72 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-003-dash-availability-clarity/15-studio-to-qa.md",
+  "sha256": "5309f987761dd19ec90956365d8dd91d4b47b50e286f4dfb68833301a73cb2f4",
+  "bytes": 3386
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "381742c8f2afe2e1a2a6af9d031dcc91f98f490ada7c90e2a990d6a1aaf27639",
+  "bytes": 1765
+ },
+ {
+  "path": "studio/skills/verify-change.md",
+  "sha256": "da40d2c0030e078ac6d085ea06b17bb9b452495f4e2f412a9e1bd723ac72ddf5",
+  "bytes": 1281
+ },
+ {
+  "path": "design/dash-availability.md",
+  "sha256": "7dc7d417b3aa4be23b60953424b7a66eeae775675b6b30cbc416b36a0e857173",
+  "bytes": 19337
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "12da243e386fe6db7eda01a2d092b70abc2133f588c6adc0b831fd4c42d98dba",
+  "bytes": 13458
+ },
+ {
+  "path": "repo/public-driver.md",
+  "sha256": "e2b12854ca86286cd8baa3077915216071aac54f418a33e10431c46d77128294",
+  "bytes": 5549
+ },
+ {
+  "path": "repo/play.py",
+  "sha256": "9e989e8184f33dbb002c745d68e0447aaa2016d975cf46e85c0457b87d7e42fc",
+  "bytes": 18041
+ },
+ {
+  "path": "repo/tests/test_dash_refusal.py",
+  "sha256": "8dc10402c09492e1ce9b5d505a4795e3b30af83f38fba44778e4ff732622c770",
+  "bytes": 3347
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "05a33c6f8e50caa20ddf4f3844885137c4261ad4a3e5f3db3eb1b5312b129a9f",
+  "bytes": 237
+ },
+ {
+  "path": "decisions/D-028-dash-indicator-on-legacy-route.md",
+  "sha256": "f18c4c1e8e324a1a11689b49471b46cf5c0cd19ffd15659d0029154116d165ac",
+  "bytes": 1748
+ },
+ {
+  "path": "decisions/D-029-g003-spec-rulings.md",
+  "sha256": "524a4a444d45573b71f680a9d25ad738dc0c46e38da885ba23db4ff653d639e5",
+  "bytes": 2822
+ },
+ {
+  "path": "goals/G-003-dash-availability-clarity/12-game-designer-to-studio.md",
+  "sha256": "a98763a830c70981eec372f1137c7c5ae46c3de35acccc4afa15cd554d70db3b",
+  "bytes": 8486
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ }
+]

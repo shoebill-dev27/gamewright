@@ -1,0 +1,82 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/13-studio-to-qa.md",
+  "sha256": "f3b43dbd78093dc4520a46e9c6481ea3b60234bbd1a0674b479c9474e63ef617",
+  "bytes": 2519
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "381742c8f2afe2e1a2a6af9d031dcc91f98f490ada7c90e2a990d6a1aaf27639",
+  "bytes": 1765
+ },
+ {
+  "path": "studio/skills/reproduce-defect.md",
+  "sha256": "aa7e161cc1fcb38fd92ede1719446f05eee1c7ac431a28a04d570ce451a2291d",
+  "bytes": 1407
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "f82c8c3cf57eb71fc0d84865254883d3ee69c4e386699ce1e2ab6234e915bd11",
+  "bytes": 14087
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "2baa0098b91ce11d171af0f4ae63e5426c92931363b3eae50ab641f2d908d946",
+  "bytes": 4376
+ },
+ {
+  "path": "repo/README.md",
+  "sha256": "40b516ae6017f4ae943ee60535cdb34c19a44ba7cc984814235b856f8f1bebf4",
+  "bytes": 872
+ },
+ {
+  "path": "repo/bots.py",
+  "sha256": "ff603ce32b821fa695b18b6e450ce5f15b1763252935953c0cd5b186a73c1c51",
+  "bytes": 11433
+ },
+ {
+  "path": "repo/game.py",
+  "sha256": "74b137e3c0c2c49edde59a26657ad59363d8ea61cd1bcf4c173f377d9551f70c",
+  "bytes": 12927
+ },
+ {
+  "path": "repo/play.py",
+  "sha256": "564cfd59b2dc0ed9c7aeb3b7beacab91a667c112de856e77f6308f31de3f6355",
+  "bytes": 15079
+ },
+ {
+  "path": "repo/tests/test_game.py",
+  "sha256": "d4bb1da43030165839e8b3777cfde690aab4774818ae6885957e8516f29cc005",
+  "bytes": 13165
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "05a33c6f8e50caa20ddf4f3844885137c4261ad4a3e5f3db3eb1b5312b129a9f",
+  "bytes": 237
+ },
+ {
+  "path": "project.md",
+  "sha256": "8a32edee44b970d2c1a5a0a76e19b3235e61b1786bb24c06583400cfa0924712",
+  "bytes": 2102
+ },
+ {
+  "path": "decisions/D-001-one-button-combat.md",
+  "sha256": "c7fe9ca23a369707a5ab439e44789a25a0a8544efce4703a676f8fd180f82ec1",
+  "bytes": 798
+ },
+ {
+  "path": "goals/G-001-combat-monotony/08-qa-to-studio.md",
+  "sha256": "3b3fc690fac744c912655aa52d7e25d6c4a0b5acef6f1576625b8b0de1f9324e",
+  "bytes": 8219
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ }
+]

@@ -1,0 +1,294 @@
+<<<FILE decisions/D-004-document-evaluation-scope.md
+---
+kind: decision
+id: D-004
+status: accepted
+decided_by: owner
+goal: G-001
+date: 2026-10-11
+supersedes: none
+---
+# D-004: 模擬ビルドの文書評価を Goal の検証とする
+
+## Decision
+
+Owner の回答原文：
+
+> B。模擬専用のサンプルなので、模擬ビルド記述に基づく文書評価をこの Goal の検証とし、計測できない項目は未判定として明記したうえで Goal を閉じてください。
+
+G-001 の完了条件を、修正の条件別独立検証から、現資料と模擬ビルド記述に基づく文書評価、未判定事項、再開条件の報告へ変更する。対象は `sim/build-0.4.md`、変更識別子 `0.3-G001-15`。
+
+追加計測や外部資料取得は今回の完了条件としない。文書評価をこの Goal の検証として扱うが、測定できない挙動は未判定とし、全4環境の実証、全条件合格、不具合解消の保証へ読み替えない。既存 QA の `question` を過去に遡って `pass` に変更しない。
+
+報告を作成し、変更後の完了条件に対する game-director の Review を経て Studio が閉じる。Owner の選択だけでは報告作成・Review 済みとは扱わない。
+
+D-002 の修正継続方針は、この Goal の完了条件について本 Decision により変更する。D-001 の入力制約、D-003 の発生源別保護、ゲーム仕様と既存の模擬変更は維持する。新規 simulator 開発、実機試験、追加実装、巻き戻しは承認しない。
+
+## Rationale
+
+模擬専用サンプルという用途に合わせ、Owner が文書評価による完了を明示的に選択した。測定不能な項目を未判定として残すことで、報告の完了と挙動の実証を区別する。
+
+## Alternatives considered
+
+- A：アクセス・資料を手配して元の独立検証を継続する。今回は追加取得を完了条件としない選択となった。
+- B の報告のみへの縮小：採用し、Owner の条件により文書評価を本 Goal の検証と位置づける。
+- C：未検証のまま中止する。Owner は文書評価を経た完了を求めており、中止は選択していない。
+
+## Revisit when
+
+実際の不具合解消や全4環境での動作保証が必要になったとき、または条件別証拠・モデルへのアクセスが得られて未判定項目の検証を再開するとき。Studio を通じて範囲、対象ビルド、仕様、必要入力を再確認する。
+>>>END
+
+<<<FILE goals/G-001-dash-damage/23-technical-director-to-owner.md
+---
+kind: escalation
+goal: G-001
+seq: 23
+from: technical-director
+to: owner
+status: resolved
+decision: D-004
+---
+# 23: Owner decision needed — ダッシュ被ダメージ修正の検証をどう進めるか
+
+## Question
+
+ダッシュ中の被ダメージ修正について、A「必要資料または取得窓口へのアクセスを手配して修正・検証を継続」、B「現資料による調査・文書評価報告へ Goal を縮小」、C「未検証事項を明記して中止」のどれを選びますか。
+
+## Why this needs the Owner
+
+必要な検証証拠を現資料や Role の作業だけでは作れず、その取得に必要な外部窓口・アクセスも確保できていません。外部入力の手配、または依頼範囲の変更・中止について判断が必要です。
+
+D-002 は元の修正 Goal の継続を選んでおり、Studio が独自に検証要件を緩めることはできません。
+
+対象は `sim/build-0.4.md`、変更識別子 `0.3-G001-15`。Handoff 21 の独立 QA は文書評価を完了しましたが、総合判定は `question` です。具体的な仕様不一致による `fail` や同じ受け入れ条件の二度目の失敗ではありません。
+
+不足していた入力は次のとおりです。
+
+- 対象変更との対応、版・出典・初期状態、FPS・入力方式の表現範囲が分かるモデル情報と観察の来歴。
+- AC-1〜AC-5 と回帰に必要な配置・衝突・命中、入力受理、各保護・入力不能の開始終了、ハート前後値の条件別記録。
+- AC-6 に必要な距離・時間、予約攻撃、再使用の拒否・受理、フレーム内順序の記録。
+- 試行一覧、有効・無効の理由、記録と集計の対応。
+- クールダウン0.6秒の起点を定めた既存原資料。回復できない場合は game-designer の判断が必要。
+
+対象は30／60 FPS × キーボード／ゲームパッドの全4環境です。命中しなかった試行を無敵の成功例に数えることはできません。
+
+runtime 管理側や既存記録の管理側が候補ですが、窓口・照会手段は未確保で、保有状況も未確認です。問い合わせ済み、モデル不存在、永久に取得不能とは判断していません。dry-run 規約はモデルへのアクセスや条件別観察の生成能力を保証しません。
+
+## Options
+
+### Option A — アクセスを手配し、元の修正 Goal を継続する
+
+出典付きの既存資料、または取得窓口へのアクセスを手配します。Owner 自身の追加計測は開始条件にしません。取得できても十分性や合格は保証されず、費用・期間は不明です。新規 simulator 開発や実機試験は別途判断が必要です。
+
+選択後：Studio が取得経路を具体化し、取得資料を packet に収録します。Handoff 19 に沿って gameplay-engineer が対象変更との対応と不足を照合し、既存モデルで可能な補完を経て独立 QA に戻します。クールダウン起点を回復できなければ game-designer に返します。
+
+### Option B — 調査・文書評価報告へ Goal を縮小する
+
+成果物を現資料で分かること、文書上の整合、未検証事項と再開条件の報告に変更します。追加資料取得・試行を完了条件から外しますが、修正の独立検証完了や全条件合格とは報告しません。仕様変更や模擬変更の巻き戻しは行いません。
+
+選択後：Studio が新しい完了条件を記録し、報告作成へ route します。QA の `question`、全4環境の証拠不足、クールダウン起点の不足を残し、変更後の Goal に対する Review を経て扱いを決めます。選択だけで完了にはしません。
+
+### Option C — 未検証事項を明記して中止する
+
+Goal を `abandoned` とし、追加取得・実装・検証を止めます。模擬変更の記録は残し、巻き戻しや検証合格を意味しません。
+
+選択後：Studio が中止判断と未検証事項を記録します。将来の再開は Owner の判断、対象ビルド・仕様の再確認、必要資料の確保から行います。
+
+## Studio recommendation
+
+回答前の推奨は **Option A** でした。元の修正 Goal を維持し、まずアクセスを確保できるか確認する案です。
+
+## Reasoning
+
+文書整合は条件別の実証を代替しません。取得可能性と費用・期間は未確認でした。Owner が現資料による報告を今回の成果として選ぶ場合は B、対応を終える場合は C が代替でした。提供期限や開発費は設定していません。
+
+## Meanwhile
+
+brief 作成時点では資料取得、問い合わせ、試行生成、追加実装、独立検証、仕様判断を実施していませんでした。独立して継続できる残作業はなく、Studio の Route で Goal は `blocked-on-owner` となりました。
+
+今回の Resume により本 Escalation は resolved、Goal は active です。文書評価報告と Review を開始する経路へ変更します。
+
+## Owner decision required
+
+回答済み。追加の選択は不要です。
+
+## Owner response
+
+**Owner response (2026-10-11):** B。模擬専用のサンプルなので、模擬ビルド記述に基づく文書評価をこの Goal の検証とし、計測できない項目は未判定として明記したうえで Goal を閉じてください。
+
+## Resolution
+
+`decisions/D-004-document-evaluation-scope.md` に回答原文と条件を記録しました。文書評価を本 Goal の検証とし、測定不能項目は未判定とします。報告作成、変更後の完了条件に対する Review、Studio による Close の順に進めます。実測合格や過去の QA 判定変更は意味しません。
+>>>END
+
+<<<FILE goals/G-001-dash-damage/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-10
+---
+# G-001: ダッシュ中の被ダメージに関する文書評価を完了する
+
+## Owner request
+
+当初の依頼：
+
+> ダッシュ中なのにダメージを受けることがある。再現できるので直してほしい。
+
+2026-10-11 の範囲変更：
+
+> B。模擬専用のサンプルなので、模擬ビルド記述に基づく文書評価をこの Goal の検証とし、計測できない項目は未判定として明記したうえで Goal を閉じてください。
+
+## Interpretation
+
+D-004 に基づき、現資料と最新の模擬ビルド `sim/build-0.4.md`（変更識別子 `0.3-G001-15`）による文書評価を本 Goal の検証とする。確認できる文書上の整合、計測できず未判定となる項目、仕様不足、再開条件を報告し、変更後の完了条件に対する Review を経て閉じる。
+
+全4環境の挙動実証や不具合解消の保証は完了条件としない。追加取得・計測、新規 simulator 開発、実機試験、追加実装、仕様変更、巻き戻し、無関係なバランス調整は対象外。
+
+## Unknowns
+
+- Observe：仕様不一致の照合と AC-1〜AC-6 の作成は完了。Owner の詳細条件の独立した試行再現とは扱わない。
+- Diagnose / Plan：D-003 と模擬実装定義は存在する。残る仕事は現資料による評価と限界をまとめる報告作成。
+- Decide：Owner が D-004 で文書評価への範囲変更を決定済み。
+- Design：クールダウン0.6秒の起点は未定義。今回は不足として報告し、新たな仕様判断は行わない。
+- Build：模擬変更の定義は完了。追加修正は不要。
+- Verify：Handoff 21 の文書評価は完了、総合結果は `question`。条件別証拠と全4環境の計測は不足したまま。D-004 に従い文書評価を今回の検証とし、実証できない項目は未判定で残す。
+- Play：体験評価を求める Goal ではないため省略。
+- Review：報告が変更後の完了条件を満たすか、game-director が判断する。
+- Next：Review 後、Studio が Owner 向け Outcome を記録して閉じる。
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | qa | reproduce-defect | done | 01-studio-to-qa.md |
+| 1b | Observe | qa | reproduce-defect | done | 03-studio-to-qa.md |
+| 1c | Observe | qa | reproduce-defect | done | 05-studio-to-qa.md |
+| 1d | Observe | qa | reproduce-defect | done | 07-studio-to-qa.md |
+| 1e | Observe | qa | reproduce-defect | done | 10-studio-to-qa.md |
+| 2 | Diagnose / Plan | technical-director | technical-plan | done | 12-studio-to-technical-director.md |
+| 3 | Decide | game-director | make-decision, prepare-owner-escalation | skipped | — |
+| 4 | Design | game-designer | write-design-spec | skipped | — |
+| 5 | Plan | technical-director | technical-plan | skipped | — |
+| 6 | Build | gameplay-engineer | implement-change | done | 14-studio-to-gameplay-engineer.md |
+| 6b | Build 資料照合・補完 | gameplay-engineer | implement-change | done | 16-studio-to-gameplay-engineer.md |
+| 6c | Plan 検証成立性の再検討 | technical-director | technical-plan | done | 18-studio-to-technical-director.md |
+| 7 | Verify 文書評価・証拠充足性確認 | qa | verify-change | done | 20-studio-to-qa.md |
+| 7a | Owner escalation 準備 | technical-director | prepare-owner-escalation | done | 22-studio-to-technical-director.md |
+| 7a-owner | Decide 検証範囲変更 | owner | — | done | 23-technical-director-to-owner.md |
+| 7b | Design クールダウン起点 | game-designer | write-design-spec | skipped | — |
+| 7c | Verify 補完後の独立検証 | qa | verify-change | skipped | — |
+| 7d | Diagnose 文書評価報告の整理 | technical-director | technical-plan | open | 24-studio-to-technical-director.md |
+| 8 | Play | playtester | playtest-session | skipped | — |
+| 9 | Review 変更後の完了条件 | game-director | review-outcome | planned | — |
+| 10 | Next | studio | — | planned | — |
+
+done は作業終了を示し、再現成功や検証合格を意味しない。主要結果は 11（不具合報告・AC）、13（計画）、15（模擬実装定義）、17（資料照合、question）、19（条件付き再計画）、21（文書評価、question）、23（Owner escalation、D-004 により resolved）。
+
+行 7b・7c の省略は不足の解消ではなく、D-004 による完了条件の変更による。既存 QA 判定の再採点や、同じ不足入力での QA 再依頼は行わない。
+
+## Route changes
+
+2026-10-10 — 02・04・06・08 の入力不足が解消せず、09 で Owner に escalation。D-002 の継続判断と補足観察を受け、11 の不具合報告・AC、13 の計画と D-003 に基づき Build へ進んだ。
+
+2026-10-11 — 15 の模擬実装定義と17の資料照合により build-0.4 と変更識別子の対応を採用。資料不足は19で再計画し、21の独立 QA は文書評価を完了したが証拠不足により question とした。
+
+2026-10-11 — 外部照会手段未確保のため22で brief 作成を依頼し、23を Owner に提示して blocked-on-owner とした。問い合わせ済み・モデル不存在・検証 fail とは扱っていない。
+
+2026-10-11 — Resume：Owner の B と文書評価による完了条件を D-004 に記録し、23を resolved、Goal を active に変更。追加計測・仕様判断は省略し、24で文書評価報告を technical-director に依頼。報告後の Review を planned とした。
+
+## Next action
+
+technical-director が `24-studio-to-technical-director.md` を受け、現資料による文書評価報告、未判定事項、再開条件を整理して Studio に返す。
+
+Studio はその報告を game-director の Review に route する。変更後の Goal が満たされたとの判断を受けて Close し、文書評価の完了と挙動実証の限界を Owner 向け Outcome に明記する。追加の Owner 回答は不要。
+
+## Outcome
+
+文書評価報告と Review は未完了。Owner は D-004 により、模擬ビルド記述の文書評価を本 Goal の検証とし、計測不能項目を未判定と明記して閉じることを決定した。
+
+模擬実装の定義と対象ビルドの識別は完了している。従来の独立 QA 総合判定は question のままであり、全4環境の条件別挙動や不具合解消の保証は得られていない。最終 Outcome は Review 後に記録する。
+>>>END
+
+<<<FILE goals/G-001-dash-damage/24-studio-to-technical-director.md
+---
+kind: handoff
+goal: G-001
+seq: 24
+from: studio
+to: technical-director
+stage: Diagnose
+outcome: routed
+---
+# 24: studio → technical-director — 変更後の完了条件に沿った文書評価報告
+
+## Task
+
+最新の模擬ビルドと既存資料に基づき、文書評価の結果、未判定事項、仕様不足、再開条件を整理してください。D-004 による完了条件に対する Review に渡せる報告を作成し、Studio に返してください。
+
+## Context
+
+元のダッシュ被ダメージ修正 Goal は、条件別証拠を得る外部照会手段がなく停止していました。Owner は Escalation 23 の B を選び、模擬ビルド記述の文書評価を本 Goal の検証とし、計測できない項目は未判定と明記して閉じるよう指示しました。
+
+これは報告作成の Step です。報告後に game-director が変更後の Goal を Review し、Studio が Close します。
+
+## Findings
+
+- 対象は `sim/build-0.4.md`、変更識別子 `0.3-G001-15`。project.md の build-0.3 は旧状態の記載です。
+- Handoff 21 は文書評価を完了しましたが、従来の検証範囲での総合判定は question。具体的な仕様不一致による fail ではありません。
+- AC-1〜AC-6、30／60 FPS × キーボード／ゲームパッド、必要な回帰の条件別証拠が不足しています。
+- クールダウン0.6秒の起点は既存資料で未定義と報告されています。測定不足とは分けて記載してください。
+- 外部窓口への問い合わせは未実施。モデル不存在や永久に取得不能とは確認されていません。
+- 以上は既存記録の要約です。報告の各結論は Load の原資料と照合し、根拠を明記してください。
+
+## Decisions already made
+
+- D-001：入力制約を維持する。
+- D-002：以前の Owner 判断による修正継続。今回の完了条件は D-004 で変更。
+- D-003：無敵の終了を発生源ごとに管理する。
+- [D-004](../../decisions/D-004-document-evaluation-scope.md)：文書評価を本 Goal の検証とし、計測不能項目は未判定として報告、Review 後に閉じる。
+
+## Constraints
+
+- 技術側でゲーム仕様や QA の判定を変更しない。文書評価と実証を区別する。
+- 過去の question を pass に変更せず、全条件合格、不具合解消の保証、試行実施を主張しない。
+- 追加資料取得・計測、新規 simulator 開発、実機試験、追加実装、巻き戻しを行わない。
+- AC や試行数を推測で補わない。資料から確認できない項目は未判定または資料不足として残す。
+- クールダウン起点を決めず、将来必要な仕様判断として整理する。
+- 同じ入力不足を理由に再計測・QA 再依頼へ戻さない。今回の不足は Owner が認めた報告対象。
+- Owner 向け報告は日本語で作成する。
+
+## Open questions
+
+- 各 AC と回帰について、文書上どこまで整合を確認でき、何が未判定か。
+- 仕様未定義と観察証拠不足をどう区別して報告するか。
+- 将来、挙動の独立検証を再開する際に必要な範囲判断、資料、仕様判断は何か。
+
+## Expected output
+
+次の outgoing Handoff を `to: studio`、`outcome: done` とし、Findings に自己完結した文書評価報告を記載してください。
+
+報告には対象ビルド・変更識別子、参照資料、AC-1〜AC-6 と必要な回帰ごとの文書上の評価・根拠・未判定事項、全4環境の証拠不足、クールダウン起点の仕様不足、既存 QA 判定、再開条件を含めてください。
+
+Owner 向けの短い結果文も含め、文書評価を完了したことと実証できていない事項を明確にしてください。Goal の達成 verdict は game-director の Review に委ねます。Studio は報告を Review に route し、その結果に基づき Close します。
+
+## Load
+
+- Role: studio/roles/technical-director.md
+- Skills: studio/skills/technical-plan.md
+- Project: project.md#constraints
+- Project: design/combat.md
+- Project: sim/build-0.4.md
+- Project: sim/repo-notes.md
+- Project: goals/G-001-dash-damage/11-qa-to-studio.md
+- Project: goals/G-001-dash-damage/19-technical-director-to-studio.md
+- Project: goals/G-001-dash-damage/21-qa-to-studio.md
+- Decisions: decisions/D-001-one-button-combat.md
+- Decisions: decisions/D-002-resume-with-owner-observations.md
+- Decisions: decisions/D-003-independent-invulnerability.md
+- Decisions: decisions/D-004-document-evaluation-scope.md
+- Previous handoff: goals/G-001-dash-damage/23-technical-director-to-owner.md
+>>>END

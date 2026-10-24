@@ -1,0 +1,247 @@
+Design is done. Plan opens because the spec is cross-system and its feasibility is unchecked. Two independent steps open alongside it: a QA defect log for the duplicate spit line and an art review of the new visual states. Build, Verify and Play are now planned, since the spec requires a change. I did not open a context request, and nothing triggers an escalation.
+
+<<<FILE goals/G-001-combat-monotony/11-studio-to-technical-director.md
+---
+kind: handoff
+goal: G-001
+seq: 11
+from: studio
+to: technical-director
+stage: Plan
+outcome: routed
+---
+# 11: studio → technical-director — Plan the Option A combat rework (build 0.5 target)
+
+## Task
+
+Write a technical plan for implementing the spec in `design/combat.md` (build 0.5 target, acceptance criteria AC-1…AC-17) and the room/run rules in D-003. Check feasibility, name risks, and set the sequencing, tests and any parallelization.
+
+## Context
+
+G-001: the Owner finds combat monotonous. Diagnosis: enemy behavior is single-state and untelegraphed. The Game Director chose Option A (D-002): rework existing enemy behavior first. The game-designer has now specified it. Summary of the spec's change:
+
+- Grub: Approach → Wind-up (0.5 s, visible) → Strike (0.15 s) → Recovery (0.9 s). Harmless outside Strike. At most 2 grubs attack at once. A hit during Wind-up cancels the strike.
+- Spitter: Charge (0.8 s, visible) → Fire → Recovery. A volley every 2.5 s, staggered per spitter. Aim locked at the end of the charge, so the shot can be dodged. Spitters can be approached and hit; a hit during Charge cancels the shot.
+- Hit feedback: swipe arc, damaged state, remaining HP in the text, multi-hit allowed.
+- Run and room rules (D-003): zero hearts stops enemies and removes projectiles, then a "run over" screen after 2.0 s, and attack starts a new run at room 1. Room clear gives +1 heart, hearts carry over, and the next room loads after 1.5 s. A room cannot clear while the player is down.
+- "(nothing happens)" on attack is allowed but must always give a reason: miss, too soon, stunned, down.
+
+Current build: `repo/` at sha e54837757611 (version 0.4). Run commands are in `project.md` (`run_tests`, `run_play`, `run_trace`, `run_bots`).
+
+## Findings
+
+The designer left these for you:
+
+- Feasibility of the attack-slot limit (max 2 attacking grubs) and the spitter aim-lock is not checked.
+- Swipe reach, cone width and projectile speed are targets; Build should report as-built values.
+- Timings marked [tune] need a live playtest after Build.
+- `manual.md` must be updated for: the practice room behavior, the `x` downed marker, the new glyphs/states, the swipe arc, the run-over screen, and the new attack messages. The designer could not edit it. Decide who does it in the plan (the engineer in the Build step is the likely owner) and include it as a task with the player-visible wording coming from the spec.
+- Everything must behave correctly at 30 and 60 FPS (project constraint). The spec has a tolerance section; check that it is testable.
+
+Parallel steps opened by the Studio at the same time as this one (their outputs may affect Build): a QA defect log for the duplicate spit line (12) and an art-director review of the new visual states (13). Plan around the possibility that the visual glyph/color notes change before Build starts.
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no new inputs.
+- D-002: rework existing enemy behavior first (Option A); Option B deferred; Option C out of scope.
+- D-003: room mix is across rooms; zero hearts ends the run; room clear heals one heart.
+
+## Constraints
+
+- No new input buttons. Desktop, keyboard and gamepad.
+- Correct at both 30 and 60 FPS.
+- Small team: reuse the existing enemy, projectile and timer systems.
+- Do not change the spec's player-facing behavior. If something is infeasible within the constraints, say so and hand back (see Expected output); do not redesign.
+
+## Open questions
+
+- Is the attack-slot limit and the aim-lock feasible as specified, with the existing systems?
+- Is parallel work worthwhile, or is this one change set? (Isolated workspaces only if you decide independent code changes run in parallel.)
+- How should AC-1…AC-17 be covered by tests, including frame-rate independence? Which can be run through `run_tests` or `run_bots`, and which need a play script?
+- Who updates `manual.md`, and when?
+
+## Expected output
+
+A technical plan: approach, order of work, risks, tests per acceptance criterion, as-built values to report, manual update task. Address the result to `studio`. Recommended next recipient: `gameplay-engineer` (Build). If the spec is infeasible or underspecified, say so and name the case; the Studio will send it to `game-designer`.
+
+## Load
+
+- Role: studio/roles/technical-director.md
+- Skills: studio/skills/technical-plan.md
+- Project: project.md#constraints, design/combat.md, manual.md, repo/README.md, repo/game.py, repo/play.py, repo/bots.py, repo/tests/test_game.py
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-002-combat-response-scope.md, decisions/D-003-run-end-and-room-rules.md
+- Previous handoff: goals/G-001-combat-monotony/10-game-designer-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/12-studio-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 12
+from: studio
+to: qa
+stage: Observe
+outcome: routed
+---
+# 12: studio → qa — Reproduce and log the repeated spitter attack line
+
+## Task
+
+On the current build, reproduce the spitter attack text that appears to be printed twice, and write a defect report with severity and acceptance criteria.
+
+## Context
+
+During a playtest of rooms 4–5 the spitter's attack line looked doubled. Rooms 4–5 each have spitters that fire a pair of shots on a beat. The design documents say one line per spitter is expected, so two lines may be correct; the problem is that identical lines read as a duplicate. This is a presentation question. The spitter's behavior is about to be reworked (target `design/combat.md`, acceptance criterion AC-8, which requires the line to name the spitter), so the report should say what is observable on the current build, not propose a fix.
+
+## Findings
+
+Nothing yet beyond the observation above. Build under test: `repo/` at sha e54837757611.
+
+## Decisions already made
+
+None that bear on this defect.
+
+## Constraints
+
+- Use the project's run commands (`run_play`, `run_trace`, `run_bots` in `project.md`); a play session is an input script (`manual.md`).
+- Check at both 30 and 60 FPS if the script format allows it; say so if it does not.
+- Do not verify or comment on the rest of the Option A spec; that is a later step.
+
+## Open questions
+
+- Is the doubled line one event printed twice (a defect), or two spitters each printing their own line (one line per spitter)?
+- Does it occur in room 4, room 5, or both? Does it change with the number of spitters?
+
+## Expected output
+
+A defect report (reproduction script, observed vs. expected, severity, acceptance criteria). Address the result to `studio`.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/reproduce-defect.md
+- Project: design/combat.md, manual.md, project.md#constraints, goals/G-001-combat-monotony/08-playtester-to-game-designer.md
+- Decisions: none
+- Previous handoff: none
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/13-studio-to-art-director.md
+---
+kind: handoff
+goal: G-001
+seq: 13
+from: studio
+to: art-director
+stage: Design
+outcome: routed
+---
+# 13: studio → art-director — Review the visuals of the Option A spec before Build
+
+## Task
+
+Review what the player will see under the Option A spec (glyphs, colors, states, telegraphs, swipe arc, run-over screen) for readability and consistency with the art direction, and give the visual rulings Build needs.
+
+## Context
+
+G-001: the Owner finds combat monotonous. The game-designer specified a rework of the grub and spitter behavior (D-002, Option A) in `design/combat.md`. The new behavior depends on telegraphs the player can read: the grub Wind-up (0.5 s), the spitter Charge (0.8 s), damaged states, the swipe arc, the downed marker and the run-over screen. Pillar 3 requires every threat to be visible before it can hurt the player. The game is a headless build shown as text; "what the player sees" is the `run_play` view.
+
+## Findings
+
+From the designer's hand-off: glyph and color choices in the spec need art-director review (threat colors saturated orange/red against the dark cave). The rooms 4–5 playtest (08) found that spitters read as scenery and their shots were never reacted to.
+
+## Decisions already made
+
+- D-001: one attack button plus dash.
+- D-002: Option A, reuse existing enemy behavior.
+
+## Constraints
+
+- Art direction in `project.md#art-direction`; small team, reuse existing systems.
+- Do not change rules, timings or parameters; those belong to the game-designer. If a visual problem needs a rule change, say so as an open question.
+- No new inputs.
+
+## Open questions
+
+- Is each telegraphed state (Wind-up, Charge, Recovery) distinguishable from the idle and harmless states in `run_play`?
+- Do the threat glyphs/colors read against the dark, and are damaged states and the downed marker clear?
+
+## Expected output
+
+A short visual review with concrete rulings (what to keep, what to change), written in Findings of the outgoing Handoff, and edits to the visual parts of `design/combat.md` only if needed. Address the result to `studio`.
+
+## Load
+
+- Role: studio/roles/art-director.md
+- Skills: studio/skills/visual-review.md, studio/skills/write-design-spec.md
+- Project: project.md#art-direction, project.md#vision, design/combat.md, manual.md, goals/G-001-combat-monotony/08-playtester-to-game-designer.md
+- Decisions: decisions/D-002-combat-response-scope.md
+- Previous handoff: goals/G-001-combat-monotony/10-game-designer-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-15
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): when an action player from the project's player profile plays through combat encounters, the fights feel varied and engaging, and the player's moment-to-moment choices (positioning, timing, enemy behavior) visibly matter. The player no longer experiences the fights as the same repeated pattern.
+
+Out of scope: adding input buttons beyond attack, dash and pause (D-001, Owner approval needed); changes to the run length or the non-combat systems; numeric targets (these belong to Design as acceptance criteria, and the final verdict to Review).
+
+No immediate escalation: the Goal does not conflict with the vision or D-001, and it needs no reinterpretation. Improving depth through positioning, timing and enemy behavior is what pillar 1 asks for.
+
+## Unknowns
+
+- Observe (playtester): done (02 rooms 1–3, 08 rooms 4–5). Not observed: room 5 fight, approaching a spitter, projectile hits, room clear, dash dodging; the Play step after Build covers them.
+- Observe (qa): done (06). Spec gaps were ruled on in Design (10, D-003). Open: the doubled spit line is logged as a minor presentation defect (12, `open`). Nothing verified at 30 FPS yet.
+- Diagnose: done (03). Cause: single-state, untelegraphed enemy behavior. Option A chosen (D-002); B deferred; C out of scope.
+- Decide: done (D-002). No Owner escalation.
+- Design: done (10). Spec in `design/combat.md` (AC-1…AC-17), run/room rules in D-003. Visual rulings (glyphs, colors, telegraph readability) are `open` with `art-director` (13).
+- Plan: `open` (11). `technical-director`: the spec is cross-system (attack-slot limit, aim-lock, hit-cancel, run-end flow, 30/60 FPS) and its feasibility is unchecked. Also covers the manual update task.
+- Build: `gameplay-engineer`. Planned: the game must change. Starts after Plan, with the QA report (12) and the art rulings (13).
+- Verify: `qa` after Build; `art-director` in parallel because visuals change. Planned.
+- Play: `playtester` replays the changed build, live and reactive. Planned.
+- Review: experience Goal. `game-director` with `review-outcome`. Planned. Run progression after "run over" is not defined; the Director may take it up there.
+- Skipped: none.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 02-playtester-to-game-designer.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-game-designer-to-game-director.md |
+| 3a | Decide | game-director | make-decision | done | 05-game-director-to-studio.md |
+| 3b | Observe (defects) | qa | reproduce-defect | done | 06-qa-to-game-designer.md |
+| 3c | Observe (rooms 4–5) | playtester | playtest-session | done | 08-playtester-to-game-designer.md |
+| 4 | Design | game-designer | write-design-spec | done | 10-game-designer-to-studio.md |
+| 5a | Plan | technical-director | technical-plan | open | 11-studio-to-technical-director.md |
+| 5b | Observe (spit line) | qa | reproduce-defect | open | 12-studio-to-qa.md |
+| 5c | Design (visuals) | art-director | visual-review, write-design-spec | open | 13-studio-to-art-director.md |
+| 6 | Build | gameplay-engineer | implement-change | planned | — |
+| 7a | Verify | qa | verify-change | planned | — |
+| 7b | Verify (visuals) | art-director | visual-review | planned | — |
+| 8 | Play | playtester | playtest-session | planned | — |
+| 9 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+After step 4 (Design): the spec fits the plan, no escalation trigger. Plan is confirmed (cross-system, feasibility unchecked) and opened with two independent parallel steps: QA logs the duplicate spit line (12) and art-director reviews the visuals (13). Build, Verify, Play are now planned; Verify adds an art-director visual review.
+
+## Next action
+
+Run the three open steps (independent, in any order): `11-studio-to-technical-director.md` (Plan), `12-studio-to-qa.md` (QA), `13-studio-to-art-director.md` (art-director). Each addresses its result to `studio`. When all three are finished, run Route: it opens Build for `gameplay-engineer` (or sends a spec problem back to `game-designer`).
+
+## Outcome
+
+(Filled at Close.)
+>>>END

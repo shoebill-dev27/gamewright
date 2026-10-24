@@ -1,0 +1,62 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-first-puzzle-stall/08-studio-to-gameplay-engineer.md",
+  "sha256": "4286b5b2feb0dc57a296d20458ba7683388486441cba33769f23d30c36c9d15f",
+  "bytes": 4127
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md",
+  "sha256": "ec063b0c2f3a86b58d7fc1774ef705d02b02e87267f735b8f4c058bb1a3ab5e8",
+  "bytes": 1569
+ },
+ {
+  "path": "studio/skills/implement-change.md",
+  "sha256": "a9befd7f1d9e09eb94c51a066f030db88c5061ad1b522d9795e62bc2c242964a",
+  "bytes": 1823
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "53351d1620ff2ecebedb3bc15243f68f6dbdee48df5382cc16e2eae8b09bbaf7",
+  "bytes": 488
+ },
+ {
+  "path": "project.md#art-direction",
+  "sha256": "c165f5eeb2bf1388d32bde8ec04f06cef64ed458b187700a8279e2ccc1054c8d",
+  "bytes": 117
+ },
+ {
+  "path": "design/onboarding.md",
+  "sha256": "06ce355e2138006bf2796f3000c566be6881e3fd8a11e3780aa4bee62e27ee34",
+  "bytes": 9251
+ },
+ {
+  "path": "sim/build-0.2.md",
+  "sha256": "ad6c91fd6243a41ed2b939839b7699c3dea2b49505bdcaf1d9f59a9e5543b2b4",
+  "bytes": 1084
+ },
+ {
+  "path": "sim/repo-notes.md",
+  "sha256": "0d29b6a735765e34d960e37fa13864d8960e1d8b2877ad73b2649af3fc098de8",
+  "bytes": 814
+ },
+ {
+  "path": "decisions/D-001-no-fail-states.md",
+  "sha256": "99362efd3625e792d862dcbec7744a761cee478a97eae271621290daff508b4e",
+  "bytes": 505
+ },
+ {
+  "path": "goals/G-001-first-puzzle-stall/07-game-designer-to-studio.md",
+  "sha256": "05aeb9562024e7e2fe31360698785cb849bcc3f1aa60ba504a1f03364bd5152d",
+  "bytes": 5526
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ }
+]

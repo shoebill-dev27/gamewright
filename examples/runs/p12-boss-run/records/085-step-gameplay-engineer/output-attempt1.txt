@@ -1,0 +1,10 @@
+<<<FILE @need
+repo/tests/test_boss.py
+repo/tests/test_boss_contract.py
+repo/tests/test_boss_contract_details.py
+repo/tests/test_game.py
+repo/tests/test_play_run_controls.py
+repo/tests/test_run_driver.py
+repo/tests/test_session.py
+repo/tests/test_terminal.py
+>>>END

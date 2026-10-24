@@ -1,0 +1,5 @@
+<<<FILE @need
+studio/roles/technical-director.md
+goals/G-002-final-boss/68-technical-director-to-studio.md
+decisions/D-023-owner-confirms-verification-supply.md
+>>>END

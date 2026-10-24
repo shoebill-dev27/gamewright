@@ -1,0 +1,10 @@
+[
+ {
+  "run": "@run/tests",
+  "command": "python3 -m unittest discover -s tests",
+  "script": "\n",
+  "exit": 0,
+  "seconds": 2.4,
+  "output": "D022 long observation fps=30 view=player run=1200.0 periodic=121/121 source=b337ca3e09cf\nD022 long observation fps=30 view=trace run=1200.0 periodic=241/241 source=b337ca3e09cf\nD022 long observation fps=60 view=player run=1200.0 periodic=121/121 source=b337ca3e09cf\nD022 long observation fps=60 view=trace run=1200.0 periodic=241/241 source=b337ca3e09cf\n.....................................................................................................................................................\n----------------------------------------------------------------------\nRan 149 tests in 2.299s\n\nOK\n"
+ }
+]

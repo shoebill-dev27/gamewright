@@ -1,0 +1,9 @@
+<<<FILE @run/play/room1
+room 1
+when see * coming within 1.5 then move aside
+when text "rears back" then dash aside
+when see g within 1.5 then attack
+when see r within 1.5 then attack
+when see g within 4 then move toward
+when see r within 4 then move toward
+>>>END

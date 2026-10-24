@@ -1,0 +1,52 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/29-studio-to-qa.md",
+  "sha256": "32f0ca90a2f6c9626eaf26c5cc3df1f4bfdd61213851242668014b3907f3d3fd",
+  "bytes": 2972
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "381742c8f2afe2e1a2a6af9d031dcc91f98f490ada7c90e2a990d6a1aaf27639",
+  "bytes": 1765
+ },
+ {
+  "path": "studio/skills/reproduce-defect.md",
+  "sha256": "aa7e161cc1fcb38fd92ede1719446f05eee1c7ac431a28a04d570ce451a2291d",
+  "bytes": 1407
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "4efb2d0cea7460cd726dbcf46cfd1f93a3b5f4f5c7d99b55fdd8560a3c5ae34c",
+  "bytes": 22417
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "2baa0098b91ce11d171af0f4ae63e5426c92931363b3eae50ab641f2d908d946",
+  "bytes": 4376
+ },
+ {
+  "path": "project.md#current-state",
+  "sha256": "b96ec805922ecf6b95bdde2b4fc7e91325aeb19b0d39915692d8f505a467e183",
+  "bytes": 465
+ },
+ {
+  "path": "decisions/D-002-contact-edge-graze-accepted.md",
+  "sha256": "30c9505b88370f5b83562cd1d747a81d45eeefa1515933e9648defece0b2a4ed",
+  "bytes": 2199
+ },
+ {
+  "path": "goals/G-001-combat-monotony/27-playtester-to-studio.md",
+  "sha256": "8d6fa6b648325596bd5805819e42e9edd2c40cc0cd916ef399f49fe8ccf38a59",
+  "bytes": 7988
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ }
+]

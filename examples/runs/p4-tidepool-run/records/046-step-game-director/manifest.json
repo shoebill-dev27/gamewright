@@ -1,0 +1,107 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-first-puzzle-stall/39-studio-to-game-director.md",
+  "sha256": "9a37aa598f325382609a96ed9ec05538c2833363869da7fa4c8bd857f4d65410",
+  "bytes": 6036
+ },
+ {
+  "path": "studio/roles/game-director.md",
+  "sha256": "f95c1ae73771ee05e5162c1d6c40646f6780e50c4193db828a3b150c12aca098",
+  "bytes": 1635
+ },
+ {
+  "path": "studio/skills/review-outcome.md",
+  "sha256": "6eda5af1b0de2807864d14a2f9c76c6e5e8f5cbcc02ac0d37cf744ee342ef70e",
+  "bytes": 1051
+ },
+ {
+  "path": "project.md#vision",
+  "sha256": "616233cc48c794ce453d953e5998d8990829cb066031eb49e0b42ff3e133906c",
+  "bytes": 355
+ },
+ {
+  "path": "project.md#player-profile",
+  "sha256": "2774d3f4bc5bca9e4a621744c24d4e37e4977b1ae950d28aa5a88992a5c817de",
+  "bytes": 191
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "53351d1620ff2ecebedb3bc15243f68f6dbdee48df5382cc16e2eae8b09bbaf7",
+  "bytes": 488
+ },
+ {
+  "path": "design/onboarding.md",
+  "sha256": "4a0734a978bc103d169183344d5f116631b35e69b102f1d684e220071350b9b0",
+  "bytes": 36396
+ },
+ {
+  "path": "sim/build-0.6.md",
+  "sha256": "71b9658940995d3be783e1cc261934be7579c265e83a9e2b9ef02683a55dc646",
+  "bytes": 12301
+ },
+ {
+  "path": "goals/G-001-first-puzzle-stall/goal.md",
+  "sha256": "61457dae9dedcbafebbbc6070ab54f1b291504d5535ac88cdb3f98f22764f3cf",
+  "bytes": 6980
+ },
+ {
+  "path": "goals/G-001-first-puzzle-stall/36-qa-to-studio.md",
+  "sha256": "f755a91545bba46d03f3f2c47c473dc2a9b801387928b914d7871835f9a3fbfb",
+  "bytes": 9133
+ },
+ {
+  "path": "decisions/D-001-no-fail-states.md",
+  "sha256": "99362efd3625e792d862dcbec7744a761cee478a97eae271621290daff508b4e",
+  "bytes": 505
+ },
+ {
+  "path": "decisions/D-002-intro-cancel-and-undo.md",
+  "sha256": "5f412d0a7512397658d74382c84055ca1fb1159b52df5cc705e1e23a687f5cd2",
+  "bytes": 1949
+ },
+ {
+  "path": "decisions/D-003-sand-tap-blip-and-pool-hit-area.md",
+  "sha256": "33f6904beaa5ff202abf355b91f021c4c5bfa9f036932b5385933fb643d304e1",
+  "bytes": 2412
+ },
+ {
+  "path": "decisions/D-004-ease-back-taps-window-origin-held-pool.md",
+  "sha256": "e78d4050831064e759af427628b44ca3dd1a81e81b1b4130ef6f2c25e6d76633",
+  "bytes": 2544
+ },
+ {
+  "path": "decisions/D-005-reduce-motion-pulse-fills-window.md",
+  "sha256": "ef5c5e50142b2ee4c4d7ea26c9cfaab8a6c85df13bba7d99456074d5c88756a1",
+  "bytes": 2785
+ },
+ {
+  "path": "decisions/D-006-cancelled-pulse-and-reduce-motion-beats.md",
+  "sha256": "da28d3dfba016343a9ce38bf383f9850982dbfe6e7804d9d0be635191d09a321",
+  "bytes": 3193
+ },
+ {
+  "path": "goals/G-001-first-puzzle-stall/38-playtester-to-studio.md",
+  "sha256": "e55bd198fc8abb4781a0e016ec293772f54fe16e04a3d57119638a686f74d08c",
+  "bytes": 7275
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "studio/templates/escalation.md",
+  "sha256": "6e505880bdef28223c7275a4bb19c8f245577964d14c28d48e04561e7a5c7b90",
+  "bytes": 975
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

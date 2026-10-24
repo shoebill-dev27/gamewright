@@ -1,0 +1,107 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "b7fb7a3d85a62bcd564a33ee20caf62b355a7ef99ce6d8cfb6df0d5adb83abc2",
+  "bytes": 1304
+ },
+ {
+  "path": "goals/G-001-combat-monotony/91-studio-to-game-director.md",
+  "sha256": "33b59ae9c3c9001775d603fc6096d65abbb0ff650ebe68317624b5184c937b69",
+  "bytes": 4925
+ },
+ {
+  "path": "studio/roles/game-director.md",
+  "sha256": "2ff4f183ec488c462c8d757903c226121150048f4cc544310ac0191bb20dab12",
+  "bytes": 1652
+ },
+ {
+  "path": "studio/skills/review-outcome.md",
+  "sha256": "6eda5af1b0de2807864d14a2f9c76c6e5e8f5cbcc02ac0d37cf744ee342ef70e",
+  "bytes": 1051
+ },
+ {
+  "path": "project.md#vision",
+  "sha256": "d3086d29c74b4ce7bd4b6ef724e73f4f0f3dde2be7fda791c0154917fee0cf66",
+  "bytes": 408
+ },
+ {
+  "path": "project.md#player-profile",
+  "sha256": "8ab7a2aeebd9deea8e5f25fb124acb3213563cbd9b926a869af8ed6dd2881a8f",
+  "bytes": 172
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "05a33c6f8e50caa20ddf4f3844885137c4261ad4a3e5f3db3eb1b5312b129a9f",
+  "bytes": 237
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "4ae5e20bc276d1f625cd37f8f5e0ec7a7df35509df3db18a3bd2c6203e2631c7",
+  "bytes": 48948
+ },
+ {
+  "path": "design/combat-step72.md",
+  "sha256": "0e504d1ebcfb8dc391a82e725a11645a5670b9f52ceaff1152ead0130aa69215",
+  "bytes": 11550
+ },
+ {
+  "path": "goals/G-001-combat-monotony/goal.md",
+  "sha256": "1791524e64bbb158d4cdc0e3549f3ffe17a2392818a0ade8eecb3c5760781416",
+  "bytes": 12146
+ },
+ {
+  "path": "goals/G-001-combat-monotony/88-playtester-to-studio.md",
+  "sha256": "be5f3668dc09e9e8705675a3eadc67b4d3fd7e457d8a59146941c7703049c87a",
+  "bytes": 8262
+ },
+ {
+  "path": "goals/G-001-combat-monotony/86-qa-to-studio.md",
+  "sha256": "0330df85074881e37d97e1918ae76ef89db6a64590b595e014bdb62ed26ca54c",
+  "bytes": 7180
+ },
+ {
+  "path": "goals/G-001-combat-monotony/67-game-director-to-studio.md",
+  "sha256": "1d427ee1145bf23ec1d84c08e7aed3ea5201ac85def894520df155450e30e14d",
+  "bytes": 9810
+ },
+ {
+  "path": "decisions/D-009-review-next-pass-variant-aware-playtest.md",
+  "sha256": "694a71f785eb38968fb0452d96021da0bbb3e0d0abec999554c80a8c1a8babf2",
+  "bytes": 3683
+ },
+ {
+  "path": "decisions/D-010-review-pass-2-build-clarity-now-room-3-content.md",
+  "sha256": "f93f704d12d42e46985f1d55e0e1bb4a696e3941dbe8fa646ae13de9bcc8b846",
+  "bytes": 3409
+ },
+ {
+  "path": "decisions/D-011-variant-named-messages-accepted.md",
+  "sha256": "bf29d86bb781ad0221fb0e0f20906afb352af9441735a73b8867a2ed71d13605",
+  "bytes": 2498
+ },
+ {
+  "path": "decisions/D-012-room3-standard-grub-and-closer-spitter.md",
+  "sha256": "6d7804de297c7dc8c9ce8533ceb174c36ff613bc19915f65b1dfd4eb1d1c2897",
+  "bytes": 2626
+ },
+ {
+  "path": "goals/G-001-combat-monotony/90-qa-to-studio.md",
+  "sha256": "6dd027b4107e48ff5898c379c9a5811626a4784d03c53f899a4943f96d0f3dc7",
+  "bytes": 9591
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "studio/templates/escalation.md",
+  "sha256": "6e505880bdef28223c7275a4bb19c8f245577964d14c28d48e04561e7a5c7b90",
+  "bytes": 975
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

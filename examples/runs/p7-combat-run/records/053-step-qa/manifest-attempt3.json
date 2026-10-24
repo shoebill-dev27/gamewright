@@ -1,0 +1,77 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/55-studio-to-qa.md",
+  "sha256": "dded7125ef9f4c92332e652d3b3496885e1e759ac7eb833aea8f088fa6c5d1dc",
+  "bytes": 5103
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "381742c8f2afe2e1a2a6af9d031dcc91f98f490ada7c90e2a990d6a1aaf27639",
+  "bytes": 1765
+ },
+ {
+  "path": "studio/skills/reproduce-defect.md",
+  "sha256": "aa7e161cc1fcb38fd92ede1719446f05eee1c7ac431a28a04d570ce451a2291d",
+  "bytes": 1407
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "8ee4bdbaeb36c69a4446cb6db9dac13f103c24b0b3e2ffc044b8088c805b0d3f",
+  "bytes": 47741
+ },
+ {
+  "path": "design/combat-cues-visual-spec.md",
+  "sha256": "1e79aa291dfc0abe373f9ed1d46248d119216b444995e369ffdd9e52f96ab7f0",
+  "bytes": 6188
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "0714d607b828069bf90d552d952510c7f36804dec57f9597b426786442b3890c",
+  "bytes": 5175
+ },
+ {
+  "path": "project.md",
+  "sha256": "8a32edee44b970d2c1a5a0a76e19b3235e61b1786bb24c06583400cfa0924712",
+  "bytes": 2102
+ },
+ {
+  "path": "decisions/D-002-contact-edge-graze-accepted.md",
+  "sha256": "30c9505b88370f5b83562cd1d747a81d45eeefa1515933e9648defece0b2a4ed",
+  "bytes": 2199
+ },
+ {
+  "path": "decisions/D-003-contact-edge-exact-reach-and-lunge-band.md",
+  "sha256": "eabaf1e1bd3a216fe3cd402846ac57e001f2fe53c715dba6359cae5c80dd572a",
+  "bytes": 3250
+ },
+ {
+  "path": "decisions/D-005-blocked-contact-consumes-shot-and-spends-lunge.md",
+  "sha256": "2a3a811f6f955e0b766d2b39edfacc96eabf732d6d3e422d5e02c42c57f5c5e8",
+  "bytes": 4726
+ },
+ {
+  "path": "goals/G-001-combat-monotony/53-playtester-to-studio.md",
+  "sha256": "9b9fe168a384d99f14cd374f9b6dac9b1b69c238b1e53e10b7b4c9ac5c568b84",
+  "bytes": 12178
+ },
+ {
+  "path": "goals/G-001-combat-monotony/32-qa-to-studio.md",
+  "sha256": "3ebd6ab119d30a8d68681c43873a23db7b0547b233e06cd1d4a801f0f152e5d5",
+  "bytes": 7043
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "@run-results",
+  "sha256": "56ab325605c0ee516aec35a0631e418f2a2b2eaf3fc8ecd148a7c0bd7cdf0bfb",
+  "bytes": 57557
+ }
+]

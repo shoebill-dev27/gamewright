@@ -1,0 +1,22 @@
+{
+ "op": "Run",
+ "goal": "G-002",
+ "operations": [
+  "079-step-game-designer",
+  "080-route",
+  "081-step-technical-director",
+  "082-route",
+  "083-step-technical-director",
+  "084-route",
+  "085-step-gameplay-engineer",
+  "086-route",
+  "087-step-gameplay-engineer",
+  "088-route",
+  "089-step-gameplay-engineer",
+  "090-route"
+ ],
+ "stop_reason": "operation budget reached (12)",
+ "status": "active",
+ "owner_reads": null,
+ "next": "run examples/runs/p12-boss-run"
+}

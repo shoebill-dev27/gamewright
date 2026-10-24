@@ -1,0 +1,152 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "b7fb7a3d85a62bcd564a33ee20caf62b355a7ef99ce6d8cfb6df0d5adb83abc2",
+  "bytes": 1304
+ },
+ {
+  "path": "studio/README.md",
+  "sha256": "47846604f59124562b83f1a16c51b342f3a2e5088e49268840e108ef3faaff4e",
+  "bytes": 6379
+ },
+ {
+  "path": "studio/orchestration.md",
+  "sha256": "1f79802f981d0d7a91cc20841229bd5edf41a785db4c7d697c3902858e5c882f",
+  "bytes": 12864
+ },
+ {
+  "path": "studio/workflows/development-loop.md",
+  "sha256": "a7128fc40c3130fa05a137ca54e3cbf0322de2cb4806ed0dbf872f7cedb35c9c",
+  "bytes": 5047
+ },
+ {
+  "path": "studio/roles/art-director.md#works-from",
+  "sha256": "1a9b4ea463ac85d107625d79994080052da5b1d784f3692ad9a104f2424ad56d",
+  "bytes": 172
+ },
+ {
+  "path": "studio/roles/game-designer.md#works-from",
+  "sha256": "fe60f9d4900dea1514aa0fb524d2c69dad547e7cc71ff3139183e3d2d86aca3b",
+  "bytes": 171
+ },
+ {
+  "path": "studio/roles/game-director.md#works-from",
+  "sha256": "fde4d1b3c02d9abaf3a00f5287e4c8d23694df2027a9f960fedbc1f27c63ff31",
+  "bytes": 203
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md#works-from",
+  "sha256": "a0ebe4d4866fa859cecd40ffd4c98b6aaf79f44403a965e3376d00b52f50293a",
+  "bytes": 175
+ },
+ {
+  "path": "studio/roles/playtester.md#works-from",
+  "sha256": "6025c9d1ca754ba86f61996472c6d3a5e308f23d81479849e1e3a01b60eb4f2d",
+  "bytes": 371
+ },
+ {
+  "path": "studio/roles/playtester.md#independence",
+  "sha256": "29e2c5b25cb9b8b16d1b40109c2ecca745024349a2b4062a24545d4643ff3d25",
+  "bytes": 232
+ },
+ {
+  "path": "studio/roles/qa.md#works-from",
+  "sha256": "e4e9de4a0c4f5b40f4c41edc771780fe53f19c1573cee671f22dcdff410f2fa8",
+  "bytes": 355
+ },
+ {
+  "path": "studio/roles/qa.md#independence",
+  "sha256": "c8090d5136ea02384fb4e96585cf1be7935428e4dac0331a52709f305dcff2f3",
+  "bytes": 208
+ },
+ {
+  "path": "studio/roles/technical-director.md#works-from",
+  "sha256": "5571f0fcf5ac14950e226c1f713d5c058a27e2649fd7ac18df4e783978323621",
+  "bytes": 160
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "studio/templates/escalation.md",
+  "sha256": "6e505880bdef28223c7275a4bb19c8f245577964d14c28d48e04561e7a5c7b90",
+  "bytes": 975
+ },
+ {
+  "path": "studio/templates/goal.md",
+  "sha256": "2e908bbcc04020e6c1701e816f577c452c27e8ab6fdbb880c781c10f0b946212",
+  "bytes": 1635
+ },
+ {
+  "path": "project.md",
+  "sha256": "8a32edee44b970d2c1a5a0a76e19b3235e61b1786bb24c06583400cfa0924712",
+  "bytes": 2102
+ },
+ {
+  "path": "@project-files",
+  "sha256": "0288711af229ae8a216fca75a78e4d0cf00c3eac5e12cb3ac87feaae0452bade",
+  "bytes": 8838
+ },
+ {
+  "path": "@decision-titles",
+  "sha256": "91d16058cd32740780536df8a20341410705f6597bc65903580c0ba406e38e33",
+  "bytes": 3536
+ },
+ {
+  "path": "goals/G-002-final-boss/goal.md",
+  "sha256": "dfc54d552b5a2c42def154e2b7d8a44833abfe22d8f777adb98db4aef4e1e00c",
+  "bytes": 7325
+ },
+ {
+  "path": "@log-recent",
+  "sha256": "1c67f3d090dbf19f98b7ac7d327d235cf0f1da7c1ce970af85751cadae2f0032",
+  "bytes": 2087
+ },
+ {
+  "path": "goals/G-002-final-boss/24-gameplay-engineer-to-studio.md",
+  "sha256": "fd76f7b0bf18de6b3704e667e8c22c7d3f6e351dfd8d51ccc7e114942c9cfeef",
+  "bytes": 6156
+ },
+ {
+  "path": "goals/G-002-final-boss/23-studio-to-gameplay-engineer.md",
+  "sha256": "b1184f38fe68b6bdb9ad737c9dfdef024a0b425d5b76117dfefeec9d65f5e38c",
+  "bytes": 6313
+ },
+ {
+  "path": "goals/G-002-final-boss/16-technical-director-to-studio.md",
+  "sha256": "07a2689af76252ce4656497e175e2532c416bc473c4349fb211c962b7e79de79",
+  "bytes": 20209
+ },
+ {
+  "path": "goals/G-002-final-boss/20-technical-director-to-studio.md",
+  "sha256": "b22d566c6d94a58d9fab88fc782d1c532b4e0da5fdd7bdd14d9037224272842a",
+  "bytes": 26099
+ },
+ {
+  "path": "repo/README.md",
+  "sha256": "0ac3ac2a75748a2fa1c0c1a270f14d37c226205b27217aa6ce6ff1c3bbd1f0cc",
+  "bytes": 1347
+ },
+ {
+  "path": "repo/game.py",
+  "sha256": "7702659c02f76ba9b59294e97d28d267fc2a9ec393f3ba6b5c80ea0a64da0af0",
+  "bytes": 15672
+ },
+ {
+  "path": "repo/play.py",
+  "sha256": "4a09a79d70115d87b3277cdde7a5e02950a4b2539ceceb4119f071a49295f45d",
+  "bytes": 15894
+ },
+ {
+  "path": "repo/bots.py",
+  "sha256": "44e205f03e3151a7538c15ca517b8ba1980b76886a7693992541bf8c24067488",
+  "bytes": 15466
+ },
+ {
+  "path": "repo/tests/test_game.py",
+  "sha256": "1841f1834362267cbbfa70ee8ddce4ceddb71c94cec3ff9e94264fad17a4e28a",
+  "bytes": 36840
+ }
+]

@@ -1,0 +1,122 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "b7fb7a3d85a62bcd564a33ee20caf62b355a7ef99ce6d8cfb6df0d5adb83abc2",
+  "bytes": 1304
+ },
+ {
+  "path": "goals/G-002-final-boss/13-studio-to-game-designer.md",
+  "sha256": "fa6aa4b7bd2298c38310498403931bea69e77fdc4b75680f541cd5fe0e968829",
+  "bytes": 6730
+ },
+ {
+  "path": "studio/roles/game-designer.md",
+  "sha256": "802be90dc84142d0a16436d842f1da18d7c7b34500089a91a617a10dde90e7fb",
+  "bytes": 1595
+ },
+ {
+  "path": "studio/skills/make-decision.md",
+  "sha256": "68436360ad82bd660f2153934ae7305118489c26ad3255d10e5018773d9eb4b6",
+  "bytes": 1129
+ },
+ {
+  "path": "studio/skills/write-design-spec.md",
+  "sha256": "f60b4ce8c6e89c2dc27ff87184c54b91452c45db8422fc378ca9253b45a0efd2",
+  "bytes": 1367
+ },
+ {
+  "path": "project.md#vision",
+  "sha256": "d3086d29c74b4ce7bd4b6ef724e73f4f0f3dde2be7fda791c0154917fee0cf66",
+  "bytes": 408
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "05a33c6f8e50caa20ddf4f3844885137c4261ad4a3e5f3db3eb1b5312b129a9f",
+  "bytes": 237
+ },
+ {
+  "path": "project.md#current-state",
+  "sha256": "b96ec805922ecf6b95bdde2b4fc7e91325aeb19b0d39915692d8f505a467e183",
+  "bytes": 465
+ },
+ {
+  "path": "goals/G-002-final-boss/goal.md",
+  "sha256": "0611c5f7cb35b8d822fa374082c2beab4ef0bedfc150dc3fbca4a0e110afd1d1",
+  "bytes": 6557
+ },
+ {
+  "path": "design/final-boss-and-continuous-run.md",
+  "sha256": "2f2407313a523e68f854c34a283f4e0cbd45a6c8a69ff3c079d5254b526b65a9",
+  "bytes": 28704
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "512f87fd87102d28a7c5f4f9647c7927e7ff919c00fcb3eaa36c6c4954299391",
+  "bytes": 49370
+ },
+ {
+  "path": "design/combat-step-44-walker-limit.md",
+  "sha256": "325029f73705da174063e2e4afbf79bef190c8fe2ceace3c67cde6f70ea58540",
+  "bytes": 5413
+ },
+ {
+  "path": "goals/G-002-final-boss/10-game-designer-to-studio.md",
+  "sha256": "65092ea45646718481e9da3dbe238d30138b4b037eed8e974cd5f91682cf42b5",
+  "bytes": 7434
+ },
+ {
+  "path": "repo/tests/test_game.py",
+  "sha256": "1841f1834362267cbbfa70ee8ddce4ceddb71c94cec3ff9e94264fad17a4e28a",
+  "bytes": 36840
+ },
+ {
+  "path": "repo/bots.py",
+  "sha256": "44e205f03e3151a7538c15ca517b8ba1980b76886a7693992541bf8c24067488",
+  "bytes": 15466
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "9b475785214db05d78537a8d2e3dcf6e6299987703a8c1c54174464a360332ef",
+  "bytes": 6038
+ },
+ {
+  "path": "decisions/D-006-walker-limit-rooms-3-5-structural-ceiling.md",
+  "sha256": "dfdc2e19f4d073a3ae313eef5a732c6aeb573f37cbf493ce688123f941a5c1f3",
+  "bytes": 3040
+ },
+ {
+  "path": "decisions/D-015-owner-approves-continuous-run-and-final-boss.md",
+  "sha256": "e0bd5b794a3b4e0e37edf8ca0324ebd38f3f062d2ecf5aedcd6896c55df3b1cb",
+  "bytes": 2110
+ },
+ {
+  "path": "decisions/D-016-final-boss-experience-direction.md",
+  "sha256": "03aa3e89898d2361f61fddea143d5e99eb4dafbae8f16d1717ac6e93e7ee4684",
+  "bytes": 4425
+ },
+ {
+  "path": "decisions/D-017-final-boss-and-run-contract.md",
+  "sha256": "48adbb02a672e45434a1b0f61c77b8c1747c437124e183b1a849e34c705f4283",
+  "bytes": 3341
+ },
+ {
+  "path": "decisions/D-018-legacy-balance-gate-transition-direction.md",
+  "sha256": "d2997ec3ebda829a18cfa18c0c08c19a6f0f446bcef975f3bd211fc81111088e",
+  "bytes": 3852
+ },
+ {
+  "path": "goals/G-002-final-boss/12-game-director-to-studio.md",
+  "sha256": "1450c1e40361ac95fe1da59fabff61c32a62551f1daf19a101e2917e1769a660",
+  "bytes": 7655
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

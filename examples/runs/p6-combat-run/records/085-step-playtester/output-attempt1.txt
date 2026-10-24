@@ -1,0 +1,18 @@
+I'll start with a short first session in room 1 to see what the room contains and how swipes feel.
+
+<<<FILE @run/play/s1-room1-probe
+room 1
+fps 30
+end 15
+0.5 attack
+1 move left
+2 stop
+2.5 attack
+3 attack
+4 move right
+5 stop
+5.5 attack
+7 dash right
+8 attack
+10 attack
+>>>END

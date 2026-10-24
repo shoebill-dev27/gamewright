@@ -1,0 +1,10 @@
+
+<invoke name="bash">
+<parameter name="command">true</parameter>
+</invoke>
+
+
+
+<invoke name="bash">
+<parameter name="command">echo ok</parameter>
+</invoke>

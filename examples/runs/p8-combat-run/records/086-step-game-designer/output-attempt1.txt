@@ -1,0 +1,102 @@
+<<<EDIT design/combat.md
+<<<<<<< SEARCH
+# Combat design (build 0.5, specified in G-001 step 07, rulings in steps 14, 22, 30, 35 and 38)
+=======
+# Combat design (specified in G-001 step 07, rulings in steps 14, 22, 30, 35 and 38; builds 0.5 and 0.6)
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Until 0.6 exists, build 0.5 behaves as described without the step 35 and step 38 parts.**
+=======
+Build 0.6 implements the step 35 and step 38 parts (verified by QA, handoff 82); build 0.5 behaved as described without them.**
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Where they differ, those notes and decisions govern.
+=======
+Where they differ, those notes and decisions govern.
+
+**Step 87 (documents only, no rule or number changed):** the wording items from QA report 82 section 4 (cue gap rule for room 3, two step 38 references to the room 3 simultaneous-start case, title and header build references) were corrected.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+  - Room 3 and practice rooms do not use this rule. Their gap stays at the old 0.2 s between consecutive cues in the room.
+=======
+  - Room 3 and practice rooms do not use this rule. Their first-shot schedule has 0.2 s between consecutive cues; after a cap delay simultaneous starts are accepted (D-007).
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Reopen if a real-room trace in room 3 shows simultaneous starts that a player cannot answer (see D-005).
+=======
+The reopen triggers are those of D-007 (revisit of D-005 item 4).
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+- Step 38: a real-room trace of room 3 with a surviving player past 7 s, to see if simultaneous cue starts occur there (D-005 revisit).
+=======
+- Step 38: a real-room trace of room 3 past 7 s — closed. QA 43 showed simultaneous starts occur there after a cap delay; accepted in D-007, whose reopen triggers apply.
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT design/combat-cues-visual-spec.md
+<<<<<<< SEARCH
+   - Reason: the design text says "thin line" but the danger is 1.2 tiles wide. A hairline makes a 1-tile sidestep look sufficient when it may not be.
+=======
+   - Reason: the danger is 1.2 tiles wide. A hairline makes a 1-tile sidestep look sufficient when it may not be. (An older design sentence called the grub cue a "thin line"; `combat.md` withdrew it in step 22. The thin line applies to the spitter only.)
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/87-game-designer-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 87
+from: game-designer
+to: studio
+stage: Design
+outcome: question
+---
+# 87: game-designer → studio — Wording fixes 1–5 made; D-007 stray line NOT removed (path not writable in this step)
+
+## Task
+
+Report the wording corrections from handoff 85 and one blocker: the D-007 edit.
+
+## Context
+
+Handoff 85 asked for wording fixes from QA report 82 section 4 and removal of the stray last line of D-007. No rule, parameter or Decision content was changed.
+
+## Findings
+
+Changed in `design/combat.md`:
+1. Cue gap rule: now "Their first-shot schedule has 0.2 s between consecutive cues; after a cap delay simultaneous starts are accepted (D-007)."
+2. Open question about a real-room room 3 trace past 7 s: marked closed (QA 43, accepted in D-007).
+3. Step 38 ruling: "Reopen if a real-room trace…" replaced by a pointer to D-007's reopen triggers.
+5. (Optional, done) Title no longer says "build 0.5"; header sentence "Until 0.6 exists…" now says build 0.6 implements the step 35 and 38 parts (QA 82) and 0.5 behaved as before. A short "Step 87" note was added under the Step 80 note.
+
+Changed in `design/combat-cues-visual-spec.md`:
+4. Grub lane item 1: no longer says the design text says "thin line"; it states the 1.2-tile width reason and notes the old sentence was withdrawn in step 22 (thin line is for the spitter only).
+
+Left unchanged:
+- `decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md`: the stray `</parameter>` line (confirmed present at the end, after the last "Revisit when" bullet in the packet copy) was not removed. The only decision path I may write in this step is `decisions/D-013-<name>.md`, so D-007 is outside my allowed paths. I did not edit it.
+- Other items from the `combat.md` header (e.g. "Status: Build 0.5 implements…") and report 82 item 6 were left; they are dated history, not conflicts.
+
+## Decisions already made
+
+D-007, D-011, D-012 unchanged.
+
+## Constraints
+
+Documents only; no rule changed. No rule-changing wording fix was found.
+
+## Open questions
+
+1. Route the removal of the single `</parameter>` line at the end of D-007 to a step whose writable paths include that file (delete only that line, change nothing else).
+
+## Expected output
+
+Studio routes the D-007 line removal, then proceeds with its own decision on the remaining unverified QA items (R3-8, R3-4, V-c).
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: design/combat.md, design/combat-cues-visual-spec.md
+- Decisions: decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md
+- Previous handoff: goals/G-001-combat-monotony/85-studio-to-game-designer.md
+>>>END

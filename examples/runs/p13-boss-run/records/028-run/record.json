@@ -1,0 +1,23 @@
+{
+ "op": "Run",
+ "goal": "G-002",
+ "operations": [
+  "015-route",
+  "016-step-game-director",
+  "017-route",
+  "018-step-game-designer",
+  "019-route",
+  "020-step-technical-director",
+  "021-route",
+  "022-step-game-director",
+  "023-route",
+  "024-step-technical-director",
+  "025-route",
+  "026-step-game-director",
+  "027-route"
+ ],
+ "stop_reason": "blocked-on-owner",
+ "status": "blocked-on-owner",
+ "owner_reads": "goals/G-002-final-boss/22-game-director-to-owner.md",
+ "next": "decide examples/runs/p10-boss-run \"<answer>\""
+}

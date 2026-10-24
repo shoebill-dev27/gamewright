@@ -1,0 +1,168 @@
+{
+ "op": "Step",
+ "role": "qa",
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "4c77579d-da06-4ed1-9f39-17bf7064c0e5",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 23547,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 1553,
+    "output_tokens_details": {
+     "thinking_tokens": 1083
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 23547,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 1553,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 23547,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 23547
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.10972199999999999,
+   "attempt": 1,
+   "started": "2026-10-16T11:43:27",
+   "seconds": 15.9,
+   "errors": [],
+   "runs": [
+    "@run/tests",
+    "@run/bots/fps60",
+    "@run/bots/fps60-repeat",
+    "@run/bots/fps30",
+    "@run/trace/dash-grub-60",
+    "@run/trace/dash-grub-30",
+    "@run/trace/dash-shot-60",
+    "@run/trace/dash-shot-30"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "109e0632-addd-4322-a906-835fa6c6bdd6",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 29056,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 2424,
+    "output_tokens_details": {
+     "thinking_tokens": 2170
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 29056,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 2424,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 29056,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 29056
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.14046799999999998,
+   "attempt": 2,
+   "started": "2026-10-16T11:43:43",
+   "seconds": 24.9,
+   "errors": [],
+   "runs": [
+    "@run/trace/dash-through-shot-60",
+    "@run/trace/dash-through-shot-30",
+    "@run/trace/control-shot-60"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "ac5ee4c3-a74b-4cc8-a79a-71a0158f2f8a",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 31058,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 6805,
+    "output_tokens_details": {
+     "thinking_tokens": 3424
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 31058,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 6805,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 31058,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 31058
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.192286,
+   "attempt": 3,
+   "started": "2026-10-16T11:44:08",
+   "seconds": 57.2,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-combat-monotony/08-qa-to-studio.md": "3b3fc690fac744c912655aa52d7e25d6c4a0b5acef6f1576625b8b0de1f9324e"
+ },
+ "decision": {}
+}

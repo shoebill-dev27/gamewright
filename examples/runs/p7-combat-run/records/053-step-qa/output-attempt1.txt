@@ -1,0 +1,41 @@
+I'm starting with the test suite and the room 2 and room 5 reproductions at 60 FPS. The results will decide what I run next.
+
+<<<FILE @run/tests
+>>>END
+
+<<<FILE @run/play/room2
+room 2
+end 16
+when see * coming within 1.5 then move aside
+when text "rears back" then move aside
+when see r within 1.4 then attack
+when see g within 1.4 then attack
+when see G within 1.4 then attack
+when see G within 3 then move away
+when see r within 3 then move away
+>>>END
+
+<<<FILE @run/trace/room2
+room 2
+end 16
+when see * coming within 1.5 then move aside
+when text "rears back" then move aside
+when see r within 1.4 then attack
+when see g within 1.4 then attack
+when see G within 1.4 then attack
+when see G within 3 then move away
+when see r within 3 then move away
+>>>END
+
+<<<FILE @run/trace/room5
+room 5
+end 16
+when see * coming within 1.5 then move aside
+when text "rears back" then move aside
+when text "takes aim" then move aside
+when see r within 1.4 then attack
+when see g within 1.4 then attack
+when see G within 1.4 then attack
+when see G within 3 then move away
+when see g within 3 then move away
+>>>END

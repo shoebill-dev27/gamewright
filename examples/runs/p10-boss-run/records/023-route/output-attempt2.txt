@@ -1,0 +1,148 @@
+<<<EDIT goals/G-002-final-boss/goal.md
+<<<<<<< SEARCH
+- Decide（実装開始条件）：open。Game Directorが16の実機ホスト追加・費用・環境依存をD-015／D-016の承認範囲と照合する。範囲内の判断とRoleで解決可能な調査を分け、承認超過またはRoleでは供給できない環境が必要ならOwnerへの具体的なEscalationを作る。未確認だけを超過確定とは扱わない。
+=======
+- Decide（実装開始条件）：done。D-020で最小実機ホストを既存要件の実現作業としてPlan対象に含める。費用・リスクの承認は未確定で、超過・供給不能も未確定。Buildは五条件の解決まで保留する。
+- Plan補完：open。既存資源の限定調査で実行基線、回帰正本、実機環境・独立検証の供給条件、更新見積もり、承認根拠を確認する。取得不能なら必要物・回答者・解決経路を特定して返す。実装、新規依存導入、購入、外部費用の確約は行わない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| 5a | Decide | game-director | make-decision, prepare-owner-escalation | open | 17-studio-to-game-director.md |
+| 5b | Plan | technical-director | technical-plan | planned | — |
+=======
+| 5a | Decide | game-director | make-decision, prepare-owner-escalation | done | 17-studio-to-game-director.md → 結果: 18-game-director-to-studio.md |
+| 5b | Plan | technical-director | technical-plan | open | 19-studio-to-technical-director.md |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+逐次実行する。17で実機ホスト・費用・環境依存の扱いをGame Directorへ戻す。判断後、Technical Directorが実行基線と環境・依存を確認し、計画を補完して開始可否を返す。必要なOwner判断とPlanの開始条件が解決する前にBuildを開かない。独立QA、Art Directorの限定Verify、独立Play、Designerの実測後判断、Reviewの順序を維持する。初回基線やQAで明白な対処不能・到達不能が判明した場合はDesigner判断を前倒しする。現時点で並列Stepは開かない。
+=======
+逐次実行する。19でTechnical DirectorがD-020に基づく限定調査とPlan補完を行う。必要なOwner判断とBuild開始の五条件が解決する前にBuildを開かない。Owner権限の問題が具体化した場合はGame Directorへ戻し、具体的なEscalationを準備する。独立QA、Art Directorの限定Verify、独立Play、Designerの実測後判断、Reviewの順序を維持する。初回基線やQAで明白な対処不能・到達不能が判明した場合はDesigner判断を前倒しする。現時点で並列Stepは開かない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+16のPlan提出Stepを完了扱いとし、開始条件未充足によるBuild保留を記録。実機ホスト追加と暫定費用・環境依存の承認範囲判断を17でGame Directorへ戻す。判断後のPlan補完を追加し、独立検証・Play・Designer実測後判断を維持する。現時点で超過や環境供給不能は確定しておらず、Ownerへの質問はまだ開かない。
+=======
+18のDecideを完了し、D-020に基づく限定Plan補完を19で開く。最小ホストの必要性と費用承認を分け、実行基線・回帰正本・実機供給・総費用と承認根拠を確認する。Build保留と後続の独立検証順序を維持し、現時点ではOwner質問を開かない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Game Directorが `17-studio-to-game-director.md` を実行し、16の実機ホスト追加・費用・環境依存を承認範囲と照合する。権限内なら判断と後続調査条件をStudioへ返し、Owner判断が必要なら具体的なEscalationを作る。Buildは開始しない。
+=======
+Technical Directorが `19-studio-to-technical-director.md` を実行し、既存資源の限定調査とPlan補完をStudioへ返す。取得不能な項目も必要物・回答者・解決経路を示す。Buildは開始しない。
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+未完了・進行中。D-015〜D-019による範囲・方向・仕様・基準適用を維持する。16に技術計画と暫定Build費用11.5〜20人日が提出されたが、独立検証は別枠で、実機入力環境と開始条件は未確認。次はGame Directorによる承認範囲・依存の判断。実装、独立検証、Play、Designer実測後判断、Reviewは未実施。指定sha一致、実行成功、難度、所要時間の新しい証拠はない。Ownerへの新たな質問はまだ開かず、project.mdのCurrent stateは変更しない。
+=======
+未完了・進行中。D-015〜D-019の範囲・方向・仕様・基準適用を維持する。D-020で最小実機ホストをPlan対象としたが、費用承認とBuild開始条件は未解決。提示済み部分は独立QA・Art・Play込み15〜26人日で、Designer判断、修正・再検証、機器等は未算入または未確認。次はTechnical Directorの限定調査。実装、独立検証、Play、Designer実測後判断、Reviewは未実施。指定sha一致、実行成功、実機供給、難度、所要時間の新しい証拠はない。Owner質問はまだ開かず、project.mdのCurrent stateは変更しない。
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-002-final-boss/19-studio-to-technical-director.md
+---
+kind: handoff
+goal: G-002
+seq: 19
+from: studio
+to: technical-director
+stage: Plan
+outcome: routed
+---
+# 19: studio → technical-director — 限定調査でBuild開始条件を補完する
+
+## Task
+
+16の技術計画をD-020に従って補完する。既存資料・実行環境・利用可能資源を調査し、Build開始の五条件について確認済みの証拠、残る不足、解決担当・経路をStudioへ返す。
+
+## Context
+
+Ownerは連続ラン、第5部屋の単体ボス、先頭からのretryをD-015で承認した。詳細仕様と基準適用はD-017／D-019で確定済み。16は静的な技術計画で、実行基線・回帰正本・実機環境・費用承認が未確認のためBuildを保留した。
+
+18とD-020は、desktopのkeyboard／gamepad操作・表示に必要な最小ホストを既存要件の実現作業としてPlanに含めた。ただし費用・リスクの承認内認定ではない。現時点で承認超過や供給不能は確定しておらず、OwnerへのEscalationは開いていない。
+
+## Findings
+
+今回の調査対象は次のとおり。
+
+1. 実行対象：gitルート、対象commit、指定sha `27fe16268ac8`との関係、作業差分の有無、0.4／0.6表記の由来。差分の有無を確認する際も秘密情報の本文を出力しない。
+2. 実行基線：Python版・既存依存、既存tests、player／trace、各botの30/60 FPS結果。実行条件、終了理由、失敗、未実施を区別する。実行方法はrepo/README.mdとrepo/manual.mdに従い、既存スクリプトを確認して選ぶ。
+3. 回帰正本：combat.md、step44・46・68・72・94、関連Decision、実テストを読み、保持／終了／置換先と仕様IDを対応させる。16で未読だった正本とD-011〜D-014を今回のLoadに追加した。
+4. 実機供給：利用可能なdesktop OS・表示環境、keyboard／gamepad機器、既存依存、導入権限、独立検証の供給元・利用条件を確認する。調査環境に見当たらないことだけで、プロジェクト全体に存在しないと断定しない。
+5. ホスト方式：共通Sessionへの接続、入力・表示・記録、保持入力解除、30/60 FPS、実時間pause確認の最小方式と制約・代替案を示す。技術方式の選択はTechnical Directorが行う。
+6. 費用・承認：ホスト・統合・独立QA／Art／Play・Designer判断・修正／再検証を含め、前提、除外、不確実性、金銭費用、既存承認との対応を整理する。
+
+16のBuild準備〜統合11.5〜20人日にはホスト2〜4人日を含む。独立QA・Art・Play込みの提示済み部分は15〜26人日だが、総費用でも承認済み予算でもない。新たな実行・供給・費用の証拠は今回まだない。
+
+## Decisions already made
+
+- D-001〜D-007：既存入力・接触・共有戦闘規則と旧基準。適用変更は後続Decisionと照合する。
+- D-011〜D-014：表示・第3部屋・文言と過去Goalの判断。履歴を改変しない。
+- D-015／D-016：連続ラン、単体ボス、先頭retryと体験方向・範囲。
+- D-017：ボス・ラン・入力・表示・終端の詳細契約。
+- D-018／D-019：旧集計の適用整理、保持回帰、対応bot比較、Review前のDesigner実測後判断。
+- D-020：最小ホストの限定調査を認める。費用承認は未確定で、五条件の解決までBuildを保留する。
+
+## Constraints
+
+- ゲーム・ホストの実装、新規依存導入、購入、外部費用の確約を行わない。
+- Owner request、Interpretation、仕様、既存Decisionを変更しない。project.mdも変更しない。
+- OS・機器・予算上限・権限・独立検証枠を推定で補わない。既存資源の発見と新たな供給の確約を分ける。
+- 秘密情報、環境変数の値、個人情報を出力・記録・後続資料へ含めない。
+- 実行未確認を成功とせず、模擬入力やheadlessをV2の独立実機検証の代用にしない。
+- 追加難度ゲートはD-019に基づく実測後のDesigner判断とし、未設定だけを新たな開始阻害にしない。
+- 逐次実装と、独立QA→限定Art Verify→独立Play→Designer実測後判断→Reviewの順序を維持する。明白な対処不能・到達不能はPlay前にDesignerへ戻す。
+- studio/orchestration.mdのEscalationトリガーとLoop limitsも照合する。同じ不足を新情報なしに再質問する経路を作らない。
+
+## Open questions
+
+1. 指定sha・既存実行基線・版表記の差を確定できるか。
+2. 回帰正本とD-019・詳細仕様の対応に未解決事項があるか。
+3. 実機ホストと独立実機検証を既存資源で供給できるか。必要な追加供給物と供給権限を持つ相手は誰か。
+4. 更新費用・リスクを既存承認内と判断する根拠はあるか。なければOwnerに求める具体的な承認は何か。
+
+## Expected output
+
+結果を `20-technical-director-to-studio.md` にまとめ、宛先はstudioとする。実行証拠と未実施項目、回帰対応表、最小ホスト方式と供給条件、更新見積もり・承認根拠、D-020の五条件ごとの充足状況、Build開始可否を含める。
+
+取得不能なら、実際の制約と試した確認経路、必要な資料・checkout・実行権限・OS・機器・検証枠、回答者と解決経路を具体化する。調査結果を返したことと開始条件の充足を区別する。
+
+購入・追加予算・権限付与・Roleでは確保できない環境、または費用承認根拠の不足が具体化した場合は、Game Directorへ戻せる brief をFindingsに含める。判断対象を「必要な供給・費用を伴う現行仕様の継続」にまとめ、現実的な2〜3案、各案の必要物・費用幅・未確定部分・後続ルート、推奨と再検討条件を示す。Studioが次にGame Directorへルーティングする。
+
+仕様変更が必要なら権限を持つRoleへ戻す理由を示す。BuildはこのStepでは開かない。
+
+## Load
+
+- Role: studio/roles/technical-director.md
+- Skills: studio/skills/technical-plan.md
+- Project: studio/orchestration.md
+- Project: project.md
+- Project: goals/G-002-final-boss/goal.md
+- Project: design/final-boss-and-continuous-run.md
+- Project: design/combat.md
+- Project: design/combat-step-44-walker-limit.md
+- Project: design/combat-step-46-room3-cap.md
+- Project: design/combat-step68.md
+- Project: design/combat-step72.md
+- Project: design/combat-step94.md
+- Project: repo/README.md
+- Project: repo/manual.md
+- Project: repo/game.py
+- Project: repo/play.py
+- Project: repo/bots.py
+- Project: repo/tests/test_game.py
+- Project: goals/G-002-final-boss/16-technical-director-to-studio.md
+- Decisions: decisions/D-001-one-button-combat.md
+- Decisions: decisions/D-002-contact-edge-graze-accepted.md
+- Decisions: decisions/D-003-contact-edge-exact-reach-and-lunge-band.md
+- Decisions: decisions/D-004-spitter-cue-gap-brute-no-cancel-room2-spitter-deferred.md
+- Decisions: decisions/D-005-blocked-contact-consumes-shot-and-spends-lunge.md
+- Decisions: decisions/D-006-walker-limit-rooms-3-5-structural-ceiling.md
+- Decisions: decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md
+- Decisions: decisions/D-011-variant-named-messages-accepted.md
+- Decisions: decisions/D-012-room3-standard-grub-and-closer-spitter.md
+- Decisions: decisions/D-013-review-pass-3-readability-wording-then-close.md
+- Decisions: decisions/D-014-review-pass-4-goal-met.md
+- Decisions: decisions/D-015-owner-approves-continuous-run-and-final-boss.md
+- Decisions: decisions/D-016-final-boss-experience-direction.md
+- Decisions: decisions/D-017-final-boss-and-run-contract.md
+- Decisions: decisions/D-018-legacy-balance-gate-transition-direction.md
+- Decisions: decisions/D-019-g002-balance-criteria-applicability.md
+- Decisions: decisions/D-020-g002-host-scope-and-plan-entry-conditions.md
+- Previous handoff: goals/G-002-final-boss/18-game-director-to-studio.md
+>>>END

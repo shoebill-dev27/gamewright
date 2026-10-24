@@ -1,0 +1,107 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "daa7d7895950007703cb54cc43a7dbafaefbfb95f644f6ae670a4db24cc3716e",
+  "bytes": 1070
+ },
+ {
+  "path": "goals/G-001-combat-monotony/74-studio-to-gameplay-engineer.md",
+  "sha256": "81db3bf859918ed1b1306cb8e968c4dfd35603a0f8a4aa3d2d961e484f7f8f69",
+  "bytes": 5875
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md",
+  "sha256": "18ecbace72fe54a14efe4897ffa4e7456facff677234c671d8841408747cb7d0",
+  "bytes": 1609
+ },
+ {
+  "path": "studio/skills/implement-change.md",
+  "sha256": "a9befd7f1d9e09eb94c51a066f030db88c5061ad1b522d9795e62bc2c242964a",
+  "bytes": 1823
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "05a33c6f8e50caa20ddf4f3844885137c4261ad4a3e5f3db3eb1b5312b129a9f",
+  "bytes": 237
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "2d36d32ef73d8f0e6cd6d94d9684a85d7d934d4e9a1da7ecf046d4158441a81f",
+  "bytes": 41687
+ },
+ {
+  "path": "design/combat-visuals.md",
+  "sha256": "79b9d7bb9a26711aec03503b11b0da7458560cfcc6a01967a0989411aeebe815",
+  "bytes": 19112
+ },
+ {
+  "path": "manual.md",
+  "sha256": "fc06710951221dbee76cc6aa69fd5cf82b94b7d64d640b910800bea6be5d6034",
+  "bytes": 4128
+ },
+ {
+  "path": "repo/README.md",
+  "sha256": "ed2d47427f733e416ceeae3304620fa38f5f2a2a65e258c5add3505fe322c7e6",
+  "bytes": 331
+ },
+ {
+  "path": "repo/game.py",
+  "sha256": "48e1b266d9c8ed4f1a41a15b5ba678748a33323754e7d4f2a504a2af03475a34",
+  "bytes": 28316
+ },
+ {
+  "path": "repo/play.py",
+  "sha256": "74ccbb991fe6a27acad54615b8f0eb82a45e01e6243537be9480b33fd043f7b3",
+  "bytes": 15366
+ },
+ {
+  "path": "repo/bots.py",
+  "sha256": "9be96669a0f659d4a02f3a67645437e2760ca39a58579c5500a6e7a7fb8171df",
+  "bytes": 6675
+ },
+ {
+  "path": "repo/tests/test_game.py",
+  "sha256": "71ea501dffdd59c9f451aa56c4f3c06fcea396e644b0bc2adefcfba3650c1051",
+  "bytes": 39826
+ },
+ {
+  "path": "project.md",
+  "sha256": "ee6eb546e89d58288cd973fec203d4067f49bb3732222a7d2007909d050aa4d8",
+  "bytes": 2047
+ },
+ {
+  "path": "decisions/D-011-grub-turns-stun-body-hit-dash-facing.md",
+  "sha256": "b5e0a7a0dfa3b77038204e2f4f0c827cbd13212967f886555e0a139091bdb551",
+  "bytes": 5528
+ },
+ {
+  "path": "decisions/D-012-on-you-line-for-displaced-enemies.md",
+  "sha256": "12836ed5c581c097d1e801ce55cb3b7a46ecb7a377b362a54a90f5e6368ed66b",
+  "bytes": 2879
+ },
+ {
+  "path": "decisions/D-013-knockback-of-grub-on-players-tile.md",
+  "sha256": "e737794c44eff8e0174dc877da99e538170e9708e639d2468948ba68a4a29f1b",
+  "bytes": 3167
+ },
+ {
+  "path": "decisions/D-014-one-rule-for-cells-on-you-and-hit-line-word.md",
+  "sha256": "b42ac5c5cb38215d624662b65c20c9f2f2c3a5e2160f43f48f9da15602d30749",
+  "bytes": 4825
+ },
+ {
+  "path": "goals/G-001-combat-monotony/73-game-designer-to-studio.md",
+  "sha256": "5f8f8a19d9f6a72c0548b0215426d7d5aaffe8904c8a33061519c15675a6b93f",
+  "bytes": 10340
+ },
+ {
+  "path": "goals/G-001-combat-monotony/70-qa-to-studio.md",
+  "sha256": "3834149ef8cb08cbd382cb818873472e4ca95fb9605c51a0da5a046912594e3e",
+  "bytes": 17963
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ }
+]

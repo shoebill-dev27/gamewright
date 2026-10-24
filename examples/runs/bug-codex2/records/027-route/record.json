@@ -1,0 +1,84 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "codex",
+   "session_id": "01a12a7e-16e7-7e52-8d22-c08fb0d0377e",
+   "model": "gpt-6-astra",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 25389,
+    "cached_input_tokens": 2688,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 275,
+    "reasoning_output_tokens": 174
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 1,
+   "started": "2026-10-11T19:24:28",
+   "seconds": 15.6,
+   "errors": [],
+   "need": [
+    "studio/roles/technical-director.md",
+    "studio/skills/prepare-owner-escalation.md",
+    "goals/G-001-dash-damage/19-technical-director-to-studio.md",
+    "sim/repo-notes.md",
+    "design/combat.md",
+    "decisions/D-001-one-button-combat.md",
+    "decisions/D-002-resume-with-owner-observations.md",
+    "decisions/D-003-independent-invulnerability.md"
+   ]
+  },
+  {
+   "runtime": "codex",
+   "session_id": "01a12a7e-53e2-72f2-9c3f-7e478d402b3b",
+   "model": "gpt-6-astra",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 33131,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 4143,
+    "reasoning_output_tokens": 97
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 2,
+   "started": "2026-10-11T19:24:44",
+   "seconds": 111.9,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-dash-damage/goal.md": "1e77559c9d7bacf18b742fad3ca3ef4cad77a8194211083861ee232a6a8df48e",
+  "goals/G-001-dash-damage/22-studio-to-technical-director.md": "72d138341f0110fcf4f8d82258d7dd56cee582a9629421e6f302f9e364f78069"
+ },
+ "decision": {
+  "status": "blocked-on-owner",
+  "open": [
+   [
+    "technical-director",
+    "Owner escalation 準備"
+   ]
+  ],
+  "new": [
+   "technical-director",
+   "Owner escalation 準備"
+  ]
+ },
+ "seen_through_seq": 22
+}

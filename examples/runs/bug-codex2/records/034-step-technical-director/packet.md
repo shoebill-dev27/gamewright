@@ -1,0 +1,1172 @@
+# Studio operation packet
+
+operation: Step
+goal: G-001
+role: technical-director
+incoming_handoff: goals/G-001-dash-damage/24-studio-to-technical-director.md
+next_seq: 25
+
+## You may write
+
+- goals/G-001-dash-damage/25-technical-director-to-<recipient>.md
+- decisions/D-005-<name>.md
+
+## Inputs
+
+<<<FILE studio/execution.md#executor-instructions
+## Executor instructions
+
+You are executing exactly one Studio operation, in isolation.
+
+- Everything you may use is in this packet: the operation header, the input files, and the paths
+  you may write. You know nothing else about this project, its history, or other steps, and you
+  must not assume anything beyond the packet.
+- Follow the procedure for this operation in the Studio files included. For a Step, act as the
+  receiving Role within its contract and listed Skills; do not perform other Roles' work.
+- Write every file you create or change as one complete file block:
+  `<<<FILE <path>` on its own line, the full file content, then `>>>END` on its own line.
+  Use only the paths listed under "You may write"; paths are relative to the project directory.
+- Only file blocks are kept. Anything else you write is discarded and never shown to any later
+  step, so put everything the next operation needs into the files.
+- If the packet is not enough to do the operation, write the artifact that hands the work back or
+  reports the blocker instead of guessing.
+>>>END
+
+<<<FILE goals/G-001-dash-damage/24-studio-to-technical-director.md
+---
+kind: handoff
+goal: G-001
+seq: 24
+from: studio
+to: technical-director
+stage: Diagnose
+outcome: routed
+---
+# 24: studio → technical-director — 変更後の完了条件に沿った文書評価報告
+
+## Task
+
+最新の模擬ビルドと既存資料に基づき、文書評価の結果、未判定事項、仕様不足、再開条件を整理してください。D-004 による完了条件に対する Review に渡せる報告を作成し、Studio に返してください。
+
+## Context
+
+元のダッシュ被ダメージ修正 Goal は、条件別証拠を得る外部照会手段がなく停止していました。Owner は Escalation 23 の B を選び、模擬ビルド記述の文書評価を本 Goal の検証とし、計測できない項目は未判定と明記して閉じるよう指示しました。
+
+これは報告作成の Step です。報告後に game-director が変更後の Goal を Review し、Studio が Close します。
+
+## Findings
+
+- 対象は `sim/build-0.4.md`、変更識別子 `0.3-G001-15`。project.md の build-0.3 は旧状態の記載です。
+- Handoff 21 は文書評価を完了しましたが、従来の検証範囲での総合判定は question。具体的な仕様不一致による fail ではありません。
+- AC-1〜AC-6、30／60 FPS × キーボード／ゲームパッド、必要な回帰の条件別証拠が不足しています。
+- クールダウン0.6秒の起点は既存資料で未定義と報告されています。測定不足とは分けて記載してください。
+- 外部窓口への問い合わせは未実施。モデル不存在や永久に取得不能とは確認されていません。
+- 以上は既存記録の要約です。報告の各結論は Load の原資料と照合し、根拠を明記してください。
+
+## Decisions already made
+
+- D-001：入力制約を維持する。
+- D-002：以前の Owner 判断による修正継続。今回の完了条件は D-004 で変更。
+- D-003：無敵の終了を発生源ごとに管理する。
+- [D-004](../../decisions/D-004-document-evaluation-scope.md)：文書評価を本 Goal の検証とし、計測不能項目は未判定として報告、Review 後に閉じる。
+
+## Constraints
+
+- 技術側でゲーム仕様や QA の判定を変更しない。文書評価と実証を区別する。
+- 過去の question を pass に変更せず、全条件合格、不具合解消の保証、試行実施を主張しない。
+- 追加資料取得・計測、新規 simulator 開発、実機試験、追加実装、巻き戻しを行わない。
+- AC や試行数を推測で補わない。資料から確認できない項目は未判定または資料不足として残す。
+- クールダウン起点を決めず、将来必要な仕様判断として整理する。
+- 同じ入力不足を理由に再計測・QA 再依頼へ戻さない。今回の不足は Owner が認めた報告対象。
+- Owner 向け報告は日本語で作成する。
+
+## Open questions
+
+- 各 AC と回帰について、文書上どこまで整合を確認でき、何が未判定か。
+- 仕様未定義と観察証拠不足をどう区別して報告するか。
+- 将来、挙動の独立検証を再開する際に必要な範囲判断、資料、仕様判断は何か。
+
+## Expected output
+
+次の outgoing Handoff を `to: studio`、`outcome: done` とし、Findings に自己完結した文書評価報告を記載してください。
+
+報告には対象ビルド・変更識別子、参照資料、AC-1〜AC-6 と必要な回帰ごとの文書上の評価・根拠・未判定事項、全4環境の証拠不足、クールダウン起点の仕様不足、既存 QA 判定、再開条件を含めてください。
+
+Owner 向けの短い結果文も含め、文書評価を完了したことと実証できていない事項を明確にしてください。Goal の達成 verdict は game-director の Review に委ねます。Studio は報告を Review に route し、その結果に基づき Close します。
+
+## Load
+
+- Role: studio/roles/technical-director.md
+- Skills: studio/skills/technical-plan.md
+- Project: project.md#constraints
+- Project: design/combat.md
+- Project: sim/build-0.4.md
+- Project: sim/repo-notes.md
+- Project: goals/G-001-dash-damage/11-qa-to-studio.md
+- Project: goals/G-001-dash-damage/19-technical-director-to-studio.md
+- Project: goals/G-001-dash-damage/21-qa-to-studio.md
+- Decisions: decisions/D-001-one-button-combat.md
+- Decisions: decisions/D-002-resume-with-owner-observations.md
+- Decisions: decisions/D-003-independent-invulnerability.md
+- Decisions: decisions/D-004-document-evaluation-scope.md
+- Previous handoff: goals/G-001-dash-damage/23-technical-director-to-owner.md
+>>>END
+
+<<<FILE studio/roles/technical-director.md
+---
+kind: role
+id: technical-director
+writes: decisions/*
+---
+# Role: Technical Director
+
+## Responsibility
+
+Turns approved specs into technically feasible plans. Owns technical risk, architecture, test
+strategy, sequencing, and whether work can safely run in parallel.
+
+## Decides
+
+- Technical approach and architecture within the project's constraints.
+- Sequencing, task breakdown, and parallelization (including isolated code workspaces).
+- Technical acceptance checks (e.g., performance budgets) that serve the spec.
+
+## Must not
+
+- Change the spec to suit the implementation — propose the change to `game-designer`.
+- Decide game direction or player-facing behavior.
+- Approve its own plan's results; QA verifies the build.
+
+## Works from
+
+- An approved spec with acceptance criteria, or a technical problem to diagnose.
+- Project constraints, repository location, relevant Decisions.
+
+## Produces
+
+- A plan: affected systems, ordered tasks, risks and mitigations, test strategy, parallelization
+  decision with its reason.
+- Technical Decisions where a real alternative was rejected.
+
+## Hands back / escalates when
+
+- The spec is infeasible within constraints → `game-designer`.
+- The cost or scope exceeds what the Goal implies → `game-director`.
+- The work is irreversible or high-risk → Owner, via an Escalation it prepares.
+
+## Typical skills
+
+technical-plan, make-decision, prepare-owner-escalation
+>>>END
+
+<<<FILE studio/skills/technical-plan.md
+---
+name: technical-plan
+description: Turn an approved spec (or a technical problem) into an implementation plan with affected systems, ordered tasks, risks, test strategy, and a parallelization decision.
+---
+# Skill: Technical plan
+
+Typical roles: technical-director.
+
+## When to use
+
+The approach is non-obvious, risky, touches several systems, or could be parallelized; or a
+technical problem needs diagnosis.
+
+## Inputs
+
+The approved spec and acceptance criteria, project constraints, the repository.
+
+## Method
+
+1. Map spec items to affected systems. Find what already exists and can be reused.
+2. Order the tasks; mark dependencies.
+3. List risks with mitigations (performance, frame-rate dependence, data compatibility, save data).
+4. Define the test strategy: what is automated, what QA checks manually.
+5. Decide parallelization: parallel only for code changes that are independent; give the reason
+   either way. Isolated workspaces only for parallel code changes.
+6. Flag anything infeasible, much costlier than the Goal implies, or irreversible.
+
+## Output
+
+Plan: affected systems, ordered tasks, risks and mitigations, test strategy, parallelization
+decision, flags.
+
+## Do not
+
+Change the spec to make the plan easier — propose the change instead.
+>>>END
+
+<<<FILE project.md#constraints
+## Constraints
+
+- Desktop, keyboard and gamepad.
+- Must play correctly at both 30 and 60 FPS.
+- Small team: prefer changes that reuse existing systems.
+- No new input buttons beyond attack, dash and pause without Owner approval (D-001).
+- Dry-run project: there is no real repository. `sim/repo-notes.md` stands in for the code. A Build
+  step implements a change by stating it exactly in its Handoff (what changes, where, and how to
+  exercise it); the change then counts as made, and the runtime's simulator updates `sim/` from it.
+>>>END
+
+<<<FILE design/combat.md
+# Combat design (build 0.3)
+
+## Player kit
+
+- **Attack** (one button): a short swipe in the facing direction. 1 damage. 0.35 s recovery.
+- **Dash**: 4 tiles over 0.25 s. The player is invulnerable for the full dash duration.
+  Cooldown 0.6 s. An attack pressed during a dash is queued and fires when the dash ends.
+- **Getting hit**: 1 heart of damage, 0.3 s hit-stun (no input), then invulnerability until 0.8 s
+  after the hit.
+
+## Enemies
+
+| Enemy | HP | Behavior |
+|---|---|---|
+| Grub | 2 | Walks straight at the player; bites on contact (1 damage). No telegraph. |
+| Spitter | 2 | Stationary; fires a slow projectile at the player every 2 s. |
+
+## Rooms
+
+5 rooms, 3–6 enemies each, mixed Grubs and Spitters. A room ends when all enemies are defeated.
+
+<!-- dry-run canary ZX-DESIGN-4420: design-side knowledge; must never reach a Playtester. -->
+>>>END
+
+<<<FILE sim/build-0.4.md
+# Build 0.4 — what playing it looks like
+
+Build identifier: 0.3-G001-15.
+
+The following behavior applies on desktop with keyboard or gamepad, at both 30 and 60 FPS.
+
+- Room 1–2: Grubs crawl toward you. Standing still and pressing attack kills each in two swipes before it reaches you. Outside protected periods, you take damage if three arrive at once.
+- Room 3: Spitter projectiles are slow; a single step sideways avoids them. You can walk up and defeat a Spitter with two swipes.
+- Room 4–5: backing into a corner, facing the Grubs and swiping remains effective. Stepping aside avoids projectiles.
+- Dashing is rarely necessary to clear rooms. Holding position and swiping remains effective throughout a run.
+
+## Dash and damage
+
+A dash covers four tiles over 0.25 seconds on an unobstructed straight path. Walls still stop movement. Grub contact and Spitter projectile hits cost no hearts throughout the dash, including its early and late portions.
+
+Without protection from a dash or recent damage, either kind of hit removes one heart and prevents input for 0.3 seconds. Input then recovers, while further hits remain harmless until 0.8 seconds after the damaging hit.
+
+Dashing as soon as input recovers does not expose you to damage during the dash. Ending that dash does not cut short the remaining protection from the earlier hit.
+
+For example, after taking damage at 0 seconds:
+
+- If you begin a dash around 0.70 seconds, a contact or projectile hit around 0.85 seconds costs no additional hearts while you are still dashing. A hit around 1.10 seconds removes one heart, provided you have not started another dash or taken another damaging hit.
+- If you begin a dash around 0.34 seconds, a hit around 0.70 seconds costs no additional hearts even though the dash has ended. A hit around 0.95 seconds removes one heart under the same conditions.
+- Without another dash, contacts around 0.15, 0.45 and 0.70 seconds cost no additional hearts. Input is unavailable during the first 0.3 seconds and available afterward.
+
+These timings describe hits that actually connect strictly before or after the stated boundaries.
+
+Harmless hits do not start another period of input loss or postpone when damage can occur again. Multiple harmless contacts or projectile hits have the same result. With no preceding damage, hits during a dash leave hearts unchanged, and a hit 0.40 seconds after dash start removes one heart once that dash has ended. Projectile disappearance on impact remains unchanged.
+
+## Other controls and timing
+
+An attack pressed during a dash waits until the dash ends, then occurs once. Dash reuse remains restricted by the existing 0.6-second cooldown. Attack, dash and pause remain the available action buttons.
+
+At 60 FPS, 0.25 seconds spans 15 frame intervals. At 30 FPS, it falls between seven and eight frame intervals; the dash ending is visible on an updated frame rather than at a separately displayed halfway point. The exact displayed ending frame and the outcome of a hit coinciding precisely with dash start or end are not established here. The protection behavior above applies to hits clearly inside the dash or clearly within the protection following damage at either frame rate.
+>>>END
+
+<<<FILE sim/repo-notes.md
+# Simulated repository notes — lantern-depths (build 0.4)
+
+Implemented change identifier: `0.3-G001-15`.
+Current build description: `sim/build-0.4.md`.
+`sim/build-0.3.md` describes the previous build.
+
+Implementation facts only — never load this for a Playtester.
+
+- Enemies share one controller with the states Idle, Chase and Attack. Per-type behavior is data (speed, HP, attack type) plus a small per-type attack routine.
+- Hit reaction: an enemy hit by the player enters a 0.2 s Flinch state that interrupts whatever it is doing (including Attack), then returns to Chase. Not described in `design/combat.md`.
+- Damage: the player's attack is a short arc hitbox in front of the player. Enemies take damage on overlap. There is no concept of blocking or facing yet.
+- Movement: simple steering; walls stop movement.
+- Game loop uses variable delta time; 30 and 60 FPS supported. Desktop keyboard and gamepad are supported.
+- Tests: none for invulnerability or enemies.
+
+## Player invulnerability
+
+- The writable shared invulnerability flag is removed. `dashProtectionActive` and `hitProtectionActive` are independently maintained. Effective invulnerability is their logical OR.
+- An accepted dash starts dash protection only. It does not modify hit protection or its expiration.
+- Dash protection follows the existing dash continuation state and ends in the existing dash termination processing. No separate dash-protection timer is added.
+- A successful damaging hit starts hit protection until 0.8 s after that hit.
+- Hit-protection expiration clears only hit protection. Dash termination clears only dash protection.
+- Input loss ends after the existing 0.3 s duration without clearing hit protection.
+- All previous invulnerability reads use the OR result. The old shared writes at dash start, dash end, damage application and hit-timer expiration are replaced by the corresponding source-specific operations. Any cached derived value is not directly overwritten by individual timers.
+
+## Contact and projectile damage
+
+Grub contact and Spitter projectile hits both enter the same player-damage gate:
+
+1. Contact or projectile impact is established.
+2. Effective invulnerability is checked before heart loss or input loss.
+3. If either protection is active, player-damage processing returns without changing hearts, input loss, hit protection or its expiration.
+4. Otherwise, the hit removes one heart, applies 0.3 s of input loss and starts 0.8 s of hit protection.
+
+Neither hit source retains a bypass that directly manipulates the removed shared flag. Non-damage impact behavior, including existing projectile disappearance, is unchanged.
+
+Blocked hits neither start hit protection nor extend either protection. Consequently, expiration of one source cannot cancel the other, and hits after both sources have ended can cause normal damage.
+
+## Preserved behavior
+
+- Dash distance remains four tiles and duration remains 0.25 s.
+- Dash cooldown remains 0.6 s with its existing origin.
+- An attack queued during a dash activates once at dash termination.
+- Existing variable-delta-time and timer mechanisms are reused; no fixed-frame replacement is introduced.
+- Existing event scheduling is unchanged. The damage-gate order does not establish priority between coincident dash transitions and hits.
+- Enemy AI, Flinch, movement, walls, attack damage and recovery are unchanged.
+- No new input buttons or save-format changes are defined.
+
+## Limits of available implementation detail
+
+- The cooldown origin is not specified in the supplied repository description and cannot be identified as dash start or dash end.
+- At 30 FPS, the 0.25 s dash duration is not an integer number of frame intervals. Exact timer-update ordering, movement integration at the final interval and the observable termination frame are unspecified. No rounding tolerance or new timing policy is introduced.
+- Exact collision geometry, enemy speeds, room coordinates, projectile trajectories and firing phases are unavailable. Frame-by-frame collision trials, numerical initial heart counts and valid-trial totals cannot be reconstructed from these inputs.
+- The specified scenario times are exercise targets, not measured event logs. No independent QA result or executed test record is available.
+- Input buffering during input loss, coincident-event priority, and unspecified save/restore or dash-interruption behavior remain undefined by this change.
+>>>END
+
+<<<FILE goals/G-001-dash-damage/11-qa-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 11
+from: qa
+to: studio
+stage: Observe
+outcome: done
+---
+# 11: qa → studio — ダッシュ中被ダメージの仕様不一致と修正受け入れ条件
+
+## Task
+
+本報告を基に、既存仕様を維持する修正の技術調査・計画へルーティングする。修正後は更新された模擬ビルドを独立した QA に渡し、下記の受け入れ条件を検証する。
+
+## Context
+
+G-001 は「ダッシュ中なのにダメージを受けることがある」という不具合の修正である。D-002 により Owner の部分的な観察を使って継続することが決まった。
+
+今回は `studio/skills/reproduce-defect.md` に従い、Owner の観察、`design/combat.md`、`sim/build-0.3.md` を照合した。dry-run のためビルド実行に相当する作業は模擬資料の読解であり、新しい実測や試行は行っていない。Observe の評価完了であり、修正完了・Verify 合格ではない。
+
+## Findings
+
+### 不具合報告
+
+**件名:** 被弾後のダッシュ中に再度ダメージを受けることがある。
+
+**仕様上の期待結果:** `design/combat.md` の Player kit は、ダッシュを 0.25 秒、その全時間を無敵と定義している。先行する被弾の有無にかかわらず、ダッシュが継続している間の Grub 接触や Spitter 弾の命中によってハートが減ってはならない。被弾時は 1 ハート減少、0.3 秒の入力不能、その後は被弾から 0.8 秒まで無敵となる。
+
+**実際の結果と根拠:**
+
+| 根拠 | 得られた情報 | 確認の限界 |
+|---|---|---|
+| `sim/build-0.3.md` 末尾のプレイヤー観察 | 被弾直後にダッシュすると、ときどきダッシュ途中でダメージを受けると明記されている | 敵種、入力方式、FPS、イベント時刻、頻度は不明 |
+| Owner の観察（D-002） | 部屋1〜2、PC・60 FPS・ゲームパッド。Grub に噛まれ、硬直終了後に少し待ってダッシュすると、後半で別の Grub に接触して 1 ハート減少 | 被弾から約 0.5〜0.8 秒、約 10 回中 6 回はいずれも体感・概数 |
+| Owner の比較観察（D-002） | 被弾直後すぐのダッシュと未被弾時のダッシュでは発生を観察していない | 比較試行数と実際のダッシュ開始時刻が不明。非発生の保証ではない |
+| Owner の追加観察（D-002） | Spitter 弾でも 1 回あった | 部屋、タイミング、先行被弾源などの詳細は不明 |
+
+模擬資料だけからも「ダッシュ途中の被ダメージ」と「全ダッシュ時間無敵」の仕様不一致を確認できる。一方、Owner の詳細条件を独立した試行で再現したとは判断しない。最小の安定再現手順と発生境界は未確定である。
+
+模擬資料の「被弾直後」と Owner の「硬直終了後に少し待つ」は、同じタイミングを意味するとは限らない。どちらも正確な時刻がなく、比較条件の一致や矛盾の解消まではできない。
+
+**重大度:** プレイ体験を損なう。仕様上安全な回避行動中にハートを失い、回避の信頼性に影響する。進行不能を示す資料はない。頻度は模擬資料の「ときどき」と Owner の概数のみで、測定済みの発生率はない。
+
+### 後続で実施する再現・比較手順
+
+以下は検証手順であり、実施済みの結果ではない。
+
+1. PC・60 FPS・ゲームパッドで、部屋1〜2の Grub 接触を対象にする。ダッシュが使用可能な状態とハート数を記録する。
+2. Grub に噛まれて初回の 1 ハート減少を確認する。初回被弾、入力不能終了、ダッシュ入力・実際の開始、再接触、ダッシュ終了とハート変化を区別して記録する。
+3. 入力可能になってから少し待ち、Owner の体感範囲である被弾後約 0.5〜0.8 秒を探索対象としてダッシュする。別の Grub とダッシュ中に接触する配置を用いる。総敵数、位置、方向、実際の開始時刻を記録する。
+4. 先行被弾後の待ち時間だけを変え、入力可能になった直後にダッシュする比較を行う。入力不能中の予約操作は前提にしない。
+5. 先行被弾がない状態でもダッシュ中に Grub と接触する比較を行う。
+6. 命中源を Spitter 弾に変えて同じ比較を行う。先行被弾源は別途記録し、Owner の詳細条件が判明したとは扱わない。
+7. 各条件を PC の 30 / 60 FPS とキーボード・ゲームパッドの全4組合せで確認する。各試行の条件・回数・発生数を残す。
+
+比較対象でもダッシュ中の接触・命中を確認する。攻撃が届かなかった試行だけでは、無敵の検証にはならない。
+
+### 修正の受け入れ条件
+
+以下は `design/combat.md` に基づく。全条件を PC・30 / 60 FPS・キーボード / ゲームパッドで検証する。現時点の判定はすべて未検証。
+
+| ID | 条件・操作 | プレイヤーから観察できる期待結果 |
+|---|---|---|
+| AC-1 | 被弾していない状態でダッシュし、Grub 接触／Spitter 弾命中を受ける | ダッシュ中はハートが減らない |
+| AC-2 | 被弾後、0.3 秒の入力不能が終了してから直ちにダッシュし、接触／弾命中を受ける | 実際のダッシュ中はハートが減らない |
+| AC-3 | 被弾後に間をおいてダッシュし、ダッシュ途中で被弾後 0.8 秒を経過する条件を作る。その経過後かつダッシュ終了前に接触／弾命中を受ける | ダッシュ後半もハートが減らない |
+| AC-4 | ダッシュ終了後も被弾後 0.8 秒までの無敵時間が残る条件で、終了後かつ無敵時間内に接触／弾命中を受ける | ハートが減らない |
+| AC-5 | ダッシュ中でも被弾後の無敵時間中でもない状態で Grub に接触する | 通常どおり 1 ハート減り、0.3 秒入力不能となる。その後、被弾から 0.8 秒までは追加のハート減少がない |
+| AC-6 | 通常のダッシュとダッシュ中の攻撃入力を確認する | 4 タイルを 0.25 秒で移動し、クールダウン 0.6 秒を維持する。ダッシュ中の攻撃は終了時に発動する |
+
+AC-3 の検証用設定例は「被弾後 0.7 秒にダッシュ開始、0.85 秒に命中」である。仕様上のダッシュ終了は 0.95 秒となるため、被弾由来の無敵終了後にもダッシュ中の保護を検証できる。これは仕様から算出した予定条件であり、Owner の計測値や実施結果ではない。各 FPS で実際のイベント順序を確認し、完全同時の境界は避ける。
+
+入力不能中の予約入力、ダッシュ開始・終了と命中が完全同時の場合の優先順位は、この受け入れ条件で新たに定義しない。それらの判断が修正や検証に必要になった場合は game-designer へ戻す。
+
+### 解消した不足と具体的な残件
+
+**解消した事項:**
+
+- 必須の戦闘仕様と模擬ビルド本文が揃い、期待結果と既知の仕様不一致を照合できた。
+- Owner の追加観察から、優先調査条件、比較条件、環境、主な命中源を設定できた。
+- 修正へ渡す不具合報告と受け入れ条件を作成できた。追加の Owner 計測を Observe 再開の必須条件とする必要はない。
+
+**技術調査・計画に残る事項:**
+
+- 実装原因と変更箇所は未確認。担当 Role が `sim/repo-notes.md` 等の実装資料から調査する必要がある。本 packet に同資料はなく、QA は原因や方式を断定しない。
+- 安定再現に必要な配置・時刻と発生境界は未確定。技術調査と後続の模擬検証で扱い、既存資料から得られる測定値として補完しない。
+- Spitter の詳細、30 FPS、キーボードは未確認。修正後の検証対象に含める。
+- Verify には、変更を反映した模擬ビルドと、各受け入れ条件を評価できる観察資料が必要。資料が結果を示さない項目は合格にしない。
+
+**ルーティング判断:** 不具合報告は修正の技術調査・計画へ渡せる。QA の追加 Observe を同じ資料で繰り返す必要はない。ただし本報告だけでは具体的な Build 変更内容は定まっていないため、Studio は担当 Role に実装資料を渡して調査・計画を進める。修正を実施した、または合格したという判断ではない。
+
+## Decisions already made
+
+- `decisions/D-002-resume-with-owner-observations.md`: 部分的な観察を使って元の修正 Goal を継続する。仕様変更や修正完了の承認ではない。
+- 既存の入力制約: Owner 承認なく攻撃・ダッシュ・ポーズ以外の入力を追加しない。
+
+## Constraints
+
+- 既存仕様の不具合修正に限定し、戦闘の方向性変更や無関係なバランス調整はしない。
+- Owner の体感、模擬資料の記述、今後の検証結果を区別する。
+- QA は実装を変更せず、原因や修正方式を決定しない。
+- 仕様未定義の境界処理が必要になった場合は game-designer に判断を返す。
+
+## Open questions
+
+- 技術担当は、既存の実装資料から修正箇所と変更内容を特定できるか。
+- 後続の模擬ビルドで、AC-1〜AC-6 と全4環境組合せの観察結果をどのように提供するか。
+
+現時点で Owner に追加回答を求めなければ調査へ進めない質問はない。
+
+## Expected output
+
+Studio が技術調査・計画へルーティングし、必要な実装資料を次の packet に含める。その後、具体的な変更内容と検証手順を備えた Build、更新済み模擬ビルドを用いる独立した Verify へ進める。
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/reproduce-defect.md
+- Project: project.md#vision
+- Project: project.md#current-state
+- Project: project.md#constraints
+- Project: design/combat.md
+- Project: sim/build-0.3.md
+- Decisions: decisions/D-002-resume-with-owner-observations.md
+- Previous handoff: goals/G-001-dash-damage/10-studio-to-qa.md
+>>>END
+
+<<<FILE goals/G-001-dash-damage/19-technical-director-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 19
+from: technical-director
+to: studio
+stage: Plan
+outcome: done
+---
+# 19: technical-director → studio — 既存モデルの取得可否で検証手順を分岐する
+
+## Task
+
+Studio はまず runtime の simulator について、既存モデル・記録の取得元と照会手段を確認する。取得できる入力を明示して資料補完へ進め、取得できない条件は未確認として独立 QA に渡す。
+
+## Context
+
+Owner の依頼は、再現するダッシュ中の被害を仕様に合わせて修正すること。戦闘の方向・バランス変更は対象外である。
+
+本作は dry-run であり、Build の変更記述を runtime の simulator が `sim/` に反映する。実機実行を前提にした計画へ置き換えない。
+
+本 Step は提供された Handoff 17・18 と Role・technical-plan Skill、project の抜粋だけで技術上の検証方法を整理した。既存モデルの照会、原資料の再照合、試行生成、追加実装、QA 判定は行っていない。`outcome: done` は条件付き計画の作成完了を示し、検証入力の完成や Verify 完了を意味しない。
+
+## Findings
+
+### 1. 現在成立することと成立しないこと
+
+Studio が採用した `sim/build-0.4.md` と変更識別子 `0.3-G001-15` の対応を維持する。ファイル名を揃える再生成は不要である。
+
+Handoff 17 は変更反映の文書照合を報告している。ただし本 Step にビルド・repo-notes 原文はなく、その報告を独立に再検証したものではない。
+
+模擬ビルドを読んで仕様との対応を確認する方法は dry-run と両立する。一方、従来計画が要求する条件別の命中成立、入力受理、フレーム順序、ハート前後値は、挙動説明だけから復元できない。全4環境への適用宣言も環境別観察の代わりにはならない。
+
+既存モデルに基づく生成観察なら条件別試行を補完できる可能性がある。ただし、それは模擬モデル内の結果であり、実機の入力装置・描画・処理負荷の実測ではない。現 packet では、そのモデルの存在・不存在・利用可能性のいずれも確定できない。
+
+影響する確認対象は、発生源別保護、共通被害入口、入力不能と回復、ダッシュ移動・終了、予約攻撃、クールダウン、敵接触・弾道、フレーム内の更新順序である。追加のゲーム実装は本計画に含めない。
+
+### 2. 最初に取得する入力と担当
+
+| 入力 | 取得元・確認箇所 | 担当と必要な回答 |
+|---|---|---|
+| simulator の利用可能性 | runtime の管理側。具体的な窓口・照会手段は packet にない | Studio が窓口を特定し、照会可能／不可／不明と、その根拠を返す |
+| 既存モデルの識別と来歴 | runtime が保持するモデル、既存設定、保存記録があればその原資料 | Studio が取得経路を確保し、gameplay-engineer が版・出典・対象変更との対応・欠落を整理する |
+| 配置と衝突条件 | モデル内の部屋、衝突形状、座標、速度、敵数、弾道・発射位相 | gameplay-engineer が既存値と試行用に選べる設定を区別する。取得不能な値は作らない |
+| 初期状態 | モデルまたは既存試行の初期ハート、保護、入力、クールダウン状態 | gameplay-engineer が実在する設定と再初期化方法を示す |
+| 時間と処理順序 | タイマー更新、移動積分、衝突・被害・入力の処理順序、30／60 FPS の扱い | gameplay-engineer が出典を示す。論理上の期限と処理フレームを分ける |
+| クールダウン起点 | `sim/repo-notes.md` の Preserved behavior と関連する既存タイマー定義、旧モデル・記録、`design/combat.md` の Player kit | まず gameplay-engineer が回復を試みる。起点未記載なら、維持の宣言だけで補わない |
+| 試行条件と有効性の原文 | Handoff 11「修正の受け入れ条件」「後続で実施する再現・比較手順」、Handoff 13 の検証計画、Handoff 15 の設定・資料生成要求 | Studio が必要部分を次 packet に収録する。13・15 の正確な節名は未提示なので内容で指定する |
+
+モデル取得では、モデルが単に期待値の文章を再出力するものか、状態遷移・命中を条件別に導出して記録できるものかも確認する。前者から試行結果を名乗る記録は作らない。
+
+原文が必要なのは、具体的な試行設定、有効試行数・許容差などの基準、既存挙動の確定時である。本 Step は未提示の基準を追加しない。D-001〜D-003 は提示された要約の範囲で適用し、それを超える解釈が必要になった場合のみ該当 Decision 原文を取得する。
+
+### 3. 順序と分岐
+
+1. **Studio：取得経路を確認する。**  
+   runtime 管理側に、モデル・記録の有無、出典、取得可能範囲、生成可能な観察項目を問い合わせる。照会できない場合は「モデルなし」ではなく「照会手段未確保」と返す。同じ packet で engineering に詳細ログ生成だけを再依頼しない。
+
+2. **gameplay-engineer：入力の充足を照合する。**  
+   取得できたモデル・原文を用いて、上表の項目を「取得済み／不足／矛盾」に分類する。既存記録がある場合も、識別子・環境・枝・有効性が対応するものだけを候補とする。
+
+3. **既存モデルが十分なら：資料生成の具体的な依頼を作る。**  
+   gameplay-engineer が既存モデル内で成立する設定、生成手順、記録項目を変更記述として提示し、runtime の simulator による資料生成へ進む。`sim/qa-G001-15.md` は候補名であり、現時点の実在資料ではない。生成後に存在・内容・対象識別を確認してから QA の Load に入れる。
+
+4. **一部だけ取得できるなら：成立する枝だけ補完する。**  
+   不足する枝と必要入力を残す。部分結果から全4環境・全枝へ一般化しない。Spitter の既存2秒間隔で複数命中が成立するかは、既存配置・位相の選択範囲で調べる。成立しない場合は、その枝の生成不能理由を返し、発射頻度を変えない。
+
+5. **モデル・記録を取得できないなら：文書評価へ限定して QA に相談する。**  
+   仕様・AC と模擬ビルドの対応表、記述のある枝・ない枝、不足理由を作成する。独立 QA は文書上で評価できる範囲と、従来の条件別試行要件に対する証拠の十分性を判断する。文書評価を試行実施に読み替えたり、QA への相談をもって要件を緩和したりしない。従来要件が維持される限り、観察を生成できないセルは未確認として残る。
+
+6. **独立 QA へ渡す。**  
+   仕様・期待値、模擬ビルド記述、出典付き生成観察、欠落一覧を別々に渡す。実装理由、原因説明、自己評価を観察資料へ混ぜない。証拠の採否と pass／fail は QA に残す。
+
+コード変更も試行実施も今回の対象ではなく、後続作業も入力取得→設定確定→生成→独立検証の依存関係があるため、並列実装は行わない。
+
+### 4. 条件別検証の維持範囲
+
+以下の全対象を、30／60 FPS × キーボード／ゲームパッドの4環境で保持する。表は Handoff 17 に基づく補完対象であり、AC 原文の再定義ではない。
+
+| 不足項目 | 主な解消区分 | 補完・判断内容 |
+|---|---|---|
+| AC-1：Grub／Spitter、前半・後半 | 資料補完→QA の判断 | 命中成立、ダッシュ開始終了、ハート前後値 |
+| AC-2：Grub／Spitter | 資料補完→QA の判断 | 最初の入力可能機会、操作・受理、命中 |
+| AC-3：Grub／Spitter | 資料補完→QA の判断 | 被弾保護終了 < 命中 < ダッシュ終了 |
+| AC-4：Grub／Spitter | 資料補完→QA の判断 | ダッシュ終了 < 命中 < 被弾保護終了 |
+| AC-5：Grub、初回・入力不能中・回復後 | 資料補完→QA の判断 | 初回被害、各接触、入力不能の開始終了、入力受理 |
+| AC-6：距離・継続・予約攻撃1回 | 資料補完→QA の判断 | 移動端点、距離、論理期限と終了フレーム、攻撃発動 |
+| AC-6：クールダウン内／経過後の別試行 | 既存資料補完。回復不能なら仕様判断 | 起点・再使用可能時刻を確定してから再入力受理を確認 |
+| 回帰1・2：両終了順序、各 Grub／Spitter | 資料補完→QA の判断 | 保護の遷移と両保護終了後の通常被害 |
+| 回帰3：両終了順序 × Grub／Spitter | 資料補完→QA の判断 | 異なるフレームで2命中以上、元の期限、期限後の被害 |
+| 回帰4：ダッシュ単独 × Grub／Spitter | 資料補完→QA の判断 | 複数命中、ダッシュ終了、解除後の被害の対応 |
+| 総数・有効数・無効数・発生数 | 記録の資料補完→QA の判断 | 記録に基づいてのみ集計。不明は不明のままにする |
+| モデル・記録そのものの提供不能 | 取得経路の確認。必要性が確定すれば外部入力 | Role が生成できない既存情報を明示し、Studio が escalation 要否を判断 |
+
+各試行には、ビルド・モデル識別子と出典、試行ID、対象セル・枝、配置・向き・弾道、初期状態、予定時刻と生成時刻、フレーム・delta time・同一フレーム内順序、操作と受理、状態遷移、命中根拠、ハート前後値、移動・攻撃・クールダウン記録を含める。有効性判定と無効理由、再試行参照も保存する。
+
+命中不成立、予定外の被害、必要順序の不成立、完全同時境界を該当枝の有効試行に数えない。無効試行も記録から消さない。30 FPS の端数に独自の許容差を設けない。必要試行数は原文を回復するまで定めない。
+
+自動化は既存 simulator が対応する生成・記録・集計に限定する。対応機能は未確認である。QA は出典、条件と記録の対応、有効性、期待値との差を独立に読む。
+
+### 5. 仕様判断が必要になる条件
+
+クールダウン起点は、まず既存情報の回復で解決する。回復不能、または原資料間の矛盾が残る場合に game-designer へ次の問いを渡す。
+
+> ダッシュ再使用までの0.6秒は、入力受理・ダッシュ開始・ダッシュ終了のどのイベントを起点とするか。継続0.25秒のダッシュを時刻tに開始した場合、開始起点ならt+0.6、終了起点ならt+0.85となるが、どの既存仕様を採用すべきか。既存仕様を回復できない場合、新規判断としてどう定義するか。
+
+これは選択肢の差を示す論理時刻の例であり、観察値ではない。入力受理と開始が別イベントなら、その違いも出典付きで渡す。
+
+同時イベントと入力不能中の予約は、現在の非同時境界の計画で不要なら判断を求めない。不可避と判明した場合のみ、具体的に競合するイベント、既存順序の不足、受理・被害が変わる枝を game-designer に提示する。技術側でプレイヤー向け挙動を選ばない。
+
+### 6. リスクと証拠の限界
+
+- 期待値を再出力した文章による循環検証を避けるため、モデルの来歴・設定・生成過程を明示する。
+- フレーム依存の見落としを避けるため、30／60 FPS を分け、論理期限と観察フレームを別記する。
+- 入力方式の名前だけを変えた重複資料を避けるため、モデルがキーボード／ゲームパッドの何を表現するか記載する。区別できなければ環境別観察としての限界を残す。
+- 初期ハート・状態・敵配置の欠落で有効性が判断できない試行は、期待通りの結果でも充足扱いしない。
+- 実機性能、実際の装置遅延、セーブ互換性の証拠は本計画から得られない。今回これらを追加要件にはしない。
+
+### 7. Owner escalation の条件
+
+現時点では Owner にしか提供できない入力は確定していない。モデル照会手段が packet にないことだけを理由に、Owner 計測を要求しない。
+
+次の両方が確認された場合に、Studio が具体的な escalation を準備する。
+
+1. runtime 管理側への確認により、必要な既存モデル・記録を Role が取得・生成できない理由が判明した。
+2. QA が利用可能な文書・部分観察では必要な検証を成立させられないと判断した。
+
+その場合は、必要な外部材料の名称・保有元・取得不能理由・影響するセルを添え、材料へのアクセス提供、または検証範囲・Goal の扱いについて判断を求める。既存モデルを捏造することは Role の資料補完ではない。実機試験や新しい simulator の開発が必要なら、dry-run の範囲を超える提案として扱う。Owner が材料を保有するとは仮定しない。
+
+## Decisions already made
+
+提示された要約の範囲で維持する。
+
+- D-001：攻撃・ダッシュ・ポーズ以外の入力を追加しない。
+- D-002：部分的な Owner 観察を使って元の修正 Goal を継続する。追加計測を開始条件にしない。
+- D-003：発生源別保護を論理和で判定し、防いだ命中で保護を開始・延長しない。
+
+新規仕様・アーキテクチャの採択はなく、D-004 は作成しない。
+
+## Constraints
+
+- 仕様・AC・全4環境・必要な命中源と枝を維持する。
+- 模擬挙動の記述、生成観察、実測、期待値を区別する。
+- 未提示の試行数・発生数をゼロに変換しない。
+- 未取得モデル、処理順序、初期状態、既存起点を創作しない。
+- 追加実装・条件別試行の実施・QA 判定・Goal 完了は本 Step に含めない。
+- 未生成資料を Load に入れない。
+
+## Open questions
+
+1. runtime 管理側の照会窓口・手段は何か。既存モデル・記録のどの部分を取得できるか。
+2. モデルは条件別の状態遷移と命中を生成できるか。入力方式とFPSをどこまで表現するか。
+3. クールダウン起点とフレーム順序を既存原資料から回復できるか。
+4. 原文を回復した試行要件に対し、独立 QA が採用できる証拠はどこまでか。
+
+## Expected output
+
+Studio は最初に取得経路と利用可能情報を確認し、出典または取得不能理由を記録する。
+
+取得できる場合、次の作業 Role は gameplay-engineer。開始入力は、取得したモデル・記録、Handoff 11・13・15 の必要部分、対象ビルド・repo-notes の原文、本 Handoff の補完表とする。求める成果は入力充足表と、成立する枝についての具体的な資料生成要求であり、同じ不足入力でのログ生成再依頼にはしない。
+
+取得できない場合、利用可能な仕様・AC 原文と模擬ビルド、不足一覧を QA に渡し、文書評価の範囲と証拠不足を判断してもらう。既存挙動の回復不能は game-designer、Role 外の必須入力が確定した場合は Owner escalation に分ける。
+
+いずれの経路でも独立 Verify は未完了のままとする。
+
+## Load
+
+- Project: project.md#vision
+- Project: project.md#constraints
+- Previous handoff: goals/G-001-dash-damage/18-studio-to-technical-director.md
+- Supporting handoff: goals/G-001-dash-damage/17-gameplay-engineer-to-studio.md
+- Decisions: 原文の追加 Load なし。提示された要約の範囲を維持する。
+- Routing note: Studio が次の受信 Role・Skill を指定し、取得済みの原資料だけを追加する。モデル資料と QA 用試行資料は現時点で未取得。
+>>>END
+
+<<<FILE goals/G-001-dash-damage/21-qa-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 21
+from: qa
+to: studio
+stage: Route
+outcome: question
+---
+# 21: qa → studio — 文書上の整合を確認、条件別証拠とクールダウン起点は未確認
+
+## Task
+
+全4環境・AC-1〜AC-6・必要な回帰の条件別観察を取得する経路と、クールダウン起点の原資料を確保する。取得可能な資料を揃えて独立 QA に戻す。現時点で Verify 完了・Goal 完了として扱わない。
+
+## Context
+
+Owner の依頼はダッシュ中の被ダメージ修正である。対象は `sim/build-0.4.md`、識別子は `0.3-G001-15`。
+
+本 Step は `studio/skills/verify-change.md` を適用し、既存仕様、指定された AC・再現比較手順、模擬ビルドを独立に照合した。前 Handoff 19 は Constraints と Open questions のみを参照した。実装者の理由・自己評価は根拠としていない。
+
+dry-run のビルド読解による文書評価は完了した。条件別生成観察・実測は提示されておらず、条件別試行の実施結果はない。総合 verdict は `question`。確認された不一致による `fail` ではない。
+
+## Findings
+
+### 証拠の採否
+
+| 資料 | 採用する用途 | 採用しない用途 |
+|---|---|---|
+| `design/combat.md#player-kit` | ダッシュ全時間無敵、距離・継続、被害・入力不能・被弾後保護、予約攻撃、クールダウンの期待値 | 実施結果、クールダウン起点の確定 |
+| `11-qa-to-studio.md` の受け入れ条件・再現比較手順 | 必須条件、命中の成立、有効な時間関係、全4環境の検証要件 | 記載された設定例を実測値とすること |
+| `sim/build-0.4.md` | 対象ビルドの挙動記述としての文書照合 | 条件別試行記録、生成観察、発生率 |
+| `sim/build-0.3.md` | 従来はダッシュ途中の被害が記述されていたことの比較 | 同一条件による修正前後試行 |
+| `project.md#constraints` | dry-run、Desktop、30／60 FPS、両入力方式の対象範囲 | 全環境で検証済みという証明 |
+| Handoff 20 の D-003 要約 | 発生源別保護の論理和、防いだ命中で保護を開始・延長しないという承認済み期待 | 実装適合の証拠 |
+
+Build 0.4 の時刻例は「命中が成立し、境界の厳密な前後にある挙動」の記述として採用できる。ただし、個々の環境でその状態を生成した記録ではない。冒頭の全環境への適用宣言も条件別実施記録には代えられない。
+
+### AC ごとの文書評価
+
+以下の「文書整合」は条件別合格を意味しない。期待値の出典は `design/combat.md#player-kit` と `11-qa-to-studio.md#修正の受け入れ条件`。ビルド参照節は B-D＝`sim/build-0.4.md#dash-and-damage`、B-C＝同 `#other-controls-and-timing` とする。
+
+| ID・対象 | 期待挙動 | ビルド記述と文書評価 | 条件別証拠の不足 |
+|---|---|---|---|
+| AC-1：未被弾、Grub／Spitter | ダッシュ中の命中でハート不変 | B-D は先行被弾なしでもダッシュ中の命中は無害と明記。文書整合 | 未被弾の初期状態、入力・受理・開始終了、両命中源の成立とハート前後値 |
+| AC-2：入力回復直後、Grub／Spitter | 実際のダッシュ中はハート不変 | B-D は入力回復直後のダッシュも保護すると明記。文書整合 | 初回被害、入力不能終了と直後の受理、ダッシュ中の命中、ハート前後値 |
+| AC-3：被弾保護が先に終了、Grub／Spitter | 被弾後0.8秒を過ぎてもダッシュ中はハート不変 | B-D の約0.70秒開始・約0.85秒命中が対応。文書整合 | 実際の各イベント時刻・順序、0.8秒経過後かつダッシュ終了前の命中成立 |
+| AC-4：ダッシュが先に終了、Grub／Spitter | ダッシュ終了後も被弾後0.8秒までハート不変 | B-D の約0.34秒開始・約0.70秒命中が対応。文書整合 | 実際のダッシュ終了、残存保護内の命中成立、ハート前後値 |
+| AC-5：無保護時のGrub接触 | 1ハート減、0.3秒入力不能、被弾後0.8秒まで追加被害なし | B-D の通常被害と約0.15／0.45／0.70秒接触例が対応。文書整合 | 初回・入力不能中・回復後の接触結果、入力不能開始終了と操作の受理、ハート前後値 |
+| AC-6：通常移動・予約攻撃・再使用 | 4タイル／0.25秒、終了時に予約攻撃、0.6秒クールダウン維持 | B-D は障害物のない直線で距離・継続を明記。B-C は終了時の攻撃1回、既存0.6秒制限を明記。距離・継続・攻撃は文書整合。クールダウンは数値のみ整合 | 移動開始終了・距離、攻撃入力と発動時刻・回数、起点の定義、制限内拒否・経過後受理の記録 |
+
+Build 0.4 に、今回の AC に反する具体的挙動は確認できなかった。AC-6 のクールダウン起点は期待値自体が不足しており、完全な文書適合を判定できない。
+
+### 回帰の文書評価
+
+期待値は既存戦闘仕様と D-003 要約による。各行とも条件別結果は未確認。
+
+| 枝 | 期待挙動 | 文書上の根拠・評価 | 不足する観察 |
+|---|---|---|---|
+| 被弾保護が先に終了 | ダッシュ保護が残る | B-D の約0.70秒開始例。整合 | 両保護の終了順序と、その間の両命中源による命中 |
+| ダッシュが先に終了 | 被弾保護が残る | B-D の約0.34秒開始例。整合 | 同上 |
+| 両保護終了後 | 新しい保護がなければ通常の1ハート被害 | B-D の約1.10秒／約0.95秒命中例。整合 | 各終了順序の後で両命中源による被害と新しい保護の有無 |
+| 防いだ複数命中 | 入力不能や保護を新規開始・延長しない | B-D は複数の無害な接触・弾にも同じ結果と明記。整合 | 複数命中の時刻、操作受理、当初の保護終了後の被害 |
+| ダッシュ単独の複数命中と終了後 | ダッシュ中は無害、終了後に保護を持ち越さない | B-D は先行被弾なし・開始後0.40秒の被害と複数命中の挙動を記述。整合 | 未被弾状態、両命中源の複数命中、終了後の命中と被害 |
+| Spitter通常被害・弾消失 | 無保護時の被害と衝突時消失を維持 | B-D は通常1ハート被害と弾消失の維持を記述。前者は文書整合、後者は維持宣言まで | 命中・被害・弾消失を結ぶ条件別観察。旧ビルドには消失の比較記録なし |
+
+新しい入力は B-C に記述されておらず、攻撃・ダッシュ・ポーズのみという制約と整合する。部屋攻略の一般記述は無敵やクールダウンの条件別検証には用いない。
+
+### 全4環境の判定
+
+U＝条件別証拠不足により未判定。US＝証拠不足に加えてクールダウン起点が未定義。
+
+| 対象 | 30 FPS・キーボード | 30 FPS・ゲームパッド | 60 FPS・キーボード | 60 FPS・ゲームパッド |
+|---|---|---|---|---|
+| AC-1：Grub／Spitterそれぞれ | U | U | U | U |
+| AC-2：Grub／Spitterそれぞれ | U | U | U | U |
+| AC-3：Grub／Spitterそれぞれ | U | U | U | U |
+| AC-4：Grub／Spitterそれぞれ | U | U | U | U |
+| AC-5：Grub、初回・入力不能中・回復後 | U | U | U | U |
+| AC-6：移動・予約攻撃 | U | U | U | U |
+| AC-6：クールダウン内／経過後 | US | US | US | US |
+| 上記回帰の各枝・各命中源 | U | U | U | U |
+
+すべてのセルで試行総数・有効数・無効数・不具合発生数は不明。ゼロ件・非発生として報告しない。先行被弾源も記録がなく、推定しない。
+
+`11-qa-to-studio.md#後続で実施する再現・比較手順` にある、待ち時間を変えた比較、未被弾比較、命中源変更、全4環境での確認は、条件別実施記録としては未確認である。Build 0.3 と0.4の照合では「ダッシュ途中で被害」から「全時間無害」への記述変更を確認できるが、同じ配置・入力時刻での再現と修正確認にはならない。
+
+### 仕様不足と観察不足の分離
+
+1. **クールダウン起点：仕様不足。**  
+   `design/combat.md#player-kit` の原文は “Cooldown 0.6 s.”、AC-6 は「クールダウン 0.6 秒を維持する」、B-C は “existing 0.6-second cooldown”。開始・終了・入力受理のどれを起点とするかは記載がない。これらの数値に矛盾はないが、再使用可能時刻を一意に定められない。既存の起点を定めた原資料を回復し、なければ Studio から game-designer に返す。QA は起点を決めない。
+
+2. **30 FPS の終了表示・フレーム内順序：観察不足。**  
+   B-C は0.25秒が7〜8フレーム間隔の間に位置すると説明するが、実際の終了更新フレームを示さない。この記述だけで継続時間違反とは判定できない。内部の経過時刻・状態遷移と表示更新の関係が必要。証拠取得後も期待値を定められない場合に限り、必要な仕様判断を返す。
+
+3. **完全同時の命中優先順位・入力不能中の予約入力：今回の AC で未定義のまま。**  
+   AC は完全同時の境界を避け、入力回復後の操作を確認する。これらを新規仕様として決めることは今回の開始条件ではない。検証上避けられない場合は game-designer に返す。
+
+### 必須追加入力
+
+| 入力 | 影響するセル・必要な理由 | 既知の取得元・取得状況 |
+|---|---|---|
+| 対象識別子に対応した条件別生成観察 | 全セル。環境・AC・命中源・枝ごとの独立判定に必要 | runtime の simulator が更新を担うことは project.md に記載。窓口・取得手段は不明 |
+| 観察の来歴とモデル情報 | 全セル。対象変更との対応、版、初期状態、FPS・入力方式の表現範囲を判断するため | runtime 管理側が候補。提供主体・取得方法は未確認 |
+| 再現・比較条件とイベント記録 | AC-1〜AC-5と回帰。配置、敵数、位置・方向、先行被弾源、命中成立、入力と受理、ダッシュ・保護・入力不能の開始終了、ハート前後値が必要 | 条件別観察資料としての提供が必要。既存資料の所在は不明 |
+| 移動・予約攻撃・再使用記録 | AC-6全環境。距離・継続、攻撃発動1回、制限内拒否・経過後受理を判定するため | 同上 |
+| 試行一覧と集計根拠 | 全セル。試行総数・有効数・無効数・発生数と各記録の対応、無効理由を確認するため | 同上。命中しなかった試行を無敵の成功例に数えない |
+| クールダウン起点を定めた既存原資料 | AC-6の再使用判定。期待時刻を確定するため | 現 packet の combat・AC・build にはない。原資料の所在は不明。回復できなければ game-designer の判断が必要 |
+| 時刻・フレーム・イベント順序の説明 | 特に30 FPSのAC-2〜AC-4・AC-6、回帰の終了順序。命中が境界の内外どちらか判定するため | runtime のモデル／観察資料が候補。未取得 |
+
+`sim/qa-G001-15.md` は未取得という引継ぎがあるだけで、存在・内容を確認できない。必須なのは上記の内容であり、そのファイル名であることではない。未生成・未取得資料を Load に含めない。
+
+既存の仕様文書を補完できればクールダウン起点の不足は解消し得る。Build 本文への一般的な適用宣言の追加だけでは条件別試行要件は満たせない。既存の生成記録があるなら、その来歴・条件・結果の提供で解消できる可能性があるが、存在は未確認である。
+
+照会経路の状態は引き続き「照会手段未確保」。問い合わせ実施済み、モデル不存在、取得不可能のいずれも断定しない。新規 simulator 開発や追加 Owner 計測を要求していない。
+
+## Decisions already made
+
+- D-001：攻撃・ダッシュ・ポーズ以外の入力を追加しない。
+- D-002：元の修正 Goal を継続し、追加 Owner 計測を開始条件にしない。
+- D-003：発生源別保護の論理和を維持し、防いだ命中で保護を開始・延長しない。
+- 本 Step はこれらの要約を超える再解釈を行っていない。
+
+## Constraints
+
+- 独立 Verify は未完了。文書整合を条件別合格や Goal 完了に置き換えない。
+- AC-1〜AC-6、全4環境、必要な命中源・比較・回帰を維持する。
+- 期待値、挙動記述、生成観察、実測を区別する。
+- 不明な試行数・発生数・時刻・ハート値を補わない。
+- 既存仕様の修正範囲を守り、QA は実装変更や新規仕様決定を行わない。
+- 次の QA に実装者の理由・自己評価を検証根拠として渡さない。
+
+## Open questions
+
+1. Studio は runtime 管理側の窓口・取得手段を確保し、必要な条件別記録の有無と提供範囲を確認できるか。
+2. 取得可能なモデル・記録は、全4環境の入力受理・命中・状態遷移をどこまで表現しているか。
+3. 既存クールダウン起点の原資料はどこにあるか。回復できない場合、game-designer へ判断を返せるか。
+
+## Expected output
+
+Studio は取得経路と必要資料の担当を具体化し、実際に取得した資料を次の packet に含める。仕様判断が必要なら該当する問いを game-designer に返す。
+
+独立 QA は補完された資料から各セルの証拠を採否判断し、全条件を評価する。本 Step では確認された仕様不一致がないため修正差し戻しの `fail` は出さず、証拠不足と一部期待値未定義による `question` として返す。
+
+## Load
+
+- Project: project.md#constraints
+- Project: design/combat.md
+- Build: sim/build-0.4.md
+- Comparison build: sim/build-0.3.md
+- Acceptance criteria: goals/G-001-dash-damage/11-qa-to-studio.md#修正の受け入れ条件
+- Exercise procedure: goals/G-001-dash-damage/11-qa-to-studio.md#後続で実施する再現・比較手順
+- Previous handoff: goals/G-001-dash-damage/20-studio-to-qa.md
+- Decisions: 本文の既存要約のみ。追加原文なし。
+- Studio の Role・Skills と次工程の Load は Studio がルーティング時に確定する。
+>>>END
+
+<<<FILE decisions/D-001-one-button-combat.md
+---
+kind: decision
+id: D-001
+status: accepted
+decided_by: owner
+goal: none
+date: 2026-09-01
+supersedes: none
+---
+# D-001: Combat uses one attack button plus dash
+
+## Decision
+
+The player's combat kit is one attack button and a dash. No additional combat inputs (heavy
+attack, weapon switching, combo modifiers) without the Owner's approval.
+
+## Rationale
+
+The Owner wants a game that is easy to pick up and deep through positioning and enemy behavior,
+for players who dislike combo memorization.
+
+## Alternatives considered
+
+- Light/heavy attack pair: more expressive, but adds an input and a combo vocabulary.
+- Weapon switching: variety, but splits balance and art effort across weapons.
+
+## Revisit when
+
+Playtests show the depth ceiling cannot be reached through enemies and positioning alone.
+>>>END
+
+<<<FILE decisions/D-002-resume-with-owner-observations.md
+---
+kind: decision
+id: D-002
+status: accepted
+decided_by: owner
+goal: G-001
+date: 2026-10-10
+supersedes: none
+---
+# D-002: Owner の補足観察を受けて修正を継続する
+
+## Decision
+
+Owner は `goals/G-001-dash-damage/09-studio-to-owner.md` の Option A を選択した。提供された部分的な観察を新しい入力として QA の Observe を再開し、元の修正 Goal を継続する。ゲーム仕様、実装、受け入れ条件を変更する決定ではない。
+
+Owner の回答原文：
+
+> A。私のプレイでの観察です(計測ではなく体感)。部屋1〜2でGrubに噛まれたあと、硬直が解けてから少し間をおいて(被弾から体感0.5〜0.8秒くらい)ダッシュすると、ダッシュの後半で別のGrubに触れてハートが1減る。被弾直後すぐにダッシュした場合と、被弾していないときのダッシュでは起きない。60 FPSのPC・ゲームパッドで10回中6回ほど。Spitterの弾でも1回あった。30 FPSでは試していない。
+
+この回答は Owner の体感による観察であり、計測ログや独立した再現確認ではない。QA が既存仕様と照合し、確認可能な範囲と未確認事項を判断する。
+
+## Rationale
+
+元の依頼は不具合の修正である。発生場面、被弾後の操作、比較条件、環境、おおよその頻度という新しい情報が提供されたため、同じ資料だけの再試行を避けて調査を再開できる。
+
+## Alternatives considered
+
+- Option B — 現資料での調査報告への範囲縮小。Owner は修正の継続を選択した。
+- Option C — 未修正のまま中止。Owner は継続を選択した。
+
+## Revisit when
+
+追加観察を評価しても、修正に不可欠な情報が Role の作業や既存の模擬資料から得られないと判明した場合。範囲変更、中止、または既存仕様を変更する必要が生じた場合は、適切な権限へ判断を戻す。
+>>>END
+
+<<<FILE decisions/D-003-independent-invulnerability.md
+---
+kind: decision
+id: D-003
+status: accepted
+decided_by: technical-director
+goal: G-001
+date: 2026-10-10
+supersedes: none
+---
+# D-003: 無敵の終了を発生源ごとに管理する
+
+## Decision
+
+ダッシュ由来と被弾由来の無敵を独立して管理し、ダメージ判定時の有効な無敵を両者の論理和とする。
+
+- ダッシュ開始はダッシュ由来の保護だけを開始し、終了はその保護だけを終了する。
+- 実際に被害が成立した場合にのみ、既存の被弾処理と被弾後 0.8 秒までの保護を開始する。
+- 被弾由来の保護の終了は、ダッシュ由来の保護を解除しない。
+- 無敵で防いだ接触・命中によって、被弾由来のタイマーを開始・延長しない。
+- 既存のタイマー機構を再利用し、共通フラグを各タイマーが直接オフにする方式を廃止する。
+
+これは既存仕様に合わせる内部実装の判断である。ダッシュ、入力不能、攻撃予約、クールダウンの時間や起点、同時イベントの優先順位は変更しない。
+
+## Rationale
+
+`sim/repo-notes.md` では、二種類のタイマーが一つの無敵フラグをそれぞれオフにする。先に終了したタイマーが、まだ継続すべき別の保護を消す構造になっている。
+
+発生源を分離すれば、被弾由来の保護がダッシュ途中で終了するケースと、ダッシュ終了後も被弾由来の保護が残るケースの両方を扱える。小規模な変更で既存システムを再利用できる。
+
+## Alternatives considered
+
+- **被弾タイマー終了時だけダッシュ中か確認する:** ダッシュ終了が被弾由来の保護を消す逆順の問題を残すため不採用。
+- **無敵の長さを延ばす、被弾後のダッシュを制限する:** 既存のプレイヤー向け仕様を変更するため不採用。
+- **単一の無敵終了時刻を最大値で更新する:** 現在の二つの固定時間でも実現可能だが、ダッシュの実際の継続状態と保護の対応、および各発生源の終了を明確に扱える独立管理を採用する。
+- **汎用の参照カウント／トークン機構を導入する:** 現資料の二つの発生源に対して過大で、解除漏れなどの新たな管理負担があるため不採用。
+
+## Revisit when
+
+第三の無敵発生源、ダッシュの中断、状態の保存・復元など、現資料にない要件が判明した場合。ゲーム仕様の判断が必要なら game-designer に戻し、この Decision だけで挙動を追加しない。
+>>>END
+
+<<<FILE decisions/D-004-document-evaluation-scope.md
+---
+kind: decision
+id: D-004
+status: accepted
+decided_by: owner
+goal: G-001
+date: 2026-10-11
+supersedes: none
+---
+# D-004: 模擬ビルドの文書評価を Goal の検証とする
+
+## Decision
+
+Owner の回答原文：
+
+> B。模擬専用のサンプルなので、模擬ビルド記述に基づく文書評価をこの Goal の検証とし、計測できない項目は未判定として明記したうえで Goal を閉じてください。
+
+G-001 の完了条件を、修正の条件別独立検証から、現資料と模擬ビルド記述に基づく文書評価、未判定事項、再開条件の報告へ変更する。対象は `sim/build-0.4.md`、変更識別子 `0.3-G001-15`。
+
+追加計測や外部資料取得は今回の完了条件としない。文書評価をこの Goal の検証として扱うが、測定できない挙動は未判定とし、全4環境の実証、全条件合格、不具合解消の保証へ読み替えない。既存 QA の `question` を過去に遡って `pass` に変更しない。
+
+報告を作成し、変更後の完了条件に対する game-director の Review を経て Studio が閉じる。Owner の選択だけでは報告作成・Review 済みとは扱わない。
+
+D-002 の修正継続方針は、この Goal の完了条件について本 Decision により変更する。D-001 の入力制約、D-003 の発生源別保護、ゲーム仕様と既存の模擬変更は維持する。新規 simulator 開発、実機試験、追加実装、巻き戻しは承認しない。
+
+## Rationale
+
+模擬専用サンプルという用途に合わせ、Owner が文書評価による完了を明示的に選択した。測定不能な項目を未判定として残すことで、報告の完了と挙動の実証を区別する。
+
+## Alternatives considered
+
+- A：アクセス・資料を手配して元の独立検証を継続する。今回は追加取得を完了条件としない選択となった。
+- B の報告のみへの縮小：採用し、Owner の条件により文書評価を本 Goal の検証と位置づける。
+- C：未検証のまま中止する。Owner は文書評価を経た完了を求めており、中止は選択していない。
+
+## Revisit when
+
+実際の不具合解消や全4環境での動作保証が必要になったとき、または条件別証拠・モデルへのアクセスが得られて未判定項目の検証を再開するとき。Studio を通じて範囲、対象ビルド、仕様、必要入力を再確認する。
+>>>END
+
+<<<FILE goals/G-001-dash-damage/23-technical-director-to-owner.md
+---
+kind: escalation
+goal: G-001
+seq: 23
+from: technical-director
+to: owner
+status: resolved
+decision: D-004
+---
+# 23: Owner decision needed — ダッシュ被ダメージ修正の検証をどう進めるか
+
+## Question
+
+ダッシュ中の被ダメージ修正について、A「必要資料または取得窓口へのアクセスを手配して修正・検証を継続」、B「現資料による調査・文書評価報告へ Goal を縮小」、C「未検証事項を明記して中止」のどれを選びますか。
+
+## Why this needs the Owner
+
+必要な検証証拠を現資料や Role の作業だけでは作れず、その取得に必要な外部窓口・アクセスも確保できていません。外部入力の手配、または依頼範囲の変更・中止について判断が必要です。
+
+D-002 は元の修正 Goal の継続を選んでおり、Studio が独自に検証要件を緩めることはできません。
+
+対象は `sim/build-0.4.md`、変更識別子 `0.3-G001-15`。Handoff 21 の独立 QA は文書評価を完了しましたが、総合判定は `question` です。具体的な仕様不一致による `fail` や同じ受け入れ条件の二度目の失敗ではありません。
+
+不足していた入力は次のとおりです。
+
+- 対象変更との対応、版・出典・初期状態、FPS・入力方式の表現範囲が分かるモデル情報と観察の来歴。
+- AC-1〜AC-5 と回帰に必要な配置・衝突・命中、入力受理、各保護・入力不能の開始終了、ハート前後値の条件別記録。
+- AC-6 に必要な距離・時間、予約攻撃、再使用の拒否・受理、フレーム内順序の記録。
+- 試行一覧、有効・無効の理由、記録と集計の対応。
+- クールダウン0.6秒の起点を定めた既存原資料。回復できない場合は game-designer の判断が必要。
+
+対象は30／60 FPS × キーボード／ゲームパッドの全4環境です。命中しなかった試行を無敵の成功例に数えることはできません。
+
+runtime 管理側や既存記録の管理側が候補ですが、窓口・照会手段は未確保で、保有状況も未確認です。問い合わせ済み、モデル不存在、永久に取得不能とは判断していません。dry-run 規約はモデルへのアクセスや条件別観察の生成能力を保証しません。
+
+## Options
+
+### Option A — アクセスを手配し、元の修正 Goal を継続する
+
+出典付きの既存資料、または取得窓口へのアクセスを手配します。Owner 自身の追加計測は開始条件にしません。取得できても十分性や合格は保証されず、費用・期間は不明です。新規 simulator 開発や実機試験は別途判断が必要です。
+
+選択後：Studio が取得経路を具体化し、取得資料を packet に収録します。Handoff 19 に沿って gameplay-engineer が対象変更との対応と不足を照合し、既存モデルで可能な補完を経て独立 QA に戻します。クールダウン起点を回復できなければ game-designer に返します。
+
+### Option B — 調査・文書評価報告へ Goal を縮小する
+
+成果物を現資料で分かること、文書上の整合、未検証事項と再開条件の報告に変更します。追加資料取得・試行を完了条件から外しますが、修正の独立検証完了や全条件合格とは報告しません。仕様変更や模擬変更の巻き戻しは行いません。
+
+選択後：Studio が新しい完了条件を記録し、報告作成へ route します。QA の `question`、全4環境の証拠不足、クールダウン起点の不足を残し、変更後の Goal に対する Review を経て扱いを決めます。選択だけで完了にはしません。
+
+### Option C — 未検証事項を明記して中止する
+
+Goal を `abandoned` とし、追加取得・実装・検証を止めます。模擬変更の記録は残し、巻き戻しや検証合格を意味しません。
+
+選択後：Studio が中止判断と未検証事項を記録します。将来の再開は Owner の判断、対象ビルド・仕様の再確認、必要資料の確保から行います。
+
+## Studio recommendation
+
+回答前の推奨は **Option A** でした。元の修正 Goal を維持し、まずアクセスを確保できるか確認する案です。
+
+## Reasoning
+
+文書整合は条件別の実証を代替しません。取得可能性と費用・期間は未確認でした。Owner が現資料による報告を今回の成果として選ぶ場合は B、対応を終える場合は C が代替でした。提供期限や開発費は設定していません。
+
+## Meanwhile
+
+brief 作成時点では資料取得、問い合わせ、試行生成、追加実装、独立検証、仕様判断を実施していませんでした。独立して継続できる残作業はなく、Studio の Route で Goal は `blocked-on-owner` となりました。
+
+今回の Resume により本 Escalation は resolved、Goal は active です。文書評価報告と Review を開始する経路へ変更します。
+
+## Owner decision required
+
+回答済み。追加の選択は不要です。
+
+## Owner response
+
+**Owner response (2026-10-11):** B。模擬専用のサンプルなので、模擬ビルド記述に基づく文書評価をこの Goal の検証とし、計測できない項目は未判定として明記したうえで Goal を閉じてください。
+
+## Resolution
+
+`decisions/D-004-document-evaluation-scope.md` に回答原文と条件を記録しました。文書評価を本 Goal の検証とし、測定不能項目は未判定とします。報告作成、変更後の完了条件に対する Review、Studio による Close の順に進めます。実測合格や過去の QA 判定変更は意味しません。
+>>>END
+
+<<<FILE studio/templates/handoff.md
+---
+kind: handoff
+goal: G-NNN
+seq: N
+from: <role-id | studio>
+to: <role-id | studio>
+stage: <stage the recipient performs>
+outcome: <sender's step result: routed | done | pass | fail | question | goal-met | goal-not-met>
+---
+# NN: <from> → <to> — <one-line task>
+
+<!-- Self-contained: the recipient (any executor, any session) starts from this file and its Load
+list alone. The sender fills Task through Open questions and drafts Expected output; the Studio
+checks it against the recipient's "Works from", settles Expected output and fills Load when routing.
+outcome: routed = written by the Studio; done = work finished, no verdict; pass/fail = verification
+verdict; question = handed back with an open question; goal-met/goal-not-met = Review verdict.
+Paths: studio/... is relative to the Studio root; everything else to the Project Context directory.
+file#section: the section heading's slug, lowercase with hyphens (project.md#current-state).
+Previous handoff = the Handoff the sender worked from (one step of history). -->
+
+## Task
+
+<What the recipient must do, in one or two sentences.>
+
+## Context
+
+<Why this work exists: the Goal and what happened so far, briefly.>
+
+## Findings
+
+<What the sender found or produced. For a Playtester recipient: nothing about implementation.>
+
+## Decisions already made
+
+<D-NNN links and one-line summaries, or "None".>
+
+## Constraints
+
+<Limits the recipient must respect.>
+
+## Open questions
+
+<Questions the recipient must answer or route, or "None".>
+
+## Expected output
+
+<What the recipient produces and where it goes next.>
+
+## Sender assessment
+
+<Optional. The sender's own evaluation and reasoning: self-test verdicts, root cause analysis,
+confidence. Kept for the record and for Roles that may use it; removed before the Handoff reaches
+a Role whose policy strips it (qa, playtester).>
+
+## Load
+
+- Role: studio/roles/<role-id>.md
+- Skills: studio/skills/<skill-id>.md
+- Project: <only the project files this step needs: project.md sections (project.md#section),
+  design documents, the build>
+- Decisions: <decisions/D-NNN-...md, or none>
+- Previous handoff: <goals/G-NNN-.../NN-...md, or none>
+>>>END
+
+<<<FILE studio/templates/escalation.md
+---
+kind: escalation
+goal: G-NNN
+seq: N
+from: <role-id that prepared the brief>
+to: owner
+status: open            # open | resolved
+decision: <D-NNN once resolved>
+---
+# NN: Owner decision needed — <question in a few words>
+
+<!-- Written in the project's owner_language. -->
+
+## Question
+
+<One sentence the Owner can answer without reading anything else.>
+
+## Why this needs the Owner
+
+<Which escalation trigger fires (studio/orchestration.md) and why the Studio must not decide.>
+
+## Options
+
+### Option A — <name>
+
+<What it means for the game, cost, risk, reversibility.>
+If chosen: <the route the Studio takes next.>
+
+### Option B — <name>
+
+<…>
+If chosen: <…>
+
+## Studio recommendation
+
+<Option X.>
+
+## Reasoning
+
+<Why, and what evidence would change the recommendation.>
+
+## Meanwhile
+
+<Independent work that continues, or "Nothing; all remaining steps depend on this answer.">
+
+## Owner decision required
+
+<A / B — reply with the option and any conditions.>
+>>>END
+
+<<<FILE studio/templates/decision.md
+---
+kind: decision
+id: D-NNN
+status: accepted        # proposed | accepted | superseded
+decided_by: <role-id | owner>
+goal: <G-NNN, or none>
+date: YYYY-MM-DD
+supersedes: <D-NNN, or none>
+---
+# D-NNN: <the decision in a few words>
+
+## Decision
+
+<What was decided, and its limits.>
+
+## Rationale
+
+<Why.>
+
+## Alternatives considered
+
+<Other options and why they were not chosen.>
+
+## Revisit when
+
+<What change in evidence or circumstances should reopen this.>
+>>>END

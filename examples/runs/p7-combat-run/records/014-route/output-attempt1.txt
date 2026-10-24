@@ -1,0 +1,154 @@
+I routed after steps 7a–7c, opened one Build step (17) and wrote the new Goal state and handoff below. I could not append the Route entry to `log.md`: it is not in my write list.
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-16
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): a player playing the current build's combat experiences it as varied and engaging instead of monotonous. Different situations call for noticeably different play (positioning, timing, use of attack and dash), and the player can tell why. The improvement stays inside the vision pillars: one-button combat (attack + dash only, D-001), short runs, readable threats. Numeric thresholds belong to Design; the final verdict belongs to Review.
+
+Out of scope: new input buttons (needs Owner approval per D-001), changing run length, new biomes or content unrelated to combat variety, and any change to the core concept. Not a defect report: nothing in the request says combat is broken.
+
+## Unknowns
+
+- Observe: done (scripted play, rooms 1–3 + practice room). Rooms 4–5 and hand-timed play are unobserved by a human; the final Play step covers them.
+- Observe (FPS divergence, qa): done (16). Deterministic. First walker difference is in room 1 at 0.30 s, a bot threshold at an exact tie (distance 2.5; hypothesis). In room 3 a shot hits at 60 FPS and not at 30 FPS; the log has no positions. No build defect shown, but criterion 16e is unproven. Step 7d adds the missing log data.
+- Diagnose: done (04).
+- Decide: skipped. No choice of direction or scope; all options stay within D-001 and the pillars. Returns here if the Build needs a new enemy type, a healing system or a new input, or if a ruling changes scope.
+- Design: done for now (14). Criteria 13–16 ruled, five spec defaults confirmed, no build or bot change needed. Reopens (tentative 8b) only if the 16e evidence shows a frame-rate-dependent graze at the contact edge (the designer then states whether that is acceptable), or if walker totals in rooms 3–5 leave 3–6.
+- Plan: skipped. The approach reuses the enemy update loop. Returns here if the same criterion fails verification twice.
+- Build: 0.5 implemented (10). Step 7d: tooling only, richer `log on` output for bots, plus the walker 30/60 test aligned with criterion 16 as ruled. No change to simulation or bot decisions.
+- Verify (visual): done (15). Cue forms are accepted. Seven visual points apply to a future graphical build (spec: design/combat-cues-visual-spec.md, V1–V12). Only V12 (timing) can be checked in the text build; V1–V11 stay unverified until a graphical build exists, so they become a proposed new Goal at Close.
+- Verify (QA, criteria 1–16 + V12): planned after 7d. Compose its Handoff from 14 (checklist items 1–6; strip the Sender assessment), 15 (V12 only; report, do not rule on, any contradiction between combat.md and the visual spec) and 16 plus the 7d log (16e).
+- Play: planned. A fresh playtester judges the result, including rooms 4–5 and hand-timed play.
+- Review: planned (`game-director`), experience Goal. Graphical cue acceptance is still open at that point.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 01-studio-to-playtester.md (report: 02-playtester-to-studio.md) |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-studio-to-game-designer.md (result: 04-game-designer-to-studio.md) |
+| 3 | Decide | game-director | make-decision | skipped (no real choice; see Unknowns) | — |
+| 4a | Design | game-designer | write-design-spec | done | 05-studio-to-game-designer.md (result: 07-game-designer-to-studio.md) |
+| 4b | Observe (FPS divergence) | qa | reproduce-defect | done | 06-studio-to-qa.md (result: 08-qa-to-studio.md) |
+| 5 | Plan | technical-director | technical-plan | skipped (approach local; see Unknowns) | — |
+| 6 | Build | gameplay-engineer | implement-change | done | 09-studio-to-gameplay-engineer.md (result: 10-gameplay-engineer-to-studio.md) |
+| 7a | Design (criterion 14, spec gaps) | game-designer | write-design-spec | done | 11-studio-to-game-designer.md (result: 14-game-designer-to-studio.md) |
+| 7b | Verify (visual) | art-director | visual-review | done | 12-studio-to-art-director.md (result: 15-art-director-to-studio.md) |
+| 7c | Observe (walker 30/60 divergence) | qa | reproduce-defect | done | 13-studio-to-qa.md (result: 16-qa-to-studio.md) |
+| 7d | Build (bot log data, walker test) | gameplay-engineer | implement-change | open | 17-studio-to-gameplay-engineer.md |
+| 8 | Verify (criteria 1–16, V12) | qa | verify-change | planned (after 7d) | — |
+| 8b | Design (frame-rate graze rule) | game-designer | write-design-spec | tentative (only if 16e shows a graze difference) | — |
+| 9 | Play | playtester | playtest-session | planned | — |
+| 10 | Review | game-director | review-outcome | planned | — |
+| 11 | Next | studio | — | planned | — |
+
+## Route changes
+
+After 7a–7c: the designer ruled 14 and 16 with no build or bot change; the art review concerns a future graphical build only; QA found no build defect, but 16e is unproven (the log lacks positions). Added 7d Build (logging only, test aligned with the ruling) before Verify, and tentative 8b Design for a frame-rate graze.
+
+## Next action
+
+Run the gameplay-engineer step with 17-studio-to-gameplay-engineer.md (result addressed to `studio`). Then Route: if the engineer reports no behavior change, open Verify (qa, criteria 1–16 + V12) as described under Unknowns; if the engineer hands back, re-route per the return rules.
+
+## Outcome
+
+(open)
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/17-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-001
+seq: 17
+from: studio
+to: gameplay-engineer
+stage: Build
+outcome: routed
+---
+# 17: studio → gameplay-engineer — Add decision-time state to the bot log; align the walker rate test with criterion 16
+
+## Task
+
+Make two tooling and test changes, with no change to the simulation or to any bot decision:
+
+1. Extend the `log on` output of `bots.py` so QA can compare a bot's decisions at 30 and 60 FPS from the same state.
+2. Replace the walker 30/60 `expectedFailure` test in `repo/tests/test_game.py` with tests that match criterion 16 as now written in `design/combat.md`.
+
+## Context
+
+G-001 (combat monotony), build 0.5. The walker bot gives different results at 30 and 60 FPS in rooms 3–5. Criterion 16e says this is a build defect only if the same decision at the same game time (±1 frame) from the same state has a different outcome. QA reproduced the divergence (deterministic) and found no build defect, but cannot close 16e because `log on` prints action names and times only, with no positions. The designer ruled that the walker only has to meet criteria 13 and 14 at each rate, and that the dodger must agree across rates (16c). The old test still describes the walker difference as unexplained.
+
+## Findings
+
+Reproduction scripts (one per rate), run with `python3 bots.py {script}`:
+
+```text
+bots walker
+rooms 1-5
+fps 30        # second script: fps 60
+log on
+```
+
+QA's baseline results, which must not change (hearts lost per room 1/2/3/4/5, ✓ cleared, ✗ not cleared):
+
+| Rate | Walker | Dodger |
+|---|---|---|
+| 30 FPS | 3✗ 2✓ 0✓ 1✓ 3✗ (9 lost, 3/5 cleared) | 0 lost, 5/5 cleared; dashes in rooms 3/4/5: 8/7/11 (35 total) |
+| 60 FPS | 3✗ 2✓ 2✓ 2✓ 2✓ (11 lost, 4/5 cleared) | 0 lost, 5/5 cleared; dashes in rooms 3/4/5: 10/8/14 (48 total) |
+
+The camper differs between rates too (room 2 cleared at 30, not at 60). Record its output before and after your change.
+
+What QA needs to see (hypotheses, not facts, which the new log should confirm or refute):
+- Room 1, ~0.30 s: the 60 FPS walker swings and the 30 FPS walker walks. The walker swings when the nearest grub is closer than 2.5 tiles; the distance may land exactly on 2.5 and fall on opposite sides at the two rates through floating-point accumulation.
+- Room 3, 2.10–2.25 s: a shot hits the player at 60 FPS but not at 30 FPS. QA cannot tell whether this is a different decision, or a contact-edge graze that is caught at one rate and missed at the other.
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no new input.
+- Designer's rulings (handoff 14), already in `design/combat.md`: criteria 14 and 16 as written there, and the five confirmed spec defaults. No build or bot change follows from them.
+- Studio: Decide and Plan are skipped for this Goal.
+
+## Constraints
+
+- **No behavior change.** Do not touch simulation code, bot decision logic, thresholds (including the 2.5 tile threshold and any tie handling), the 0.15 s decision grid, or player-visible output. Changing the walker's numbers would invalidate the criterion 13/14 results the designer ruled on.
+- With `log` off, bot output must stay byte-identical to the current output.
+- No new input; the build must still play correctly at 30 and 60 FPS.
+- Stop and hand back to `studio` (outcome `question`) if meeting the criteria below would need a change to the simulation or a bot decision, or if the existing walker test cannot be replaced without ambiguity. Do not decide spec questions.
+
+## Open questions
+
+None for you. Whether a contact-edge graze that depends on the frame rate is acceptable is the game-designer's decision and is decided only after QA reads your log. If your log makes such a case visible, say so in your notes as an observation, without judging it.
+
+## Expected output
+
+Acceptance criteria:
+
+1. **Decision lines.** With `log on`, each bot decision line keeps its current content and adds: the frame number, the grid decision time and the actual frame time; player position (x, y); hearts; whether the player is stunned (and remaining stun); the nearest enemy's kind, position and distance, where the distance is the exact value the bot compared against its threshold, printed to at least 6 decimals; and the position and velocity of every shot in flight.
+2. **Skipped decisions.** When a grid decision is skipped (for example while the player is stunned), a log line says so with the time and the reason.
+3. **Heart-loss lines.** Each heart lost produces a line with the time, the frame, the source (grub or shot), the player position and the source's position.
+4. **Same results.** For `bots walker`, `bots dodger` and `bots camper`, `rooms 1-5`, at `fps 30` and `fps 60`: hearts lost per room, cleared rooms, action counts and the logged action names and times are identical to the output before your change (the table above plus your recorded camper output).
+5. **Tests.** `python3 -m unittest discover -s tests` passes. The walker `expectedFailure` test is replaced by tests of what criterion 16 now requires, expressed with the existing bots and deterministic: the dodger agrees across rates (same cleared set, hearts lost per room within 1), and the walker meets criteria 13 and 14 at each rate separately. Leave the other tests as they are.
+
+Write your build notes as a handoff addressed to `studio` (not to qa). Include: files changed; the run_tests result; before and after output for criterion 4 (walker, dodger, camper, both rates); a sample of the new decision lines for room 1 at 0.15–0.50 s and room 3 at 1.80–2.60 s at both rates. Your Sender assessment is stripped before QA sees the Handoff.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: design/combat.md (criteria 13–16), repo/bots.py, repo/game.py, repo/play.py, repo/tests/test_game.py, repo/README.md, project.md#constraints
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-001-combat-monotony/16-qa-to-studio.md (also relevant: goals/G-001-combat-monotony/14-game-designer-to-studio.md)
+>>>END

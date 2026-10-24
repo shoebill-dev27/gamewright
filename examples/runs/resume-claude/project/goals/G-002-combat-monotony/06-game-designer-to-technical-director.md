@@ -1,0 +1,111 @@
+---
+kind: handoff
+goal: G-002
+seq: 6
+from: game-designer
+to: technical-director
+stage: Plan
+outcome: done
+---
+# 06: game-designer → technical-director — plan the build of Option A enemy-side combat depth
+
+## Task
+
+Make a technical plan for building the spec in `design/enemy-depth.md`: telegraphed attacks, the
+Charger, the Shieldbearer, and new compositions for the 5 existing rooms. Split the work into
+buildable, verifiable parts and call out risks.
+
+## Context
+
+Goal G-002: the Owner said 「戦闘が単調なので改善したい」. The playtest (01–02) found monotony. The
+diagnosis (03) offered options. The Owner chose Option A on 2026-10-10 (D-002): fix it through enemy
+behavior and room composition, keep one-button combat. This handoff delivers the design spec.
+
+## Findings
+
+- The spec is in **`design/enemy-depth.md`** (new file). `design/combat.md` is unchanged; the spec
+  says it supersedes combat.md's Enemies and Rooms sections from the implementing build.
+- Summary of the spec:
+  - **Telegraph rules (section 2.2):** every damaging enemy action except Grub contact has telegraph
+    → active → recovery phases. A floor danger marker in orange/red appears for at least 0.5 s,
+    direction/area locked at telegraph start, no damage before the active phase, no stagger, death
+    cancels everything.
+  - **Dash (section 2.3):** reuses the existing full-duration dash invulnerability; an active phase
+    that overlaps a dashing player is not used up, so it can still hurt if it overlaps when the dash
+    ends. Telegraphs that expect a dash are at least as long as the 0.6 s dash cooldown.
+  - **Spitter:** telegraph 0.6 s, cycle 2.0 s, locked aim line. **Grub:** unchanged.
+  - **Charger:** HP 3; telegraph 0.7 s with a 1.5-tile-wide, up-to-8-tile lane; rush 8 tiles/s;
+    recovery 1.2 s after a wall or enemy, 0.6 s after a player hit or a full-length miss.
+  - **Shieldbearer:** HP 3; 120° guard arc, front hits deal 0 with feedback; 90°/s turn rate; bash
+    with 0.7 s telegraph, then 1.0 s guard-down recovery. Player gets past it by flanking after a
+    dash, or by baiting the bash.
+  - **Rooms:** R1 Charger + 2 Grubs; R2 Shieldbearer + 2 Grubs; R3 2 Spitters + Charger; R4 2
+    Shieldbearers + Spitter + Grub; R5 Charger + Shieldbearer + Spitter + 2 Grubs.
+  - **Acceptance criteria** are in section 6 (V1–V10 for QA, experience signals separately).
+- All timings are in seconds and tiles per second. At 30 and 60 FPS outcomes must match within one
+  30 FPS frame; fast movement needs path-based contact checks, not end-position checks.
+- Art follow-ups for `art-director` are listed in spec section 7 (marker look, wind-up poses, guard
+  presentation, dazed pose, non-colour cue). They are not decided in this spec.
+
+## Decisions already made
+
+- D-001: one attack button plus dash, unchanged.
+- D-002: enemy behavior and room composition only; no heavy attack, no new input, **no
+  hold-to-charge** in this Goal. (The spec calls the Charger's attack a "rush" to avoid confusion.)
+
+## Constraints
+
+- No new input buttons. Holding attack must do nothing new.
+- Must play correctly at 30 and 60 FPS.
+- Small team: reuse existing systems (hit, invulnerability, dash, contact rules, enemy controller).
+- Stay inside the 5-room cave slice. No layout, biome, meta-progression or run-length changes.
+- Pillar 3: every threat is visible before it can hurt.
+
+## Open questions
+
+For the Technical Director to confirm or answer in the plan. None of them changes the design
+direction; if one does, hand back with a question.
+
+1. Does the current dash pass through enemies, or stop against them? The spec's flank and bait
+   routes should work with sideways dashes, but a dash through the Shieldbearer's space would be
+   an additional route. Please report the actual behavior.
+2. Player walk speed is not in `combat.md`. The spec assumes the player is clearly faster than the
+   Shieldbearer (1.0 tile/s) and the Charger's approach (1.5 tiles/s). Please confirm or report the
+   value.
+3. Enemy-versus-enemy collision: the spec assumes a Charger's rush stops at any enemy as at a
+   wall, and that Spitter projectiles pass over enemies without hurting them. Please confirm
+   whether this matches existing behavior; if not, say what is cheapest.
+4. Cost and approach for generalising telegraph → active → recovery across enemies, and for the
+   "hit check along the path" requirement at 30 FPS.
+5. Whether total enemy HP in rooms 4–5 risks the 15–20 minute run target; flag if a measurement is
+   needed in the verification plan.
+6. The dash defect in G-001 should be fixed or confirmed fixed before V3 can be verified reliably;
+   please order the work accordingly.
+
+## Expected output
+
+A technical plan (Skill `technical-plan`): approach, work breakdown, order, risks, and how each
+spec check V1–V10 will be verified, including at 30 and 60 FPS. It also lists art-director's visual
+spec (spec section 7) as a dependency or parallel task, and states explicitly whether it gates Build
+or Verify, so the Studio can confirm or drop the tentative art-director Design step (6b).
+
+The plan goes to `gameplay-engineer` (Build) as the next Handoff, unless it must be handed back with
+a question (to `game-designer` for spec gaps, to `game-director` if scope or direction would change).
+Write the verification section so that `qa` can use it from the spec, acceptance criteria and build
+alone, without the planner's or implementer's reasoning.
+
+## Sender assessment
+
+Confidence is good on intent and parameters, medium on tuning: numbers such as the 1.2 s Charger
+recovery, the 90°/s turn rate and total enemy HP in room 5 are first estimates and should be
+expected to need a tuning pass after the first playable build. The spec keeps all numbers in its
+parameter tables so tuning does not require changing criteria. No D-001 or pillar 3 conflict found.
+Not written: a new Decision (no significant choice beyond D-002 was needed).
+
+## Load
+
+- Role: studio/roles/technical-director.md
+- Skills: studio/skills/technical-plan.md
+- Project: project.md#constraints, design/combat.md, design/enemy-depth.md, sim/build-0.3.md, sim/repo-notes.md
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-002-enemy-side-depth-one-button.md
+- Previous handoff: goals/G-002-combat-monotony/05-studio-to-game-designer.md

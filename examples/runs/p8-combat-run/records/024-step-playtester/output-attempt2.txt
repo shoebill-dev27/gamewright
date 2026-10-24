@@ -1,0 +1,44 @@
+<<<FILE @run/play/room2-react
+room 2
+fps 60
+end 40
+when see * coming within 1.5 then move aside
+when text "rears back" then move aside
+when see r within 1.4 then attack
+when see s within 6 then move toward
+when see g within 1.4 then attack
+when see G within 1.4 then attack
+when see g within 3 then face
+>>>END
+
+<<<FILE @run/play/room3-dash-react
+room 3
+fps 60
+end 40
+when see * coming within 2 then dash aside
+when text "rears back" then dash aside
+when see r within 1.4 then attack
+when see g within 1.4 then attack
+when see G within 1.4 then attack
+when see s within 1.4 then attack
+when nothing within 20 then stop
+when see s within 8 then move toward
+when see g within 8 then move toward
+when see G within 8 then move toward
+when see r within 8 then face
+>>>END
+
+<<<FILE @run/play/room4-react
+room 4
+fps 60
+end 40
+when see * coming within 2 then move aside
+when text "rears back" then move aside
+when see r within 1.4 then attack
+when see g within 1.4 then attack
+when see G within 1.4 then attack
+when see s within 1.4 then attack
+when see s within 8 then move toward
+when see G within 8 then move away
+when see g within 8 then move toward
+>>>END

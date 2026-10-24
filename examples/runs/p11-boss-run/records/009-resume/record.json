@@ -1,0 +1,52 @@
+{
+ "op": "Resume",
+ "role": null,
+ "goal": "G-002",
+ "attempts": [
+  {
+   "runtime": "codex",
+   "session_id": "01a15799-3501-76b3-b776-caae56bf620c",
+   "model": "default",
+   "tools": "disabled: shell_tool,unified_exec,apps,browser_use,browser_use_external,computer_use,in_app_browser,plugins,skill_search,sleep_tool,tool_suggest,code_mode_host,goals,image_generation,multi_agent,view_image,realtime_conversation; any use rejected",
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 25942,
+    "cached_input_tokens": 7680,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 3204,
+    "reasoning_output_tokens": 92
+   },
+   "cost_usd": null,
+   "warnings": [
+    "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+   ],
+   "ambient_instructions": "user-level $CODEX_HOME/AGENTS.md (cannot be disabled by flags)",
+   "attempt": 1,
+   "started": "2026-10-20T13:37:00",
+   "seconds": 56.4,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "decisions/D-015-owner-approves-continuous-run-and-final-boss.md": "e0bd5b794a3b4e0e37edf8ca0324ebd38f3f062d2ecf5aedcd6896c55df3b1cb",
+  "goals/G-002-final-boss/goal.md": "46a28a05afdb33dd13fdf6f4f6103498dc4188d933cc75bdf515e3c5b7bddc92",
+  "goals/G-002-final-boss/07-studio-to-game-director.md": "12aae22d93bef4209b5db005010c90197c7f71fe5000d40996141e79a6619bd7",
+  "goals/G-002-final-boss/06-game-director-to-owner.md": "f33ce13d0a9b5faee9f168abc02ef2f40b44bb1ad673a644bba73c6d07661dd1"
+ },
+ "decision": {
+  "status": "active",
+  "open": [
+   [
+    "game-director",
+    "Decide"
+   ]
+  ],
+  "new": [
+   "game-director",
+   "Decide"
+  ]
+ },
+ "seen_through_seq": 7
+}

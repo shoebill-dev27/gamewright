@@ -1,0 +1,165 @@
+Route for steps 14, 15 and 16: all three fit the plan and no escalation trigger fires, so I opened Build. I composed a fresh Build Handoff (17) that merges the three results. I did not edit 14, 15 or 16, and I did not append to `log.md`, which is outside my write list.
+
+<<<FILE goals/G-001-combat-monotony/17-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-001
+seq: 17
+from: studio
+to: gameplay-engineer
+stage: Build
+outcome: routed
+---
+# 17: studio → gameplay-engineer — Build the Option A combat rework (build 0.5)
+
+## Task
+
+Implement the approved combat rework in `repo/` as one sequential change set (D-004), following `design/combat.md` (AC-1…AC-17), `design/combat-visuals.md` (V-1…V-8) and the Technical Director's plan in handoff 14 (tasks T1–T9). Update `manual.md` in the same change set. If the spec is ambiguous, contradictory or missing a case, stop and hand back; do not decide it yourself.
+
+## Context
+
+G-001: "戦闘が単調なので改善したい" (combat feels monotonous). Diagnosis found single-state, untelegraphed enemy behavior. The Director chose Option A (D-002): rework existing enemy behavior (grub and spitter state machines, telegraphs, attack-slot limit, spitter aim-lock, clearer feedback, run/room flow per D-003). Design is done. Three inputs have now come back:
+
+- **Plan (handoff 14):** feasible within constraints. No spec item is infeasible. Read it in full; it defines the approach, tick order, tasks T1–T9, the test table per AC, the as-built report contents, the manual task, and spec-gap defaults F1–F11.
+- **QA defect report (handoff 15):** in rooms 4–5 each volley prints two identical "a spitter spits" lines at one timestamp. It is two events (one per spitter), not a double print. It is presentation-only and is covered by AC-8.
+- **Art-director review (handoff 16):** rulings in `design/combat-visuals.md`. No rule, timing or parameter changed.
+
+## Findings
+
+What to build, in short (details are in 14 and the two design files):
+
+1. **Sim (T1–T3):**
+   - Grub states: Approach, Wind-up, Strike, Recovery, plus a Knockback overlay.
+   - Spitter states: Idle, Charge, Recovery, Stagger, with aim-lock at the end of Charge.
+   - Attack-slot limit: at most 2 grubs in Wind-up/Strike, ties broken by (distance, spawn index).
+   - Swept strike check; elapsed-seconds timers with leftover carry.
+   - 90° swipe cone; hit and cancel rules.
+   - Tick order per 14.
+   - Run flow: down, run over, restart on attack, clear heal +1 (max 3), 1.5 s pause, room 5 "run complete", practice-room rules.
+2. **Trace (T4), view (T5), bots (T6), tests (T7), manual (T8), as-built report (T9)** as in 14.
+3. **Spit-line requirement from QA (15), alongside AC-8.** Verify will check these at fps 30 and 60 in rooms 3, 4 and 5 and with 1, 2 and 3 spitters:
+   - Each spit line names its spitter (by position, e.g. "spitter (top right) spits"), per the naming in `design/combat-visuals.md`.
+   - No two lines at one timestamp have identical text. If two spitters share a position label, add a disambiguator (14, T5).
+   - The number of spit lines at a timestamp equals the number of spitters that fired; the `spit` trace event count is unchanged.
+   - Each spit line can be matched to its projectile `*`.
+4. **Visual rulings from the Art Director (16).** `design/combat-visuals.md` is authoritative for glyphs, colors, extra draws and text lines.
+   - Glyph carries the state, not color alone: uppercase (`G`, `W`, `S`, `Z`) means committed to hurting; lowercase (`g`, `w`, `s`, `z`) means harmless; a damaged enemy uses the `w/z` family.
+   - Orange/red is reserved for telegraphed enemies and `*`. The player, the swipe arc and `x` never use it.
+   - Extra room draws on: Wind-up start, Charge start, projectile spawn, every swipe, grub Recovery start, player down, room load and run over. Timings are untouched.
+   - Swipe arc glyphs `) ( ^ v` in lantern color.
+   - New lines: "a grub rears back (left)", "the grub is open" at the start of Recovery, a spitter stagger line.
+   - The run-over screen adds "press attack to start again".
+   - Plan T5 puts the glyphs and strings into one `GLYPHS` table and one `LINES` table in `play.py`. Fill them from `combat-visuals.md`.
+   - Where 14's glyph-state wording (F9: telegraph glyph has priority over damaged) differs from `combat-visuals.md`, follow `combat-visuals.md` and report it as built. If it does not settle the case, hand back.
+5. **Open question from the Art Director:** can the extra event draws be added cheaply? The plan assumes yes (T5 snapshots). If not, hand back: a 0.5 s Wind-up cannot be guaranteed visible with only a 0.5 s draw cadence.
+6. **Optional, no rule change:** the Art Director suggests a visible invulnerability marker (`p` for `P`). Do not add it unless `combat-visuals.md` requires it. Mention it in the report if you did.
+
+## Decisions already made
+
+- D-001: one attack button plus dash. No new inputs.
+- D-002: Option A; B deferred, C out of scope.
+- D-003: room mix across rooms; zero hearts ends the run; room clear heals one heart.
+- D-004: build Option A as one sequential change set on the existing simulation, no isolated workspaces.
+
+## Constraints
+
+- Must play correctly at 30 and 60 FPS; tests parameterized over both, with the spec's tolerance (0.04 s at 30 FPS, 0.02 s at 60 FPS).
+- Reuse existing systems; no new modules. `Game` stays in `game.py`, with small helpers allowed.
+- Do not change rules, timings or parameters from the spec. [tune] values stay as specified.
+- Defaults F1–F11 in handoff 14 apply unless the spec says otherwise. F1: implement grub speed 2.0 tiles/s (build 0.4 has 1.2) and flag it in the report. F11: add no pause.
+- Keep the shot shape `[x, y, vx, vy]` and the meaning of `cleared`, so `bots.py` keeps working. Existing event names are kept per 14.
+- `manual.md` is player-facing: describe behavior, no [tune] numbers, no implementation notes.
+- Run `run_tests` and `run_bots` at both frame rates before reporting. The existing tests that break by design (14, section 4) are to be rewritten.
+
+## Open questions
+
+- Non-blocking, for `game-designer` at Review: F1–F11 in 14 (especially F1, F6, F7).
+- Hand back to the Studio (do not guess) if the spec is ambiguous, if the plan is not workable, or if a change conflicts with the approved direction or scope.
+
+## Expected output
+
+- The change set: T1–T8 in `repo/` and `manual.md`, with `run_tests` passing.
+- The as-built report from 14, section 5, written in the artifact you produce, covering:
+  - every as-built value listed there;
+  - the glyph/color table and exact player-visible strings;
+  - timestamp error and cross-fps difference at 30 and 60 FPS;
+  - minimum Strike frames at 30 FPS;
+  - the choice made for each of F1–F11 and the V-1…V-8 and spit-line items.
+- Address the result to `studio` (the Studio routes it to independent QA verification and an Art Director visual review, so the report must state facts and values; QA does not receive your Sender assessment).
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: project.md#constraints, project.md#art-direction, design/combat.md, design/combat-visuals.md, manual.md, repo/README.md, repo/game.py, repo/play.py, repo/bots.py, repo/tests/test_game.py
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-002-combat-response-scope.md, decisions/D-003-run-end-and-room-rules.md, decisions/D-004-option-a-single-change-set.md
+- Previous handoff: goals/G-001-combat-monotony/14-technical-director-to-studio.md (also read 15-qa-to-studio.md and 16-art-director-to-studio.md)
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-15
+---
+# G-001: Combat feels monotonous
+
+## Owner request
+
+> 戦闘が単調なので改善したい
+
+## Interpretation
+
+Success condition (qualitative): when an action player from the project's player profile plays through combat encounters, the fights feel varied and engaging, and the player's moment-to-moment choices (positioning, timing, enemy behavior) visibly matter. The player no longer experiences the fights as the same repeated pattern.
+
+Out of scope: adding input buttons beyond attack, dash and pause (D-001, Owner approval needed); changes to the run length or the non-combat systems; numeric targets (these belong to Design as acceptance criteria, and the final verdict to Review).
+
+No immediate escalation: the Goal does not conflict with the vision or D-001, and it needs no reinterpretation. Improving depth through positioning, timing and enemy behavior is what pillar 1 asks for.
+
+## Unknowns
+
+- Observe (playtester): done (02 rooms 1–3, 08 rooms 4–5). Not observed: room 5 fight, approaching a spitter, projectile hits, room clear, dash dodging; the Play step after Build covers them.
+- Observe (qa): done (06, 15). Spec gaps were ruled on in Design (10, D-003). The doubled spit line is reproduced (15): two spitters, identical text, presentation only; it is covered by AC-8 and goes to Build. Nothing verified at 30 FPS yet beyond that report.
+- Diagnose: done (03). Cause: single-state, untelegraphed enemy behavior. Option A chosen (D-002); B deferred; C out of scope.
+- Decide: done (D-002). No Owner escalation.
+- Design: done (10, 16). Spec in `design/combat.md` (AC-1…AC-17), run/room rules in D-003, visual spec in `design/combat-visuals.md` (V-1…V-8).
+- Plan: done (14). Feasible; one change set (D-004). Spec gaps F1–F11 have defaults; the designer confirms them at Review (F1 grub speed matters most).
+- Build: `open` (17). `gameplay-engineer`: T1–T9 and the manual update.
+- Verify: `qa` after Build; `art-director` in parallel because visuals change. Planned. Each verifies from the spec and the build, not from the engineer's reasoning.
+- Play: `playtester` replays the changed build, live and reactive. Planned. Slot starvation and "grubs not trivial / dash matters" are watch items.
+- Review: experience Goal. `game-director` with `review-outcome`. Planned. Run progression after "run over" is not defined; the Director may take it up there.
+- Skipped: none.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | playtester | playtest-session | done | 02-playtester-to-game-designer.md |
+| 2 | Diagnose | game-designer | diagnose-experience | done | 03-game-designer-to-game-director.md |
+| 3a | Decide | game-director | make-decision | done | 05-game-director-to-studio.md |
+| 3b | Observe (defects) | qa | reproduce-defect | done | 06-qa-to-game-designer.md |
+| 3c | Observe (rooms 4–5) | playtester | playtest-session | done | 08-playtester-to-game-designer.md |
+| 4 | Design | game-designer | write-design-spec | done | 10-game-designer-to-studio.md |
+| 5a | Plan | technical-director | technical-plan | done | 14-technical-director-to-studio.md |
+| 5b | Observe (spit line) | qa | reproduce-defect | done | 15-qa-to-studio.md |
+| 5c | Design (visuals) | art-director | visual-review, write-design-spec | done | 16-art-director-to-studio.md |
+| 6 | Build | gameplay-engineer | implement-change | open | 17-studio-to-gameplay-engineer.md |
+| 7a | Verify | qa | verify-change | planned | — |
+| 7b | Verify (visuals) | art-director | visual-review | planned | — |
+| 8 | Play | playtester | playtest-session | planned | — |
+| 9 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+After steps 5a–5c: plan feasible (no spec change needed), spit-line defect confirmed as presentation under AC-8, visual spec added (V-1…V-8). All fit the plan; no escalation. Build opened (17) with all three merged; Verify now also checks V-1…V-8 and the spit-line criteria.
+
+## Next action
+
+Run `17-studio-to-gameplay-engineer.md` (Build, `gameplay-engineer`). It addresses its result to `studio`. Then run Route: compose fresh Handoffs for QA verification (7a) and Art Director visual review (7b) in parallel from the as-built facts only, without the engineer's Sender assessment.
+
+## Outcome
+
+(Filled at Close.)
+>>>END

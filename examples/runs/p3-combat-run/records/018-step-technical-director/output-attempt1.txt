@@ -1,0 +1,201 @@
+<<<FILE goals/G-001-combat-monotony/16-technical-director-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 16
+from: technical-director
+to: studio
+stage: Route
+outcome: done
+---
+# 16: technical-director → studio — Phase 2 is feasible and cheap; Phase 1 needs no separate Plan gate; four spec questions go to the game-designer
+
+## Task
+
+Pass this assessment on with the art-director's answer to `game-designer`. Phase 1 may go to Build now with the plan in "Findings". Phase 2 stays blocked until the designer has answered the questions in "Open questions" and the art-director has given the telegraph direction.
+
+## Context
+
+Handoff 13 asked whether the Lunge Grub and Fan Spitter can be built cheaply by a small team on existing systems, which to drop if cost is high, whether Phase 1 needs a Plan, and which values are already in code. I worked from `design/g001-combat-escalation.md`, `design/combat.md`, `sim/repo-notes.md` and D-001..D-003. The technical choices are recorded in D-004.
+
+## Findings
+
+### Verdict
+- **Both Phase 2 behaviors are feasible within constraints, with no new input and no pillar change. Neither needs to be dropped for cost.**
+- The shared enemy controller (Idle / Chase / Attack, per-type data plus a small per-type attack routine) fits both.
+- **Fan Spitter: cheapest.**
+  - It reuses the Spitter routine and projectile.
+  - The new parts are a 0.6 s charge, an aim lock, three projectiles at −25° / 0° / +25°, and a 3 s cycle (mostly data).
+  - Cost: small.
+- **Lunge Grub: small to medium.**
+  - It needs a per-type routine with wind-up, lunge and recovery, plus a direction lock.
+  - It needs a path-swept hit check (below).
+  - It needs a per-state flinch exemption (see the critical finding).
+  - Cost: small to medium.
+- **Repositioning Spitter: rejected on cost.** The designer left the choice to me. It needs wall-position selection, movement and pathing, and it interacts with the Phase 1 placement rules. See D-004.
+- If something must be cut later, that is a design-value call for the designer. It would not be a cost call. The Lunge Grub carries the "dash has a purpose" goal, and the Fan Spitter is the cheaper add-on.
+- The unknown art cost of the telegraphs is the main open cost. It is with the art-director.
+
+### Critical finding: the existing Flinch conflicts with the Phase 2 spec
+`sim/repo-notes.md`: a player hit puts an enemy in a 0.2 s **Flinch** that interrupts whatever it is doing, including Attack, then returns it to Chase. `combat.md` does not describe this.
+
+- The spec (4.1) says damage does not interrupt wind-up or lunge, and puts stagger out of scope. As built, one swipe during wind-up would cancel the telegraph, and the Grub would re-enter Chase and wind up again. A player could reset a Lunge Grub indefinitely.
+- Flinch during recovery would cut the 0.8 s punish window to about 0.2 s.
+- The same applies to the Fan Spitter's 0.6 s charge. The spec is silent on whether a hit cancels it.
+- Cheap fix (no new system): add a per-state "flinch-immune" flag that the Flinch entry checks. Phase 2 states set it.
+- This is a player-facing choice, so the designer decides (Open questions 1 and 2).
+- It also affects Phase 1 slightly, since existing Grubs and Spitters are interrupted by Flinch today. That is existing behavior and I am not changing it.
+
+### Swept hit check for the lunge
+The lunge covers 5 tiles in 0.3 s, which is about 16.7 tiles/s, or 0.56 tile per frame at 30 FPS and 0.28 at 60 FPS.
+
+- **Position is a function of elapsed lunge time.** Use the lunge start timestamp on the accumulated game clock, not `velocity * dt` accumulation. The lunge distance is then identical at 30 and 60 FPS and clamps exactly at 5 tiles.
+- **Sub-step along the path.** Each frame, advance the Grub in sub-steps of at most about 0.25 tile (or a fraction of the smaller hitbox radius, if that is smaller) with the existing wall-stop movement and the existing overlap and contact test. At each sub-step, call `isInvulnerable(t)` with the time at that sub-step.
+- This reuses existing code and needs no new collision primitive. An analytic segment test is a possible alternative and I rejected it for now (D-004).
+- Damage is dealt at most once per lunge.
+- The lunge ends at a wall or after 5 tiles, as the spec says.
+- Wind-up and lunge start on scheduled timestamps (wind-up start + 0.6 s), not on the frame that notices the expiry. The 30 FPS result then differs by at most 1 frame.
+
+### Observation on the spec's dash window (for the designer, not changed by me)
+Spec 4.1 says a dash started between wind-up 0.35 s and the lunge start (0.6 s) covers the lunge hit. As written, that does not hold.
+
+- A dash started at 0.35 s ends at 0.60 s (invulnerability is 0.25 s), exactly when the lunge starts. It covers nothing.
+- What counts is when contact happens. Contact is at about `0.6 s + (distance − combined hitbox radius) / 16.7`.
+- A dash covers the hit if it starts within the 0.25 s before contact, and also not after it. So the real window is **about 0.25 s, about 7 frames at 30 FPS**. It is not wider than the dash.
+- Where it sits depends on the distance and hitbox sizes. Those are not in the packet. For example, a net gap of 2.2 tiles puts contact at about 0.73 s and the window at about 0.48–0.73 s.
+- A dash started at lunge start (0.6 s) covers any contact within 4.2 tiles, which includes everything the 3.5-tile trigger allows.
+- The 4-tile dash also takes the player out of the locked line, which may matter more than the invulnerability. The 0.6 s dash cooldown also applies.
+- The window is probably workable, and it may suit the intent, but the spec's description and the criterion 2 check ("dash starts within 0.6 s before a threat would hit") should be set against the real numbers. This is the designer's call (Open question 3).
+
+### Phase 1: does it need a Plan?
+- **No separate Plan gate and no isolated workspace.** Phase 1 can go to Build with the plan below. The risk is low to medium and concentrated in timing. There is no save data, nothing irreversible, and no cross-system risk beyond the spawner and the enemy controller.
+- **Caveat on "data and tuning only".** The room table is data, but the 0.8 s marker, the 5-tile spawn-point selection, the wave trigger (≤1 alive or 8 s) and the Spitter's 1.0 s first-shot delay are logic. They need a small wave scheduler. I cannot tell from the packet whether the room system already supports waves, edges or spawn markers.
+- Build's first task is to report that. If a spawner rework beyond a small scheduler is needed, hand it back to me. If it clearly exceeds what the Goal implies, I escalate to `game-director`.
+
+**Phase 1 ordered tasks (serial, one Build):**
+0. Report what is in the code: Grub speed, player speed, projectile speed, hearts, room size in tiles, whether a spawn effect or spawner exists, and what a dash or attack pressed during hit-stun does today (repo notes say "unspecified").
+1. Make the dash and attack input ignored, not buffered, during hit-stun (D-003) if they are not already. Add tests.
+2. Add the wave scheduler and spawn queue. The enemy object is not created during the marker (it must not exist, move or attack). All timers are timestamps on the accumulated game clock, like `isInvulnerable`.
+3. Add the marker (reuse an existing effect, or a placeholder flagged for the art-director) and the spawn-point selection. This covers the 5-tile minimum distance, the same-edge fallback, then the farthest point, and being on screen.
+4. Add the wave trigger (≤1 alive or 8 s from the previous wave's marker start).
+5. Add the Spitter's first shot no sooner than 1.0 s after it appears, then the existing 2 s interval.
+6. Enter the room tables (3.2) and the Spitter placements (3.4) as data.
+
+**Phase 2 ordered tasks (after designer and art-director answers):** flinch-immune flag, then Fan Spitter, then Lunge Grub with sub-stepping, then room-table swaps (spec 4: room 3 gets 1 Lunge Grub, room 4 gets 2 Lunge Grubs and 1 Fan Spitter, room 5 gets 3 Lunge Grubs and 1 Fan Spitter).
+
+### Risks and mitigations
+- **Frame-rate dependence (all timers).** Use timestamps and elapsed-time functions, never frame counts or per-frame increments.
+- **Tunneling at 30 FPS.** Sub-stepping, plus a unit test where the lunge crosses a thin target in one frame.
+- **No enemy tests exist.** The only tests today are for `isInvulnerable`. A small headless enemy simulation on a fixed clock (1/30, 1/60, variable dt) is the main hidden cost and I count it in the estimate. Build should extend the existing test pattern.
+- **Flinch interaction** (above).
+- **Unmeasured numbers.** The spec's values are untested. Make them data (timings, ranges, angles, counts), not constants in code, so tuning needs no code change.
+- **Projectile and effect limits.** The Fan Spitter spawns 3 projectiles per volley. Build should confirm there is no projectile pool limit.
+
+### Test strategy
+- **Automated** (simulated clock at 1/30, 1/60 and varying dt):
+  - marker 0.8 s (nothing exists or damages before it ends);
+  - minimum spawn distance and on-screen spawn;
+  - wave trigger at 8 s and at ≤1 alive;
+  - Spitter first shot ≥1.0 s;
+  - D-003 input ignore in hit-stun;
+  - lunge: direction lock, exact 5-tile distance, tunneling case, one hit per lunge, no damage while dash- or hit-invulnerable, and flinch immunity (once the designer decides);
+  - Fan: aim lock at charge start, three angles;
+  - timestamps matching within 1 frame at 30 FPS (±0.034 s), per criterion 5.
+- **QA manually:** criteria 1, 3 and 4, the stationary-stance check, telegraph readability, and that the lunge reads clearly before it hurts.
+- **Playtest:** real run time (criterion 6) and the feel of the dash window.
+
+### Parallelization
+**None.** Phase 1 tasks 2–5 share the spawner and the enemy controller, so they are not independent. Phase 2 also touches the same controller and room data, and it is blocked on reviews anyway. The Fan Spitter and Lunge Grub routines are separable, but the work is too small to be worth a second workspace and the merge risk on the shared flinch flag.
+
+### Values already in code
+`sim/repo-notes.md` does not contain Grub speed, player speed, projectile speed, hearts or room size, so I cannot report them from the packet. Build must report them in task 0. Two things are in the notes: the Flinch (0.2 s, interrupts, undocumented in `combat.md`) and the invulnerability timestamps (`hitInvulnUntil`, `dashInvulnUntil`, `isInvulnerable(now)`).
+
+## Decisions already made
+
+- D-001: one attack button plus dash; no new input.
+- D-002: B then A, C in reserve; 5 rooms and 15–20 min runs stay.
+- D-003: input during hit-stun is ignored, not buffered.
+- D-004 (new, technical): time-parametrized, sub-stepped lunge hit check; Fan Spitter over the repositioning Spitter; Phase 1 as one serial Build with no separate Plan.
+
+## Constraints
+
+- Frame-rate independent at 30 and 60 FPS.
+- Reuse existing systems. No new input and no pillar change; none of this needs either.
+- I did not change the spec. The points below are proposals for the designer.
+
+## Open questions
+
+For `game-designer` (via the Studio):
+1. **Flinch on Phase 2 enemies.** Should a player hit leave Lunge Grub wind-up and lunge uninterrupted, as spec 4.1 says? The default I will build is a flinch-immune flag set during wind-up, lunge and recovery. Should a hit during recovery be ignored, or should it end recovery early? Same question for the Fan Spitter charge.
+2. **Contact damage by state.** Does a Lunge Grub bite on contact during recovery, when a lunge ends on top of the player? The default I propose is that damage happens only during the lunge and in normal Chase, not in wind-up or recovery.
+3. **Dash window.** Correct spec 4.1's window text and the criterion 2 check to the real timing (about 0.25 s ending at contact), or change the lunge or dash timing so the intended window holds. Which do you want?
+4. **Fan Spitter.** I chose the fan over the repositioning Spitter (D-004). Confirm.
+
+For `art-director` (already routed): telegraph direction for the 0.6 s wind-up and 0.6 s charge, and whether a spawn effect exists for the marker.
+
+For `playtest` and Build: report real run time and per-room clear time after Phase 1 (criterion 6).
+
+## Expected output
+
+The Studio waits for the art-director's answer, then routes both answers to `game-designer`. The designer adjusts the Phase 2 spec and hands it to the Studio for Build. Phase 1 can start Build now at task 0.
+
+## Sender assessment
+
+Confidence is high that both behaviors are cheap enough. The dominant risks are the undocumented Flinch and the missing enemy test harness, and both are controllable. Confidence in the lunge and dash window numbers is low until the hitbox sizes and speeds are known from Build's report. No Owner escalation is needed. No `game-director` escalation is needed unless Build finds that Phase 1 needs more than a small scheduler.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: design/g001-combat-escalation.md; design/combat.md; sim/repo-notes.md; project.md#constraints
+- Decisions: decisions/D-001-one-button-combat.md; decisions/D-002-combat-variety-direction.md; decisions/D-003-input-during-hit-stun.md; decisions/D-004-phase-2-technical-approach.md
+- Previous handoff: goals/G-001-combat-monotony/13-studio-to-technical-director.md
+>>>END
+
+<<<FILE decisions/D-004-phase-2-technical-approach.md
+---
+kind: decision
+id: D-004
+status: accepted
+decided_by: technical-director
+goal: G-001
+date: 2026-10-11
+supersedes: none
+---
+# D-004: Time-parametrized, sub-stepped lunge hit check; Fan Spitter over the repositioning Spitter; Phase 1 as one serial Build
+
+## Decision
+
+1. **Lunge motion and hit check.**
+   - Lunge position is a function of elapsed time since a scheduled lunge-start timestamp on the accumulated game clock. It is not accumulated `velocity * dt`.
+   - Each frame the Grub advances in sub-steps of at most about 0.25 tile (or a fraction of the smaller hitbox radius, if smaller), using the existing wall-stop movement and the existing overlap and contact test.
+   - Each sub-step calls `isInvulnerable(t)` with that sub-step's time.
+   - At most one hit per lunge.
+   - Wind-up and lunge start on scheduled timestamps (wind-up start + 0.6 s), not on the frame that notices the expiry.
+2. **Phase 2 Spitter variant: the Fan Spitter, not the repositioning Spitter.** It reuses the Spitter routine and projectile and needs no movement or pathing. The designer delegated the choice to the cheaper option.
+3. **Phase 1 goes to Build as one serial task list with no separate Plan gate and no isolated workspace.** Build's first task reports current values (speeds, hearts, room size, spawner and marker support, hit-stun input behavior). If a spawner rework beyond a small scheduler is needed, it comes back to the technical-director.
+4. **Gameplay numbers stay data** (timings, ranges, angles, counts), not code constants, so tuning needs no code change.
+
+Not decided here: how the existing 0.2 s Flinch behaves for Phase 2 states. That is player-facing and goes to the game-designer (handoff 16, Open questions 1 and 2). The technical mechanism will be a per-state flinch-immune flag.
+
+## Rationale
+
+- The lunge moves 0.56 tile per frame at 30 FPS. A time-parametrized path with sub-stepping gives identical distance at 30 and 60 FPS and prevents tunneling, using only existing movement, overlap and invulnerability code.
+- The Fan Spitter costs mostly data plus a charge and an aim lock. The repositioning Spitter needs wall selection and movement, and it interacts with the Phase 1 placement rules.
+- Phase 1 tasks all touch the same spawner and enemy controller, so they cannot safely run in parallel. The risk is moderate and mostly about timers, which a test on the simulated clock covers.
+
+## Alternatives considered
+
+- **Analytic swept test (segment against hitbox) per frame:** exact and a little cheaper at run time, but it adds a new collision primitive, and wall-stop movement would still need separate handling. It can replace sub-stepping if profiling shows a need.
+- **Per-frame velocity integration with an end-of-frame test:** tunnels at 30 FPS and differs between frame rates. Rejected.
+- **Repositioning Spitter:** higher cost and more risk, less direct dash purpose. Rejected.
+- **A separate Plan gate for Phase 1:** no benefit given the serial, low-risk task list. Rejected.
+- **Parallel Phase 2 routines in isolated workspaces:** too small to be worth the merge risk on the shared flinch flag. Rejected.
+
+## Revisit when
+
+- Build's report shows Phase 1 needs more than a small scheduler.
+- Profiling shows sub-stepping is too costly (use the analytic swept test).
+- The designer changes the lunge speed or distance enough that the sub-step size no longer fits.
+- The art-director's telegraph cost makes the Lunge Grub or Fan Spitter more expensive than assessed here.
+>>>END

@@ -1,0 +1,4 @@
+<<<FILE @need
+goals/G-002-final-boss/16-technical-director-to-studio.md
+decisions/D-020-g002-host-scope-and-plan-entry-conditions.md
+>>>END

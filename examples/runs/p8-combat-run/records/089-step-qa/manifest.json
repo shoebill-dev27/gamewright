@@ -1,0 +1,92 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "b7fb7a3d85a62bcd564a33ee20caf62b355a7ef99ce6d8cfb6df0d5adb83abc2",
+  "bytes": 1304
+ },
+ {
+  "path": "goals/G-001-combat-monotony/89-studio-to-qa.md",
+  "sha256": "5ba2d89ae0a3682e084444571cfd184d5fb363af49cde41a9555e48b95977da5",
+  "bytes": 5499
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "381742c8f2afe2e1a2a6af9d031dcc91f98f490ada7c90e2a990d6a1aaf27639",
+  "bytes": 1765
+ },
+ {
+  "path": "studio/skills/reproduce-defect.md",
+  "sha256": "aa7e161cc1fcb38fd92ede1719446f05eee1c7ac431a28a04d570ce451a2291d",
+  "bytes": 1407
+ },
+ {
+  "path": "studio/skills/verify-change.md",
+  "sha256": "da40d2c0030e078ac6d085ea06b17bb9b452495f4e2f412a9e1bd723ac72ddf5",
+  "bytes": 1281
+ },
+ {
+  "path": "project.md",
+  "sha256": "8a32edee44b970d2c1a5a0a76e19b3235e61b1786bb24c06583400cfa0924712",
+  "bytes": 2102
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "436989d7223f53ca69a0ce4d34a319b31b3a5be492d460d43a463a646dfb51d1",
+  "bytes": 5716
+ },
+ {
+  "path": "design/combat.md",
+  "sha256": "4ae5e20bc276d1f625cd37f8f5e0ec7a7df35509df3db18a3bd2c6203e2631c7",
+  "bytes": 48948
+ },
+ {
+  "path": "design/combat-step72.md",
+  "sha256": "0e504d1ebcfb8dc391a82e725a11645a5670b9f52ceaff1152ead0130aa69215",
+  "bytes": 11550
+ },
+ {
+  "path": "design/combat-cues-visual-spec.md",
+  "sha256": "6d878e8fdcafbfa4d6df3b8a39f1522107c392f7f8f8e82a1ec4a02357d6147a",
+  "bytes": 6417
+ },
+ {
+  "path": "goals/G-001-combat-monotony/86-qa-to-studio.md",
+  "sha256": "0330df85074881e37d97e1918ae76ef89db6a64590b595e014bdb62ed26ca54c",
+  "bytes": 7180
+ },
+ {
+  "path": "decisions/D-002-contact-edge-graze-accepted.md",
+  "sha256": "30c9505b88370f5b83562cd1d747a81d45eeefa1515933e9648defece0b2a4ed",
+  "bytes": 2199
+ },
+ {
+  "path": "decisions/D-003-contact-edge-exact-reach-and-lunge-band.md",
+  "sha256": "eabaf1e1bd3a216fe3cd402846ac57e001f2fe53c715dba6359cae5c80dd572a",
+  "bytes": 3250
+ },
+ {
+  "path": "decisions/D-007-room3-simultaneous-cues-accepted-in-flight-bound.md",
+  "sha256": "70283fc2cfe5f66068caf7216d4f43567af8e4e9f10dbb963c0368a6faf55ee5",
+  "bytes": 3083
+ },
+ {
+  "path": "decisions/D-011-variant-named-messages-accepted.md",
+  "sha256": "bf29d86bb781ad0221fb0e0f20906afb352af9441735a73b8867a2ed71d13605",
+  "bytes": 2498
+ },
+ {
+  "path": "decisions/D-012-room3-standard-grub-and-closer-spitter.md",
+  "sha256": "6d7804de297c7dc8c9ce8533ceb174c36ff613bc19915f65b1dfd4eb1d1c2897",
+  "bytes": 2626
+ },
+ {
+  "path": "goals/G-001-combat-monotony/88-playtester-to-studio.md",
+  "sha256": "be5f3668dc09e9e8705675a3eadc67b4d3fd7e457d8a59146941c7703049c87a",
+  "bytes": 8262
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "c7cabe4a4f73c6a97d838e30876d09358a2402a525796f6705b9ac08db1027ca",
+  "bytes": 2146
+ }
+]

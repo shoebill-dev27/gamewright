@@ -1,0 +1,14 @@
+<<<FILE @run/play/room1-dash-counter
+room 1
+fps 30
+end 20
+1.45 dash
+2.1 attack
+2.8 attack
+3.5 attack
+4.0 dash right
+4.7 attack
+5.4 attack
+6.1 attack
+7.0 attack
+>>>END

@@ -1,0 +1,158 @@
+<<<FILE goals/G-001-dash-damage/03-gameplay-engineer-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 3
+from: gameplay-engineer
+to: qa
+stage: Verify
+outcome: done
+---
+# 03: gameplay-engineer → qa — Verify fix: player takes damage mid-dash when the dash overlaps the end of post-hit invulnerability
+
+## Task
+
+Verify the fix below against the acceptance criteria in handoff 02, at both 30 FPS and 60 FPS. Give a pass or fail verdict.
+
+## Context
+
+Goal G-001. The Owner reported: "Sometimes I take damage even while dashing." QA's defect report (02) established that `design/combat.md` says the dash makes the player invulnerable for its full 0.25 s. It also says a hit is followed by 0.3 s hit-stun and then invulnerability until 0.8 s after the hit. The fix has been made in the player invulnerability logic. It is stated below and counts as made, per the dry-run rules in `project.md#constraints`. Verify from the spec, the acceptance criteria and the build (`sim/build-0.4.md`).
+
+## Findings
+
+### Change
+
+Where: the player invulnerability logic. The enemy controller, hit-stun, dash movement and cooldown are not touched.
+
+What:
+1. The shared invulnerability on/off flag and its two "switch the flag off" timer callbacks are removed.
+2. Two independent sources of invulnerability remain:
+   - Dash source: the player is invulnerable while the dash state is active, read from the dash state itself.
+   - Post-hit source: on a hit, `hitInvulnUntil = hitTime + 0.8 s` is stored using accumulated game time. The source is active while `gameTime < hitInvulnUntil`.
+3. The player is invulnerable if either source is active: `isInvulnerable = isDashing || gameTime < hitInvulnUntil`.
+4. The damage check reads `isInvulnerable` at the moment damage would apply.
+
+Frame rate: both sources compare against accumulated game time or the dash state, with no per-frame countdown. Timing on the end of the 0.8 s window may quantize by at most one frame (about 33 ms at 30 FPS).
+
+Tests added: unit tests that step the simulation with fixed delta times of 1/30 s and 1/60 s, covering a hit followed by a dash at 0.3, 0.4, 0.55, 0.7 and 0.79 s, a dash with no prior hit, damage after the post-hit window ends, and a dash and a hit in the same frame.
+
+### How to exercise it (maps to the acceptance criteria in 02)
+
+At both 30 FPS and 60 FPS:
+1. Get hit, then dash at about 0.3 s, 0.4 s, 0.55 s, 0.7 s and 0.79 s after the hit, with a Grub in contact range. Expect no damage for the full dash (criteria 1 and 2).
+2. Repeat with a Spitter projectile crossing the dash path (criterion 3).
+3. Dash with no recent hit and enemies in contact range. Expect no damage (criterion 4).
+4. Regression (criterion 5):
+   - Dash is still 4 tiles over 0.25 s, with a 0.6 s cooldown.
+   - An attack pressed during a dash is still queued and fires when the dash ends.
+   - A hit still deals 1 heart with 0.3 s hit-stun.
+   - After a dash that ends before 0.8 s after the hit, the player stays invulnerable until 0.8 s after the hit. This is a new check.
+   - Once the dash and the post-hit window have both ended, the player takes damage normally.
+
+### Areas worth extra attention
+
+- Post-hit invulnerability now lasts the full 0.8 s even after an early dash, as the design text says.
+- Damage on the exact frame a dash starts or ends: include a dash started and a dash ended while an enemy is in contact range.
+- The enemy Flinch behavior (0.2 s when an enemy is hit by the player) is untouched. If damage still occurs during a dash after this fix, report the conditions precisely, including any other damage source involved.
+
+## Decisions already made
+
+- D-001: no new input buttons beyond attack, dash and pause. This fix adds none.
+
+## Constraints
+
+- Must play correctly at both 30 and 60 FPS.
+- Desktop, keyboard and gamepad.
+- Reuse existing systems (small team).
+- No new input buttons (D-001).
+
+## Open questions
+
+None.
+
+## Expected output
+
+A verification Handoff addressed to `studio`, with outcome `pass` or `fail`, stating the result for each acceptance criterion at 30 FPS and at 60 FPS. On `fail`, give the failing conditions and reproduction details. The Studio then routes it (a `fail` normally goes back to `gameplay-engineer`).
+
+## Sender assessment
+
+- Root cause: confidence is high, from the implementation notes. The single on/off flag with two timers that each clear it on expiry produces exactly the reported symptom: occasional damage when a dash is started shortly after a hit. The window is the 0.55 s to 0.8 s range from QA's hypothesis, which is consistent with it.
+- Frame rate: the cause is not frame-rate dependent by itself. The window is set by the timer arithmetic. A variable delta time only shifts the exact moment of expiry by up to one frame. The fix uses game-time comparison and dash state, so both frame rates should behave the same.
+- Self-test: no real build exists in this dry-run. The verdicts are from reasoning about the code path and the described unit tests, not from execution. QA must verify independently.
+- Not confirmed: whether any damage during a dash with no prior hit exists. No other mechanism is known from the notes. If QA reproduces damage in criterion 4, the cause is something else, so hand back.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: project.md#constraints, design/combat.md, sim/build-0.4.md
+- Decisions: decisions/D-001-one-button-combat.md
+- Previous handoff: goals/G-001-dash-damage/02-qa-to-gameplay-engineer.md
+>>>END
+
+<<<FILE goals/G-001-dash-damage/goal.md
+---
+kind: goal
+id: G-001
+project: lantern-depths
+status: active
+created: 2026-10-11
+---
+# G-001: Player takes damage while dashing
+
+## Owner request
+
+> ダッシュ中なのにダメージを受けることがある。再現できるので直してほしい。
+
+## Interpretation
+
+Success condition: when the player is in the state the game defines as "dashing" (and the design documents say the player should not be hurt then), no damage is taken. The Owner can no longer reproduce the case where a dashing player takes damage, at both 30 and 60 FPS.
+
+Whether "dash should protect the player" is already specified (design/combat.md covers damage and invulnerability rules) was not read at Intake. The first step checked it: QA confirmed that combat.md specifies full invulnerability for the whole 0.25 s dash, so this is a defect.
+
+Out of scope: changing the combat kit, adding input buttons (D-001), rebalancing damage or dash tuning beyond what the fix requires, and new enemies or rooms.
+
+The Owner says the problem is reproducible but gave no steps. QA found a likely trigger (dashing shortly after being hit). The engineer has since determined the root cause and stated the fix (handoff 03); QA now verifies it.
+
+## Unknowns
+
+Entry questions from development-loop.md:
+
+- **Observe**: Done. QA reproduced the defect from the build description and wrote a defect report with acceptance criteria (01 → 02).
+- **Diagnose**: Root cause is a defect-cause question owned by `gameplay-engineer`. It happened inside Build, so there was no separate stage.
+- **Decide**: No real choice of direction is visible. Tentative: only if the engineer or QA finds something that implies a direction or priority change.
+- **Design**: Skipped. QA confirmed that combat.md is unambiguous (dash = full invulnerability for 0.25 s). Reopen only if verification shows expected behavior is undefined.
+- **Plan**: Tentative: needed if verification fails twice on the same criterion.
+- **Build**: Done (handoff 03).
+- **Verify**: Always after Build.
+- **Play / Review**: Skipped. This is a defect with a specified behavior, not an experience Goal, and no direction Decision is involved.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Observe | qa | reproduce-defect | done | 01-studio-to-qa.md (result: 02-qa-to-gameplay-engineer.md) |
+| 2 | Design | game-designer | write-design-spec | skipped (combat.md already specifies full dash invulnerability) | — |
+| 3 | Plan | technical-director | technical-plan | tentative (if the same criterion fails verification twice) | — |
+| 4 | Build | gameplay-engineer | implement-change | done | 02-qa-to-gameplay-engineer.md (result: 03-gameplay-engineer-to-qa.md) |
+| 5 | Verify | qa | verify-change | open | 04-studio-to-qa.md is not needed; starts from 03-gameplay-engineer-to-qa.md |
+
+Status: planned | tentative | open | done | skipped. Handoff: the file name (in this goal's directory)
+of the incoming Handoff that starts the step. Parallel steps: 2a, 2b. Step numbers need not
+match Handoff seq numbers. The route is a plan; the Route operation revises it.
+
+Skipped: Decide (tentative only, see Unknowns), Diagnose (part of Build), Design (spec already unambiguous), Play and Review (defect, not an experience Goal).
+
+## Route changes
+
+- After step 1 (Observe): the outcome fits the plan. QA confirmed a defect against an unambiguous spec, which settles the tentative Design condition, so Design is now `skipped`. Plan stays tentative. The 02 handoff's stage was relabelled from Diagnose to Build, because diagnosis belongs to the engineer's Build step.
+- After step 4 (Build): the outcome fits the plan (a fix stated exactly, no open questions, no spec ambiguity). Plan stays tentative. The engineer's handoff was edited in place before going to QA: the root-cause analysis was removed from Findings and the Load list now uses `verify-change` and `sim/build-0.4.md`. The `## Sender assessment` section is untouched and stays on record. The Expected output now asks QA to address its verdict to `studio`.
+
+## Next action
+
+Start Step 5 (Verify): `qa` executes `goals/G-001-dash-damage/03-gameplay-engineer-to-qa.md` (verify against the acceptance criteria from 02 at 30 and 60 FPS, in a fresh context without the implementation history, and address the verdict to `studio`).
+
+## Outcome
+
+<At close, for the Owner, in ja.>
+>>>END

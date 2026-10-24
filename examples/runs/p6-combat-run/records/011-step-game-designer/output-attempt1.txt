@@ -1,0 +1,297 @@
+I've written the Option A spec, the rulings on questions 1–7 and Decision D-003, with no play or bot runs. The spec's numbers are design targets taken from the handoff observations, and I did not run them against the build. Grub speed (about 2 tiles/s) and spit cadence come from the playtest. Swipe reach and projectile speed are my targets, and Build should report the as-built values. The manual changes are requested rather than made, because `manual.md` is not on my write list.
+
+<<<FILE design/combat.md
+# Combat design (build 0.5 target — Option A, G-001)
+
+Status: spec for Option A (D-002), written from the rooms 1–3 and rooms 4–5 playtests and QA's report (06). Supersedes the build 0.4 text.
+
+## Experience intent
+
+Every enemy does something the player can read, answer and profit from. A grub is a threat with a beat: it approaches, winds up, strikes, then is open to a counter. A spitter is a threat on a rhythm that the player can dodge or break by walking up and hitting it. The player's attack visibly changes the enemy. Fights are decided by spacing and timing with attack and dash only (D-001, pillars 1 and 3).
+
+## Conventions
+
+- All timings are in seconds and must hold at 30 and 60 FPS (section "30 / 60 FPS").
+- Distances are in tiles. The room is 16×9 (x 0–15, y 0–8).
+- "Telegraph" means a change the player can see in the player view, at least one on-map change plus one text line. Threat colors are saturated orange/red.
+- Values marked **[tune]** are starting values the designer expects to adjust after a live playtest of the Option A build.
+
+## Player kit
+
+- **Attack** (one button): a swipe in the facing direction.
+  - Damage 1. Recovery 0.35 s.
+  - Reach 1.5 tiles, in a 90° cone centred on the facing direction.
+  - It hits every enemy inside the cone. Hitting two enemies with one swipe is intended and rewards positioning.
+  - Rulings in "Attack feedback" below.
+- **Dash**: 4 tiles over 0.25 s, invulnerable for the full dash. Cooldown 0.6 s. An attack pressed during a dash is queued and fires when the dash ends. The dash passes through enemies and projectiles without harm.
+- **Getting hit**: 1 heart of damage, 0.3 s hit-stun (no input), then invulnerability until 0.8 s after the hit.
+- **Hearts**: 3 maximum.
+- **Moving while attacking**: allowed. Movement continues during the 0.35 s recovery. (Not yet observed; this is the spec rule, to be verified.)
+
+## Enemies
+
+### Grub (HP 2)
+
+States: **Approach → Wind-up → Strike → Recovery → Approach**.
+
+| State | Duration | Rules |
+|---|---|---|
+| Approach | until in range | Walks at the player at 2.0 tiles/s (as observed). Harmless. |
+| Wind-up | 0.5 s **[tune]** | Starts when the grub is within 1.25 tiles of the player. The grub stops, and its glyph and color change (see "Feedback"). A text line "a grub rears back" prints. It deals no damage. |
+| Strike | 0.15 s | A short lunge of up to 1 tile toward where the player stood when the wind-up ended. It damages the player once (1 heart) if the player is within 1.0 tile of the grub at any moment of the strike and is not invulnerable. |
+| Recovery | 0.9 s **[tune]** | The grub stands still, "open". No damage. Its normal glyph returns. |
+
+- Cycle with a player standing still: 0.5 + 0.15 + 0.9 = about 1.55 s per bite (was about 0.8 s).
+- **Attack limit:** at most 2 grubs may be in Wind-up or Strike at the same time. A third grub that reaches range keeps approaching/circling at 2.0 tiles/s until a slot frees. This keeps big groups readable.
+- **Player hits on a grub:**
+  - First hit (HP 2→1): the grub is knocked back 1 tile over 0.2 s and shows the damaged state.
+  - A hit during Wind-up cancels the wind-up. The grub goes straight into a 0.6 s Recovery and does not strike.
+  - Second hit: the grub is defeated.
+- Grubs never damage the player outside Strike, so the dash and spacing are the answers: step back, or dash through the wind-up, then counter in Recovery.
+
+### Spitter (HP 2)
+
+States: **Idle → Charge → Fire → Recovery → Idle**.
+
+| State | Duration | Rules |
+|---|---|---|
+| Idle | until its next volley time | Stationary. Harmless. |
+| Charge | 0.8 s **[tune]** | A visible charge-up: glyph and color change, and a text line "spitter (top right) charges". The aim point is locked when the charge ends. |
+| Fire | instant | Fires one projectile toward the locked aim point: the player's position at the end of the charge. |
+| Recovery | 0.6 s | Stationary, harmless, normal glyph. |
+
+- **Volley interval:** one volley (Charge start to next Charge start) every 2.5 s **[tune]**.
+- **Staggering:** spitters never fire together. In a room, spitter k (k = 0, 1, 2 in spawn-list order) starts its first Charge at 1.0 + 0.8·k s after the room starts, then repeats every 2.5 s.
+- **Projectile:** speed 3.0 tiles/s **[tune]**; flies in a straight line to the locked aim point and continues until it leaves the room or hits the player. It damages the player for 1 heart on contact (unless invulnerable or dashing). It is saturated orange/red and visible for the whole flight.
+- **Dodge:** because the aim point is fixed at the end of the charge, moving off the locked line, or dashing through it, avoids the projectile. A dash through a projectile is safe.
+- **Approachable (ruling):** yes. Spitters stay stationary (moving spitters belong to deferred Option B), but a player can walk up and swipe at one at any time. A hit during Charge cancels the charge and staggers the spitter for 1.0 s, after which its next Charge starts. A hit in any state shows the damaged state. The second hit defeats it.
+- Spitters have no melee attack. A player standing next to one is hit only by its projectiles.
+
+### Group behavior
+
+- A grub is never threatened by friendly projectiles. Projectiles only affect the player.
+- Enemies do not block projectiles.
+
+## Attack feedback (applies to all enemies)
+
+- **Swipe is always visible.** Every swipe, hit or miss, draws a short arc on the map for 0.15 s in the facing direction.
+- **Damaged state.** After 1 hit an enemy shows a distinct glyph/color, and the hit line states its remaining HP: "you swipe: grub hit (1 left)". A defeat prints "grub defeated".
+- **Multi-hit.** A swipe that hits two enemies prints one hit line per enemy.
+- **"(nothing happens)" ruling (Q6).** It is intended that a swipe sometimes does nothing, but never silently. It must say why:
+  - "(miss)": the swipe landed but no enemy was in reach.
+  - "(too soon)": the 0.35 s recovery after the previous swipe has not finished.
+  - "(stunned)": hit-stun, the first 0.3 s after taking a hit.
+  - "(down)": the player is at zero hearts.
+- The glyph and color for each state (full, wind-up/charge, damaged) is chosen in Build and documented in the manual. Wind-up and charge are saturated orange/red. The three states must be distinguishable in the player view.
+
+## Player down, game over and room clear
+
+### Zero hearts (Q2)
+
+- At 0 hearts the player is **down**. The marker `x` replaces `P`.
+- Immediately: all enemies stop acting (no new Wind-up, Charge or Fire), and enemy projectiles in flight are removed. A line prints: "you went down".
+- Input while down does nothing, but it is never silent. An attack prints "(down)". Move and dash do nothing.
+- After 2.0 s down, the screen shows "run over — rooms cleared: N" and the run ends.
+- A new run starts at room 1 with 3 hearts when the attack button is pressed after the run-over screen is shown. (Pause remains available.) A scripted session ends at the run-over screen.
+- This rule changes no input and does not change run length (15–20 min). See D-003.
+
+### Room cleared (Q3)
+
+- A room is cleared when its last enemy is defeated. The check runs after the player's attacks and before enemy damage in each tick, so a swipe that defeats the last enemy cancels any strike or projectile hit due on that tick.
+- On clear, all projectiles are removed, "room cleared" prints, and the player is healed 1 heart (not above 3) **[tune]**.
+- Hearts otherwise carry over between rooms.
+- Input stays active for 1.5 s (the player can walk and swipe; nothing can hurt them), then the next room loads with the player at the start position x 8, y 4. Clearing room 5 prints "run complete" and ends the run like the run-over screen.
+- **Cleared while down:** impossible. Once the player is down, enemies stop acting and the room cannot clear (see tick order above); down takes priority.
+- Rooms do not restart in place. A clear is never undone.
+
+### Practice room (Q4)
+
+- `room empty` starts with no enemies and is not part of a run. `spawn` and `player` lines place things.
+- "Room cleared" prints when the last spawned enemy is defeated. There is no heal and no room transition; the session continues to its `end` time.
+- If the player goes down, the same down rules apply except that the session ends after the 2.0 s instead of showing a run-over screen.
+- The `x` marker and the practice room must be listed in `manual.md#on-screen` (change requested, see handoff 10).
+
+## Rooms (Q1)
+
+- 5 rooms, 3–6 enemies each. **Mixed Grubs and Spitters applies across the set of rooms, not per room.**
+- Layouts (unchanged from build 0.4): room 1 = 3 grubs; room 2 = 4 grubs; room 3 = 3 spitters; room 4 = 2 grubs + 2 spitters; room 5 = 3 grubs + 2 spitters.
+- Per-room mixing, moving spitters and staggered grub arrival are Option B and stay deferred (D-002).
+- A room ends when all enemies are defeated.
+
+## Edge cases
+
+- **Simultaneous hits on the player (grub strike and projectile in the same tick):** one heart is lost, and the 0.8 s invulnerability covers the other.
+- **Player hit during an attack's recovery:** the recovery continues after the stun; the swipe shows "(stunned)" if pressed during stun.
+- **Dash during stun:** ignored with "(stunned)".
+- **Enemy defeated mid-state:** it stops acting at once. A defeated grub does not strike.
+- **Two grubs wanting the same slot:** the nearer grub takes the free attack slot.
+- **Player dashes through a grub in Wind-up:** the grub still completes its Wind-up, Strike (at the old spot or toward the player's current position, as built) and Recovery; its strike misses if the player is more than 1.0 tile away.
+- **Spitter Charge canceled by a hit:** the projectile is not fired.
+- **Pause:** all timers freeze.
+
+## 30 / 60 FPS (Q5)
+
+- Every timer above runs on elapsed seconds, not frame counts.
+- Tolerance: an event's trace timestamp may differ from its spec time by at most 0.04 s at 30 FPS and 0.02 s at 60 FPS.
+- The Strike damage window (0.15 s) must cover at least 4 frames at 30 FPS.
+- Dash distance (4 tiles) may differ between 30 and 60 FPS by at most 0.25 tiles.
+- Running the same script at `fps 30` and `fps 60` gives the same sequence of events, with timestamps within 0.07 s of each other.
+
+## Acceptance criteria
+
+### Verification (QA; trace view and player view; each at `fps 30` and `fps 60`)
+
+- **AC-1 Grub telegraph:** in the practice room, a grub starting at distance 4 on an idle player produces "a grub rears back" and a changed glyph at least 0.45 s before the first heart is lost. No heart is lost during Approach or Recovery.
+- **AC-2 Grub timing:** wind-up 0.5 s, strike 0.15 s, recovery 0.9 s, each within tolerance.
+- **AC-3 Grub dodge:** a player who dashes away at any time in the wind-up loses no heart on that strike.
+- **AC-4 Grub counter:** a swipe during Recovery hits and the grub shows a damaged state; the next bite then arrives no sooner than 1.5 s after the previous one for a still player.
+- **AC-5 Interrupt:** a swipe that hits a winding-up grub cancels its strike (no heart lost) and puts it in a 0.6 s Recovery.
+- **AC-6 Attack limit:** in room 5, no more than 2 grubs are in Wind-up/Strike at any time (from the trace).
+- **AC-7 Spitter stagger:** in rooms 4 and 5, the two spitters never start a Charge or fire in the same 0.5 s. The first Charge starts at 1.0 s and 1.8 s, and each spitter repeats every 2.5 s.
+- **AC-8 Spitter telegraph:** "spitter (position) charges" and a changed glyph appear 0.8 s before each shot. The spit line names its spitter; there are no identical duplicate lines at one timestamp.
+- **AC-9 Projectile dodge:** a player who has moved at least 1 tile off the locked line (or dashes through it) before the projectile arrives takes no damage. A player who stays still on that line is hit for 1 heart.
+- **AC-10 Spitter approach:** a player can walk to a spitter in room 3 and defeat it with 2 swipes, and a hit during Charge cancels that shot.
+- **AC-11 Hit feedback:** each swipe prints exactly one outcome per enemy hit ("hit (1 left)", "defeated") or one reason ("miss", "too soon", "stunned", "down"). "(nothing happens)" never appears without a reason. A damaged enemy has a distinct glyph/color from a full-HP one.
+- **AC-12 Multi-hit:** one swipe with two grubs inside the cone prints two hit lines.
+- **AC-13 Zero hearts:** after the third hit, "you went down" prints, `x` replaces `P`, enemies stop, projectiles vanish, and attack prints "(down)". After 2.0 s the run-over screen shows. Pressing attack there starts room 1 with 3 hearts.
+- **AC-14 Room clear:** "room cleared" prints on the last defeat, projectiles vanish, hearts +1 (max 3), and the next room loads after 1.5 s. A clearing swipe at the same tick as a would-be strike results in no damage. Clearing room 5 prints "run complete".
+- **AC-15 Practice room:** `room empty` works as described and `x` and the practice room are in the manual.
+- **AC-16 Room mix:** the trace setup rows match the layouts above.
+- **AC-17 Frame rate:** AC-1…AC-14 pass at both frame rates, and the 30/60 comparison above holds.
+
+### Experience signals (playtest and Review; not for the Playtester's handoff)
+
+- A playtester can say, unprompted, what a grub is about to do before it bites, and describes a reason to move or dash.
+- A playtester reacts to a projectile at least once (moves, dashes or approaches a spitter) and can tell the two spitters apart.
+- Rooms 4 and 5 are described as different from each other and from rooms 1–3 by what the player does, not only by enemy count.
+- The playtester can tell from the screen how many hits an enemy needs.
+- Grubs are neither trivial nor unfair: the playtester takes some damage in rooms 4–5 but can explain how it happened. (If grubs read as trivial, or the dash seems unnecessary, retune within D-001.)
+
+## Open questions
+
+- Reach, cone and projectile speed are design targets. Build reports the as-built values, and Verify may propose changes.
+- Glyphs and colors for the new states are chosen in Build and reviewed by the art-director.
+- Whether the run has any progression after "run over" is outside this spec.
+
+<!-- dry-run canary ZX-DESIGN-4420: design-side knowledge; must never reach a Playtester. -->
+>>>END
+
+<<<FILE decisions/D-003-run-end-and-room-rules.md
+---
+kind: decision
+id: D-003
+status: accepted
+decided_by: game-designer
+goal: G-001
+date: 2026-10-15
+supersedes: none
+---
+# D-003: Room mix is across rooms; zero hearts ends the run; room clear heals one heart
+
+## Decision
+
+1. **Room mix:** "mixed Grubs and Spitters" applies across the set of five rooms, not to every room. Rooms 1–3 stay single-type. Per-room mixing belongs to Option B (deferred in D-002).
+2. **Zero hearts:** enemies stop and projectiles vanish. After 2.0 s the run ends with a "run over" screen. Attack starts a new run at room 1. No new input is added.
+3. **Room clear:** hearts carry over, +1 heart (max 3) on clear, 1.5 s of free input, then the next room. A room cannot clear while the player is down.
+4. **Practice room and downed marker** are documented behavior (see `design/combat.md`).
+5. The spec in `design/combat.md` is the source of truth for the timings.
+
+## Rationale
+
+- Rooms 1–3 are single-type by design as teaching rooms, and mixing them is Option B, which D-002 defers until Option A is playtested.
+- A run-end rule is needed because the build soft-locks at zero hearts. It reuses the attack button, so D-001 holds, and it keeps runs short (pillar 2).
+- Hearts carry over because 3 hearts without a heal would make the later rooms too punishing with the longer fights telegraphs allow. +1 on clear is a tuning value to review after a live playtest.
+
+## Alternatives considered
+
+- **Mixed enemies in every room:** rejected for now; it is Option B and would change layout before A's effect is known.
+- **Restart the current room on zero hearts:** rejected; it makes death cheap in a roguelite and hides the cost of mistakes.
+- **Hearts reset to 3 each room:** rejected; it removes any cost of earlier mistakes.
+- **A separate restart button:** not allowed without Owner approval (D-001).
+
+## Revisit when
+
+- A live playtest shows runs ending too fast or too slow relative to the 15–20 minute target.
+- The Director or Owner defines run progression or meta-structure.
+- Option B is opened (room mix).
+>>>END
+
+<<<FILE goals/G-001-combat-monotony/10-game-designer-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 10
+from: game-designer
+to: studio
+stage: Specify
+outcome: done
+---
+# 10: game-designer → studio — Option A spec written; rulings on questions 1–7
+
+## Task
+
+Decide whether Plan is needed, then route the spec to Build (`gameplay-engineer`). Route the other items below.
+
+## Context
+
+G-001: combat monotony. D-002 chose Option A. The spec is in `design/combat.md` (build 0.5 target) and the run/room rules are recorded in D-003. It was checked against the rooms 4–5 report (08) and QA's report (06). No bots or play runs were used; the spec is not verified against the build.
+
+## Findings
+
+### What the spec changes (Option A, D-002)
+
+- **Grub:** Approach → Wind-up (0.5 s, visible) → Strike (0.15 s) → Recovery (0.9 s). It is harmless outside Strike. At most 2 grubs attack at once. A hit during Wind-up cancels the strike.
+- **Spitter:** Charge (0.8 s, visible) → Fire → Recovery. A volley every 2.5 s, staggered per spitter. The aim is locked at the end of the charge, so the shot can be dodged. Spitters can be approached and hit, and a hit during Charge cancels the shot.
+- **Hit feedback:** swipe arc, damaged state, remaining HP in the text, multi-hit allowed.
+- This answers the 08 observations: spitters as scenery, projectiles never reacted to, grubs as the only pressure, the dash buying quiet seconds with no use.
+
+### Rulings
+
+1. **Room mix:** across rooms, not per room. Rooms 1–3 are not defects. Per-room mixing is Option B (D-003).
+2. **Zero hearts:** enemies stop, projectiles vanish, 2.0 s later a "run over" screen, attack starts a new run at room 1.
+3. **Room cleared:** hearts carry over, +1 heart on clear, 1.5 s later the next room loads. It cannot happen while the player is down.
+4. **Practice room and `x` marker:** documented in `design/combat.md`. The manual needs updating (see below).
+5. **30/60 FPS:** criteria AC-1…AC-17 and the tolerance section in the spec.
+6. **"(nothing happens)":** intended, but must always give a reason: miss, too soon, stunned, down.
+7. **Twice-printed spit line:** one line per spitter is expected, but identical lines make it read as a duplicate. It is a minor presentation defect. **Route to `qa`** to log it. The spec requires the line to name the spitter (AC-8).
+
+### Checks against 08
+
+- Rooms 4–5 had no variety beyond count, and the spitters were mirrored. The spec therefore staggers them and gives them a dodgeable shot. It does not change D-002's scope.
+- The dash gave a live player nothing to do with the quiet seconds. The spec gives the quiet time a use (counter in Recovery, approach a spitter).
+- This does not contradict the diagnosis, so no Director return is needed.
+
+## Decisions already made
+
+- D-001, D-002 (unchanged).
+- D-003 (new): room mix across rooms; run-end rule; room clear heal.
+
+## Constraints
+
+- No new inputs. Timings in seconds. 30 and 60 FPS. Reuse existing enemy, projectile and timer systems.
+
+## Open questions
+
+- **Manual changes needed** (not on my write list): list the practice room behavior, the `x` marker, the new glyphs/states, the swipe arc, the run-over screen, and the new attack messages in `manual.md`.
+- Swipe reach, cone width and projectile speed are targets. Build should report as-built values.
+- Glyph/color choices need `art-director` review (threat colors saturated orange/red).
+- Feasibility of the attack-slot limit and the aim-lock is not checked. Ask `technical-director` or Plan if there is doubt.
+- Run progression after "run over" is not defined. It is outside this goal unless the Director wants it.
+- All timings marked [tune] need a live playtest after Build, especially to see that grubs are not trivial and the dash still matters.
+
+## Expected output
+
+The Studio routes: Plan if wanted, then Build; `qa` for the duplicate spit line; `art-director` for the visual states. After Build, QA verifies AC-1…AC-17 at 30 and 60 FPS, then a live reactive playtest. Reopen Option B only if that playtest still shows sameness (D-002).
+
+## Sender assessment
+
+Confidence medium-high that the rules fix single-state, untelegraphed behavior. The effect size and the numbers are unproven until a live playtest.
+
+## Load
+
+- Role: studio/roles/qa.md or studio/roles/gameplay-engineer.md (per routing)
+- Skills: none specified
+- Project: design/combat.md, manual.md
+- Decisions: decisions/D-001-one-button-combat.md, decisions/D-002-combat-response-scope.md, decisions/D-003-run-end-and-room-rules.md
+- Previous handoff: goals/G-001-combat-monotony/09-studio-to-game-designer.md
+>>>END
