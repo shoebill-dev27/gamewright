@@ -1,0 +1,67 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-001-first-playable-run/03-technical-director-to-gameplay-engineer.md",
+  "sha256": "4e02d59ae198630a73e09a7383efc6f74526a8c3f1a606cc23e2b5f719a013bf",
+  "bytes": 17424
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md",
+  "sha256": "8a447e66877cd14dfff47ac1b8482ba77c850159c8fb43ec2780e91064869351",
+  "bytes": 1742
+ },
+ {
+  "path": "studio/skills/implement-change.md",
+  "sha256": "a9befd7f1d9e09eb94c51a066f030db88c5061ad1b522d9795e62bc2c242964a",
+  "bytes": 1823
+ },
+ {
+  "path": "project.md#vision",
+  "sha256": "f7148f891902b9f1bd9c9364155d3325453ff66c0a9363272cc4f833c6dced17",
+  "bytes": 969
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "450fd395c0cb68189bb9f0c7ff683df5db990e6a88dacea42fd26cf28e181cf0",
+  "bytes": 849
+ },
+ {
+  "path": "design/game-spec.md",
+  "sha256": "cabf78efedb946935772af573aac9e50cd7631cbcd66decaabebcef70866f018",
+  "bytes": 16457
+ },
+ {
+  "path": "design/acceptance-criteria.md",
+  "sha256": "9d6eb4b96f99964e36bf7af85b5243adc96be691c5fe5bd2375aaea5c98b3cb6",
+  "bytes": 6907
+ },
+ {
+  "path": "repo/README.md",
+  "sha256": "db72c9f3c853bde47ed05bec9f9cfc88f53cb205d0c340db1fa03a1f65359e55",
+  "bytes": 100
+ },
+ {
+  "path": "decisions/D-001-classic-scripts-shared-rules.md",
+  "sha256": "d8028757b2b22bd72544eeeb055593d1a4118d0c695f753f8c7f8e75f99255ff",
+  "bytes": 1575
+ },
+ {
+  "path": "goals/G-001-first-playable-run/02-game-designer-to-technical-director.md",
+  "sha256": "fad73b6f7e46c1f9b49b5608e6a4bdca00fdf1c849bdf7aa7b9b8f5248d3fa4e",
+  "bytes": 6148
+ },
+ {
+  "path": "@files/repo",
+  "sha256": "5ef1d7a5cc160c1815864965f9a6f70af61038d53b29d90276766b30834c7a94",
+  "bytes": 114
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ }
+]

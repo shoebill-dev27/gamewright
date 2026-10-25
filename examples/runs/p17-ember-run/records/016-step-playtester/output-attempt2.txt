@@ -1,0 +1,5 @@
+<<<FILE @run/play/seed42-west
+seed 42
+aaaaaaaa
+aaaaaaaa
+>>>END

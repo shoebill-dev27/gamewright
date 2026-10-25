@@ -1,0 +1,189 @@
+
+<invoke name="bash">
+<parameter name="command">echo "routing via file blocks only"</parameter>
+</invoke>
+
+<<<FILE goals/G-001-first-playable-run/07-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-001
+seq: 7
+from: studio
+to: gameplay-engineer
+stage: Build
+outcome: routed
+---
+# 07: studio → gameplay-engineer — apply the check-14 amendment (reach marks, D-002) and finish the build
+
+## Task
+
+Change `repo/` so that it meets the amended spec section 9.7 and checks 14 and 29 (reach marks, D-002). Then run the tests and scripts and report what you saw.
+
+## Context
+
+G-001: the Owner wants the concept playable from start to finish in the browser. Your first pass (handoff 05) wrote the whole build. Its outcome was `partial`, so the rest of the work comes back to you. The runtime's Build check of that pass: `node --test` exit 0, 34 tests, 0 failed. Nothing else was executed then: bot checks (14, 26), generator success rates, `--trace` output and the page.
+
+While you built, the Game Designer answered the check-14 question (handoff 06): the threat-mark rule was right but the display was incomplete. The spec is amended. Handoff 05 is not sent to `qa`. Verify opens after this step and the parallel Design step 08 are both done.
+
+## Findings
+
+Changes required (from handoff 06, authoritative together with `design/game-spec.md` §9.7, §11 and `design/acceptance-criteria.md` checks 14 and 29):
+
+1. Compute marks with E after this turn's dimming: current E minus 1, or minus 2 near the Gloom. At E = 20 a Wait beside a shade must already show a threat mark, because the creature phase sees r = 2.
+2. Add reach marks to `view()` for the four neighbour tiles: for each tile the player could step onto, which visible creatures would hurt the player at their next action if the player ended the turn there. Use `planAction` with a hypothetical player position. Brazier tiles and stairs tiles get none (the flare stuns visible creatures; stairs skip the creature phase). Walls and creature-occupied tiles get none.
+3. Always show a creature orthogonally adjacent to the player or to a neighbour tile, even if line of sight is blocked.
+4. Show reach marks in both the text frame (for example `Danger: N (m), E (h)`) and the page, from the same `view` data. Define the final format in `manual.md`. The glyphs must be distinct from threat marks (check 29).
+5. Replace the check-14 test assertion with the strict form: the damaging creature was visible in the previous output and carried a mark on the tile where the player ended the turn, and the test log names the case (threat or reach). Add the hand-made scenarios the check lists. Update the sampled-states test so marks equal what the planner does.
+
+Still open, owned by the Game Designer (parallel step 08): the flare stun reading (does "next 2 turns" include the lighting turn's creature phase; built: yes) and the hound bite at lunge distance 1 (built: bites for 3). Keep the built readings, with `STUN_TURNS` and the bite rule easy to change. Do not change them yourself. If 08 changes them, the Studio will route that.
+
+Unchanged from handoff 05: checks 27-30 need a human opening `index.html` from `file://`; check 26 is bot-based, so report its result and do not tune numbers or weaken generator rules.
+
+## Decisions already made
+
+- D-001: plain classic-script UMD modules, no ES modules.
+- D-002: threat marks plus reach marks on the four neighbour tiles; marks use E after dimming; check 14 is strict.
+
+## Constraints
+
+- Do not change creature behaviour, numbers, content or scope to fit the marks; the marks follow the rules.
+- Deterministic; no dependencies, no network; page has no rule logic.
+- Report only what you ran or saw. State what you could not show (page appearance, anything unexecuted).
+
+## Open questions
+
+None for you (the two rule questions are with the Game Designer).
+
+## Expected output
+
+The changed build, tests and `manual.md`. Then a Handoff to `qa` (stage Verify) with the changes, how to exercise them, what you ran and its results, and the known gaps. If a test or script shows a rule gap you cannot settle, hand back with the failing check, seed and rule.
+
+## Sender assessment
+
+None (written by the Studio).
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: design/game-spec.md, design/acceptance-criteria.md, repo/manual.md, project.md#constraints
+- Decisions: decisions/D-001-classic-scripts-shared-rules.md, decisions/D-002-threat-and-reach-marks.md
+- Previous handoff: goals/G-001-first-playable-run/06-game-designer-to-studio.md
+>>>END
+
+<<<FILE goals/G-001-first-playable-run/08-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-001
+seq: 8
+from: studio
+to: game-designer
+stage: Design
+outcome: routed
+---
+# 08: studio → game-designer — rule the flare stun timing and the hound bite at lunge distance 1
+
+## Task
+
+Answer two spec questions the Build raised, amending `design/game-spec.md` and `design/acceptance-criteria.md` only if the answer differs from what is built.
+
+## Context
+
+G-001: first playable five-floor run. The Build (handoff 05) chose readings where the spec was silent or ambiguous. Two are left for you; the check-14 question was answered in handoff 06 / D-002. Build is continuing in parallel (handoff 07) with the built readings, and Verify waits for both.
+
+## Findings
+
+1. **Flare stun.** Stun is 2 and is decremented in the lighting turn's own creature phase. Effect: the creature shows as "stunned" in only one frame, but skips 2 actions. Question: does "next 2 turns" include the lighting turn's creature phase (reading A, built) or start after it (reading B, a one-line change to `STUN_TURNS`/the decrement)?
+2. **Hound bite at lunge distance 1.** A hound that springs while the player is directly adjacent in the line bites for 3 (the hound hunts statelessly at path distance ≤ 6). Question: is that correct (built), or should "cannot move" mean no damage?
+
+Note: a built reading that agrees with the spec text and the pillars costs nothing to ratify. Changing it costs a Build return. Change one only if it contradicts the spec or a pillar (readable threats, a decision every turn), and say which.
+
+## Decisions already made
+
+- D-002: threat marks plus reach marks; check 14 strict. Marks follow the planner, so the answers must be expressible as planner rules.
+
+## Constraints
+
+- Within the vision and Goal scope; no change to numbers beyond what the answers need.
+- Keep the 30 checks and their numbering.
+
+## Open questions
+
+The two above.
+
+## Expected output
+
+A Handoff to `studio` (outcome `done`): for each question, the ruling and its reason; if a ruling differs from the built reading, the exact rule and the check(s) amended so that Build and QA can apply it. Amend the design files in place if needed.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: design/game-spec.md, design/acceptance-criteria.md, repo/manual.md
+- Decisions: decisions/D-002-threat-and-reach-marks.md
+- Previous handoff: goals/G-001-first-playable-run/05-gameplay-engineer-to-qa.md
+>>>END
+
+<<<FILE goals/G-001-first-playable-run/goal.md
+---
+kind: goal
+id: G-001
+project: ember-hollow
+status: active
+created: 2026-10-26
+budget: 19
+---
+# G-001: First complete playable run in the browser
+
+## Owner request
+
+> このコンセプトで、最初から最後まで通して遊べる版を作ってほしい。ブラウザで遊べるようにしてほしい
+
+## Interpretation
+
+Success condition: a person opens `repo/index.html` straight from the file system in a browser and can play one whole run with keyboard or mouse. The run starts on floor 1, passes through all five floors, and ends in one of the ways the vision names: beating the floor-5 creature (win), dying, or the ember going out. No setup, server or developer step is needed. The vision's pillars hold in that run: readable threats, light as the resource, a short seeded run (same seed gives the same run).
+
+The team-side means from `project.md#constraints` also ship, because verification depends on them: `node play.js {script}`, `--trace`, `node --test`, and `repo/manual.md` (the script format and everything a player is told).
+
+Out of scope (not requested): saving or resuming runs, meta-progression between runs, sound, mobile or touch layouts, network features, content beyond what one complete five-floor run needs, and any change to the vision or pillars.
+
+## Unknowns
+
+- Observe: skipped. No build exists and nothing is reported broken or off.
+- Diagnose: skipped. There is no problem to explain.
+- Decide: skipped. Design stayed inside the vision and Goal scope and raised no direction, priority or scope choice. Reopens only if Plan or a spec question finds scope must change (then `game-director`).
+- Design: spec and 30 checks done. Check 14 settled by D-002 (reach marks). Open: flare stun timing and hound bite at lunge distance 1 (handoff 08). Balance is unverified; Play must report it.
+- Plan: done (handoff 03). Reasoning only, nothing measured.
+- Build: open. First pass written (05, partial; 34 tests passed in the runtime's check, bots, generator and page unexecuted). Now applying D-002 reach marks and finishing (handoff 07).
+- Verify: planned. QA against the acceptance criteria through the scripts and tests, after Build and Design 4c; Art Director visual review in parallel (grid readability, threat and reach mark clarity). Checks 27-30 need a human opening `index.html`.
+- Play: planned. A Playtester plays from `repo/manual.md` and the player profile only.
+- Review: planned. `game-director` judges whether the intent was met and names the next issues.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Design | game-designer | write-design-spec | done | 01-studio-to-game-designer.md |
+| 2 | Decide | game-director | make-decision | skipped | — |
+| 3 | Plan | technical-director | technical-plan | done | 02-game-designer-to-technical-director.md |
+| 4a | Build | gameplay-engineer | implement-change | open | 07-studio-to-gameplay-engineer.md |
+| 4b | Design (check 14 question) | game-designer | write-design-spec | done | 04-studio-to-game-designer.md |
+| 4c | Design (flare stun, hound bite) | game-designer | write-design-spec | open | 08-studio-to-game-designer.md |
+| 5a | Verify | qa | verify-change | planned | — |
+| 5b | Verify (visual) | art-director | visual-review | planned | — |
+| 6 | Play | playtester | playtest-session | planned | — |
+| 7 | Review | game-director | review-outcome | planned | — |
+| 8 | Next | studio | — | planned | — |
+
+## Route changes
+
+After Build (05, partial) and Design 4b (06): check 14 is settled by D-002 reach marks, so Build continues with those changes (07). 05's two other rule questions go to a parallel Design step (08). Verify waits for both. 05 is not sent to qa. Budget is nearly used up: a further return would pass it.
+
+## Next action
+
+Start steps 4a and 4c, in either order: `gameplay-engineer` with `07-studio-to-gameplay-engineer.md`, and `game-designer` with `08-studio-to-game-designer.md`. The Route after both opens Verify (qa with art-director in parallel), or returns a changed ruling to Build first.
+
+## Outcome
+
+(open)
+>>>END

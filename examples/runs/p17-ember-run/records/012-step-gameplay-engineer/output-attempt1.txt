@@ -1,0 +1,7 @@
+<<<FILE @need
+repo/src/script.js
+repo/src/scenario.js
+repo/src/light.js
+repo/tests/gloom.test.js
+repo/tests/view.test.js
+>>>END

@@ -1,0 +1,77 @@
+Routing: the Design step produced a spec that fits the plan, so Plan (`technical-director`) opens next. Decide is dropped as `skipped`, because the designer made no choice of direction, priority or scope. I'm also correcting the Load list in the handoff, which named a skill file that doesn't exist.
+
+<<<FILE goals/G-001-first-playable-run/goal.md
+---
+kind: goal
+id: G-001
+project: ember-hollow
+status: active
+created: 2026-10-26
+budget: 19
+---
+# G-001: First complete playable run in the browser
+
+## Owner request
+
+> このコンセプトで、最初から最後まで通して遊べる版を作ってほしい。ブラウザで遊べるようにしてほしい
+
+## Interpretation
+
+Success condition: a person opens `repo/index.html` straight from the file system in a browser and can play one whole run with keyboard or mouse. The run starts on floor 1, passes through all five floors, and ends in one of the ways the vision names: beating the floor-5 creature (win), dying, or the ember going out. No setup, server or developer step is needed. The vision's pillars hold in that run: readable threats, light as the resource, a short seeded run (same seed gives the same run).
+
+The team-side means from `project.md#constraints` also ship, because verification depends on them: `node play.js {script}`, `--trace`, `node --test`, and `repo/manual.md` (the script format and everything a player is told).
+
+Out of scope (not requested): saving or resuming runs, meta-progression between runs, sound, mobile or touch layouts, network features, content beyond what one complete five-floor run needs, and any change to the vision or pillars.
+
+## Unknowns
+
+- Observe: skipped. No build exists and nothing is reported broken or off.
+- Diagnose: skipped. There is no problem to explain.
+- Decide: skipped. Design stayed inside the vision and Goal scope and raised no direction, priority or scope choice. Reopens only if Plan finds the spec too costly and scope must change (then `game-director`).
+- Design: done (spec and 30 acceptance checks in `design/`). Reopens if Plan or Build sends back a spec question. Balance is unverified; Play must report it.
+- Plan: open. Cross-system work (shared rules core for browser and Node, deterministic seeded generation, floor generator guarantees, threat marking consistent with creature actions, browser renderer, script player and trace, bulk-seed test support for checks 14, 21, 23, 26). Technical approach and sequencing are the `technical-director`'s.
+- Build: planned. The game must be created from scratch.
+- Verify: planned. QA against the acceptance criteria through the scripts and tests; Art Director visual review in parallel (grid readability, threat clarity).
+- Play: planned. A Playtester plays from `repo/manual.md` and the player profile only.
+- Review: planned. `game-director` judges whether the intent was met and names the next issues.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Design | game-designer | write-design-spec | done | 01-studio-to-game-designer.md |
+| 2 | Decide | game-director | make-decision | skipped | — |
+| 3 | Plan | technical-director | technical-plan | open | 02-game-designer-to-technical-director.md |
+| 4 | Build | gameplay-engineer | implement-change | planned | — |
+| 5a | Verify | qa | verify-change | planned | — |
+| 5b | Verify (visual) | art-director | visual-review | planned | — |
+| 6 | Play | playtester | playtest-session | planned | — |
+| 7 | Review | game-director | review-outcome | planned | — |
+| 8 | Next | studio | — | planned | — |
+
+## Route changes
+
+After Design: it fits the plan. Decide dropped (skipped): the designer resolved all ambiguities inside the vision and scope. Plan opens with the Design handoff; its Load list was corrected to the existing skill `technical-plan`.
+
+## Next action
+
+Start step 3: `technical-director` with `goals/G-001-first-playable-run/02-game-designer-to-technical-director.md`. Its plan goes to `gameplay-engineer`.
+
+## Outcome
+
+(open)
+>>>END
+
+<<<EDIT goals/G-001-first-playable-run/02-game-designer-to-technical-director.md
+<<<<<<< SEARCH
+A technical plan for Build (approach, structure of the shared rules module, runner, page, tests, `repo/manual.md`, and the order of work), written as the Technical Director's Plan artifact, and the handoff to the Build role.
+=======
+A technical plan for Build (approach, structure of the shared rules module, runner, page, tests, `repo/manual.md`, and the order of work), written in the Findings of the outgoing Handoff to `gameplay-engineer` (`03-technical-director-to-gameplay-engineer.md`), or in a project file that Findings names. Include the support for bulk-seed runs that checks 14, 21, 23 and 26 need. Set `outcome: done` when the plan is ready. If a spec rule is infeasible, ambiguous or too costly, hand back to `game-designer` with the exact question (outcome `question`); if scope must change, hand back so the Studio can route to `game-director`.
+>>>END
+
+<<<EDIT goals/G-001-first-playable-run/02-game-designer-to-technical-director.md
+<<<<<<< SEARCH
+- Skills: studio/skills/make-technical-plan.md
+=======
+- Skills: studio/skills/technical-plan.md
+>>>END

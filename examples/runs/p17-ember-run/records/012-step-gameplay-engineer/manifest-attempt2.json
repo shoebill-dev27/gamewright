@@ -1,0 +1,147 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-001-first-playable-run/11-studio-to-gameplay-engineer.md",
+  "sha256": "0238fca3577f6d5cd4928011fbeea50e4f8a9d41bca1e16ab9732881bb5cf238",
+  "bytes": 4449
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md",
+  "sha256": "8a447e66877cd14dfff47ac1b8482ba77c850159c8fb43ec2780e91064869351",
+  "bytes": 1742
+ },
+ {
+  "path": "studio/skills/implement-change.md",
+  "sha256": "a9befd7f1d9e09eb94c51a066f030db88c5061ad1b522d9795e62bc2c242964a",
+  "bytes": 1823
+ },
+ {
+  "path": "design/game-spec.md",
+  "sha256": "5a49d3f2c7ea90a42935dd7fcb476240f09edd540abadae1e568af020ba2f4b3",
+  "bytes": 19121
+ },
+ {
+  "path": "design/acceptance-criteria.md",
+  "sha256": "7e86d8201ca491669b298a39b93925ba389dc407e7d0cc9dd3264955acad7666",
+  "bytes": 7923
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "aae9397c3af0af637fa84e4874124d39d92ec10e248121bb1f36217855b21239",
+  "bytes": 6362
+ },
+ {
+  "path": "repo/play.js",
+  "sha256": "da6d9aa64c4a3407172f1417b05d5da0b00825081299f2338a28cf33dcb1b979",
+  "bytes": 1044
+ },
+ {
+  "path": "repo/src/view.js",
+  "sha256": "bf13d17cbea3a9df7bca4fe8d84c23cd9c5eef11cad48ea847fbded7e5ab9003",
+  "bytes": 6091
+ },
+ {
+  "path": "repo/src/game.js",
+  "sha256": "107905bc763fafe363437c910e939df9fec41c6b297306d2ef5b21fb2cd0cc16",
+  "bytes": 17559
+ },
+ {
+  "path": "repo/src/textview.js",
+  "sha256": "bd86d1c55d96ed8f317ca372363eb4a676966f5a7610804fd8ecf897c8b20b74",
+  "bytes": 4425
+ },
+ {
+  "path": "repo/src/page.js",
+  "sha256": "00dd30bbdbe56a036f95b14e5655eddf10b634be868d1b5ea10a6df20287fa78",
+  "bytes": 7653
+ },
+ {
+  "path": "repo/tests/bots.test.js",
+  "sha256": "7cd0f9a34fe61f2b69be5a4311c299092eceed98d0faadeddf67b30cb43c4959",
+  "bytes": 2702
+ },
+ {
+  "path": "repo/tests/creatures.test.js",
+  "sha256": "5dfd11c15f9f3ac1f2bcbb05698df29b218f82be578cea6c959512111d7c163a",
+  "bytes": 3846
+ },
+ {
+  "path": "repo/tests/rules.test.js",
+  "sha256": "ea461e0ec4dfb3bf0263a27a5ca0995d3be7395a4d80cd89c8250d2e77b9c7e6",
+  "bytes": 5883
+ },
+ {
+  "path": "repo/tests/bot.js",
+  "sha256": "ad6efb4648a156a3e1b9f051a1ca8a4ae08195dbf2a60feb84a662b65096253c",
+  "bytes": 3912
+ },
+ {
+  "path": "repo/tests/reach.test.js",
+  "sha256": "5ecd2c60acf29557f5179efda446b8087a637ac606d2551184d6850887b346ba",
+  "bytes": 4697
+ },
+ {
+  "path": "repo/tests/helpers.js",
+  "sha256": "a33f743a0564e7d93c4f8469c099774eb476dfb4bd67efcd5bc9e487c580ff46",
+  "bytes": 716
+ },
+ {
+  "path": "goals/G-001-first-playable-run/10-game-designer-to-studio.md",
+  "sha256": "9ae3bb3ec70bc8f102b0dbf9af38cb0893dead056e4d75bb1f766edcd5b854c0",
+  "bytes": 5422
+ },
+ {
+  "path": "decisions/D-001-classic-scripts-shared-rules.md",
+  "sha256": "d8028757b2b22bd72544eeeb055593d1a4118d0c695f753f8c7f8e75f99255ff",
+  "bytes": 1575
+ },
+ {
+  "path": "decisions/D-002-threat-and-reach-marks.md",
+  "sha256": "05ba76f00173c03e14b3d829b371b88cafc9dd6e874de2d5c32b009665dc3971",
+  "bytes": 1943
+ },
+ {
+  "path": "goals/G-001-first-playable-run/09-gameplay-engineer-to-qa.md",
+  "sha256": "787680312e3b079905e3180227e6774f34935dbfb1461dc7158bd332b9628c56",
+  "bytes": 7482
+ },
+ {
+  "path": "@files/repo",
+  "sha256": "ed4502487fc5cf5d640fee870e249319e2c371c9d2285d5da2b48f26c040a87c",
+  "bytes": 585
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ },
+ {
+  "path": "repo/src/script.js",
+  "sha256": "132ae366d5b75b457c970e69bf306a36813e624c197427c5d5637c9bcb3a4be3",
+  "bytes": 4676
+ },
+ {
+  "path": "repo/src/scenario.js",
+  "sha256": "b48905282531a80b04c9544d612146ba7ed5beac462dcd408329d96aee45aab0",
+  "bytes": 2059
+ },
+ {
+  "path": "repo/src/light.js",
+  "sha256": "8c7bfedfd6aec3baf8bbbdf8bc462605c091409ed538e3311bcf60f88abf1394",
+  "bytes": 1928
+ },
+ {
+  "path": "repo/tests/gloom.test.js",
+  "sha256": "ca26f6572287f7914791f15aed4cf469d7c1faf5e0802c4bdc3d7209a80ec942",
+  "bytes": 2440
+ },
+ {
+  "path": "repo/tests/view.test.js",
+  "sha256": "8a9b85fc9993dd3d1ee9ae6b8046281bb8a820f012217327454902fb93f3f092",
+  "bytes": 2238
+ }
+]

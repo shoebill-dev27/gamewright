@@ -1,0 +1,10 @@
+I'll start with a first exploratory run on one seed.
+
+<<<FILE @run/play/seed42-explore
+seed 42
+dddd ss
+dd ww
+..
+aaaa
+ssss
+>>>END

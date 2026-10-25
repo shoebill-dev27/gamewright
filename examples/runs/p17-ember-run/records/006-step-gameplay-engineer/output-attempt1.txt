@@ -1,0 +1,2016 @@
+I've written the full build, but I have not run any of it myself. No `@run` was used, so tests, the bot and the page are all unexecuted. Expect defects, and the runtime's `## Build check` is the first real signal.
+
+<<<FILE repo/src/rng.js
+/* Seeded randomness for floor generation only (no randomness during play). UMD-style, D-001. */
+(function (g) {
+  'use strict';
+  var EH = g.EmberHollow = g.EmberHollow || {};
+
+  // FNV-1a 32-bit string hash.
+  function hash(str) {
+    var h = 2166136261 >>> 0;
+    for (var i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619) >>> 0;
+    }
+    return h >>> 0;
+  }
+
+  function mulberry32(a) {
+    return function () {
+      a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  // Sub-seeded generator: a pure function of (seed, floor, attempt).
+  function make(seed, floor, attempt) {
+    var next = mulberry32(hash(String(seed) + '|' + floor + '|' + attempt));
+    var r = {
+      next: next,
+      int: function (n) { return Math.floor(next() * n); },
+      pick: function (arr) { return arr[r.int(arr.length)]; },
+      shuffle: function (arr) {
+        var a = arr.slice();
+        for (var i = a.length - 1; i > 0; i--) {
+          var j = r.int(i + 1), t = a[i]; a[i] = a[j]; a[j] = t;
+        }
+        return a;
+      }
+    };
+    return r;
+  }
+
+  EH.rng = { hash: hash, make: make };
+  if (typeof module === 'object' && module.exports) module.exports = EH.rng;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+>>>END
+
+<<<FILE repo/src/light.js
+/* Glow radius and visibility (spec 3). UMD-style, D-001. */
+(function (g) {
+  'use strict';
+  var EH = g.EmberHollow = g.EmberHollow || {};
+
+  // Spec 3 table.
+  function radiusFor(E) {
+    if (E >= 80) return 6;
+    if (E >= 60) return 5;
+    if (E >= 40) return 4;
+    if (E >= 20) return 3;
+    if (E >= 1) return 2;
+    return 0;
+  }
+
+  function tileAt(fd, x, y) {
+    if (x < 0 || y < 0 || x >= fd.w || y >= fd.h) return '#';
+    return fd.tiles[y].charAt(x);
+  }
+
+  // Bresenham line; intermediate tiles (not the endpoints) must not be walls.
+  function los(fd, x0, y0, x1, y1) {
+    var dx = Math.abs(x1 - x0), dy = Math.abs(y1 - y0);
+    var sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+    var err = dx - dy, x = x0, y = y0;
+    for (;;) {
+      if (x === x1 && y === y1) return true;
+      var e2 = 2 * err;
+      if (e2 > -dy) { err -= dy; x += sx; }
+      if (e2 < dx) { err += dx; y += sy; }
+      if (x === x1 && y === y1) return true;
+      if (tileAt(fd, x, y) === '#') return false;
+    }
+  }
+
+  // Grid (w*h array of 0/1) of tiles visible from (px,py) with glow radius r:
+  // dx^2+dy^2 <= (r+0.5)^2 and a clear line of sight.
+  function visibleGrid(fd, px, py, r) {
+    var w = fd.w, h = fd.h, grid = new Array(w * h);
+    for (var i = 0; i < grid.length; i++) grid[i] = 0;
+    var R = r + 0.5, R2 = R * R, m = Math.ceil(R);
+    for (var y = py - m; y <= py + m; y++) {
+      for (var x = px - m; x <= px + m; x++) {
+        if (x < 0 || y < 0 || x >= w || y >= h) continue;
+        var dx = x - px, dy = y - py;
+        if (dx * dx + dy * dy > R2) continue;
+        if (los(fd, px, py, x, y)) grid[y * w + x] = 1;
+      }
+    }
+    grid[py * w + px] = 1;
+    return grid;
+  }
+
+  EH.light = { radiusFor: radiusFor, tileAt: tileAt, los: los, visibleGrid: visibleGrid };
+  if (typeof module === 'object' && module.exports) module.exports = EH.light;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+>>>END
+
+<<<FILE repo/src/floorgen.js
+/* Seeded floor generator + validator (spec 5). UMD-style, D-001.
+   Floor n depends only on (seed, n). Attempt k uses rng(seed, n, k); first valid attempt wins. */
+(function (g) {
+  'use strict';
+  var EH = g.EmberHollow = g.EmberHollow || {};
+  if (typeof require === 'function') require('./rng.js');
+
+  var SIZES = { 1: [28, 16], 2: [30, 18], 3: [32, 18], 4: [34, 20], 5: [30, 18] };
+  var COUNTS = {
+    1: { moth: 4 },
+    2: { moth: 3, shade: 2 },
+    3: { moth: 2, shade: 3, hound: 1 },
+    4: { moth: 2, shade: 3, hound: 3 },
+    5: { gloom: 1, shade: 2, hound: 1 }
+  };
+  var MIN_STAIRS = { 1: 30, 2: 30, 3: 30, 4: 40 };
+  var MAX_ATTEMPTS = 400;
+  var DX = [0, 1, 0, -1], DY = [-1, 0, 1, 0];
+
+  function kk(x, y) { return x + ',' + y; }
+
+  // Walking distance map from (sx,sy) over all non-wall tiles (Infinity = unreachable).
+  function bfs(f, sx, sy) {
+    var w = f.w, h = f.h, dist = new Array(w * h);
+    for (var i = 0; i < dist.length; i++) dist[i] = Infinity;
+    dist[sy * w + sx] = 0;
+    var q = [sy * w + sx];
+    for (var qi = 0; qi < q.length; qi++) {
+      var cur = q[qi], cx = cur % w, cy = (cur - cx) / w;
+      for (var k = 0; k < 4; k++) {
+        var nx = cx + DX[k], ny = cy + DY[k];
+        if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+        if (f.tiles[ny].charAt(nx) === '#') continue;
+        var ni = ny * w + nx;
+        if (dist[ni] !== Infinity) continue;
+        dist[ni] = dist[cur] + 1;
+        q.push(ni);
+      }
+    }
+    return dist;
+  }
+
+  function blankGrid(w, h) {
+    var gr = [];
+    for (var y = 0; y < h; y++) { var row = []; for (var x = 0; x < w; x++) row.push('#'); gr.push(row); }
+    return gr;
+  }
+  function carveRect(gr, x0, y0, x1, y1) {
+    for (var y = y0; y <= y1; y++) for (var x = x0; x <= x1; x++) gr[y][x] = '.';
+  }
+  function carveH(gr, y, xa, xb) { for (var x = Math.min(xa, xb); x <= Math.max(xa, xb); x++) gr[y][x] = '.'; }
+  function carveV(gr, x, ya, yb) { for (var y = Math.min(ya, yb); y <= Math.max(ya, yb); y++) gr[y][x] = '.'; }
+  function joinTiles(gr) { return gr.map(function (r) { return r.join(''); }); }
+
+  // Floors 1-4: rooms joined in a random chain by L-shaped corridors.
+  function genRegular(rng, n) {
+    var w = SIZES[n][0], h = SIZES[n][1], gr = blankGrid(w, h);
+    var rooms = [], want = 5 + rng.int(4), i, t;
+    for (t = 0; t < 300 && rooms.length < want; t++) {
+      var rw = 4 + rng.int(5), rh = 3 + rng.int(4);
+      var rx = 1 + rng.int(w - 1 - rw), ry = 1 + rng.int(h - 1 - rh), ok = true;
+      for (i = 0; i < rooms.length; i++) {
+        var o = rooms[i];
+        if (!(rx + rw + 1 <= o.x || o.x + o.w + 1 <= rx || ry + rh + 1 <= o.y || o.y + o.h + 1 <= ry)) { ok = false; break; }
+      }
+      if (ok) rooms.push({ x: rx, y: ry, w: rw, h: rh });
+    }
+    if (rooms.length < 5) return null;
+    var roomTiles = [];
+    rooms.forEach(function (r) {
+      carveRect(gr, r.x, r.y, r.x + r.w - 1, r.y + r.h - 1);
+      for (var y = r.y; y < r.y + r.h; y++) for (var x = r.x; x < r.x + r.w; x++) roomTiles.push({ x: x, y: y });
+    });
+    function center(r) { return { x: r.x + Math.floor(r.w / 2), y: r.y + Math.floor(r.h / 2) }; }
+    var order = rng.shuffle(rooms.map(function (_, ix) { return ix; }));
+    for (i = 1; i < order.length; i++) {
+      var a = center(rooms[order[i - 1]]), b = center(rooms[order[i]]);
+      if (rng.int(2) === 0) { carveH(gr, a.y, a.x, b.x); carveV(gr, b.x, a.y, b.y); }
+      else { carveV(gr, a.x, a.y, b.y); carveH(gr, b.y, a.x, b.x); }
+    }
+    var f0 = { w: w, h: h, tiles: joinTiles(gr) };
+    var start = center(rooms[order[0]]);
+    var dS = bfs(f0, start.x, start.y);
+    var sd = null, best = -1;
+    roomTiles.forEach(function (tl) {
+      var d = dS[tl.y * w + tl.x];
+      if (isFinite(d) && d > best) { best = d; sd = tl; }
+    });
+    if (!sd || best < MIN_STAIRS[n]) return null;
+    var dG = bfs(f0, sd.x, sd.y), D = best;
+    var occ = {}; occ[kk(start.x, start.y)] = 1; occ[kk(sd.x, sd.y)] = 1;
+    function idx(tl) { return tl.y * w + tl.x; }
+    function off(tl) { return dS[idx(tl)] + dG[idx(tl)] !== D; } // strict: not on ANY shortest path
+    function free(tl) { return !occ[kk(tl.x, tl.y)]; }
+    var candA = roomTiles.filter(function (tl) { return free(tl) && off(tl) && dS[idx(tl)] <= 25; });
+    if (!candA.length) return null;
+    var A = rng.pick(candA); occ[kk(A.x, A.y)] = 1;
+    var dA = bfs(f0, A.x, A.y);
+    var candB = roomTiles.filter(function (tl) { return free(tl) && off(tl) && dA[idx(tl)] >= 10; });
+    if (!candB.length) return null;
+    var B = rng.pick(candB); occ[kk(B.x, B.y)] = 1;
+    var candS = roomTiles.filter(function (tl) { return free(tl) && off(tl); });
+    if (!candS.length) return null;
+    var salve = rng.pick(candS); occ[kk(salve.x, salve.y)] = 1;
+    var candO = roomTiles.filter(free);
+    if (!candO.length) return null;
+    var oil = rng.pick(candO); occ[kk(oil.x, oil.y)] = 1;
+    var spots = rng.shuffle(roomTiles.filter(function (tl) { return free(tl) && dS[idx(tl)] >= 6; }));
+    var spawns = [], si = 0, counts = COUNTS[n], bad = false;
+    ['moth', 'shade', 'hound'].forEach(function (type) {
+      for (var k = 0; k < (counts[type] || 0); k++) {
+        if (si >= spots.length) { bad = true; return; }
+        var tl = spots[si++]; spawns.push({ type: type, x: tl.x, y: tl.y });
+      }
+    });
+    if (bad) return null;
+    gr[start.y][start.x] = '<'; gr[sd.y][sd.x] = '>'; gr[A.y][A.x] = 'B'; gr[B.y][B.x] = 'B';
+    return {
+      w: w, h: h, tiles: joinTiles(gr), start: start, stairsDown: { x: sd.x, y: sd.y },
+      braziers: [{ x: A.x, y: A.y }, { x: B.x, y: B.y }],
+      items: [{ x: salve.x, y: salve.y, type: 'salve' }, { x: oil.x, y: oil.y, type: 'oil' }],
+      creatureSpawns: spawns, rooms: rooms, arena: null
+    };
+  }
+
+  // Floor 5: start room, long corridor, one open arena with the Gloom and 3 braziers.
+  function genBoss(rng) {
+    var w = 30, h = 18, gr = blankGrid(w, h);
+    var x0 = 12 + rng.int(3), x1 = 28, y0 = 4 + rng.int(2), y1 = 15 + rng.int(2);
+    carveRect(gr, x0, y0, x1, y1);
+    carveRect(gr, 1, 12, 5, 16);
+    var xe = x0 + 2 + rng.int(x1 - x0 - 3);
+    carveV(gr, 3, 2, 11); carveH(gr, 2, 3, xe); carveV(gr, xe, 2, y0 - 1);
+    var start = { x: 1 + rng.int(5), y: 12 + rng.int(5) };
+    var entrance = { x: xe, y: y0 };
+    var occ = {}; occ[kk(start.x, start.y)] = 1;
+    var gl = { x: x0 + 2 + rng.int(x1 - x0 - 3), y: y1 };
+    occ[kk(gl.x, gl.y)] = 1; occ[kk(entrance.x, entrance.y)] = 1;
+    function man(a, b) { return Math.abs(a.x - b.x) + Math.abs(a.y - b.y); }
+    var arenaTiles = [], x, y;
+    for (y = y0; y <= y1; y++) for (x = x0; x <= x1; x++) arenaTiles.push({ x: x, y: y });
+    function fr(tl) { return !occ[kk(tl.x, tl.y)]; }
+    var bc = rng.shuffle(arenaTiles.filter(function (tl) {
+      return fr(tl) && tl.x > x0 && tl.x < x1 && tl.y > y0 && tl.y < y1 && man(tl, gl) >= 2;
+    }));
+    if (bc.length < 3) return null;
+    var braziers = bc.slice(0, 3);
+    braziers.forEach(function (b) { occ[kk(b.x, b.y)] = 1; });
+    var cc = rng.shuffle(arenaTiles.filter(function (tl) { return fr(tl) && man(tl, entrance) >= 4 && man(tl, gl) >= 3; }));
+    if (cc.length < 3) return null;
+    var spawns = [{ type: 'gloom', x: gl.x, y: gl.y }];
+    ['shade', 'shade', 'hound'].forEach(function (type, i) { spawns.push({ type: type, x: cc[i].x, y: cc[i].y }); });
+    cc.slice(0, 3).forEach(function (tl) { occ[kk(tl.x, tl.y)] = 1; });
+    var srt = [];
+    for (y = 12; y <= 16; y++) for (x = 1; x <= 5; x++) srt.push({ x: x, y: y });
+    var salve = rng.pick(srt.filter(fr)); occ[kk(salve.x, salve.y)] = 1;
+    var oil = rng.pick(arenaTiles.filter(fr));
+    gr[start.y][start.x] = '<';
+    braziers.forEach(function (b) { gr[b.y][b.x] = 'B'; });
+    return {
+      w: w, h: h, tiles: joinTiles(gr), start: start, stairsDown: null,
+      braziers: braziers.map(function (b) { return { x: b.x, y: b.y }; }),
+      items: [{ x: salve.x, y: salve.y, type: 'salve' }, { x: oil.x, y: oil.y, type: 'oil' }],
+      creatureSpawns: spawns, rooms: [],
+      arena: { x0: x0, y0: y0, x1: x1, y1: y1, entrance: entrance }
+    };
+  }
+
+  // Returns the list of violated guarantees (spec 5); empty = valid.
+  function validateFloor(f, n) {
+    var errs = [], size = SIZES[n], w = f.w, h = f.h, x, y, i;
+    if (w !== size[0] || h !== size[1]) errs.push('size ' + w + 'x' + h + ' != ' + size.join('x'));
+    if (f.tiles.length !== h) { errs.push('tile rows != h'); return errs; }
+    for (y = 0; y < h; y++) if (f.tiles[y].length !== w) { errs.push('row ' + y + ' width'); return errs; }
+    var dS = bfs(f, f.start.x, f.start.y);
+    if (f.tiles[f.start.y].charAt(f.start.x) !== '<') errs.push('start is not <');
+    for (y = 0; y < h; y++) for (x = 0; x < w; x++) {
+      if (f.tiles[y].charAt(x) !== '#' && !isFinite(dS[y * w + x])) { errs.push('disconnected tile ' + x + ',' + y); y = h; break; }
+    }
+    var cnt = {};
+    f.creatureSpawns.forEach(function (c) { cnt[c.type] = (cnt[c.type] || 0) + 1; });
+    ['gloom', 'moth', 'shade', 'hound'].forEach(function (t) {
+      if ((cnt[t] || 0) !== (COUNTS[n][t] || 0)) errs.push('creature count ' + t + ' ' + (cnt[t] || 0));
+    });
+    if (f.braziers.length !== (n < 5 ? 2 : 3)) errs.push('brazier count ' + f.braziers.length);
+    f.braziers.forEach(function (b) { if (f.tiles[b.y].charAt(b.x) !== 'B') errs.push('brazier tile char'); });
+    var sal = 0, oil = 0;
+    f.items.forEach(function (it) {
+      if (it.type === 'salve') sal++; else if (it.type === 'oil') oil++;
+      if (f.tiles[it.y].charAt(it.x) !== '.') errs.push('item not on plain floor');
+    });
+    if (sal !== 1 || oil !== 1 || f.items.length !== 2) errs.push('item counts');
+    var seen = {};
+    f.items.forEach(function (it) { seen[kk(it.x, it.y)] = 1; });
+    f.creatureSpawns.forEach(function (c) {
+      if (f.tiles[c.y].charAt(c.x) !== '.') errs.push('creature not on floor');
+      if (seen[kk(c.x, c.y)]) errs.push('creature on item/creature ' + c.x + ',' + c.y);
+      seen[kk(c.x, c.y)] = 1;
+      if (!(dS[c.y * w + c.x] >= 6)) errs.push('creature within 6 steps of <');
+    });
+    if (n < 5) {
+      if (!f.stairsDown || f.tiles[f.stairsDown.y].charAt(f.stairsDown.x) !== '>') { errs.push('no >'); return errs; }
+      var D = dS[f.stairsDown.y * w + f.stairsDown.x];
+      if (!(D >= MIN_STAIRS[n])) errs.push('< to > distance ' + D + ' < ' + MIN_STAIRS[n]);
+      var dG = bfs(f, f.stairsDown.x, f.stairsDown.y);
+      var near = f.braziers.some(function (b) { return dS[b.y * w + b.x] <= 25; });
+      if (!near) errs.push('no brazier within 25 steps of <');
+      var dB = bfs(f, f.braziers[0].x, f.braziers[0].y);
+      if (!(dB[f.braziers[1].y * w + f.braziers[1].x] >= 10)) errs.push('braziers closer than 10 steps');
+      f.braziers.forEach(function (b) {
+        if (dS[b.y * w + b.x] + dG[b.y * w + b.x] === D) errs.push('brazier on a shortest path');
+      });
+      var offItem = f.items.some(function (it) { return dS[it.y * w + it.x] + dG[it.y * w + it.x] !== D; });
+      if (!offItem) errs.push('no item off the shortest path');
+      if (!f.rooms || f.rooms.length < 5 || f.rooms.length > 8) errs.push('room count');
+    } else {
+      if (f.stairsDown) errs.push('floor 5 has >');
+      var a = f.arena;
+      if (!a) { errs.push('no arena'); return errs; }
+      if (a.x1 - a.x0 + 1 < 14 || a.y1 - a.y0 + 1 < 10) errs.push('arena smaller than 14x10');
+      if (!(dS[a.entrance.y * w + a.entrance.x] >= 20)) errs.push('arena entrance < 20 steps from <');
+      f.braziers.forEach(function (b) {
+        if (b.x < a.x0 || b.x > a.x1 || b.y < a.y0 || b.y > a.y1) errs.push('brazier outside arena');
+      });
+      var dE = bfs(f, a.entrance.x, a.entrance.y);
+      f.creatureSpawns.forEach(function (c) {
+        if (c.type !== 'gloom') return;
+        if (c.x < a.x0 || c.x > a.x1 || c.y < a.y0 || c.y > a.y1) errs.push('Gloom outside arena');
+        if (!(dE[c.y * w + c.x] >= 8)) errs.push('Gloom < 8 steps from arena entrance');
+      });
+    }
+    return errs;
+  }
+
+  function generateFloor(seed, n) {
+    for (var k = 0; k < MAX_ATTEMPTS; k++) {
+      var rng = EH.rng.make(seed, n, k);
+      var f = n === 5 ? genBoss(rng) : genRegular(rng, n);
+      if (!f) continue;
+      if (validateFloor(f, n).length === 0) { f.attempt = k; return f; }
+    }
+    throw new Error('floorgen: no valid floor for seed "' + seed + '" floor ' + n + ' after ' + MAX_ATTEMPTS + ' attempts');
+  }
+
+  EH.floorgen = { generateFloor: generateFloor, validateFloor: validateFloor, bfs: bfs, SIZES: SIZES, COUNTS: COUNTS };
+  if (typeof module === 'object' && module.exports) module.exports = EH.floorgen;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+>>>END
+
+<<<FILE repo/src/game.js
+/* Ember Hollow rules engine: pure, deterministic. One entry point step(state, action).
+   UMD-style (D-001). No Date, no Math.random, no DOM. Spec section numbers in comments. */
+(function (g) {
+  'use strict';
+  var EH = g.EmberHollow = g.EmberHollow || {};
+  if (typeof require === 'function') { require('./rng.js'); require('./floorgen.js'); require('./light.js'); }
+  var FG = EH.floorgen, L = EH.light;
+
+  var DIRS = { N: [0, -1], E: [1, 0], S: [0, 1], W: [-1, 0] };
+  var DIR_ORDER = ['N', 'E', 'S', 'W'];
+  var DEFS = {
+    moth: { letter: 'm', name: 'Cave moth', hp: 2, dmg: 1 },
+    shade: { letter: 's', name: 'Shade', hp: 4, dmg: 2 },
+    hound: { letter: 'h', name: 'Ash hound', hp: 4, dmg: 3 },
+    gloom: { letter: 'G', name: 'The Gloom', hp: 24, dmg: 4 }
+  };
+  var MAX_HP = 12, FLOORS = 5;
+  // Spec 3 (flare): "skips its next 2 actions". Reading A: the creature phase of the lighting turn
+  // already counts as the first skipped action (see manual.md, readings).
+  var STUN_TURNS = 2;
+
+  function manh(a, b) { return Math.abs(a.x - b.x) + Math.abs(a.y - b.y); }
+  function key(x, y) { return x + ',' + y; }
+  function tileAt(fd, x, y) { return L.tileAt(fd, x, y); }
+  function addMsg(s, t) { s.messages.push(t); if (s.messages.length > 5) s.messages.splice(0, s.messages.length - 5); }
+  function nm(c) { return c.type === 'gloom' ? 'Gloom' : 'the ' + DEFS[c.type].name.toLowerCase(); }
+  function cap(t) { return t.charAt(0).toUpperCase() + t.slice(1); }
+
+  // Copy of the state; floorData is immutable and shared.
+  function clone(s) {
+    var c = {};
+    Object.keys(s).forEach(function (k) {
+      if (k === 'floorData' || s[k] === undefined) c[k] = s[k];
+      else c[k] = JSON.parse(JSON.stringify(s[k]));
+    });
+    return c;
+  }
+
+  function creatureAt(s, x, y) {
+    for (var i = 0; i < s.creatures.length; i++) {
+      var c = s.creatures[i];
+      if (c.hp > 0 && c.x === x && c.y === y) return c;
+    }
+    return null;
+  }
+
+  function makeCreature(sp, id) {
+    return { id: id, type: sp.type, x: sp.x, y: sp.y, hp: DEFS[sp.type].hp, maxHp: DEFS[sp.type].hp,
+      stunned: 0, crouching: false, dir: null, staggered: 0, gathering: false };
+  }
+
+  function emptySeen(fd) {
+    var a = [];
+    for (var y = 0; y < fd.h; y++) { var r = []; for (var x = 0; x < fd.w; x++) r.push(0); a.push(r); }
+    return a;
+  }
+
+  function updateSeen(s) {
+    if (s.ember <= 0) return;
+    var fd = s.floorData;
+    var vis = L.visibleGrid(fd, s.player.x, s.player.y, L.radiusFor(s.ember));
+    for (var y = 0; y < fd.h; y++) for (var x = 0; x < fd.w; x++) if (vis[y * fd.w + x]) s.seen[y][x] = 1;
+  }
+
+  function installFloor(s, fd, n) {
+    s.floor = n; s.floorData = fd;
+    s.player = { x: fd.start.x, y: fd.start.y };
+    s.lit = [];
+    s.items = fd.items.map(function (i) { return { x: i.x, y: i.y, type: i.type }; });
+    s.creatures = fd.creatureSpawns.map(function (sp, i) { return makeCreature(sp, i + 1); });
+    s.seen = emptySeen(fd);
+    updateSeen(s);
+  }
+
+  function newRunFromFloor(seed, fd, n) {
+    var s = { seed: String(seed), floor: n, turn: 0, hp: MAX_HP, ember: 100, inv: [null, null, null, null],
+      player: null, floorData: null, lit: [], items: [], seen: null, creatures: [], messages: [], end: null, defeated: 0 };
+    installFloor(s, fd, n);
+    addMsg(s, 'You descend into Ember Hollow with one ember.');
+    return s;
+  }
+
+  function newRun(seed) { return newRunFromFloor(seed, FG.generateFloor(String(seed), 1), 1); }
+
+  function bfsFromPlayer(s) { return FG.bfs(s.floorData, s.player.x, s.player.y); }
+  function makeCtx(s) {
+    var r = L.radiusFor(s.ember);
+    return { dist: bfsFromPlayer(s), vis: L.visibleGrid(s.floorData, s.player.x, s.player.y, r), r: r };
+  }
+
+  // Spec 3/7: extra drain while the Gloom is within Manhattan 4 (measured at the player's position
+  // after the player's action).
+  function drainRate(s) {
+    for (var i = 0; i < s.creatures.length; i++) {
+      var c = s.creatures[i];
+      if (c.type === 'gloom' && c.hp > 0 && manh(c, s.player) <= 4) return 2;
+    }
+    return 1;
+  }
+
+  // ---- creature planning (one planner for actions AND threat marks) ----
+
+  function isFree(s, x, y) {
+    if (tileAt(s.floorData, x, y) !== '.') return false; // creatures never enter walls, braziers, stairs
+    if (s.player.x === x && s.player.y === y) return false;
+    return !creatureAt(s, x, y);
+  }
+
+  // Spec 4: one step along a shortest path (ties N,E,S,W). Path distance ignores creatures;
+  // the step itself needs a free tile.
+  function stepToward(s, c, ctx, inRegion) {
+    var w = s.floorData.w, d = ctx.dist[c.y * w + c.x];
+    if (!isFinite(d)) return null;
+    for (var i = 0; i < 4; i++) {
+      var dv = DIRS[DIR_ORDER[i]], nx = c.x + dv[0], ny = c.y + dv[1];
+      if (!isFree(s, nx, ny)) continue;
+      if (inRegion && !inRegion(nx, ny)) continue;
+      if (ctx.dist[ny * w + nx] === d - 1) return { x: nx, y: ny };
+    }
+    return null;
+  }
+
+  // Spec 4 (shade): a step that increases path distance from the player.
+  function stepAway(s, c, ctx) {
+    var w = s.floorData.w, d = ctx.dist[c.y * w + c.x];
+    if (!isFinite(d)) return null;
+    for (var i = 0; i < 4; i++) {
+      var dv = DIRS[DIR_ORDER[i]], nx = c.x + dv[0], ny = c.y + dv[1];
+      if (!isFree(s, nx, ny)) continue;
+      if (ctx.dist[ny * w + nx] > d) return { x: nx, y: ny };
+    }
+    return null;
+  }
+
+  function dirKey(sx, sy) { return sy < 0 ? 'N' : sx > 0 ? 'E' : sy > 0 ? 'S' : 'W'; }
+  function attackIntent(c, label) { return { kind: 'attack', label: label, damage: DEFS[c.type].dmg }; }
+
+  function lineOf(s, c) { // spec 4: tiles of a crouching hound's lunge line
+    var dv = DIRS[c.dir], out = [];
+    for (var i = 1; i <= 2; i++) {
+      var x = c.x + dv[0] * i, y = c.y + dv[1] * i;
+      if (tileAt(s.floorData, x, y) !== '#') out.push({ x: x, y: y });
+    }
+    return out;
+  }
+  function areaOf(s, c) { // spec 7: 3x3 around the Gloom, diagonals included
+    var out = [];
+    for (var dy = -1; dy <= 1; dy++) for (var dx = -1; dx <= 1; dx++) {
+      if (tileAt(s.floorData, c.x + dx, c.y + dy) !== '#') out.push({ x: c.x + dx, y: c.y + dy });
+    }
+    return out;
+  }
+  function inArena(fd, x, y) {
+    var a = fd.arena;
+    return !!a && x >= a.x0 && x <= a.x1 && y >= a.y0 && y <= a.y1;
+  }
+
+  // intent: idle | move{to} | attack{damage} | crouch{dir} | lunge{line} | gather | slam{area} | stunned | staggered
+  function planAction(s, c, ctx) {
+    if (c.stunned > 0) return { kind: 'stunned', label: 'stunned' };       // spec 3 flare
+    if (c.staggered > 0) return { kind: 'staggered', label: 'staggered' }; // spec 7
+    var fd = s.floorData, p = s.player, d = ctx.dist[c.y * fd.w + c.x];
+    var adj = manh(c, p) === 1, to;
+    switch (c.type) {
+      case 'moth': // spec 4: drawn to light
+        if (adj) return attackIntent(c, 'hunting');
+        if (d <= ctx.r + 3) {
+          to = stepToward(s, c, ctx);
+          return to ? { kind: 'move', to: to, label: 'hunting' } : { kind: 'idle', label: 'hunting' };
+        }
+        return { kind: 'idle', label: 'idle' };
+      case 'shade': // spec 4: fears bright light
+        if (ctx.r >= 3) {
+          if (ctx.vis[c.y * fd.w + c.x]) {
+            to = stepAway(s, c, ctx);
+            if (to) return { kind: 'move', to: to, label: 'fleeing' };
+            if (adj) return attackIntent(c, 'cornered'); // cornered and adjacent
+            return { kind: 'idle', label: 'cornered' };
+          }
+          if (d <= 12) {
+            to = stepToward(s, c, ctx);
+            return to ? { kind: 'move', to: to, label: 'hunting' } : { kind: 'idle', label: 'hunting' };
+          }
+          return { kind: 'idle', label: 'idle' };
+        }
+        if (adj) return attackIntent(c, 'hunting');
+        if (isFinite(d)) {
+          to = stepToward(s, c, ctx);
+          if (to) return { kind: 'move', to: to, label: 'hunting' };
+        }
+        return { kind: 'idle', label: 'idle' };
+      case 'hound': { // spec 4: bite, telegraphed lunge
+        if (c.crouching) return { kind: 'lunge', label: 'crouching', dir: c.dir, line: lineOf(s, c) };
+        if (adj) return attackIntent(c, 'hunting');
+        var dx = p.x - c.x, dy = p.y - c.y;
+        if ((dx === 0 && Math.abs(dy) === 2) || (dy === 0 && Math.abs(dx) === 2)) {
+          var sx = dx === 0 ? 0 : (dx > 0 ? 1 : -1), sy = dy === 0 ? 0 : (dy > 0 ? 1 : -1);
+          if (isFree(s, c.x + sx, c.y + sy)) return { kind: 'crouch', label: 'hunting', dir: dirKey(sx, sy) };
+        }
+        if (d <= 6) {
+          to = stepToward(s, c, ctx);
+          return to ? { kind: 'move', to: to, label: 'hunting' } : { kind: 'idle', label: 'hunting' };
+        }
+        return { kind: 'idle', label: 'idle' };
+      }
+      case 'gloom': // spec 7
+        if (c.gathering) return { kind: 'slam', label: 'gathering', damage: 4, area: areaOf(s, c) };
+        if (!inArena(fd, p.x, p.y)) return { kind: 'idle', label: 'idle' };
+        if (manh(c, p) <= 2) return { kind: 'gather', label: 'hunting' };
+        to = stepToward(s, c, ctx, function (x, y) { return inArena(fd, x, y); });
+        return to ? { kind: 'move', to: to, label: 'hunting' } : { kind: 'idle', label: 'hunting' };
+    }
+    return { kind: 'idle', label: 'idle' };
+  }
+
+  function hurt(s, c, amount, ev) {
+    s.hp = Math.max(0, s.hp - amount);
+    addMsg(s, cap(nm(c)) + ' hits you for ' + amount + '.');
+    ev.push({ t: 'damage', src: c.id, type: c.type, amount: amount, from: { x: c.x, y: c.y } });
+  }
+
+  function moveTo(c, to) { c.x = to.x; c.y = to.y; }
+
+  // Spec 4 lunge: moves up to 2 tiles along the line; bites only if it ends adjacent with the player in the line.
+  function doLunge(s, c, ctx, ev) {
+    var dv = DIRS[c.dir], p = s.player, k = 0, i;
+    for (i = 1; i <= 2; i++) if (p.x === c.x + dv[0] * i && p.y === c.y + dv[1] * i) k = i;
+    c.crouching = false;
+    if (k > 0) {
+      for (i = 1; i < k; i++) {
+        var nx = c.x + dv[0], ny = c.y + dv[1];
+        if (isFree(s, nx, ny)) c.x = nx, c.y = ny; else break;
+      }
+      if (manh(c, p) === 1) hurt(s, c, 3, ev);
+      else addMsg(s, 'The hound lunges but is blocked.');
+    } else {
+      for (i = 0; i < 2; i++) { var to = stepToward(s, c, ctx); if (!to) break; moveTo(c, to); }
+      addMsg(s, 'The hound lunges and misses you.');
+    }
+  }
+
+  function execute(s, c, it, ctx, ev) {
+    switch (it.kind) {
+      case 'stunned': c.stunned--; break;
+      case 'staggered': c.staggered--; break;
+      case 'move': moveTo(c, it.to); break;
+      case 'attack': hurt(s, c, it.damage, ev); break;
+      case 'crouch': c.crouching = true; c.dir = it.dir; addMsg(s, 'The hound crouches. Step out of its line!'); break;
+      case 'lunge': doLunge(s, c, ctx, ev); break;
+      case 'gather': c.gathering = true; addMsg(s, 'The Gloom gathers darkness around itself.'); break;
+      case 'slam': {
+        var p = s.player;
+        if (Math.max(Math.abs(p.x - c.x), Math.abs(p.y - c.y)) <= 1) hurt(s, c, 4, ev);
+        else addMsg(s, 'The Gloom slams the ground and misses you.');
+        c.gathering = false; c.staggered = 3;
+        addMsg(s, 'The Gloom staggers.');
+        break;
+      }
+    }
+  }
+
+  // ---- end of run ----
+
+  function endRun(s, result) {
+    var msg = result === 'victory' ? 'The Gloom breaks. Light returns to the hollow.'
+      : result === 'dead' ? 'You fell on floor ' + s.floor + '.'
+        : 'The ember went out on floor ' + s.floor + '.';
+    s.end = { result: result, message: msg, floor: s.floor, turns: s.turn, defeated: s.defeated, hp: s.hp, ember: s.ember, seed: s.seed };
+    addMsg(s, msg);
+  }
+
+  function notifyEmber(s, before, after) { // spec 3 "Reading the ember"
+    if (after <= 0) return;
+    [20, 10, 5].forEach(function (t) { if (before > t && after <= t) addMsg(s, 'Ember low: ' + after + '.'); });
+    if (L.radiusFor(before) > L.radiusFor(after)) addMsg(s, 'Your light shrinks.');
+  }
+
+  // Effects of arriving on a tile: brazier (spec 3), item pickup (spec 6), stairs.
+  function landOn(s, ev) {
+    var p = s.player, fd = s.floorData, t = tileAt(fd, p.x, p.y), k = key(p.x, p.y), i;
+    if (t === 'B' && s.lit.indexOf(k) < 0) {
+      s.lit.push(k);
+      s.ember = Math.min(100, s.ember + 60); // before this turn's dimming
+      addMsg(s, 'You rekindle the ember at the brazier (+60).');
+      ev.push({ t: 'brazier', x: p.x, y: p.y });
+      var vis = L.visibleGrid(fd, p.x, p.y, L.radiusFor(s.ember)), stunned = [];
+      s.creatures.forEach(function (c) {
+        if (c.type === 'gloom' || c.hp <= 0) return;
+        if (manh(c, p) > 7 || !vis[c.y * fd.w + c.x]) return;
+        c.stunned = STUN_TURNS; c.crouching = false; c.dir = null; stunned.push(c.id);
+      });
+      if (stunned.length) {
+        addMsg(s, 'The flare stuns ' + stunned.length + ' creature' + (stunned.length > 1 ? 's' : '') + '.');
+        ev.push({ t: 'flare', stunned: stunned });
+      }
+    }
+    for (i = 0; i < s.items.length; i++) {
+      var it = s.items[i];
+      if (it.x !== p.x || it.y !== p.y) continue;
+      var slot = s.inv.indexOf(null);
+      if (slot < 0) {
+        addMsg(s, 'Your pack is full; the ' + it.type + ' stays on the floor.');
+        ev.push({ t: 'pack-full', item: it.type });
+      } else {
+        s.inv[slot] = it.type; s.items.splice(i, 1);
+        addMsg(s, 'You pick up a ' + it.type + ' (slot ' + (slot + 1) + ').');
+        ev.push({ t: 'pickup', item: it.type, slot: slot + 1 });
+      }
+      break;
+    }
+    return t === '>';
+  }
+
+  function refuse(state, msg) {
+    if (!msg) return { state: state, turnConsumed: false, events: [], plans: [], drain: 0 };
+    var s = clone(state); addMsg(s, msg); // only the message list changes
+    return { state: s, turnConsumed: false, events: [{ t: 'refused', text: msg }], plans: [], drain: 0 };
+  }
+
+  // action: {type:'move',dir:'N|E|S|W'} | {type:'wait'} | {type:'use',slot:1..4}
+  function step(state, action) {
+    if (state.end) return { state: state, turnConsumed: false, events: [], plans: [], drain: 0 };
+    var s = clone(state), ev = [], plans = [], fd = s.floorData, p = s.player;
+    var descend = false, won = false, type = action && action.type;
+
+    if (type === 'move') { // spec 2
+      var dv = DIRS[action.dir];
+      if (!dv) return refuse(state, null);
+      var nx = p.x + dv[0], ny = p.y + dv[1];
+      if (tileAt(fd, nx, ny) === '#') return refuse(state, null);
+      s.turn++;
+      var c = creatureAt(s, nx, ny);
+      if (c) { // fight
+        var dmg = (c.type === 'gloom' && c.staggered > 0) ? 4 : 2;
+        c.hp -= dmg;
+        addMsg(s, 'You hit ' + nm(c) + ' for ' + dmg + '.');
+        ev.push({ t: 'hit', target: c.id, type: c.type, amount: dmg });
+        if (c.hp <= 0) {
+          s.creatures = s.creatures.filter(function (o) { return o !== c; });
+          s.defeated++;
+          addMsg(s, cap(nm(c)) + ' dies.');
+          ev.push({ t: 'kill', target: c.id, type: c.type });
+          if (c.type === 'gloom') won = true;
+        }
+      } else {
+        p.x = nx; p.y = ny;
+        descend = landOn(s, ev);
+      }
+    } else if (type === 'wait') {
+      s.turn++;
+    } else if (type === 'use') { // spec 6
+      var slot = action.slot | 0, item = s.inv[slot - 1];
+      if (!item) return refuse(state, 'Slot ' + slot + ' is empty.');
+      if (item === 'salve') {
+        if (s.hp >= MAX_HP) return refuse(state, 'You are already at full health.');
+        s.turn++; s.hp = Math.min(MAX_HP, s.hp + 5); addMsg(s, 'You use the salve (+5 HP).');
+      } else {
+        if (s.ember >= 100) return refuse(state, 'Your ember is already at full strength.');
+        s.turn++; s.ember = Math.min(100, s.ember + 30); addMsg(s, 'You pour oil on the ember (+30).');
+      }
+      ev.push({ t: 'use', item: item, slot: slot });
+      s.inv[slot - 1] = null;
+    } else {
+      return refuse(state, null);
+    }
+
+    // Win check comes before dimming (spec 3, 7, 8).
+    if (won) { endRun(s, 'victory'); updateSeen(s); return { state: s, turnConsumed: true, events: ev, plans: plans, drain: 0 }; }
+
+    // Dimming.
+    var drain = drainRate(s), before = s.ember;
+    s.ember = Math.max(0, s.ember - drain);
+    notifyEmber(s, before, s.ember);
+
+    if (s.ember <= 0) {            // ember check: creatures do not act (spec 3, 8)
+      endRun(s, 'ember');
+    } else if (descend) {          // spec 2: next floor starts, no creature phase
+      installFloor(s, FG.generateFloor(s.seed, s.floor + 1), s.floor + 1);
+      addMsg(s, 'You descend to floor ' + s.floor + '.');
+      ev.push({ t: 'descend', floor: s.floor });
+    } else {                       // creature phase in id order (spec 2, 11)
+      var ctx = makeCtx(s);
+      s.creatures.slice().forEach(function (c) {
+        if (c.hp <= 0 || s.creatures.indexOf(c) < 0) return;
+        var d = ctx.dist[c.y * fd.w + c.x];
+        var it = planAction(s, c, ctx);
+        plans.push({ id: c.id, type: c.type, x: c.x, y: c.y, intent: it.kind, label: it.label, dist: isFinite(d) ? d : null });
+        execute(s, c, it, ctx, ev);
+      });
+      if (s.hp <= 0) endRun(s, 'dead');
+    }
+    updateSeen(s);
+    return { state: s, turnConsumed: true, events: ev, plans: plans, drain: drain };
+  }
+
+  EH.game = {
+    newRun: newRun, newRunFromFloor: newRunFromFloor, step: step, planAction: planAction, makeCtx: makeCtx,
+    bfsFromPlayer: bfsFromPlayer, drainRate: drainRate, DEFS: DEFS, DIRS: DIRS, FLOORS: FLOORS, MAX_HP: MAX_HP,
+    STUN_TURNS: STUN_TURNS, updateSeen: updateSeen
+  };
+  if (typeof module === 'object' && module.exports) module.exports = EH.game;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+>>>END
+
+<<<FILE repo/src/view.js
+/* view(state): the render model shared by play.js and the page (spec 9). UMD-style (D-001). */
+(function (g) {
+  'use strict';
+  var EH = g.EmberHollow = g.EmberHollow || {};
+  if (typeof require === 'function') { require('./light.js'); require('./game.js'); }
+  var L = EH.light, G = EH.game;
+
+  var DAMAGING = { attack: true, lunge: true, slam: true };
+
+  function view(s) {
+    var fd = s.floorData, w = fd.w, h = fd.h, E = s.ember, r = L.radiusFor(E);
+    var vis = L.visibleGrid(fd, s.player.x, s.player.y, r);
+    var ctx = { dist: G.bfsFromPlayer(s), vis: vis, r: r };
+    var litSet = {}, itemAt = {}, tt = {}, creatures = [], threats = [], x, y;
+    s.lit.forEach(function (k) { litSet[k] = 1; });
+    s.items.forEach(function (it) { itemAt[it.x + ',' + it.y] = it.type; });
+
+    s.creatures.forEach(function (c) {
+      if (c.hp <= 0 || !vis[c.y * w + c.x]) return; // creatures are never remembered
+      var it = G.planAction(s, c, ctx), th = !!DAMAGING[it.kind], reason = null;
+      if (th) {
+        if (it.kind === 'attack') reason = 'hits for ' + it.damage + ' at its next action';
+        else if (it.kind === 'lunge') reason = 'crouched: lunges along the marked line for 3';
+        else reason = 'slam on the marked area for ' + it.damage;
+        (it.line || it.area || []).forEach(function (t) { tt[t.x + ',' + t.y] = 1; });
+      }
+      var cv = { id: c.id, type: c.type, letter: G.DEFS[c.type].letter, name: G.DEFS[c.type].name,
+        hp: c.hp, maxHp: c.maxHp, x: c.x, y: c.y, state: it.label, threat: th, reason: reason };
+      creatures.push(cv);
+      if (th) threats.push(cv);
+    });
+
+    var cells = [];
+    for (y = 0; y < h; y++) {
+      var row = [];
+      for (x = 0; x < w; x++) {
+        var seen = !!(s.seen[y][x] || vis[y * w + x]), k = x + ',' + y, ch = fd.tiles[y].charAt(x), terrain = null;
+        if (seen) terrain = ch === '#' ? 'wall' : ch === '<' ? 'up' : ch === '>' ? 'down'
+          : ch === 'B' ? (litSet[k] ? 'lit' : 'brazier') : 'floor';
+        row.push({ terrain: terrain, item: seen && itemAt[k] ? itemAt[k] : null, vis: !!vis[y * w + x], seen: seen,
+          threat: !!(tt[k] && vis[y * w + x]) });
+      }
+      cells.push(row);
+    }
+    return {
+      seed: s.seed, floor: s.floor, floors: G.FLOORS, turn: s.turn, hp: s.hp, maxHp: G.MAX_HP,
+      ember: E, radius: r, dim: G.drainRate(s), inv: s.inv.slice(), w: w, h: h, cells: cells,
+      player: { x: s.player.x, y: s.player.y }, creatures: creatures, threats: threats,
+      messages: s.messages.slice(), end: s.end
+    };
+  }
+
+  EH.view = { view: view, visibleGrid: L.visibleGrid, radiusFor: L.radiusFor };
+  if (typeof module === 'object' && module.exports) module.exports = EH.view;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+>>>END
+
+<<<FILE repo/src/textview.js
+/* Text renderer for the view model (play.js and tests). UMD-style (D-001). */
+(function (g) {
+  'use strict';
+  var EH = g.EmberHollow = g.EmberHollow || {};
+
+  function bar(E) {
+    var n = Math.round(E / 5);
+    return '[' + new Array(n + 1).join('#') + new Array(21 - n).join('-') + ']';
+  }
+
+  function cellChar(c) {
+    if (!c.seen) return ' ';
+    switch (c.terrain) {
+      case 'wall': return c.vis ? '#' : '%';
+      case 'up': return '<';
+      case 'down': return '>';
+      case 'brazier': return 'B';
+      case 'lit': return 'b';
+    }
+    if (c.item) return c.item === 'salve' ? '+' : 'o';
+    if (c.threat) return '!';
+    return c.vis ? '.' : ',';
+  }
+
+  function renderFrame(v) {
+    var out = [], x, y;
+    out.push('Ember Hollow | seed: ' + v.seed);
+    out.push('Floor ' + v.floor + '/' + v.floors + ' | Turn ' + v.turn + ' | HP ' + v.hp + '/' + v.maxHp);
+    out.push('Ember ' + v.ember + '/100 ' + bar(v.ember) + ' r=' + v.radius + ' | dims ' + v.dim + '/turn');
+    out.push('Items: ' + v.inv.map(function (it, i) { return '[' + (i + 1) + '] ' + (it || 'empty'); }).join('  '));
+    var grid = [];
+    for (y = 0; y < v.h; y++) { var row = []; for (x = 0; x < v.w; x++) row.push(cellChar(v.cells[y][x])); grid.push(row); }
+    v.creatures.forEach(function (c) { grid[c.y][c.x] = c.letter; });
+    grid[v.player.y][v.player.x] = '@';
+    grid.forEach(function (r) { out.push(r.join('').replace(/\s+$/, '')); });
+    out.push('Legend: @ you  m moth  s shade  h hound  G Gloom  B/b brazier unlit/lit  + salve  o oil  ! marked danger  , % remembered');
+    out.push('Creatures:' + (v.creatures.length ? '' : ' none in sight'));
+    v.creatures.forEach(function (c) {
+      out.push('  ' + (c.threat ? '! ' : '  ') + c.letter + '#' + c.id + ' ' + c.name + ' HP ' + c.hp + '/' + c.maxHp +
+        ' ' + c.state + ' at (' + c.x + ',' + c.y + ')' + (c.threat ? ' THREAT: ' + c.reason : ''));
+    });
+    out.push('Messages:' + (v.messages.length ? '' : ' none'));
+    v.messages.forEach(function (m) { out.push('  - ' + m); });
+    if (v.end) {
+      out.push('');
+      out.push('=== ' + v.end.message + ' ===');
+      out.push('Result: ' + ({ victory: 'Victory', dead: 'Dead', ember: 'Ember out' })[v.end.result]);
+      out.push('Floor reached: ' + v.end.floor + '/' + v.floors);
+      out.push('Turns: ' + v.end.turns);
+      out.push('Creatures defeated: ' + v.end.defeated);
+      out.push('Final HP: ' + v.end.hp + '/' + v.maxHp);
+      out.push('Final ember: ' + v.end.ember);
+      out.push('Seed: ' + v.end.seed);
+    }
+    return out.join('\n');
+  }
+
+  function renderTrace(e) {
+    var out = [];
+    out.push('[trace] command ' + e.n + ' (' + JSON.stringify(e.cmd) + ') turn ' + e.turn + ' consumed=' + e.consumed +
+      ' E=' + e.ember + ' drain=' + e.drain + '/turn');
+    e.plans.forEach(function (p) {
+      out.push('[trace]   creature #' + p.id + ' ' + p.type + ' at (' + p.x + ',' + p.y + ') state=' + p.label +
+        ' intent=' + p.intent + ' pathdist=' + p.dist);
+    });
+    out.push('[trace]   threats before action: ' + (e.threatsBefore.length ? e.threatsBefore.map(function (t) {
+      return '#' + t.id + ' ' + t.type + ' (' + t.reason + ')';
+    }).join('; ') : 'none'));
+    out.push('[trace]   events: ' + (e.events.length ? e.events.map(function (x) { return JSON.stringify(x); }).join(' ') : 'none'));
+    e.damage.forEach(function (d) {
+      out.push('[trace]   damage ' + d.amount + ' from #' + d.src + ' ' + d.type + ' visibleBefore=' + d.visibleBefore +
+        ' markedBefore=' + d.markedBefore + ' steppedAdjacent=' + d.steppedAdjacent + ' radiusChanged=' + d.radiusChanged);
+    });
+    out.push('[trace]   no random numbers are drawn during play');
+    return out.join('\n');
+  }
+
+  EH.textview = { renderFrame: renderFrame, renderTrace: renderTrace };
+  if (typeof module === 'object' && module.exports) module.exports = EH.textview;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+>>>END
+
+<<<FILE repo/src/script.js
+/* Script parsing and the single run path (play.js, tests, bots). Pure: no I/O. UMD-style (D-001). */
+(function (g) {
+  'use strict';
+  var EH = g.EmberHollow = g.EmberHollow || {};
+  if (typeof require === 'function') { require('./game.js'); require('./view.js'); require('./textview.js'); }
+  var G = EH.game, V = EH.view, T = EH.textview;
+  var DEFAULT_SEED = 'hollow';
+
+  // See manual.md. First non-comment line may be "seed <text>"; every other non-space character is a command.
+  function parseScript(text) {
+    var seed = DEFAULT_SEED, commands = [], first = true, lines = String(text).split(/\r?\n/);
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i].replace(/#.*$/, '').trim();
+      if (!line) continue;
+      if (first) {
+        first = false;
+        var m = /^seed\s+(.+)$/i.exec(line);
+        if (m) { seed = m[1].trim(); continue; }
+      }
+      for (var j = 0; j < line.length; j++) {
+        var ch = line.charAt(j);
+        if (/\s/.test(ch)) continue;
+        var c = ch.toLowerCase();
+        if ('wasd.1234'.indexOf(c) < 0) throw new Error('Line ' + (i + 1) + ': unknown command "' + ch + '"');
+        commands.push(c);
+      }
+    }
+    return { seed: seed, commands: commands };
+  }
+
+  function toAction(cmd) {
+    switch (cmd) {
+      case 'w': return { type: 'move', dir: 'N' };
+      case 'a': return { type: 'move', dir: 'W' };
+      case 's': return { type: 'move', dir: 'S' };
+      case 'd': return { type: 'move', dir: 'E' };
+      case '.': return { type: 'wait' };
+      default: return { type: 'use', slot: parseInt(cmd, 10) };
+    }
+  }
+
+  // One logged step. entry.damage classifies each damage event for the check-14 assertion.
+  function stepLogged(state, action, prevView, n) {
+    var pv = prevView || V.view(state);
+    var res = G.step(state, action);
+    var after = V.view(res.state);
+    var moved = state.player.x !== res.state.player.x || state.player.y !== res.state.player.y;
+    var dmg = [];
+    res.events.forEach(function (e) {
+      if (e.t !== 'damage') return;
+      var b = pv.creatures.filter(function (c) { return c.id === e.src; })[0];
+      var plan = res.plans.filter(function (p) { return p.id === e.src; })[0];
+      var stepped = !!(moved && action.type === 'move' && plan &&
+        Math.abs(plan.x - res.state.player.x) + Math.abs(plan.y - res.state.player.y) === 1);
+      dmg.push({ src: e.src, type: e.type, amount: e.amount, visibleBefore: !!b, markedBefore: !!(b && b.threat),
+        steppedAdjacent: stepped, radiusChanged: pv.radius !== after.radius });
+    });
+    var entry = { n: n || 0, cmd: action, turn: res.state.turn, consumed: res.turnConsumed, ember: res.state.ember,
+      drain: res.drain, events: res.events, plans: res.plans, damage: dmg, threatsBefore: pv.threats.map(function (t) {
+        return { id: t.id, type: t.type, reason: t.reason };
+      }) };
+    return { state: res.state, entry: entry, view: after, consumed: res.turnConsumed };
+  }
+
+  // Pure: returns frames, final state, log, ignored count. opts.state overrides the initial state.
+  function runScript(seed, commands, opts) {
+    opts = opts || {};
+    var state = opts.state || G.newRun(seed), v = V.view(state), frames = [{ index: 0, cmd: null, consumed: true, view: v, entry: null }];
+    var log = [], ignored = 0;
+    for (var i = 0; i < commands.length; i++) {
+      if (state.end) { ignored = commands.length - i; break; } // spec 8: nothing changes after the end
+      var r = stepLogged(state, toAction(commands[i]), v, i + 1);
+      r.entry.cmd = commands[i];
+      state = r.state; v = r.view; log.push(r.entry);
+      frames.push({ index: i + 1, cmd: commands[i], consumed: r.consumed, view: v, entry: r.entry });
+    }
+    return { seed: state.seed, frames: frames, state: state, log: log, ignored: ignored };
+  }
+
+  function renderRun(res, opts) {
+    opts = opts || {};
+    var out = [];
+    res.frames.forEach(function (f) {
+      if (f.index === 0) out.push('--- start ---');
+      else out.push('--- command ' + f.index + ': "' + f.cmd + '"' + (f.consumed ? '' : ' (refused: no turn passed)') + ' ---');
+      out.push(T.renderFrame(f.view));
+      if (opts.trace && f.entry) out.push(T.renderTrace(f.entry));
+      out.push('');
+    });
+    if (res.ignored) out.push('(' + res.ignored + ' further command(s) ignored: the run is over)');
+    return out.join('\n');
+  }
+
+  EH.script = { parseScript: parseScript, toAction: toAction, stepLogged: stepLogged, runScript: runScript,
+    renderRun: renderRun, DEFAULT_SEED: DEFAULT_SEED };
+  if (typeof module === 'object' && module.exports) module.exports = EH.script;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+>>>END
+
+<<<FILE repo/src/scenario.js
+/* Hand-made states for tests. Rows: # wall, . floor, @ player, < > stairs, B brazier,
+   m s h G creatures (ids in row-major order), + salve, o oil. UMD-style (D-001). */
+(function (g) {
+  'use strict';
+  var EH = g.EmberHollow = g.EmberHollow || {};
+  if (typeof require === 'function') require('./game.js');
+  var G = EH.game;
+  var TYPES = { m: 'moth', s: 'shade', h: 'hound', G: 'gloom' };
+
+  function fromAscii(rows, opts) {
+    opts = opts || {};
+    var h = rows.length, w = rows[0].length, tiles = [], spawns = [], items = [], braziers = [], start = null, stairs = null;
+    for (var y = 0; y < h; y++) {
+      var line = '';
+      for (var x = 0; x < w; x++) {
+        var ch = rows[y].charAt(x) || '#', t = '.';
+        if (ch === '#' || ch === ' ') t = '#';
+        else if (ch === '@') start = { x: x, y: y };
+        else if (ch === '<') { t = '<'; if (!start) start = { x: x, y: y }; }
+        else if (ch === '>') { t = '>'; stairs = { x: x, y: y }; }
+        else if (ch === 'B') { t = 'B'; braziers.push({ x: x, y: y }); }
+        else if (TYPES[ch]) spawns.push({ type: TYPES[ch], x: x, y: y });
+        else if (ch === '+') items.push({ x: x, y: y, type: 'salve' });
+        else if (ch === 'o') items.push({ x: x, y: y, type: 'oil' });
+        line += t;
+      }
+      tiles.push(line);
+    }
+    var fd = { w: w, h: h, tiles: tiles, start: start, stairsDown: stairs, braziers: braziers, items: items,
+      creatureSpawns: spawns, rooms: [], arena: opts.arena || { x0: 1, y0: 1, x1: w - 2, y1: h - 2 } };
+    var s = G.newRunFromFloor(opts.seed || 'scenario', fd, opts.floor || 1);
+    if (opts.ember !== undefined) s.ember = opts.ember;
+    if (opts.hp !== undefined) s.hp = opts.hp;
+    if (opts.inv) s.inv = opts.inv.slice();
+    if (opts.lit) opts.lit.forEach(function (p) { s.lit.push(p[0] + ',' + p[1]); });
+    G.updateSeen(s);
+    return s;
+  }
+
+  EH.scenario = { fromAscii: fromAscii };
+  if (typeof module === 'object' && module.exports) module.exports = EH.scenario;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+>>>END
+
+<<<FILE repo/play.js
+#!/usr/bin/env node
+'use strict';
+// Usage: node play.js [--trace] <script-file | ->    (format: see manual.md)
+const fs = require('fs');
+const SC = require('./src/script.js');
+
+const USAGE = 'Usage: node play.js [--trace] <script-file | ->\nSee manual.md for the script format.';
+
+function main(argv) {
+  let trace = false;
+  const files = [];
+  for (const a of argv.slice(2)) {
+    if (a === '--trace') trace = true;
+    else if (a === '-h' || a === '--help') { console.log(USAGE); return 0; }
+    else files.push(a);
+  }
+  if (files.length !== 1) { console.error(USAGE); return 2; }
+  let text;
+  try { text = files[0] === '-' ? fs.readFileSync(0, 'utf8') : fs.readFileSync(files[0], 'utf8'); }
+  catch (e) { console.error('Cannot read script: ' + e.message); return 2; }
+  let parsed;
+  try { parsed = SC.parseScript(text); } catch (e) { console.error(e.message); return 2; }
+  const res = SC.runScript(parsed.seed, parsed.commands);
+  console.log(SC.renderRun(res, { trace: trace }));
+  return 0;
+}
+
+process.exitCode = main(process.argv);
+>>>END
+
+<<<FILE repo/index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ember Hollow</title>
+<style>
+  body { background: #0b0907; color: #d8cdb8; font-family: monospace; margin: 12px; }
+  #app { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
+  canvas { background: #000; border: 1px solid #4a3d2e; cursor: pointer; }
+  #panel { min-width: 300px; max-width: 360px; }
+  .row { margin: 6px 0; }
+  #embar { width: 260px; height: 14px; border: 1px solid #7a5a2a; background: #1a120a; display: inline-block; vertical-align: middle; }
+  #emfill { height: 100%; background: #e8902a; }
+  button { background: #2a2118; color: #d8cdb8; border: 1px solid #7a5a2a; font-family: monospace; padding: 3px 8px; cursor: pointer; margin: 2px; }
+  button:hover { background: #3a2f22; }
+  #inv button { min-width: 84px; }
+  #msgs div { color: #bfb399; }
+  #msgs div:last-child { color: #fff; }
+  #seedline input { background: #1a120a; color: #d8cdb8; border: 1px solid #7a5a2a; font-family: monospace; width: 130px; }
+  #summary { position: fixed; left: 0; top: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.82); display: none; align-items: center; justify-content: center; }
+  #summary .box { background: #1a120a; border: 2px solid #e8902a; padding: 20px 28px; min-width: 320px; }
+  #summary h2 { margin-top: 0; color: #e8902a; }
+  #err { color: #f66; }
+  .hint { color: #8a7a62; font-size: 12px; }
+</style>
+</head>
+<body>
+<h1 style="margin:0 0 8px 0;">Ember Hollow</h1>
+<div id="app">
+  <canvas id="board"></canvas>
+  <div id="panel">
+    <div class="row" id="floorline"></div>
+    <div class="row" id="hpline"></div>
+    <div class="row">Ember <span id="embar"><div id="emfill"></div></span> <span id="emtext"></span></div>
+    <div class="row" id="inv"></div>
+    <div class="row"><button id="waitbtn">Wait (. / Space)</button><button id="restartbtn">Restart (R)</button><button id="newbtn">New seed (N)</button></div>
+    <div class="row" id="seedline">Seed: <b id="seedtext"></b> <input id="seedinput" placeholder="type a seed"><button id="seedgo">Start</button></div>
+    <div class="row"><b>Messages</b><div id="msgs"></div></div>
+    <div class="row" id="threats"></div>
+    <div class="row hint">Arrows/WASD move or fight, . or Space waits, 1-4 use item, R restart, N new seed. Click an adjacent tile to move or fight. Red marks = danger next turn.</div>
+    <div id="err"></div>
+  </div>
+</div>
+<div id="summary"><div class="box" id="summarybox"></div></div>
+<script src="src/rng.js"></script>
+<script src="src/floorgen.js"></script>
+<script src="src/light.js"></script>
+<script src="src/game.js"></script>
+<script src="src/view.js"></script>
+<script src="src/page.js"></script>
+</body>
+</html>
+>>>END
+
+<<<FILE repo/src/page.js
+/* Browser page. Calls only newRun, step and view from the shared rules; no rule logic here (D-001).
+   This is the only file that may use window/document/Math.random. */
+(function () {
+  'use strict';
+  var EH = window.EmberHollow, G = EH.game, V = EH.view;
+  var TILE = 22;
+  var COLORS = { m: '#d9a0e0', s: '#8fb4ff', h: '#ff9050', G: '#ff40ff' };
+  var state = null, seed = '';
+  var canvas = document.getElementById('board'), ctx = canvas.getContext('2d');
+
+  function $(id) { return document.getElementById(id); }
+
+  function start(newSeed) {
+    try {
+      seed = String(newSeed);
+      state = G.newRun(seed);
+      $('err').textContent = '';
+      render();
+    } catch (e) { $('err').textContent = 'Could not start: ' + e.message; }
+  }
+  function randomSeed() { return 'ember-' + Math.floor(Math.random() * 1000000000); }
+
+  function act(a) {
+    if (!state) return;
+    state = G.step(state, a).state;
+    render();
+  }
+
+  function glyph(ch, x, y, color, alpha) {
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = color;
+    ctx.fillText(ch, x * TILE + TILE / 2, y * TILE + TILE / 2 + 1);
+    ctx.globalAlpha = 1;
+  }
+
+  function render() {
+    var v = V.view(state), x, y;
+    canvas.width = v.w * TILE; canvas.height = v.h * TILE;
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.font = 'bold ' + (TILE - 6) + 'px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    for (y = 0; y < v.h; y++) for (x = 0; x < v.w; x++) {
+      var c = v.cells[y][x];
+      if (!c.seen) continue;
+      var a = c.vis ? 1 : 0.38; // remembered tiles are clearly dimmer
+      ctx.globalAlpha = a;
+      if (c.terrain === 'wall') ctx.fillStyle = '#6b5842';
+      else ctx.fillStyle = c.vis ? '#3a3026' : '#1f1a14';
+      ctx.fillRect(x * TILE, y * TILE, TILE - 1, TILE - 1);
+      ctx.globalAlpha = 1;
+      if (c.terrain === 'up') glyph('<', x, y, '#9cf', a);
+      else if (c.terrain === 'down') glyph('>', x, y, '#9f9', a);
+      else if (c.terrain === 'brazier') glyph('B', x, y, '#7788aa', a);      // unlit: cold blue-grey
+      else if (c.terrain === 'lit') { glyph('B', x, y, '#ffb030', a); }      // lit: warm orange
+      if (c.item === 'salve') glyph('+', x, y, '#5f5', a);
+      else if (c.item === 'oil') glyph('o', x, y, '#ee5', a);
+      if (c.threat) {
+        ctx.fillStyle = 'rgba(255,40,40,0.35)'; ctx.fillRect(x * TILE, y * TILE, TILE - 1, TILE - 1);
+        ctx.strokeStyle = '#ff3030'; ctx.lineWidth = 2; ctx.strokeRect(x * TILE + 1, y * TILE + 1, TILE - 3, TILE - 3);
+      }
+    }
+    v.creatures.forEach(function (cr) {
+      glyph(cr.letter, cr.x, cr.y, COLORS[cr.type] || '#fff', cr.state === 'stunned' || cr.state === 'staggered' ? 0.55 : 1);
+      if (cr.threat) {
+        ctx.strokeStyle = '#ff3030'; ctx.lineWidth = 2;
+        ctx.strokeRect(cr.x * TILE + 1, cr.y * TILE + 1, TILE - 3, TILE - 3);
+        glyph('!', cr.x, cr.y - 0.55, '#ff4040', 1);
+      }
+    });
+    glyph('@', v.player.x, v.player.y, '#ffffff', 1);
+
+    $('floorline').textContent = 'Floor ' + v.floor + '/' + v.floors + '   Turn ' + v.turn;
+    $('hpline').textContent = 'HP ' + v.hp + '/' + v.maxHp;
+    $('emfill').style.width = v.ember + '%';
+    $('emtext').textContent = v.ember + '/100  r=' + v.radius + '  dims ' + v.dim + '/turn';
+    $('seedtext').textContent = v.seed;
+    var inv = $('inv'); inv.innerHTML = '';
+    v.inv.forEach(function (it, i) {
+      var b = document.createElement('button');
+      b.textContent = '[' + (i + 1) + '] ' + (it || 'empty');
+      b.onclick = function () { act({ type: 'use', slot: i + 1 }); };
+      inv.appendChild(b);
+    });
+    var msgs = $('msgs'); msgs.innerHTML = '';
+    v.messages.forEach(function (m) { var d = document.createElement('div'); d.textContent = m; msgs.appendChild(d); });
+    $('threats').innerHTML = '';
+    if (v.creatures.length) {
+      var t = document.createElement('div');
+      t.textContent = 'In sight: ' + v.creatures.map(function (c) {
+        return c.letter + ' ' + c.hp + '/' + c.maxHp + ' ' + c.state + (c.threat ? ' !' : '');
+      }).join(' | ');
+      $('threats').appendChild(t);
+    }
+    var sm = $('summary');
+    if (v.end) {
+      var e = v.end, label = { victory: 'Victory', dead: 'Dead', ember: 'Ember out' }[e.result];
+      $('summarybox').innerHTML = '<h2></h2><div id="sf"></div><div style="margin-top:12px"><button id="s1">Same seed (R)</button><button id="s2">New seed (N)</button></div>';
+      $('summarybox').querySelector('h2').textContent = label + ': ' + e.message;
+      $('sf').innerHTML = ['Floor reached: ' + e.floor + '/' + v.floors, 'Turns: ' + e.turns, 'Creatures defeated: ' + e.defeated,
+        'Final HP: ' + e.hp + '/' + v.maxHp, 'Final ember: ' + e.ember, 'Seed: ' + e.seed].join('<br>');
+      $('s1').onclick = function () { start(seed); };
+      $('s2').onclick = function () { start(randomSeed()); };
+      sm.style.display = 'flex';
+    } else sm.style.display = 'none';
+  }
+
+  document.addEventListener('keydown', function (ev) {
+    if (ev.target && ev.target.tagName === 'INPUT') { if (ev.key === 'Enter') $('seedgo').click(); return; }
+    var k = ev.key, a = null;
+    if (k === 'ArrowUp' || k === 'w' || k === 'W') a = { type: 'move', dir: 'N' };
+    else if (k === 'ArrowDown' || k === 's' || k === 'S') a = { type: 'move', dir: 'S' };
+    else if (k === 'ArrowLeft' || k === 'a' || k === 'A') a = { type: 'move', dir: 'W' };
+    else if (k === 'ArrowRight' || k === 'd' || k === 'D') a = { type: 'move', dir: 'E' };
+    else if (k === '.' || k === ' ') a = { type: 'wait' };
+    else if (k >= '1' && k <= '4') a = { type: 'use', slot: parseInt(k, 10) };
+    else if (k === 'r' || k === 'R') { start(seed); ev.preventDefault(); return; }
+    else if (k === 'n' || k === 'N') { start(randomSeed()); ev.preventDefault(); return; }
+    if (a) { ev.preventDefault(); act(a); }
+  });
+
+  canvas.addEventListener('click', function (ev) {
+    if (!state) return;
+    var rect = canvas.getBoundingClientRect();
+    var x = Math.floor((ev.clientX - rect.left) * (canvas.width / rect.width) / TILE);
+    var y = Math.floor((ev.clientY - rect.top) * (canvas.height / rect.height) / TILE);
+    var dx = x - state.player.x, dy = y - state.player.y;
+    if (Math.abs(dx) + Math.abs(dy) !== 1) return;
+    act({ type: 'move', dir: dy < 0 ? 'N' : dy > 0 ? 'S' : dx > 0 ? 'E' : 'W' });
+  });
+
+  $('waitbtn').onclick = function () { act({ type: 'wait' }); };
+  $('restartbtn').onclick = function () { start(seed); };
+  $('newbtn').onclick = function () { start(randomSeed()); };
+  $('seedgo').onclick = function () { var t = $('seedinput').value.trim(); if (t) start(t); };
+
+  var fromHash = location.hash.length > 1 ? decodeURIComponent(location.hash.slice(1)) : '';
+  start(fromHash || randomSeed());
+})();
+>>>END
+
+<<<FILE repo/manual.md
+# Ember Hollow: manual
+
+You carry one ember down five floors. The ember is your light **and** your time: it loses 1 each turn you act
+(2 while the Gloom is within 4 tiles). Braziers refill it (+60, once each). At 0 the run ends. Reach floor 5
+and break the Gloom to win.
+
+## Playing in the browser
+
+Open `index.html` from the file system (no server needed).
+
+- Arrow keys / WASD: move, or fight an adjacent creature (2 damage). `.` or Space: wait. `1`-`4`: use the item in that slot.
+- `R`: restart with the same seed. `N`: new run with a new seed. Or type a seed in the box and press Start.
+- Mouse: click an orthogonally adjacent tile to move or fight; click an inventory slot to use it; buttons for Wait, Restart, New seed.
+- The seed is always shown. The same seed always gives the same floors. `index.html#my-seed` starts with the seed `my-seed`.
+- Red marks show what can hurt you at its next action (an adjacent biter, a crouching hound's line, the Gloom's gathered area).
+
+## Playing / scripting in text: `node play.js [--trace] <script>`
+
+A script is a text file. `#` starts a comment (so a seed cannot contain `#`).
+
+- The first non-comment line may be `seed <integer or text>`. No seed line means the default seed `hollow`.
+- Every other non-space character is one command (spaces and newlines are only for readability):
+
+| Char | Command |
+|---|---|
+| `w` `a` `s` `d` | move or fight north / west / south / east |
+| `.` | wait |
+| `1` `2` `3` `4` | use the item in that slot |
+
+Example:
+
+```
+seed 42
+dddd ss  # walk east, then south
+..       # wait twice
+```
+
+`node play.js script.txt` prints the frame after every command; `-` reads the script from stdin.
+`--trace` adds, per command, each creature's id, position, state, intent and path distance, the threats marked
+before the action, the events with damage sources, E and the drain rate. A command refused with no cost
+(a wall, an item refused at full HP/E, an empty slot) prints its frame with "(refused: no turn passed)".
+After an end state the summary lines are printed and later commands are ignored.
+
+## Reading a frame
+
+```
+Floor 1/5 | Turn 12 | HP 12/12
+Ember 87/100 [#################---] r=6 | dims 1/turn
+Items: [1] salve  [2] empty  [3] empty  [4] empty
+```
+
+Map symbols: `@` you, `#` wall, `.` visible floor, `<` `>` stairs, `B` unlit brazier, `b` lit brazier, `+` salve, `o` oil,
+`m` moth, `s` shade, `h` hound, `G` the Gloom. Remembered tiles are dimmer: `,` floor and `%` wall in text (terrain, stairs,
+braziers and items stay shown). Unseen tiles are blank. Creatures are drawn only while visible.
+`!` on the map marks a tile that is part of a marked danger (hound line, Gloom area). In the creature list a line starting
+with `!` is a threat that can hurt you at its next action, with the reason.
+The last five messages and the seed are always printed.
+
+## Rule readings the build chose (where the spec leaves room)
+
+1. **Drain distance**: the Gloom's Manhattan distance is measured after the player's action (the player's position at the end of their half of the turn), before the creatures move.
+2. **Path distance** (moth trigger r+3, hound 6, shade 12, "toward the player"): walking distance over all non-wall tiles, ignoring creatures. A creature's step must be a free floor tile (never a wall, brazier, stairs, the player or another creature); if the only shortest-path step is blocked it stays.
+3. **Flare stun**: stunned = 2 skipped actions, counted from the creature phase of the lighting turn itself. A stunned creature is therefore labelled "stunned" in the frame after the lighting turn, acts nothing that turn and the next, and acts on the third turn after. (Open question to the game designer; see the handoff.)
+4. **Hound lunge**: with the player directly adjacent in the crouch line when it springs (the player stepped toward it), it bites for 3. A lunge blocked before it ends adjacent deals no damage. The hound hunts whenever the path distance is <= 6 (no memory of having hunted).
+5. **Empty item slot**: using an empty slot is refused at no cost, with a message. Refused actions only add a message; turn, E, HP and position do not change.
+6. **Threat marks** come from the same planner the creatures act with. Marked: an attack at the next action (adjacent moth/hound, shade that is cornered or at r=2), a crouched hound (always, with its line), the Gloom once it has gathered (with its area). A hound that is about to crouch is not marked yet. Stunned or staggered creatures are never marked.
+7. **Shade visibility** ("a visible shade flees") uses the visibility after the player's action and that turn's dimming.
+8. Descending never triggers creature actions. A creature never follows.
+
+## Not covered by this build
+
+Saving, sound, mobile layout. Balance is a first estimate and unverified.
+>>>END
+
+<<<FILE repo/tests/helpers.js
+'use strict';
+const G = require('../src/game.js');
+const V = require('../src/view.js');
+const S = require('../src/scenario.js');
+const L = require('../src/light.js');
+const FG = require('../src/floorgen.js');
+const SC = require('../src/script.js');
+
+const A = {
+  wait: { type: 'wait' },
+  N: { type: 'move', dir: 'N' }, E: { type: 'move', dir: 'E' }, S: { type: 'move', dir: 'S' }, W: { type: 'move', dir: 'W' }
+};
+const use = (n) => ({ type: 'use', slot: n });
+function run(s, ...acts) { let st = s; for (const a of acts) st = G.step(st, a).state; return st; }
+const cr = (s, id) => s.creatures.find((c) => c.id === id);
+const world = S.fromAscii;
+
+module.exports = { G, V, S, L, FG, SC, A, use, run, cr, world };
+>>>END
+
+<<<FILE repo/tests/rules.test.js
+'use strict';
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const { G, V, L, A, use, run, cr, world } = require('./helpers.js');
+
+const quiet = (opts) => world(['#'.repeat(30), '#@' + '.'.repeat(27) + '#', '#'.repeat(30)], opts);
+
+test('check 1: a new run shows E=100, r=6, HP 12/12, floor 1/5', () => {
+  const v = V.view(G.newRun('check-1'));
+  assert.equal(v.ember, 100); assert.equal(v.radius, 6);
+  assert.equal(v.hp, 12); assert.equal(v.maxHp, 12);
+  assert.equal(v.floor, 1); assert.equal(v.floors, 5); assert.equal(v.turn, 0);
+});
+
+test('check 2: waiting costs 1 E; radius thresholds', () => {
+  let s = quiet();
+  s = run(s, A.wait);
+  assert.equal(s.ember, 99);
+  for (let i = 0; i < 19; i++) s = run(s, A.wait);
+  assert.equal(s.ember, 80); assert.equal(V.view(s).radius, 6);
+  s = run(s, A.wait);
+  assert.equal(s.ember, 79); assert.equal(V.view(s).radius, 5);
+  const table = { 100: 6, 80: 6, 79: 5, 60: 5, 59: 4, 40: 4, 39: 3, 20: 3, 19: 2, 1: 2 };
+  for (const E of Object.keys(table)) assert.equal(L.radiusFor(Number(E)), table[E], 'E=' + E);
+});
+
+test('check 3: move, wait, fight and item use each cost exactly 1 E; refused actions cost 0 and no turn', () => {
+  let s = quiet();
+  let r = G.step(s, A.E); assert.equal(r.state.ember, 99); assert.equal(r.state.turn, 1);
+  r = G.step(s, A.wait); assert.equal(r.state.ember, 99);
+  r = G.step(world(['#@m#']), A.E); assert.equal(r.state.ember, 99); assert.equal(r.state.defeated, 1);
+  r = G.step(world(['#@.#'], { hp: 5, inv: ['salve', null, null, null] }), use(1));
+  assert.equal(r.state.ember, 99); assert.equal(r.state.hp, 10);
+  r = G.step(world(['#@.#'], { ember: 50, inv: ['oil', null, null, null] }), use(1));
+  assert.equal(r.state.ember, 79); // +30 then -1
+  // refused: wall, oil at full E, salve at full HP, empty slot
+  const w = world(['###', '#@#', '###']);
+  r = G.step(w, A.N); assert.equal(r.turnConsumed, false); assert.equal(r.state.turn, 0); assert.equal(r.state.ember, 100);
+  const o = world(['#@.#'], { inv: ['oil', 'salve', null, null] });
+  r = G.step(o, use(1)); assert.equal(r.turnConsumed, false); assert.equal(r.state.turn, 0); assert.equal(r.state.ember, 100);
+  assert.deepEqual(r.state.inv, ['oil', 'salve', null, null]);
+  r = G.step(o, use(2)); assert.equal(r.turnConsumed, false); assert.equal(r.state.hp, 12);
+  r = G.step(o, use(3)); assert.equal(r.turnConsumed, false);
+});
+
+test('check 4: brazier at E=30 gives 89, at E=80 gives 99; a lit brazier gives nothing later', () => {
+  let s = world(['#@B..#'], { ember: 30 });
+  s = run(s, A.E);
+  assert.equal(s.ember, 89); assert.equal(s.lit.length, 1);
+  s = run(s, A.E); assert.equal(s.ember, 88);
+  s = run(s, A.W); assert.equal(s.ember, 87); // back on the lit brazier: only dimming
+  assert.equal(run(world(['#@B..#'], { ember: 80 }), A.E).ember, 99);
+});
+
+test('check 5: E reaching 0 ends the run; creatures do not act', () => {
+  const s = run(world(['#@m.#'], { ember: 1 }), A.wait);
+  assert.equal(s.end.result, 'ember'); assert.equal(s.hp, 12);
+  assert.match(s.end.message, /The ember went out on floor 1/);
+});
+
+test('check 6: messages at E 20, 10, 5 and when r drops', () => {
+  const m = (E) => run(quiet({ ember: E }), A.wait).messages.join(' | ');
+  assert.match(m(21), /Ember low: 20/);
+  assert.match(m(11), /Ember low: 10/);
+  assert.match(m(6), /Ember low: 5/);
+  assert.match(m(80), /Your light shrinks/);
+  assert.doesNotMatch(m(90), /shrinks/);
+});
+
+test('check 7: remembered tiles stay; out-of-sight creatures are not listed', () => {
+  let s = world(['#'.repeat(41), '#@' + '.'.repeat(37) + 'm#', '#'.repeat(41)], { ember: 30 });
+  for (let i = 0; i < 10; i++) s = run(s, A.E);
+  const v = V.view(s);
+  assert.equal(v.cells[1][1].seen, true); assert.equal(v.cells[1][1].vis, false);
+  assert.equal(v.cells[1][1].terrain, 'floor');
+  assert.equal(v.creatures.length, 0);
+});
+
+test('check 8: oil +30 up to 100 then dim; salve +5 up to 12', () => {
+  assert.equal(run(world(['#@.#'], { ember: 90, inv: ['oil', null, null, null] }), use(1)).ember, 99);
+  assert.equal(run(world(['#@.#'], { hp: 10, inv: ['salve', null, null, null] }), use(1)).hp, 12);
+});
+
+test('check 19: HP 0 gives "You fell on floor N"; HP 0 with E 0 gives ember out', () => {
+  let s = run(world(['#@m.#'], { hp: 1, ember: 50 }), A.wait);
+  assert.equal(s.end.result, 'dead'); assert.equal(s.end.message, 'You fell on floor 1.');
+  assert.equal(s.end.floor, 1);
+  s = run(world(['#@m.#'], { hp: 1, ember: 1 }), A.wait);
+  assert.equal(s.end.result, 'ember');
+});
+
+test('check 20: after an end state further commands change nothing', () => {
+  const s = run(world(['#@m.#'], { hp: 1, ember: 50 }), A.wait);
+  const before = JSON.stringify(s);
+  const r = G.step(s, A.E);
+  assert.equal(r.turnConsumed, false);
+  assert.equal(JSON.stringify(r.state), before);
+  assert.equal(JSON.stringify(G.step(s, use(1)).state), before);
+});
+
+test('check 24: descending keeps E and HP apart from dimming, increments floor, places on <', () => {
+  const s0 = world(['#@>.#'], { hp: 7, ember: 50 });
+  const r = G.step(s0, A.E);
+  const s = r.state;
+  assert.equal(s.floor, 2); assert.equal(s.ember, 49); assert.equal(s.hp, 7); assert.equal(s.turn, 1);
+  assert.deepEqual(s.player, s.floorData.start);
+  assert.equal(s.floorData.tiles[s.player.y].charAt(s.player.x), '<');
+  assert.equal(s.end, null);
+});
+
+test('check 25: a full inventory leaves the item on the floor with a message; the move still costs a turn', () => {
+  const s = run(world(['#@+.#'], { inv: ['salve', 'salve', 'oil', 'oil'] }), A.E);
+  assert.equal(s.items.length, 1); assert.equal(s.turn, 1); assert.equal(s.ember, 99);
+  assert.match(s.messages.join(' '), /pack is full/);
+  assert.deepEqual(s.inv, ['salve', 'salve', 'oil', 'oil']);
+  const t = run(world(['#@+.#']), A.E);
+  assert.equal(t.items.length, 0); assert.equal(t.inv[0], 'salve');
+});
+>>>END
+
+<<<FILE repo/tests/creatures.test.js
+'use strict';
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const { G, V, A, run, cr, world } = require('./helpers.js');
+
+test('check 9: moth moves 1 toward the player within r+3, stays beyond, hits for 1, dies to one hit', () => {
+  let s = run(world(['#@....m.#']), A.wait);
+  assert.equal(cr(s, 1).x, 5);                               // path distance 5 <= 9: moves
+  s = run(world(['#@' + '.'.repeat(10) + 'm#']), A.wait);
+  assert.equal(cr(s, 1).x, 12);                              // distance 11 > 9: stays
+  s = run(world(['#@m.#']), A.wait);
+  assert.equal(s.hp, 11);                                    // adjacent: exactly 1
+  s = run(world(['#@m.#']), A.E);
+  assert.equal(s.creatures.length, 0); assert.equal(s.hp, 12); assert.equal(s.defeated, 1);
+});
+
+test('check 10: shade flees when r>=3, hits only when cornered; at r=2 it hunts and hits for 2; takes 2 hits', () => {
+  let s = world(['#@..s....#']);
+  let prev = cr(s, 1).x - 1;
+  for (let i = 0; i < 3; i++) {
+    s = run(s, A.wait);
+    assert.ok(cr(s, 1).x - 1 > prev, 'moved away'); prev = cr(s, 1).x - 1;
+    assert.equal(s.hp, 12);
+  }
+  assert.equal(run(world(['#@s#']), A.wait).hp, 10);          // cornered and adjacent
+  s = world(['#@...s...#'], { ember: 19 });
+  s = run(s, A.wait, A.wait, A.wait);
+  assert.equal(cr(s, 1).x, 2); assert.equal(s.hp, 12);        // adjacent now, has not attacked yet
+  s = run(s, A.wait);
+  assert.equal(s.hp, 10);
+  s = world(['#@s#'], { ember: 19 });
+  s = run(s, A.E);
+  assert.equal(cr(s, 1).hp, 2);
+  s = run(s, A.E);
+  assert.equal(s.creatures.length, 0);
+});
+
+const ROOM = ['#########', '#.......#', '#..@.h..#', '#.......#', '#########'];
+
+test('check 11: hound crouches at distance 2 in a clear line; stepping out avoids the bite; staying takes 3; adjacent bites 3', () => {
+  let s = run(world(ROOM), A.wait);
+  assert.equal(cr(s, 1).crouching, true); assert.equal(s.hp, 12);
+  const v = V.view(s);
+  assert.equal(v.creatures[0].threat, true); assert.equal(v.creatures[0].state, 'crouching');
+  assert.equal(v.cells[2][4].threat, true);                   // its line is marked
+  const out = run(s, A.N);
+  assert.equal(out.hp, 12); assert.equal(cr(out, 1).crouching, false);
+  const stay = run(s, A.wait);
+  assert.equal(stay.hp, 9); assert.equal(cr(stay, 1).x, 4);
+  assert.equal(run(world(['#########', '#..@h...#', '#########']), A.wait).hp, 9);
+  assert.equal(cr(run(world(['#@....h..#']), A.wait), 1).x, 5);   // hunts within 6
+  assert.equal(cr(run(world(['#@......h#']), A.wait), 1).x, 8);   // distance 7: idle
+});
+
+test('check 12: a creature moves or attacks, never both; it appears adjacent one turn before its first attack', () => {
+  let s = world(['#@..m.#']);
+  s = run(s, A.wait); assert.equal(cr(s, 1).x, 3); assert.equal(s.hp, 12);
+  s = run(s, A.wait); assert.equal(cr(s, 1).x, 2); assert.equal(s.hp, 12);   // now adjacent, no damage yet
+  const r = G.step(s, A.wait);
+  assert.equal(r.state.hp, 11);
+  assert.equal(r.events.filter((e) => e.t === 'damage').length, 1);
+});
+
+test('check 13: brazier flare stuns visible creatures within 7 for 2 turns and labels them stunned', () => {
+  let s = world(['#@B..m.#']);
+  s = run(s, A.E);
+  assert.equal(cr(s, 1).stunned, 1);
+  assert.equal(V.view(s).creatures[0].state, 'stunned');
+  assert.equal(V.view(s).creatures[0].threat, false);
+  assert.equal(cr(s, 1).x, 5);
+  s = run(s, A.wait); assert.equal(cr(s, 1).x, 5);            // second skipped action
+  s = run(s, A.wait); assert.equal(cr(s, 1).x, 4);            // acts again
+  const far = run(world(['#@B' + '.'.repeat(9) + 'm#']), A.E);
+  assert.equal(cr(far, 1).stunned, 0);                        // farther than 7
+  const gl = run(world(['#@B.G..#'], { floor: 5 }), A.E);
+  assert.equal(cr(gl, 1).stunned, 0);                         // the Gloom is not stunned
+});
+>>>END
+
+<<<FILE repo/tests/gloom.test.js
+'use strict';
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const { G, V, A, run, cr, world } = require('./helpers.js');
+
+const rows = (px, gx) => {
+  const mid = '#' + '.'.repeat(9) + '#';
+  const line = mid.split('');
+  line[px] = '@'; line[gx] = 'G';
+  return ['#'.repeat(11), mid, line.join(''), mid, '#'.repeat(11)];
+};
+
+test('check 15: the Gloom has 24 HP; within 4 the ember loses 2 and the HUD says dims 2/turn', () => {
+  let s = world(rows(1, 5), { floor: 5 });
+  assert.equal(cr(s, 1).hp, 24);
+  assert.equal(V.view(s).dim, 2);
+  s = run(s, A.wait); assert.equal(s.ember, 98);
+  const far = world(rows(1, 6), { floor: 5 });
+  assert.equal(V.view(far).dim, 1);
+  assert.equal(run(far, A.wait).ember, 99);
+});
+
+test('check 16: gather marks 3x3 for one turn; the next turn deals 4 inside, 0 outside', () => {
+  // player outside the area (distance 2)
+  let s = run(world(rows(2, 4), { floor: 5 }), A.wait);
+  assert.equal(cr(s, 1).gathering, true);
+  const v = V.view(s);
+  assert.equal(v.cells[1][3].threat, true); assert.equal(v.cells[3][5].threat, true);
+  assert.equal(v.creatures[0].threat, true);
+  s = run(s, A.wait);
+  assert.equal(s.hp, 12); assert.equal(cr(s, 1).staggered, 3);
+  // player inside the area (adjacent)
+  s = run(world(rows(3, 4), { floor: 5 }), A.wait, A.wait);
+  assert.equal(s.hp, 8); assert.equal(cr(s, 1).staggered, 3);
+});
+
+test('check 17: staggered for 3 turns doing nothing; hits deal 4 then, 2 otherwise', () => {
+  let s = world(rows(3, 4), { floor: 5 });
+  s.creatures[0].staggered = 3;
+  const hit = run(s, A.E);
+  assert.equal(cr(hit, 1).hp, 20);
+  const w = run(s, A.wait, A.wait, A.wait);
+  assert.equal(cr(w, 1).staggered, 0); assert.equal(w.hp, 12); assert.equal(cr(w, 1).x, 4);
+  assert.equal(cr(w, 1).gathering, false);
+  assert.equal(cr(run(world(rows(3, 4), { floor: 5 }), A.E), 1).hp, 22);
+});
+
+test('check 18: killing the Gloom wins at once, before dimming, with the summary', () => {
+  const s0 = world(rows(3, 4), { floor: 5, ember: 3 });
+  s0.creatures[0].hp = 2;
+  const s = run(s0, A.E);
+  assert.equal(s.end.result, 'victory');
+  assert.equal(s.end.message, 'The Gloom breaks. Light returns to the hollow.');
+  assert.equal(s.ember, 3);                                   // no dimming on the winning turn
+  assert.equal(s.end.turns, 1); assert.equal(s.end.defeated, 1); assert.equal(s.end.floor, 5);
+  assert.equal(s.end.seed, 'scenario');
+});
+>>>END
+
+<<<FILE repo/tests/floors.test.js
+'use strict';
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const { G, V, FG, SC, A, run, world } = require('./helpers.js');
+
+test('check 21: same seed + same commands gives byte-identical text output', () => {
+  const cmds = 'dddddwwwaaasssdd....ddddwwww'.split('');
+  const a = SC.renderRun(SC.runScript('det-1', cmds), { trace: true });
+  const b = SC.renderRun(SC.runScript('det-1', cmds), { trace: true });
+  assert.equal(a, b);
+  assert.notEqual(a, SC.renderRun(SC.runScript('det-2', cmds), { trace: true }));
+});
+
+test('check 21: floor 2 does not depend on what the player did on floor 1', () => {
+  const a = run(world(['#@>.#'], { seed: 'xfloor' }), A.E);
+  const b = run(world(['#@>.#'], { seed: 'xfloor' }), A.wait, A.wait, A.E);
+  assert.equal(a.floor, 2); assert.equal(b.floor, 2);
+  assert.equal(JSON.stringify(a.floorData), JSON.stringify(b.floorData));
+  assert.deepEqual(a.creatures.map((c) => [c.type, c.x, c.y]), b.creatures.map((c) => [c.type, c.x, c.y]));
+  assert.deepEqual(a.items, b.items);
+});
+
+test('check 22: at least 9 of 10 seeds give different floor 1 layouts', () => {
+  const set = new Set();
+  for (let i = 0; i < 10; i++) set.add(FG.generateFloor('layout-' + i, 1).tiles.join('/'));
+  assert.ok(set.size >= 9, 'distinct layouts: ' + set.size);
+});
+
+test('check 23: 50 seeds x floors 1-5 satisfy every generator guarantee', () => {
+  for (let i = 0; i < 50; i++) {
+    for (let n = 1; n <= 5; n++) {
+      const seed = 'bulk-' + i;
+      const f = FG.generateFloor(seed, n);
+      const errs = FG.validateFloor(f, n);
+      assert.deepEqual(errs, [], 'seed ' + seed + ' floor ' + n);
+      const flat = f.tiles.join('');
+      assert.equal((flat.match(/</g) || []).length, 1);
+      assert.equal((flat.match(/>/g) || []).length, n < 5 ? 1 : 0);
+      assert.equal((flat.match(/B/g) || []).length, n < 5 ? 2 : 3);
+      assert.equal(f.creatureSpawns.length, ({ 1: 4, 2: 5, 3: 6, 4: 8, 5: 4 })[n]);
+      // same inputs, same floor
+      assert.equal(JSON.stringify(FG.generateFloor(seed, n)), JSON.stringify(f));
+    }
+  }
+});
+
+test('check 20: after an end state a script ignores later commands', () => {
+  const a = SC.runScript('end-test', '.'.repeat(150).split(''));
+  const b = SC.runScript('end-test', '.'.repeat(200).split(''));
+  assert.ok(a.state.end, 'the run ended');
+  assert.ok(a.ignored > 0);
+  assert.equal(JSON.stringify(a.state), JSON.stringify(b.state));
+});
+
+test('script format: seed line, comments, spaces, unknown characters', () => {
+  const p = SC.parseScript('# comment\nseed my seed 7 # trailing\nw a s d . 1 2\n3 4 # x\n');
+  assert.equal(p.seed, 'my seed 7');
+  assert.deepEqual(p.commands, ['w', 'a', 's', 'd', '.', '1', '2', '3', '4']);
+  assert.equal(SC.parseScript('ddd').seed, SC.DEFAULT_SEED);
+  assert.throws(() => SC.parseScript('seed 1\nwx'), /unknown command/);
+});
+>>>END
+
+<<<FILE repo/tests/view.test.js
+'use strict';
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const { G, V, L, FG, world } = require('./helpers.js');
+const TV = require('../src/textview.js');
+
+test('visibility: adjacent tiles and clear distance-2 straight tiles are always visible at r=2', () => {
+  for (const seed of ['vis-1', 'vis-2']) for (const n of [1, 3]) {
+    const f = FG.generateFloor(seed, n);
+    for (let y = 1; y < f.h - 1; y++) for (let x = 1; x < f.w - 1; x++) {
+      if (f.tiles[y].charAt(x) === '#') continue;
+      const vis = L.visibleGrid(f, x, y, 2);
+      for (const [dx, dy] of [[0, -1], [1, 0], [0, 1], [-1, 0]]) {
+        assert.equal(vis[(y + dy) * f.w + x + dx], 1, 'adjacent ' + x + ',' + y);
+        const tx = x + 2 * dx, ty = y + 2 * dy;
+        if (tx >= 0 && ty >= 0 && tx < f.w && ty < f.h && f.tiles[y + dy].charAt(x + dx) !== '#') {
+          assert.equal(vis[ty * f.w + tx], 1, 'distance 2 ' + x + ',' + y);
+        }
+      }
+    }
+  }
+});
+
+test('visibility: walls block line of sight; the glow is circular', () => {
+  const s = world(['#@.#.#']);
+  const vis = L.visibleGrid(s.floorData, 1, 0, 6);
+  assert.equal(vis[2], 1); assert.equal(vis[3], 1); assert.equal(vis[4], 0);
+  const f = world(['#'.repeat(20), '#@' + '.'.repeat(17) + '#', '#'.repeat(20)]).floorData;
+  const g = L.visibleGrid(f, 1, 1, 2);
+  assert.equal(g[1 * 20 + 3], 1); assert.equal(g[1 * 20 + 4], 0);
+});
+
+test('check 9.1-9.9: the text frame shows every item of spec section 9', () => {
+  const s = world(['#@..m.#', '#######'], { inv: ['salve', null, 'oil', null] });
+  const text = TV.renderFrame(V.view(s));
+  for (const needle of ['seed: scenario', 'Floor 1/5', 'Turn 0', 'HP 12/12', 'Ember 100/100', 'r=6', 'dims 1/turn',
+    '[1] salve', '[2] empty', '[3] oil', '[4] empty', 'Creatures:', 'Cave moth', 'Messages:', '@']) {
+    assert.ok(text.includes(needle), 'missing: ' + needle);
+  }
+});
+
+test('view and rules agree: marked threats come from the planner (adjacent moth is marked, distant one is not)', () => {
+  const adj = V.view(world(['#@m.#']));
+  assert.equal(adj.creatures[0].threat, true);
+  assert.match(TV.renderFrame(adj), /! m#1/);
+  assert.equal(V.view(world(['#@.m#'])).creatures[0].threat, false);
+});
+>>>END
+
+<<<FILE repo/tests/bot.js
+'use strict';
+// Threat-following bot. Uses only the public API: newRun, step (through stepLogged) and view.
+const G = require('../src/game.js');
+const V = require('../src/view.js');
+const SC = require('../src/script.js');
+
+const DIRS = [['N', 0, -1], ['E', 1, 0], ['S', 0, 1], ['W', -1, 0]];
+const key = (x, y) => x + ',' + y;
+const manh = (a, b) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+const dirTo = (a, b) => (b.y < a.y ? 'N' : b.y > a.y ? 'S' : b.x > a.x ? 'E' : 'W');
+
+function chooseAction(v) {
+  const me = v.player;
+  const crea = new Map(v.creatures.map((c) => [key(c.x, c.y), c]));
+  const cell = (x, y) => (x < 0 || y < 0 || x >= v.w || y >= v.h ? null : v.cells[y][x]);
+  const walk = (c) => !!(c && c.seen && c.terrain && c.terrain !== 'wall');
+  const move = (d) => ({ type: 'move', dir: d });
+  const WAIT = { type: 'wait' };
+  const here = cell(me.x, me.y);
+
+  function search(goal, blockCreatures, avoidThreat) {
+    const seen = new Set([key(me.x, me.y)]);
+    const q = [{ x: me.x, y: me.y, first: null, d: 0 }];
+    for (let qi = 0; qi < q.length; qi++) {
+      const cur = q[qi];
+      for (const [dn, dx, dy] of DIRS) {
+        const nx = cur.x + dx, ny = cur.y + dy, k = key(nx, ny);
+        if (seen.has(k)) continue;
+        const c = cell(nx, ny);
+        if (!walk(c)) continue;
+        seen.add(k);
+        const isGoal = goal(nx, ny, c);
+        if (!isGoal) {
+          if (blockCreatures && crea.has(k)) continue;
+          if (avoidThreat && c.threat) continue;
+        }
+        const first = cur.first || dn;
+        if (isGoal) return { dir: first, x: nx, y: ny, d: cur.d + 1 };
+        q.push({ x: nx, y: ny, first, d: cur.d + 1 });
+      }
+    }
+    return null;
+  }
+  const find = (goal) => search(goal, true, true) || search(goal, false, true) || search(goal, false, false);
+
+  // 1. step out of a marked line / area
+  if (here.threat) {
+    for (const [dn, dx, dy] of DIRS) {
+      const n = cell(me.x + dx, me.y + dy);
+      if (walk(n) && !crea.has(key(me.x + dx, me.y + dy)) && !n.threat) return move(dn);
+    }
+  }
+  // 2. fight what is adjacent (threats first)
+  const adj = v.creatures.filter((c) => manh(c, me) === 1).sort((a, b) => (b.threat - a.threat) || (a.id - b.id));
+  if (adj.length) return move(dirTo(me, adj[0]));
+  // 3. items
+  if (v.hp <= 6) { const i = v.inv.indexOf('salve'); if (i >= 0) return { type: 'use', slot: i + 1 }; }
+  if (v.ember <= 25) { const i = v.inv.indexOf('oil'); if (i >= 0) return { type: 'use', slot: i + 1 }; }
+  // 4. the Gloom: wait out the gather outside the area, otherwise close in
+  const gl = v.creatures.find((c) => c.type === 'gloom');
+  if (gl) {
+    if (gl.state === 'gathering') return WAIT;
+    const r = find((x, y) => manh({ x, y }, gl) === 1);
+    return r ? move(r.dir) : WAIT;
+  }
+  // 5. braziers within about 10 steps, nearby items, stairs, exploration
+  const br = find((x, y, c) => c.terrain === 'brazier');
+  if (br && br.d <= 10 && v.ember <= 75) return move(br.dir);
+  if (v.inv.includes(null)) {
+    const it = find((x, y, c) => !!c.item);
+    if (it && it.d <= 8) return move(it.dir);
+  }
+  const st = find((x, y, c) => c.terrain === 'down');
+  if (st) return move(st.dir);
+  const fr = find((x, y) => DIRS.some(([, dx, dy]) => { const n = cell(x + dx, y + dy); return n && !n.seen; }));
+  if (fr) return move(fr.dir);
+  return WAIT;
+}
+
+function playRun(seed, opts) {
+  opts = opts || {};
+  const max = opts.maxCommands || 1500;
+  let st = G.newRun(seed), v = V.view(st), n = 0, refused = 0;
+  const log = [];
+  while (!st.end && n < max) {
+    if (opts.onState) opts.onState(st, v);
+    const a = refused > 0 ? { type: 'wait' } : chooseAction(v);
+    const r = SC.stepLogged(st, a, v, n + 1);
+    n++;
+    refused = r.consumed ? 0 : refused + 1;
+    log.push(r.entry); st = r.state; v = r.view;
+  }
+  return { seed, state: st, log, commands: n };
+}
+
+module.exports = { chooseAction, playRun };
+>>>END
+
+<<<FILE repo/tests/bots.test.js
+'use strict';
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const { G, V, A } = require('./helpers.js');
+const bot = require('./bot.js');
+
+const SEEDS = Array.from({ length: 20 }, (_, i) => 'bot-' + (i + 1));
+let cache = null;
+const runs = () => (cache = cache || SEEDS.map((s) => bot.playRun(s, { maxCommands: 1500 })));
+
+test('check 14: every damaging creature was visible and threat-marked in the previous frame (20 seeds)', (t) => {
+  const counts = { marked: 0, steppedAdjacent: 0, radiusChanged: 0 };
+  const bad = [];
+  for (const r of runs()) {
+    for (const e of r.log) {
+      for (const d of e.damage) {
+        if (!d.visibleBefore) bad.push({ seed: r.seed, turn: e.turn, why: 'not visible before', d });
+        else if (d.markedBefore) counts.marked++;
+        else if (d.steppedAdjacent) counts.steppedAdjacent++;
+        else if (d.radiusChanged) counts.radiusChanged++;
+        else bad.push({ seed: r.seed, turn: e.turn, why: 'visible but not marked', d });
+      }
+    }
+  }
+  t.diagnostic('damage events by category: ' + JSON.stringify(counts));
+  assert.deepEqual(bad.slice(0, 5), [], 'unmarked damage (' + bad.length + ' total); see handoff, check 14 reading');
+});
+
+test('check 14: threat marks and creature actions come from one planner (sampled states)', () => {
+  let samples = 0;
+  for (const seed of ['plan-1', 'plan-2', 'plan-3', 'plan-4']) {
+    bot.playRun(seed, {
+      maxCommands: 150,
+      onState: (st, v) => {
+        const r = G.step(st, A.wait);
+        if (V.view(r.state).radius !== v.radius) return; // an r change flips shade behaviour (reported separately)
+        const marked = new Set(v.creatures.filter((c) => c.threat).map((c) => c.id));
+        for (const e of r.events) if (e.t === 'damage') {
+          samples++;
+          assert.ok(marked.has(e.src), 'seed ' + seed + ' turn ' + st.turn + ': #' + e.src + ' hit unmarked');
+        }
+      }
+    });
+  }
+  assert.ok(samples >= 0);
+});
+
+test('check 26: bot runs end in a result; at least 3 land in 250-700 turns; at least one wins', (t) => {
+  const all = runs();
+  const summary = all.map((r) => r.seed + ':' + (r.state.end ? r.state.end.result : 'unfinished') + '@' + r.state.turn + '/f' + r.state.floor);
+  t.diagnostic(summary.join(' '));
+  for (const r of all) assert.ok(r.state.end, r.seed + ' did not finish in 1500 commands');
+  const inRange = all.filter((r) => r.state.turn >= 250 && r.state.turn <= 700);
+  assert.ok(inRange.length >= 3, 'runs in 250-700 turns: ' + inRange.length + ' of ' + all.length + ' (' + summary.join(' ') + ')');
+  assert.ok(all.some((r) => r.state.end.result === 'victory'), 'no bot victory (' + summary.join(' ') + ')');
+});
+>>>END
+
+<<<FILE goals/G-001-first-playable-run/05-gameplay-engineer-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 5
+from: gameplay-engineer
+to: qa
+stage: Verify
+outcome: partial
+---
+# 05: gameplay-engineer → qa — verify the five-floor Ember Hollow build (written, not yet run)
+
+## Task
+
+Verify the build in `repo/` against `design/acceptance-criteria.md`. Run `node --test` and `node play.js` yourself. The Build check appended below is the first execution of this code. If it shows failures, route this back to `gameplay-engineer` (outcome is `partial`) instead of verifying.
+
+## Context
+
+G-001: the Owner wants the concept playable from start to finish in the browser. I built everything in Findings 2-7 of handoff 03 in one pass: shared rules, seeded floor generator, text runner with `--trace`, browser page, tests, bot, `manual.md`. I did not execute anything: no `@run` was used, so tests, the bot, the generator guarantees and the page are all unexecuted. Defects are likely in a build this size. That is why the outcome is `partial` and not `done`. Nothing here has been seen working.
+
+## Findings
+
+### What was built (all under `repo/`)
+
+- `src/rng.js`: string hash and a mulberry32 PRNG sub-seeded by (seed, floor, attempt). Used only by the floor generator.
+- `src/floorgen.js`: `generateFloor(seed, n)`, `validateFloor(floor, n)` and `bfs`. There are up to 400 attempts per floor and it throws loudly if none is valid.
+- `src/light.js`: radius table, visibility (circle plus Bresenham line of sight). I split this out of `view.js` so `game.js` can use it without a circular dependency.
+- `src/game.js`: `newRun`, `step(state, action)` and the single `planAction` planner. Creature actions and threat marks both come from `planAction`.
+- `src/view.js`: `view(state)`, the render model shared by text and page.
+- `src/textview.js`, `src/script.js`: frame and trace rendering, script parsing, `runScript` (pure) and `stepLogged`.
+- `src/scenario.js`: `fromAscii` for hand-made test states.
+- `play.js`: `node play.js [--trace] <script|->`.
+- `index.html`, `src/page.js`: the page. It calls only `newRun`, `step` and `view`. It has no rule logic.
+- `manual.md`: script format, controls, how to read a frame, and the readings below.
+- `tests/`: `rules`, `creatures`, `gloom`, `floors`, `view` and `bots` test files, plus `helpers.js` and `bot.js`.
+
+### Script format
+
+See `repo/manual.md`. A script may open with `seed <text or integer>`; the default is `hollow`. Every other non-space character is a command: `w a s d` move or fight, `.` waits, `1`-`4` use a slot. `#` starts a comment.
+
+### Acceptance checks and how they are covered
+
+- **Automated by tests I wrote, not yet run:** checks 1-13, 15-25 and 26. Test titles name their check numbers.
+- **Check 14**, in two forms. The bot over 20 seeds asserts the narrow reading from handoff 03 §10.1 on the turn log. The sampled-state test asserts that anything that damages under a wait was marked.
+- **Check 26** is bot-based and may fail for balance or bot reasons. If so, report it. I did not tune any number.
+- **Only a human can check, by opening `index.html` from `file://`:** checks 27-30. No browser was used, so the page is untested. **The 30-check list is not complete without a human opening `index.html`.**
+
+### Readings chosen (also in `manual.md`)
+
+1. The Gloom's drain distance is measured after the player's action.
+2. Path distance ignores creatures. A creature's step needs a free floor tile.
+3. **Flare stun (open question).** Stun is 2 and is decremented in the lighting turn's own creature phase. So the creature is labelled "stunned" in only one frame, but it skips 2 actions.
+4. A hound that springs with the player directly adjacent in the line bites for 3. The hound hunts statelessly at path distance ≤ 6.
+5. An empty-slot use is refused at no cost. Refusals add only a message to the log.
+6. Threat marks: attack intents, a crouched hound (always, with its line), and the Gloom once gathered (with its area). A hound that is about to crouch is not marked. Stunned and staggered creatures are never marked.
+7. Descending never triggers creature actions.
+8. Generator: braziers must be off every shortest `<`→`>` path (the strict reading, both braziers). Items: one off every shortest path. Floor 5 has a corridor of at least 20 steps; the Gloom stands at the bottom edge of the arena.
+
+### Known rule gaps for the Game Designer
+
+- **Check 14, stepped-adjacent case.** As in handoff 03 §10.1, stepping next to an unmarked moth or shade is followed by a hit the same turn. The bot test accepts it as category `steppedAdjacent` and counts it in a diagnostic. The Game Designer's answer is still pending.
+- **Check 14, dimming case.** A dimming step can lower r from 3 to 2. A shade that was adjacent and fleeing then attacks at once while unmarked in the previous frame. That is a new gap between "marked beforehand" and the shade rule. The test accepts it as category `radiusChanged`, so the diagnostic shows how often it happens. It needs a Game Designer ruling.
+- **Flare stun reading (above).** The Game Designer should say whether "next 2 turns" includes the lighting turn's creature phase.
+- **Check 14, possible failures.** A hit from a creature that was not visible before the step (for example around a corner) would also fail the bot test as "not visible before". That would be a real finding for the spec, not a test defect.
+
+### What I could not show
+
+I could not show any run, test result, trace output, generator success rate, balance or page appearance. The runtime's Build check follows below.
+
+## Decisions already made
+
+- D-001: plain classic-script UMD modules, no ES modules, so `index.html` opens from `file://`. All `src/` files except `page.js` run in Node 20 and the browser.
+- Planning choice kept: a single `planAction` feeds creature actions and threat marks.
+
+## Constraints
+
+- JavaScript for Node 20 and the browser, no dependencies, no network, no build step. Deterministic: same seed plus same commands gives the same run, with no `Date` or `Math.random` outside `page.js`.
+- The spec, concept, pillars and scope are unchanged. I changed no numbers.
+
+## Open questions
+
+For `game-designer`, through the Studio:
+1. Check 14 versus stepping adjacent to an unmarked creature (still open from handoff 03). Also the dimming case where r drops from 3 to 2 and a fleeing shade attacks at once.
+2. Does the flare's "next 2 turns" include the lighting turn's creature phase (reading A, built) or start after it (reading B, would need a one-line change)?
+3. Is a hound bite at lunge distance 1 correct (built), or should "cannot move" mean no damage?
+
+For QA: do not call check 14 final until the Game Designer answers. Check 26 depends on the bot (`tests/bot.js`) and may need a better one. Report its result; do not tune the spec.
+
+## Expected output
+
+A Verify verdict per check for 1-26 from running `node --test` and `node play.js` (plus `--trace`) with scripts of your own. List 27-30 as not verifiable without a human on `index.html`. If any test fails because of a code defect, return to `gameplay-engineer` with the failing check, seed and rule. If it fails because of a spec rule, return to `game-designer`.
+
+## Sender assessment
+
+Confidence is low until the tests run. I wrote everything without executing it, and a build this size is unlikely to be defect-free.
+
+The riskiest parts, in order:
+1. **Floor generator.** Floor 4's 40-step minimum with 5-8 randomly chained rooms in 34×20 may need many attempts. The cap is 400 and it throws on failure. If check 23 fails, report the seed and rule; do not weaken a rule.
+2. **Bot-based checks 14 and 26.** The bot is a first draft with simple heuristics (dodge marks, fight what is adjacent, light braziers within about 10 steps, close in on the Gloom during stagger). It may lose early or wander, which would fail the 250-700 range for reasons that are not balance.
+3. **`tests/bots.test.js` runtime.** Twenty bot runs up to 1500 commands each could make `node --test` slow.
+
+Root cause notes for later fixes: all rules live in `src/game.js`. Creature intents are in `planAction`, effects in `execute`, turn order in `step`. The flare stun reading is the single constant `STUN_TURNS` plus the decrement in the creature phase.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: project.md#vision, project.md#constraints, design/game-spec.md, design/acceptance-criteria.md, repo/manual.md
+- Decisions: decisions/D-001-classic-scripts-shared-rules.md
+- Previous handoff: goals/G-001-first-playable-run/03-technical-director-to-gameplay-engineer.md
+>>>END

@@ -1,0 +1,421 @@
+<<<FILE repo/src/view.js
+/* view(state): the render model shared by play.js and the page (spec 9). UMD-style (D-001).
+   Marks (D-002) use the ember as it will be after this turn's dimming, and come from the same
+   planner the creatures act with (planAction), evaluated with a hypothetical player position. */
+(function (g) {
+  'use strict';
+  var EH = g.EmberHollow = g.EmberHollow || {};
+  if (typeof require === 'function') { require('./light.js'); require('./game.js'); }
+  var L = EH.light, G = EH.game;
+
+  var DAMAGING = { attack: true, lunge: true, slam: true };
+  var DIR_ORDER = ['N', 'E', 'S', 'W'];
+
+  function manh(a, b) { return Math.abs(a.x - b.x) + Math.abs(a.y - b.y); }
+
+  // Shallow copy of the state with the player moved (planAction only reads).
+  function withPlayer(s, pos) {
+    var o = {};
+    Object.keys(s).forEach(function (k) { o[k] = s[k]; });
+    o.player = { x: pos.x, y: pos.y };
+    return o;
+  }
+
+  // Planner context for "the player ends the turn on pos": E after that turn's dimming.
+  // null when the ember would be out (creatures do not act).
+  function hypo(s, pos) {
+    var s2 = withPlayer(s, pos), e = Math.max(0, s.ember - G.drainRate(s2));
+    if (e <= 0) return null;
+    var r = L.radiusFor(e);
+    return { s: s2, ctx: { dist: G.bfsFromPlayer(s2), vis: L.visibleGrid(s.floorData, pos.x, pos.y, r), r: r } };
+  }
+
+  function occupied(s, x, y) {
+    return s.creatures.some(function (c) { return c.hp > 0 && c.x === x && c.y === y; });
+  }
+
+  // Damage the creature would do to s2.player at its next action given its planned intent (0 = none).
+  function hurtsAt(s2, c, it) {
+    var p = s2.player, i;
+    if (it.kind === 'attack') return it.damage;
+    if (it.kind === 'slam') return Math.max(Math.abs(p.x - c.x), Math.abs(p.y - c.y)) <= 1 ? it.damage : 0;
+    if (it.kind === 'lunge') {
+      var dv = G.DIRS[c.dir], k = 0;
+      for (i = 1; i <= 2; i++) if (p.x === c.x + dv[0] * i && p.y === c.y + dv[1] * i) k = i;
+      if (!k) return 0;
+      for (i = 1; i < k; i++) {
+        var x = c.x + dv[0] * i, y = c.y + dv[1] * i;
+        if (L.tileAt(s2.floorData, x, y) !== '.' || occupied(s2, x, y)) return 0;
+      }
+      return 3;
+    }
+    return 0;
+  }
+
+  function view(s) {
+    var fd = s.floorData, w = fd.w, h = fd.h, E = s.ember, r = L.radiusFor(E), pl = s.player;
+    var vis = L.visibleGrid(fd, pl.x, pl.y, r);
+    var litSet = {}, itemAt = {}, tt = {}, rk = {}, creatures = [], threats = [], reach = [], x, y;
+    s.lit.forEach(function (k) { litSet[k] = 1; });
+    s.items.forEach(function (it) { itemAt[it.x + ',' + it.y] = it.type; });
+
+    // Neighbour tiles the player could step onto (not walls).
+    var nbs = [];
+    DIR_ORDER.forEach(function (d) {
+      var dv = G.DIRS[d], nx = pl.x + dv[0], ny = pl.y + dv[1];
+      if (L.tileAt(fd, nx, ny) !== '#') nbs.push({ dir: d, x: nx, y: ny });
+    });
+
+    // Shown creatures: visible ones, plus any orthogonally adjacent to the player or a neighbour tile.
+    var shown = s.creatures.filter(function (c) {
+      if (c.hp <= 0) return false;
+      if (vis[c.y * w + c.x]) return true;
+      if (manh(c, pl) === 1) return true;
+      return nbs.some(function (n) { return manh(c, n) === 1; });
+    });
+
+    var cur = s.end ? null : hypo(s, pl);
+    var planS = cur ? cur.s : s, planCtx = cur ? cur.ctx : { dist: G.bfsFromPlayer(s), vis: vis, r: r };
+
+    shown.forEach(function (c) {
+      var it = G.planAction(planS, c, planCtx), th = !!cur && !!DAMAGING[it.kind], reason = null;
+      if (th) {
+        if (it.kind === 'attack') reason = 'hits for ' + it.damage + ' at its next action';
+        else if (it.kind === 'lunge') reason = 'crouched: lunges along the marked line for 3';
+        else reason = 'slam on the marked area for ' + it.damage;
+        (it.line || it.area || []).forEach(function (t) { tt[t.x + ',' + t.y] = 1; });
+      }
+      var cv = { id: c.id, type: c.type, letter: G.DEFS[c.type].letter, name: G.DEFS[c.type].name,
+        hp: c.hp, maxHp: c.maxHp, x: c.x, y: c.y, state: it.label, threat: th, reason: reason };
+      creatures.push(cv);
+      if (th) threats.push(cv);
+    });
+
+    // Reach marks (D-002): per neighbour tile, which shown creatures would hurt the player there.
+    // None on walls, creature tiles, the down stairs, or an unlit brazier (the flare stuns).
+    nbs.forEach(function (n) {
+      var t = fd.tiles[n.y].charAt(n.x);
+      if (s.end || t === '>' || (t === 'B' && !litSet[n.x + ',' + n.y]) || occupied(s, n.x, n.y)) return;
+      var hp = hypo(s, n);
+      if (!hp) return;
+      var list = [];
+      shown.forEach(function (c) {
+        var dmg = hurtsAt(hp.s, c, G.planAction(hp.s, c, hp.ctx));
+        if (dmg) list.push({ id: c.id, letter: G.DEFS[c.type].letter, damage: dmg });
+      });
+      if (list.length) {
+        reach.push({ dir: n.dir, x: n.x, y: n.y, creatures: list });
+        rk[n.x + ',' + n.y] = list.map(function (e) { return e.letter; });
+      }
+    });
+
+    var cells = [];
+    for (y = 0; y < h; y++) {
+      var row = [];
+      for (x = 0; x < w; x++) {
+        var seen = !!(s.seen[y][x] || vis[y * w + x]), k = x + ',' + y, ch = fd.tiles[y].charAt(x), terrain = null;
+        if (seen) terrain = ch === '#' ? 'wall' : ch === '<' ? 'up' : ch === '>' ? 'down'
+          : ch === 'B' ? (litSet[k] ? 'lit' : 'brazier') : 'floor';
+        row.push({ terrain: terrain, item: seen && itemAt[k] ? itemAt[k] : null, vis: !!vis[y * w + x], seen: seen,
+          threat: !!(tt[k] && vis[y * w + x]), reach: rk[k] || [] });
+      }
+      cells.push(row);
+    }
+    return {
+      seed: s.seed, floor: s.floor, floors: G.FLOORS, turn: s.turn, hp: s.hp, maxHp: G.MAX_HP,
+      ember: E, radius: r, dim: G.drainRate(s), inv: s.inv.slice(), w: w, h: h, cells: cells,
+      player: { x: pl.x, y: pl.y }, creatures: creatures, threats: threats, reach: reach,
+      messages: s.messages.slice(), end: s.end
+    };
+  }
+
+  EH.view = { view: view, visibleGrid: L.visibleGrid, radiusFor: L.radiusFor };
+  if (typeof module === 'object' && module.exports) module.exports = EH.view;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+>>>END
+
+<<<EDIT repo/src/textview.js
+<<<<<<< SEARCH
+    if (c.threat) return '!';
+    return c.vis ? '.' : ',';
+=======
+    if (c.threat) return '!';
+    if (c.reach && c.reach.length) return '?';
+    return c.vis ? '.' : ',';
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/src/textview.js
+<<<<<<< SEARCH
+    out.push('Legend: @ you  m moth  s shade  h hound  G Gloom  B/b brazier unlit/lit  + salve  o oil  ! marked danger  , % remembered');
+=======
+    out.push('Danger: ' + dangerText(v));
+    out.push('Legend: @ you  m moth  s shade  h hound  G Gloom  B/b brazier unlit/lit  + salve  o oil  ! threat mark  ? reach mark (step there and be hit)  , % remembered');
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/src/textview.js
+<<<<<<< SEARCH
+  function renderFrame(v) {
+=======
+  // Reach marks: "N (m), E (h, s)" = stepping N is met by a moth, stepping E by a hound and a shade.
+  function dangerText(v) {
+    var parts = (v.reach || []).map(function (rc) {
+      return rc.dir + ' (' + rc.creatures.map(function (c) { return c.letter; }).join(', ') + ')';
+    });
+    return parts.length ? parts.join(', ') : 'none';
+  }
+
+  function renderFrame(v) {
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/src/page.js
+<<<<<<< SEARCH
+    v.creatures.forEach(function (cr) {
+=======
+    v.reach.forEach(function (rc) { // reach marks: dashed orange tile with the creature letters (threat marks are red)
+      ctx.fillStyle = 'rgba(255,170,0,0.30)'; ctx.fillRect(rc.x * TILE, rc.y * TILE, TILE - 1, TILE - 1);
+      ctx.strokeStyle = '#ffb000'; ctx.lineWidth = 2; ctx.setLineDash([4, 3]);
+      ctx.strokeRect(rc.x * TILE + 1, rc.y * TILE + 1, TILE - 3, TILE - 3); ctx.setLineDash([]);
+      var big = ctx.font; ctx.font = 'bold 10px monospace';
+      glyph(rc.creatures.map(function (c) { return c.letter; }).join(''), rc.x, rc.y, '#ffd070', 1);
+      ctx.font = big;
+    });
+    v.creatures.forEach(function (cr) {
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/src/page.js
+<<<<<<< SEARCH
+    var sm = $('summary');
+=======
+    var dg = document.createElement('div');
+    dg.textContent = 'Danger: ' + (v.reach.length ? v.reach.map(function (rc) {
+      return rc.dir + ' (' + rc.creatures.map(function (c) { return c.letter; }).join(', ') + ')';
+    }).join(', ') : 'none');
+    $('threats').appendChild(dg);
+    var sm = $('summary');
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE repo/tests/reach.test.js
+'use strict';
+// D-002 / checks 14 and 29: threat marks and reach marks, strict form.
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const { G, V, A, world } = require('./helpers.js');
+const TV = require('../src/textview.js');
+
+const reachOf = (v, dir) => { const e = v.reach.find((r) => r.dir === dir); return e ? e.creatures.map((c) => c.letter) : []; };
+
+test('reach: a step next to a moth shows a reach mark before the step', () => {
+  const v = V.view(world(['#@.m.#']));
+  assert.deepEqual(reachOf(v, 'E'), ['m']);
+  assert.equal(v.threats.length, 0);
+  const text = TV.renderFrame(v);
+  assert.match(text, /Danger: E \(m\)/);
+  const s = G.step(world(['#@.m.#']), A.E);
+  assert.equal(s.state.hp, 11);
+});
+
+test('reach: a step next to a hound shows a reach mark; the hound is not a threat while the player stays', () => {
+  const v = V.view(world(['#@.h.#']));
+  assert.deepEqual(reachOf(v, 'E'), ['h']);
+  assert.equal(v.threats.length, 0);
+  assert.equal(G.step(world(['#@.h.#']), A.E).state.hp, 9);
+});
+
+test('reach: a step next to a shade at r=2 shows a reach mark', () => {
+  const s = world(['#@.s.#'], { ember: 19 });
+  assert.deepEqual(reachOf(V.view(s), 'E'), ['s']);
+  assert.equal(G.step(s, A.E).state.hp, 10);
+});
+
+test('threat: a Wait at E=20 beside a shade is already a strike; at E=21 it is not', () => {
+  const a = world(['#@s..#'], { ember: 20 });
+  assert.equal(V.view(a).threats.length, 1);
+  assert.equal(G.step(a, A.wait).state.hp, 10);
+  const b = world(['#@s..#'], { ember: 21 });
+  assert.equal(V.view(b).threats.length, 0);
+  assert.equal(G.step(b, A.wait).state.hp, 12);
+});
+
+test('reach: no mark on an unlit brazier or the down stairs; a lit brazier is marked', () => {
+  assert.deepEqual(reachOf(V.view(world(['#@Bm.#'])), 'E'), []);
+  assert.deepEqual(reachOf(V.view(world(['#@>m.#'])), 'E'), []);
+  assert.deepEqual(reachOf(V.view(world(['#@Bm.#'], { lit: [[2, 0]] })), 'E'), ['m']);
+});
+
+test('reach: no mark on walls or on a tile holding a creature', () => {
+  const v = V.view(world(['#@m.#']));
+  assert.deepEqual(reachOf(v, 'E'), []);
+  assert.deepEqual(reachOf(v, 'W'), []);
+  assert.deepEqual(reachOf(v, 'N'), []);
+});
+
+test('text frame: reach tiles are drawn with ? and differ from the threat glyph', () => {
+  const text = TV.renderFrame(V.view(world(['#@.m.#'])));
+  assert.ok(text.split('\n').some((l) => l.startsWith('#@?m')), text);
+});
+
+function lcg(seed) { let x = (seed >>> 0) || 1; return () => { x = (Math.imul(x, 1664525) + 1013904223) >>> 0; return x >>> 16; }; }
+const ACTS = [A.N, A.E, A.S, A.W, A.wait];
+
+test('check 14 (strict): every damage event was shown and marked on the tile where the player ended the turn', (t) => {
+  const counts = { threat: 0, reach: 0 };
+  for (let i = 0; i < 20; i++) {
+    let st = G.newRun('c14-' + i);
+    const rnd = lcg(i + 7);
+    for (let n = 0; n < 600 && !st.end; n++) {
+      const before = V.view(st);
+      const res = G.step(st, ACTS[rnd() % 5]);
+      const moved = res.state.floor === st.floor && (res.state.player.x !== st.player.x || res.state.player.y !== st.player.y);
+      for (const e of res.events.filter((x) => x.t === 'damage')) {
+        const where = 'seed c14-' + i + ' command ' + n + ' creature #' + e.src + ' ' + e.type;
+        if (moved) {
+          const p = res.state.player;
+          const rc = before.reach.find((r) => r.x === p.x && r.y === p.y);
+          assert.ok(rc && rc.creatures.some((c) => c.id === e.src), 'no reach mark: ' + where);
+          counts.reach++; t.diagnostic('reach  ' + where);
+        } else {
+          assert.ok(before.threats.some((c) => c.id === e.src), 'no threat mark: ' + where);
+          counts.threat++; t.diagnostic('threat ' + where);
+        }
+      }
+      st = res.state;
+    }
+  }
+  t.diagnostic('damage events: threat ' + counts.threat + ', reach ' + counts.reach);
+});
+
+test('sampled states: threat flags equal what the planner does with the ember after dimming', () => {
+  for (let i = 0; i < 6; i++) {
+    let st = G.newRun('mark-' + i);
+    const rnd = lcg(i + 31);
+    for (let n = 0; n < 200 && !st.end; n++) {
+      const v = V.view(st);
+      const after = Math.max(0, st.ember - G.drainRate(st));
+      const s2 = Object.assign({}, st, { ember: after });
+      for (const cv of v.creatures) {
+        const c = st.creatures.find((o) => o.id === cv.id);
+        const it = G.planAction(s2, c, G.makeCtx(s2));
+        const expect = after > 0 && (it.kind === 'attack' || it.kind === 'lunge' || it.kind === 'slam');
+        assert.equal(cv.threat, expect, 'seed mark-' + i + ' command ' + n + ' creature #' + cv.id);
+      }
+      st = G.step(st, ACTS[rnd() % 5]).state;
+    }
+  }
+});
+>>>END
+
+<<<EDIT repo/manual.md
+<<<<<<< SEARCH
+- Red marks show what can hurt you at its next action (an adjacent biter, a crouching hound's line, the Gloom's gathered area).
+=======
+- Red marks (threat marks) show what can hurt you at its next action if you stay or fight (an adjacent biter, a crouching hound's line, the Gloom's gathered area).
+- Dashed orange tiles with creature letters (reach marks) are the neighbour tiles where a visible creature would hurt you if you stepped there. The line `Danger: N (m), E (h)` under the map lists the same.
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/manual.md
+<<<<<<< SEARCH
+The last five messages and the seed are always printed.
+=======
+`?` on the map marks a **reach mark**: a neighbour tile where stepping would get you hurt at the creatures' next action.
+Under the map the line `Danger: N (m), E (h, s)` lists, per direction N/E/S/W, the creature letters that would hurt you if
+you ended the turn on that neighbour tile (`Danger: none` when no step is marked). A wall, a tile holding a creature, the
+down stairs and an unlit brazier never get a reach mark. Reach marks use the same planner as the creatures and the same ember
+as they will see (current E minus this turn's dimming).
+The last five messages and the seed are always printed.
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/manual.md
+<<<<<<< SEARCH
+A hound that is about to crouch is not marked yet. Stunned or staggered creatures are never marked.
+=======
+A hound that is about to crouch is not marked yet. Stunned or staggered creatures are never marked.
+   Marks and creature states use the ember after this turn's dimming (D-002), so at E = 20 a Wait beside a shade already shows the strike.
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/manual.md
+<<<<<<< SEARCH
+8. Descending never triggers creature actions. A creature never follows.
+=======
+8. Descending never triggers creature actions. A creature never follows.
+9. **Reach marks** (D-002) are computed with `planAction` and a hypothetical player position (E after the dimming at that tile, visibility and path distances from that tile). A crouched hound counts only if the tile is on its line, within 2, and the tiles between are free. A creature orthogonally adjacent to the player or to a neighbour tile is listed even if a wall blocks line of sight.
+10. **Lit brazier** (reading, to confirm with the game designer): the spec says "a brazier tile gets none" because of the flare. A lit brazier has no flare, so it gets reach marks like a floor tile; otherwise strict check 14 could not hold there.
+>>>END
+>>>END
+
+<<<FILE goals/G-001-first-playable-run/09-gameplay-engineer-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 9
+from: gameplay-engineer
+to: qa
+stage: Verify
+outcome: partial
+---
+# 09: gameplay-engineer → qa — reach marks (D-002) built, but not executed and two places not updated; verify with care
+
+## Task
+
+Verify the reach-mark change against checks 14 and 29 and spec 9.7 and 11. Run `node --test` first. Failures in older tests that assert the old marking are expected to be listed under Known gaps and sent back to `gameplay-engineer`.
+
+## Context
+
+G-001. Handoff 07 asked for the check-14 amendment (D-002). I could only see part of the repository, and I did not run anything in this step (no `@run` used). So this is `partial`: the code and new tests are written, but not executed by me. The runtime's Build check follows this handoff.
+
+## Findings
+
+What changed:
+- `repo/src/view.js`: marks use E after this turn's dimming (current E minus `drainRate`). The planner context (visibility for shade fear, path distances, r) is built from the player's position at the end of the turn. New `view.reach` list: `{dir, x, y, creatures:[{id, letter, damage}]}` for each neighbour tile that has at least one mark. Each cell gets `reach` (letters). Reach comes from `planAction` with a hypothetical player position. Tiles with no mark: wall, creature-occupied, `>`, unlit brazier. Creatures orthogonally adjacent to the player or to a non-wall neighbour tile are listed even without line of sight. Creature `state` labels now come from the after-dimming planning too. No marks once `end` is set or when the ember would be 0.
+- `repo/src/textview.js`: a `Danger: N (m), E (h, s)` line (or `Danger: none`) under the map; `?` on the map for reach tiles (floor tiles without an item; `!` stays the threat glyph); legend updated.
+- `repo/src/page.js`: dashed orange tile highlight with creature letters for each reach entry, and a `Danger:` line, both from `view.reach` (red threat marks unchanged, so they are distinct).
+- `repo/manual.md`: the final format and readings 9-10.
+- `repo/tests/reach.test.js` (new): hand-made scenarios (moth, hound, shade at r=2, Wait at E=20 vs 21, unlit brazier and stairs with no mark, lit brazier with a mark, walls/creature tiles), a strict check-14 test over 20 seeds × up to 600 random-walk commands (each damage event logged as `threat` or `reach` via `t.diagnostic`), and a sampled-states test (threat flags equal the planner with the after-dimming ember).
+- `STUN_TURNS` and the bite rule are untouched.
+
+How to exercise: `node --test`; look at the diagnostics of the check-14 test; play a script such as `seed 1` with moves toward a moth and read the `Danger:` line before each step; open `index.html` (check 29 needs a human).
+
+Known gaps (honest list):
+1. I could not see `repo/play.js`, `tests/bots.test.js`, `tests/creatures.test.js`, `tests/rules.test.js`, `tests/bot.js`, so I did not replace the old check-14 assertion or the old sampled-states test there. They may still use the old rule (e.g. exempting the player's own move) or fail with the new after-dimming marks. `reach.test.js` carries the strict form, but the old assertion must be removed or replaced by whoever sees those files. `--trace` fields `markedBefore`/`steppedAdjacent`/`radiusChanged` in play.js likely still use the old meaning.
+2. Nothing was run: no tests, no trace, no bot checks (14, 26), no page. The new tests may fail or reveal a rule gap; the random walk may rarely trigger a hound or the Gloom, so those cases are covered only by the hand-made scenarios (the Gloom slam by `hurtsAt` logic, untested).
+3. No test for a creature shown only because it is adjacent to a neighbour tile with line of sight blocked (I did not build a reliable scenario).
+4. Reading to confirm with the Game Designer: a lit brazier tile gets reach marks (the flare happens only when lighting), whereas spec 9.7 says "a brazier tile gets none". Without it, strict check 14 could not hold on a lit brazier. Easy to change in `view.js` (`t === 'B' && !litSet`).
+5. Page appearance (checks 27-30) not seen.
+
+## Decisions already made
+
+- D-001: classic-script UMD modules.
+- D-002: threat plus reach marks, after-dimming E, strict check 14.
+
+## Constraints
+
+- Report only what was run. No creature behaviour, numbers, content or scope were changed.
+
+## Open questions
+
+- Lit brazier reach marks (Known gap 4), for the Game Designer via the Studio.
+- Still open and unchanged: flare stun reading, hound bite at lunge distance 1 (step 08).
+
+## Expected output
+
+A verification verdict on checks 14 and 29 (and a regression pass on the rest), with gaps routed back to `gameplay-engineer`; in particular the old check-14 assertion and play.js trace fields from Known gap 1 need an engineer who can see those files.
+
+## Sender assessment
+
+Confidence is moderate for the logic in view.js (it mirrors `execute`'s context: `makeCtx` after dimming uses the same r, distances and visibility). I expect possible old-test failures, as noted. I did not run anything, so this is not evidence of a pass.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: none
+- Project: design/game-spec.md, design/acceptance-criteria.md, repo/manual.md
+- Decisions: decisions/D-002-threat-and-reach-marks.md
+- Previous handoff: goals/G-001-first-playable-run/07-studio-to-gameplay-engineer.md
+>>>END

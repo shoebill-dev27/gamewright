@@ -1,0 +1,133 @@
+Plan is done and fits the route. Build opens with handoff 03. The check-14 spec question is independent of Build, so it opens in parallel as handoff 04 to `game-designer`. QA must not start Verify until that is answered.
+
+<<<EDIT goals/G-001-first-playable-run/03-technical-director-to-gameplay-engineer.md
+<<<<<<< SEARCH
+- Skills: as set by the Studio when routing (the Plan lists no required skill)
+=======
+- Skills: studio/skills/implement-change.md
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT goals/G-001-first-playable-run/03-technical-director-to-gameplay-engineer.md
+<<<<<<< SEARCH
+- Spec question for `game-designer` (the Studio routes it): check 14 versus the threat-mark definition when the player steps next to a creature (see Findings 10.1). Build continues in the meantime on the reading given there.
+=======
+- Spec question for `game-designer`: check 14 versus the threat-mark definition when the player steps next to a creature (see Findings 10.1). The Studio opened it as `04-studio-to-game-designer.md`, in parallel with this Build. Continue on the reading in Findings 10.1. If the answer changes the spec before you finish, the Studio will pass it to you; otherwise state in your Handoff to `qa` which reading you built.
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-001-first-playable-run/04-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-001
+seq: 4
+from: studio
+to: game-designer
+stage: Design
+outcome: routed
+---
+# 04: studio → game-designer — resolve check 14 versus the threat-mark definition
+
+## Task
+
+Decide whether acceptance check 14 and the spec's threat-mark definition (section 9.7) conflict, and fix whichever is wrong. Amend `design/game-spec.md` and/or `design/acceptance-criteria.md` so check 14 is verifiable with correct rules.
+
+## Context
+
+G-001 (first complete playable run in the browser). Design and Plan are done; Build is running now in parallel (handoff 03) and does not wait for this answer. Verify must not start until this is settled. The Technical Director found, while planning, that a threat mark means "can hurt the player at its next action", so a creature that is visible but not adjacent has no mark. If the player steps next to it, it attacks in that same turn's creature phase. The damage then comes from a creature that was visible but not marked in the previous output. The same holds for an adjacent step toward a shade at r = 2. Read literally, check 14 ("no damage from a creature that was not shown and marked before it hit") would fail with correct rules.
+
+## Findings
+
+Technical Director's proposed interim reading, used by Build: every damaging creature was visible in the previous frame, and it was threat-marked there unless the player's own move ended adjacent to it (or inside its reach). The check-14 test logs both cases. One alternative the TD named: mark "would strike if you step adjacent" tiles, so the danger is readable before the step (this bears on pillar 1, "every threat that can hurt the player next turn is visible and readable before it does"). Choosing between them is a rules and player-facing decision and belongs to you.
+
+## Decisions already made
+
+- D-001: shared code is plain classic-script modules (not relevant to the content, listed for completeness).
+- No Decision exists on threat marking.
+
+## Constraints
+
+- Stay inside the vision and its pillars, and inside Goal scope. Do not add content beyond what one five-floor run needs.
+- If the fix would change a pillar or the Goal's scope, say so and hand back with the question instead of deciding.
+- Stay in design terms; do not prescribe code structure.
+- Keep the numbered checks stable (same count and numbering) so Build and QA references hold.
+
+## Open questions
+
+- Is the interim reading acceptable as the intended meaning of check 14, or should the spec change (for example, mark tiles that would be struck if the player stepped there)?
+
+## Expected output
+
+Updated spec and/or acceptance criteria in `design/`, with the reasoning and the exact new wording of check 14 and of section 9.7 if changed. Write a Handoff addressed to `studio` (outcome `done`, or `question` if a Decision is out of your authority) that states in Findings whether Build's interim reading stands or what must change. The Studio will route it to `gameplay-engineer` (if Build is still open) or `qa`.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: project.md#vision, design/game-spec.md, design/acceptance-criteria.md
+- Decisions: none
+- Previous handoff: goals/G-001-first-playable-run/03-technical-director-to-gameplay-engineer.md (Findings 10.1 only)
+>>>END
+
+<<<FILE goals/G-001-first-playable-run/goal.md
+---
+kind: goal
+id: G-001
+project: ember-hollow
+status: active
+created: 2026-10-26
+budget: 19
+---
+# G-001: First complete playable run in the browser
+
+## Owner request
+
+> このコンセプトで、最初から最後まで通して遊べる版を作ってほしい。ブラウザで遊べるようにしてほしい
+
+## Interpretation
+
+Success condition: a person opens `repo/index.html` straight from the file system in a browser and can play one whole run with keyboard or mouse. The run starts on floor 1, passes through all five floors, and ends in one of the ways the vision names: beating the floor-5 creature (win), dying, or the ember going out. No setup, server or developer step is needed. The vision's pillars hold in that run: readable threats, light as the resource, a short seeded run (same seed gives the same run).
+
+The team-side means from `project.md#constraints` also ship, because verification depends on them: `node play.js {script}`, `--trace`, `node --test`, and `repo/manual.md` (the script format and everything a player is told).
+
+Out of scope (not requested): saving or resuming runs, meta-progression between runs, sound, mobile or touch layouts, network features, content beyond what one complete five-floor run needs, and any change to the vision or pillars.
+
+## Unknowns
+
+- Observe: skipped. No build exists and nothing is reported broken or off.
+- Diagnose: skipped. There is no problem to explain.
+- Decide: skipped. Design stayed inside the vision and Goal scope and raised no direction, priority or scope choice. Reopens only if Plan or a spec question finds scope must change (then `game-director`).
+- Design: done (spec and 30 acceptance checks in `design/`). Reopened for one question: check 14 versus the threat-mark definition (handoff 04, parallel with Build). Balance is unverified; Play must report it.
+- Plan: done (handoff 03). Reasoning only, nothing measured.
+- Build: open. The game is created from scratch in `repo/`; the engineer builds on the interim check-14 reading until the designer answers.
+- Verify: planned. QA against the acceptance criteria through the scripts and tests, only after the check-14 answer; Art Director visual review in parallel (grid readability, threat clarity). Checks 27-30 need a human opening `index.html`.
+- Play: planned. A Playtester plays from `repo/manual.md` and the player profile only.
+- Review: planned. `game-director` judges whether the intent was met and names the next issues.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Design | game-designer | write-design-spec | done | 01-studio-to-game-designer.md |
+| 2 | Decide | game-director | make-decision | skipped | — |
+| 3 | Plan | technical-director | technical-plan | done | 02-game-designer-to-technical-director.md |
+| 4a | Build | gameplay-engineer | implement-change | open | 03-technical-director-to-gameplay-engineer.md |
+| 4b | Design (check 14 question) | game-designer | write-design-spec | open | 04-studio-to-game-designer.md |
+| 5a | Verify | qa | verify-change | planned | — |
+| 5b | Verify (visual) | art-director | visual-review | planned | — |
+| 6 | Play | playtester | playtest-session | planned | — |
+| 7 | Review | game-director | review-outcome | planned | — |
+| 8 | Next | studio | — | planned | — |
+
+## Route changes
+
+After Plan: it fits. Build opens (03). The TD's spec question on check 14 vs threat marks opens as a parallel Design step (04); Build does not consume its answer. Verify waits for both. Skills in 03's Load set to implement-change.
+
+## Next action
+
+Start steps 4a and 4b, which may run in either order: `gameplay-engineer` with `03-technical-director-to-gameplay-engineer.md`, and `game-designer` with `04-studio-to-game-designer.md`. The Route after both opens Verify (qa with art-director in parallel).
+
+## Outcome
+
+(open)
+>>>END

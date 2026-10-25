@@ -1,0 +1,278 @@
+I made the code, test and manual changes but ran nothing myself. I did not use `@run`, because the packet doesn't show the block syntax, so I put the play, trace and bot runs inside tests instead. The only result I will see is the runtime's `node --test` Build check, so I set the handoff to `partial`.
+
+<<<EDIT repo/src/view.js
+<<<<<<< SEARCH
+  function hypo(s, pos) {
+=======
+  function hypo(s, pos, base) {
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    var s2 = withPlayer(s, pos), e = Math.max(0, s.ember - G.drainRate(s2));
+=======
+    var s2 = withPlayer(s, pos), e = Math.max(0, (base === undefined ? s.ember : base) - G.drainRate(s2));
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    // None on walls, creature tiles, the down stairs, or an unlit brazier (the flare stuns).
+=======
+    // None on walls, creature tiles or the down stairs. An unlit brazier is lit by the step (E+60 first) and the
+    // flare stuns every stunnable creature there, so only the Gloom (not stunned) is evaluated on it.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+      if (s.end || t === '>' || (t === 'B' && !litSet[n.x + ',' + n.y]) || occupied(s, n.x, n.y)) return;
+=======
+      var unlit = t === 'B' && !litSet[n.x + ',' + n.y];
+      if (s.end || t === '>' || occupied(s, n.x, n.y)) return;
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+      var hp = hypo(s, n);
+=======
+      var hp = hypo(s, n, unlit ? Math.min(100, s.ember + 60) : undefined);
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+        var dmg = hurtsAt(hp.s, c, G.planAction(hp.s, c, hp.ctx));
+=======
+        if (unlit && c.type !== 'gloom') return;
+        var dmg = hurtsAt(hp.s, c, G.planAction(hp.s, c, hp.ctx));
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/src/script.js
+<<<<<<< SEARCH
+      var stepped = !!(moved && action.type === 'move' && plan &&
+        Math.abs(plan.x - res.state.player.x) + Math.abs(plan.y - res.state.player.y) === 1);
+      dmg.push({ src: e.src, type: e.type, amount: e.amount, visibleBefore: !!b, markedBefore: !!(b && b.threat),
+        steppedAdjacent: stepped, radiusChanged: pv.radius !== after.radius });
+=======
+      // D-002 strict meaning: the mark that applied on the tile where the player ended the turn.
+      var np = res.state.player, marked;
+      if (moved) {
+        var rc = pv.reach.filter(function (q) { return q.x === np.x && q.y === np.y; })[0];
+        marked = !!(rc && rc.creatures.some(function (c) { return c.id === e.src; }));
+      } else marked = !!(b && b.threat);
+      dmg.push({ src: e.src, type: e.type, amount: e.amount, visibleBefore: !!b, markedBefore: marked,
+        case: moved ? 'reach' : 'threat' });
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/src/textview.js
+<<<<<<< SEARCH
+' markedBefore=' + d.markedBefore + ' steppedAdjacent=' + d.steppedAdjacent + ' radiusChanged=' + d.radiusChanged);
+=======
+' case=' + d.case + ' markedBefore=' + d.markedBefore);
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT repo/manual.md
+<<<<<<< SEARCH
+before the action, the events with damage sources, E and the drain rate. A command refused with no cost
+=======
+before the action, the events with damage sources, E and the drain rate. Each damage line gives `case=threat` (the player
+did not move) or `case=reach` (the player stepped onto a neighbour tile), `visibleBefore`, and `markedBefore`: whether the
+creature was shown in the previous frame with the threat mark (threat) or the reach mark on the tile where the player ended
+the turn (reach), per D-002. A command refused with no cost
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+down stairs and an unlit brazier never get a reach mark.
+=======
+down stairs never get a reach mark. An unlit brazier gets none from creatures the flare stuns, but does get one from the Gloom (not stunned) if it would hurt you there.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+acts nothing that turn and the next, and acts on the third turn after. (Open question to the game designer; see the handoff.)
+=======
+skips its action in the lighting turn's own creature phase (first skipped action) and in the next turn (second), and acts in the creature phase of the second turn after the lighting turn (the third turn, counting the lighting turn as the first). Ratified by the game designer.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+(reading, to confirm with the game designer)
+=======
+(ratified by the game designer)
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE repo/tests/bots.test.js
+'use strict';
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const bot = require('./bot.js');
+
+const SEEDS = Array.from({ length: 20 }, (_, i) => 'bot-' + (i + 1));
+let cache = null;
+const runs = () => (cache = cache || SEEDS.map((s) => bot.playRun(s, { maxCommands: 1500 })));
+
+test('check 14 (strict, D-002): every bot damage event was shown and marked on the tile where the player ended the turn (20 seeds)', (t) => {
+  const counts = { threat: 0, reach: 0 };
+  const bad = [];
+  for (const r of runs()) {
+    for (const e of r.log) {
+      for (const d of e.damage) {
+        if (!d.visibleBefore) bad.push({ seed: r.seed, turn: e.turn, why: 'not shown before', d });
+        else if (!d.markedBefore) bad.push({ seed: r.seed, turn: e.turn, why: 'shown but not marked for case ' + d.case, d });
+        else counts[d.case]++;
+      }
+    }
+  }
+  t.diagnostic('damage events by case: ' + JSON.stringify(counts));
+  assert.deepEqual(bad.slice(0, 5), [], 'unmarked damage (' + bad.length + ' total)');
+});
+
+test('check 26: bot runs end in a result; at least 3 land in 250-700 turns; at least one wins', (t) => {
+  const all = runs();
+  const summary = all.map((r) => r.seed + ':' + (r.state.end ? r.state.end.result : 'unfinished') + '@' + r.state.turn + '/f' + r.state.floor);
+  t.diagnostic(summary.join(' '));
+  for (const r of all) assert.ok(r.state.end, r.seed + ' did not finish in 1500 commands');
+  const inRange = all.filter((r) => r.state.turn >= 250 && r.state.turn <= 700);
+  assert.ok(inRange.length >= 3, 'runs in 250-700 turns: ' + inRange.length + ' of ' + all.length + ' (' + summary.join(' ') + ')');
+  assert.ok(all.some((r) => r.state.end.result === 'victory'), 'no bot victory (' + summary.join(' ') + ')');
+});
+>>>END
+
+<<<FILE repo/tests/g001-final.test.js
+'use strict';
+// Handoff 11: unlit brazier + Gloom, hound at distance 1, trace fields, and real play.js / --trace runs.
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const path = require('node:path');
+const cp = require('node:child_process');
+const { G, V, SC, A, run, cr, world } = require('./helpers.js');
+const TV = require('../src/textview.js');
+
+const reachOf = (v, dir) => { const e = v.reach.find((r) => r.dir === dir); return e ? e.creatures.map((c) => c.letter) : []; };
+const PLAY = path.join(__dirname, '..', 'play.js');
+
+test('unlit brazier beside a gathered Gloom: reach mark from the Gloom; the slam lands', () => {
+  const s = world(['#.@BG..#'], { floor: 5 });
+  s.creatures[0].gathering = true;
+  const v = V.view(s);
+  assert.deepEqual(reachOf(v, 'E'), ['G']);
+  assert.deepEqual(reachOf(v, 'W'), []);
+  assert.match(TV.renderFrame(v), /Danger: E \(G\)/);
+  const after = G.step(s, A.E).state;
+  assert.equal(after.hp, 8);
+});
+
+test('unlit brazier beside an ungathered Gloom: no mark (it only gathers), no damage', () => {
+  const s = world(['#.@BG..#'], { floor: 5 });
+  assert.deepEqual(reachOf(V.view(s), 'E'), []);
+  assert.equal(G.step(s, A.E).state.hp, 12);
+});
+
+test('crouching hound at distance 2: a step toward it is marked beforehand and is bitten for 3', () => {
+  const s = world(['#@.h.#']);
+  s.creatures[0].crouching = true; s.creatures[0].dir = 'W';
+  const v = V.view(s);
+  assert.equal(v.threats.length, 1);
+  assert.deepEqual(reachOf(v, 'E'), ['h']);
+  assert.equal(G.step(s, A.E).state.hp, 9);
+});
+
+test('flare timing: a moth acts on the third turn counting the lighting turn as the first', () => {
+  let s = world(['#@B..m.#']);
+  s = run(s, A.E);                       // turn 1 (lighting): skipped
+  assert.equal(cr(s, 1).x, 5);
+  s = run(s, A.wait); assert.equal(cr(s, 1).x, 5);   // turn 2: skipped
+  s = run(s, A.wait); assert.equal(cr(s, 1).x, 4);   // turn 3: acts
+});
+
+test('trace fields: damage entries carry case and the matching mark', () => {
+  const s = world(['#@.m.#']);
+  let r = SC.stepLogged(s, A.E, V.view(s), 1);
+  assert.equal(r.entry.damage.length, 1);
+  assert.equal(r.entry.damage[0].case, 'reach'); assert.equal(r.entry.damage[0].markedBefore, true);
+  assert.match(TV.renderTrace(r.entry), /case=reach markedBefore=true/);
+  const w = world(['#@m.#']);
+  r = SC.stepLogged(w, A.wait, V.view(w), 1);
+  assert.equal(r.entry.damage[0].case, 'threat'); assert.equal(r.entry.damage[0].markedBefore, true);
+});
+
+test('node play.js runs a script from stdin', (t) => {
+  const res = cp.spawnSync(process.execPath, [PLAY, '-'], { input: 'seed 42\ndd.\n', encoding: 'utf8' });
+  assert.equal(res.status, 0, res.stderr);
+  assert.match(res.stdout, /seed: 42/);
+  assert.match(res.stdout, /--- command 3: "\." ---/);
+  assert.match(res.stdout, /Danger: /);
+  t.diagnostic('play.js stdout lines: ' + res.stdout.split('\n').length);
+});
+
+test('node play.js --trace prints trace lines', (t) => {
+  const res = cp.spawnSync(process.execPath, [PLAY, '--trace', '-'], { input: 'seed 42\ndd.\n', encoding: 'utf8' });
+  assert.equal(res.status, 0, res.stderr);
+  assert.match(res.stdout, /\[trace\] command 3/);
+  assert.match(res.stdout, /threats before action:/);
+  t.diagnostic(res.stdout.split('\n').filter((l) => l.startsWith('[trace] command')).join(' || '));
+});
+>>>END
+
+<<<FILE goals/G-001-first-playable-run/12-gameplay-engineer-to-qa.md
+---
+kind: handoff
+goal: G-001
+seq: 12
+from: gameplay-engineer
+to: qa
+stage: Verify
+outcome: partial
+---
+# 12: gameplay-engineer → qa — reach-mark Build finished in code; unlit-brazier/Gloom rule added; verify checks 14 and 29 and regress the rest
+
+## Task
+
+Verify the Build against the amended spec (sections 3, 4, 9) and checks 13, 14, 26 (and 29 by eye). Run `node --test` first. Checks 27-30 need a human opening `repo/index.html`; no text run can show them.
+
+## Context
+
+G-001. Handoff 11 asked for: old check-14 assertions replaced by the strict form, `--trace` fields moved to the D-002 meaning, the unlit-brazier/Gloom ruling confirmed or implemented, hand-made tests, and real runs. The code and tests are written. I did not run anything with `@run` myself. The runtime's Build check (below) is the only execution of this change, and it covers `node --test` only. The play.js and `--trace` runs and the bot checks 14 and 26 are written as tests inside `node --test`, so they appear in that output and not as separate runs. Hence `partial`.
+
+## Findings
+
+What changed:
+- `repo/src/view.js`: confirmed that the old code gave an unlit brazier no reach mark at all (an early return), so the Gloom was never evaluated there. Changed it. For an unlit brazier neighbour tile the hypothetical uses E = min(100, E+60) minus that tile's drain (the rekindle happens before dimming). Stunnable creatures (everything except the Gloom) are skipped there, and the Gloom is still evaluated through `planAction` and `hurtsAt`. Lit braziers, floor tiles and the stairs are unchanged (stairs never marked).
+- `repo/src/script.js` (`stepLogged`): damage log entries are now `{src, type, amount, visibleBefore, markedBefore, case}`. `case` is `reach` if the player moved onto a neighbour tile, else `threat`. `markedBefore` is true only if the creature carried the threat mark (threat) or the reach mark on the tile where the player ended the turn (reach) in the previous view. `steppedAdjacent` and `radiusChanged` are removed.
+- `repo/src/textview.js`: trace damage line now prints `case=... markedBefore=...`.
+- `repo/tests/bots.test.js`: the old check-14 test (which accepted `steppedAdjacent` and `radiusChanged` as excuses) and the old sampled-states test are replaced by one strict test. Any damage not shown and marked per `case` fails it. Check 26 test unchanged. The strict check-14 and sampled-states tests in `tests/reach.test.js` stay. I did not edit `creatures.test.js`, `rules.test.js` or `bot.js`; from reading them, they carry no old check-14 rule, and `bot.js` only reads `threat` and `terrain` from the view.
+- `repo/tests/g001-final.test.js` (new): a gathered Gloom beside an arena brazier (reach mark `G`, step in, hp 12→8); an ungathered Gloom there (no mark, no damage); a crouching hound at distance 2, step toward it (threat and reach mark beforehand, bitten for 3); flare timing with a moth (acts on the third turn counting the lighting turn as the first); trace fields via `stepLogged` and `renderTrace`; `node play.js -` and `node play.js --trace -` run as child processes on `seed 42 / dd.`.
+- `repo/manual.md`: flare wording clarified (reading 3, now marked ratified), reading 10 marked ratified, the unlit-brazier sentence reflects the Gloom rule, trace damage fields described.
+- No creature behaviour, number, content or scope was changed. `STUN_TURNS` and the bite rule are untouched.
+
+How to exercise:
+- `node --test`, and read the diagnostics of the check-14 (strict) and check-26 tests in `bots.test.js`, and of `reach.test.js`.
+- `node play.js script.txt` with a script such as `seed 1` plus moves; read the `Danger:` line before each step.
+- `node play.js --trace script.txt`; damage lines show `case=` and `markedBefore=`.
+- On floor 5, walk toward an arena brazier next to a gathering Gloom and read `Danger:`.
+- Checks 27-30: a human opens `repo/index.html`.
+
+Criteria addressed: 13 (timing test), 14 (strict, including hand-made unlit/lit brazier and Gloom cases), 26 (bot test), and 29 (reach marks, code only).
+
+Known gaps:
+1. I did not run `node --test` myself, nor any `play.js` script, `--trace` script or bot run outside the test file. The Build check below shows only the `node --test` outcome.
+2. Blocked-line-of-sight neighbour case: no scenario written. From `los()` in `light.js`, a creature at Manhattan distance 2 from the player and adjacent to a non-wall neighbour tile is either straight-line (the only intermediate tile is the neighbour itself, a non-wall) or diagonal (Bresenham has no intermediate tile), so it is always visible. The "listed only via a neighbour with blocked sight" path in `view.js` therefore looks unreachable. This is code reading, not a run. QA may confirm.
+3. The random-walk check-14 test may rarely meet hounds or the Gloom; those are covered by hand-made scenarios.
+4. Page appearance (checks 27-30) not seen.
+
+## Decisions already made
+
+- D-001: classic-script UMD modules.
+- D-002: threat plus reach marks, after-dimming E, strict check 14. Handoff 10 rulings applied: flare reading A, hound bite at distance 1, lit brazier marked, unlit brazier marked by the Gloom only.
+
+## Constraints
+
+- Report only what was run. No creature behaviour, numbers, content or scope changes. The 30 checks and numbering are unchanged.
+
+## Open questions
+
+None for the Game Designer. A spec case I met was silent on nothing.
+
+## Expected output
+
+A verdict on checks 14, 13, 26 and 29 plus a regression pass on checks 1-26, with failures routed to `gameplay-engineer`. Checks 27-30 need a human at `index.html`.
+
+## Sender assessment
+
+Confidence is moderate-high for the view.js change: `hypo` only gained a base-ember override, and the Gloom's plan does not depend on r. The risk is that the strict bot check-14 test may expose a case the old weaker assertions hid (for example a shade whose fear state differs between the hypothetical and the creature phase). If it fails, the failing entry names seed, turn and `case`. I have no execution evidence beyond what the runtime's Build check shows.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: none
+- Project: design/game-spec.md, design/acceptance-criteria.md, repo/manual.md, repo/play.js, repo/src/view.js, repo/src/script.js, repo/tests/g001-final.test.js, repo/tests/bots.test.js, repo/tests/reach.test.js
+- Decisions: decisions/D-002-threat-and-reach-marks.md
+- Previous handoff: goals/G-001-first-playable-run/11-studio-to-gameplay-engineer.md
+>>>END

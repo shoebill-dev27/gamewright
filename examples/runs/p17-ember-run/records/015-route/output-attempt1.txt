@@ -1,0 +1,132 @@
+
+<invoke name="note">
+</invoke>
+
+
+
+<invoke name="x">
+</invoke>
+
+
+I have no tools for these calls, so I'm writing the Route output directly as file blocks.
+
+<<<FILE goals/G-001-first-playable-run/14-studio-to-playtester.md
+---
+kind: handoff
+goal: G-001
+seq: 14
+from: studio
+to: playtester
+stage: Play
+outcome: routed
+---
+# 14: studio → playtester — play the game as a player and report what you experience
+
+## Task
+
+Play the game as a player would, from `repo/manual.md` alone, and report what you observe. Try to play whole runs from floor 1 to an ending. Use more than one seed if the manual lets you choose one.
+
+## Context
+
+The project is a short turn-based roguelike, played by descending a cave. The player profile (in the Load list) describes who it is for. A person would play it in a browser. You play through the text interface the manual describes.
+
+## Findings
+
+Not applicable. You receive no information about the implementation or its history.
+
+## Decisions already made
+
+None.
+
+## Constraints
+
+- Work from the build and the manual only. Read nothing else in the repository (no source, tests or design files).
+- Run the game only as `repo/manual.md` says (`node play.js {script}`). `--trace` shows internal state that a player never sees. Do not base observations on it.
+- Report only what you observed. Say plainly what your means cannot show. A text interface cannot show how the browser page looks or handles keyboard and mouse input, so do not claim anything about it.
+
+## Open questions
+
+None.
+
+## Expected output
+
+An observation report, addressed to `studio`:
+- What you did: the seeds and scripts you ran, and how each run ended (win, death, ember out, or stopped before an ending, and why).
+- What you understood and what confused you, turn by turn where it mattered.
+- Whether you could see what could hurt you before it did.
+- How the light and time trade-off felt.
+- Pacing and rough length of a run, and how different the runs felt.
+- Anything that looked broken or that the manual did not explain.
+
+## Load
+
+- Role: studio/roles/playtester.md
+- Skills: studio/skills/playtest-session.md
+- Project: project.md#player-profile, repo/manual.md; the build in repo/ (run command in project.md)
+- Decisions: none
+- Previous handoff: none (independence: the Playtester does not receive implementation history)
+>>>END
+
+<<<FILE goals/G-001-first-playable-run/goal.md
+---
+kind: goal
+id: G-001
+project: ember-hollow
+status: active
+created: 2026-10-26
+budget: 19
+---
+# G-001: First complete playable run in the browser
+
+## Owner request
+
+> このコンセプトで、最初から最後まで通して遊べる版を作ってほしい。ブラウザで遊べるようにしてほしい
+
+## Interpretation
+
+Success condition: a person opens `repo/index.html` straight from the file system in a browser and can play one whole run with keyboard or mouse. The run starts on floor 1, passes through all five floors, and ends in one of the ways the vision names: beating the floor-5 creature (win), dying, or the ember going out. No setup, server or developer step is needed. The vision's pillars hold in that run: readable threats, light as the resource, a short seeded run (same seed gives the same run).
+
+The team-side means from `project.md#constraints` also ship, because verification depends on them: `node play.js {script}`, `--trace`, `node --test`, and `repo/manual.md` (the script format and everything a player is told).
+
+Out of scope (not requested): saving or resuming runs, meta-progression between runs, sound, mobile or touch layouts, network features, content beyond what one complete five-floor run needs, and any change to the vision or pillars.
+
+## Unknowns
+
+- Observe: skipped. No build exists and nothing is reported broken or off.
+- Diagnose: skipped. There is no problem to explain.
+- Decide: skipped. Design stayed inside the vision and Goal scope and raised no direction, priority or scope choice.
+- Design: done. 30 checks; check 14 settled by D-002; flare stun timing, hound bite at distance 1, lit/unlit brazier reach marks ruled (handoff 10). Balance is unverified; Play must report it.
+- Plan: done (handoff 03).
+- Build: done (handoff 12). `node --test` passed 49/49.
+- Verify: done as partial (handoff 13). No defects found; `node --test` green. Not individually observed by QA: per-test results for checks 13, 14 (hand-made cases) and 26, plus 9-12, 15-18, 21-23. Checks 27-30 (browser page) were not verified by anyone: no executor can open `index.html`. They are items for the Owner. Art Director visual review skipped (budget, no way to see the page).
+- Play: open (playtester, handoff 14). Text runs only, from `repo/manual.md` and the player profile.
+- Review: planned. `game-director` judges whether the intent was met from the Play report and QA's results, and names the next issues, including the unverified browser checks.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Design | game-designer | write-design-spec | done | 01-studio-to-game-designer.md |
+| 2 | Decide | game-director | make-decision | skipped | — |
+| 3 | Plan | technical-director | technical-plan | done | 02-game-designer-to-technical-director.md |
+| 4a | Build | gameplay-engineer | implement-change | done | 11-studio-to-gameplay-engineer.md |
+| 4b | Design (check 14 question) | game-designer | write-design-spec | done | 04-studio-to-game-designer.md |
+| 4c | Design (flare stun, hound bite) | game-designer | write-design-spec | done | 08-studio-to-game-designer.md |
+| 5a | Verify | qa | verify-change | done | 13-qa-to-studio.md |
+| 5b | Verify (visual) | art-director | visual-review | skipped | — |
+| 6 | Play | playtester | playtest-session | open | 14-studio-to-playtester.md |
+| 7 | Review | game-director | review-outcome | planned | — |
+| 8 | Next | studio | — | planned | — |
+
+## Route changes
+
+After Verify (13, partial): QA found no defect; what is missing (browser checks 27-30, per-test detail) cannot be produced by another QA run, so it is not routed back. Play opens with a fresh Handoff (14) from the manual and player profile only. Budget: 15 of 19 used; Play, Route, Review, Close fit exactly.
+
+## Next action
+
+Start step 6: `playtester` with `14-studio-to-playtester.md`, in a fresh executor context. The Route after it passes the report and QA's handoff 13 to `game-director` for Review.
+
+## Outcome
+
+(open)
+>>>END

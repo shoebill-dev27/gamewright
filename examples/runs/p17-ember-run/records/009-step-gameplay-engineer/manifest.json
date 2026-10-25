@@ -1,0 +1,67 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-001-first-playable-run/07-studio-to-gameplay-engineer.md",
+  "sha256": "5e8ea6a0d19d81d15e1bf8797b05aeb124f8b92b11bee3d48216a5bd052fe4cc",
+  "bytes": 4412
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md",
+  "sha256": "8a447e66877cd14dfff47ac1b8482ba77c850159c8fb43ec2780e91064869351",
+  "bytes": 1742
+ },
+ {
+  "path": "studio/skills/implement-change.md",
+  "sha256": "a9befd7f1d9e09eb94c51a066f030db88c5061ad1b522d9795e62bc2c242964a",
+  "bytes": 1823
+ },
+ {
+  "path": "design/game-spec.md",
+  "sha256": "de9a8806e462d688d0a65e5536127efc3971566511dab13ff49dc8d3d237afab",
+  "bytes": 18451
+ },
+ {
+  "path": "design/acceptance-criteria.md",
+  "sha256": "7a205196f512ca16bbe5b09cf17e9fd7429db4ea2b1346bf71cd45e0841381a2",
+  "bytes": 7561
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "397c05c4d683d3e8104cf68499e969ea9fa9664221054e4f75e2676c56f1d778",
+  "bytes": 4795
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "450fd395c0cb68189bb9f0c7ff683df5db990e6a88dacea42fd26cf28e181cf0",
+  "bytes": 849
+ },
+ {
+  "path": "decisions/D-001-classic-scripts-shared-rules.md",
+  "sha256": "d8028757b2b22bd72544eeeb055593d1a4118d0c695f753f8c7f8e75f99255ff",
+  "bytes": 1575
+ },
+ {
+  "path": "decisions/D-002-threat-and-reach-marks.md",
+  "sha256": "05ba76f00173c03e14b3d829b371b88cafc9dd6e874de2d5c32b009665dc3971",
+  "bytes": 1943
+ },
+ {
+  "path": "goals/G-001-first-playable-run/06-game-designer-to-studio.md",
+  "sha256": "f235521610104d26626e7e077d78e91ca024b85b8bcc71bc2cdd82a41e55dd64",
+  "bytes": 4554
+ },
+ {
+  "path": "@files/repo",
+  "sha256": "84cb246c0d9dfe5f68de594dcbe14dd0f69052c8989065712860176e4aead267",
+  "bytes": 558
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ }
+]

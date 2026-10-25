@@ -1,0 +1,10 @@
+<<<FILE @need
+repo/src/game.js
+repo/src/view.js
+repo/src/textview.js
+repo/src/page.js
+repo/tests/view.test.js
+repo/tests/helpers.js
+repo/src/scenario.js
+repo/src/light.js
+>>>END

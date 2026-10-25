@@ -1,0 +1,132 @@
+
+<invoke name="bash_placeholder">
+</invoke>
+```
+(no tool use needed)
+```
+
+<<<FILE goals/G-001-first-playable-run/11-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-001
+seq: 11
+from: studio
+to: gameplay-engineer
+stage: Build
+outcome: routed
+---
+# 11: studio → gameplay-engineer — finish the reach-mark Build: old tests and trace fields, Gloom on unlit braziers, run everything
+
+## Task
+
+Continue the Build (handoff 09 was `partial`; nothing is missing, so the same Role finishes it). You can now see the files the earlier pass could not (see Load). Bring the build into line with the amended spec and D-002, run it, and hand the result to `qa`.
+
+## Context
+
+G-001, first complete playable five-floor run. Reach marks (D-002) are written (09) and the runtime's check passed `node --test` (43 tests, exit 0), but that was the only thing run. The Game Designer has ruled on the open questions (handoff 10, in Load). Budget is tight (10 of 19 used before this Route), so do the whole list in one pass.
+
+## Findings
+
+From 09 (Known gaps): old check-14 assertion and old sampled-states test in `tests/bots.test.js`, `tests/creatures.test.js`, `tests/rules.test.js` or `tests/bot.js` may still use the old rule; `play.js --trace` fields `markedBefore`/`steppedAdjacent`/`radiusChanged` likely keep the old meaning; nothing but `node --test` was executed; no scenario for a creature listed only through a neighbour tile with blocked line of sight.
+
+From 10 (Game Designer rulings, spec and checks amended in place):
+- Flare stun: reading A (built) is ratified. The lighting turn's own creature phase is the first skipped action, the next turn the second. The manual may be reworded for clarity.
+- Hound bite at lunge distance 1: built reading is ratified. Only a blocked lunge (wall or creature stops the hound before it ends adjacent) means no damage.
+- Lit brazier gets reach marks like a floor tile: ratified (resolves 09 gap 4).
+- NEW, to confirm in code: an unlit brazier tile gets no reach mark from creatures a flare stuns, but it does get a reach mark from the Gloom if the Gloom would hurt the player there at its next action (the Gloom is not stunned by flares). If the code shows no reach mark at all on unlit braziers, change it: skip stunnable creatures in unlit-brazier hypotheticals, still evaluate the Gloom.
+
+## Decisions already made
+
+- D-001: classic-script UMD modules.
+- D-002: threat marks plus reach marks, after-dimming E, strict check 14.
+
+## Constraints
+
+- No creature behaviour, numbers, content or scope changes beyond the rulings above. The 30 checks and numbering are unchanged.
+- If a spec case is ambiguous or contradictory, stop and hand back `question`; do not decide.
+- Report only what you ran. Keep the strict check-14 test; remove or replace any older, weaker assertion of it rather than leaving two rules.
+
+## Open questions
+
+None for the Owner. Return a `question` only if the spec is silent on a case you meet.
+
+## Expected output
+
+1. Old check-14 assertion and sampled-states tests replaced by the strict form; `play.js --trace` fields updated to the D-002 meaning (document in `repo/manual.md` if trace fields are described there).
+2. Unlit-brazier/Gloom rule implemented or confirmed, with hand-made tests: a gathered Gloom beside an arena brazier; a hound at distance 1 after a step toward it (bite, marked beforehand); flare timing (acts on the third turn counting the lighting turn as the first); optionally the blocked-line-of-sight neighbour case.
+3. Manual flare wording clarified if needed.
+4. Actually run with `@run`: `node --test`, a `node play.js` script, a `--trace` script, and the bots (checks 14 and 26). Fix failures, and put the real output in the handoff.
+5. Write the outgoing handoff to `qa` (stage Verify): what changed, how to exercise it (including that checks 27-30 need a human opening `index.html`), remaining gaps. `qa` does not receive your Sender assessment.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: design/game-spec.md, design/acceptance-criteria.md, repo/manual.md, repo/play.js, repo/src/view.js, repo/src/game.js, repo/src/textview.js, repo/src/page.js, repo/tests/bots.test.js, repo/tests/creatures.test.js, repo/tests/rules.test.js, repo/tests/bot.js, repo/tests/reach.test.js, repo/tests/helpers.js, goals/G-001-first-playable-run/10-game-designer-to-studio.md
+- Decisions: decisions/D-001-classic-scripts-shared-rules.md, decisions/D-002-threat-and-reach-marks.md
+- Previous handoff: goals/G-001-first-playable-run/09-gameplay-engineer-to-qa.md
+>>>END
+
+<<<FILE goals/G-001-first-playable-run/goal.md
+---
+kind: goal
+id: G-001
+project: ember-hollow
+status: active
+created: 2026-10-26
+budget: 19
+---
+# G-001: First complete playable run in the browser
+
+## Owner request
+
+> このコンセプトで、最初から最後まで通して遊べる版を作ってほしい。ブラウザで遊べるようにしてほしい
+
+## Interpretation
+
+Success condition: a person opens `repo/index.html` straight from the file system in a browser and can play one whole run with keyboard or mouse. The run starts on floor 1, passes through all five floors, and ends in one of the ways the vision names: beating the floor-5 creature (win), dying, or the ember going out. No setup, server or developer step is needed. The vision's pillars hold in that run: readable threats, light as the resource, a short seeded run (same seed gives the same run).
+
+The team-side means from `project.md#constraints` also ship, because verification depends on them: `node play.js {script}`, `--trace`, `node --test`, and `repo/manual.md` (the script format and everything a player is told).
+
+Out of scope (not requested): saving or resuming runs, meta-progression between runs, sound, mobile or touch layouts, network features, content beyond what one complete five-floor run needs, and any change to the vision or pillars.
+
+## Unknowns
+
+- Observe: skipped. No build exists and nothing is reported broken or off.
+- Diagnose: skipped. There is no problem to explain.
+- Decide: skipped. Design stayed inside the vision and Goal scope and raised no direction, priority or scope choice. Reopens only if Plan or a spec question finds scope must change (then `game-director`).
+- Design: done. 30 checks; check 14 settled by D-002; flare stun timing, hound bite at distance 1, lit/unlit brazier reach marks ruled (handoff 10). Balance is unverified; Play must report it.
+- Plan: done (handoff 03). Reasoning only, nothing measured.
+- Build: open. Reach marks written and `node --test` passed (43) in the runtime's check, but little else was run. Remaining (handoff 11): replace old check-14 tests and trace fields, Gloom on unlit braziers, run scripts and bots.
+- Verify: planned. QA against the acceptance criteria through the scripts and tests; Art Director visual review in parallel (grid readability, threat and reach mark clarity). Checks 27-30 need a human opening `index.html`.
+- Play: planned. A Playtester plays from `repo/manual.md` and the player profile only.
+- Review: planned. `game-director` judges whether the intent was met and names the next issues.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Design | game-designer | write-design-spec | done | 01-studio-to-game-designer.md |
+| 2 | Decide | game-director | make-decision | skipped | — |
+| 3 | Plan | technical-director | technical-plan | done | 02-game-designer-to-technical-director.md |
+| 4a | Build | gameplay-engineer | implement-change | open | 11-studio-to-gameplay-engineer.md |
+| 4b | Design (check 14 question) | game-designer | write-design-spec | done | 04-studio-to-game-designer.md |
+| 4c | Design (flare stun, hound bite) | game-designer | write-design-spec | done | 08-studio-to-game-designer.md |
+| 5a | Verify | qa | verify-change | planned | — |
+| 5b | Verify (visual) | art-director | visual-review | planned | — |
+| 6 | Play | playtester | playtest-session | planned | — |
+| 7 | Review | game-director | review-outcome | planned | — |
+| 8 | Next | studio | — | planned | — |
+
+## Route changes
+
+After Build (09, partial) and Design 4c (10, done): both rulings ratify the built readings; one check (Gloom on unlit braziers) may need code. 09 is not sent to qa: Build continues (11) with old tests, trace fields and real runs. Budget: 11 of 19 used; remaining steps must not return again.
+
+## Next action
+
+Start step 4a: `gameplay-engineer` with `11-studio-to-gameplay-engineer.md`. The Route after it opens Verify (qa with art-director in parallel).
+
+## Outcome
+
+(open)
+>>>END

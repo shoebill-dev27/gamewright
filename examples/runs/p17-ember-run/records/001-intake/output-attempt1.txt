@@ -1,0 +1,150 @@
+G-001の起票(Intake)を行い、`goal.md` と最初のHandoff(ゲームデザイナー宛て)を書きました。
+
+<<<FILE goals/G-001-first-playable-run/goal.md
+---
+kind: goal
+id: G-001
+project: ember-hollow
+status: active
+created: 2026-10-26
+budget: 19
+---
+# G-001: First complete playable run in the browser
+
+## Owner request
+
+> このコンセプトで、最初から最後まで通して遊べる版を作ってほしい。ブラウザで遊べるようにしてほしい
+
+## Interpretation
+
+Success condition: a person opens `repo/index.html` straight from the file system in a browser and can play one whole run with keyboard or mouse. The run starts on floor 1, passes through all five floors, and ends in one of the ways the vision names: beating the floor-5 creature (win), dying, or the ember going out. No setup, server or developer step is needed. The vision's pillars hold in that run: readable threats, light as the resource, a short seeded run (same seed gives the same run).
+
+The team-side means from `project.md#constraints` also ship, because verification depends on them: `node play.js {script}`, `--trace`, `node --test`, and `repo/manual.md` (the script format and everything a player is told).
+
+Out of scope (not requested): saving or resuming runs, meta-progression between runs, sound, mobile or touch layouts, network features, content beyond what one complete five-floor run needs, and any change to the vision or pillars.
+
+## Unknowns
+
+- Observe: skipped. No build exists and nothing is reported broken or off.
+- Diagnose: skipped. There is no problem to explain.
+- Decide: tentative. The vision already sets the direction. Needed only if Design finds a real choice of direction, priority or scope (for example, content size against the run-length target).
+- Design: planned. Nothing is specified: ember rules, braziers, creatures and how they react to light, items, floor generation from a seed, the floor-5 creature, win and lose conditions, and how threats are made readable before they hurt. Needs player-observable acceptance criteria with numbers.
+- Plan: planned. The work is cross-system (one shared rules core for browser and Node, deterministic seeded generation, a browser renderer, script player and trace, tests), so the approach and sequencing are not obvious.
+- Build: planned. The game must be created from scratch.
+- Verify: planned. QA against the acceptance criteria through the scripts and tests; Art Director visual review in parallel, since the browser page is what the player sees (grid readability, threat clarity).
+- Play: planned. The Goal is about how a whole run plays; a Playtester plays from `repo/manual.md` and the player profile only.
+- Review: planned. `game-director` judges whether the intent was met (complete, readable, short, light-as-resource) and names the next issues.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Design | game-designer | write-design-spec | open | 01-studio-to-game-designer.md |
+| 2 | Decide | game-director | make-decision | tentative | — |
+| 3 | Plan | technical-director | technical-plan | planned | — |
+| 4 | Build | gameplay-engineer | implement-change | planned | — |
+| 5a | Verify | qa | verify-change | planned | — |
+| 5b | Verify (visual) | art-director | visual-review | planned | — |
+| 6 | Play | playtester | playtest-session | planned | — |
+| 7 | Review | game-director | review-outcome | planned | — |
+| 8 | Next | studio | — | planned | — |
+
+## Route changes
+
+Intake: initial route. Observe and Diagnose skipped (no build, no problem). Decide tentative: only if Design needs a direction, priority or scope choice. Budget 19 = 7 planned steps x 2, plus 4 for one return, plus 1 for Intake.
+
+## Next action
+
+Start step 1: `game-designer` with `goals/G-001-first-playable-run/01-studio-to-game-designer.md`.
+
+## Outcome
+
+(open)
+>>>END
+
+<<<FILE goals/G-001-first-playable-run/01-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-001
+seq: 1
+from: studio
+to: game-designer
+stage: Design
+outcome: routed
+---
+# 01: studio → game-designer — specify a complete five-floor run of Ember Hollow
+
+## Task
+
+Write the design spec for the first complete playable version of Ember Hollow: everything the player-facing game needs so that one run, from floor 1 to a win or a loss, can be built and verified. Include player-observable acceptance criteria with numbers.
+
+## Context
+
+G-001. The Owner asked (ja): "このコンセプトで、最初から最後まで通して遊べる版を作ってほしい。ブラウザで遊べるようにしてほしい" ("Make a version of this concept that can be played from start to finish, playable in the browser"). The project is concept only: `repo/` holds a README, with no design documents and no Decisions. You are the first step. After you come Plan (`technical-director`), Build, Verify, Play and Review. The Plan and Build steps work from your spec and cannot ask you what you meant, so it must stand alone.
+
+## Findings
+
+Nothing yet; this is the first step. The vision, pillars, player profile and constraints are in `project.md` (see Load). Points to cover:
+
+- **Ember and light:** how the glow sets how far the player sees, how it dims per turn, how braziers rekindle it, what happens when it goes out, and how the player can read the ember's state.
+- **Turn actions:** move, wait, fight, use an item; what each costs and does.
+- **Creatures:** the roster for five floors and how each reacts to light and acts. Each behavior must be learnable. Every threat that can hurt the player next turn is visible and readable beforehand (pillar 1).
+- **Floor 5 creature:** the one that keeps the hollow dark. Its behavior, and the win condition.
+- **Items:** only what the run needs, with their effects.
+- **Floors:** what a floor contains (layout rules, brazier placement, creature and item placement) and that floors derive from a seed (same seed gives the same run, different seeds differ).
+- **Run shape:** the 15–30 minute target, translated into floor sizes and counts that can be checked; the end of run states and what the player sees at each.
+- **Player-facing information:** what the screen must show (grid, ember state, health, threats, messages), described by what the player can tell, not by layout code. Keyboard and mouse controls in the browser.
+- **Acceptance criteria:** player-observable and numeric where numbers matter, checkable through text output of `node play.js {script}` and by looking at the browser page.
+
+## Decisions already made
+
+None. (There are no Decisions in the project.)
+
+## Constraints
+
+- Stay inside the vision and pillars. If completing the spec would need a change to the concept, a pillar, or the scope of the Goal, hand back to the Studio for a `game-director` decision instead of choosing it yourself.
+- Specify player-facing behavior only. Do not decide technical approach, architecture or file structure. The script format is the build's to define in `repo/manual.md`; do not specify it.
+- Keep content to what one complete five-floor run needs. No saving, meta-progression, sound or mobile layouts.
+- The game is deterministic: the same seed and commands always give the same run. Rules must allow this (no rule that depends on real time or other outside input).
+- The spec must be buildable in the project's technology (JavaScript, Node.js 20 and browser, no dependencies, no network); keep rules simple enough to implement and test as such.
+- Write the spec as project design documents under `design/` (for example `design/game-spec.md`), not only in the Handoff. Use several files if that helps, and name them in Findings.
+
+## Open questions
+
+None for you to route beyond the escalation condition in Constraints. List any ambiguity you resolved yourself, with the choice made, in Findings of your outgoing Handoff.
+
+## Expected output
+
+The design spec in `design/`, with player-observable acceptance criteria. The outgoing Handoff goes to `technical-director` (stage Plan), with the spec file names under Findings. If the spec needs a direction, priority or scope choice that is not yours, set `to` to `studio` with `outcome: question` and say which choice.
+
+## Sender assessment
+
+Studio's routing view: the vision is already specific, so no Diagnose or Decide stage is planned. The main risk is size: five floors with a creature roster and a boss in one spec. Prefer a small, complete content set with clear behaviors over a large one. The art-director's visual review comes after Build; what the player must see should be in your acceptance criteria.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: project.md#vision, project.md#player-profile, project.md#current-state, project.md#constraints, repo/README.md
+- Decisions: none
+- Previous handoff: none
+>>>END
+
+**Intake完了(G-001)。** 以下が計画です。
+
+**ゴール:** `repo/index.html` をブラウザで直接開き、キーボードかマウスで、1階から5階の最後まで1ランを通して遊べる状態にします。勝利(5階の主を倒す)、死亡、余燼の消灯のいずれかで終わります。チーム側の確認手段(`node play.js`、`--trace`、`node --test`、`repo/manual.md`)も一緒に出荷します。
+
+**ルート:**
+1. **Design**(game-designer): ゲーム全体の仕様と、数値つきの受け入れ基準を作ります。何も仕様化されていないためです。
+2. **Decide**(game-director): 仮置きです。Designで方向性・優先度・スコープの選択が出たときだけ行います。
+3. **Plan**(technical-director): ブラウザとNodeで共有するルールコア、シード決定性、スクリプト実行など、横断的で自明でないため入れます。
+4. **Build**(gameplay-engineer)
+5. **Verify**(qa、art-directorの視覚レビューを並行): ブラウザ画面が見た目の中心なので並行にします。
+6. **Play**(playtester): 1ランを通した遊び心地がゴールの中心だからです。
+7. **Review**(game-director)
+
+**省略した段階:** Observe と Diagnose は、ビルドが存在せず、不具合や体験上の問題の報告もないため省きました。
+
+**予算:** 19操作です。
+
+**次のアクション:** `01-studio-to-game-designer.md` で game-designer のDesignステップを開始してください。

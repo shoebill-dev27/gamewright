@@ -1,0 +1,73 @@
+{
+ "op": "Intake",
+ "role": null,
+ "goal": "G-001 (new)",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "a04e4b08-ed7e-4111-a81f-05eaba06f7e9",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 13788,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 5167,
+    "output_tokens_details": {
+     "thinking_tokens": 1581
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 13788,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 5167,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 13788,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 13788
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.10682599999999999,
+   "attempt": 1,
+   "started": "2026-10-26T03:07:53",
+   "seconds": 47.4,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-first-playable-run/goal.md": "c24eba07d27970b064528835d594bd7191e1dc31a97b24afb74c0ee47a400c66",
+  "goals/G-001-first-playable-run/01-studio-to-game-designer.md": "aeb06ec82ad5f3a08776192499959963ff9663dd9651a0a4d18ef970fbefdeae"
+ },
+ "decision": {
+  "status": "active",
+  "open": [
+   [
+    "game-designer",
+    "Design"
+   ]
+  ],
+  "new": [
+   "game-designer",
+   "Design"
+  ]
+ },
+ "seen_through_seq": 1
+}

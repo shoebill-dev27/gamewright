@@ -1,0 +1,57 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-001-first-playable-run/01-studio-to-game-designer.md",
+  "sha256": "aeb06ec82ad5f3a08776192499959963ff9663dd9651a0a4d18ef970fbefdeae",
+  "bytes": 4892
+ },
+ {
+  "path": "studio/roles/game-designer.md",
+  "sha256": "802be90dc84142d0a16436d842f1da18d7c7b34500089a91a617a10dde90e7fb",
+  "bytes": 1595
+ },
+ {
+  "path": "studio/skills/write-design-spec.md",
+  "sha256": "f60b4ce8c6e89c2dc27ff87184c54b91452c45db8422fc378ca9253b45a0efd2",
+  "bytes": 1367
+ },
+ {
+  "path": "project.md#vision",
+  "sha256": "f7148f891902b9f1bd9c9364155d3325453ff66c0a9363272cc4f833c6dced17",
+  "bytes": 969
+ },
+ {
+  "path": "project.md#player-profile",
+  "sha256": "00466a3c22762110ab7dbe2bba33dfec33f4382e8c760a379fc9463ef3251be0",
+  "bytes": 231
+ },
+ {
+  "path": "project.md#current-state",
+  "sha256": "1a7198101b9ae47e1ffbcc00e70f8e39acee878ef09027d50e9c4d8f64c267a0",
+  "bytes": 149
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "450fd395c0cb68189bb9f0c7ff683df5db990e6a88dacea42fd26cf28e181cf0",
+  "bytes": 849
+ },
+ {
+  "path": "repo/README.md",
+  "sha256": "db72c9f3c853bde47ed05bec9f9cfc88f53cb205d0c340db1fa03a1f65359e55",
+  "bytes": 100
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

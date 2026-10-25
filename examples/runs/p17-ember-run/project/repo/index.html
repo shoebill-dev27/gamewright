@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ember Hollow</title>
+<style>
+  body { background: #0b0907; color: #d8cdb8; font-family: monospace; margin: 12px; }
+  #app { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
+  canvas { background: #000; border: 1px solid #4a3d2e; cursor: pointer; }
+  #panel { min-width: 300px; max-width: 360px; }
+  .row { margin: 6px 0; }
+  #embar { width: 260px; height: 14px; border: 1px solid #7a5a2a; background: #1a120a; display: inline-block; vertical-align: middle; }
+  #emfill { height: 100%; background: #e8902a; }
+  button { background: #2a2118; color: #d8cdb8; border: 1px solid #7a5a2a; font-family: monospace; padding: 3px 8px; cursor: pointer; margin: 2px; }
+  button:hover { background: #3a2f22; }
+  #inv button { min-width: 84px; }
+  #msgs div { color: #bfb399; }
+  #msgs div:last-child { color: #fff; }
+  #seedline input { background: #1a120a; color: #d8cdb8; border: 1px solid #7a5a2a; font-family: monospace; width: 130px; }
+  #summary { position: fixed; left: 0; top: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.82); display: none; align-items: center; justify-content: center; }
+  #summary .box { background: #1a120a; border: 2px solid #e8902a; padding: 20px 28px; min-width: 320px; }
+  #summary h2 { margin-top: 0; color: #e8902a; }
+  #err { color: #f66; }
+  .hint { color: #8a7a62; font-size: 12px; }
+</style>
+</head>
+<body>
+<h1 style="margin:0 0 8px 0;">Ember Hollow</h1>
+<div id="app">
+  <canvas id="board"></canvas>
+  <div id="panel">
+    <div class="row" id="floorline"></div>
+    <div class="row" id="hpline"></div>
+    <div class="row">Ember <span id="embar"><div id="emfill"></div></span> <span id="emtext"></span></div>
+    <div class="row" id="inv"></div>
+    <div class="row"><button id="waitbtn">Wait (. / Space)</button><button id="restartbtn">Restart (R)</button><button id="newbtn">New seed (N)</button></div>
+    <div class="row" id="seedline">Seed: <b id="seedtext"></b> <input id="seedinput" placeholder="type a seed"><button id="seedgo">Start</button></div>
+    <div class="row"><b>Messages</b><div id="msgs"></div></div>
+    <div class="row" id="threats"></div>
+    <div class="row hint">Arrows/WASD move or fight, . or Space waits, 1-4 use item, R restart, N new seed. Click an adjacent tile to move or fight. Red marks = danger next turn.</div>
+    <div id="err"></div>
+  </div>
+</div>
+<div id="summary"><div class="box" id="summarybox"></div></div>
+<script src="src/rng.js"></script>
+<script src="src/floorgen.js"></script>
+<script src="src/light.js"></script>
+<script src="src/game.js"></script>
+<script src="src/view.js"></script>
+<script src="src/page.js"></script>
+</body>
+</html>

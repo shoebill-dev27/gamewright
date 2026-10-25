@@ -1,0 +1,50 @@
+{
+ "checks": "docs/phase17.md \u00a74 (V1-V6); scripts played only through play.js and repo/manual.md",
+ "V1_script_play": true,
+ "V2_constraints": {
+  "node_test": "49 pass, 0 fail",
+  "dependencies": "none (no package.json; only fs and the build's own files)",
+  "network": "none"
+ },
+ "V3_volume": {
+  "floors_reached": [
+   1,
+   2,
+   3,
+   4,
+   5
+  ],
+  "boss": "the Gloom, floor 5",
+  "creature_kinds": [
+   "moth",
+   "shade",
+   "hound"
+  ],
+  "item_kinds": [
+   "salve",
+   "oil"
+  ],
+  "met": false,
+  "why": "2 item kinds, 3 were required"
+ },
+ "V4_deterministic": true,
+ "V5_win_and_loss": {
+  "win": {
+   "seed": "bot-3",
+   "commands": "sssssssddaaadddddssssddddddddwdddwwwdddsawwaawwwaawwwassaawaaadddddaaaaaaaaaaaaaawwwaaaddddwwwwwddsdddddwwddddddadadadadadadadadadadadadadadadadadadadadadadadada2dwwwdddwwaasassdssssddddwddddddssddddddadd1ddddddwddwwwwwwawaaaasaaaaaaaaaaaaaaassssssssssssawwdddddddddwdddsddaaaaaadd1ddddddddsddddddsssssssssssssdddddddwwwwwdsasssd3ddddwdddwwddddssswddddddddddwwwwwwwa3wwwdss3wwawwwwwwwwwwdd1dddddddddddsssaassssdsssddddd.ddddaddddadd"
+  },
+  "loss": {
+   "seed": "bot-1",
+   "result": "Ember out",
+   "commands": "waaaaaaaaswaawwwwwwdwdddddadwdddsaaaaaaaaaaaaaaaawawaaaawdsddddddsssssssaaawwwwdddddddddddddddddddwddsssssssaaaasaaasaddddsssssssssssddssaawwaaaaaawwwawwwssssssssawwwwwdwwwaaaaaadaaaawwawss1wssaaadddssssssdssssaaaawwwddwdd4wwwwwwwwwwdddd2dddwdddddddddddddddsassssddds3wwwwwwwwwwwwwdddddddddddddddddddddddssdssdd1sssssssssa"
+  },
+  "source": "the team's bot (repo/tests/bot.js), replayed through play.js",
+  "bot_wins_of_20": 12
+ },
+ "V6_browser": {
+  "opens_from_file": true,
+  "console_errors": 0,
+  "keys_advance_turns": "0 -> 4, ember 100 -> 96",
+  "tool": "Playwright with Chromium (Chrome DevTools MCP could not connect)"
+ }
+}

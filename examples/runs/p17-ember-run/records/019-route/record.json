@@ -1,0 +1,64 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "a17a0005-b92a-4cd2-b59f-7c35b133b325",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 20519,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 3244,
+    "output_tokens_details": {
+     "thinking_tokens": 445
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 20519,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 3244,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 20519,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 20519
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.11451999999999998,
+   "attempt": 1,
+   "started": "2026-10-26T03:39:57",
+   "seconds": 28.0,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-first-playable-run/goal.md": "8530c047e82e1c83699bde79d5782a5e944768df523b92444a73e1bb47449994",
+  "project.md": "adcc469b726a45331ef5dd657d2ee2dedb0b810b2a413f5c806e4402bfdfab8d"
+ },
+ "decision": {
+  "status": "done",
+  "open": []
+ },
+ "seen_through_seq": 17
+}

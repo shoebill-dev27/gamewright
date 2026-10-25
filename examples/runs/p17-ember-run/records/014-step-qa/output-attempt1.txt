@@ -1,0 +1,9 @@
+<<<FILE @run/trace/seed42-walk
+seed 42
+# walk, wait, probe walls and item slots; checks Danger line, trace fields, refusals
+dddddddd ssssssss dddddddd wwwwwwww
+........
+aaaa ssss dddd wwww
+1234
+dddddddd ssssssss
+>>>END

@@ -1,0 +1,122 @@
+I ratified both built readings with no behavior change. I added clarifying wording to the spec and check 13, and ruled on two nearby points: the lit brazier and the Gloom on a brazier tile.
+
+<<<EDIT design/game-spec.md
+<<<<<<< SEARCH
+A stunned creature skips its next 2 actions, and a crouching hound's crouch is cancelled.
+=======
+A stunned creature skips its next 2 actions, and a crouching hound's crouch is cancelled. The first skipped action is the one in the lighting turn's own creature phase, the second is in the next turn. The creature is labelled "stunned" in the frame after the lighting turn and acts again in the creature phase of the second turn after the lighting turn.
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT design/game-spec.md
+<<<<<<< SEARCH
+A lunge that cannot move (blocked) deals no damage.
+=======
+A lunge that cannot move (blocked) deals no damage. If the player stands directly adjacent to the hound when it acts, the hound simply bites for 3 (the adjacent-bite rule applies, and the line is irrelevant). "Blocked" means a wall or another creature stops the hound before it ends adjacent to the player.
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT design/game-spec.md
+<<<<<<< SEARCH
+A brazier tile gets none either, because the flare stuns every visible creature in range 7.
+=======
+An unlit brazier tile gets no reach mark from creatures the flare stuns (every visible non-boss creature in range 7), but it does get one from the Gloom, which a flare does not stun. A lit brazier has no flare and is marked like a floor tile.
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT design/acceptance-criteria.md
+<<<<<<< SEARCH
+13. Brazier flare: creatures visible within distance 7 after lighting do nothing for the next 2 turns and are labeled stunned.
+=======
+13. Brazier flare: non-boss creatures visible within distance 7 after lighting skip exactly 2 actions: the one in the lighting turn's own creature phase and the one in the next turn. They are labeled stunned in the frame after the lighting turn and act again in the second turn after it. A crouching hound's crouch is cancelled.
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT design/acceptance-criteria.md
+<<<<<<< SEARCH
+A step onto a brazier or the down stairs shows no reach mark.
+=======
+A step onto the down stairs shows no reach mark. A step onto an unlit brazier shows no reach mark for creatures the flare stuns, but does show one for the Gloom if it would hurt; a lit brazier is marked like a floor tile.
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-001-first-playable-run/10-game-designer-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 10
+from: game-designer
+to: studio
+stage: Design
+outcome: done
+---
+# 10: game-designer → studio — flare stun timing and hound bite at distance 1 ruled; both built readings ratified
+
+## Task
+
+Route the rulings below to Build (continuing under handoff 07) and to Verify. No code change is needed for the two asked questions.
+
+## Context
+
+G-001: first playable five-floor run. Handoff 08 asked for rulings on two spec questions raised by the Build (handoff 05). The rule was to change a built reading only if it contradicts the spec text or a pillar (readable threats, a decision every turn).
+
+## Findings
+
+### 1. Flare stun: reading A (built) is ratified
+
+- **Ruling:** "Stunned for 2 turns" and "skips its next 2 actions" mean 2 creature actions. The first is in the lighting turn's own creature phase, the second is in the next turn. The creature acts again in the second turn after the lighting turn.
+- **Reason:** The spec text says "skips its next 2 actions". The lighting turn's creature phase is the creature's next action, so reading A is the literal reading. No pillar is violated: the frame after the lighting turn shows "stunned" (1 skip remaining), which is true because the creature will skip the next action. The frame after that shows it unstunned, and it can then act, so a threat mark on it is accurate. Marks and states never mislead.
+- **Effect on the player:** The flare buys one full free player turn plus the lighting turn. This is a deliberate, modest strength. Reading B would give two full free turns and is not needed. Play can report if flares are too weak.
+- **Changed text only:**
+  - Spec section 3, flare bullet: explicit timing added.
+  - Check 13 reworded so QA does not have to guess ("next 2 turns" was ambiguous).
+  - The manual says "acts on the third turn after", counting the lighting turn as the first. That is the same timing as the new text. Build may reword it for clarity.
+
+### 2. Hound bite at lunge distance 1: built reading is ratified
+
+- **Ruling:** A hound adjacent to the player at the start of its action bites for 3. Here a crouching hound whose target stepped adjacent is just a hound adjacent at its action, so the existing adjacent-bite rule applies. "Cannot move, no damage" applies only to a blocked lunge: a wall or another creature stops the hound before it ends adjacent to the player.
+- **Reason:** This agrees with the spec's lunge text ("if the player is still within 2 tiles in the line, the hound ends adjacent and the player takes 3"). It also keeps the hound readable. The crouch mark and its line cover distance 1 and 2, and the reach mark already shows a step toward the hound as dangerous. No pillar is contradicted.
+- **Changed text only:** one clarifying sentence in the spec's lunge paragraph.
+
+### 3. Two related points the Build flagged or implied, also ruled
+
+- **Lit brazier (manual reading 10): ratified.** A lit brazier has no flare, so it gets reach marks like a floor tile. Otherwise strict check 14 could not hold there.
+- **Unlit brazier and the Gloom: new ruling, Build to confirm.** A flare does not stun the Gloom (spec section 7). An unlit brazier tile therefore gets no reach mark from creatures the flare stuns, but it does get a reach mark from the Gloom if the Gloom would hurt the player there at its next action (for example the arena braziers beside a gathered Gloom).
+  - This follows from D-002's strict check 14 and the pillar. It is expressible as a planner rule: skip stunnable creatures on unlit brazier hypotheticals, but still evaluate the Gloom.
+  - I could not see the build's code. If the build currently shows no reach mark at all on unlit brazier tiles, this is a small Build return.
+  - Spec section 9 and check 14 were amended to say so.
+
+### Design files amended in place
+
+- `design/game-spec.md`: flare timing sentence (section 3), lunge adjacency and "blocked" definition (section 4), brazier reach-mark rule (section 9).
+- `design/acceptance-criteria.md`: check 13 reworded, and the brazier sentence in check 14. The 30 checks and their numbering are unchanged.
+
+### What I could not show
+
+I could not run anything. The unlit-brazier-and-Gloom ruling is unchecked against the code. Balance impact of the flare timing is unmeasured.
+
+## Decisions already made
+
+- D-002: threat marks plus reach marks, check 14 strict. The Gloom-on-brazier ruling is an application of it. No new Decision was written because nothing changed direction.
+
+## Constraints
+
+- No numbers changed. Scope and the 30 checks are unchanged.
+
+## Open questions
+
+- For Build: does the current reach-mark code evaluate the Gloom on unlit brazier tiles (Finding 3)? If not, add it; this is the only possible code change from this handoff.
+- For QA: apply the reworded check 13 and the brazier sentence in check 14. Add a hand-made scenario for each, with a gathered Gloom beside an arena brazier and a hound at distance 1 after a step toward it.
+
+## Expected output
+
+Studio routes Finding 3 to Build if needed, then Verify runs checks 1-26 against the amended spec. This handoff changes no verdicts.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: design/game-spec.md, design/acceptance-criteria.md, repo/manual.md
+- Decisions: decisions/D-002-threat-and-reach-marks.md
+- Previous handoff: goals/G-001-first-playable-run/08-studio-to-game-designer.md
+>>>END

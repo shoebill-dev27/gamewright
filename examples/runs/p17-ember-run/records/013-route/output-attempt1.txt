@@ -1,0 +1,63 @@
+Routing: Build (12) is finished in code and `node --test` passed 49 of 49. Verify goes to QA alone, and I skip the Art Director's visual review because the budget cannot cover it.
+
+
+<<<EDIT goals/G-001-first-playable-run/12-gameplay-engineer-to-qa.md
+<<<<<<< SEARCH
+I did not edit `creatures.test.js`, `rules.test.js` or `bot.js`; from reading them, they carry no old check-14 rule, and `bot.js` only reads `threat` and `terrain` from the view.
+=======
+Not edited: `creatures.test.js`, `rules.test.js`, `bot.js`.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+2. Blocked-line-of-sight neighbour case: no scenario written. From `los()` in `light.js`, a creature at Manhattan distance 2 from the player and adjacent to a non-wall neighbour tile is either straight-line (the only intermediate tile is the neighbour itself, a non-wall) or diagonal (Bresenham has no intermediate tile), so it is always visible. The "listed only via a neighbour with blocked sight" path in `view.js` therefore looks unreachable. This is code reading, not a run. QA may confirm.
+=======
+2. Blocked-line-of-sight neighbour case: no scenario written. QA should judge whether that case can occur and whether it is covered.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+A verdict on checks 14, 13, 26 and 29 plus a regression pass on checks 1-26, with failures routed to `gameplay-engineer`. Checks 27-30 need a human at `index.html`.
+=======
+A verdict on checks 14, 13, 26 and 29 plus a regression pass on checks 1-26, with failures routed to `gameplay-engineer`. Checks 27-30 need a human at `index.html`; report them as not verifiable by text runs rather than passed. Run the scripts and `--trace` yourself (`node play.js {script}`), not only `node --test`. Address the result to `studio` (a Playtester step may follow and needs a fresh Handoff composed from permitted information only).
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+- Skills: none
+- Project: design/game-spec.md, design/acceptance-criteria.md, repo/manual.md, repo/play.js, repo/src/view.js, repo/src/script.js, repo/tests/g001-final.test.js, repo/tests/bots.test.js, repo/tests/reach.test.js
+- Decisions: decisions/D-002-threat-and-reach-marks.md
+- Previous handoff: goals/G-001-first-playable-run/11-studio-to-gameplay-engineer.md
+=======
+- Skills: studio/skills/verify-change.md, studio/skills/reproduce-defect.md
+- Project: design/game-spec.md, design/acceptance-criteria.md, repo/manual.md, repo/play.js, repo/src/view.js, repo/src/script.js, repo/tests/g001-final.test.js, repo/tests/bots.test.js, repo/tests/reach.test.js; the build in repo/ (run commands in project.md)
+- Decisions: decisions/D-001-classic-scripts-shared-rules.md, decisions/D-002-threat-and-reach-marks.md
+- Previous handoff: none
+>>>>>>> REPLACE
+>>>END
+
+<<<EDIT goals/G-001-first-playable-run/goal.md
+<<<<<<< SEARCH
+- Build: open. Reach marks written and `node --test` passed (43) in the runtime's check, but little else was run. Remaining (handoff 11): replace old check-14 tests and trace fields, Gloom on unlit braziers, run scripts and bots.
+- Verify: planned. QA against the acceptance criteria through the scripts and tests; Art Director visual review in parallel (grid readability, threat and reach mark clarity). Checks 27-30 need a human opening `index.html`.
+=======
+- Build: done (handoff 12). Reach marks, trace fields and the unlit-brazier Gloom rule are in code; `node --test` passed 49/49 in the runtime's check. The engineer ran no scripts directly, so QA must.
+- Verify: open (qa, handoff 12). Checks 27-30 need a human opening `index.html`; QA reports them as not verifiable by text runs. Art Director visual review skipped: the budget does not cover it and no executor can see the page, so grid and mark readability stay open for the Owner.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| 4a | Build | gameplay-engineer | implement-change | open | 11-studio-to-gameplay-engineer.md |
+=======
+| 4a | Build | gameplay-engineer | implement-change | done | 11-studio-to-gameplay-engineer.md |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+| 5a | Verify | qa | verify-change | planned | — |
+| 5b | Verify (visual) | art-director | visual-review | planned | — |
+=======
+| 5a | Verify | qa | verify-change | open | 12-gameplay-engineer-to-qa.md |
+| 5b | Verify (visual) | art-director | visual-review | skipped | — |
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+After Build (09, partial) and Design 4c (10, done): both rulings ratify the built readings; one check (Gloom on unlit braziers) may need code. 09 is not sent to qa: Build continues (11) with old tests, trace fields and real runs. Budget: 11 of 19 used; remaining steps must not return again.
+=======
+After Build (12, partial): the code work is finished and tests pass; remaining unrun checks are QA's to run, so 12 goes to qa (self-assessment stays out of QA's view). 5b skipped for budget (13 of 19 used after this Route; QA, Route, Play, Route, Review, Close fit exactly). No further returns possible.
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+Start step 4a: `gameplay-engineer` with `11-studio-to-gameplay-engineer.md`. The Route after it opens Verify (qa with art-director in parallel).
+=======
+Start step 5a: `qa` with `12-gameplay-engineer-to-qa.md`, in a fresh executor context. The Route after it composes a fresh Handoff for the Playtester from the build, `repo/manual.md` and the player profile only.
+>>>>>>> REPLACE
+>>>END

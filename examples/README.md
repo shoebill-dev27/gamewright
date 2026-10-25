@@ -141,3 +141,11 @@ Results and findings: `docs/phase15.md`.
 | `runs/p16-lamplight-run` | `fixtures/lamplight-keeper` (a turn-based lighthouse puzzle: vision, pillars and the harness contract, with an empty `repo/`) given "このコンセプトで、遊べる最初の版を作ってほしい" on Claude. The Studio designed the rules and three nights, built the game, its tests and manual from nothing, verified and played it, and closed in 17 operations (budget 15, 23 executors, no Owner question, no rejection). The engineer handed back a contradiction in the spec instead of guessing. `held-out.json` records the pre-registered checks N1–N5, all met, played only through `play.py` and the manual. |
 
 Results and findings: `docs/phase16.md`.
+
+## Phase 17: a larger game with a browser page, from a concept
+
+| Run | What it shows |
+|---|---|
+| `runs/p17-ember-run` | `fixtures/ember-hollow` (a short roguelike: five seeded floors, an ember that is light and time, a boss; JavaScript with shared rules, a browser page and input scripts) given "このコンセプトで、最初から最後まで通して遊べる版を作ってほしい。ブラウザで遊べるようにしてほしい" on Claude. The Studio built about 1,100 lines and 49 tests and closed exactly on its budget (19 operations, 25 executors), judging the Goal partly met: no executor could see the page and the playtest stopped on floor 1. `held-out.json` records the pre-registered checks: all but V3 met (2 item kinds, not 3); the team's bot wins 13 of 20 seeds, and the page opens from a file and plays. |
+
+Results and findings: `docs/phase17.md`.
