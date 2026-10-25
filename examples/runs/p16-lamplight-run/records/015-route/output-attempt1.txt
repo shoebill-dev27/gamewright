@@ -1,0 +1,150 @@
+Routing to Review: the Goal's planned last step, with `game-director`. The Handoff, the updated goal record and the outgoing Handoff follow.
+
+<<<FILE goals/G-001-first-playable/15-studio-to-game-director.md
+---
+kind: handoff
+goal: G-001
+seq: 15
+from: studio
+to: game-director
+stage: Review
+outcome: routed
+---
+# 15: studio → game-director — Review the first playable against the pillars and E-1..E-5
+
+## Task
+
+Judge whether G-001's intent is met, using the playtest observations and the QA result below. Give a verdict (`goal-met` or `goal-not-met`), answer the designer's two open questions (mid-night arrivals; whether a wreck always loses), and name the next issues. Address the result to `studio`.
+
+## Context
+
+Goal G-001: "このコンセプトで、遊べる最初の版を作ってほしい". Design, Build and Verify are done. QA passed the build against AC-1..AC-15 with no defects (12-qa-to-studio.md); `run_tests` is green (31 tests). A Playtester then played nights 1–3 from the manual and the build only (14-playtester-to-studio.md, attached as the previous handoff).
+
+**Budget:** 14 of 15 operations were used before this Route, so this Route uses the last. Review is the one remaining planned step. Studio rules for a used budget: no stages may be added except a `game-director` scope cut or an `owner` cost escalation. If you judge the goal not met, do not request another Diagnose or Build chain on your own. Decide what is the minimum needed for the Owner's request. Either cut scope (the rest becomes proposed Goals), or say that an Owner decision on budget is needed. The Studio will then route accordingly.
+
+## Findings
+
+Playtester observation report (from 14; read it in full for detail):
+
+- **Played:** Night 1 won on turn 7 (also lost by doing nothing, turn 5); Night 2 won on turn 7; Night 3 won on turn 7 (also lost by doing nothing, turn 4). All by input scripts.
+- **Pillars:**
+  - Reading ahead worked. Predictions matched outcomes every time, and nothing was random.
+  - The forecast line, the lit `~` tiles and the per-turn messages made every move explainable.
+  - Win and loss messages are plain, and the wreck message names the position.
+  - Each night adds one idea: slide, two sides, keep one ship dark.
+- **Difficulty and depth:**
+  - Night 1 reads as a tutorial.
+  - Night 2 is a gentle step up (the beam swing passes through UP).
+  - Night 3 is the first with a real trade-off (lighting the wrong ship at the wrong time ruins it), and the best of the three.
+  - Rated medium impact: all wins took 7 of 10 turns, nights 1–2 were over quickly, and only one winning line per night was seen. The playtester cannot say whether other or shorter solutions exist.
+- **Low-impact friction:**
+  - The final screen prints twice with the same turn number (for example "Turn 7 of 10" twice), which briefly suggested a new turn had begun. This is a defect candidate or a presentation issue; you decide which.
+  - No hint on a first attempt: an unfinished script gives no sense of progress.
+  - Script play removes live feedback; this is a known constraint of the project.
+- **Not observed:**
+  - DAWN (loss by running out of turns).
+  - Pinned ships at column 0 or 6.
+  - Overlapping ships.
+  - Unrecognized words and a missing `night N` start.
+  - A failing Night 2.
+  - Real-time pacing and long-session feel (not observable by this method).
+- **Player questions:**
+  - Is there a reason to win in fewer turns, since the result only says "won on turn N"?
+  - Do later nights exist beyond these three?
+
+QA result: pass against AC-1..AC-15, no defects, 31 tests green (see 12-qa-to-studio.md).
+
+## Decisions already made
+
+- D-001: Lit ships slide along the beam row; the beam has three aims.
+- Night 3's first screen was settled in Design (the first screen draws `~` under the starting aim); the spec is amended.
+
+## Constraints
+
+- Verdict scope: whether this is a "first version" that shows the core loop (a small set of nights, not a full game), and whether the three pillars hold qualitatively. Numbers and balancing beyond a first playable set are out of scope for G-001.
+- You hold direction and scope. Anything that would change a pillar or an existing Decision is an Owner escalation, not yours to decide.
+- The playtest is by scripts only; do not treat what it could not observe as a failure by itself.
+- Record a Decision only if it constrains work beyond this step.
+
+## Open questions
+
+- The designer's two non-blocking questions, left for Review: (1) mid-night arrivals (ships appearing after turn 1); (2) whether a wreck always loses the night. Answer both, or say they become next issues.
+- Is the short, mostly-gentle difficulty (medium finding) acceptable for a first playable, or does it make the Goal not met?
+- Is the duplicate final screen a defect to fix now or a next-issue item?
+
+## Expected output
+
+A Review result (templates/handoff.md) addressed to `studio` with `outcome: goal-met` or `goal-not-met`: the verdict against the pillars and E-1..E-5, answers to the open questions, and next issues as proposed new Goals (not scope growth). If goal-not-met, state the minimal remaining work and whether it fits the used budget. The Studio then Closes the Goal or escalates the budget question to the Owner.
+
+## Load
+
+- Role: studio/roles/game-director.md
+- Skills: studio/skills/review-outcome.md
+- Project: project.md (vision, pillars, player profile); design/first-playable.md; repo/manual.md
+- Decisions: decisions/D-001-beam-and-ship-rules.md
+- Previous handoff: goals/G-001-first-playable/14-playtester-to-studio.md (also read goals/G-001-first-playable/12-qa-to-studio.md for the QA result)
+>>>END
+
+<<<FILE goals/G-001-first-playable/goal.md
+---
+kind: goal
+id: G-001
+project: lamplight-keeper
+status: active
+created: 2026-10-25
+budget: 15
+---
+# G-001: First playable version
+
+## Owner request
+
+> このコンセプトで、遊べる最初の版を作ってほしい
+
+## Interpretation
+
+Success condition: a player, given only `repo/manual.md`, can play complete nights of Lamplight Keeper through input scripts (`python3 play.py {script}`), seeing a text grid each turn, and each night ends in a clear win (ships reach the harbor, none lost) or loss (a ship hits the rocks). The three vision pillars hold qualitatively: one clear choice per turn (left / right / hold), outcomes readable ahead from what is on screen with no luck, and a night that is short. The build is deterministic, runs on standard-library Python 3, and has tests that pass.
+
+"First version" means a small set of nights that shows the core loop, not a full game. Numbers (grid size, ship counts, number of nights) belong to Design; the verdict belongs to Review.
+
+Out of scope: graphics, live input, randomness, new mechanics beyond the vision (beam turning, ships moving one tile per turn, harbor, rocks), balancing beyond a first playable set, anything outside `repo/` and the project context.
+
+## Unknowns
+
+- Observe: skipped. Nothing exists to reproduce or observe.
+- Diagnose: skipped. There is no problem to explain; this is greenfield. Becomes planned only if Review finds the goal not met, and then only within the scope the `game-director` sets (budget is used).
+- Decide: skipped. D-001 and the spec stay within the vision. The designer's two open questions (mid-night arrivals, wreck always loses) go to Review.
+- Design: settled. The Night 3 first-screen contradiction was resolved; the spec is amended.
+- Plan: skipped. Scope is small, standard-library only.
+- Build: done. `run_tests` is green (31 tests OK).
+- Verify: done. Pass against AC-1..AC-15, no defects (12-qa-to-studio.md).
+- Play: done. Nights 1–3 all won by script; pillars readable and deterministic. Findings: nights 1–2 are very short and gentle (medium); the final screen prints twice (low); several paths unobserved (DAWN, pinned or overlapping ships, bad commands) (14-playtester-to-studio.md).
+- Review: open. `game-director` judges against the pillars and E-1..E-5, answers the designer's open questions and the playtest findings, and may cut scope.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Design | game-designer | write-design-spec | done | 01-studio-to-game-designer.md (result: 02-game-designer-to-studio.md) |
+| 2 | Plan | technical-director | technical-plan | skipped | — |
+| 3 | Build | gameplay-engineer | implement-change | done (1st pass) | 03-studio-to-gameplay-engineer.md (result: 04-gameplay-engineer-to-studio.md) |
+| 3b | Design | game-designer | write-design-spec | done | 05-studio-to-game-designer.md (result: 06-game-designer-to-studio.md) |
+| 3c | Build | gameplay-engineer | implement-change | done (check red) | 07-studio-to-gameplay-engineer.md (result: 08-gameplay-engineer-to-studio.md) |
+| 3d | Build | gameplay-engineer | implement-change | done | 09-studio-to-gameplay-engineer.md (result: 10-gameplay-engineer-to-studio.md) |
+| 4 | Verify | qa | verify-change | done (pass) | 11-studio-to-qa.md (result: 12-qa-to-studio.md) |
+| 5 | Play | playtester | playtest-session | done | 13-studio-to-playtester.md (result: 14-playtester-to-studio.md) |
+| 6 | Review | game-director | review-outcome | open | 15-studio-to-game-director.md |
+
+## Route changes
+
+After Play (done, all three nights won by script, only low/medium friction, no blocking defect): the plan holds and Review opens with the playtest and QA results. This Route uses the last budget operation, so Review also holds the scope decision: no new stages unless the game-director cuts scope or the Owner is asked about cost.
+
+## Next action
+
+Start step 6 (Review) with `15-studio-to-game-director.md`, executed as `game-director`. Its result is addressed to `studio`, which then Closes the Goal (goal-met), or, if goal-not-met, follows the game-director's scope decision or escalates the budget to the Owner.
+
+## Outcome
+
+(Filled at close.)
+>>>END
+
+Next action: run step 6 (Review) as `game-director` from `15-studio-to-game-director.md`. I could not append the Route entry to `log.md` because it is not in my writable paths.

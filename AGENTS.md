@@ -62,4 +62,4 @@ Step; the packet is the only input. The manual operations above remain valid.
   `tests/test_phase11.py`; Step context requests and directory listings: `tests/test_phase12.py`;
   Goal budgets and closing Resumes: `tests/test_phase13.py`; a budgeted Goal run to Close:
   `tests/test_phase14.py`; build file names for build-writing Steps: `tests/test_phase15.py`;
-  Phases 5-15 need `bwrap`).
+  a first playable from a concept: `tests/test_phase16.py`; Phases 5-16 need `bwrap`).

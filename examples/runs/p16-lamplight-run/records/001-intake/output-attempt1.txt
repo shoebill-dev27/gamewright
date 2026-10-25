@@ -1,0 +1,138 @@
+Intake の結果です。`goal.md` と最初のハンドオフ(ゲームデザイナー宛)を書きました。
+
+<<<FILE goals/G-001-first-playable/goal.md
+---
+kind: goal
+id: G-001
+project: lamplight-keeper
+status: active
+created: 2026-10-25
+budget: 15
+---
+# G-001: First playable version
+
+## Owner request
+
+> このコンセプトで、遊べる最初の版を作ってほしい
+
+## Interpretation
+
+Success condition: a player, given only `repo/manual.md`, can play complete nights of Lamplight Keeper through input scripts (`python3 play.py {script}`), seeing a text grid each turn, and each night ends in a clear win (ships reach the harbor, none lost) or loss (a ship hits the rocks). The three vision pillars hold qualitatively: one clear choice per turn (left / right / hold), outcomes readable ahead from what is on screen with no luck, and a night that is short. The build is deterministic, runs on standard-library Python 3, and has tests that pass.
+
+"First version" means a small set of nights that shows the core loop, not a full game. Numbers (grid size, ship counts, number of nights) belong to Design; the verdict belongs to Review.
+
+Out of scope: graphics, live input, randomness, new mechanics beyond the vision (beam turning, ships moving one tile per turn, harbor, rocks), balancing beyond a first playable set, anything outside `repo/` and the project context.
+
+## Unknowns
+
+- Observe: skipped. Nothing exists to reproduce or observe.
+- Diagnose: skipped. There is no problem to explain; this is greenfield.
+- Decide: skipped for now. The vision already fixes direction; rule choices within it are the designer's. Tentative: becomes open if Design finds that a rule choice would change a pillar or the scope.
+- Design: planned. No rules, parameters, beam behavior, ship behavior, win/loss conditions or night content are specified. Owner: `game-designer`.
+- Plan: tentative. Needed only if the spec is cross-system or risky to build (for example, beam/ship interaction rules that are hard to make deterministic). The repo is empty, but a small standard-library program may not need one.
+- Build: planned. The game must be created, including the script format, `play.py`, tests and `manual.md`. The script format is the engineer's to define.
+- Verify: planned, always after Build (`qa`).
+- Play: planned. The Goal is about how the game plays (pillars: readability, no luck, short nights). `playtester`, from the manual and the build only.
+- Review: planned. First-playable experience Goal; `game-director` judges against the vision pillars.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Design | game-designer | write-design-spec | open | 01-studio-to-game-designer.md |
+| 2 | Plan | technical-director | technical-plan | tentative | — |
+| 3 | Build | gameplay-engineer | implement-change | planned | — |
+| 4 | Verify | qa | verify-change | planned | — |
+| 5 | Play | playtester | playtest-session | planned | — |
+| 6 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+Intake: initial route. Plan is tentative (only if the spec turns out risky or cross-system); Decide is skipped unless Design needs a direction or scope choice.
+
+## Next action
+
+Start step 1 (Design) with `01-studio-to-game-designer.md`, executed as `game-designer`.
+
+## Outcome
+
+(Filled at close.)
+>>>END
+
+<<<FILE goals/G-001-first-playable/01-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-001
+seq: 1
+from: studio
+to: game-designer
+stage: Design
+outcome: routed
+---
+# 01: studio → game-designer — specify the first playable version of Lamplight Keeper
+
+## Task
+
+Write the design specification for the first playable version, with player-observable acceptance criteria, so that an engineer can build it and QA can verify it without further questions.
+
+## Context
+
+Goal G-001: the Owner asked (ja) "このコンセプトで、遊べる最初の版を作ってほしい" ("build a first playable version of this concept"). The project is a concept only: no design documents, no Decisions and no build exist. `repo/` holds only a README. This is the first step; you are the one who turns the vision into rules.
+
+## Findings
+
+Nothing yet. The vision, pillars, player profile and constraints are in `project.md`. They are the only source of truth so far.
+
+## Decisions already made
+
+None.
+
+## Constraints
+
+- Stay inside the vision and its pillars: one clear choice per turn (beam left, right or hold), reading ahead is the fun with no luck, a night is short (a few minutes).
+- Text output only (a character grid per turn); deterministic; standard-library Python 3; played through input scripts, with no live input.
+- Specify player-facing behavior, not code. The script format is the build's to define and goes in `repo/manual.md`, but your spec must say what the player must be able to do and see, for example what is displayed each turn and how a night ends.
+- Specify at least: the grid and its elements (lighthouse, beam, ships, harbor, rocks, sea), turn order and what happens within a turn, how the beam turns ships aside (and what it does when it does not reach them), how ships move, win and loss conditions, how a player can work out future positions from the screen, and a small set of nights (suggest a few, rising in difficulty) that shows the core loop. Give concrete night layouts with a solution for each so QA can check them.
+- Acceptance criteria must be player-observable and verifiable by playing scripts. Numeric values are yours to set here.
+- Keep the scope to a first playable. Do not add mechanics beyond the vision. If a rule choice would change a pillar or needs a scope decision you do not hold, say so under Open questions rather than deciding it.
+- Save the spec as `design/first-playable.md` in the Project Context, and list it in the project's design index in your Findings (the Owner owns `project.md`; do not edit it).
+
+## Open questions
+
+- Which rules make "the beam turns ships aside" fully readable and luck-free? Decide them in the spec.
+- Is a rule choice needed that changes a pillar or the scope? If so, hand back with `outcome: question` for a `game-director` decision.
+
+## Expected output
+
+The design document `design/first-playable.md` and a Handoff (templates/handoff.md) summarizing it in Findings, with the spec's acceptance criteria listed, addressed to `studio` for routing (Plan or Build next).
+
+## Sender assessment
+
+Intake judges the Plan stage tentative: the build looks small and standard-library only, so a technical plan is likely unnecessary unless the spec proves cross-system or risky.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: project.md (vision, player profile, current state, constraints)
+- Decisions: none
+- Previous handoff: none
+>>>END
+
+**オーナー向けご報告(Intake 完了)**
+
+ご依頼「このコンセプトで、遊べる最初の版を作ってほしい」を G-001 として登録しました。
+
+**成功条件**: `manual.md` だけを頼りに、入力スクリプトで夜を最後まで遊べること。毎ターン文字グリッドが表示され、船が全員港に着けば勝ち、一隻でも岩に当たれば負けです。「毎ターンの選択は1つ」「先読みで解ける(運なし)」「1夜は短い」という3つの柱が成り立ち、同じスクリプトなら結果も同じで、テストが通ることも条件です。グラフィックスやライブ入力は対象外です。
+
+**ルート**(予算 15 オペレーション)
+1. **Design**(ゲームデザイナー): ルール、数値、数夜分のレイアウトを定めます。現時点では何も決まっていないためです。
+2. **Plan**(テクニカルディレクター): 条件付き。仕様が複雑・高リスクな場合のみ行います。
+3. **Build**(ゲームプレイエンジニア): ゲーム本体、スクリプト形式、テスト、`manual.md` を作ります。
+4. **Verify**(QA): 受け入れ基準に照らして検証します。
+5. **Play**(プレイテスター): ビルドとマニュアルだけで遊び、体験を報告します。
+6. **Review**(ゲームディレクター): 3つの柱に照らして達成度を判断します。
+
+**省略した段階**: Observe と Diagnose は、観察すべき既存物や原因究明すべき問題がないため省略しました。Decide は、方向性がビジョンで決まっているため今は省略し、Design で柱や範囲に関わる選択が出たときだけ追加します。
+
+**次のアクション**: `01-studio-to-game-designer.md` を使い、ゲームデザイナーとして Design を実行してください。

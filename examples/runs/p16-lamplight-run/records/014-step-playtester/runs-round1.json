@@ -1,0 +1,10 @@
+[
+ {
+  "run": "@run/play/night1-explore",
+  "command": "python3 play.py {script}",
+  "script": "night 1\nH H H\n",
+  "exit": 0,
+  "seconds": 0.0,
+  "output": "=== Night 1 \"First light\" | Turn 1 of 10 | Beam: UP ===\n  0123456\n0 .......\n1 ..1....\n2 .......\n3 ...T...\n4 .......\n5 .......\n6 H######\nShips:\n  Ship 1: (1,2)\nForecast: L -> LEFT, H -> UP, R -> RIGHT\n> Turn 1 command: H\n  Ship 1 moved south (1,2) -> (2,2).\n=== Night 1 \"First light\" | Turn 2 of 10 | Beam: UP ===\n  0123456\n0 .......\n1 .......\n2 ..1....\n3 ...T...\n4 .......\n5 .......\n6 H######\nShips:\n  Ship 1: (2,2)\nForecast: L -> LEFT, H -> UP, R -> RIGHT\n> Turn 2 command: H\n  Ship 1 moved south (2,2) -> (3,2).\n=== Night 1 \"First light\" | Turn 3 of 10 | Beam: UP ===\n  0123456\n0 .......\n1 .......\n2 .......\n3 ..1T...\n4 .......\n5 .......\n6 H######\nShips:\n  Ship 1: (3,2)\nForecast: L -> LEFT, H -> UP, R -> RIGHT\n> Turn 3 command: H\n  Ship 1 moved south (3,2) -> (4,2).\n=== Night 1 \"First light\" | Turn 4 of 10 | Beam: UP ===\n  0123456\n0 .......\n1 .......\n2 .......\n3 ...T...\n4 ..1....\n5 .......\n6 H######\nShips:\n  Ship 1: (4,2)\nForecast: L -> LEFT, H -> UP, R -> RIGHT\nSCRIPT ENDED: the night is unfinished at turn 4 of 10.\n"
+ }
+]

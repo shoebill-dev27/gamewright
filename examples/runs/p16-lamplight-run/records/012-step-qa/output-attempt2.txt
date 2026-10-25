@@ -1,0 +1,15 @@
+<<<FILE @run/play/n2-solution-extra
+night 2
+H L R R L H H
+H
+>>>END
+
+<<<FILE @run/play/n3-solution
+night 3
+L L R R L H H
+>>>END
+
+<<<FILE @run/play/n1-dawn
+night 1
+L H H H H H H H H H
+>>>END

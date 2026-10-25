@@ -1,0 +1,26 @@
+{
+ "op": "Run",
+ "goal": "G-001",
+ "operations": [
+  "002-step-game-designer",
+  "003-route",
+  "004-step-gameplay-engineer",
+  "005-route",
+  "006-step-game-designer",
+  "007-route",
+  "008-step-gameplay-engineer",
+  "009-route",
+  "010-step-gameplay-engineer",
+  "011-route",
+  "012-step-qa",
+  "013-route",
+  "014-step-playtester",
+  "015-route",
+  "016-step-game-director",
+  "017-route"
+ ],
+ "stop_reason": "done",
+ "status": "done",
+ "owner_reads": "goals/G-001-first-playable/goal.md#outcome",
+ "next": null
+}

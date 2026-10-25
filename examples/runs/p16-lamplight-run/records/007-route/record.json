@@ -1,0 +1,73 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "99280d38-2dd7-4ee8-ac49-3710e87f9cd8",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 17905,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 3599,
+    "output_tokens_details": {
+     "thinking_tokens": 698
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 17905,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 3599,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 17905,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 17905
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.107614,
+   "attempt": 1,
+   "started": "2026-10-25T11:05:54",
+   "seconds": 26.7,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-first-playable/07-studio-to-gameplay-engineer.md": "8d921a1fb3db68c57d2c5a642b657a10926dffce0884f3af423c7b115096b6cb",
+  "goals/G-001-first-playable/goal.md": "dc52647c446d0782f3ea46ae9abf3914b4786f5e617f57953edd2017ec4acf0e"
+ },
+ "decision": {
+  "new": [
+   "gameplay-engineer",
+   "Build"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "gameplay-engineer",
+    "Build"
+   ]
+  ]
+ },
+ "seen_through_seq": 7
+}

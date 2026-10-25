@@ -1,0 +1,123 @@
+<<<FILE goals/G-001-first-playable/14-playtester-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 14
+from: playtester
+to: studio
+stage: Play
+outcome: done
+---
+# 14: playtester → studio — observation report on the Lamplight Keeper first playable (nights 1–3)
+
+## Task
+
+Review the playtest observation report in Findings and route it. Experience issues go to `game-designer`, defects to `qa`.
+
+## Context
+
+I played the first playable as a new player, using only `repo/manual.md` and the screen output. The profile was a puzzle player who likes short, thinky sessions with readable rules and wants to plan rather than react. I did not read source, tests or design documents, and I did not use `--trace`.
+
+## Findings
+
+### Method
+
+- I played with input scripts, run as `python3 play.py {script}`. There was no live play.
+- I had three run rounds and used all of them. The output arrived as run results, and everything below comes from those outputs and the manual.
+- I cannot observe real-time pacing or my own attention over time. Where I describe feel, it is inferred from the screens and the number of turns.
+
+### Scripts tried, in order
+
+Round 1:
+1. Night 1, `H H H`. The ship drifted straight down and the script ended at turn 4. The output said the night was unfinished.
+
+Round 2:
+2. Night 1, `H H L H R H H`. **Won on turn 7.**
+3. Night 1, ten times `H`. **Lost on turn 5.** The ship sank to (6,2), which is a rock. Five more `H` were reported as "Ignored (the night is over)".
+4. Night 2, `H`. I only looked at the opening. The script ended at turn 2.
+5. Night 3, `H`. I only looked at the opening. The script ended at turn 2.
+
+Round 3:
+6. Night 2, `H L R R L H H`. **Won on turn 7.**
+7. Night 3, `L L R R L H H`. **Won on turn 7.**
+8. Night 3, six times `H`. **Lost on turn 4.** Ship 1 sank onto a rock at (6,1), while ship 3 slid east to (3,6).
+
+### What happened and how it felt, by night
+
+**Night 1 "First light" (one ship)**
+- The first screen showed the ship at (1,2) and the harbor at the far left of the coast (6,0). The rest of the coast is rock.
+- Doing nothing wrecks the ship on a rock, so the puzzle is to steer the ship sideways to column 0.
+- The rule that a lit ship slides away from the lighthouse made sense once I read the manual. Planning was easy: the ship arrives at row 3, you light it, and it slides west.
+- The solution came on the first real attempt. It worked as the manual predicts, and I could work out the whole path before running it. That is pleasing for a thinky player, but it is a very small puzzle with almost nothing to weigh. It reads as a tutorial.
+- The "do nothing" run showed clearly why the ship dies. The wreck message gave the position, so the cause was readable.
+
+**Night 2 "Both sides" (two ships)**
+- Harbors sit at columns 1 and 5, with rock at column 0, columns 2–4 and column 6. Ship 1 at (2,2) must go one tile west, and ship 2 at (0,4) one tile east.
+- The new idea is that the beam can only point one way at a time, so the two ships must reach row 3 at different times and the beam has to swing between sides. The swing passes through UP.
+- My solution used `L R R L` around the middle turns. I could plan it on paper from the opening screen, and the result matched my plan.
+- It felt like a real step up from night 1, but still gentle.
+- I did not run a failing script for night 2, so I have not seen how it loses.
+
+**Night 3 "Keep it dark" (three ships)**
+- It starts with the beam already RIGHT, so (3,4)–(3,6) are lit on the first screen.
+- Harbors are at columns 0, 2 and 6, with rock at column 1. Ship 1 starts at column 1 and needs a west slide. Ship 2 at column 2 must pass through row 3 while it is dark. Ship 3 needs an east slide.
+- The title and the lit start made me think about when a ship is lit, and that is the interesting part: lighting the wrong ship at the wrong time ruins it.
+- The forecast line was useful here (`L -> UP, H -> RIGHT, R -> RIGHT`). It showed that pressing `L` from RIGHT only gets to UP.
+- My win script came out of working through the three ships' timings. It felt like the best of the three nights.
+- The "do nothing" run lost at turn 4, earlier than night 1's, and the loss was easy to read.
+
+### Clear
+- The forecast line, the lit `~` tiles and the per-turn "moved south / lit, slid west" messages made every move explainable. I never had to guess why something happened.
+- A win or loss is stated plainly: "NIGHT WON on turn N" or "NIGHT LOST on turn N: ship X wrecked at (row,col)".
+- Nothing is random. My predictions matched the outcome every time.
+
+### Confusing or friction (all low impact)
+- **Duplicate final screen (low).** After the last move the screen is printed again with the same turn number, for example "Turn 7 of 10" twice. It was briefly unclear whether a new turn had begun.
+- **No hint on first attempts (low).** A first script such as `H H H` ends as "unfinished" with no sense of whether you were doing well. You have to read the manual's note about row 3 and the harbors to know where to aim.
+- **Scripts instead of live play (low).** Writing the whole sequence blind at first, before seeing the effect of each command, is more like planning on paper. That suits a planner, but it removes the feedback of live play.
+- **Short nights (medium).** Winning took 7 of the 10 turns on all three nights. Nights 1 and 2 felt over quickly and did not make me think hard; night 3 was the first with real decisions. I saw only one winning line per night and cannot say whether others exist.
+
+### Positives
+- The rules are readable, and the planning worked as promised.
+- Night 3 is the first night with a real trade-off.
+- Each night adds one idea to the last: slide, two sides, keep one ship dark.
+
+### Not observed
+- **DAWN:** no loss by running out of turns.
+- **Pinned ships:** a ship stuck at column 0 or 6 under the beam.
+- **Overlapping ships:** two ships sharing a tile.
+- **Unrecognized words:** the "skipped" behaviour for a bad command.
+- **Error cases:** a script with no `night N` start.
+- **Night 2 failing:** no failing script for this night.
+- **Other solutions:** I tried one winning script per night. I cannot say whether any night has a shorter or alternative solution.
+- **Feel:** real-time pacing and long-session feel are not observable with this method.
+
+### Open player questions
+- Is there a reason to win in fewer turns, since the result only says "won on turn N"?
+- Do later nights exist beyond these three?
+
+## Decisions already made
+
+None.
+
+## Constraints
+
+- This is observable experience only, with no prescribed fixes.
+- Nothing in the build or project was edited.
+
+## Open questions
+
+None for the sender. The Studio decides where to route the experience observations (`game-designer`) and the duplicate-final-screen note (`qa` if treated as a defect).
+
+## Expected output
+
+Studio routes this report: experience observations to `game-designer`, any defect candidates to `qa`.
+
+## Load
+
+- Role: studio/roles/playtester.md
+- Skills: studio/skills/playtest-session.md
+- Project: project.md#player-profile; repo/manual.md
+- Decisions: none
+- Previous handoff: goals/G-001-first-playable/13-studio-to-playtester.md
+>>>END

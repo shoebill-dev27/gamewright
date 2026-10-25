@@ -1,0 +1,14 @@
+<<<FILE @run/play/n1-solution
+night 1
+L H H H R H H
+>>>END
+
+<<<FILE @run/play/n2-all-hold
+night 2
+H H H H
+>>>END
+
+<<<FILE @run/play/n3-all-hold
+night 3
+H H H H
+>>>END

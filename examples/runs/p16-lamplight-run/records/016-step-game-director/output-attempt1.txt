@@ -1,0 +1,115 @@
+<<<FILE goals/G-001-first-playable/16-game-director-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 16
+from: game-director
+to: studio
+stage: Review
+outcome: goal-met
+---
+# 16: game-director → studio — Review of the G-001 first playable: goal met
+
+## Task
+
+Close G-001 as met. Take the proposed Goals under Findings (next issues) into the backlog. No further budgeted work is needed on this Goal.
+
+## Context
+
+Goal G-001 is "このコンセプトで、遊べる最初の版を作ってほしい". Design, Build and Verify are done. QA passed AC-1..AC-15 with no defects, and the 31 unit tests are green. A Playtester then played nights 1–3 from the manual and the build only. All 14 of 15 prior operations are spent and this Review is the last. Because the verdict is goal-met, no scope cut and no Owner budget escalation is needed.
+
+## Findings
+
+### Verdict: goal-met
+
+I compared the evidence with the Owner's request and the verdict scope, not with the plan. The request is a playable first version of the concept. The scope is a small set of nights that shows the core loop, with the three pillars holding qualitatively.
+
+**Pillar 1, one clear choice per turn: holds.**
+- Each turn offers only `L`, `R` or `H`.
+- The forecast line made the consequence of each choice visible. The playtester used it on Night 3 to see that `L` from RIGHT only reaches UP.
+
+**Pillar 2, reading ahead is the fun: holds.**
+- The playtester's predictions matched outcomes on every play, and nothing is random.
+- Wins and losses were all explainable from the screen: the `~` tiles, the per-turn messages, and the wreck message that names the position.
+- The three nights teach one idea each (slide, two sides, keep one ship dark).
+- Night 3 has a real trade-off, because lighting the wrong ship at the wrong time ruins it.
+
+**Pillar 3, a night is short: holds.**
+- Wins take 7 turns, and the cap is 10.
+- Real-time length cannot be measured by script play, so I count this as consistent with the design, not as measured.
+
+### E-1..E-5
+
+This is an honest reading of what the method could show. Unobserved items are not counted as failures.
+
+- **E-1 (predict the slide before playing): supported, not tested directly.** The playtester worked out whole paths on paper before running them, and the results matched. Nobody was asked the E-1 question.
+- **E-2 (Night 2 stuck → knows why): not observed.** The playtester ran no failing Night 2 script. The mechanism (two turns to swing through UP) was understood and used in the win. QA played the Night 2 all-hold loss and found it readable.
+- **E-3 (Night 3 wrong-ship loss → can name the turn): partly supported.**
+  - The playtester's Night 3 loss was by doing nothing, not by lighting the wrong ship.
+  - QA's play of `L L H R H H` showed the messages naming both wrecks and their positions.
+  - Whether a player can name the turn they should have turned the beam off was not tested.
+- **E-4 (under 5 minutes): consistent, not measurable.** All nights took at most 7 turns. Wall-clock time and attention are not observable by script.
+- **E-5 (planning, not reacting): supported.** The playtester described the play as planning on paper, and that style fits the target player. Script play removes live feedback, which is a known constraint of the project and not a flaw in the build.
+
+### Answers to the open questions
+
+1. **Short, mostly gentle difficulty: acceptable for a first playable.** The scope is to show the core loop in a small set of nights. Night 1 as a tutorial, Night 2 as a step up and Night 3 as the first real decision is the intended progression. The playtester saw one winning line per night and could not say whether shorter or alternative solutions exist. That is a depth and balance question beyond this Goal's scope, so it becomes a next issue and does not make the Goal not met.
+2. **Duplicate final screen: a presentation next issue, not a fix now.** The rules, results and positions are all correct, and QA found no defect. It briefly misled the playtester about whether a new turn had begun, which is low impact. It should be tidied (print the result once, or mark the closing screen as final) in a small follow-up. Reopening Build for it would add a stage after the budget is used, for a cosmetic problem.
+3. **Mid-night arrivals: not in the first playable; a proposed Goal for later.**
+   - The vision's "ships come in from the dark sea" is met well enough by ships starting in the dark, row 0 and the top rows. Turn-0 placement protects Pillar 2.
+   - If arrivals are added, they must stay deterministic and visible on screen ahead of time, for example a printed arrival schedule. Without that they would break Pillar 2, and that would be an Owner question.
+   - The "revisit when" condition in D-001, "later nights need mid-night arrivals", has not been reached. Nothing in the evidence calls for it yet.
+4. **Does a wreck always lose the night: yes, keep it.** This is D-001 and follows the vision, "let none hit the rocks". Nothing in the evidence argues against it. Changing it, for example to tolerate some losses or to score ships, would touch a pillar or the vision's wording. Any such change goes to the Owner, not to me.
+
+### Decisions to revisit
+
+- D-001 "revisit when": "Playtests show the nights are too easy or too hard to read." The playtest showed the nights are easy but very readable. The condition is not reached, because it concerns readability. Difficulty depth is covered by the proposed Goals below.
+- D-001 "revisit when": "Later nights need rocks in the beam row or mid-night arrivals." Not reached. Both are listed as future scope.
+
+### Next issues (proposed Goals, not an extension of G-001)
+
+- **P-1: Depth and replay value of the nights.**
+  - Add nights 4 and up with real trade-offs (like Night 3), or tighter turn budgets.
+  - Check whether alternative or shorter solutions exist.
+  - Decide whether turn count should matter (the player's question), for example a "par" turn count or a rating. This needs a design call, and scoring beyond won/lost is currently out of scope.
+- **P-2: Final-screen tidy-up.** Print the end of a night once, with no repeated turn number.
+- **P-3: Observation gaps.** Play and watch the paths not observed in the playtest:
+  - DAWN.
+  - Pinned ships at column 0 or 6.
+  - Overlapping ships.
+  - Unrecognized words and a missing `night N` start.
+  - A failing Night 2.
+  - A Night 3 loss caused by lighting the wrong ship, to check E-3.
+- **P-4: Mid-night arrivals as a possible later mechanic.** Deterministic and shown ahead on screen. Only if P-1 shows the nights need it. Bring it to the Owner if it would change how Pillar 2 is read.
+- **P-5: Small manual and first-attempt guidance.**
+  - Say whether `night` is case-sensitive.
+  - Give an unfinished first script some sense of progress, or a hint where to look. Keep script-only play in mind.
+
+## Decisions already made
+
+- D-001: three beam aims, lit ships slide along the beam row, a wreck loses the night at once, 10-turn limit. Kept as is.
+- Night 3's first screen draws `~` under the starting aim (spec amended in Design). Kept as is.
+- No new Decision is recorded. Nothing in this step constrains later work beyond what D-001 already says.
+
+## Constraints
+
+- Verdict scope was a first version showing the core loop and the pillars qualitatively. Balancing beyond a first playable set was out of scope.
+- The playtest was by scripts only. What it could not observe was not counted as a failure.
+- The budget is used. No stages are added. The next issues above are proposed Goals and need the Studio's normal intake.
+
+## Open questions
+
+None for the Studio. The proposed Goals above are for the Studio or the Owner to prioritise.
+
+## Expected output
+
+The Studio Closes G-001 as goal-met and records P-1..P-5 as proposed Goals. No Owner escalation is needed.
+
+## Load
+
+- Role: studio/roles/game-director.md
+- Skills: studio/skills/review-outcome.md
+- Project: project.md; design/first-playable.md; repo/manual.md
+- Decisions: decisions/D-001-beam-and-ship-rules.md
+- Previous handoff: goals/G-001-first-playable/15-studio-to-game-director.md
+>>>END

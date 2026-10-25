@@ -1,0 +1,81 @@
+---
+kind: handoff
+goal: G-001
+seq: 12
+from: qa
+to: studio
+stage: Verify
+outcome: pass
+---
+# 12: qa → studio — verification of the first playable against AC-1..AC-15: pass
+
+## Task
+
+Route the verified first playable onward to the Playtester step. This report is the verification record. The Playtester handoff should carry the build and the experience signals (E-1..E-5), not this verification history.
+
+## Context
+
+Goal G-001: first playable of Lamplight Keeper. QA verified `repo/` against AC-1..AC-15 in `design/first-playable.md`, using the spec, `repo/manual.md` and observed play output. No implementer reasoning was used. All run rounds were used. Scripts played: n3-same-turn-invalid, n2-solution-extra, n3-solution, n1-dawn, n1-solution, n2-all-hold, n3-all-hold. The unit suite also ran: 31 tests, OK. The suite is not counted as verification evidence on its own.
+
+## Findings
+
+**Overall verdict: pass.** No defects were found: no regressions, no spec mismatches, no severity-bearing failures.
+
+### Per-criterion results
+
+| AC | Result | Evidence |
+|---|---|---|
+| AC-1 Start screen | pass | First screens of Night 1 (n1-solution), Night 2 (n2-all-hold) and Night 3 (n3-solution) match §8 exactly: coast rows, ships, `T` at (3,3), row and column numbers, header, ship list, forecast line. Night 1 and 2 show UP with no `~`. Night 3 shows RIGHT with `~` on (3,4)-(3,6) and forecast `L -> UP, H -> RIGHT, R -> RIGHT`. |
+| AC-2 Commands | pass (partly by code reading) | Observed in play: UP+L→LEFT, UP+R→RIGHT, LEFT+R→UP, RIGHT+L→UP, H never changes the aim. LEFT to RIGHT took two commands in the Night 2 solution (R, then R). The clamps (LEFT+L stays LEFT, RIGHT+R stays RIGHT) were not played as a command. They show in the forecast lines (`L -> LEFT` under LEFT, `R -> RIGHT` under RIGHT) and in `next_aim` (index clamp). |
+| AC-3 Beam display | pass | LEFT shows `~~~T...`, RIGHT shows `...T~~~`, UP shows no `~`. A ship on a lit tile shows its digit (`~~1T...`, `1~~T...`, `...T~2~`). The header aim always matches the drawn tiles. |
+| AC-4 Unlit ships | pass | Every unlit ship moved exactly one tile south in all plays. |
+| AC-5 Lit ships | pass | Lit ships slid west under LEFT and east under RIGHT, staying in row 3 (e.g. (3,2)→(3,1)→(3,0); (3,4)→(3,5); (3,5)→(3,6)). |
+| AC-6 Edge | pass (right edge by code reading) | Left edge: ship pinned at (3,0) under LEFT and not wrecked (n1-dawn turns 5-10, n3-same-turn turn 3). The right-edge pin was not reached in the played scripts. The code path is symmetric (`nc` outside 0..6 keeps the position). |
+| AC-7 Fates | pass (lighthouse wreck by code reading) | Harbor: `DOCKED at (6,0)`, `(6,1)`, `(6,5)`, `(6,6)`, `(6,2)`. Rock: `WRECKED at (6,2)`, `(6,1)`, `(6,5)`. All are reported with positions. No night script can send a ship into the lighthouse, because ships start off column 3 and only slide away from it. The `T` branch is the same code as the rock branch. |
+| AC-8 Winning | pass | Solution scripts for Nights 1, 2 and 3 each ended `NIGHT WON on turn 7.` with every ship position matching the §8 tables, turn by turn. |
+| AC-9 Losing | pass (two Night 1 scripts derived) | Played: Night 2 `H H H H` (lost turn 4, ship 1 at (6,2)). Night 3 `H H H H` (lost turn 4, ship 1 at (6,1); ship 3 slid to (3,6) the same turn). Night 3 `L L H R H H` (lost turn 6, ships 2 at (6,1) and 3 at (6,5); ship 1 docked). The Night 1 scripts `H H H H H` and `L H H R H H` were not played in the rounds. Tracing them through the code gives the §8 results: wrecked at (6,2) on turn 5 and at (6,1) on turn 6. The unit tests assert both. |
+| AC-10 Dawn | pass | `L` then `H`×9: at turn 10 the output was `DAWN: ships still at sea (NIGHT LOST at turn 10): ship 1 at (3,0).` Ship 1 was pinned from turn 5. |
+| AC-11 Same-turn events | pass | Night 3 `L L H R H H` turn 6 reported ship 1 DOCKED, ship 2 WRECKED and ship 3 WRECKED. The night was lost and both wrecks were named in the result line. |
+| AC-12 Determinism | pass (by inspection) | The code has no randomness, clock or unordered iteration (ships are iterated sorted). No script was played twice in the rounds, so byte-identical repeat output was not directly observed. The unit test `test_deterministic` compares two runs. |
+| AC-13 Invalid and unfinished input | pass (unfinished by code reading) | Script `L L H X R H H Z`: `Unrecognized command 'X': ignored. Turn 4 is unchanged`, and the next line was `> Turn 4 command: R`, so the turn did not advance and the state was unchanged. No script ended early in the rounds. The code appends `SCRIPT ENDED: the night is unfinished at turn N of 10.` whenever the night is not over. |
+| AC-14 Night end | pass | `Ignored (the night is over): Z` after the Night 3 loss. `Ignored (the night is over): H` after the Night 2 win. |
+| AC-15 Predictability | pass | The manual's rules (aim change, lit set of the new aim, slide or south, fate by tile) reproduce every ship position in the played solution tables. The forecast line was correct on every observed screen (UP: `LEFT, UP, RIGHT`; LEFT: `LEFT, LEFT, UP`; RIGHT: `UP, RIGHT, RIGHT`), always in the order L, H, R. No place was found where a player following the manual would be misled or stuck. |
+
+### Evidence limits
+
+- This step could not play more scripts. Not played in the rounds: Night 1 failure scripts, an early-ending script, a same-script repeat, a right-edge pin, and `L` at LEFT or `R` at RIGHT as actual commands. Each is marked above as verified by code reading, with the unit tests agreeing. The Studio may add these plays in a later round if it wants direct play evidence.
+- `--trace` was not run, and no criterion needs it.
+- The manual does not say whether `night` is case-sensitive. The build rejects anything other than the lowercase `night N`. This is minor and not a failure of any AC.
+
+### Spec gaps, design questions, regressions
+
+- No spec gaps affected any verdict.
+- No concrete player-facing trouble was observed in mid-night arrivals or in wreck-loses-night, so nothing is raised for Review.
+- Regressions: none seen. The unit suite (31 tests) is green.
+
+## Decisions already made
+
+- D-001: three beam aims, lit ships slide along the beam row, a wreck loses the night at once, 10-turn limit. Treated as intended behavior.
+- The first screen of a night draws `~` under the starting aim (spec amended). Treated as intended behavior.
+
+## Constraints
+
+- QA did not edit the build, the design or the Decisions.
+- The build was run only through the project's commands.
+- The Playtester step must be composed without this verification history. Pass it the manual, the build and E-1..E-5 only.
+
+## Open questions
+
+None.
+
+## Expected output
+
+Studio routes to the Playtester step (experience signals E-1..E-5), composing that handoff without the contents of this report. No fix work is needed, so there is nothing for `gameplay-engineer` or `game-designer`.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: design/first-playable.md; repo/manual.md; project.md#constraints
+- Decisions: decisions/D-001-beam-and-ship-rules.md
+- Previous handoff: goals/G-001-first-playable/11-studio-to-qa.md

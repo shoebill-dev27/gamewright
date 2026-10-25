@@ -1,0 +1,21 @@
+Next I'm running the first script that should win Night 1, a Night 1 script that should fail, and a single-turn probe of each of Nights 2 and 3 to see their opening screens.
+
+<<<FILE @run/play/night1-win
+night 1
+H H L H R H H   # slide the ship west with the beam, then let it sink to the harbor
+>>>END
+
+<<<FILE @run/play/night1-fail
+night 1
+H H H H H H H H H H   # do nothing, see what happens
+>>>END
+
+<<<FILE @run/play/night2-look
+night 2
+H
+>>>END
+
+<<<FILE @run/play/night3-look
+night 3
+H
+>>>END

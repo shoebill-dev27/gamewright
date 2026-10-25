@@ -1,0 +1,62 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-001-first-playable/11-studio-to-qa.md",
+  "sha256": "0bb50f9e39d191620c59781ade44cf3aead9ed05405374b1414701363edfde19",
+  "bytes": 2933
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "381742c8f2afe2e1a2a6af9d031dcc91f98f490ada7c90e2a990d6a1aaf27639",
+  "bytes": 1765
+ },
+ {
+  "path": "studio/skills/verify-change.md",
+  "sha256": "da40d2c0030e078ac6d085ea06b17bb9b452495f4e2f412a9e1bd723ac72ddf5",
+  "bytes": 1281
+ },
+ {
+  "path": "design/first-playable.md",
+  "sha256": "4b817cd27f4c6549e707ecfe80afae0083da0ae7e7d31aef4e6841f8a73eaa4e",
+  "bytes": 15057
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "11474564e0a0d9dd4e2528cbe73e1839624daf858c40e70f28f63a2600f98e05",
+  "bytes": 5183
+ },
+ {
+  "path": "repo/play.py",
+  "sha256": "2d1bced4b3bf837f919329d7fe88ecde29354167eb6fd2a51baf330cbb2afece",
+  "bytes": 710
+ },
+ {
+  "path": "repo/lamplight.py",
+  "sha256": "c8d5cb912a8c40d3a026a1ecf7a8e800ab4f57ec2b5c6042929be64fe46a96cc",
+  "bytes": 7816
+ },
+ {
+  "path": "repo/tests/test_game.py",
+  "sha256": "0e62bff89891271c6b8f77a62da8b61184b79182528f52157b99b31f5c985dfb",
+  "bytes": 7990
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "9133fffa068721dd1864f7a3c26cd809a49563078f64092ef3453b0243483d8c",
+  "bytes": 576
+ },
+ {
+  "path": "decisions/D-001-beam-and-ship-rules.md",
+  "sha256": "d8becec0f50544671435fda9cf1e8d945cbe87b5063bbca98be03ce3cf87c9bc",
+  "bytes": 1751
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ }
+]
