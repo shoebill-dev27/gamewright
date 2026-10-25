@@ -1,0 +1,73 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-001",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "14bc1244-be07-4827-a086-eedc6a8884aa",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 19497,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 4776,
+    "output_tokens_details": {
+     "thinking_tokens": 1014
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 19497,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 4776,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 19497,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 19497
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.125752,
+   "attempt": 1,
+   "started": "2026-10-25T11:11:16",
+   "seconds": 36.1,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-001-first-playable/15-studio-to-game-director.md": "c496d5248e59c8e308c26896fafb3a76ce4c8dd8e824cef9e31acbf1ef136cfe",
+  "goals/G-001-first-playable/goal.md": "566a97e8d4403b3be698e7f6130743d5c8b98e14a384a653f593fab3fd04109a"
+ },
+ "decision": {
+  "new": [
+   "game-director",
+   "Review"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "game-director",
+    "Review"
+   ]
+  ]
+ },
+ "seen_through_seq": 15
+}

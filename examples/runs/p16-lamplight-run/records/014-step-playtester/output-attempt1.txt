@@ -1,0 +1,4 @@
+<<<FILE @run/play/night1-explore
+night 1
+H H H
+>>>END

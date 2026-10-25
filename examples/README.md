@@ -133,3 +133,11 @@ Results and findings: `docs/phase14.md`.
 | `runs/p15-budget-check-run` | The Phase 14 request again on the same project, on Claude, with the corrected Intake budget guidance. Intake set `budget: 17` and the Goal closed in 20 operations (33 executors), against 9 and 13 in Phase 14. A first Build was lost because the Route loaded no source and the engineer guessed file names; a build-writing Step now always gets the names of the build's files. Near the budget, the Route opened Review as a verdict plus scope cut. The measurement in `measurement.json` meets S1–S3 and B1–B2. |
 
 Results and findings: `docs/phase15.md`.
+
+## Phase 16: a first playable from a concept alone
+
+| Run | What it shows |
+|---|---|
+| `runs/p16-lamplight-run` | `fixtures/lamplight-keeper` (a turn-based lighthouse puzzle: vision, pillars and the harness contract, with an empty `repo/`) given "このコンセプトで、遊べる最初の版を作ってほしい" on Claude. The Studio designed the rules and three nights, built the game, its tests and manual from nothing, verified and played it, and closed in 17 operations (budget 15, 23 executors, no Owner question, no rejection). The engineer handed back a contradiction in the spec instead of guessing. `held-out.json` records the pre-registered checks N1–N5, all met, played only through `play.py` and the manual. |
+
+Results and findings: `docs/phase16.md`.

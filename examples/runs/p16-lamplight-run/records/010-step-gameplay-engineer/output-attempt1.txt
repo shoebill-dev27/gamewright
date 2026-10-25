@@ -1,0 +1,92 @@
+Only the one test needed fixing. The Night 3 first screen uses aim RIGHT, so under the `L, H, R` order the forecast is `L -> UP, H -> RIGHT, R -> RIGHT`. That matches the spec (§3, §6) and the game output, so the expected string was right and only the missing `out` assignment was wrong. I did not run anything.
+
+<<<EDIT repo/tests/test_game.py
+<<<<<<< SEARCH
+        first = play(3, "").split("Forecast:")[0]
+        self.assertEqual(first.count("~"), 3)
+=======
+        out = play(3, "")
+        first = out.split("Forecast:")[0]
+        self.assertEqual(first.count("~"), 3)
+>>>>>>> REPLACE
+>>>END
+
+<<<FILE goals/G-001-first-playable/10-gameplay-engineer-to-studio.md
+---
+kind: handoff
+goal: G-001
+seq: 10
+from: gameplay-engineer
+to: studio
+stage: Routing (QA verifies the build against AC-1..AC-15, then the Playtester)
+outcome: done
+---
+# 10: gameplay-engineer → studio — test typo fixed, build ready for QA
+
+## Task
+
+Compose the QA Handoff from permitted information only (QA gets no Sender assessment). Read the `## Build check` the runtime appends below. If it is not green, route back to `gameplay-engineer` with the failing output.
+
+## Context
+
+Goal G-001, first playable of Lamplight Keeper. Handoff 09 reported the Build check after handoff 08: 31 tests ran, 30 passed, 1 errored (`NameError` in `test_first_screen_lit_matches_aim`). This step fixes that error.
+
+## Findings
+
+**What changed (only `repo/tests/test_game.py`):**
+- In `test_first_screen_lit_matches_aim`, the Night 3 first-screen output is now assigned to `out` (`out = play(3, "")`). The `first = ...` line reads from `out`, and the later `assertIn` on the forecast line uses the same variable.
+- The expected string `Forecast: L -> UP, H -> RIGHT, R -> RIGHT` was checked against the spec (§3, §4, §6) and the `L, H, R` order. From aim RIGHT, `L` gives UP, `H` gives RIGHT, `R` gives RIGHT, so the string is correct and was left as is.
+- `lamplight.py`, `play.py`, `manual.md`, the design and the Decisions were not touched. No game rule changed.
+
+**Re-read of the whole test file for other undefined names or typos:** none found.
+- Names used (`Game`, `run_script`, `next_aim`, `play`, `positions`, `os`, `sys`, `unittest`) are all defined or imported.
+- Expected strings in the other tests were traced against the code and spec and are consistent.
+- Those other tests already passed in the previous run.
+
+**How to exercise:**
+- `python3 -m unittest discover -s tests` (expected 31 tests, all passing).
+- `python3 play.py SCRIPT` with a script of `night 3` alone shows the Night 3 first screen with `3 ...T~~~`, `Beam: RIGHT` and `Forecast: L -> UP, H -> RIGHT, R -> RIGHT`.
+- Scripts from spec §8 (solutions and check scripts).
+
+**Criteria addressed:** the test change covers AC-1 (first screen `~` rule) and AC-15 (forecast aims) only through the test suite. The game's behavior is unchanged from handoff 08.
+
+**Known risks:**
+- The runtime's Build check below is the only test evidence.
+- AC-15's "derivable from `manual.md` alone" claim has not been checked.
+- E-1..E-5 are untested.
+
+## Decisions already made
+
+- D-001: three beam aims, lit ships slide along the beam row, a wreck loses the night at once, 10-turn limit. Not reopened.
+- Handoff 06: option (a), the first screen draws `~` under the starting aim.
+- Forecast order `L, H, R` (handoff 08), kept.
+
+## Constraints
+
+- Python 3 standard library only, deterministic, text output.
+- QA must receive the Handoff without the Sender assessment.
+- Design documents and Decisions not edited. No new nights or mechanics.
+
+## Open questions
+
+- None for this step.
+- For `game-director` at Review, unchanged: mid-night arrivals, and whether a wreck always loses the night.
+
+## Expected output
+
+- Studio routes the build to `qa` for AC-1..AC-15 verdicts by playing scripts, then to the Playtester.
+- If the Build check below is not green, route back to `gameplay-engineer` with the failing output.
+
+## Sender assessment
+
+- Root cause: the test was edited in handoff 08 with a use of `out` but without assigning it. It was a test typo, not a game bug.
+- Confidence that the run is now green is high. The fix is a single assignment, and the other 30 tests passed unchanged in the previous run. I have not seen the new result.
+
+## Load
+
+- Role: studio/roles/qa.md
+- Skills: none
+- Project: design/first-playable.md; repo/manual.md; repo/play.py; repo/lamplight.py; repo/tests/test_game.py
+- Decisions: decisions/D-001-beam-and-ship-rules.md
+- Previous handoff: goals/G-001-first-playable/09-studio-to-gameplay-engineer.md
+>>>END

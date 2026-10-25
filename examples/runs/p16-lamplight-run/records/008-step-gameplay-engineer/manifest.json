@@ -1,0 +1,72 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-001-first-playable/07-studio-to-gameplay-engineer.md",
+  "sha256": "8d921a1fb3db68c57d2c5a642b657a10926dffce0884f3af423c7b115096b6cb",
+  "bytes": 3789
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md",
+  "sha256": "8a447e66877cd14dfff47ac1b8482ba77c850159c8fb43ec2780e91064869351",
+  "bytes": 1742
+ },
+ {
+  "path": "studio/skills/implement-change.md",
+  "sha256": "a9befd7f1d9e09eb94c51a066f030db88c5061ad1b522d9795e62bc2c242964a",
+  "bytes": 1823
+ },
+ {
+  "path": "design/first-playable.md",
+  "sha256": "4b817cd27f4c6549e707ecfe80afae0083da0ae7e7d31aef4e6841f8a73eaa4e",
+  "bytes": 15057
+ },
+ {
+  "path": "repo/lamplight.py",
+  "sha256": "bd71ed843ef4dc7a6d253bd03b99e1aa48a4523bccd8a708eb0e0f6b683aa147",
+  "bytes": 8034
+ },
+ {
+  "path": "repo/tests/test_game.py",
+  "sha256": "11939818c3a79364966516729bc55a0078412622c0cee7974c18790f09d8b7ab",
+  "bytes": 7506
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "4a7ed3d9f4b8506166af16d3aeb154c442f8a07d4f99ce738e2e5b2e59a8b517",
+  "bytes": 4926
+ },
+ {
+  "path": "repo/play.py",
+  "sha256": "2d1bced4b3bf837f919329d7fe88ecde29354167eb6fd2a51baf330cbb2afece",
+  "bytes": 710
+ },
+ {
+  "path": "goals/G-001-first-playable/04-gameplay-engineer-to-studio.md",
+  "sha256": "c3208e084c0382ed424cc8b68adeabd9b0031164cc36b8cb03e43978be739abd",
+  "bytes": 8174
+ },
+ {
+  "path": "decisions/D-001-beam-and-ship-rules.md",
+  "sha256": "d8becec0f50544671435fda9cf1e8d945cbe87b5063bbca98be03ce3cf87c9bc",
+  "bytes": 1751
+ },
+ {
+  "path": "goals/G-001-first-playable/06-game-designer-to-studio.md",
+  "sha256": "4c2c9a676f87888e6d3e77972c10940b609e7ca80ad1da26b98fdf2a6cad0231",
+  "bytes": 4138
+ },
+ {
+  "path": "@files/repo",
+  "sha256": "4d6427f464e47ef747b1696cab4033fc9d92de6abed7dad1797350ffd19b695b",
+  "bytes": 192
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ }
+]

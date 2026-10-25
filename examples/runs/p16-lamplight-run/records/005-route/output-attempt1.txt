@@ -1,0 +1,136 @@
+Handoff 04 can't go to QA as it stands, for two reasons:
+
+- **Spec contradiction.** The Night 3 first-screen question belongs to `game-designer`.
+- **Failing tests.** The runtime's Build check shows `run_tests` failing (exit 1, 4 failures). The two failures visible in the output are the forecast order, where the tests expect `L, H, R` and the build prints `L, R, H`. These are the engineer's to fix, and the failures don't depend on the display answer. The Build step therefore reopens after Design.
+
+
+<<<FILE goals/G-001-first-playable/05-studio-to-game-designer.md
+---
+kind: handoff
+goal: G-001
+seq: 5
+from: studio
+to: game-designer
+stage: Design
+outcome: routed
+---
+# 05: studio → game-designer — settle the first-screen display of Night 3
+
+## Task
+
+Decide whether the first screen of Night 3 shows `~` on (3,4)-(3,6) (the starting aim is RIGHT), and amend `design/first-playable.md` so that §8, §2, AC-1 and AC-3 no longer contradict each other.
+
+## Context
+
+Goal G-001: first playable of Lamplight Keeper. The engineer built the game from your spec (`repo/`). One contradiction came up during Build:
+- Night 3 starts with aim RIGHT. §8 draws its first screen with no `~` (`3 ...T...`).
+- AC-3 and §2 say that under RIGHT the tiles (3,4)-(3,6) show `~`.
+- AC-1 says the first screen shows the board "exactly as in §8".
+
+It changes no ship movement (lit status is judged after the first command), only what the first Night 3 screen looks like.
+
+## Findings
+
+Engineer's options (see handoff 04):
+- (a) Draw `~` under the starting aim. This matches AC-3 and every later screen. The §8 drawing is then layout only. The engineer proposes this and has provisionally built it.
+- (b) Draw the first screen with no `~` until a command has been given. This matches the §8 drawing literally, but the lit state would disagree with the aim shown in the header, so say how the first-screen lit state should be shown.
+
+Studio note: the question is yours (player-facing behavior). Pick the option that best serves pillar 2 (readable ahead); (a) looks consistent with it, but the choice is yours.
+
+## Decisions already made
+
+- D-001: three beam aims, lit ships slide along the beam row, a wreck loses the night at once, 10-turn limit. Not reopened.
+
+## Constraints
+
+- Change only what resolves this contradiction; no new mechanics, no changes to the other nights' behavior.
+- Do not change the code. The engineer applies your answer in the next Build step.
+- Stay within the vision and D-001. If the answer would need a direction choice, say so and hand back.
+- Do not take up the two Review questions (mid-night arrivals, wrecks always losing the night): they remain for `game-director`.
+
+## Open questions
+
+- Option (a) or (b) for the first screen of Night 3? State the final wording of AC-1 / §8 so QA can check it.
+
+## Expected output
+
+Amend `design/first-playable.md` in place and write a handoff to `studio` with the decision stated in one sentence and the exact amended sections. The Studio then routes to `gameplay-engineer` to apply it, fix the failing tests and rebuild.
+
+## Load
+
+- Role: studio/roles/game-designer.md
+- Skills: studio/skills/write-design-spec.md
+- Project: design/first-playable.md
+- Decisions: decisions/D-001-beam-and-ship-rules.md
+- Previous handoff: goals/G-001-first-playable/04-gameplay-engineer-to-studio.md
+>>>END
+
+<<<EDIT goals/G-001-first-playable/04-gameplay-engineer-to-studio.md
+<<<<<<< SEARCH
+The `game-designer` answers the display question. Then the Studio sets `DRAW_LIT_ON_FIRST_SCREEN` as decided (a gameplay-engineer step if (b) is chosen) and routes to `qa` with this Handoff minus Sender assessment.
+=======
+Studio routing (done in Route after seq 4): the display question went to `game-designer` (05). Then `gameplay-engineer` applies the answer, fixes the failing tests reported in the Build check (4 failures, e.g. forecast order `L, R, H` in the build against `L, H, R` in the tests) and reports a green `run_tests`. Only then does the build go to `qa`, with that Build handoff minus Sender assessment.
+>>>END
+
+<<<FILE goals/G-001-first-playable/goal.md
+---
+kind: goal
+id: G-001
+project: lamplight-keeper
+status: active
+created: 2026-10-25
+budget: 15
+---
+# G-001: First playable version
+
+## Owner request
+
+> このコンセプトで、遊べる最初の版を作ってほしい
+
+## Interpretation
+
+Success condition: a player, given only `repo/manual.md`, can play complete nights of Lamplight Keeper through input scripts (`python3 play.py {script}`), seeing a text grid each turn, and each night ends in a clear win (ships reach the harbor, none lost) or loss (a ship hits the rocks). The three vision pillars hold qualitatively: one clear choice per turn (left / right / hold), outcomes readable ahead from what is on screen with no luck, and a night that is short. The build is deterministic, runs on standard-library Python 3, and has tests that pass.
+
+"First version" means a small set of nights that shows the core loop, not a full game. Numbers (grid size, ship counts, number of nights) belong to Design; the verdict belongs to Review.
+
+Out of scope: graphics, live input, randomness, new mechanics beyond the vision (beam turning, ships moving one tile per turn, harbor, rocks), balancing beyond a first playable set, anything outside `repo/` and the project context.
+
+## Unknowns
+
+- Observe: skipped. Nothing exists to reproduce or observe.
+- Diagnose: skipped. There is no problem to explain; this is greenfield.
+- Decide: skipped. D-001 and the spec stay within the vision. The designer's two open questions (mid-night arrivals, wreck always loses) are non-blocking and go to Review.
+- Design: open again for one point: the spec contradicts itself on whether the first Night 3 screen draws `~` under the starting aim (§8 vs AC-1/AC-3).
+- Plan: skipped. Scope is small, standard-library only. Becomes planned again if Build returns "plan not workable".
+- Build: first pass written but `run_tests` fails (4 failures, e.g. forecast order). Needs a second pass: apply the Design answer, fix the tests, green run.
+- Verify: planned, always after Build (`qa`), against AC-1..AC-15.
+- Play: planned. `playtester`, from the manual and the build only.
+- Review: planned. `game-director` judges against the pillars and E-1..E-5, and answers the designer's open questions.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Design | game-designer | write-design-spec | done | 01-studio-to-game-designer.md (result: 02-game-designer-to-studio.md) |
+| 2 | Plan | technical-director | technical-plan | skipped | — |
+| 3 | Build | gameplay-engineer | implement-change | done (1st pass) | 03-studio-to-gameplay-engineer.md (result: 04-gameplay-engineer-to-studio.md) |
+| 3b | Design | game-designer | write-design-spec | open | 05-studio-to-game-designer.md |
+| 3c | Build | gameplay-engineer | implement-change | planned | — |
+| 4 | Verify | qa | verify-change | planned | — |
+| 5 | Play | playtester | playtest-session | planned | — |
+| 6 | Review | game-director | review-outcome | planned | — |
+
+## Route changes
+
+After Build (1st pass, outcome question): a spec contradiction (Night 3 first screen) returns to Design (3b); then Build again (3c) to apply the answer and fix the 4 failing tests in the runtime's Build check, since QA needs a green build. Verify, Play, Review unchanged.
+
+## Next action
+
+Start step 3b (Design) with `05-studio-to-game-designer.md`, executed as `game-designer`.
+
+## Outcome
+
+(Filled at close.)
+>>>END
+
+Next action: run `05-studio-to-game-designer.md` as `game-designer`. After that, the Studio routes a second Build pass to `gameplay-engineer`: apply the answer, fix the failing tests, and show a green `run_tests`. QA gets the build only after that. I did not append to `log.md`, which is outside my writable paths.

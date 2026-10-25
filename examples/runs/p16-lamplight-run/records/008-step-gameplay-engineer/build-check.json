@@ -1,0 +1,6 @@
+{
+ "command": "python3 -m unittest discover -s tests",
+ "exit": 1,
+ "seconds": 0.0,
+ "output": "...........................E...\n======================================================================\nERROR: test_first_screen_lit_matches_aim (test_game.StartScreens)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/work/tests/test_game.py\", line 51, in test_first_screen_lit_matches_aim\n    self.assertIn(\"Forecast: L -> UP, H -> RIGHT, R -> RIGHT\", out)\nNameError: name 'out' is not defined\n\n----------------------------------------------------------------------\nRan 31 tests in 0.004s\n\nFAILED (errors=1)\n"
+}

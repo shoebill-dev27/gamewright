@@ -1,0 +1,6 @@
+<<<FILE @run/tests/suite
+>>>END
+<<<FILE @run/play/n3-same-turn-invalid
+night 3
+L L H X R H H Z
+>>>END

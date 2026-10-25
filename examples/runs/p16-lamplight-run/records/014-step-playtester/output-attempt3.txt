@@ -1,0 +1,16 @@
+I'm using my last run round to play nights 2 and 3 properly. So far I have only seen their opening screens.
+
+<<<FILE @run/play/night2-win
+night 2
+H L R R L H H   # ship 1 slides west to column 1, ship 2 slides east to column 5, then both sink to harbors
+>>>END
+
+<<<FILE @run/play/night3-win
+night 3
+L L R R L H H   # swing the beam left to push ship 1, keep ship 2 dark, then right for ship 3
+>>>END
+
+<<<FILE @run/play/night3-fail
+night 3
+H H H H H H   # leave the beam alone, see what happens
+>>>END

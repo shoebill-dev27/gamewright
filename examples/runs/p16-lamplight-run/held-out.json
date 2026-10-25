@@ -1,0 +1,12 @@
+{
+ "checks": "docs/phase16.md §4 (N1-N5), played only through play.py and repo/manual.md",
+ "N1_playable": true,
+ "N2_tests_and_stdlib": {"tests_exit": 0, "imports": ["os", "sys", "unittest"]},
+ "N3_choices_matter": {
+  "1": {"states": 39, "win": "L L L L R L L", "loss": "L L R L L"},
+  "2": {"states": 46, "win": "L L R R L L L", "loss": "L R L L"},
+  "3": {"states": 45, "win": "L L R R L L L", "loss": "L H L L"}
+ },
+ "N4_deterministic": true,
+ "N5_only_L_R_H": true
+}

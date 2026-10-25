@@ -1,0 +1,97 @@
+G-001 is closed as met. I updated `goal.md` and the Current state in `project.md`.
+
+<<<FILE goals/G-001-first-playable/goal.md
+---
+kind: goal
+id: G-001
+project: lamplight-keeper
+status: done
+created: 2026-10-25
+budget: 15
+---
+# G-001: First playable version
+
+## Owner request
+
+> このコンセプトで、遊べる最初の版を作ってほしい
+
+## Interpretation
+
+Success condition: a player, given only `repo/manual.md`, can play complete nights of Lamplight Keeper through input scripts (`python3 play.py {script}`), seeing a text grid each turn, and each night ends in a clear win (ships reach the harbor, none lost) or loss (a ship hits the rocks). The three vision pillars hold qualitatively: one clear choice per turn (left / right / hold), outcomes readable ahead from what is on screen with no luck, and a night that is short. The build is deterministic, runs on standard-library Python 3, and has tests that pass.
+
+"First version" means a small set of nights that shows the core loop, not a full game. Numbers (grid size, ship counts, number of nights) belong to Design; the verdict belongs to Review.
+
+Out of scope: graphics, live input, randomness, new mechanics beyond the vision (beam turning, ships moving one tile per turn, harbor, rocks), balancing beyond a first playable set, anything outside `repo/` and the project context.
+
+## Unknowns
+
+- Observe: skipped. Nothing existed to reproduce or observe.
+- Diagnose: skipped. Greenfield; Review found the goal met, so it was not needed.
+- Decide: skipped. D-001 and the spec stay within the vision.
+- Design: done. Spec written and amended (Night 3 first screen).
+- Plan: skipped. Scope small, standard-library only.
+- Build: done. 31 tests green.
+- Verify: done. Pass against AC-1..AC-15, no defects.
+- Play: done. Nights 1–3 won by script; pillars readable and deterministic.
+- Review: done. Goal met (16-game-director-to-studio.md). Open items became proposed Goals P-1..P-5.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Design | game-designer | write-design-spec | done | 01-studio-to-game-designer.md (result: 02-game-designer-to-studio.md) |
+| 2 | Plan | technical-director | technical-plan | skipped | — |
+| 3 | Build | gameplay-engineer | implement-change | done (1st pass) | 03-studio-to-gameplay-engineer.md (result: 04-gameplay-engineer-to-studio.md) |
+| 3b | Design | game-designer | write-design-spec | done | 05-studio-to-game-designer.md (result: 06-game-designer-to-studio.md) |
+| 3c | Build | gameplay-engineer | implement-change | done (check red) | 07-studio-to-gameplay-engineer.md (result: 08-gameplay-engineer-to-studio.md) |
+| 3d | Build | gameplay-engineer | implement-change | done | 09-studio-to-gameplay-engineer.md (result: 10-gameplay-engineer-to-studio.md) |
+| 4 | Verify | qa | verify-change | done (pass) | 11-studio-to-qa.md (result: 12-qa-to-studio.md) |
+| 5 | Play | playtester | playtest-session | done | 13-studio-to-playtester.md (result: 14-playtester-to-studio.md) |
+| 6 | Review | game-director | review-outcome | done (goal-met) | 15-studio-to-game-director.md (result: 16-game-director-to-studio.md) |
+
+## Route changes
+
+After Review (goal-met): no further stages. The Goal is closed; the open items (depth, final-screen tidy-up, observation gaps, mid-night arrivals, manual wording) are recorded as proposed Goals P-1..P-5, not as scope growth.
+
+## Next action
+
+None for this Goal. The Owner may pick a proposed Goal (P-1..P-5) for Intake.
+
+## Outcome
+
+**結果:** 「遊べる最初の版」は達成されました（ゲームディレクターのレビュー: goal-met）。
+
+- `repo/` に標準ライブラリのみの Python 3 製ビルドがあります。`python3 play.py {script}` で入力スクリプトを再生すると、毎ターン文字のグリッドが表示されます。遊び方は `repo/manual.md` に記載されています。
+- 夜（ステージ）は3つです。第1夜は「ビームに沿って船が滑る」、第2夜は「両側から来る船」、第3夜は「1隻を暗いままにする」を教える構成です。
+- 検証: 単体テスト31件が成功し、QAは受け入れ基準 AC-1〜AC-15 をすべて合格としました（欠陥なし）。プレイテスターはマニュアルとビルドだけで第1〜3夜をクリアしました。
+- 3本の柱（毎ターン1つの明確な選択／先を読む楽しさ／短い夜）は、定性的に成立していると判断されました。夜の実時間の長さは、スクリプト実行では測れないため未計測です（最長7ターン、上限10ターン）。
+- 決定: D-001（ビームは3方向、照らされた船はビーム行に沿って滑る、難破すると即敗北、10ターン制限）を維持しました。第3夜の最初の画面で、開始時のビーム方向の下に `~` を描く仕様修正が入っています。新しい Decision は追加していません。
+
+**次の課題（新規Goal案、G-001の拡張ではありません）:**
+
+- P-1: 夜の奥行きとリプレイ性（第4夜以降、別解・短い解の有無、ターン数を評価に使うか）。
+- P-2: 最終画面が二重に表示される点の整理。
+- P-3: 未観察の経路の確認（DAWN、端に固定された船、船の重なり、不正なコマンド、失敗する第2夜、誤った船を照らして負ける第3夜）。
+- P-4: 夜の途中で船が現れる仕組み（任意。決定的で、事前に画面に示す場合のみ）。
+- P-5: マニュアルの小さな補足（`night` の大文字小文字、最初のスクリプトの手がかり）。
+
+**オーナーへの確認事項:** 現時点で必須のものはありません。次に着手するGoalの選択をお願いします。P-4 は柱2の読み方が変わる場合のみ、オーナーの判断が必要になります。
+>>>END
+
+<<<EDIT project.md
+<<<<<<< SEARCH
+Concept only. Nothing has been designed or built: `repo/` holds only a README. There are no
+design documents and no Decisions yet.
+=======
+First playable exists (G-001 closed, goal met). `repo/` holds a standard-library Python 3 build
+(`lamplight.py`, `play.py`, `manual.md`, `tests/`). Three nights are playable by input script:
+Night 1 teaches the slide, Night 2 two sides, Night 3 keeping one ship dark. Each turn offers
+L / R / H; wins took at most 7 turns, cap 10. Deterministic. Spec: `design/first-playable.md`;
+Decision: D-001 (three aims, lit ships slide along the beam row, a wreck loses the night).
+Run: `python3 play.py {script}` (`--trace` adds state); tests: `python3 -m unittest discover -s tests`
+(31 pass). QA passed AC-1..AC-15; a script-only playtest won nights 1-3.
+Known issues: the final screen prints twice (low); nights 1-2 are short and gentle; DAWN, pinned or
+overlapping ships, bad commands, a failing Night 2 and a wrong-ship Night 3 loss are unobserved;
+real-time length is unmeasured. Proposed next Goals: depth of nights, final-screen tidy-up,
+observation gaps, mid-night arrivals, manual wording.
+>>>END

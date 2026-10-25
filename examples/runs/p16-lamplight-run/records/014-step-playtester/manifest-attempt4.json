@@ -1,0 +1,47 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-001-first-playable/13-studio-to-playtester.md",
+  "sha256": "2d0a32c9e1fb3318c26069d82b50131878acfec8c9f19cc608a2f32673bc455f",
+  "bytes": 2270
+ },
+ {
+  "path": "studio/roles/playtester.md",
+  "sha256": "812d4a19b8900cf982bda78ad18b54cdc0cf6c5e3ab50a71b95e3f8569128945",
+  "bytes": 1715
+ },
+ {
+  "path": "studio/skills/playtest-session.md",
+  "sha256": "12e7a01c76b0b8645629e709f58ac4f93d1abd9045a6c397bfd0f64253268043",
+  "bytes": 1250
+ },
+ {
+  "path": "project.md#player-profile",
+  "sha256": "5b500191e0dde211cec642b89e6816998c5eb00debef5912da5574c4650565d3",
+  "bytes": 174
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "11474564e0a0d9dd4e2528cbe73e1839624daf858c40e70f28f63a2600f98e05",
+  "bytes": 5183
+ },
+ {
+  "path": "@files/repo",
+  "sha256": "141b0bcc3e2126badec30f24d7170647070364715050eb2dbca1c01a860b9ba2",
+  "bytes": 114
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ },
+ {
+  "path": "@run-results",
+  "sha256": "d37d31b17fad2b839f2ae48bbfe75cb7b3d65f9486cb8ac8f83a6bce924095a0",
+  "bytes": 14263
+ }
+]

@@ -1,0 +1,47 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-001-first-playable/05-studio-to-game-designer.md",
+  "sha256": "15d9ac1967d5486e0f71dcfa0954d154119aba0739c9f3c8c356366e7f7deeb0",
+  "bytes": 2775
+ },
+ {
+  "path": "studio/roles/game-designer.md",
+  "sha256": "802be90dc84142d0a16436d842f1da18d7c7b34500089a91a617a10dde90e7fb",
+  "bytes": 1595
+ },
+ {
+  "path": "studio/skills/write-design-spec.md",
+  "sha256": "f60b4ce8c6e89c2dc27ff87184c54b91452c45db8422fc378ca9253b45a0efd2",
+  "bytes": 1367
+ },
+ {
+  "path": "design/first-playable.md",
+  "sha256": "f541dd213941bac90dedc3daf55be0106823a5948a35899c13cca505cad79919",
+  "bytes": 14418
+ },
+ {
+  "path": "decisions/D-001-beam-and-ship-rules.md",
+  "sha256": "d8becec0f50544671435fda9cf1e8d945cbe87b5063bbca98be03ce3cf87c9bc",
+  "bytes": 1751
+ },
+ {
+  "path": "goals/G-001-first-playable/04-gameplay-engineer-to-studio.md",
+  "sha256": "c3208e084c0382ed424cc8b68adeabd9b0031164cc36b8cb03e43978be739abd",
+  "bytes": 8174
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]
