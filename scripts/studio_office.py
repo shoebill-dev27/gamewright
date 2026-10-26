@@ -393,7 +393,7 @@ def office_state(ws, at=None):
             ),
             None,
         )
-        task, stage, since = "", "", None
+        task, stage, since, h = "", "", None, None
         if work:
             h = by_file.get(Path(work["incoming"] or "").name)
             task, stage, since = (
@@ -415,6 +415,7 @@ def office_state(ws, at=None):
             "task": task,
             "stage": stage,
             "since": fmt(since),
+            "file": (h or {}).get("file", ""),
             "steps_done": len(mine_done),
             "last": None,
         }

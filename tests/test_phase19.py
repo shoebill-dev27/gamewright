@@ -86,6 +86,7 @@ def test_a_running_operation_shows_its_role_at_work(tmp_path):
     )
     s = so.office_state(ws)
     assert s["agents"]["qa"]["state"] == "busy" and s["agents"]["qa"]["task"]
+    assert s["agents"]["qa"]["file"] == "12-gameplay-engineer-to-qa.md"
     assert s["log"][-1]["who"] == "qa" and s["log"][-1]["kind"] == "start"
 
 

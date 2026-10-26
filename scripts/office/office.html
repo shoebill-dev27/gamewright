@@ -6,421 +6,744 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src data:">
 <title>Virtual AI Game Studio</title>
 <style>
-  /* Layout: a header band; the office in the middle with status panels on each side; the live log and queue below. */
+  /* Layout: header band; status column, the office floor, detail column; log and queue below. */
   :root {
-    --bg: #0b1220; --panel: #111b2e; --panel-2: #16233a; --line: #243653; --ink: #e8eef8; --muted: #93a4bf;
-    --accent: #4cc3ff; --ok: #3ecf8e; --warn: #ffb547; --busy: #3ecf8e; --wait: #93a4bf; --bad: #ff6b6b;
-    --font: "Hiragino Sans", "Noto Sans JP", "Yu Gothic", "Meiryo", system-ui, sans-serif;
-    --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    --bg: #0a1121; --panel: rgba(16, 26, 46, 0.94); --row: #142039;
+    --line: #22344f; --line-hi: #2e4670; --ink: #eaf1fb; --sub: #a9b8cf; --muted: #7d8da8;
+    --green: #2fd18b; --cyan: #38bdf8; --purple: #8b5cf6; --orange: #f59e0b;
+    --font: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Noto Sans CJK JP", "Yu Gothic UI", "Yu Gothic", "Meiryo", system-ui, sans-serif;
     color-scheme: dark;
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; }
-  body { background: radial-gradient(120% 90% at 50% 0%, #13213a 0%, var(--bg) 60%); color: var(--ink); font-family: var(--font); font-size: 14px; }
-  .wrap { display: grid; grid-template-rows: auto 1fr auto; gap: 12px; min-height: 100%; padding-block: 12px; padding-left: max(14px, env(safe-area-inset-left, 0px)); padding-right: max(14px, env(safe-area-inset-right, 0px)); }
-  header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 10px 16px; }
-  .brand { display: flex; flex-direction: column; min-width: 0; }
-  .brand b { font-size: 20px; letter-spacing: 0.02em; }
-  .brand small { color: var(--muted); font-size: 11px; letter-spacing: 0.14em; }
-  .goalbox { display: flex; align-items: center; gap: 10px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 6px 12px; min-width: 0; flex: 1 1 280px; }
-  .goalbox .t { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 3px 10px; font-size: 12px; font-weight: 700; white-space: nowrap; border: 1px solid transparent; }
-  .pill.busy { background: rgba(62,207,142,.16); color: #7af0b6; border-color: rgba(62,207,142,.4); }
-  .pill.waiting { background: rgba(147,164,191,.14); color: #c7d2e4; border-color: rgba(147,164,191,.35); }
-  .pill.idle { background: rgba(147,164,191,.08); color: var(--muted); border-color: rgba(147,164,191,.2); }
-  .pill.done { background: rgba(76,195,255,.14); color: #8fd8ff; border-color: rgba(76,195,255,.35); }
-  .pill.warn { background: rgba(255,181,71,.14); color: #ffd08a; border-color: rgba(255,181,71,.4); }
-  .counts { display: flex; gap: 8px; flex-wrap: wrap; }
-  .count { display: flex; align-items: center; gap: 6px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px; font-size: 12px; color: var(--muted); }
-  .count b { color: var(--ink); font-size: 18px; font-variant-numeric: tabular-nums; }
-  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
-  .clock { text-align: right; font-variant-numeric: tabular-nums; }
-  .clock b { font-size: 20px; display: block; }
-  .clock small { color: var(--muted); font-size: 11px; }
-  .replay { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  html, body { margin: 0; min-height: 100%; }
+  body { background: radial-gradient(1200px 700px at 50% 30%, #13244a 0%, var(--bg) 70%) fixed, var(--bg); color: var(--ink); font-family: var(--font); font-size: 13px; }
+  .wrap { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; padding: 10px max(12px, env(safe-area-inset-right, 0px)) 14px max(12px, env(safe-area-inset-left, 0px)); }
+
+  /* Header */
+  header { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; background: linear-gradient(180deg, #16243f, #111c33); border: 1px solid var(--line); border-radius: 14px; padding: 8px 14px; box-shadow: 0 6px 24px rgba(0,0,0,.35); }
+  .brand { display: flex; align-items: center; gap: 10px; padding-right: 14px; border-right: 1px solid var(--line); }
+  .brand svg { width: 46px; height: 32px; flex: none; }
+  .brand b { display: block; font-size: 20px; font-weight: 800; }
+  .brand small { display: block; color: var(--muted); font-size: 10px; letter-spacing: .16em; }
+  .proj { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1 1 300px; }
+  .proj .lbl { color: var(--muted); font-size: 11px; line-height: 1.2; }
+  .proj .lbl small { display: block; font-size: 9px; letter-spacing: .14em; }
+  .proj .box { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; background: #0c162b; border: 1px solid var(--line-hi); border-radius: 10px; padding: 7px 12px; }
+  .proj .box .t { font-weight: 700; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { display: flex; align-items: center; gap: 7px; background: #0f1a30; border: 1px solid var(--line); border-radius: 12px; padding: 6px 12px; font-size: 12px; color: var(--sub); white-space: nowrap; }
+  .chip b { color: var(--ink); font-size: 18px; font-variant-numeric: tabular-nums; }
+  .chip small { color: var(--muted); font-size: 12px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: none; }
+  .when { text-align: right; font-variant-numeric: tabular-nums; line-height: 1.15; }
+  .when small { color: var(--sub); font-size: 12px; display: block; }
+  .when b { font-size: 22px; }
+  .replay { display: flex; align-items: center; gap: 6px; }
   .replay[hidden] { display: none !important; }
-  .replay button, .replay select { background: var(--panel-2); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font: inherit; cursor: pointer; }
-  .replay input[type=range] { width: 200px; accent-color: var(--accent); }
-  main { display: grid; grid-template-columns: minmax(250px, 300px) minmax(0, 1fr) minmax(260px, 320px); gap: 12px; min-height: 0; }
-  @media (max-width: 1100px) { main { grid-template-columns: minmax(0, 1fr); } }
-  .col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; min-width: 0; }
-  .panel h2 { margin: 0 0 8px; font-size: 14px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-  .panel h2 small { color: var(--muted); font-size: 10px; letter-spacing: 0.14em; font-weight: 400; }
-  .panel h2 .num { color: var(--accent); font-size: 22px; font-variant-numeric: tabular-nums; }
-  .bar { height: 6px; background: var(--panel-2); border-radius: 999px; overflow: hidden; margin: 2px 0 10px; }
-  .bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--ok)); width: 0; transition: width .6s ease; }
-  ul.list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-  .row { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 8px; align-items: center; background: var(--panel-2); border-radius: 9px; padding: 6px 8px; }
-  .row .main { min-width: 0; }
-  .row .main b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
-  .row .main span { display: block; color: var(--muted); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .office { position: relative; background: radial-gradient(70% 70% at 50% 50%, #1a2b47 0%, #0f1a2d 70%); border: 1px solid var(--line); border-radius: 18px; padding: 8px; min-width: 0; }
-  .office svg { display: block; width: 100%; height: auto; max-width: 100%; }
-  .detail .who { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-  .detail .who b { font-size: 18px; }
-  .detail .avatar { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; color: #0b1220; }
-  .kv { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 10px; font-size: 12px; }
-  .kv dt { color: var(--muted); }
-  .kv dd { margin: 0; overflow-wrap: anywhere; }
-  .duties { margin: 8px 0 0; padding-left: 18px; color: var(--muted); font-size: 12px; }
-  .bottom { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 12px; }
-  @media (max-width: 900px) { .bottom { grid-template-columns: minmax(0, 1fr); } }
-  .log { font-family: var(--mono); font-size: 12px; max-height: 190px; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; }
-  .log div { display: grid; grid-template-columns: 52px 112px minmax(0, 1fr); gap: 8px; }
-  .log time { color: var(--muted); font-variant-numeric: tabular-nums; }
-  .log .text { overflow-wrap: anywhere; }
-  .empty { color: var(--muted); font-size: 12px; }
-  .note { color: var(--muted); font-size: 11px; }
+  .replay button, .replay select, select.agent { width: 100%; margin-bottom: 10px; } .replay select, select.agent { background: #0f1a30; color: var(--ink); border: 1px solid var(--line-hi); border-radius: 9px; padding: 6px 10px; font: inherit; cursor: pointer; }
+  .replay input[type=range] { width: 170px; accent-color: var(--cyan); }
+
+  /* Columns and panels */
+  main { display: grid; grid-template-columns: minmax(240px, 300px) minmax(0, 1fr) minmax(260px, 320px); gap: 10px; align-items: start; }
+  @media (max-width: 1150px) { main { grid-template-columns: minmax(0, 1fr); } }
+  .col { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; min-width: 0; box-shadow: 0 6px 22px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.03); }
+  .ph { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .ph .ico { width: 22px; height: 22px; flex: none; }
+  .ph .tt { flex: 1; min-width: 0; }
+  .ph .tt b { display: block; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #stages { max-height: 430px; overflow-y: auto; }
+  .ph .tt small { display: block; color: var(--muted); font-size: 9px; letter-spacing: .16em; }
+  .ph .big { color: var(--cyan); font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .ph .badge { min-width: 28px; height: 28px; padding: 0 6px; border-radius: 14px; background: #1d2b47; display: grid; place-items: center; font-weight: 700; }
+  .bar { height: 7px; background: #0c1629; border-radius: 999px; overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #22d3ee, #3b82f6); border-radius: 999px; transition: width .6s ease; }
+  .gt { margin: 12px 0 4px; font-weight: 800; font-size: 14px; line-height: 1.4; }
+  .gr { color: var(--sub); font-size: 12px; line-height: 1.5; margin-bottom: 10px; }
+  ul.rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .r { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; align-items: center; gap: 10px; background: var(--row); border: 1px solid #1a2a47; border-radius: 10px; padding: 7px 10px; }
+  .r .m { min-width: 0; }
+  .r .m b { display: block; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .r .m span { display: block; color: var(--muted); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .r .end { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+  .r .end time { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .r.now { border-color: #2c5ea8; background: #15284a; }
+  .num { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 11px; color: #0a1121; }
+  .st { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 800; }
+  .st.done { background: #10b981; color: #052e1f; }
+  .st.open { background: #3b82f6; box-shadow: 0 0 0 3px #1e3a6e; }
+  .st.planned { border: 2px solid #3a4a66; }
+  .st.tentative { border: 2px dashed #3a4a66; color: var(--muted); }
+  .st.skipped { border: 2px solid #2a3850; color: var(--muted); }
+  .pill { display: inline-flex; align-items: center; justify-content: center; border-radius: 7px; padding: 3px 9px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+  .p-green { background: #0f3b2c; color: #5ff0b0; }
+  .p-blue { background: #14306a; color: #93c5fd; }
+  .p-purple { background: #2e1e5c; color: #c4b5fd; }
+  .p-orange { background: #4a2e0a; color: #fcd34d; }
+  .p-grey { background: #1e2a41; color: #a9b8cf; }
+  .p-dark { background: #141e33; color: #6f809d; }
+  .p-red { background: #4a1420; color: #fda4af; }
+  .p-pink { background: #4a1638; color: #f9a8d4; }
+
+  /* Office floor */
+  .office { position: relative; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: radial-gradient(900px 560px at 50% 52%, #1d3463 0%, #12213f 48%, #0b1428 100%); min-width: 0; }
+  .office svg { display: block; width: 100%; height: auto; }
   .desk { cursor: pointer; }
   .desk:focus { outline: none; }
-  .desk:focus-visible .plate { stroke: var(--accent); stroke-width: 2.5; }
-  @keyframes typing { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
+  .desk:focus-visible .plate, .desk.picked .plate { stroke: #7dd3fc; stroke-width: 2.5; }
+
+  /* Agent detail */
+  .card { background: #f4f7fc; color: #0f1a2e; border-radius: 12px; padding: 12px 14px; }
+  .card .top { display: flex; align-items: center; gap: 10px; }
+  .card .top svg { width: 50px; height: 50px; flex: none; }
+  .card .top b { font-size: 18px; display: block; }
+  .card .top small { color: #4b5b75; font-size: 12px; }
+  .card .lbl { color: #4b5b75; font-size: 11px; margin: 12px 0 4px; }
+  .card .lbl span { color: #8592a8; }
+  .card .task { font-size: 13px; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; max-height: 7.5em; overflow: hidden; }
+  .card .bar { background: #dde5f1; margin-top: 10px; }
+  .card .meta { display: flex; justify-content: space-between; gap: 10px; color: #4b5b75; font-size: 12px; margin-top: 8px; flex-wrap: wrap; }
+  .card .meta span { min-width: 0; overflow-wrap: anywhere; }
+  .card .next { display: flex; justify-content: space-between; gap: 8px; border: 1px solid #d5ddea; border-radius: 9px; padding: 8px 10px; font-size: 13px; }
+  .card .next span:last-child { color: #4b5b75; white-space: nowrap; }
+  .card .duties { margin: 6px 0 0; padding-left: 18px; color: #3b4a63; font-size: 12px; line-height: 1.6; }
+
+  /* Bottom */
+  .bottom { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 430px); gap: 10px; }
+  @media (max-width: 950px) { .bottom { grid-template-columns: minmax(0, 1fr); } }
+  .log { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(8, auto); grid-auto-flow: column; gap: 4px 24px; font-size: 12px; }
+  @media (max-width: 700px) { .log { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-auto-flow: row; } }
+  .log div { display: grid; grid-template-columns: 8px 40px auto minmax(0, 1fr); gap: 7px; align-items: center; min-width: 0; }
+  .log time { color: var(--sub); font-variant-numeric: tabular-nums; }
+  .log .who { font-weight: 700; white-space: nowrap; }
+  .log .tx { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .q { display: grid; grid-template-columns: 24px minmax(0, 1fr) 130px 36px; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid #1a2a47; font-size: 12px; }
+  .q:last-child { border-bottom: none; }
+  .q .n { width: 22px; height: 22px; border-radius: 6px; background: #1d2b47; display: grid; place-items: center; font-weight: 700; font-size: 11px; }
+  .q .s { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .q .who { display: flex; align-items: center; gap: 6px; color: var(--sub); font-size: 11px; overflow: hidden; white-space: nowrap; }
+  .empty { color: var(--muted); font-size: 12px; padding: 4px 2px; }
+  .live { display: inline-flex; align-items: center; gap: 6px; color: var(--sub); font-size: 11px; font-weight: 400; margin-left: 10px; }
+  @keyframes blink { 50% { opacity: .25; } }
+  @keyframes typing { 0%, 80%, 100% { opacity: .2; } 40% { opacity: 1; } }
+  @keyframes pulse { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes scan { 0%, 100% { transform: scaleX(.4); } 50% { transform: scaleX(1); } }
+  @keyframes dash { to { stroke-dashoffset: -28; } }
+  .live .dot { animation: blink 1.6s infinite; }
   .typing circle { animation: typing 1.2s infinite; }
-  .typing circle:nth-child(2) { animation-delay: .2s; }
-  .typing circle:nth-child(3) { animation-delay: .4s; }
-  @keyframes pulse { 0% { opacity: .35; } 50% { opacity: .85; } 100% { opacity: .35; } }
-  .glow { animation: pulse 1.8s ease-in-out infinite; }
-  @media (prefers-reduced-motion: reduce) { .typing circle, .glow { animation: none; } .bar i { transition: none; } }
+  .typing circle:nth-of-type(2) { animation-delay: .2s; }
+  .typing circle:nth-of-type(3) { animation-delay: .4s; }
+  .pulse { animation: pulse 2.2s ease-in-out infinite; }
+  .spin { transform-box: fill-box; transform-origin: center; animation: spin 24s linear infinite; }
+  .busy .scan { transform-box: fill-box; transform-origin: left center; animation: scan 1.4s ease-in-out infinite; }
+  .flowing { stroke-dasharray: 14 14; animation: dash .9s linear infinite; }
+  @media (prefers-reduced-motion: reduce) { .typing circle, .pulse, .spin, .busy .scan, .live .dot, .flowing { animation: none; } .bar i { transition: none; } }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div class="brand"><b>Virtual AI Game Studio</b><small>AI AGENTS × GAME DEVELOPMENT</small></div>
-    <div class="goalbox"><span class="note">プロジェクト</span><span class="t" id="projectName">—</span><span class="pill idle" id="goalStatus">—</span></div>
-    <div class="counts">
-      <span class="count"><i class="dot" style="background:var(--busy)"></i>作業中 <b id="cBusy">0</b></span>
-      <span class="count"><i class="dot" style="background:var(--wait)"></i>待機中 <b id="cWait">0</b></span>
-      <span class="count"><i class="dot" style="background:#5b6b86"></i>手すき <b id="cIdle">0</b></span>
-      <span class="count">予算 <b id="budget">—</b></span>
+    <div class="brand">
+      <svg viewBox="0 0 46 32" aria-hidden="true"><defs><linearGradient id="gp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e2e8f0"/><stop offset="1" stop-color="#94a3b8"/></linearGradient></defs><path d="M10 6h26a9 9 0 0 1 9 9v3a10 10 0 0 1-17 7h-10A10 10 0 0 1 1 18v-3a9 9 0 0 1 9-9z" fill="url(#gp)"/><rect x="9" y="13" width="10" height="3.6" rx="1.2" fill="#1e293b"/><rect x="12.2" y="9.8" width="3.6" height="10" rx="1.2" fill="#1e293b"/><circle cx="32" cy="12.5" r="2.4" fill="#ef4444"/><circle cx="37" cy="17" r="2.4" fill="#3b82f6"/><circle cx="27.5" cy="17" r="2.4" fill="#22c55e"/><circle cx="32" cy="21.5" r="2.4" fill="#f59e0b"/></svg>
+      <div><b>Virtual AI Game Studio</b><small>AI AGENTS × GAME DEVELOPMENT</small></div>
+    </div>
+    <div class="proj">
+      <div class="lbl">プロジェクト<small>PROJECT</small></div>
+      <div class="box"><span class="t" id="projectName">—</span><span class="pill p-green" id="goalStatus">—</span></div>
+    </div>
+    <div class="chips">
+      <span class="chip"><i class="dot" style="background:var(--green)"></i>稼働中 <b id="cBusy">0</b></span>
+      <span class="chip"><i class="dot" style="background:#94a3b8"></i>待機中 <b id="cWait">0</b></span>
+      <span class="chip"><i class="dot" style="background:var(--purple)"></i>レビュー <b id="cReview">0</b></span>
+      <span class="chip"><i class="dot" style="background:var(--orange)"></i>テスト <b id="cTest">0</b></span>
+      <span class="chip"><i class="dot" style="background:var(--cyan)"></i>実行 <b id="cUsed">0</b><small id="cBudget"></small></span>
     </div>
     <div class="replay" id="replay" hidden>
       <button id="play" type="button">▶ 再生</button>
-      <select id="speed" aria-label="再生の速さ">
-        <option value="10">×10</option><option value="60" selected>×60</option><option value="300">×300</option><option value="600">×600</option>
-      </select>
+      <select id="speed" aria-label="再生の速さ"><option value="10">×10</option><option value="60" selected>×60</option><option value="300">×300</option><option value="600">×600</option></select>
       <input id="scrub" type="range" min="0" max="0" value="0" aria-label="時間">
     </div>
-    <div class="clock"><b id="clock">--:--:--</b><small id="mode">接続中…</small></div>
+    <div class="when"><small id="date">--/--</small><b id="clock">--:--</b></div>
   </header>
 
   <main>
     <div class="col">
       <section class="panel">
-        <h2><span>プロジェクト進行状況</span><span class="num" id="pct">0%</span></h2>
+        <div class="ph"><svg class="ico" viewBox="0 0 22 22" aria-hidden="true"><rect x="1" y="1" width="9" height="9" rx="2" fill="#38bdf8"/><rect x="12" y="1" width="9" height="9" rx="2" fill="#818cf8"/><rect x="1" y="12" width="9" height="9" rx="2" fill="#818cf8"/><rect x="12" y="12" width="9" height="9" rx="2" fill="#38bdf8"/></svg><div class="tt"><b>プロジェクト進行状況</b><small>PROJECT STATUS</small></div><span class="big" id="pct">0%</span></div>
         <div class="bar"><i id="pctBar"></i></div>
-        <div style="font-weight:700;margin-bottom:2px" id="goalTitle">—</div>
-        <div class="note" id="goalRequest" style="margin-bottom:8px"></div>
-        <ul class="list" id="stages"></ul>
+        <div class="gt" id="goalTitle">—</div>
+        <div class="gr" id="goalRequest"></div>
+        <ul class="rows" id="stages"></ul>
       </section>
       <section class="panel">
-        <h2><span>最近の受け渡し</span><small>HANDOFFS</small></h2>
-        <ul class="list" id="handoffs"></ul>
+        <div class="ph"><svg class="ico" viewBox="0 0 22 22" aria-hidden="true"><rect x="1" y="3" width="9" height="16" rx="2" fill="#a78bfa"/><rect x="12" y="3" width="9" height="16" rx="2" fill="#60a5fa"/></svg><div class="tt"><b>現在のハンドオフ</b><small>ACTIVE HANDOFF</small></div><span class="badge" id="hCount">0</span></div>
+        <ul class="rows" id="handoffs"></ul>
       </section>
     </div>
 
-    <div class="office">
-      <svg id="floor" viewBox="0 0 1000 660" role="img" aria-label="バーチャルオフィス。7 人のエージェントの席と、中央の Goal"></svg>
-    </div>
+    <div class="office"><svg id="floor" viewBox="0 0 1400 915" role="img" aria-label="バーチャルオフィス。7 人の AI エージェントの席と、中央の Goal"></svg></div>
 
     <div class="col">
-      <section class="panel detail">
-        <h2><span>エージェントの詳細</span><small>AGENT DETAIL</small></h2>
-        <div class="who"><div class="avatar" id="dAvatar">E</div><div><b id="dName">—</b><div class="note" id="dEn"></div></div><span class="pill idle" id="dState" style="margin-left:auto">—</span></div>
-        <dl class="kv">
-          <dt>いまの仕事</dt><dd id="dStage">—</dd>
-          <dt>内容</dt><dd id="dTask">—</dd>
-          <dt>経過</dt><dd id="dSince">—</dd>
-          <dt>完了した工程</dt><dd id="dDone">0</dd>
-          <dt>最近の行動</dt><dd id="dLast">—</dd>
-        </dl>
-        <ul class="duties" id="dDuties"></ul>
-        <div class="note" style="margin-top:8px">席をクリックすると切り替わります。</div>
+      <section class="panel">
+        <div class="ph"><svg class="ico" viewBox="0 0 22 22" aria-hidden="true"><rect x="1" y="1" width="9" height="9" rx="2" fill="#f472b6"/><rect x="12" y="1" width="9" height="9" rx="2" fill="#38bdf8"/><rect x="1" y="12" width="20" height="9" rx="2" fill="#818cf8"/></svg><div class="tt"><b>エージェントの詳細</b><small>AGENT DETAIL</small></div></div>
+        <select class="agent" id="agentSelect" aria-label="エージェントを選ぶ"></select>
+        <div class="card">
+          <div class="top"><svg id="dFace" viewBox="0 0 60 60" aria-hidden="true"></svg><div style="flex:1;min-width:0"><b id="dName">—</b><small id="dJa"></small></div><span class="pill p-grey" id="dState">—</span></div>
+          <div class="lbl">いまの仕事 <span>Current Task</span></div>
+          <div class="task" id="dTask">—</div>
+          <div class="bar"><i id="dBar"></i></div>
+          <div class="meta"><span id="dFile">—</span><span id="dSince"></span></div>
+          <div class="lbl">次の予定 <span>Next</span></div>
+          <div class="next"><span id="dNext">—</span><span id="dNextWho"></span></div>
+          <div class="lbl">受け持ち <span>Duties</span></div>
+          <ul class="duties" id="dDuties"></ul>
+        </div>
       </section>
       <section class="panel">
-        <h2><span>意思決定の記録</span><small>DECISION LOG</small></h2>
-        <ul class="list" id="decisions"></ul>
+        <div class="ph"><svg class="ico" viewBox="0 0 22 22" aria-hidden="true"><rect x="3" y="2" width="16" height="18" rx="3" fill="#fb923c"/><rect x="6" y="6" width="10" height="2" rx="1" fill="#7c2d12"/><rect x="6" y="10" width="10" height="2" rx="1" fill="#7c2d12"/><rect x="6" y="14" width="6" height="2" rx="1" fill="#7c2d12"/></svg><div class="tt"><b>意思決定の記録</b><small>DECISION LOG</small></div><span class="badge" id="dCount">0</span></div>
+        <ul class="rows" id="decisions"></ul>
       </section>
     </div>
   </main>
 
   <div class="bottom">
     <section class="panel">
-      <h2><span>実行ログ</span><small id="logNote">LIVE LOG</small></h2>
+      <div class="ph"><svg class="ico" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="#2563eb"/><path d="M6 11.5l3.2 3.2L16 8" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg><div class="tt"><b>実行ログ<span class="live"><i class="dot" style="background:var(--green)"></i><span id="liveNote">接続中…</span></span></b><small>LIVE LOG</small></div></div>
       <div class="log" id="log"></div>
     </section>
     <section class="panel">
-      <h2><span>これからの仕事</span><small>TASK QUEUE</small></h2>
-      <ul class="list" id="queue"></ul>
+      <div class="ph"><svg class="ico" viewBox="0 0 22 22" aria-hidden="true"><rect x="2" y="4" width="18" height="3" rx="1.5" fill="#60a5fa"/><rect x="2" y="9.5" width="18" height="3" rx="1.5" fill="#60a5fa"/><rect x="2" y="15" width="11" height="3" rx="1.5" fill="#60a5fa"/></svg><div class="tt"><b>キュー（今後のタスク）</b><small>TASK QUEUE</small></div><span class="badge" id="qCount">0</span></div>
+      <div id="queue"></div>
     </section>
   </div>
 </div>
 
 <script>
 "use strict";
+// Roles: names, colour, desk position on the floor, which side the duties bubble sits on, and looks.
 const ROLES = {
-  "game-director":      { ja: "ディレクター", en: "Director", color: "#f5b942", x: 500, y: 112, duties: ["方向と優先順位の判断", "体験の Goal の達成判定", "Owner への確認の準備"] },
-  "game-designer":      { ja: "デザイナー", en: "Designer", color: "#3ecf8e", x: 225, y: 190, duties: ["ルールと数値の設計", "受け入れ基準の作成", "仕様の質問への回答"] },
-  "technical-director": { ja: "テクニカルディレクター", en: "Tech Director", color: "#8b9cff", x: 775, y: 190, duties: ["技術方針の決定", "作業の分割と順序", "リスクの見極め"] },
-  "art-director":       { ja: "アートディレクター", en: "Art Director", color: "#ff8fb1", x: 165, y: 390, duties: ["見た目の方針", "絵の仕様", "画面の確認"] },
-  "gameplay-engineer":  { ja: "エンジニア", en: "Engineer", color: "#4cc3ff", x: 835, y: 390, duties: ["実装", "不具合の原因究明", "試験の追加"] },
-  "qa":                 { ja: "品質保証", en: "QA", color: "#ffa94d", x: 335, y: 565, duties: ["受け入れ基準の検証", "不具合の再現と重大度", "回帰の確認"] },
-  "playtester":         { ja: "プレイテスター", en: "Playtester", color: "#7ee081", x: 665, y: 565, duties: ["プレイヤーの目で遊ぶ", "体験の報告", "分かりにくさの指摘"] },
+  "game-director":      { ja: "ディレクター", en: "Director", color: "#f5b942", x: 700, y: 170, side: "right",
+                          hair: "#2b2f3a", style: "short", shirt: "#3b4b7a", acc: "crown", skin: "#f3cfb3",
+                          duties: ["全体方針の確認", "工程の優先度の判断", "品質の最終承認"] },
+  "game-designer":      { ja: "デザイナー", en: "Designer", color: "#34d399", x: 390, y: 290, side: "left",
+                          hair: "#7a4b2a", style: "bob", shirt: "#e7e2d6", acc: "none", skin: "#f6d3b9",
+                          duties: ["遊びとルールの設計", "数値とレベルの設計", "仕様書の作成"] },
+  "technical-director": { ja: "テクニカルディレクター", en: "Tech Director", color: "#818cf8", x: 1010, y: 290, side: "right",
+                          hair: "#1f2430", style: "spiky", shirt: "#2f3b55", acc: "glasses", skin: "#efc9ad",
+                          duties: ["技術方針の検討", "作りの分け方の設計", "実装方法のレビュー"] },
+  "art-director":       { ja: "アートディレクター", en: "Art Director", color: "#f472b6", x: 320, y: 520, side: "left",
+                          hair: "#f1a7c3", style: "long", shirt: "#f8f4f0", acc: "beret", skin: "#f8d8c4",
+                          duties: ["アートスタイルの監修", "絵と画面の方針", "見た目の確認"] },
+  "gameplay-engineer":  { ja: "エンジニア", en: "Engineer", color: "#38bdf8", x: 1080, y: 520, side: "right",
+                          hair: "#22324f", style: "messy", shirt: "#1f3a5f", acc: "headphones", skin: "#f0cbb0",
+                          duties: ["ゲームロジックの実装", "画面と操作の実装", "試験とビルド"] },
+  "qa":                 { ja: "品質保証", en: "QA", color: "#f59e0b", x: 540, y: 770, side: "left",
+                          hair: "#2a2320", style: "short", shirt: "#3a4f7a", acc: "glasses", skin: "#f2cdb1",
+                          duties: ["動作テスト", "不具合の検証", "受け入れ基準の確認"] },
+  "playtester":         { ja: "プレイテスター", en: "Playtester", color: "#a3e635", x: 860, y: 770, side: "right",
+                          hair: "#3a2a20", style: "cap", shirt: "#e2e8f0", acc: "cap", skin: "#f3d0b5",
+                          duties: ["実際に遊んで確かめる", "遊びやすさの確認", "プレイの所見"] },
 };
-const HUB = { x: 500, y: 350 };
+const ORDER = Object.keys(ROLES);
+const HUB = { x: 700, y: 480, color: "#38bdf8" };
 const NAME = { studio: "Studio", owner: "Owner" };
 for (const [k, r] of Object.entries(ROLES)) NAME[k] = r.en;
-const STATE_JA = { done: "完了", open: "進行中", planned: "予定", tentative: "保留", skipped: "省略" };
+const STAGE_JA = { Intake: "受付", Design: "企画・仕様", Decide: "方針の判断", Plan: "技術計画", Art: "アート", Build: "実装・ビルド",
+  Fix: "修正", Verify: "テスト", Test: "テスト", Play: "プレイ検証", Playtest: "プレイ検証", Review: "レビュー", Route: "段取り", Close: "まとめ" };
 const SVGNS = "http://www.w3.org/2000/svg";
 const $ = (id) => document.getElementById(id);
-let selected = "gameplay-engineer", lastSeq = null, current = null;
+let selected = "game-designer", picked = false, lastSeq = null, drawnSeq = null, current = null;
+const desk = {}, layer = {};
 
-function el(tag, attrs, text) {
-  const e = document.createElement(tag);
-  for (const [k, v] of Object.entries(attrs || {})) e.setAttribute(k, v);
-  if (text !== undefined) e.textContent = text;
-  return e;
-}
-function sv(tag, attrs, text) {
-  const e = document.createElementNS(SVGNS, tag);
-  for (const [k, v] of Object.entries(attrs || {})) e.setAttribute(k, v);
-  if (text !== undefined) e.textContent = text;
-  return e;
-}
+function el(tag, attrs, text) { const e = document.createElement(tag); for (const [k, v] of Object.entries(attrs || {})) e.setAttribute(k, v); if (text !== undefined) e.textContent = text; return e; }
+function sv(tag, attrs, text) { const e = document.createElementNS(SVGNS, tag); for (const [k, v] of Object.entries(attrs || {})) e.setAttribute(k, v); if (text !== undefined) e.textContent = text; return e; }
+function shade(hex, f) { const n = parseInt(hex.slice(1), 16); return "#" + [n >> 16, (n >> 8) & 255, n & 255].map((v) => Math.max(0, Math.min(255, Math.round(f < 0 ? v * (1 + f) : v + (255 - v) * f))).toString(16).padStart(2, "0")).join(""); }
 const hhmm = (iso) => (iso ? iso.slice(11, 16) : "--:--");
-function elapsed(since, now) {
-  if (!since || !now) return "—";
-  const s = Math.max(0, (Date.parse(now) - Date.parse(since)) / 1000);
-  const m = Math.floor(s / 60), h = Math.floor(m / 60);
-  return h ? `${h} 時間 ${m % 60} 分` : m ? `${m} 分 ${Math.floor(s % 60)} 秒` : `${Math.floor(s)} 秒`;
-}
-function stateKey(status) {
-  const s = (status || "").toLowerCase();
-  return s.startsWith("done") ? "done" : s.startsWith("open") ? "open" : s.startsWith("skip") ? "skipped" : s.startsWith("tent") ? "tentative" : "planned";
-}
+function elapsed(since, now) { if (!since || !now) return ""; const s = Math.max(0, (Date.parse(now) - Date.parse(since)) / 1000), m = Math.floor(s / 60), h = Math.floor(m / 60); return h ? `${h}時間${m % 60}分` : m ? `${m}分${Math.floor(s % 60)}秒` : `${Math.floor(s)}秒`; }
+function stateKey(s) { s = (s || "").toLowerCase(); return s.startsWith("done") ? "done" : s.startsWith("open") ? "open" : s.startsWith("skip") ? "skipped" : s.startsWith("tent") ? "tentative" : "planned"; }
+function stageJa(stage) { return STAGE_JA[(stage || "").split(/[\s:(-]/)[0]] || stage || "—"; }
+const colorOf = (who) => (ROLES[who] || HUB).color;
+const anchorOf = (who) => (ROLES[who] ? { x: ROLES[who].x, y: ROLES[who].y + 40, rx: 168, ry: 112 } : { x: HUB.x, y: HUB.y, rx: 128, ry: 122 });
 
-// --- The office floor (drawn once; updated per snapshot) ---------------------------------------
-const floor = $("floor"), deskParts = {};
-function drawFloor() {
-  const defs = sv("defs");
-  const g = sv("radialGradient", { id: "hubGlow" });
-  g.append(sv("stop", { offset: "0%", "stop-color": "#4cc3ff", "stop-opacity": "0.55" }), sv("stop", { offset: "100%", "stop-color": "#4cc3ff", "stop-opacity": "0" }));
+// Shrink an SVG text until it fits, then cut it short with an ellipsis.
+function fit(t, text, maxW, size, min = 11) {
+  t.textContent = text; t.setAttribute("font-size", size);
+  while (size > min && t.getComputedTextLength() > maxW) t.setAttribute("font-size", --size);
+  let s = text; while (s.length > 1 && t.getComputedTextLength() > maxW) { s = s.slice(0, -1); t.textContent = s + "…"; }
+}
+// Wrap text over the given SVG lines by measured width; the last line ends with an ellipsis if needed.
+function wrapInto(lines, text, maxW, size, y0) {
+  const tokens = /[\u3000-\u9fff]/.test(text) ? [...text] : text.split(/(\s+)/);
+  let i = 0, used = 0;
+  for (const [n, t] of lines.entries()) {
+    t.setAttribute("font-size", size); t.textContent = "";
+    if (i >= tokens.length) continue;
+    used++;
+    if (n === lines.length - 1) { fit(t, tokens.slice(i).join("").trim(), maxW, size, size); i = tokens.length; continue; }
+    let cur = "";
+    while (i < tokens.length) { t.textContent = cur + tokens[i]; if (cur.trim() && t.getComputedTextLength() > maxW) break; cur += tokens[i++]; }
+    t.textContent = cur.trim();
+  }
+  lines.forEach((t, n) => t.setAttribute("y", y0 + (n - (used - 1) / 2) * (size + 4)));
+}
+function gradient(defs, id, stops, radial = false) {
+  const g = radial ? sv("radialGradient", { id }) : sv("linearGradient", { id, x1: 0, y1: 0, x2: 0, y2: 1 });
+  for (const [o, c, a] of stops) g.append(sv("stop", { offset: o, "stop-color": c, "stop-opacity": a === undefined ? 1 : a }));
   defs.append(g);
-  floor.append(defs);
-  floor.append(sv("ellipse", { cx: 500, cy: 360, rx: 470, ry: 300, fill: "#13223b", stroke: "#243653" }));
-  for (const [k, r] of Object.entries(ROLES)) floor.append(sv("line", { x1: HUB.x, y1: HUB.y, x2: r.x, y2: r.y + 20, stroke: "#2b4468", "stroke-width": 2, "stroke-dasharray": "4 6" }));
-  floor.append(sv("circle", { cx: HUB.x, cy: HUB.y, r: 110, fill: "url(#hubGlow)", class: "glow" }));
-  floor.append(sv("circle", { cx: HUB.x, cy: HUB.y, r: 78, fill: "#10213a", stroke: "#4cc3ff", "stroke-width": 2 }));
-  const hubTitle = sv("text", { x: HUB.x, y: HUB.y - 26, "text-anchor": "middle", fill: "#e8eef8", "font-size": 13, "font-weight": 700 });
-  const hubTitle2 = sv("text", { x: HUB.x, y: HUB.y - 9, "text-anchor": "middle", fill: "#e8eef8", "font-size": 13, "font-weight": 700 });
-  const hubSub = sv("text", { x: HUB.x, y: HUB.y + 12, "text-anchor": "middle", fill: "#93a4bf", "font-size": 11 }, "Current Goal");
-  const hubStudio = sv("text", { x: HUB.x, y: HUB.y + 34, "text-anchor": "middle", fill: "#4cc3ff", "font-size": 13, "font-weight": 700 }, "Studio: 見守り中");
-  floor.append(hubTitle, hubTitle2, hubSub, hubStudio);
-  deskParts.hub = { title: hubTitle, title2: hubTitle2, studio: hubStudio };
-  for (const [k, r] of Object.entries(ROLES)) {
-    const d = sv("g", { class: "desk", tabindex: 0, role: "button", "aria-label": `${r.ja}の詳細を見る` });
-    d.append(sv("ellipse", { cx: r.x, cy: r.y + 36, rx: 96, ry: 30, fill: "#1a2c49", stroke: "#2b4468" }));
-    const halo = sv("ellipse", { cx: r.x, cy: r.y + 36, rx: 100, ry: 33, fill: "none", stroke: r.color, "stroke-width": 3, opacity: 0, class: "glow" });
-    d.append(halo);
-    d.append(sv("rect", { x: r.x - 54, y: r.y - 8, width: 108, height: 26, rx: 6, fill: "#2a3a55" }));
-    const screen = sv("rect", { x: r.x - 26, y: r.y - 40, width: 52, height: 32, rx: 4, fill: "#0d1626", stroke: "#3a5072" });
-    d.append(screen, sv("rect", { x: r.x - 3, y: r.y - 8, width: 6, height: 6, fill: "#3a5072" }));
-    d.append(sv("circle", { cx: r.x + 46, cy: r.y - 20, r: 13, fill: r.color }));
-    d.append(sv("path", { d: `M ${r.x + 26} ${r.y + 14} q 20 -30 40 0 z`, fill: r.color, opacity: 0.85 }));
-    const typing = sv("g", { class: "typing", opacity: 0 });
-    for (let i = 0; i < 3; i++) typing.append(sv("circle", { cx: r.x - 12 + i * 12, cy: r.y - 24, r: 3.5, fill: r.color }));
-    d.append(typing);
-    d.append(sv("rect", { x: r.x - 104, y: r.y + 52, width: 208, height: 46, rx: 12, fill: "#0f1a2d", stroke: "#2b4468", class: "plate" }));
-    d.append(sv("circle", { cx: r.x - 86, cy: r.y + 75, r: 8, fill: r.color }));
-    d.append(sv("text", { x: r.x - 72, y: r.y + 72, fill: "#e8eef8", "font-size": 13, "font-weight": 700 }, r.en));
-    d.append(sv("text", { x: r.x - 72, y: r.y + 89, fill: "#93a4bf", "font-size": 11 }, r.ja));
-    const pillBg = sv("rect", { x: r.x + 36, y: r.y + 64, width: 62, height: 22, rx: 11, fill: "#1c2a42" });
-    const pillTx = sv("text", { x: r.x + 67, y: r.y + 79, "text-anchor": "middle", fill: "#93a4bf", "font-size": 11, "font-weight": 700 }, "手すき");
-    d.append(pillBg, pillTx);
-    const bubbleBg = sv("rect", { x: r.x - 90, y: r.y - 82, width: 180, height: 26, rx: 8, fill: "#0f1a2d", stroke: r.color, opacity: 0 });
-    const bubbleTx = sv("text", { x: r.x, y: r.y - 64, "text-anchor": "middle", fill: "#e8eef8", "font-size": 11, opacity: 0 });
-    d.append(bubbleBg, bubbleTx);
-    d.addEventListener("click", () => { selected = k; if (current) renderDetail(current); });
-    d.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selected = k; if (current) renderDetail(current); } });
-    floor.append(d);
-    deskParts[k] = { halo, screen, typing, pillBg, pillTx, bubbleBg, bubbleTx };
-  }
 }
 
-function point(who) {
-  if (ROLES[who]) return { x: ROLES[who].x, y: ROLES[who].y + 20 };
-  return HUB;
+// A seated chibi-style person facing the viewer.
+function person(g, cx, cy, r, scale = 1) {
+  const p = sv("g", { transform: `translate(${cx} ${cy}) scale(${scale})` });
+  const skin = r.skin, hair = r.hair;
+  p.append(sv("path", { d: "M-30 34 Q-30 6 -14 2 L14 2 Q30 6 30 34 Z", fill: r.shirt }));
+  p.append(sv("path", { d: "M-8 2 L0 12 L8 2 Z", fill: shade(r.shirt, 0.4) }));
+  p.append(sv("rect", { x: -5, y: -6, width: 10, height: 10, rx: 3, fill: shade(skin, -0.1) }));
+  if (r.style === "long") p.append(sv("path", { d: "M-24 -30 Q-28 10 -16 20 L16 20 Q28 10 24 -30 Z", fill: hair }));
+  if (r.style === "bob") p.append(sv("path", { d: "M-24 -28 Q-27 0 -18 6 L18 6 Q27 0 24 -28 Z", fill: hair }));
+  p.append(sv("ellipse", { cx: 0, cy: -26, rx: 21, ry: 22, fill: skin }));
+  for (const ex of [-21, 21]) p.append(sv("ellipse", { cx: ex, cy: -24, rx: 3.5, ry: 5, fill: shade(skin, -0.08) }));
+  const top = {
+    short: "M-22 -28 Q-22 -50 0 -50 Q22 -50 22 -28 Q14 -38 0 -36 Q-12 -38 -22 -28 Z",
+    bob: "M-23 -26 Q-24 -52 0 -51 Q24 -52 23 -26 Q16 -34 6 -36 Q-2 -30 -10 -36 Q-18 -34 -23 -26 Z",
+    spiky: "M-22 -28 L-24 -42 L-15 -40 L-12 -52 L-4 -44 L2 -55 L8 -44 L16 -51 L17 -40 L24 -42 L22 -28 Q12 -36 0 -35 Q-12 -36 -22 -28 Z",
+    long: "M-23 -24 Q-24 -52 0 -51 Q24 -52 23 -24 Q18 -38 2 -38 Q-6 -32 -14 -36 Q-20 -32 -23 -24 Z",
+    messy: "M-23 -26 Q-26 -48 -8 -51 Q4 -56 14 -49 Q26 -46 23 -26 Q18 -37 8 -34 Q2 -40 -6 -35 Q-14 -40 -23 -26 Z",
+    cap: "M-22 -30 Q-22 -50 0 -50 Q22 -50 22 -30 Z",
+  }[r.style];
+  p.append(sv("path", { d: top, fill: hair }));
+  p.append(sv("path", { d: "M-14 -46 Q-2 -52 10 -47", stroke: shade(hair, 0.35), "stroke-width": 2.2, fill: "none", "stroke-linecap": "round", opacity: 0.7 }));
+  for (const ex of [-8, 8]) {
+    p.append(sv("ellipse", { cx: ex, cy: -24, rx: 3.4, ry: 4.4, fill: "#22252f" }));
+    p.append(sv("circle", { cx: ex + 1.2, cy: -25.6, r: 1.3, fill: "#ffffff" }));
+  }
+  p.append(sv("path", { d: "M-12 -32 Q-8 -34 -4 -32 M4 -32 Q8 -34 12 -32", stroke: shade(hair, -0.2), "stroke-width": 1.6, fill: "none", "stroke-linecap": "round" }));
+  p.append(sv("path", { d: "M-4 -14 Q0 -11 4 -14", stroke: "#a3533f", "stroke-width": 1.8, fill: "none", "stroke-linecap": "round" }));
+  for (const ex of [-13, 13]) p.append(sv("ellipse", { cx: ex, cy: -17, rx: 4, ry: 2.4, fill: "#f49c9c", opacity: 0.45 }));
+  if (r.acc === "glasses") {
+    for (const ex of [-8, 8]) p.append(sv("circle", { cx: ex, cy: -24, r: 6, fill: "none", stroke: "#1f2937", "stroke-width": 1.8 }));
+    p.append(sv("path", { d: "M-2 -24 L2 -24", stroke: "#1f2937", "stroke-width": 1.8 }));
+  }
+  if (r.acc === "headphones") {
+    p.append(sv("path", { d: "M-24 -24 Q-24 -56 0 -56 Q24 -56 24 -24", stroke: "#111827", "stroke-width": 4, fill: "none" }));
+    for (const ex of [-28, 19]) p.append(sv("rect", { x: ex, y: -32, width: 9, height: 15, rx: 4, fill: "#38bdf8" }));
+  }
+  if (r.acc === "cap") {
+    p.append(sv("path", { d: "M-23 -36 Q-20 -56 0 -56 Q20 -56 23 -36 Z", fill: "#1e3a8a" }));
+    p.append(sv("path", { d: "M-6 -38 Q16 -42 34 -36 Q20 -32 -4 -34 Z", fill: "#1e40af" }));
+  }
+  if (r.acc === "beret") p.append(sv("ellipse", { cx: -4, cy: -48, rx: 20, ry: 7, fill: "#7c3aed" }));
+  if (r.acc === "crown") p.append(sv("path", { d: "M-9 -58 L-6 -51 L0 -57 L6 -51 L9 -58 L8 -49 L-8 -49 Z", fill: "#f5b942" }));
+  p.append(sv("path", { d: "M-28 14 Q-34 30 -22 40 L-14 38 Q-20 28 -18 16 Z", fill: shade(r.shirt, -0.15) }));
+  p.append(sv("path", { d: "M28 14 Q34 30 22 40 L14 38 Q20 28 18 16 Z", fill: shade(r.shirt, -0.15) }));
+  g.append(p);
 }
-function flow(from, to) {
+
+function monitor(g, x, y, w, h, color, tilt) {
+  const m = sv("g", { transform: `translate(${x} ${y}) skewY(${tilt})` });
+  m.append(sv("rect", { x: -w / 2 - 3, y: -h - 3, width: w + 6, height: h + 6, rx: 3, fill: "#0b1120" }));
+  m.append(sv("rect", { x: -w / 2, y: -h, width: w, height: h, rx: 2, fill: "#0f1d36" }));
+  for (let i = 0; i < Math.floor((h - 6) / 7); i++) {
+    const bw = (0.35 + ((i * 37) % 60) / 100) * (w - 10);
+    m.append(sv("rect", { x: -w / 2 + 5, y: -h + 5 + i * 7, width: bw, height: 3, rx: 1.5, fill: i % 3 === 0 ? color : i % 3 === 1 ? "#7dd3fc" : "#94a3b8", opacity: 0.85, class: i % 2 ? "scan" : "" }));
+  }
+  m.append(sv("rect", { x: -3, y: 2, width: 6, height: 6, fill: "#334155" }));
+  m.append(sv("rect", { x: -10, y: 7, width: 20, height: 3, rx: 1.5, fill: "#334155" }));
+  g.append(m);
+}
+
+function plant(g, x, y, s = 1) {
+  const p = sv("g", { transform: `translate(${x} ${y}) scale(${s})` });
+  p.append(sv("ellipse", { cx: 0, cy: 16, rx: 12, ry: 4, fill: "#000", opacity: 0.25 }));
+  p.append(sv("path", { d: "M-10 0 L10 0 L7 16 L-7 16 Z", fill: "#e5e7eb" }));
+  p.append(sv("rect", { x: -11, y: -2, width: 22, height: 4, rx: 2, fill: "#cbd5e1" }));
+  for (const [dx, dy, rot, c] of [[-8, -12, -35, "#16a34a"], [8, -12, 35, "#15803d"], [0, -18, 0, "#22c55e"], [-4, -22, -12, "#16a34a"], [5, -22, 14, "#4ade80"]])
+    p.append(sv("ellipse", { cx: dx, cy: dy, rx: 5, ry: 13, fill: c, transform: `rotate(${rot} ${dx} ${dy})` }));
+  g.append(p);
+}
+
+// The office floor ---------------------------------------------------------------------------------
+const floor = $("floor");
+function drawFloor() {
+  desk.later = [];
+  layer.keepClear = [[HUB.x - 100, HUB.y - 70, 200, 140]];
+  const defs = sv("defs");
+  gradient(defs, "floorG", [["0%", "#2a4d88"], ["60%", "#1c3666"], ["100%", "#14284b"]], true);
+  gradient(defs, "rimG", [["0", "#0f1e3a"], ["1", "#091428"]]);
+  gradient(defs, "podTop", [["0", "#34527f"], ["1", "#25416d"]]);
+  gradient(defs, "podSide", [["0", "#1a2e52"], ["1", "#0f1d38"]]);
+  gradient(defs, "deskTop", [["0", "#52678c"], ["1", "#3c4f72"]]);
+  gradient(defs, "deskFront", [["0", "#2a3a58"], ["1", "#1a2742"]]);
+  gradient(defs, "hubGlow", [["0%", "#7dd3fc", 0.7], ["55%", "#38bdf8", 0.22], ["100%", "#38bdf8", 0]], true);
+  gradient(defs, "hubBall", [["0%", "#2273d6"], ["65%", "#0f3d86"], ["100%", "#0a2a5e"]], true);
+  gradient(defs, "plateG", [["0", "#15264a"], ["1", "#0d1830"]]);
+  gradient(defs, "wallG", [["0", "#0c1830"], ["1", "#122243"]]);
+  for (const [k, c] of [...Object.entries(ROLES).map(([k, r]) => [k, r.color]), ["hub", HUB.color]]) {
+    const mk = sv("marker", { id: "arw-" + k, viewBox: "0 0 10 10", refX: 7, refY: 5, markerWidth: 4.5, markerHeight: 4.5, orient: "auto" });
+    mk.append(sv("path", { d: "M0 0 L10 5 L0 10 z", fill: c }));
+    defs.append(mk);
+  }
+  const clip = sv("clipPath", { id: "floorClip" }); clip.append(sv("ellipse", { cx: 700, cy: 505, rx: 676, ry: 376 })); defs.append(clip);
+  floor.append(defs);
+
+  // back wall with windows
+  floor.append(sv("rect", { x: 0, y: 0, width: 1400, height: 150, fill: "url(#wallG)" }));
+  for (let i = 0; i < 7; i++) {
+    const wx = 40 + i * 196;
+    floor.append(sv("rect", { x: wx, y: 20, width: 140, height: 80, rx: 6, fill: "#14305e", stroke: "#24467d" }));
+    floor.append(sv("path", { d: `M${wx + 12} 96 L${wx + 58} 24 L${wx + 76} 24 L${wx + 30} 96 Z`, fill: "#7cb8ff", opacity: 0.1 }));
+    floor.append(sv("rect", { x: wx + 68, y: 20, width: 4, height: 80, fill: "#24467d" }));
+  }
+
+  // the round floor
+  floor.append(sv("ellipse", { cx: 700, cy: 518, rx: 680, ry: 380, fill: "url(#rimG)" }));
+  floor.append(sv("ellipse", { cx: 700, cy: 505, rx: 680, ry: 380, fill: "url(#floorG)" }));
+  const grid = sv("g", { opacity: 0.16, stroke: "#9cc3ff", "stroke-width": 1, "clip-path": "url(#floorClip)" });
+  for (let i = -16; i <= 16; i++) {
+    grid.append(sv("line", { x1: 700 + i * 56 - 380, y1: 120, x2: 700 + i * 56 + 380, y2: 900 }));
+    grid.append(sv("line", { x1: 700 + i * 56 + 380, y1: 120, x2: 700 + i * 56 - 380, y2: 900 }));
+  }
+  floor.append(grid);
+  floor.append(sv("ellipse", { cx: 700, cy: 505, rx: 676, ry: 376, fill: "none", stroke: "#3d67a8", "stroke-width": 2, opacity: 0.6 }));
+  for (const [x, y, s] of [[56, 340, 1.7], [1344, 340, 1.7], [90, 850, 1.9], [1310, 850, 1.9], [220, 168, 1.2], [1180, 168, 1.2]]) plant(floor, x, y, s);
+
+  // faint links from the hub to every desk; handoff arrows draw over them
+  for (const k of ORDER) {
+    const a = anchorOf(k);
+    floor.append(sv("path", { d: `M${HUB.x} ${HUB.y} L${a.x} ${a.y}`, stroke: ROLES[k].color, "stroke-width": 2, "stroke-dasharray": "3 9", opacity: 0.28, "stroke-linecap": "round" }));
+  }
+  layer.arrows = sv("g"); floor.append(layer.arrows);
+
+  // the hub: Goal and progress ring
+  floor.append(sv("ellipse", { cx: HUB.x, cy: HUB.y + 90, rx: 160, ry: 36, fill: "#0a1730", opacity: 0.85 }));
+  floor.append(sv("circle", { cx: HUB.x, cy: HUB.y, r: 185, fill: "url(#hubGlow)", class: "pulse" }));
+  floor.append(sv("ellipse", { cx: HUB.x, cy: HUB.y + 82, rx: 142, ry: 32, fill: "#12305f", stroke: "#38bdf8", "stroke-width": 2 }));
+  floor.append(sv("circle", { cx: HUB.x, cy: HUB.y, r: 108, fill: "url(#hubBall)", stroke: "#7dd3fc", "stroke-width": 2.5 }));
+  floor.append(sv("path", { d: `M${HUB.x - 70} ${HUB.y - 68} Q${HUB.x} ${HUB.y - 110} ${HUB.x + 70} ${HUB.y - 68}`, stroke: "#bae6fd", "stroke-width": 3, fill: "none", opacity: 0.35 }));
+  floor.append(sv("ellipse", { cx: HUB.x, cy: HUB.y, rx: 146, ry: 40, fill: "none", stroke: "#7dd3fc", "stroke-width": 1.5, "stroke-dasharray": "6 10", opacity: 0.55, class: "spin" }));
+  layer.ring = sv("g"); floor.append(layer.ring);
+  const txt = (y, size, fill, weight, text) => { const t = sv("text", { x: HUB.x, y, "text-anchor": "middle", fill, "font-size": size, "font-weight": weight }, text); floor.append(t); return t; };
+  desk.hub = { id: txt(HUB.y - 56, 14, "#7dd3fc", 800, ""), lines: [0, 1, 2].map(() => txt(HUB.y, 18, "#ffffff", 800, "")),
+               cg: txt(HUB.y + 40, 14, "#bae6fd", 400, "Current Goal"), st: txt(HUB.y + 62, 14, "#7dd3fc", 700, "") };
+
+  for (const k of [...ORDER].sort((a, b) => ROLES[a].y - ROLES[b].y)) drawDesk(k);
+  layer.badges = sv("g"); layer.flow = sv("g");
+  floor.append(layer.badges, layer.flow);
+}
+
+function drawDesk(k) {
+  const r = ROLES[k], x = r.x, y = r.y;
+  const g = sv("g", { class: "desk", tabindex: 0, role: "button", "aria-label": `${r.ja}（${r.en}）の詳細を見る` });
+  g.append(sv("ellipse", { cx: x, cy: y + 46, rx: 150, ry: 54, fill: "url(#podSide)" }));
+  g.append(sv("ellipse", { cx: x, cy: y + 34, rx: 150, ry: 54, fill: "url(#podTop)", stroke: "#3f6096", "stroke-width": 1.5 }));
+  const glow = sv("ellipse", { cx: x, cy: y + 34, rx: 146, ry: 50, fill: r.color, opacity: 0 });
+  const halo = sv("ellipse", { cx: x, cy: y + 36, rx: 158, ry: 60, fill: "none", stroke: r.color, "stroke-width": 4, opacity: 0, class: "pulse" });
+  g.append(glow, halo);
+  // screen wall behind the seat
+  g.append(sv("path", { d: `M${x - 110} ${y - 30} L${x + 110} ${y - 30} L${x + 100} ${y - 16} L${x - 100} ${y - 16} Z`, fill: "url(#deskTop)" }));
+  g.append(sv("rect", { x: x - 100, y: y - 16, width: 200, height: 14, fill: "url(#deskFront)" }));
+  const shine = sv("rect", { x: x - 94, y: y - 84, width: 188, height: 56, rx: 8, fill: r.color, opacity: 0 });
+  const screens = sv("g");
+  monitor(screens, x - 62, y - 34, 50, 34, r.color, 8);
+  monitor(screens, x, y - 38, 62, 40, r.color, 0);
+  monitor(screens, x + 62, y - 34, 50, 34, r.color, -8);
+  g.append(shine, screens);
+  // chair, the person, the front desk
+  g.append(sv("rect", { x: x - 34, y: y - 4, width: 68, height: 46, rx: 15, fill: "#111a2e", stroke: "#26324a" }));
+  person(g, x, y + 22, r, 0.92);
+  g.append(sv("path", { d: `M${x - 78} ${y + 50} L${x + 78} ${y + 50} L${x + 92} ${y + 66} L${x - 92} ${y + 66} Z`, fill: "url(#deskTop)" }));
+  g.append(sv("rect", { x: x - 92, y: y + 66, width: 184, height: 16, fill: "url(#deskFront)" }));
+  g.append(sv("path", { d: `M${x - 34} ${y + 54} L${x + 34} ${y + 54} L${x + 38} ${y + 62} L${x - 38} ${y + 62} Z`, fill: "#a7b4c8" }));
+  g.append(sv("rect", { x: x + 50, y: y + 48, width: 12, height: 13, rx: 3, fill: "#f8fafc" }));
+  g.append(sv("path", { d: `M${x + 62} ${y + 51} q6 3 0 7`, stroke: "#f8fafc", "stroke-width": 2, fill: "none" }));
+  g.append(sv("rect", { x: x - 70, y: y + 52, width: 22, height: 8, rx: 2, fill: shade(r.color, -0.2), transform: `rotate(-8 ${x - 59} ${y + 56})` }));
+  plant(g, x + (r.side === "right" ? -130 : 130), y + 30, 0.9);
+  const typing = sv("g", { class: "typing", opacity: 0 });
+  typing.append(sv("rect", { x: x + 26, y: y - 30, width: 56, height: 22, rx: 11, fill: "#0f1d36", stroke: r.color, "stroke-width": 1.5 }));
+  for (let i = 0; i < 3; i++) typing.append(sv("circle", { cx: x + 41 + i * 13, cy: y - 19, r: 3.6, fill: r.color }));
+  g.append(typing);
+  // name plate
+  layer.keepClear.push([x - 122, y + 92, 244, 48]);
+  g.append(sv("rect", { x: x - 122, y: y + 92, width: 244, height: 48, rx: 12, fill: "url(#plateG)", stroke: "#2e4670", "stroke-width": 1.5, class: "plate" }));
+  g.append(sv("circle", { cx: x - 98, cy: y + 116, r: 14, fill: shade(r.color, -0.6), stroke: r.color, "stroke-width": 2 }));
+  g.append(sv("circle", { cx: x - 98, cy: y + 116, r: 5, fill: r.color }));
+  const en = sv("text", { x: x - 76, y: y + 114, fill: "#ffffff", "font-weight": 800 });
+  const ja = sv("text", { x: x - 76, y: y + 133, fill: "#a9b8cf" });
+  const pill = sv("rect", { x: x + 34, y: y + 102, width: 80, height: 28, rx: 14, fill: "#1e2a41" });
+  const pillTx = sv("text", { x: x + 74, y: y + 121, "text-anchor": "middle", fill: "#a9b8cf", "font-size": 14, "font-weight": 800 }, "手すき");
+  g.append(en, ja, pill, pillTx);
+  // duties bubble
+  const bx = r.side === "right" ? x + 112 : x - 302, by = y - 98;
+  layer.keepClear.push([bx, by, 190, 76]);
+  const bubble = sv("g", { opacity: 0.97 });
+  bubble.append(sv("rect", { x: bx, y: by, width: 190, height: 76, rx: 12, fill: "#f8fafc", stroke: shade(r.color, 0.3), "stroke-width": 1.5 }));
+  bubble.append(sv("path", { d: r.side === "right" ? `M${bx + 1} ${by + 46} l-12 8 l12 6 Z` : `M${bx + 189} ${by + 46} l12 8 l-12 6 Z`, fill: "#f8fafc" }));
+  r.duties.forEach((d, i) => {
+    bubble.append(sv("circle", { cx: bx + 15, cy: by + 18 + i * 20, r: 4, fill: r.color }));
+    const t = sv("text", { x: bx + 26, y: by + 23 + i * 20, fill: "#1f2937", "font-weight": 700 });
+    bubble.append(t);
+    desk.later.push([t, d, 156, 15, 11]);
+  });
+  g.append(bubble);
+  const pick = () => { selected = k; picked = true; $("agentSelect").value = k; if (current) renderDetail(current); };
+  g.addEventListener("click", pick);
+  g.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); } });
+  floor.append(g);
+  desk.later.push([en, r.en, 106, 19, 12], [ja, r.ja, 106, 13, 9]);
+  desk[k] = { g, glow, halo, typing, pill, pillTx, shine, screens };
+}
+
+// Handoff arrows: the latest handoff between each pair of places, newest brightest, with a numbered badge.
+function curve(from, to) {
+  const a = anchorOf(from), b = anchorOf(to), dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len;
+  const trim = (p) => 1 / Math.hypot(ux / p.rx, uy / p.ry);
+  const s = { x: a.x + ux * trim(a), y: a.y + uy * trim(a) }, e = { x: b.x - ux * trim(b), y: b.y - uy * trim(b) };
+  const span = Math.hypot(e.x - s.x, e.y - s.y), bend = Math.min(60, span * 0.28);
+  const c = { x: (s.x + e.x) / 2 - uy * bend, y: (s.y + e.y) / 2 + ux * bend };
+  return { s, c, e, d: `M${s.x.toFixed(1)} ${s.y.toFixed(1)} Q${c.x.toFixed(1)} ${c.y.toFixed(1)} ${e.x.toFixed(1)} ${e.y.toFixed(1)}` };
+}
+const overlap = (a, b) => Math.max(0, Math.min(a[0] + a[2], b[0] + b[2]) - Math.max(a[0], b[0])) * Math.max(0, Math.min(a[1] + a[3], b[1] + b[3]) - Math.max(a[1], b[1]));
+function place(c, w, h, placed) {
+  const len = Math.hypot(c.e.x - c.s.x, c.e.y - c.s.y) || 1, px = -(c.e.y - c.s.y) / len, py = (c.e.x - c.s.x) / len;
+  let best = null;
+  for (const t of [0.5, 0.4, 0.6, 0.3, 0.7]) for (const off of [0, 30, -30, 60, -60]) {
+    const u = 1 - t, x = u * u * c.s.x + 2 * u * t * c.c.x + t * t * c.e.x + px * off, y = u * u * c.s.y + 2 * u * t * c.c.y + t * t * c.e.y + py * off;
+    const box = [x - w / 2, y - h / 2, w, h];
+    const cost = [...layer.keepClear, ...placed].reduce((n, r) => n + overlap(box, r), 0) + Math.abs(off) * 2 + Math.abs(t - 0.5) * 200;
+    if (!best || cost < best.cost) best = { x, y, box, cost };
+  }
+  placed.push(best.box);
+  return best;
+}
+function drawArrows(handoffs) {
+  layer.arrows.textContent = ""; layer.badges.textContent = "";
+  const seen = new Set(), shown = [], paths = {}, placed = [];
+  for (const h of handoffs) {
+    const key = [h.from, h.to].sort().join("|");
+    if (h.from === h.to || seen.has(key)) continue;
+    seen.add(key); shown.push(h);
+    if (shown.length === 4) break;
+  }
+  shown.forEach((h, i) => {
+    const c = curve(h.from, h.to), who = ROLES[h.to] ? h.to : ROLES[h.from] ? h.from : "hub", color = colorOf(who), op = [1, 0.75, 0.55, 0.4][i];
+    layer.arrows.append(sv("path", { d: c.d, stroke: color, "stroke-width": 14, fill: "none", opacity: op * 0.18, "stroke-linecap": "round" }));
+    const p = sv("path", { d: c.d, stroke: color, "stroke-width": 5, fill: "none", opacity: op, "stroke-linecap": "round", "marker-end": `url(#arw-${who})`, class: i === 0 ? "flowing" : "" });
+    layer.arrows.append(p); paths[h.seq] = { p, color };
+    const full = i < 2, w = full ? 168 : 32, hh = full ? 56 : 32, at = place(c, w, hh, placed);
+    const b = sv("g", { transform: `translate(${at.x.toFixed(1)} ${at.y.toFixed(1)})`, opacity: Math.max(op, 0.75) });
+    layer.badges.append(b);
+    if (full) {
+      const t = sv("text", { x: 0, y: -5, "text-anchor": "middle", fill: "#ffffff", "font-weight": 800 });
+      b.append(sv("rect", { x: -84, y: -28, width: 168, height: 56, rx: 12, fill: "#101f3e", stroke: color, "stroke-width": 2.5 }), t,
+        sv("text", { x: -12, y: 18, "text-anchor": "middle", fill: shade(color, 0.35), "font-size": 14, "font-weight": 700 }, "Hand-off"),
+        sv("circle", { cx: 44, cy: 13, r: 12, fill: color }),
+        sv("text", { x: 44, y: 18, "text-anchor": "middle", fill: "#0b1428", "font-size": 13, "font-weight": 800 }, String(h.seq)));
+      fit(t, stageJa(h.stage), 150, 17);
+    } else {
+      b.append(sv("circle", { r: 15, fill: "#101f3e", stroke: color, "stroke-width": 2.5 }),
+        sv("text", { y: 5, "text-anchor": "middle", fill: "#ffffff", "font-size": 13, "font-weight": 800 }, String(h.seq)));
+    }
+  });
+  return paths;
+}
+function flowAlong(path, color) {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const a = point(from), b = point(to), color = (ROLES[from] || ROLES[to] || { color: "#4cc3ff" }).color;
-  const dotEl = sv("circle", { r: 7, fill: color });
-  const trail = sv("circle", { r: 14, fill: color, opacity: 0.25 });
-  floor.append(trail, dotEl);
-  const t0 = performance.now(), dur = 1400;
-  function at(p) {
-    const mid = p < 0.5 ? p * 2 : (p - 0.5) * 2;
-    const s = p < 0.5 ? a : HUB, e = p < 0.5 ? HUB : b;
-    return { x: s.x + (e.x - s.x) * mid, y: s.y + (e.y - s.y) * mid };
-  }
-  function step(now) {
-    const p = Math.min(1, (now - t0) / dur), q = at(p);
-    dotEl.setAttribute("cx", q.x); dotEl.setAttribute("cy", q.y);
-    trail.setAttribute("cx", q.x); trail.setAttribute("cy", q.y);
-    if (p < 1) requestAnimationFrame(step); else { dotEl.remove(); trail.remove(); }
-  }
+  const halo = sv("circle", { r: 20, fill: color, opacity: 0.35 }), dot = sv("circle", { r: 8, fill: "#ffffff", stroke: color, "stroke-width": 4 });
+  layer.flow.append(halo, dot);
+  const total = path.getTotalLength(), t0 = performance.now(), dur = 1400;
+  const step = (now) => {
+    const p = Math.min(1, (now - t0) / dur), q = path.getPointAtLength(total * p);
+    for (const n of [halo, dot]) { n.setAttribute("cx", q.x); n.setAttribute("cy", q.y); }
+    if (p < 1) requestAnimationFrame(step); else { halo.remove(); dot.remove(); }
+  };
   requestAnimationFrame(step);
 }
+function drawRing(stages) {
+  layer.ring.textContent = "";
+  const rows = stages.filter((x) => stateKey(x.status) !== "skipped"), n = rows.length, R = 124;
+  if (!n) return;
+  const gap = n > 1 ? 0.06 : 0, arc = (2 * Math.PI) / n;
+  rows.forEach((x, i) => {
+    const a0 = -Math.PI / 2 + i * arc + gap / 2, a1 = a0 + arc - gap, k = stateKey(x.status);
+    const pt = (a) => `${(HUB.x + R * Math.cos(a)).toFixed(1)} ${(HUB.y + R * Math.sin(a)).toFixed(1)}`;
+    const d = n === 1 ? `M${HUB.x} ${HUB.y - R} a${R} ${R} 0 1 1 -0.1 0` : `M${pt(a0)} A${R} ${R} 0 ${arc - gap > Math.PI ? 1 : 0} 1 ${pt(a1)}`;
+    layer.ring.append(sv("path", { d, fill: "none", "stroke-width": 7, "stroke-linecap": "round", stroke: k === "done" || k === "open" ? colorOf(x.role) : "#2a3d63", opacity: k === "done" ? 1 : k === "open" ? 0.9 : 0.8, class: k === "open" ? "pulse" : "" }));
+  });
+}
 
-// --- Render one snapshot ----------------------------------------------------------------------
+// Panels -----------------------------------------------------------------------------------------
+const OUTCOME = { done: ["完了", "p-green"], partial: ["途中", "p-orange"], question: ["質問", "p-purple"], pass: ["合格", "p-green"], fail: ["不合格", "p-red"],
+  routed: ["依頼", "p-blue"], "goal-met": ["達成", "p-green"], "goal-not-met": ["未達", "p-orange"], open: ["回答待ち", "p-pink"], resolved: ["回答済み", "p-grey"] };
+const DECIDER = { owner: ["Owner", "p-pink"], "game-director": ["方針", "p-purple"], "game-designer": ["仕様", "p-green"], "technical-director": ["技術", "p-blue"],
+  "art-director": ["アート", "p-pink"], "gameplay-engineer": ["実装", "p-blue"], qa: ["品質", "p-orange"], playtester: ["所見", "p-green"] };
+
+function face(svgEl, k) {
+  svgEl.textContent = "";
+  svgEl.append(sv("circle", { cx: 30, cy: 30, r: 29, fill: shade(ROLES[k].color, -0.55), stroke: ROLES[k].color, "stroke-width": 2 }));
+  const clip = sv("clipPath", { id: "faceClip" }); clip.append(sv("circle", { cx: 30, cy: 30, r: 28 }));
+  svgEl.append(clip);
+  const g = sv("g", { "clip-path": "url(#faceClip)" }); svgEl.append(g);
+  person(g, 30, 50, ROLES[k], 0.62);
+}
+
 function render(s) {
   current = s;
   $("projectName").textContent = s.project.name || s.project.id || "—";
-  const gs = $("goalStatus");
-  gs.textContent = { active: "進行中", done: "完了", abandoned: "打ち切り", "blocked-on-owner": "Owner の判断待ち" }[s.goal.status] || s.goal.status || "—";
-  gs.className = "pill " + (s.goal.status === "done" ? "done" : s.goal.status === "active" ? "busy" : "warn");
-  $("cBusy").textContent = s.counts.busy; $("cWait").textContent = s.counts.waiting; $("cIdle").textContent = s.counts.idle;
-  $("budget").textContent = s.goal.budget ? `${s.goal.used}/${s.goal.budget}` : `${s.goal.used}`;
-  $("clock").textContent = s.now ? s.now.slice(11, 19) : "--:--:--";
-  $("goalTitle").textContent = `${s.goal.id}: ${s.goal.title || "—"}`;
-  $("goalRequest").textContent = s.goal.request ? `依頼: 「${s.goal.request}」` : "";
-
+  const gs = { active: ["進行中", "p-green"], done: ["完了", "p-blue"], abandoned: ["打ち切り", "p-grey"], "blocked-on-owner": ["Owner 判断待ち", "p-pink"] }[s.goal.status] || [s.goal.status || "Goal 待ち", "p-grey"];
+  $("goalStatus").textContent = gs[0]; $("goalStatus").className = "pill " + gs[1];
+  $("cBusy").textContent = s.counts.busy; $("cWait").textContent = s.counts.waiting;
+  $("cReview").textContent = s.agents["game-director"].state === "busy" ? 1 : 0;
+  $("cTest").textContent = ["qa", "playtester"].filter((k) => s.agents[k].state === "busy").length;
+  $("cUsed").textContent = s.goal.used || 0; $("cBudget").textContent = s.goal.budget ? `/ ${s.goal.budget}` : "";
+  if (s.now) {
+    const d = new Date(s.now);
+    $("date").textContent = `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()} (${"日月火水木金土"[d.getDay()]})`;
+    $("clock").textContent = s.now.slice(11, 16);
+  }
   const counted = s.stages.filter((x) => stateKey(x.status) !== "skipped");
   const done = counted.filter((x) => stateKey(x.status) === "done").length;
   const pct = s.goal.status === "done" ? 100 : counted.length ? Math.round((100 * done) / counted.length) : 0;
   $("pct").textContent = pct + "%"; $("pctBar").style.width = pct + "%";
+  $("goalTitle").textContent = s.goal.title ? `${s.goal.id}: ${s.goal.title}` : "Goal を待っています";
+  $("goalRequest").textContent = s.goal.request ? `依頼「${s.goal.request}」` : "";
+
   const stages = $("stages"); stages.textContent = "";
   if (!s.stages.length) stages.append(el("li", { class: "empty" }, "工程表はまだありません"));
   for (const x of s.stages) {
-    const k = stateKey(x.status), li = el("li", { class: "row" });
-    li.append(el("span", {}, { done: "✓", open: "◉", planned: "○", tentative: "？", skipped: "–" }[k]));
-    const m = el("div", { class: "main" }); m.append(el("b", {}, x.stage), el("span", {}, NAME[x.role] || x.role)); li.append(m);
-    li.append(el("span", { class: "pill " + (k === "done" ? "done" : k === "open" ? "busy" : "idle") }, STATE_JA[k]));
+    const k = stateKey(x.status), li = el("li", { class: "r" + (k === "open" ? " now" : "") });
+    li.append(el("span", { class: "st " + k }, { done: "✓", open: "", planned: "", tentative: "?", skipped: "–" }[k]));
+    const m = el("div", { class: "m" }); m.append(el("b", {}, stageJa(x.stage)), el("span", { title: x.stage }, `${x.n} · ${NAME[x.role] || x.role} · ${x.stage}`)); li.append(m);
+    const lab = { done: ["完了", "p-green"], open: ["進行中", "p-blue"], planned: ["未着手", "p-dark"], tentative: ["保留", "p-grey"], skipped: ["省略", "p-dark"] }[k];
+    li.append(el("span", { class: "pill " + lab[1] }, lab[0]));
     stages.append(li);
   }
 
-  const hl = $("handoffs"); hl.textContent = "";
+  const hl = $("handoffs"); hl.textContent = ""; $("hCount").textContent = String(s.latest_seq || 0);
   if (!s.handoffs.length) hl.append(el("li", { class: "empty" }, "まだ受け渡しはありません"));
-  for (const h of s.handoffs.slice(0, 6)) {
-    const li = el("li", { class: "row" });
-    li.append(el("span", {}, String(h.seq)));
-    const m = el("div", { class: "main" });
-    m.append(el("b", {}, `${NAME[h.from] || h.from} → ${NAME[h.to] || h.to}`), el("span", {}, h.title || h.stage));
-    li.append(m, el("span", { class: "note" }, hhmm(h.time)));
-    hl.append(li);
-  }
+  s.handoffs.slice(0, 5).forEach((h, i) => {
+    const li = el("li", { class: "r" + (i === 0 ? " now" : "") });
+    const n = el("span", { class: "num" }, String(h.seq)); n.style.background = colorOf(ROLES[h.from] ? h.from : h.to); li.append(n);
+    const m = el("div", { class: "m" }); m.append(el("b", {}, `${NAME[h.from] || h.from} → ${NAME[h.to] || h.to}`), el("span", {}, `${stageJa(h.stage)}${h.title ? " · " + h.title : ""}`)); li.append(m);
+    const end = el("div", { class: "end" }), o = OUTCOME[h.outcome] || [h.outcome || "—", "p-grey"];
+    end.append(el("span", { class: "pill " + o[1] }, o[0]), el("time", {}, hhmm(h.time)));
+    li.append(end); hl.append(li);
+  });
 
-  const dl = $("decisions"); dl.textContent = "";
+  const dl = $("decisions"); dl.textContent = ""; $("dCount").textContent = String(s.decisions.length);
   if (!s.decisions.length) dl.append(el("li", { class: "empty" }, "まだ決定はありません"));
-  for (const d of s.decisions) {
-    const li = el("li", { class: "row" });
-    li.append(el("span", {}, "◆"));
-    const m = el("div", { class: "main" }); m.append(el("b", {}, `${d.id} ${d.title}`), el("span", {}, `決めた人: ${NAME[d.by] || d.by}  ${d.date}`));
-    li.append(m, el("span", { class: "note" }, hhmm(d.time)));
+  for (const d of s.decisions.slice(0, 5)) {
+    const li = el("li", { class: "r" });
+    const n = el("span", { class: "num" }, d.id.replace(/^D-0*/, "")); n.style.background = colorOf(d.by); li.append(n);
+    const m = el("div", { class: "m" }); m.append(el("b", { title: d.title }, d.title), el("span", {}, `${d.id} · ${NAME[d.by] || d.by} · ${d.date} ${hhmm(d.time)}`)); li.append(m);
+    const t = DECIDER[d.by] || ["決定", "p-grey"]; li.append(el("span", { class: "pill " + t[1] }, t[0]));
     dl.append(li);
   }
 
-  const log = $("log"), atBottom = log.scrollTop + log.clientHeight >= log.scrollHeight - 8;
-  log.textContent = "";
+  const log = $("log"); log.textContent = "";
   if (!s.log.length) log.append(el("div", { class: "empty" }, "まだ記録はありません"));
-  for (const l of s.log) {
-    const row = el("div");
-    const who = el("span", {}, `[${NAME[l.who] || l.who}]`);
-    who.style.color = (ROLES[l.who] || { color: "#4cc3ff" }).color;
-    row.append(el("time", {}, hhmm(l.time)), who, el("span", { class: "text" }, l.text));
+  for (const l of s.log.slice(-16).reverse()) {
+    const row = el("div"), c = colorOf(l.who);
+    const dot = el("span", { class: "dot" }); dot.style.background = c; dot.style.width = "8px"; dot.style.height = "8px";
+    const who = el("span", { class: "who" }, `[${NAME[l.who] || l.who}]`); who.style.color = c;
+    row.append(dot, el("time", {}, hhmm(l.time)), who, el("span", { class: "tx", title: l.text }, l.text));
     log.append(row);
   }
-  if (atBottom) log.scrollTop = log.scrollHeight;
 
-  const q = $("queue"); q.textContent = "";
-  if (!s.queue.length) q.append(el("li", { class: "empty" }, "残っている仕事はありません"));
-  s.queue.forEach((x, i) => {
-    const k = stateKey(x.status), li = el("li", { class: "row" });
-    li.append(el("span", {}, String(i + 1)));
-    const m = el("div", { class: "main" }); m.append(el("b", {}, x.stage), el("span", {}, NAME[x.role] || x.role)); li.append(m);
-    li.append(el("span", { class: "pill " + (k === "open" ? "busy" : "idle") }, STATE_JA[k]));
-    q.append(li);
+  const q = $("queue"); q.textContent = ""; $("qCount").textContent = String(s.queue.length);
+  if (!s.queue.length) q.append(el("div", { class: "empty" }, "残っている仕事はありません"));
+  s.queue.slice(0, 6).forEach((x, i) => {
+    const k = stateKey(x.status), row = el("div", { class: "q" });
+    row.append(el("span", { class: "n" }, String(i + 1)), el("span", { class: "s", title: x.stage }, stageJa(x.stage)));
+    const who = el("span", { class: "who" }), dot = el("span", { class: "dot" }); dot.style.background = colorOf(x.role); who.append(dot, document.createTextNode(NAME[x.role] || x.role)); row.append(who);
+    const pr = { open: ["高", "p-red"], planned: ["中", "p-blue"], tentative: ["低", "p-grey"] }[k] || ["中", "p-blue"];
+    row.append(el("span", { class: "pill " + pr[1] }, pr[0]));
+    q.append(row);
   });
 
-  const words = (s.goal.title || s.goal.id || "").split(" "), lines = ["", ""];
-  for (const w of words) { const k = lines[0].length + w.length < 17 && !lines[1] ? 0 : 1; lines[k] = (lines[k] ? lines[k] + " " : "") + w; }
-  deskParts.hub.title.textContent = lines[0].slice(0, 20);
-  deskParts.hub.title2.textContent = lines[1].length > 18 ? lines[1].slice(0, 17) + "…" : lines[1];
-  deskParts.hub.studio.textContent = `Studio: ${s.studio.label}`;
+  // the floor
+  desk.hub.id.textContent = s.goal.id || "";
+  wrapInto(desk.hub.lines, s.goal.title || "Goal を待っています", 184, 17, HUB.y - 10);
+  desk.hub.st.textContent = `Studio: ${s.studio.label}`;
+  drawRing(s.stages);
   for (const [k, a] of Object.entries(s.agents)) {
-    const p = deskParts[k]; if (!p) continue;
+    const p = desk[k]; if (!p) continue;
     const busy = a.state === "busy", waiting = a.state === "waiting";
-    p.halo.setAttribute("opacity", busy ? 1 : 0);
+    p.g.classList.toggle("busy", busy);
+    p.halo.setAttribute("opacity", busy ? 1 : waiting ? 0.35 : 0);
+    p.glow.setAttribute("opacity", busy ? 0.22 : waiting ? 0.07 : 0);
     p.typing.setAttribute("opacity", busy ? 1 : 0);
-    p.screen.setAttribute("fill", busy ? ROLES[k].color : waiting ? "#1d2c45" : "#0d1626");
-    p.screen.setAttribute("fill-opacity", busy ? 0.55 : 1);
-    p.pillTx.textContent = a.label;
-    p.pillBg.setAttribute("fill", busy ? "#14432f" : waiting ? "#2a3650" : "#1c2a42");
-    p.pillTx.setAttribute("fill", busy ? "#7af0b6" : waiting ? "#c7d2e4" : "#93a4bf");
-    const show = busy || waiting;
-    p.bubbleBg.setAttribute("opacity", show ? 0.95 : 0); p.bubbleTx.setAttribute("opacity", show ? 1 : 0);
-    p.bubbleTx.textContent = show ? (a.stage || "").slice(0, 24) : "";
+    p.shine.setAttribute("opacity", busy ? 0.16 : 0);
+    p.screens.setAttribute("opacity", busy ? 1 : waiting ? 0.8 : 0.5);
+    const lab = busy ? [a.label, "#0f3b2c", "#5ff0b0"] : waiting ? ["待機中", "#3a3a12", "#fde68a"] : ["手すき", "#141e33", "#7d8da8"];
+    if (busy && k === "game-director") lab.splice(1, 2, "#2e1e5c", "#c4b5fd");
+    if (busy && k === "qa") lab.splice(1, 2, "#4a2e0a", "#fcd34d");
+    p.pillTx.textContent = lab[0]; p.pill.setAttribute("fill", lab[1]); p.pillTx.setAttribute("fill", lab[2]);
   }
-  if (lastSeq !== null && s.latest_seq > lastSeq) {
-    s.handoffs.filter((h) => h.seq > lastSeq).reverse().forEach((h, i) => setTimeout(() => flow(h.from, h.to), i * 500));
+  if (drawnSeq !== s.latest_seq) {
+    const paths = drawArrows(s.handoffs);
+    if (lastSeq !== null && s.latest_seq > lastSeq)
+      s.handoffs.filter((h) => h.seq > lastSeq && paths[h.seq]).reverse().forEach((h, i) => setTimeout(() => flowAlong(paths[h.seq].p, paths[h.seq].color), i * 500));
+    drawnSeq = s.latest_seq;
   }
   lastSeq = s.latest_seq;
   renderDetail(s);
 }
 
 function renderDetail(s) {
-  const r = ROLES[selected], a = s.agents[selected];
-  $("dAvatar").style.background = r.color; $("dAvatar").textContent = r.en[0];
-  $("dName").textContent = r.ja; $("dEn").textContent = r.en;
-  const st = $("dState"); st.textContent = a.label; st.className = "pill " + a.state;
-  $("dStage").textContent = a.stage || "—";
-  $("dTask").textContent = a.task || "—";
-  $("dSince").textContent = a.state === "busy" ? elapsed(a.since, s.now) : "—";
-  $("dDone").textContent = String(a.steps_done);
-  $("dLast").textContent = a.last ? `${hhmm(a.last.time)} ${a.last.text}` : "—";
-  const du = $("dDuties"); du.textContent = "";
-  for (const d of r.duties) du.append(el("li", {}, d));
+  // follow whoever is working until the viewer picks someone
+  const busy = ORDER.find((r) => s.agents[r].state === "busy");
+  if (!picked && busy) { selected = busy; $("agentSelect").value = busy; }
+  const k = selected, r = ROLES[k], a = s.agents[k];
+  for (const [kk, p] of Object.entries(desk)) if (ROLES[kk]) p.g.classList.toggle("picked", kk === k);
+  face($("dFace"), k);
+  $("dName").textContent = r.en; $("dJa").textContent = r.ja;
+  $("dState").textContent = a.label;
+  $("dState").className = "pill " + (a.state === "busy" ? "p-green" : a.state === "waiting" ? "p-orange" : "p-dark");
+  $("dTask").textContent = a.stage ? `${stageJa(a.stage)}${a.task ? " — " + a.task : ""}` : a.last ? `直近: ${a.last.text}` : "割り当てはありません";
+  const mine = s.stages.filter((x) => x.role === k && stateKey(x.status) !== "skipped");
+  const doneMine = mine.filter((x) => stateKey(x.status) === "done").length;
+  $("dBar").style.width = mine.length ? Math.round((100 * doneMine) / mine.length) + "%" : "0%";
+  $("dFile").textContent = a.file ? `📄 ${a.file}` : `担当の工程 ${doneMine}/${mine.length} 完了`;
+  $("dSince").textContent = a.state === "busy" ? `⏱ ${elapsed(a.since, s.now)}` : `提出 ${a.steps_done} 回${a.last ? "・最終 " + hhmm(a.last.time) : ""}`;
+  const next = s.queue.find((x) => x.role === k && stateKey(x.status) !== "open") || s.queue.find((x) => x.role === k);
+  $("dNext").textContent = next ? stageJa(next.stage) : "予定なし";
+  $("dNextWho").textContent = next ? ({ open: "進行中", planned: "予定", tentative: "保留" }[stateKey(next.status)] || "") : "";
+  const du = $("dDuties"); du.textContent = ""; for (const d of r.duties) du.append(el("li", {}, d));
 }
 
-// --- Modes: replay a timeline.json if one sits beside the page, else poll the live API ---------
+// Modes -------------------------------------------------------------------------------------------
 async function start() {
   drawFloor();
+  for (const [t, text, w, size, min] of desk.later) fit(t, text, w, size, min);
+  const sel = $("agentSelect");
+  for (const k of ORDER) sel.append(el("option", { value: k }, `${ROLES[k].en}（${ROLES[k].ja}）`));
+  sel.value = selected;
+  sel.addEventListener("change", () => { selected = sel.value; picked = true; if (current) renderDetail(current); });
   try {
     const res = await fetch("timeline.json", { cache: "no-store" });
-    if (res.ok) {
-      const tl = await res.json();
-      if (Array.isArray(tl) && tl.length) return replay(tl);
-    }
-  } catch (e) { /* no timeline: live */ }
+    if (res.ok) { const tl = await res.json(); if (Array.isArray(tl) && tl.length) return replay(tl); }
+  } catch (e) { /* no timeline beside the page: live */ }
   live();
 }
-
 function live() {
-  $("mode").textContent = "ライブ（1.5 秒ごとに更新）";
-  $("logNote").textContent = "LIVE LOG";
+  $("liveNote").textContent = "ライブ: Studio の記録から 1.5 秒ごとに取得";
   const tick = async () => {
-    try {
-      const res = await fetch("api/state", { cache: "no-store" });
-      if (res.ok) render(await res.json());
-      else $("mode").textContent = "サーバーから状態を取得できません";
-    } catch (e) { $("mode").textContent = "サーバーに接続できません"; }
+    try { const res = await fetch("api/state", { cache: "no-store" }); if (res.ok) render(await res.json()); else $("liveNote").textContent = "状態を取得できません"; }
+    catch (e) { $("liveNote").textContent = "サーバーに接続できません"; }
   };
   tick(); setInterval(tick, 1500);
 }
-
 function replay(tl) {
   $("replay").hidden = false;
-  $("logNote").textContent = "REPLAY";
   const times = tl.map((s) => Date.parse(s.now)), t0 = times[0], t1 = times[times.length - 1];
-  const scrub = $("scrub"); scrub.max = String(Math.max(1, Math.round((t1 - t0) / 1000))); scrub.value = "0";
+  const scrub = $("scrub"); scrub.max = String(Math.max(1, Math.round((t1 - t0) / 1000)));
   let clock = t0, playing = false, lastFrame = null, shown = -1;
   const show = () => {
-    let i = 0;
-    while (i + 1 < times.length && times[i + 1] <= clock) i++;
+    let i = 0; while (i + 1 < times.length && times[i + 1] <= clock) i++;
     if (i !== shown) { shown = i; render(tl[i]); }
-    $("clock").textContent = new Date(clock).toTimeString().slice(0, 8);
-    $("mode").textContent = `リプレイ ${tl[i].now.slice(0, 10)}（${i + 1}/${tl.length}）`;
+    $("clock").textContent = new Date(clock).toTimeString().slice(0, 5);
+    $("liveNote").textContent = `リプレイ: 記録 ${i + 1}/${tl.length}（${tl[i].now.slice(0, 10)}）`;
     scrub.value = String(Math.round((clock - t0) / 1000));
   };
   const frame = (now) => {
@@ -432,12 +755,11 @@ function replay(tl) {
   };
   $("play").addEventListener("click", () => {
     playing = !playing; $("play").textContent = playing ? "❚❚ 一時停止" : "▶ 再生";
-    if (playing) { if (clock >= t1) { clock = t0; lastSeq = null; } lastFrame = null; requestAnimationFrame(frame); }
+    if (playing) { if (clock >= t1) { clock = t0; lastSeq = null; shown = -1; } lastFrame = null; requestAnimationFrame(frame); }
   });
   scrub.addEventListener("input", () => { clock = t0 + Number(scrub.value) * 1000; lastSeq = null; shown = -1; show(); });
   show();
 }
-
 start();
 </script>
 </body>
