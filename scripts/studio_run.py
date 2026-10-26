@@ -258,6 +258,19 @@ def run_commands(project):
     return commands
 
 
+def runs_by_role(project):
+    """Which Role's steps may request which build runs, so Studio operations know what a step can
+    show: one Role's limits (no screenshots, say) are not every Role's."""
+    commands = run_commands(project)
+    roles = sorted(p.stem for p in (STUDIO / "roles").glob("*.md"))
+    parts = [
+        f"{role} ({', '.join(runs)})"
+        for role in roles
+        if (runs := [r for r in role_policy(role)["runs"] if r in commands])
+    ]
+    return "; ".join(parts) or None
+
+
 def browser_tools():
     """(Chromium binary, node_modules dir holding Playwright) for `shot`, or None."""
     home = Path.home()
@@ -806,6 +819,8 @@ def build_intake(project, request):
         goal=f"{number} (new)",
         owner_language=project_meta(project).get("owner_language", ""),
     )
+    if runs_by_role(project):
+        packet.header["runs_by_role"] = runs_by_role(project)
     packet.add_studio_context(project, ["goal", "handoff"])
     packet.add("@owner-request", request)
     packet.writes = [
@@ -1114,6 +1129,8 @@ def build_route(project, gdir, records=None, since=None):
     )
     if current_build(project):
         packet.header["current_build"] = current_build(project)
+    if runs_by_role(project):
+        packet.header["runs_by_role"] = runs_by_role(project)
     packet.add_studio_context(project, ["handoff", "escalation", "goal"])
     packet.add_entry(project, f"{grel}/goal.md")
     add_log(packet, gdir, grel)
@@ -1292,6 +1309,8 @@ def build_resume(project, gdir, records=None):
     )
     if current_build(project):
         packet.header["current_build"] = current_build(project)
+    if runs_by_role(project):
+        packet.header["runs_by_role"] = runs_by_role(project)
     packet.add_studio_context(project, ["decision", "handoff", "goal", "escalation"])
     packet.add_entry(project, f"{grel}/goal.md")
     add_log(packet, gdir, grel)

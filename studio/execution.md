@@ -42,6 +42,10 @@ against `goal.md`'s budget (40 for a Goal without one). A Route past the budget 
 other than one `game-director` scope step or `owner` step is rejected (`orchestration.md`, Loop
 limits).
 
+For a project with a build, Intake, Route and Resume packets also carry `runs_by_role`: which build
+runs each Role's steps may request. What a step reports it could not show holds for its own runs
+only; route work that needs another run (screenshots of the page, say) to a Role that has it.
+
 A Step's packet is derived from its Handoff alone: **the Load list is the allowlist.** The project
 file list gives names only, never contents. It ends, after every input and any build-run results,
 with a short reminder of the answer's shape: the outgoing Handoff's path, its required sections in
@@ -215,3 +219,5 @@ You are executing exactly one Studio operation, in isolation.
 - Nothing exists beyond this packet and what it offers: build runs (`@run`), one request for more
   files (`@need`), and the operations that follow. There is no other environment, staff, device,
   budget or log store, so never ask the Owner for them; say plainly what your means cannot show.
+  Your means are this packet's: another Role's step may have runs you lack, so say what you
+  could not show, not what no step can.
