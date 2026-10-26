@@ -2,7 +2,7 @@
 kind: role
 id: qa
 strip_sections: Sender assessment
-runs: tests, play, trace, bots
+runs: tests, play, trace, bots, shot
 ---
 # Role: QA
 

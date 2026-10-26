@@ -18,6 +18,7 @@ Options: --runtime claude|codex, --model NAME, --goal G-NNN, --handoff FILE (par
 """
 
 import argparse
+import base64
 import datetime
 import fnmatch
 import hashlib
@@ -238,11 +239,50 @@ def project_meta(project):
 
 
 def run_commands(project):
-    """The build commands a project declares (`run_<name>: <command>`), if it has a build."""
+    """The build commands a project declares (`run_<name>: <command>`), if it has a build, plus
+    `shot` (screenshots of the page) when it declares `page:` and a browser is at hand.
+    """
     meta = project_meta(project)
     if not meta.get("build"):
         return {}
-    return {k[4:]: v for k, v in meta.items() if k.startswith("run_") and v}
+    commands = {k[4:]: v for k, v in meta.items() if k.startswith("run_") and v}
+    if meta.get("page") and browser_tools():
+        commands["shot"] = f"screenshots of {meta['page']} ({{script}}: keys to press)"
+    return commands
+
+
+def browser_tools():
+    """(Chromium binary, node_modules dir holding Playwright) for `shot`, or None."""
+    home = Path.home()
+    chrome = os.environ.get("GAMEWRIGHT_CHROME") or next(
+        iter(
+            sorted(
+                map(
+                    str,
+                    home.glob(".cache/ms-playwright/chromium-*/chrome-linux*/chrome"),
+                ),
+                reverse=True,
+            )
+        ),
+        "",
+    )
+    modules = os.environ.get("GAMEWRIGHT_PLAYWRIGHT") or next(
+        (
+            str(p.parent.parent)
+            for p in sorted(
+                home.glob(".npm/_npx/*/node_modules/playwright/package.json")
+            )
+        ),
+        "",
+    )
+    if (
+        chrome
+        and Path(chrome).is_file()
+        and modules
+        and (Path(modules) / "playwright").is_dir()
+    ):
+        return Path(chrome), Path(modules)
+    return None
 
 
 def goal_dir(project, goal_id=None):
@@ -639,6 +679,9 @@ class Packet:
         # Handoff pattern (build_check).
         self.answer, self.out = "", None
         self.strip_names = ()  # sections removed from Handoffs added by @need (Steps)
+        self.images = (
+            []
+        )  # screenshots from the latest run round: {"label", "data"} (PNG bytes)
 
     def add(self, label, content):
         self.inputs.append((label, content.rstrip() + "\n"))
@@ -1347,7 +1390,7 @@ def build_simulator(project, gdir, artifact):
 # --- Runtimes ----------------------------------------------------------------------------------
 
 
-def run_claude(packet_text, model=None):
+def run_claude(packet_text, model=None, images=None):
     cwd = tempfile.mkdtemp(prefix="step-")
     cmd = [
         "claude",
@@ -1367,11 +1410,35 @@ def run_claude(packet_text, model=None):
     ]
     if model:
         cmd += ["--model", model]
+    stdin = packet_text
+    if images:  # text and screenshots in one user message
+        cmd += ["--input-format", "stream-json"]
+        content = [{"type": "text", "text": packet_text}]
+        for number, image in enumerate(images, 1):
+            content.append(
+                {"type": "text", "text": f"Image {number}: {image['label']}"}
+            )
+            content.append(
+                {
+                    "type": "image",
+                    "source": {
+                        "type": "base64",
+                        "media_type": "image/png",
+                        "data": base64.b64encode(image["data"]).decode(),
+                    },
+                }
+            )
+        stdin = (
+            json.dumps(
+                {"type": "user", "message": {"role": "user", "content": content}}
+            )
+            + "\n"
+        )
     env = {**os.environ, "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1"}
     try:
         proc = subprocess.run(
             cmd,
-            input=packet_text,
+            input=stdin,
             capture_output=True,
             text=True,
             cwd=cwd,
@@ -1432,7 +1499,11 @@ CODEX_TOOL_FEATURES = [
 ]
 
 
-def run_codex(packet_text, model=None):
+def run_codex(packet_text, model=None, images=None):
+    if images:
+        raise RuntimeError(
+            "the codex runtime cannot take screenshots; run this Goal with claude"
+        )
     cwd = tempfile.mkdtemp(prefix="step-")
     cmd = [
         "codex",
@@ -1718,8 +1789,10 @@ SANDBOX = [
 ]  # fmt: skip
 
 
-def sandboxed(work, argv):
-    """Run one build command where only /usr (read-only) and the build copy (/work) exist, offline."""
+def sandboxed(work, argv, binds=()):
+    """Run one build command where only /usr (read-only) and the build copy (/work) exist, offline.
+    `binds`: extra (host path, sandbox path) pairs mounted read-only (the browser for `shot`).
+    """
     if not shutil.which("bwrap"):
         raise RuntimeError(
             "sandbox unavailable: bubblewrap (bwrap) not found; build commands never run unsandboxed"
@@ -1727,7 +1800,10 @@ def sandboxed(work, argv):
     started = time.time()
     try:
         proc = subprocess.run(
-            SANDBOX + ["--bind", str(work), "/work", "--chdir", "/work"] + argv,
+            SANDBOX
+            + [a for host, inside in binds for a in ("--ro-bind", str(host), inside)]
+            + ["--bind", str(work), "/work", "--chdir", "/work"]
+            + argv,
             capture_output=True,
             text=True,
             timeout=RUN_TIMEOUT,
@@ -1789,7 +1865,7 @@ def run_round(project, packet, files, rec):
         {p: c for p, c in files.items() if not p.startswith("@run/")}
     )
     packet.rounds += 1
-    results = []
+    results, images = [], []
     labels = [label for label in files if label.startswith("@run/")]
     with tempfile.TemporaryDirectory(prefix="build-") as tmp:
         for number, label in enumerate(labels):
@@ -1803,9 +1879,43 @@ def run_round(project, packet, files, rec):
                 target.write_text(content, encoding="utf-8")
             script, command = files[label], commands[label.split("/")[1]]
             (work / SCRIPT_NAME).write_text(script, encoding="utf-8")
-            code, output, seconds = sandboxed(
-                work, shlex.split(command.replace("{script}", SCRIPT_NAME))
-            )
+            taken = []
+            if label.split("/")[1] == "shot":
+                code, output, seconds = sandboxed(
+                    work,
+                    [
+                        "node",
+                        "/opt/gamewright/shot.js",
+                        project_meta(project)["page"],
+                        SCRIPT_NAME,
+                    ],
+                    shot_binds(),
+                )
+                shots = work / ".shots"
+                for png in (
+                    sorted(shots.glob("*.png"), key=lambda f: int(f.stem))
+                    if shots.is_dir()
+                    else []
+                ):
+                    if (
+                        len(images) >= MAX_IMAGES
+                        or png.is_symlink()
+                        or not png.is_file()
+                    ):
+                        continue
+                    name = f"shot-round{packet.rounds}-{len(images) + 1}.png"
+                    (rec / name).write_bytes(png.read_bytes())
+                    images.append(
+                        {
+                            "label": f"{label} screenshot {png.stem}",
+                            "data": png.read_bytes(),
+                        }
+                    )
+                    taken.append(f"image {len(images)} ({name})")
+            else:
+                code, output, seconds = sandboxed(
+                    work, shlex.split(command.replace("{script}", SCRIPT_NAME))
+                )
             results.append(
                 {
                     "run": label,
@@ -1813,7 +1923,13 @@ def run_round(project, packet, files, rec):
                     "script": script,
                     "exit": code,
                     "seconds": seconds,
-                    "output": output,
+                    "output": output
+                    + (
+                        "\nAttached to this packet: " + ", ".join(taken)
+                        if taken
+                        else ""
+                    ),
+                    **({"images": taken} if taken else {}),
                 }
             )
     (rec / f"runs-round{packet.rounds}.json").write_text(
@@ -1829,6 +1945,8 @@ def run_round(project, packet, files, rec):
             f"### Round {packet.rounds}: {r['run']} — `{r['command']}`\n\n{script}"
             f"Exit: {r['exit']} ({r['seconds']} s). Output:\n\n```text\n{r['output'].rstrip()}\n```\n"
         )
+    if any(label.split("/")[1] == "shot" for label in labels):
+        packet.images = images  # only the latest round's screenshots travel on
     if packet.base_inputs is None:
         packet.base_inputs = list(packet.inputs)
     packet.inputs = list(packet.base_inputs)
@@ -1842,6 +1960,21 @@ def run_round(project, packet, files, rec):
     if not left:
         packet.writes = [w for w in packet.writes if not w.startswith("@run/")]
     return results
+
+
+MAX_IMAGES = 4
+
+
+def shot_binds():
+    chrome, modules = browser_tools()
+    binds = [
+        (chrome.parent, "/opt/browser"),
+        (modules, "/opt/node_modules"),
+        (ROOT / "scripts" / "shot.js", "/opt/gamewright/shot.js"),
+    ]
+    if Path("/etc/fonts").is_dir():
+        binds.append((Path("/etc/fonts"), "/etc/fonts"))
+    return binds
 
 
 def record_dir(ws, op, role=None):
@@ -1885,7 +2018,8 @@ def execute(ws, packet, validate, args, role=None):
                 base + feedback, encoding="utf-8"
             )
         try:
-            result = RUNTIMES[args.runtime](base + feedback, args.model)
+            extra = {"images": packet.images} if packet.images else {}
+            result = RUNTIMES[args.runtime](base + feedback, args.model, **extra)
         except (RuntimeError, Rejected, OSError) as error:
             record.update(status="error", errors=[str(error)])
             save_record(rec, record)

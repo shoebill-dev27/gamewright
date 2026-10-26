@@ -2,7 +2,7 @@
 kind: role
 id: game-director
 writes: decisions/*
-runs: play, bots
+runs: play, bots, shot
 ---
 # Role: Game Director
 

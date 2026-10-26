@@ -4,7 +4,7 @@ id: playtester
 receives_from: studio
 load_only: studio/roles/playtester.md, studio/skills/playtest-session.md, project.md#player-profile, @player_visible
 strip_sections: Sender assessment
-runs: play
+runs: play, shot
 ---
 # Role: Playtester
 

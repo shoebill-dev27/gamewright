@@ -9,6 +9,7 @@ build: <optional: the directory holding a build that commands can run>
 run_tests: <optional, with build: command that runs the build's tests>
 run_play: <optional, with build: command that plays a script ({script}) and shows the player view>
 run_trace: <optional, with build: command that plays a script and shows internal state>
+page: <optional, with build: a page of the build that a browser opens; Steps may then take screenshots of it (`shot`)>
 ---
 # Project: <display name>
 

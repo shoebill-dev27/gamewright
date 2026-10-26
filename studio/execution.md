@@ -78,6 +78,14 @@ that final answer. Commands run in a sandbox: only the system's programs (read-o
 copy are visible, there is no network, and each command is stopped after 30 seconds. Without a
 sandbox, build commands are not run. Rounds, scripts and outputs are recorded.
 
+**Screenshots.** A project whose build has a page a browser can open declares it as `page:` in
+`project.md`. Where the runtime has a browser, Roles whose policy allows `shot` may then request
+`@run/shot` runs: the script optionally starts with `page <path>[#fragment]`, then lists keys to
+press, with `shot` wherever a screenshot is wanted (the last screen is always taken; at most 4 per
+run). The browser runs in the same sandbox as other build commands. The screenshots of the latest
+round are attached as images to the next executor's packet and kept in the records; the run
+results say which image is which.
+
 **Build check.** When a Step's final answer writes build files and the project declares
 `run_tests`, the runtime runs it in the sandbox on the build exactly as written, before writing,
 and adds the result (command, exit code, end of the output) to the outgoing Handoff under

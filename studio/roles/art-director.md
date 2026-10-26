@@ -2,6 +2,7 @@
 kind: role
 id: art-director
 writes: design/*, decisions/*
+runs: shot
 ---
 # Role: Art Director
 
