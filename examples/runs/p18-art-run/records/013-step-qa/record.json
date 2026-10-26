@@ -1,0 +1,112 @@
+{
+ "op": "Step",
+ "role": "qa",
+ "goal": "G-002",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "2d7fba35-8cf7-4f13-a7d2-964bf51518c9",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 25251,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 543,
+    "output_tokens_details": {
+     "thinking_tokens": 431
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 25251,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 543,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 25251,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 25251
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.10643799999999999,
+   "attempt": 1,
+   "started": "2026-10-26T11:09:10",
+   "seconds": 8.9,
+   "errors": [],
+   "runs": [
+    "@run/tests",
+    "@run/play/hollow-walk",
+    "@run/shot/start",
+    "@run/shot/walk"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "6e5f6d38-5777-432c-87cc-744ae9fbdf6f",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 33473,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 6797,
+    "output_tokens_details": {
+     "thinking_tokens": 3073
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 33473,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 6797,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 33473,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 33473
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.20186600000000002,
+   "attempt": 2,
+   "started": "2026-10-26T11:09:22",
+   "seconds": 61.7,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-002-entity-pictures/14-qa-to-studio.md": "9cde400968cc3af72f07a2b5282449ecdbc84f402acc70c33ac7168db23522d5"
+ },
+ "decision": {}
+}

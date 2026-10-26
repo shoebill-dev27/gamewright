@@ -1,0 +1,87 @@
+---
+kind: goal
+id: G-001
+project: ember-hollow
+status: done
+created: 2026-10-26
+budget: 19
+---
+# G-001: First complete playable run in the browser
+
+## Owner request
+
+> このコンセプトで、最初から最後まで通して遊べる版を作ってほしい。ブラウザで遊べるようにしてほしい
+
+## Interpretation
+
+Success condition: a person opens `repo/index.html` straight from the file system in a browser and can play one whole run with keyboard or mouse. The run starts on floor 1, passes through all five floors, and ends in one of the ways the vision names: beating the floor-5 creature (win), dying, or the ember going out. No setup, server or developer step is needed. The vision's pillars hold in that run: readable threats, light as the resource, a short seeded run (same seed gives the same run).
+
+The team-side means from `project.md#constraints` also ship, because verification depends on them: `node play.js {script}`, `--trace`, `node --test`, and `repo/manual.md` (the script format and everything a player is told).
+
+Out of scope (not requested): saving or resuming runs, meta-progression between runs, sound, mobile or touch layouts, network features, content beyond what one complete five-floor run needs, and any change to the vision or pillars.
+
+## Unknowns
+
+- Observe: skipped. No build existed and nothing was reported broken or off.
+- Diagnose: skipped. There was no problem to explain.
+- Decide: skipped. Design stayed inside the vision and Goal scope.
+- Design: done. 30 checks; D-002 settled check 14. Balance unverified.
+- Plan: done (handoff 03).
+- Build: done (handoff 12). `node --test` passed 49/49.
+- Verify: done, partial (handoff 13). No defects found. Checks 27-30 (browser page) not verifiable by any executor. Art Director review skipped (budget).
+- Play: done, partial (handoff 15). Seed 42, floor 1, 16 turns, scripts only.
+- Review: done (handoff 17). Verdict goal-not-met, read as partly met. Missing evidence becomes proposed Goals.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Design | game-designer | write-design-spec | done | 01-studio-to-game-designer.md |
+| 2 | Decide | game-director | make-decision | skipped | — |
+| 3 | Plan | technical-director | technical-plan | done | 02-game-designer-to-technical-director.md |
+| 4a | Build | gameplay-engineer | implement-change | done | 11-studio-to-gameplay-engineer.md |
+| 4b | Design (check 14 question) | game-designer | write-design-spec | done | 04-studio-to-game-designer.md |
+| 4c | Design (flare stun, hound bite) | game-designer | write-design-spec | done | 08-studio-to-game-designer.md |
+| 5a | Verify | qa | verify-change | done | 13-qa-to-studio.md |
+| 5b | Verify (visual) | art-director | visual-review | skipped | — |
+| 6 | Play | playtester | playtest-session | done | 14-studio-to-playtester.md |
+| 7 | Review | game-director | review-outcome | done | 16-studio-to-game-director.md |
+| 8 | Next | studio | — | done | 17-game-director-to-studio.md |
+
+## Route changes
+
+After Review (17, goal-not-met, partly met): no stage fits the remaining budget (18 of 19 used), and no escalation trigger fires. The Goal is closed with the gaps stated; the missing evidence becomes four proposed Goals for the Owner.
+
+## Next action
+
+Goal closed. The Owner checks `repo/index.html` (checks 27-30) and chooses which proposed Goals to open and in what order.
+
+## Outcome
+
+**結果(部分的に達成)**
+
+5 フロア、残り火、3 種類のクリーチャー、暗闇(Gloom)、シード付きの run をすべて備えたビルドを作りました。自動テストは 49/49 で通っています。テキスト版プレイヤー(`node play.js`、`--trace`)と `repo/manual.md` も、説明どおりに動作します。
+
+ただし、ご依頼が達成されたとはまだ確認できていません。
+- ブラウザ用ページ(`repo/index.html`)は、誰も実際に見ていません。どの実行者もページを見られなかったためです。
+- 最初から最後まで通して遊んだ人はいません。プレイテストはシード 42 のフロア 1、16 ターンだけです。フロア 2〜5、ブラジャー、アイテム、ハウンド、シェード、Gloom、勝利・敗北、run の長さ、バランスは観察されていません。
+- QA は、チェック 13・14(手作りシナリオ)・26 のテスト個別結果を見ていません。
+
+**行った Decision**
+- D-001: 共有コードは通常のスクリプト形式(UMD 風)のモジュールにする。
+- D-002: 脅威マークに加え、隣接 4 マスに到達マークを付ける。
+
+どちらも変更していません。ビジョンとピラーも変わっていません。
+
+**気づいた点**
+プレイテスターは、古いメッセージが後のフレームにも残ると報告しました。仕様の「直近 5 件を表示する」どおりの動作で、ルールの不具合ではありません。ただ、直前に起きたことと古い記録の区別がつかず、読み取りにくくなっています。
+
+**次の課題(提案する Goal、順番どおり)**
+1. `repo/index.html` のブラウザ確認(チェック 27〜30)。ご依頼の中心で、リスクが最も高く、手間は最小です。
+2. QA による全テストの個別結果の確認(`reach.test.js`、`g001-final.test.js`、`bots.test.js`)。run の長さの数値も得られます。
+3. 複数シードでの広いプレイテストとバランス確認(フロア 2〜5、ブラジャー、アイテム、Gloom 戦、勝利と敗北、run の長さ)。
+4. メッセージの読みやすさ改善(現在のターンのメッセージを区別する)。3 の結果次第で、他の表示の問題とまとめて対応します。
+
+**オーナーにお願いしたいこと**
+- `repo/index.html` をブラウザで開き、次を確認してください。グリッド、残り火のバー、キーとマウスでの操作、見えているマスが明るいこと、マークの区別、3 種類の終了画面、新しい run の開始。これは他では代えられません。
+- 提案 Goal 2〜4 を進めるかどうか、進める場合の順番をお知らせください。

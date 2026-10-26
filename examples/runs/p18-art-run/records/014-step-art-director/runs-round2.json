@@ -1,0 +1,13 @@
+[
+ {
+  "run": "@run/shot/keys-spaced",
+  "command": "screenshots of index.html ({script}: keys to press)",
+  "script": "d d d d s s\n",
+  "exit": 0,
+  "seconds": 0.6,
+  "output": "{\"page\":\"index.html\",\"keys_pressed\":6,\"screenshots\":1,\"screenshots_not_taken\":0,\"console_errors\":[]}\n\nAttached to this packet: image 1 (shot-round2-1.png)",
+  "images": [
+   "image 1 (shot-round2-1.png)"
+  ]
+ }
+]

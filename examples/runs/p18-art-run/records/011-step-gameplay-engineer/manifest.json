@@ -1,0 +1,107 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-002-entity-pictures/10-studio-to-gameplay-engineer.md",
+  "sha256": "d549841c538771e610e78dbd7167f3343593e098c3b6e902e0f8d1634d577428",
+  "bytes": 4975
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md",
+  "sha256": "8a447e66877cd14dfff47ac1b8482ba77c850159c8fb43ec2780e91064869351",
+  "bytes": 1742
+ },
+ {
+  "path": "studio/skills/implement-change.md",
+  "sha256": "a9befd7f1d9e09eb94c51a066f030db88c5061ad1b522d9795e62bc2c242964a",
+  "bytes": 1823
+ },
+ {
+  "path": "design/entity-pictures.md",
+  "sha256": "36d79bc0eaa16d8f82ad5657c1f95bfb0e1dadcbdbb0209450f51751d071e1a8",
+  "bytes": 14545
+ },
+ {
+  "path": "repo/src/page.js",
+  "sha256": "231e8212a3e3c36e7c41b26eec2a64002137127b38110b3300cac071a3cd0445",
+  "bytes": 8214
+ },
+ {
+  "path": "repo/src/pictures.js",
+  "sha256": "49f3cfece5de960e53e77f1597e562f24765da68e7bab1e8f72c37a882ed2a10",
+  "bytes": 6570
+ },
+ {
+  "path": "repo/src/scene.js",
+  "sha256": "5909e85ef4ffea92df928bee059df57f0541bde1a3e48c72d239b404e74f6b2a",
+  "bytes": 2202
+ },
+ {
+  "path": "repo/index.html",
+  "sha256": "56556bfa421f8c804c50a94cd2db5666bf2b38a48547e6bf08d004ad4b33abff",
+  "bytes": 2787
+ },
+ {
+  "path": "repo/tests/pictures.test.js",
+  "sha256": "b5edf83644d2295c3f550837cc36e089ae7060421bf133b15e6ce4d92d9168b8",
+  "bytes": 4036
+ },
+ {
+  "path": "repo/tests/golden.test.js",
+  "sha256": "9a1be75d58a49db780339cfc7a2f8d40d9dd4239c1675e85f9afb639f4e79ecf",
+  "bytes": 2041
+ },
+ {
+  "path": "repo/tests/golden/hashes.json",
+  "sha256": "182aeb36e391656fc040f962b594117fb7031e7e7c8368755307a7d247780fcc",
+  "bytes": 966
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "450fd395c0cb68189bb9f0c7ff683df5db990e6a88dacea42fd26cf28e181cf0",
+  "bytes": 849
+ },
+ {
+  "path": "decisions/D-002-threat-and-reach-marks.md",
+  "sha256": "05ba76f00173c03e14b3d829b371b88cafc9dd6e874de2d5c32b009665dc3971",
+  "bytes": 1943
+ },
+ {
+  "path": "decisions/D-003-picture-style-and-mark-layering.md",
+  "sha256": "b2ba6fda05f1f2e4e1f4386b6e33af77fd25d3a74bedff7d7071fe018ae260c5",
+  "bytes": 2331
+ },
+ {
+  "path": "decisions/D-004-pictures-drawn-by-code-with-pure-scene-mapping.md",
+  "sha256": "7215a4c18b7cd317446b4e222e24707ec6a291bb44314e531bfe6480e7895069",
+  "bytes": 3163
+ },
+ {
+  "path": "decisions/D-005-tile-size-and-mark-chips.md",
+  "sha256": "8fe8048980f655bffd4b2aabb1986fd4bae89be1ccbedecdb6700482d6567afb",
+  "bytes": 4352
+ },
+ {
+  "path": "goals/G-002-entity-pictures/09-art-director-to-studio.md",
+  "sha256": "dfe10df7990897ba6882f85060e1f4a31f3450fc76412eef1c633ef349d98e16",
+  "bytes": 8456
+ },
+ {
+  "path": "goals/G-002-entity-pictures/08-qa-to-studio.md",
+  "sha256": "c03fbae2521cd48eaf3531067fe8055c231ca7d4f5781324aada28c7342dfc83",
+  "bytes": 11869
+ },
+ {
+  "path": "@files/repo",
+  "sha256": "ab3d69199b98a75bb49d478081df0126bce4873b0ed0c438ab13c683e980ca63",
+  "bytes": 832
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ }
+]

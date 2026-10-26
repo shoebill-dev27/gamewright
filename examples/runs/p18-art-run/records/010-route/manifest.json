@@ -1,0 +1,117 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "studio/README.md",
+  "sha256": "47846604f59124562b83f1a16c51b342f3a2e5088e49268840e108ef3faaff4e",
+  "bytes": 6379
+ },
+ {
+  "path": "studio/orchestration.md",
+  "sha256": "c375263d5cb1b5f4b29ac5f824ce1da2701f22a7b5ca5e15b8f1b694793e27cf",
+  "bytes": 14082
+ },
+ {
+  "path": "studio/workflows/development-loop.md",
+  "sha256": "a7128fc40c3130fa05a137ca54e3cbf0322de2cb4806ed0dbf872f7cedb35c9c",
+  "bytes": 5047
+ },
+ {
+  "path": "studio/roles/art-director.md#works-from",
+  "sha256": "1a9b4ea463ac85d107625d79994080052da5b1d784f3692ad9a104f2424ad56d",
+  "bytes": 172
+ },
+ {
+  "path": "studio/roles/game-designer.md#works-from",
+  "sha256": "fe60f9d4900dea1514aa0fb524d2c69dad547e7cc71ff3139183e3d2d86aca3b",
+  "bytes": 171
+ },
+ {
+  "path": "studio/roles/game-director.md#works-from",
+  "sha256": "fde4d1b3c02d9abaf3a00f5287e4c8d23694df2027a9f960fedbc1f27c63ff31",
+  "bytes": 203
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md#works-from",
+  "sha256": "a0ebe4d4866fa859cecd40ffd4c98b6aaf79f44403a965e3376d00b52f50293a",
+  "bytes": 175
+ },
+ {
+  "path": "studio/roles/playtester.md#works-from",
+  "sha256": "6025c9d1ca754ba86f61996472c6d3a5e308f23d81479849e1e3a01b60eb4f2d",
+  "bytes": 371
+ },
+ {
+  "path": "studio/roles/playtester.md#independence",
+  "sha256": "29e2c5b25cb9b8b16d1b40109c2ecca745024349a2b4062a24545d4643ff3d25",
+  "bytes": 232
+ },
+ {
+  "path": "studio/roles/qa.md#works-from",
+  "sha256": "e4e9de4a0c4f5b40f4c41edc771780fe53f19c1573cee671f22dcdff410f2fa8",
+  "bytes": 355
+ },
+ {
+  "path": "studio/roles/qa.md#independence",
+  "sha256": "c8090d5136ea02384fb4e96585cf1be7935428e4dac0331a52709f305dcff2f3",
+  "bytes": 208
+ },
+ {
+  "path": "studio/roles/technical-director.md#works-from",
+  "sha256": "5571f0fcf5ac14950e226c1f713d5c058a27e2649fd7ac18df4e783978323621",
+  "bytes": 160
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ },
+ {
+  "path": "studio/templates/escalation.md",
+  "sha256": "6e505880bdef28223c7275a4bb19c8f245577964d14c28d48e04561e7a5c7b90",
+  "bytes": 975
+ },
+ {
+  "path": "studio/templates/goal.md",
+  "sha256": "f798a99b06412b183b8418b65607332d31c350003a7320abb6517e7dc6c51211",
+  "bytes": 1761
+ },
+ {
+  "path": "project.md",
+  "sha256": "80ec63f9059313b3f21c58c7e5bdf3e7dbcc2bacf5b8ba33afe4fc96581d7d3b",
+  "bytes": 3451
+ },
+ {
+  "path": "@project-files",
+  "sha256": "346e5ac242b4d897d1140d2e750bbeaddc80f272f59eb7946680805d7bd5f4e1",
+  "bytes": 2736
+ },
+ {
+  "path": "@decision-titles",
+  "sha256": "4a57eaf63b4ae51899ff937c528c924f7c1d45568de507744663ad36ece61fc1",
+  "bytes": 680
+ },
+ {
+  "path": "goals/G-002-entity-pictures/goal.md",
+  "sha256": "b47ca357dd826679f6cfc331ca52a73f8eb7a9786b63a9ba4f577c1a70e0fb0d",
+  "bytes": 4086
+ },
+ {
+  "path": "@log-recent",
+  "sha256": "238ee1ff23297cbcb815e19c8cec98d68f7b62652b3600f82b6f304eb41d26aa",
+  "bytes": 1320
+ },
+ {
+  "path": "goals/G-002-entity-pictures/08-qa-to-studio.md",
+  "sha256": "c03fbae2521cd48eaf3531067fe8055c231ca7d4f5781324aada28c7342dfc83",
+  "bytes": 11869
+ },
+ {
+  "path": "goals/G-002-entity-pictures/09-art-director-to-studio.md",
+  "sha256": "dfe10df7990897ba6882f85060e1f4a31f3450fc76412eef1c633ef349d98e16",
+  "bytes": 8456
+ }
+]

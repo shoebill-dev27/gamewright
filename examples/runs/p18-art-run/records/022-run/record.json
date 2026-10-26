@@ -1,0 +1,13 @@
+{
+ "op": "Run",
+ "goal": "G-002",
+ "operations": [
+  "019-route",
+  "020-step-game-director",
+  "021-route"
+ ],
+ "stop_reason": "done",
+ "status": "done",
+ "owner_reads": "goals/G-002-entity-pictures/goal.md#outcome",
+ "next": null
+}

@@ -1,0 +1,67 @@
+---
+kind: handoff
+goal: G-002
+seq: 3
+from: studio
+to: technical-director
+stage: Plan
+outcome: routed
+---
+# 03: studio → technical-director — plan how to build the entity pictures
+
+## Task
+
+Write a technical plan for implementing the picture spec `design/entity-pictures.md` (criteria 31 to 49) on the browser page, and settle the method questions below so the Gameplay Engineer can build without deciding them.
+
+## Context
+
+Goal G-002. The Owner said 「それぞれに絵をつけてほしい」; the Studio read it as a picture for each kind of thing on the floor grid. The Art Director has finished the Design step: 13 entities (player with ember flame, cave moth, shade, ash hound in two poses, the Gloom, unlit and lit brazier, salve, oil flask, wall, floor, `<`, `>`), a flat dark-cave style (D-003), light and memory rules, and a fixed layering of marks over pictures. The Art Director advised a Plan because the method is risky. Nobody has seen the browser page, and your means may not show it either.
+
+## Findings
+
+From the Art Director's handoff (`02-art-director-to-studio.md`):
+
+- Unseen tiles stay blank; remembered tiles are dimmer with the same shapes; creatures are never drawn from memory; visible tiles share one brightness inside the glow.
+- Flame size on the player follows the ember radius r (criterion 36).
+- Layering: threat border and badge on top of the creature; hound line and Gloom area are tints under the creature; reach border and letter over the tile picture; stunned or staggered creatures get a pale-blue wash and no red.
+- The marked set on the page must equal the text player's (criterion 45).
+- Existing checks 27 to 30 are refined or re-checked; checks 1 to 26 are untouched. The text player output must stay byte-identical (criterion 48).
+- Tile size and current mark styling are unknown. The 10% inner margin and the 3 px border may not fit small tiles; below about 20 px per tile the Art Director wants to be consulted again.
+
+## Decisions already made
+
+- D-001: shared code is plain classic-script modules (UMD style); rules code stays free of drawing.
+- D-002: threat marks plus reach marks on the four neighbour tiles.
+- D-003: flat dark-cave pictures; marks always drawn over pictures; warm light reserved for the ember; red and orange reserved for marks.
+
+## Constraints
+
+- No rule, balance or content changes; the text player and its output unchanged; `node --test` must still pass.
+- No dependencies, no network; the page opens from `file://` without a server.
+- Rules code stays shared and separate from drawing (D-001).
+- Checks 1 to 30 stay in force.
+
+## Open questions
+
+Decide, and record a Decision (`make-decision`) if one constrains later work or rejects a real alternative:
+
+1. How pictures are made and stored: separate image files, drawing by code (canvas), inline vector, or embedded data. Which works from `file://` in the page as built.
+2. Where the entity-and-state to picture mapping lives, so that it reads the same state the marks use and cannot alter a mark or a rule.
+3. How remembered (dimmed) tiles and flame sizes are produced: in code, or stored.
+4. How to check pictures with the means available: which criteria can be tested by `node --test` (for example mapping tables, marked-set equality, byte-identical text output) and which need someone to see the page. Say plainly which cannot be checked without a viewer.
+5. Whether the build should report tile size and the current mark styling, and what the engineer must do if tiles are too small (hand back to the Art Director).
+6. Sequencing, and whether any part can be built in parallel. Parallel code workspaces only if you decide it is worth it.
+
+If the spec turns out infeasible within the constraints, hand back for Design (`game-designer` or `art-director`) instead of choosing for them.
+
+## Expected output
+
+A plan in Findings of your outgoing Handoff: approach, files to change, tests, risks, and sequencing. Set `to: gameplay-engineer` (Build). In Expected output for the engineer, ask that the build notes address the result to `studio`, since QA and the Art Director verify next. If the spec is infeasible, or a direction or scope change is needed, route per your Role contract.
+
+## Load
+
+- Role: studio/roles/technical-director.md
+- Skills: studio/skills/technical-plan.md, studio/skills/make-decision.md
+- Project: project.md#constraints, project.md#current-state, design/entity-pictures.md, design/game-spec.md, design/acceptance-criteria.md, repo/manual.md, repo/index.html, repo/src/page.js, repo/src/view.js, repo/src/textview.js
+- Decisions: decisions/D-001-classic-scripts-shared-rules.md, decisions/D-002-threat-and-reach-marks.md, decisions/D-003-picture-style-and-mark-layering.md
+- Previous handoff: goals/G-002-entity-pictures/02-art-director-to-studio.md

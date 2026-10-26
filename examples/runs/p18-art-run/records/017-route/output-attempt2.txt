@@ -1,0 +1,133 @@
+<<<FILE goals/G-002-entity-pictures/goal.md
+---
+kind: goal
+id: G-002
+project: ember-hollow
+status: active
+created: 2026-10-26
+budget: 13
+---
+# G-002: Pictures for each kind of thing in the game
+
+## Owner request
+
+> それぞれに絵をつけてほしい
+
+## Interpretation
+
+"それぞれ" has no stated referent. The Studio reads it as: **each kind of thing the player meets and sees on the floor grid gets its own picture** (a drawn image instead of a bare glyph or colour), with the player and ember, each creature type (three), braziers, and items as the core set. Whether terrain tiles (walls, floor, the Gloom) and the final-floor creature are included is the Art Director's call from the design docs, within this reading.
+
+Success, observable: on the browser page, a player can tell every kind of entity apart by its picture at a glance, the pictures fit the cave and ember mood of the vision, and the threat and reach marks (D-002) and the ember-light visibility are still as readable as before.
+
+Out of scope: rule, balance or content changes; new creatures or items; the text player's output (`node play.js`) and its format; sound; animation unless the spec asks for it. The pictures must not add dependencies or network use, and the page must still open from the file system (project constraints).
+
+Risk noted: if the Owner meant something narrower (e.g., creatures only) or wider (e.g., a picture for every floor), the Art Director's scope list will show it. The Owner can correct it on seeing the Design step's result. This is not escalated now, because the reading above is a plain one and stays within the vision.
+
+## Unknowns
+
+- Observe: skipped. This is an addition, not a problem report. No one has yet seen the browser page (project.md Current state).
+- Diagnose: skipped. Nothing is misbehaving.
+- Decide (visual style): skipped. Settled by D-003 and D-005.
+- Design: settled. Spec design/entity-pictures.md (criteria 31 to 49), D-003, D-005.
+- Plan: settled. Method fixed in the Technical Director's plan and D-004.
+- Build: second pass done (D-005 applied; 69/69 tests). One small change proposed by the Art Director (dim factor 0.55 to 0.65), not yet applied.
+- Verify: second pass done, both partial. Nothing seen fails, but most scenes (marks, creatures other than a moth, items, r = 2, 1280 px layout) could not be reached with the `shot` tool (keys only, random seed). Criterion 44 is not verified.
+- Scope (budget used up, 15 of 13): open. Game Director decides what the remaining work must be for the Owner request (accept on partial evidence, one more targeted look, or an Owner look-and-confirm), or escalates the cost.
+- Play: tentative, subject to the scope decision.
+- Review: skipped. Not an experience Goal and no direction Decision is involved.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Design | art-director | write-design-spec | done | 02-art-director-to-studio.md |
+| 2 | Plan | technical-director | technical-plan | done | 04-technical-director-to-gameplay-engineer.md |
+| 3 | Build | gameplay-engineer | implement-change | done | 05-gameplay-engineer-to-studio.md |
+| 4a | Verify | qa | verify-change | done | 08-qa-to-studio.md |
+| 4b | Verify (visual) | art-director | visual-review | done | 09-art-director-to-studio.md |
+| 5 | Build (fix 44, D-005) | gameplay-engineer | implement-change | done | 11-gameplay-engineer-to-studio.md |
+| 6a | Verify (2nd, screenshots) | qa | verify-change | done | 12-studio-to-qa.md |
+| 6b | Verify (visual, screenshots) | art-director | visual-review | done | 13-studio-to-art-director.md |
+| 7 | Decide (scope cut) | game-director | make-decision | open | 16-studio-to-game-director.md |
+| 8 | Play | playtester | playtest-session | tentative | — |
+
+Status: planned | tentative | open | done | skipped. Further stages (dim-factor Build, a third Verify) are not planned; the Game Director's scope decision says which of them stay, the rest is skipped.
+
+## Route changes
+
+After the two parallel Verify steps (14, 15; both partial, nothing failing): the budget is used up (15 of 13), so the only stage added is a game-director scope step (16). It decides what remaining work the Owner request needs; the rest is then skipped. Or it escalates the cost.
+
+## Next action
+
+Start step 7: game-director with `16-studio-to-game-director.md`. Result goes to studio.
+
+## Outcome
+
+(Written at Close, in Japanese.)
+>>>END
+
+<<<FILE goals/G-002-entity-pictures/16-studio-to-game-director.md
+---
+kind: handoff
+goal: G-002
+seq: 16
+from: studio
+to: game-director
+stage: Decide
+outcome: routed
+---
+# 16: studio → game-director — cut the remaining G-002 work to what the Owner request needs
+
+## Task
+
+The Goal's budget is used up (15 of 13 operations). Decide the scope of the remaining work, within the Goal, so that it meets the Owner request "それぞれに絵をつけてほしい" and no more. Either name the remaining steps that stay and skip the rest, or accept the Goal as it stands, or (if the cost itself is the question) prepare an Owner escalation.
+
+## Context
+
+G-002 adds a drawn picture for each kind of thing on the floor grid of the browser page. Design (spec design/entity-pictures.md, criteria 31 to 49), Plan, Build and one fix Build (D-005) are done; `node --test` passes 69/69. Two Verify steps just ran in parallel on the D-005 build (QA: 14, Art Director: 15). Both finished `partial`:
+
+- Nothing seen fails. Wall, floor, unlit brazier, the player, `<` and a moth read clearly on the dark cave background; no console errors; the ember flame is the brightest spot.
+- Most scenes could not be reached. The `shot` tool takes key names only, picks a random seed and takes one screenshot after the last key. So threat marks, reach marks (criterion 44, the one that failed earlier and was to be re-checked first), hound, shade, Gloom, stunned creatures, items, lit brazier, flame at r = 2 and the 1280 px layout were not seen. These are unverified, not failed.
+- The Art Director suggests one small change: the dim factor for remembered tiles in `repo/src/pictures.js` `dim()`, 0.55 to 0.65, because remembered floor is almost black. He recommends holding the Goal until the mark scenes are seen (marks carry pillar 1).
+- QA offers means to see them: (a) a QA-only fixture page or scenario script under a new path, loading the real `src/` (the write list of the last QA step did not allow it); (b) extending `shot` to set the URL hash seed or viewport (not in the Studio's gift: no such tool change exists); (c) the Owner looks at the page, at 1280 px.
+- Ways to cost: any further pass is at least a Step plus a Route each (about 2 operations per stage). The budget can only be changed by the Owner.
+
+## Findings
+
+Options the Studio can see (the choice is yours, within scope):
+
+1. **Accept on the partial evidence.** Close G-002 now, with the unverified criteria listed plainly in the Outcome and the page handed to the Owner to look at. Apply or skip the dim-factor change.
+2. **One more targeted pass.** Keep: Build (dim factor) and a third Verify by QA with a fixture (a), with the exact scenes the criterion 44 re-check needs. Skip Play. Costs more than the budget, so this also needs an Owner step to raise the budget.
+3. **Owner look-and-confirm.** Skip further Verify and Play; the Outcome asks the Owner to open `repo/index.html` and check named scenes (marks, creatures, 1280 px). Maybe with the dim-factor Build first.
+
+The Studio does not recommend among these; it is a scope question. Note only that the means cannot show the marked scenes without a new tool or a QA fixture path, and that no Role can supply Owner eyes on the real page.
+
+## Decisions already made
+
+- D-002: threat and reach marks. D-003: flat dark-cave pictures, marks over pictures. D-004: pictures drawn by code. D-005: tile 28 px, dark chips behind badges and reach letters, player and shade/Gloom contrast.
+
+## Constraints
+
+- Scope is within the Goal; the Goal's interpretation (Owner request) is not changed here. A Route that would reinterpret it must escalate.
+- The Studio adds no stage except what you decide here. Once budget is used up, the only stages allowed are your scope step or an Owner step that escalates the cost.
+- Rules, balance, content and the text player stay out of scope.
+
+## Open questions
+
+1. Which remaining work stays (dim-factor Build, third Verify, Play), and which is skipped?
+2. Is the evidence enough to call the visual intent met on the page, given that the marks (D-002) were not seen working after D-005?
+3. If the work you keep exceeds the budget, escalate the cost to the Owner instead (write an Escalation; the Owner then decides).
+
+## Expected output
+
+A Decision (record it if it constrains later work: next free number is D-006) stating the scope, and a Handoff addressed to `studio` listing the steps kept, the steps skipped, and what the Outcome must tell the Owner as unverified. If you choose to escalate, write the Escalation brief (templates/escalation.md) in Japanese, as one question.
+
+## Load
+
+- Role: studio/roles/game-director.md
+- Skills: studio/skills/make-decision.md, studio/skills/prepare-owner-escalation.md
+- Project: project.md#vision, project.md#current-state, design/entity-pictures.md, goals/G-002-entity-pictures/goal.md
+- Decisions: decisions/D-002-threat-and-reach-marks.md, decisions/D-003-picture-style-and-mark-layering.md, decisions/D-005-tile-size-and-mark-chips.md
+- Previous handoff: goals/G-002-entity-pictures/14-qa-to-studio.md
+- Also: goals/G-002-entity-pictures/15-art-director-to-studio.md
+>>>END

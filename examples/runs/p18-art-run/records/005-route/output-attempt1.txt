@@ -1,0 +1,11 @@
+My second edit stopped partway through the Project line, so it probably did not apply. Here is the corrected edit with the full lines.
+
+<<<EDIT goals/G-002-entity-pictures/04-technical-director-to-gameplay-engineer.md
+<<<<<<< SEARCH
+- Skills: none specified; use the Role's typical skills
+- Project: project.md#constraints, project.md#current-state, design/entity-pictures.md, design/game-spec.md, repo/manual.md, repo/index.html, repo/src/page.js, repo/src/view.js, repo/src/textview.js, repo/src/game.js
+=======
+- Skills: studio/skills/implement-change.md
+- Project: project.md#constraints, project.md#current-state, design/entity-pictures.md, design/acceptance-criteria.md, design/game-spec.md, repo/manual.md, repo/index.html, repo/src/page.js, repo/src/view.js, repo/src/textview.js, repo/src/game.js
+>>>>>>> REPLACE
+>>>END

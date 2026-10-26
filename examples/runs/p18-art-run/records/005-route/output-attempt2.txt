@@ -1,0 +1,72 @@
+Plan is done, so I'm opening the Build step for the gameplay engineer. The only change to the handoff is the Load list: it now names the `implement-change` skill instead of "none specified". The budget stays at 13.
+
+<<<FILE goals/G-002-entity-pictures/goal.md
+---
+kind: goal
+id: G-002
+project: ember-hollow
+status: active
+created: 2026-10-26
+budget: 13
+---
+# G-002: Pictures for each kind of thing in the game
+
+## Owner request
+
+> それぞれに絵をつけてほしい
+
+## Interpretation
+
+"それぞれ" has no stated referent. The Studio reads it as: **each kind of thing the player meets and sees on the floor grid gets its own picture** (a drawn image instead of a bare glyph or colour), with the player and ember, each creature type (three), braziers, and items as the core set. Whether terrain tiles (walls, floor, the Gloom) and the final-floor creature are included is the Art Director's call from the design docs, within this reading.
+
+Success, observable: on the browser page, a player can tell every kind of entity apart by its picture at a glance, the pictures fit the cave and ember mood of the vision, and the threat and reach marks (D-002) and the ember-light visibility are still as readable as before.
+
+Out of scope: rule, balance or content changes; new creatures or items; the text player's output (`node play.js`) and its format; sound; animation unless the spec asks for it. The pictures must not add dependencies or network use, and the page must still open from the file system (project constraints).
+
+Risk noted: if the Owner meant something narrower (e.g., creatures only) or wider (e.g., a picture for every floor), the Art Director's scope list will show it. The Owner can correct it on seeing the Design step's result. This is not escalated now, because the reading above is a plain one and stays within the vision.
+
+## Unknowns
+
+- Observe: skipped. This is an addition, not a problem report. Note that no one has yet seen the browser page (project.md Current state), and the means here may not be able to show it.
+- Diagnose: skipped. Nothing is misbehaving.
+- Decide: skipped. Visual style within the vision is the Art Director's authority; no direction or priority choice is open.
+- Design: settled. Spec design/entity-pictures.md (criteria 31 to 49) and D-003.
+- Plan: settled. Method fixed in the Technical Director's plan and D-004 (code-drawn pictures, pure scene.js mapping, pictures.js, thin page.js changes, golden text tests). No hand-back to Design needed.
+- Build: **open**. The page must change; the engineer implements per plan. Risks: pictures too crude at TILE 22 (hand back to the Art Director via studio if so), state label strings unverified.
+- Verify: always after Build. QA checks against acceptance criteria; the Art Director reviews visually in parallel. Many visual criteria cannot be checked without a viewer.
+- Play: tentative. Only if the page can actually be shown to a playtester with the available means. Otherwise the limit is stated at Close.
+- Review: skipped. Not an experience Goal and no direction Decision is involved. Revisit if a direction question appears.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Design | art-director | write-design-spec | done | 02-art-director-to-studio.md |
+| 2 | Plan | technical-director | technical-plan | done | 04-technical-director-to-gameplay-engineer.md |
+| 3 | Build | gameplay-engineer | implement-change | open | 04-technical-director-to-gameplay-engineer.md |
+| 4a | Verify | qa | verify-change | planned | — |
+| 4b | Verify (visual) | art-director | visual-review | planned | — |
+| 5 | Play | playtester | playtest-session | tentative | — |
+
+Status: planned | tentative | open | done | skipped. Play becomes planned if the page can be shown to a player.
+
+## Route changes
+
+After Plan (done): plan written (04) and D-004 recorded; the spec is feasible, no hand-back to Design. Build is now open with the plan as its Handoff. The engineer addresses the build notes to studio so Verify can get a fresh Handoff without the Sender assessment.
+
+## Next action
+
+Start step 3 with `04-technical-director-to-gameplay-engineer.md`: the gameplay engineer builds the pictures and writes `05-gameplay-engineer-to-studio.md`. The Owner is not needed.
+
+## Outcome
+
+(Written at Close, in Japanese.)
+>>>END
+
+<<<EDIT goals/G-002-entity-pictures/04-technical-director-to-gameplay-engineer.md
+<<<<<<< SEARCH
+- Skills: none specified; use the Role's typical skills
+=======
+- Skills: studio/skills/implement-change.md
+>>>>>>> REPLACE
+>>>END

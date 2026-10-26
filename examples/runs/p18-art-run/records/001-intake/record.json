@@ -1,0 +1,73 @@
+{
+ "op": "Intake",
+ "role": null,
+ "goal": "G-002 (new)",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "890130e4-9dd2-422c-910b-08f306688015",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 15042,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 5533,
+    "output_tokens_details": {
+     "thinking_tokens": 2191
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 15042,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 5533,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 15042,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 15042
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.115502,
+   "attempt": 1,
+   "started": "2026-10-26T10:49:26",
+   "seconds": 47.5,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-002-entity-pictures/goal.md": "3cc12092d4e75c79b86bc6774c9be0941621de1186faef0045dfb21a4d56bea4",
+  "goals/G-002-entity-pictures/01-studio-to-art-director.md": "092eb25f99b37e84d3f2eba6b2e8b36d4ae4d13b0a9da18fde13740ebba26956"
+ },
+ "decision": {
+  "status": "active",
+  "open": [
+   [
+    "art-director",
+    "Design"
+   ]
+  ],
+  "new": [
+   "art-director",
+   "Design"
+  ]
+ },
+ "seen_through_seq": 1
+}

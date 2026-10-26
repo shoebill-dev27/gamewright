@@ -1,0 +1,119 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-002",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "7abd1da3-3be3-4722-9086-46581770275a",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 22838,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 2872,
+    "output_tokens_details": {
+     "thinking_tokens": 1633
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 22838,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 2872,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 22838,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 22838
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.120076,
+   "attempt": 1,
+   "started": "2026-10-26T10:53:21",
+   "seconds": 25.6,
+   "errors": [
+    "goal.md: keep budget as it was; only the Owner changes it (through Resume)",
+    "goal.md must be written"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "a5c62e45-fa2d-47cf-ac22-028973954eac",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 22918,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 2099,
+    "output_tokens_details": {
+     "thinking_tokens": 441
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 22918,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 2099,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 22918,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 22918
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.112666,
+   "attempt": 2,
+   "started": "2026-10-26T10:53:47",
+   "seconds": 16.4,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-002-entity-pictures/goal.md": "4a50d61e5e0bd97a2a3cfbe85576fd9aaaf947a075712ebccdd9b50f2ea1a055",
+  "goals/G-002-entity-pictures/04-technical-director-to-gameplay-engineer.md": "20839633da3f344f90849e988ce8d4f6e21f0d3f24d87631455e069777975f0c"
+ },
+ "decision": {
+  "status": "active",
+  "open": [
+   [
+    "gameplay-engineer",
+    "Build"
+   ]
+  ]
+ },
+ "seen_through_seq": 4
+}

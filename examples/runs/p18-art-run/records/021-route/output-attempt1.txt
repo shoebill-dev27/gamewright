@@ -1,0 +1,145 @@
+<<<FILE goals/G-002-entity-pictures/goal.md
+---
+kind: goal
+id: G-002
+project: ember-hollow
+status: done
+created: 2026-10-26
+budget: 13
+---
+# G-002: Pictures for each kind of thing in the game
+
+## Owner request
+
+> それぞれに絵をつけてほしい
+
+## Interpretation
+
+"それぞれ" has no stated referent. The Studio reads it as: **each kind of thing the player meets and sees on the floor grid gets its own picture** (a drawn image instead of a bare glyph or colour), with the player and ember, each creature type (three), braziers, and items as the core set. Whether terrain tiles (walls, floor, the Gloom) and the final-floor creature are included is the Art Director's call from the design docs, within this reading.
+
+Success, observable: on the browser page, a player can tell every kind of entity apart by its picture at a glance, the pictures fit the cave and ember mood of the vision, and the threat and reach marks (D-002) and the ember-light visibility are still as readable as before.
+
+Out of scope: rule, balance or content changes; new creatures or items; the text player's output (`node play.js`) and its format; sound; animation unless the spec asks for it. The pictures must not add dependencies or network use, and the page must still open from the file system (project constraints).
+
+Risk noted: if the Owner meant something narrower (e.g., creatures only) or wider (e.g., a picture for every floor), the Art Director's scope list will show it. The Owner can correct it on seeing the Design step's result. This is not escalated now, because the reading above is a plain one and stays within the vision.
+
+## Unknowns
+
+- Observe: skipped. This is an addition, not a problem report.
+- Diagnose: skipped. Nothing is misbehaving.
+- Decide (scope): settled by D-006 (close on partial evidence; Owner look-and-confirm; dim change as follow-up).
+- Design: settled. Spec design/entity-pictures.md (criteria 31 to 49), D-003, D-005.
+- Plan: settled. Technical Director's plan and D-004.
+- Build: done (D-005 applied; 69/69 tests).
+- Verify: ended partial, no failure seen. Not seen on the page: threat and reach marks (criterion 44 re-check), hound, shade, Gloom, stunned creatures, r = 2 flame, items, lit brazier, 1280 px layout.
+- Play: skipped. The page cannot be shown to a playtester with the available means.
+- Review: skipped. Not an experience Goal.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Design | art-director | write-design-spec | done | 02-art-director-to-studio.md |
+| 2 | Plan | technical-director | technical-plan | done | 04-technical-director-to-gameplay-engineer.md |
+| 3 | Build | gameplay-engineer | implement-change | done | 05-gameplay-engineer-to-studio.md |
+| 4a | Verify | qa | verify-change | done | 08-qa-to-studio.md |
+| 4b | Verify (visual) | art-director | visual-review | done | 09-art-director-to-studio.md |
+| 5 | Build (fix 44, D-005) | gameplay-engineer | implement-change | done | 11-gameplay-engineer-to-studio.md |
+| 6a | Verify (2nd, screenshots) | qa | verify-change | done | 14-qa-to-studio.md |
+| 6b | Verify (visual, screenshots) | art-director | visual-review | done | 15-art-director-to-studio.md |
+| 7 | Decide (scope, over budget) | game-director | make-decision | done | 17-game-director-to-studio.md |
+| 8 | Play | playtester | playtest-session | skipped | — |
+
+Status: planned | tentative | open | done | skipped.
+
+## Route changes
+
+After the game-director's scope decision (17, D-006): Play and Review are skipped, no further Build or Verify is opened, and the Goal is closed with an Owner look-and-confirm list. The dim change becomes a proposed follow-up Goal.
+
+## Next action
+
+None for the Studio. Waiting on the Owner only for the look-and-confirm list in the Outcome (optional new Goals).
+
+## Outcome
+
+**結果（Owner 向け）**
+
+G-002「それぞれに絵をつけてほしい」は、**作ったが、見た証拠は部分的**という状態で閉じます。「検証済み」や「見た目の意図を満たした」とは言いません。
+
+**作ったもの**
+- ブラウザのページで、フロード上の各種類のものに専用の絵が付きました。プレイヤーと熾火、ガ・影・猟犬の3種類の生き物、ゲロム、ブレイジャー（点灯／消灯）、アイテム、階段、壁と床です。
+- 絵はコードでキャンバスに描きます（D-004）。依存やネットワークは増えていません。ページはファイルから直接開けます。
+- 平らな暗い洞窟風のスタイルで、脅威・到達マークは常に絵の上に描かれます（D-003）。タイル28px、マーク用の暗い下地を追加しました（D-005）。
+- ルール、バランス、テキストプレイヤー（`node play.js`）は変えていません。`node --test` は 69/69 合格です。
+
+**見たもの**
+ページはエラーなく読み込まれ、壁、床、消灯のブレイジャー、プレイヤー、`<`、遠くのガ、記憶された壁と見えている壁の違い、炎の半径6は問題なく見えました。失敗した基準は見つかっていません。
+
+**見ていないもの（正直に）**
+スクリーンショット用ツールがキー入力だけで、シード、シナリオ、幅を指定できないため、次は誰も見ていません。基準 32、33、35（`<` と点灯ブレイジャー上）、36（半径2）、37、40、42〜44、46。特に**基準44（到達マークの文字の下地）は、先に不合格だった後、D-005の修正が効いている様子を一度も見ていません**。1280px での収まりは計算上のみです。Play（プレイテスト）も、見せる手段がないため行っていません。
+
+**Owner に確認をお願いしたいこと**（`repo/index.html` をファイルから開いてください。読み込みごとに新しいシードです）
+1. 脅威マーク：次のターンに攻撃してくる生き物に赤い枠と小さな `!` が付き、中の絵がまだ見分けられる。
+2. 到達マーク：攻撃を受けうる隣のタイルに橙の破線枠があり、暗い下地の上で生き物の文字が読める（アイテムや点灯ブレイジャーのあるタイルでも）。**これが最重要です（基準44）。**
+3. 猟犬のしゃがみ線とゲロムの3×3範囲：赤い色味が見え、下の絵も見分けられる。
+4. 生き物：ガ、影、猟犬（立ち／しゃがみ）、ゲロムが互いに違って見える。スタン中は淡い青で赤枠なし。
+5. アイテムとブレイジャー：塗り薬、油壺、点灯と消灯のブレイジャー、`>` がそれぞれ違う。持ち物欄にも同じ絵が出る。
+6. 熾火が低いとき（半径2）、炎が最初（半径6）より明らかに小さい。`<` と点灯ブレイジャーの上でもプレイヤーが見える。
+7. 約1280pxの幅で、盤面と側のパネルが並び、切れていない。
+8. 好み：記憶された床がほぼ黒です。暗すぎるなら教えてください。
+
+1〜7のどれかが失敗なら、マークを最優先に新しいGoalを立てます（柱1）。
+
+**決定**：D-003、D-004、D-005、D-006（証拠が部分的なまま閉じる、Owner が見て確認する、暗さの変更は後続に回す）。
+
+**次のGoal候補**
+1. 上の確認リストで見つかった問題の修正（マーク優先）。
+2. `dim()` の係数を 0.55 から 0.65 に（`repo/src/pictures.js`）。基準の失敗ではなく、見た目の好み。
+3. シード・シナリオを指定できるスクリーンショット手段を整えての再検証。
+4. 全フロードのプレイテストとバランス確認。
+5. メッセージの見やすさ（古いメッセージが残る件）。
+
+**予算**：13に対し16回の操作を使いました。予算の変更はOwnerだけが行えます。
+>>>END
+
+<<<EDIT project.md
+<<<<<<< SEARCH
+After G-001 (partly met): `repo/` holds a build with five floors, ember, three creature types,
+the Gloom and seeded runs; rules are shared by the page and the text player (D-001); threats
+and reach are marked (D-002). Design docs are in `design/` (30 acceptance checks).
+`node --test` passes 49/49.
+
+Run it: open `repo/index.html` (browser); `node play.js {script}` (add `--trace` for state);
+`node --test`. Script format and player info: `repo/manual.md`.
+
+Not verified: the browser page (checks 27-30) has been seen by no one. No whole run has been
+observed: Play covered only seed 42, floor 1, 16 turns. Floors 2-5, braziers, items, hounds,
+shades, Gloom, win/loss, run length and balance are unobserved. QA did not see per-test
+results for checks 13, 14 (hand-made) and 26.
+
+Known weakness: old messages stay in later frames (spec's "last 5"), so new events are hard
+to tell from old.
+
+Proposed next Goals: (1) Owner checks the page; (2) QA full test listing; (3) broad playtest
+and balance; (4) message legibility.
+=======
+After G-002 (built, partial evidence): `repo/` holds five floors, ember, three creature types,
+the Gloom, seeded runs, and a picture per entity kind on the page (drawn by code:
+`src/pictures.js`, `src/scene.js`; D-003 to D-005). Rules are shared by page and text player
+(D-001); threats and reach are marked (D-002). Design docs in `design/` (criteria 1-30 game,
+31-49 pictures). `node --test` passes 69/69.
+
+Run it: open `repo/index.html`; `node play.js {script}` (`--trace` for state); `node --test`.
+Script format: `repo/manual.md`.
+
+Not seen by anyone: marks over pictures (criterion 44 fix never seen working), hound, shade,
+Gloom, stunned creatures, r=2 flame, items, lit brazier, 1280 px layout. Owner look-and-confirm
+pending (D-006). No whole run observed; floors 2-5, balance, win/loss unobserved.
+
+Known weaknesses: remembered floor nearly black (dim 0.55; 0.65 proposed); old messages stay in
+later frames.
+
+Proposed next Goals: fix what the Owner's check finds (marks first); dim change; screenshot
+tool with seed/scenario; broad playtest and balance; message legibility.
+>>>>>>> REPLACE
+>>>END

@@ -1,0 +1,10 @@
+{
+  "note": "sha256 of renderRun(...) (no trace) taken BEFORE any G-002 change, with textview.js/script.js/play.js unchanged. Scripts are defined in tests/golden.test.js.",
+  "seed-a": { "sha256": "d120b8efd1d1318348da052523733aad285d8ec0920dc5508af0fe94048b0707", "bytes": 76794 },
+  "seed-b": { "sha256": "1742fb17ed0c25ca3beb4135483aa7dbc7e503a44c9e199f7c4f6d21fdf32fd6", "bytes": 88573 },
+  "seed-c": { "sha256": "1a49b49fbcaa6b872d3cc47a48b0e602eff1d064c8ed039502fd6ab5df1669ec", "bytes": 98545 },
+  "seed-d": { "sha256": "169dd502c10c74626ff739d9600b50f863ab5a0b9483896e149d1436c64c9305", "bytes": 101251 },
+  "scenario-hound": { "sha256": "d800fd2d4f5e3b304f1179fe409804f908d7dfb0eed13abdb708389f28959ab8", "bytes": 2942 },
+  "scenario-gloom": { "sha256": "f752844b4673cdc3c12932aa3ac864c038ff6b99bf9425b05139f0ff7fd66872", "bytes": 4304 },
+  "scenario-flare": { "sha256": "9618902d1e0142427f2602e17624576205616428fc1935fcde361d6a4bc24f5f", "bytes": 3876 }
+}

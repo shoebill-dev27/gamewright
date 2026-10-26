@@ -155,3 +155,38 @@ def test_a_shot_run_attaches_screenshots_to_the_next_executor(tmp_path, monkeypa
     result = json.loads((rec / "runs-round1.json").read_text())[0]
     assert result["exit"] == 0 and '"console_errors":[]' in result["output"]
     assert '"keys_pressed":5' in result["output"]  # "dd.s" is four presses
+
+
+# --- Recorded live run ---------------------------------------------------------------------
+
+RUN = ROOT / "examples" / "runs" / "p18-art-run"
+
+
+@pytest.mark.skipif(not RUN.is_dir(), reason="no recorded Phase 18 run")
+def test_recorded_studio_looked_at_its_own_pictures():
+    gdir = sr.goal_dir(RUN / "project", "G-002")
+    assert sr.parse((gdir / "goal.md").read_text())[0]["status"] == "done"
+    lookers = set()
+    for result in RUN.glob("records/*/runs-round*.json"):
+        for r in json.loads(result.read_text()):
+            if r["run"].startswith("@run/shot") and r.get("images"):
+                lookers.add(result.parent.name.split("-step-")[1])
+    assert {"qa", "art-director"} <= lookers
+
+
+@pytest.mark.skipif(
+    not (shutil.which("bwrap") and shutil.which("node")), reason="no bubblewrap or node"
+)
+@pytest.mark.skipif(not RUN.is_dir(), reason="no recorded Phase 18 run")
+def test_recorded_pictures_left_the_rules_alone(tmp_path):
+    p17 = ROOT / "examples" / "runs" / "p17-ember-run"
+    for name in ("rng", "floorgen", "light", "game", "view"):
+        assert (RUN / "project/repo/src" / f"{name}.js").read_bytes() == (
+            p17 / "project/repo/src" / f"{name}.js"
+        ).read_bytes(), name
+    work = tmp_path / "w"
+    shutil.copytree(RUN / "project" / "repo", work)
+    win = json.loads((p17 / "held-out.json").read_text())["V5_win_and_loss"]["win"]
+    (work / "s.txt").write_text(f"seed {win['seed']}\n{win['commands']}\n")
+    code, out, _ = sr.sandboxed(work, ["node", "play.js", "s.txt"])
+    assert code == 0 and "Result: Victory" in out

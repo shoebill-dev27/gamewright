@@ -1,0 +1,92 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-002-entity-pictures/13-studio-to-art-director.md",
+  "sha256": "8b294d83f2c395e538f59d9c82aa1b27b04a222b4d7b4f225f705bbaf9dccc82",
+  "bytes": 3054
+ },
+ {
+  "path": "studio/roles/art-director.md",
+  "sha256": "e3f2f2d53dd17c71caffe3cd19e994e8e3fbbe3d7f61dc06065e5c4c4e20bc65",
+  "bytes": 1150
+ },
+ {
+  "path": "studio/skills/visual-review.md",
+  "sha256": "a4c0a2bc09a91a5af5765901e80bae9296517858e7d87341f54a53f006c1a263",
+  "bytes": 1066
+ },
+ {
+  "path": "design/entity-pictures.md",
+  "sha256": "36d79bc0eaa16d8f82ad5657c1f95bfb0e1dadcbdbb0209450f51751d071e1a8",
+  "bytes": 14545
+ },
+ {
+  "path": "repo/index.html",
+  "sha256": "56556bfa421f8c804c50a94cd2db5666bf2b38a48547e6bf08d004ad4b33abff",
+  "bytes": 2787
+ },
+ {
+  "path": "repo/src/page.js",
+  "sha256": "759645b6827c65a6c279a4ddec23c1d1d79e4c754c4d5d2da094efde7ee4b93c",
+  "bytes": 8796
+ },
+ {
+  "path": "repo/src/pictures.js",
+  "sha256": "b8c38da2ed650e6014a635d3cb83f8d27143342799fe92e7643f4b5d28bb0462",
+  "bytes": 7035
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "80f1606337bcc9815f835c863bfc8a7b070375cc62626f7caf2a6c589b7a3c49",
+  "bytes": 7947
+ },
+ {
+  "path": "decisions/D-002-threat-and-reach-marks.md",
+  "sha256": "05ba76f00173c03e14b3d829b371b88cafc9dd6e874de2d5c32b009665dc3971",
+  "bytes": 1943
+ },
+ {
+  "path": "decisions/D-003-picture-style-and-mark-layering.md",
+  "sha256": "b2ba6fda05f1f2e4e1f4386b6e33af77fd25d3a74bedff7d7071fe018ae260c5",
+  "bytes": 2331
+ },
+ {
+  "path": "decisions/D-004-pictures-drawn-by-code-with-pure-scene-mapping.md",
+  "sha256": "7215a4c18b7cd317446b4e222e24707ec6a291bb44314e531bfe6480e7895069",
+  "bytes": 3163
+ },
+ {
+  "path": "decisions/D-005-tile-size-and-mark-chips.md",
+  "sha256": "8fe8048980f655bffd4b2aabb1986fd4bae89be1ccbedecdb6700482d6567afb",
+  "bytes": 4352
+ },
+ {
+  "path": "goals/G-002-entity-pictures/09-art-director-to-studio.md",
+  "sha256": "dfe10df7990897ba6882f85060e1f4a31f3450fc76412eef1c633ef349d98e16",
+  "bytes": 8456
+ },
+ {
+  "path": "@files/repo",
+  "sha256": "ab3d69199b98a75bb49d478081df0126bce4873b0ed0c438ab13c683e980ca63",
+  "bytes": 832
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ },
+ {
+  "path": "@run-results",
+  "sha256": "11f245e473eba6bf8280e03eb465b59c05a55666e35fb5b43c52437a3fd2796d",
+  "bytes": 207
+ }
+]

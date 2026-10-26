@@ -1,0 +1,112 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-002-entity-pictures/03-studio-to-technical-director.md",
+  "sha256": "56ff09601754e2e17db192ac512b01e061a5243cc2a25276c1d3a3b5ec15bb96",
+  "bytes": 4805
+ },
+ {
+  "path": "studio/roles/technical-director.md",
+  "sha256": "7cfecd0d6d00336c569f0cdedbb61c5774ccbbd0fcd749f85d87ec3564ec7790",
+  "bytes": 1439
+ },
+ {
+  "path": "studio/skills/technical-plan.md",
+  "sha256": "8e140abc942d3eaa8838fc766938a7b25b9813b799108f75112ad82f20e46c92",
+  "bytes": 1264
+ },
+ {
+  "path": "studio/skills/make-decision.md",
+  "sha256": "68436360ad82bd660f2153934ae7305118489c26ad3255d10e5018773d9eb4b6",
+  "bytes": 1129
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "450fd395c0cb68189bb9f0c7ff683df5db990e6a88dacea42fd26cf28e181cf0",
+  "bytes": 849
+ },
+ {
+  "path": "project.md#current-state",
+  "sha256": "1fe38baeb437f33376e6672942ebdd276bc9b3afc39d9f7d30e6dfa4c20be43b",
+  "bytes": 1038
+ },
+ {
+  "path": "design/entity-pictures.md",
+  "sha256": "36d79bc0eaa16d8f82ad5657c1f95bfb0e1dadcbdbb0209450f51751d071e1a8",
+  "bytes": 14545
+ },
+ {
+  "path": "design/game-spec.md",
+  "sha256": "5a49d3f2c7ea90a42935dd7fcb476240f09edd540abadae1e568af020ba2f4b3",
+  "bytes": 19121
+ },
+ {
+  "path": "design/acceptance-criteria.md",
+  "sha256": "7e86d8201ca491669b298a39b93925ba389dc407e7d0cc9dd3264955acad7666",
+  "bytes": 7923
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "4a77541cca79152650818a34d36d78dc6f1cbf8fb4b616b17d21934fe1421fba",
+  "bytes": 6937
+ },
+ {
+  "path": "repo/index.html",
+  "sha256": "4eca66f3566adf018ffd4ae68215b7dc004d3f96f0866936d10aee804eba4cf2",
+  "bytes": 2710
+ },
+ {
+  "path": "repo/src/page.js",
+  "sha256": "00dd30bbdbe56a036f95b14e5655eddf10b634be868d1b5ea10a6df20287fa78",
+  "bytes": 7653
+ },
+ {
+  "path": "repo/src/view.js",
+  "sha256": "aa01bb554dc2231bfcd3339173c0af9a1a788e46a7d0e05f30b32abe5190f8ef",
+  "bytes": 6362
+ },
+ {
+  "path": "repo/src/textview.js",
+  "sha256": "eed3e4f0cbdbe68e5f18a8e6982b32d38eb20bdb8217739edd8bac30666e85e2",
+  "bytes": 4365
+ },
+ {
+  "path": "decisions/D-001-classic-scripts-shared-rules.md",
+  "sha256": "d8028757b2b22bd72544eeeb055593d1a4118d0c695f753f8c7f8e75f99255ff",
+  "bytes": 1575
+ },
+ {
+  "path": "decisions/D-002-threat-and-reach-marks.md",
+  "sha256": "05ba76f00173c03e14b3d829b371b88cafc9dd6e874de2d5c32b009665dc3971",
+  "bytes": 1943
+ },
+ {
+  "path": "decisions/D-003-picture-style-and-mark-layering.md",
+  "sha256": "b2ba6fda05f1f2e4e1f4386b6e33af77fd25d3a74bedff7d7071fe018ae260c5",
+  "bytes": 2331
+ },
+ {
+  "path": "goals/G-002-entity-pictures/02-art-director-to-studio.md",
+  "sha256": "be9d920f21b9994c969c76ba0e9698db9fd127c92c9d8c070c088959e23877a3",
+  "bytes": 5584
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ },
+ {
+  "path": "studio/templates/escalation.md",
+  "sha256": "6e505880bdef28223c7275a4bb19c8f245577964d14c28d48e04561e7a5c7b90",
+  "bytes": 975
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

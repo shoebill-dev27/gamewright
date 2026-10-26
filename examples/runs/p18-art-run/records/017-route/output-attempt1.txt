@@ -1,0 +1,136 @@
+Both Verify steps came back `partial`, with no failures. The budget is used up (15 of 13), so this Route adds only a game-director scope step. It decides what the Owner request still needs and whether the remaining cost goes to the Owner.
+
+<<<FILE goals/G-002-entity-pictures/16-studio-to-game-director.md
+---
+kind: handoff
+goal: G-002
+seq: 16
+from: studio
+to: game-director
+stage: Decide
+outcome: routed
+---
+# 16: studio → game-director — cut the remaining G-002 work to what the Owner request needs
+
+## Task
+
+Decide the scope of the rest of G-002 (budget rule: the Goal is over budget, so this is the only step the Studio may add). Choose one of the options under Open questions and record it as a Decision if it constrains later work. If the cost of the remaining work is itself an Owner-level matter, say so and prepare the escalation instead (`prepare-owner-escalation`).
+
+## Context
+
+The Owner asked: 「それぞれに絵をつけてほしい」. G-002 reads this as a picture for each kind of thing on the floor grid; the pictures must be readable, fit the cave and ember mood, and keep the threat and reach marks and the ember-light visibility as readable as before.
+
+Done so far: Design (spec design/entity-pictures.md, criteria 31 to 49), Plan, Build, Verify, Build (fix of 44 by D-005), and a second Verify by QA (14) and the Art Director (15) in parallel. Budget: 15 of 13 operations used.
+
+## Findings
+
+From the two second-pass reports (14 and 15), in short:
+
+- `node --test` passes 69/69 (including 7 golden hash tests). `node play.js` runs. No console errors on page load. No criterion was seen to fail.
+- Real screenshots exist for the first time, but only of a quiet start room: wall, floor, unlit brazier, player, `<`, and a moth. They read well and fit the mood. The Art Director passes 34 and 41 (for what was seen), and QA passes 34, 41 and 47 (limited).
+- Not seen on the page by anyone: shade, hound, Gloom, lit brazier, salve, oil flask, `>`, threat borders and chips, reach marks (so the criterion 44 re-check after D-005 is still unverified), crouch line, stunned state, flame at r = 2, and the page at 1280 px width. These are criteria 31 to 33, 35 to 37, 39, 40, 42 to 44, 46 and 49 in part.
+- Why: the `shot` tool takes key names only, gives one screenshot per run, and cannot choose a seed or URL hash or window width. The page picks a random seed on load. QA may not write outside its listed paths (no fixture page). Neither role can aim at the missing scenes with the means available in their steps.
+- The Art Director recommends one small change: in `repo/src/pictures.js`, `dim()`, change the final factor 0.55 to 0.65, because remembered floor is almost black. If the visible/remembered gap then looks too small, use 0.60. No rule or mark changes.
+- The Art Director recommends holding G-002 (the marks carry pillar 1 and the D-005 chips were never seen working). QA says the change cannot count as verified.
+
+Remaining route as planned: Play is tentative (only if the page can be shown to a player), so it has not been opened.
+
+## Decisions already made
+
+- D-002 threat and reach marks. D-003 flat dark-cave pictures, marks over pictures. D-004 pictures drawn by code with pure scene mapping. D-005 tile 28 px, mark chips, player and shade/Gloom contrast.
+
+## Constraints
+
+- Scope within the Goal is yours. Rules, balance, new content and the text player stay out of scope. No dependencies, no network, and the page must open from the file system.
+- Over budget: after your step, the Studio may open only steps your Decision makes necessary and that fit the budget rule (another scope or owner step). Planned steps are not blocked, but none other than yours is planned. The Owner alone raises the budget (in a Resume), so a Decision that needs more than a little more work should be taken as an Owner escalation.
+- The Studio cannot create means: the only means named in the packets are `node --test`, `node play.js`, `node play.js --trace`, and `shot` (keys only). Do not assume a viewer, a device or a person exists other than the Owner.
+
+## Open questions
+
+Choose, and say what is skipped as a result:
+
+1. **Accept and close with an Owner look-and-confirm.** Apply the dim factor change (a small Build, no further Verify beyond `node --test`), mark the unseen scenes as "not shown with the available means", and close with the Owner asked to look at the page (marks, creatures, items, 1280 px). Cheapest; leaves the D-005 mark legibility seen by no one but the Owner.
+2. **One more bounded Build and Verify to make the scenes reachable.** For example, a Build adds a way to start the page in a fixed scenario from keys alone (or QA gets a tooling path such as `qa/`), then one QA and one Art Director pass on a named scene list (14, Open question 2). This needs a budget increase, so route it as an Owner escalation with the cost, or state which part fits without one.
+3. **Something between** (e.g. only reach marks and threat marks as the required scenes, the rest left to the Owner's look). Name the scene list and who checks it.
+
+Also decide: is Play skipped (no one but the Owner can see the page), and does the Art Director's dim change go in whichever option you pick?
+
+## Expected output
+
+A short Decision (D-006, if it constrains later work) plus a handoff addressed to `studio` that states: the cut scope, which criteria are accepted as "not shown" and why, whether the dim change goes in, whether Play is skipped, and either the next step (a Build or Owner step) or an Escalation brief if the cost needs the Owner. Do not change the Owner request's interpretation; if scope would need that, escalate.
+
+## Sender assessment
+
+Not applicable: written by the Studio.
+
+## Load
+
+- Role: studio/roles/game-director.md
+- Skills: studio/skills/make-decision.md, studio/skills/prepare-owner-escalation.md
+- Project: project.md#vision, project.md#constraints, project.md#current-state, design/entity-pictures.md
+- Decisions: decisions/D-002-threat-and-reach-marks.md, decisions/D-003-picture-style-and-mark-layering.md, decisions/D-005-tile-size-and-mark-chips.md
+- Previous handoff: goals/G-002-entity-pictures/15-art-director-to-studio.md (and 14-qa-to-studio.md)
+>>>END
+
+<<<FILE goals/G-002-entity-pictures/goal.md
+---
+kind: goal
+id: G-002
+project: ember-hollow
+status: active
+created: 2026-10-26
+budget: 13
+---
+# G-002: Pictures for each kind of thing in the game
+
+## Owner request
+
+> それぞれに絵をつけてほしい
+
+## Interpretation
+
+"それぞれ" has no stated referent. The Studio reads it as: **each kind of thing the player meets and sees on the floor grid gets its own picture** (a drawn image instead of a bare glyph or colour), with the player and ember, each creature type (three), braziers, and items as the core set. Whether terrain tiles (walls, floor, the Gloom) and the final-floor creature are included is the Art Director's call from the design docs, within this reading.
+
+Success, observable: on the browser page, a player can tell every kind of entity apart by its picture at a glance, the pictures fit the cave and ember mood of the vision, and the threat and reach marks (D-002) and the ember-light visibility are still as readable as before.
+
+Out of scope: rule, balance or content changes; new creatures or items; the text player's output (`node play.js`) and its format; sound; animation unless the spec asks for it. The pictures must not add dependencies or network use, and the page must still open from the file system (project constraints).
+
+Risk noted: if the Owner meant something narrower (e.g., creatures only) or wider (e.g., a picture for every floor), the Art Director's scope list will show it. The Owner can correct it on seeing the Design step's result. This is not escalated now, because the reading above is a plain one and stays within the vision.
+
+## Unknowns
+
+- Observe, Diagnose, Decide (visual style), Review: skipped (addition, nothing misbehaving; style is the Art Director's authority; not an experience Goal).
+- Design, Plan, Build: settled. Spec design/entity-pictures.md (criteria 31 to 49), D-003, D-004, D-005; 69/69 tests.
+- Verify: second pass done, partial. No criterion seen failing. Unseen on the page: threat and reach marks (44 re-check), hound, shade, Gloom, items, lit brazier, stunned state, r = 2, 1280 px width. Cause: `shot` takes keys only, random seed, one image per run. Art Director proposes dim factor 0.55 to 0.65.
+- Decide (scope): open. Budget is used up (15 of 13); the game-director cuts the remaining work or the cost goes to the Owner.
+- Play: tentative. Only if the page can be shown to a playtester with the available means. Otherwise the limit is stated at Close.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Design | art-director | write-design-spec | done | 02-art-director-to-studio.md |
+| 2 | Plan | technical-director | technical-plan | done | 04-technical-director-to-gameplay-engineer.md |
+| 3 | Build | gameplay-engineer | implement-change | done | 05-gameplay-engineer-to-studio.md |
+| 4a | Verify | qa | verify-change | done | 08-qa-to-studio.md |
+| 4b | Verify (visual) | art-director | visual-review | done | 09-art-director-to-studio.md |
+| 5 | Build (fix 44, D-005) | gameplay-engineer | implement-change | done | 11-gameplay-engineer-to-studio.md |
+| 6a | Verify (2nd, screenshots) | qa | verify-change | done | 14-qa-to-studio.md |
+| 6b | Verify (visual, screenshots) | art-director | visual-review | done | 15-art-director-to-studio.md |
+| 7 | Decide (scope, over budget) | game-director | make-decision | open | 16-studio-to-game-director.md |
+| 8 | Play | playtester | playtest-session | tentative | — |
+
+Status: planned | tentative | open | done | skipped. Play becomes planned if the page can be shown to a player. Further steps depend on step 7.
+
+## Route changes
+
+After Verify 6a/6b (both partial, nothing failing; marks, creatures, items and r = 2 unseen for lack of means): budget is over (15 of 13), so only a scope step is added. Step 7 (game-director) cuts the remaining work or escalates the cost to the Owner.
+
+## Next action
+
+Start step 7: game-director with `16-studio-to-game-director.md`. Its result is addressed to studio. The next Route follows the Decision (a small Build for the dim change and Close with an Owner look-and-confirm, or an Owner escalation for more budget).
+
+## Outcome
+
+(Written at Close, in Japanese.)
+>>>END

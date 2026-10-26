@@ -1,0 +1,82 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-002-entity-pictures/06-studio-to-qa.md",
+  "sha256": "1805ccd4a2f2e47c341a556085d09112f68f2cf14951ddd29f64e29c46f45f08",
+  "bytes": 3613
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "195f2577b415690bb94f98028cd9f5cefc18ab84b0cf2d122d142a44fac4840a",
+  "bytes": 1771
+ },
+ {
+  "path": "studio/skills/verify-change.md",
+  "sha256": "da40d2c0030e078ac6d085ea06b17bb9b452495f4e2f412a9e1bd723ac72ddf5",
+  "bytes": 1281
+ },
+ {
+  "path": "design/entity-pictures.md",
+  "sha256": "36d79bc0eaa16d8f82ad5657c1f95bfb0e1dadcbdbb0209450f51751d071e1a8",
+  "bytes": 14545
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "80f1606337bcc9815f835c863bfc8a7b070375cc62626f7caf2a6c589b7a3c49",
+  "bytes": 7947
+ },
+ {
+  "path": "repo/index.html",
+  "sha256": "56556bfa421f8c804c50a94cd2db5666bf2b38a48547e6bf08d004ad4b33abff",
+  "bytes": 2787
+ },
+ {
+  "path": "repo/src/page.js",
+  "sha256": "231e8212a3e3c36e7c41b26eec2a64002137127b38110b3300cac071a3cd0445",
+  "bytes": 8214
+ },
+ {
+  "path": "repo/src/scene.js",
+  "sha256": "5909e85ef4ffea92df928bee059df57f0541bde1a3e48c72d239b404e74f6b2a",
+  "bytes": 2202
+ },
+ {
+  "path": "repo/src/pictures.js",
+  "sha256": "49f3cfece5de960e53e77f1597e562f24765da68e7bab1e8f72c37a882ed2a10",
+  "bytes": 6570
+ },
+ {
+  "path": "repo/tests/golden.test.js",
+  "sha256": "9a1be75d58a49db780339cfc7a2f8d40d9dd4239c1675e85f9afb639f4e79ecf",
+  "bytes": 2041
+ },
+ {
+  "path": "repo/tests/golden/hashes.json",
+  "sha256": "182aeb36e391656fc040f962b594117fb7031e7e7c8368755307a7d247780fcc",
+  "bytes": 966
+ },
+ {
+  "path": "decisions/D-002-threat-and-reach-marks.md",
+  "sha256": "05ba76f00173c03e14b3d829b371b88cafc9dd6e874de2d5c32b009665dc3971",
+  "bytes": 1943
+ },
+ {
+  "path": "decisions/D-003-picture-style-and-mark-layering.md",
+  "sha256": "b2ba6fda05f1f2e4e1f4386b6e33af77fd25d3a74bedff7d7071fe018ae260c5",
+  "bytes": 2331
+ },
+ {
+  "path": "decisions/D-004-pictures-drawn-by-code-with-pure-scene-mapping.md",
+  "sha256": "7215a4c18b7cd317446b4e222e24707ec6a291bb44314e531bfe6480e7895069",
+  "bytes": 3163
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ }
+]

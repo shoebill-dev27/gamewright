@@ -1,0 +1,12 @@
+I need to see how the existing tests build hound and Gloom situations before I write mine. Without that I would be guessing at the floor data format, and the plan requires real hound-crouch and Gloom-gather scenarios. I'm requesting those files now.
+
+<<<FILE @need
+repo/tests/helpers.js
+repo/tests/reach.test.js
+repo/tests/gloom.test.js
+repo/tests/view.test.js
+repo/src/scenario.js
+repo/src/script.js
+repo/src/light.js
+repo/play.js
+>>>END

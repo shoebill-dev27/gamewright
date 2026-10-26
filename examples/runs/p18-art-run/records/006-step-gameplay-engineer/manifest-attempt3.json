@@ -1,0 +1,197 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-002-entity-pictures/04-technical-director-to-gameplay-engineer.md",
+  "sha256": "20839633da3f344f90849e988ce8d4f6e21f0d3f24d87631455e069777975f0c",
+  "bytes": 13257
+ },
+ {
+  "path": "studio/roles/gameplay-engineer.md",
+  "sha256": "8a447e66877cd14dfff47ac1b8482ba77c850159c8fb43ec2780e91064869351",
+  "bytes": 1742
+ },
+ {
+  "path": "studio/skills/implement-change.md",
+  "sha256": "a9befd7f1d9e09eb94c51a066f030db88c5061ad1b522d9795e62bc2c242964a",
+  "bytes": 1823
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "450fd395c0cb68189bb9f0c7ff683df5db990e6a88dacea42fd26cf28e181cf0",
+  "bytes": 849
+ },
+ {
+  "path": "project.md#current-state",
+  "sha256": "1fe38baeb437f33376e6672942ebdd276bc9b3afc39d9f7d30e6dfa4c20be43b",
+  "bytes": 1038
+ },
+ {
+  "path": "design/entity-pictures.md",
+  "sha256": "36d79bc0eaa16d8f82ad5657c1f95bfb0e1dadcbdbb0209450f51751d071e1a8",
+  "bytes": 14545
+ },
+ {
+  "path": "design/game-spec.md",
+  "sha256": "5a49d3f2c7ea90a42935dd7fcb476240f09edd540abadae1e568af020ba2f4b3",
+  "bytes": 19121
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "4a77541cca79152650818a34d36d78dc6f1cbf8fb4b616b17d21934fe1421fba",
+  "bytes": 6937
+ },
+ {
+  "path": "repo/index.html",
+  "sha256": "4eca66f3566adf018ffd4ae68215b7dc004d3f96f0866936d10aee804eba4cf2",
+  "bytes": 2710
+ },
+ {
+  "path": "repo/src/page.js",
+  "sha256": "00dd30bbdbe56a036f95b14e5655eddf10b634be868d1b5ea10a6df20287fa78",
+  "bytes": 7653
+ },
+ {
+  "path": "repo/src/view.js",
+  "sha256": "aa01bb554dc2231bfcd3339173c0af9a1a788e46a7d0e05f30b32abe5190f8ef",
+  "bytes": 6362
+ },
+ {
+  "path": "repo/src/textview.js",
+  "sha256": "eed3e4f0cbdbe68e5f18a8e6982b32d38eb20bdb8217739edd8bac30666e85e2",
+  "bytes": 4365
+ },
+ {
+  "path": "repo/src/game.js",
+  "sha256": "107905bc763fafe363437c910e939df9fec41c6b297306d2ef5b21fb2cd0cc16",
+  "bytes": 17559
+ },
+ {
+  "path": "decisions/D-001-classic-scripts-shared-rules.md",
+  "sha256": "d8028757b2b22bd72544eeeb055593d1a4118d0c695f753f8c7f8e75f99255ff",
+  "bytes": 1575
+ },
+ {
+  "path": "decisions/D-002-threat-and-reach-marks.md",
+  "sha256": "05ba76f00173c03e14b3d829b371b88cafc9dd6e874de2d5c32b009665dc3971",
+  "bytes": 1943
+ },
+ {
+  "path": "decisions/D-003-picture-style-and-mark-layering.md",
+  "sha256": "b2ba6fda05f1f2e4e1f4386b6e33af77fd25d3a74bedff7d7071fe018ae260c5",
+  "bytes": 2331
+ },
+ {
+  "path": "decisions/D-004-pictures-drawn-by-code-with-pure-scene-mapping.md",
+  "sha256": "7215a4c18b7cd317446b4e222e24707ec6a291bb44314e531bfe6480e7895069",
+  "bytes": 3163
+ },
+ {
+  "path": "goals/G-002-entity-pictures/03-studio-to-technical-director.md",
+  "sha256": "56ff09601754e2e17db192ac512b01e061a5243cc2a25276c1d3a3b5ec15bb96",
+  "bytes": 4805
+ },
+ {
+  "path": "@files/repo",
+  "sha256": "51d8a878a0d2cf9935027debb27667dcd277e8305483e8b7b881d3fe5cae35de",
+  "bytes": 617
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ },
+ {
+  "path": "repo/tests/helpers.js",
+  "sha256": "a33f743a0564e7d93c4f8469c099774eb476dfb4bd67efcd5bc9e487c580ff46",
+  "bytes": 716
+ },
+ {
+  "path": "repo/tests/reach.test.js",
+  "sha256": "5ecd2c60acf29557f5179efda446b8087a637ac606d2551184d6850887b346ba",
+  "bytes": 4697
+ },
+ {
+  "path": "repo/tests/gloom.test.js",
+  "sha256": "ca26f6572287f7914791f15aed4cf469d7c1faf5e0802c4bdc3d7209a80ec942",
+  "bytes": 2440
+ },
+ {
+  "path": "repo/tests/view.test.js",
+  "sha256": "8a9b85fc9993dd3d1ee9ae6b8046281bb8a820f012217327454902fb93f3f092",
+  "bytes": 2238
+ },
+ {
+  "path": "repo/src/scenario.js",
+  "sha256": "b48905282531a80b04c9544d612146ba7ed5beac462dcd408329d96aee45aab0",
+  "bytes": 2059
+ },
+ {
+  "path": "repo/src/script.js",
+  "sha256": "c20e9e5081a9e7b16610b229ee69d30b513b0bc0742ba5fd3226dfd7ddc81caa",
+  "bytes": 4848
+ },
+ {
+  "path": "repo/src/light.js",
+  "sha256": "8c7bfedfd6aec3baf8bbbdf8bc462605c091409ed538e3311bcf60f88abf1394",
+  "bytes": 1928
+ },
+ {
+  "path": "repo/play.js",
+  "sha256": "da6d9aa64c4a3407172f1417b05d5da0b00825081299f2338a28cf33dcb1b979",
+  "bytes": 1044
+ },
+ {
+  "path": "repo/src/scene.js (proposed in a run round; not written)",
+  "sha256": "5909e85ef4ffea92df928bee059df57f0541bde1a3e48c72d239b404e74f6b2a",
+  "bytes": 2202
+ },
+ {
+  "path": "repo/src/pictures.js (proposed in a run round; not written)",
+  "sha256": "49f3cfece5de960e53e77f1597e562f24765da68e7bab1e8f72c37a882ed2a10",
+  "bytes": 6570
+ },
+ {
+  "path": "repo/index.html (proposed in a run round; not written)",
+  "sha256": "56556bfa421f8c804c50a94cd2db5666bf2b38a48547e6bf08d004ad4b33abff",
+  "bytes": 2787
+ },
+ {
+  "path": "repo/src/page.js (proposed in a run round; not written)",
+  "sha256": "231e8212a3e3c36e7c41b26eec2a64002137127b38110b3300cac071a3cd0445",
+  "bytes": 8214
+ },
+ {
+  "path": "repo/tests/pic-helpers.js (proposed in a run round; not written)",
+  "sha256": "ec4f209d84493ca7296ab3aaeb086ec2c4bd1cf9acb43a2fb3be19ae0de95c6b",
+  "bytes": 3924
+ },
+ {
+  "path": "repo/tests/scene.test.js (proposed in a run round; not written)",
+  "sha256": "879e84b99c50e69e48c890444cb4cce72a8de275e92133e78e47e320274f0320",
+  "bytes": 5201
+ },
+ {
+  "path": "repo/tests/pictures.test.js (proposed in a run round; not written)",
+  "sha256": "b5edf83644d2295c3f550837cc36e089ae7060421bf133b15e6ce4d92d9168b8",
+  "bytes": 4036
+ },
+ {
+  "path": "repo/tests/marks.test.js (proposed in a run round; not written)",
+  "sha256": "ebf7ae3d2ca4ce39e747e7c59f5d639df594fdb0879648c9a73e3642b4904250",
+  "bytes": 2472
+ },
+ {
+  "path": "repo/tests/capture-golden.test.js (proposed in a run round; not written)",
+  "sha256": "c5127a454375dddce9a2bd10ed265fa00228d440b0d6544e157f53faef62fb42",
+  "bytes": 2183
+ },
+ {
+  "path": "@run-results",
+  "sha256": "09b00edb618fededbcb61fc01229102af7dfd5b9948d138a533e593de64c4edd",
+  "bytes": 9012
+ }
+]

@@ -1,0 +1,142 @@
+<<<FILE goals/G-002-entity-pictures/10-studio-to-gameplay-engineer.md
+---
+kind: handoff
+goal: G-002
+seq: 10
+from: studio
+to: gameplay-engineer
+stage: Build
+outcome: routed
+---
+# 10: studio → gameplay-engineer — fix criterion 44 and apply D-005 (picture and mark legibility)
+
+## Task
+
+Edit `repo/src/page.js` and `repo/src/pictures.js` to apply Decision D-005 in full. This includes the dark backing behind the reach letters, which fixes the QA failure on criterion 44. Run `node --test` and report to `studio`.
+
+## Context
+
+Goal G-002 (a picture for each kind of thing on the floor grid). The first build (sha ed0ad983accb, 69/69 tests) went through two parallel checks:
+
+- QA (08): criterion 44 **fails**. `design/entity-pictures.md` section 5 requires a dark backing behind the reach letter, and `page.js` draws the letters (`#ffd070`, 10 px) with none. QA could not check the other visual criteria because it had no viewer.
+- Art Director (09): judged from the code only and accepted **D-005**. It requires TILE 28, explicit badge fonts, dark chips behind the threat `!` badge, the stun/stagger badge and the reach letters, a night outline on the player, a lighter shade violet and a thicker Gloom ring. It also checked the remembered wall/floor contrast (item 7). The details and exact values are in D-005. It is the authority for this step.
+
+This is the first failure of criterion 44, so it goes back to Build, not to Plan.
+
+## Findings
+
+Points from the two reports that the engineer needs:
+
+- QA R2: the threat `!` badge is centered on the creature tile's top edge (`cr.y - 0.55` tiles, 16 px font). Half of it lies on the tile above and is clipped in row 0. D-005 items 2 and 3 address this.
+- QA R1 / Art Director: the player body is the same blue as `<`, and the player flame is the same gold as the lit-brazier flame. D-005 item 5 (outline, `grow` flame parameter) addresses this.
+- The Art Director could not read the board width (`v.w`). The board at TILE 28 plus the 360 px panel must fit a 1280 px window. If it does not, use TILE 26 (D-005's fallback) and say which TILE you used.
+- The Art Director expects reach marks inside a Gloom area or hound line to possibly merge with the 3 px red border. Do not change this now. Screenshots will decide.
+
+## Decisions already made
+
+- D-002: threat marks plus reach marks. Their meaning and tile sets do not change.
+- D-003: flat dark-cave style, marks always drawn over pictures.
+- D-004: pictures drawn by code, pure `scene.js` mapping.
+- D-005: tile size, badge fonts, dark chips, player outline, shade violet, Gloom ring.
+
+## Constraints
+
+- Do not touch `scene.js`, the rules, `textview.js`, `script.js`, `play.js` or the mark logic. `scene.js` must stay pure and must not read `threat` or `reach`.
+- No rule, content, dependency, network or asset change. The palette stays at 12 colors at most, with no red or orange main fill. The page must still open from the file system.
+- The text player output must stay byte-identical. The golden hashes in `repo/tests/golden/hashes.json` must not change. Do not regenerate them to make a test pass.
+- The existing tests (the picture tests, the marks tests for criteria 42 to 46 and the golden test) must pass. Adjust a picture test only where D-005 deliberately changes the value it checks (for example the TILE size), and say which one you changed and why.
+- If D-005 conflicts with the spec or with a tested criterion, stop and hand back with the conflict. Do not decide the look yourself.
+
+## Open questions
+
+None for the engineer. The Studio sends the results of the screenshots to the Art Director and QA later.
+
+## Expected output
+
+Build notes in the handoff template, addressed to `studio` (`to: studio`), so that the next Verify steps get fresh Handoffs. They list:
+
+- the files changed, and how each D-005 item (1 to 7) was applied, or why one was not applied;
+- which TILE was used (28 or 26) and why;
+- the `node --test` result with counts, with the golden test unchanged;
+- anything the Art Director or QA should look at in screenshots.
+
+The notes are not a verification verdict.
+
+## Sender assessment
+
+Studio routing note: this step is the first return to Build for criterion 44. The next step is Verify in parallel, with screenshots (QA and Art Director). Budget is tight: 13 planned in total, 10 used after this Route.
+
+## Load
+
+- Role: studio/roles/gameplay-engineer.md
+- Skills: studio/skills/implement-change.md
+- Project: design/entity-pictures.md, repo/src/page.js, repo/src/pictures.js, repo/src/scene.js, repo/index.html, repo/tests/pictures.test.js, repo/tests/golden.test.js, repo/tests/golden/hashes.json, project.md#constraints
+- Decisions: decisions/D-002-threat-and-reach-marks.md, decisions/D-003-picture-style-and-mark-layering.md, decisions/D-004-pictures-drawn-by-code-with-pure-scene-mapping.md, decisions/D-005-tile-size-and-mark-chips.md
+- Previous handoff: goals/G-002-entity-pictures/09-art-director-to-studio.md (also read goals/G-002-entity-pictures/08-qa-to-studio.md for the criterion 44 failure)
+>>>END
+
+<<<FILE goals/G-002-entity-pictures/goal.md
+---
+kind: goal
+id: G-002
+project: ember-hollow
+status: active
+created: 2026-10-26
+budget: 13
+---
+# G-002: Pictures for each kind of thing in the game
+
+## Owner request
+
+> それぞれに絵をつけてほしい
+
+## Interpretation
+
+"それぞれ" has no stated referent. The Studio reads it as: **each kind of thing the player meets and sees on the floor grid gets its own picture** (a drawn image instead of a bare glyph or colour), with the player and ember, each creature type (three), braziers, and items as the core set. Whether terrain tiles (walls, floor, the Gloom) and the final-floor creature are included is the Art Director's call from the design docs, within this reading.
+
+Success, observable: on the browser page, a player can tell every kind of entity apart by its picture at a glance, the pictures fit the cave and ember mood of the vision, and the threat and reach marks (D-002) and the ember-light visibility are still as readable as before.
+
+Out of scope: rule, balance or content changes; new creatures or items; the text player's output (`node play.js`) and its format; sound; animation unless the spec asks for it. The pictures must not add dependencies or network use, and the page must still open from the file system (project constraints).
+
+Risk noted: if the Owner meant something narrower (e.g., creatures only) or wider (e.g., a picture for every floor), the Art Director's scope list will show it. The Owner can correct it on seeing the Design step's result. This is not escalated now, because the reading above is a plain one and stays within the vision.
+
+## Unknowns
+
+- Observe: skipped. This is an addition, not a problem report. No one has yet seen the browser page (project.md Current state).
+- Diagnose: skipped. Nothing is misbehaving.
+- Decide: skipped. Visual style within the vision is the Art Director's authority; no direction or priority choice is open.
+- Design: settled. Spec design/entity-pictures.md (criteria 31 to 49), D-003, and D-005 (tile size and mark chips).
+- Plan: settled. Method fixed in the Technical Director's plan and D-004.
+- Build: second pass open. First pass done (69/69 tests). Criterion 44 failed (no reach-letter backing); the Art Director's D-005 also needs TILE 28 (or 26), badge chips, player outline, shade violet, Gloom ring.
+- Verify: first pass done. QA: 44 fail, 45 and 48 pass (with limits), the rest not checkable without a viewer. Art Director: all visual verdicts unverified. Second pass needs real screenshots (QA's `shot` call must use one key name per press), then the Art Director's final visual verdict.
+- Play: tentative. Only if the page can actually be shown to a playtester with the available means. Otherwise the limit is stated at Close.
+- Review: skipped. Not an experience Goal and no direction Decision is involved.
+
+## Route
+
+| # | Stage | Role | Skills | Status | Handoff |
+|---|---|---|---|---|---|
+| 1 | Design | art-director | write-design-spec | done | 02-art-director-to-studio.md |
+| 2 | Plan | technical-director | technical-plan | done | 04-technical-director-to-gameplay-engineer.md |
+| 3 | Build | gameplay-engineer | implement-change | done | 05-gameplay-engineer-to-studio.md |
+| 4a | Verify | qa | verify-change | done | 08-qa-to-studio.md |
+| 4b | Verify (visual) | art-director | visual-review | done | 09-art-director-to-studio.md |
+| 5 | Build (fix 44, D-005) | gameplay-engineer | implement-change | open | 10-studio-to-gameplay-engineer.md |
+| 6a | Verify (2nd, screenshots) | qa | verify-change | planned | — |
+| 6b | Verify (visual, screenshots) | art-director | visual-review | planned | — |
+| 7 | Play | playtester | playtest-session | tentative | — |
+
+Status: planned | tentative | open | done | skipped. Play becomes planned if the page can be shown to a player.
+
+## Route changes
+
+After Verify (done): QA failed criterion 44 (no reach-letter backing); the Art Director's D-005 asks for more legibility changes. Both go to one Build (10). Then Verify runs again in parallel with screenshots. Budget: 10 of 13 used; steps 5 to 6b plus Routes need more, so the next Route must check the budget rule.
+
+## Next action
+
+Start step 5: gameplay-engineer with `10-studio-to-gameplay-engineer.md`. The build notes are addressed to studio. After them, the Route composes fresh Handoffs for QA (with a corrected `shot` use) and the Art Director to verify in parallel.
+
+## Outcome
+
+(Written at Close, in Japanese.)
+>>>END

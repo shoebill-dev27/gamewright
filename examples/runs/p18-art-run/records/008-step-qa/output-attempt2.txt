@@ -1,0 +1,130 @@
+<<<FILE goals/G-002-entity-pictures/08-qa-to-studio.md
+---
+kind: handoff
+goal: G-002
+seq: 8
+from: qa
+to: studio
+stage: Verify
+outcome: fail
+---
+# 08: qa → studio — verification of the entity pictures build (criteria 31 to 49): fail on 44, visual criteria not checkable
+
+## Task
+
+Route the result. One criterion (44) fails on a code-evident spec deviation. Most visual criteria could not be checked with my means. Studio decides: send the fix to `gameplay-engineer`, and get a real look at the page (screenshots or the Owner) before the Goal counts as done.
+
+## Context
+
+Goal G-002, build `repo/` sha ed0ad983accb. I verified against `design/entity-pictures.md` criteria 31 to 49 and regressions in 1 to 30. I did not change the repository. I did not use the implementer's assessment.
+
+## Findings
+
+### Means used
+
+- `node --test` (round 1): exit 0, 69 tests, 69 pass, 0 fail. This is above the 49 required by criterion 48.
+- `node play.js` with a 27-command script on seed 42 (round 1): exit 0. Frames are well-formed, refused commands are marked "(refused: no turn passed)", `Danger:` and `Legend:` lines are present, and the summary and empty-slot message work. I have no pre-change output to compare it with.
+- Source reading of `page.js`, `scene.js`, `pictures.js`, `index.html`, `golden.test.js` and `hashes.json`.
+- `shot` (round 1) **failed** on input format, not on the page: `keyboard.press: Unknown key: "dddd....ssss..dddd"`. The tool presses one key name per press, and my multi-key string was passed as a single key. I produced no screenshots and did not retry in this step. **I have no browser, no screenshot and no pixel output.** The only canvas-like means is the fake recording ctx in the Node tests (`pictures.test.js`).
+- Code reading is not counted as a pass for any look or legibility criterion.
+
+### What the fake ctx can and cannot show
+
+It can show structure only: a picture exists per entity and pose, drawing stays inside the tile, drawing does not throw in either tone, the palette is small with no red or orange main fill, dim differs from full, silhouettes are not copies, and flame height grows per step. These tests pass.
+
+It cannot show how anything looks: legibility, contrast against neighbours, greyscale distinction, brightness steps, mood, mark legibility on top of pictures, or console errors in a real browser.
+
+I could not add my own test or tooling files in this step, because the only writable path was this handoff.
+
+### Per-criterion result
+
+| # | Result | How checked / evidence |
+|---|---|---|
+| 31 | not checkable (display) | Node: `scene` mapping table covers every terrain, stair, brazier, item and creature type, and each maps to a named picture (tests: scene full mapping table, one picture per entity and pose). Nobody has seen them on the page. |
+| 32 | not checkable | Needs a viewer and greyscale. Node only shows that silhouettes are not copies. |
+| 33 | not checkable (look) | In code the salve (jar with cross) and the oil flask (flask with gold cap) differ in shape. The lit brazier adds a gold flame to the same bowl. `<` and `>` differ in shape and color (blue and green). Visual confirmation is missing. |
+| 34 | not checkable | Wall and floor are different colors in code, but contrast cannot be judged without a viewer. |
+| 35 | not checkable, risk | See risk R1. |
+| 36 | not checkable (visual), mapping ok | `flameFor` maps r = 6..2 to steps 5..1. Tests pass: five distinct, strictly increasing steps from real views, and flame height grows with every step. Two screenshots from one run were not possible. |
+| 37 | not checkable (visual) | Code: the inventory button draws the same `P.draw` item picture on a 24 px canvas. An empty slot adds no icon. |
+| 38 | not checkable (visual), logic ok | Code and test "memory: tone follows vis; unseen tiles get no request". Creatures come only from `v.creatures` (visible only). Dim palette is a separate function. |
+| 39 | not checkable | All visible tiles use `full`, remembered use `dim`. The size of the difference needs a viewer. |
+| 40 | not checkable (visual) | Visibility rules are untouched, and tests for checks 2 and visibility pass. No full-tone picture outside the visible set is produced by the scene mapping. |
+| 41 | not checkable | Mood needs a viewer. Wall colors (up to `#6f6352`) are not near black, but unseen tiles are drawn black. |
+| 42 | not checkable (visual) | Code: `page.js` draws a 3 px red border plus `!` for every `cr.threat`, after the creature picture, so the picture is not replaced. Recognisability inside the border is unchecked. See risk R2. |
+| 43 | not checkable (visual) | Code: red tint at alpha 0.35 (under the 40% limit) plus a 3 px red border per marked cell, drawn after the terrain and item pictures and before the actors. Recognisability under the tint is unchecked. |
+| 44 | **fail** | Spec section 5 requires the reach letter to have "a dark backing so it reads on any picture". `page.js` draws the letters (`#ffd070`, 10 px) directly on the 30% orange fill with **no backing**. This is code-evident, not a look judgement. On a lit-brazier tile (gold flame `#f0c640`) the letters will likely have low contrast; this needs a viewer to confirm. The dashed orange border and the letters are otherwise present. |
+| 45 | pass at view level, not on the page | Test "criterion 45: scripted runs with a hound crouch, a Gloom gather, a flare and random walks" passes. I did not load its source, so I cannot say exactly what it compares. `scene.js` never decides a mark, and `page.js` draws marks from the same view fields as before. Marked tiles on the drawn canvas were not compared with the text output. |
+| 46 | not checkable (visual) | Code: `crouching` hounds get their own picture (`hound-crouch`); `stunned` and `staggered` get a pale-blue wash plus a `z` or `~` badge. The threat border follows `cr.threat`, which the rules never set for stunned or staggered creatures. Test "wash only for stunned and staggered" passes. |
+| 47 | not checkable (console) | Only local `<script src>` tags in classic order: `view`, `scene`, `pictures`, `page`. Test "scene.js and pictures.js use no DOM, network or Image" passes. A clean console on a real open was not observed. |
+| 48 | pass, with limits (see below) | 7 of 7 golden tests pass (4 seeds × 250 commands, 3 scenarios). `node --test` passes 69 of 69. |
+| 49 | not checkable | Code structure of the controls, key handling, click handling and summary screen in `page.js` looks unchanged apart from the inventory icons. Not exercised in a browser. |
+
+### Criterion 48: is the golden test adequate? (open question 1)
+
+Mostly yes, for what it covers:
+
+- It hashes the full `renderRun` text of 7 runs (about 380 KB) and also checks the byte count.
+- The 4 seeds × 250 commands plus the hound, Gloom and flare scenarios cover a wide range of frames.
+
+What is missing:
+
+- **Provenance.** I cannot verify that the hashes really were taken before the change. The baseline came from the same party that built the change, and I have no pre-change checkout to re-hash.
+- **No `--trace` output** and no real `node play.js` CLI output (args and stdin paths) is hashed. The existing play.js tests only check that it runs and prints lines.
+- **No diff on failure.** A mismatch shows two hashes only.
+- **Unchanged files not diffed.** The claim that `textview.js`, `script.js` and `play.js` are untouched cannot be checked from the packet.
+
+Recommended: a hashed `--trace` case, one CLI-level case, and a failure message that prints the first differing line (by storing the expected text in a git-ignored fixture, or by hashing per command).
+
+### Regressions, criteria 1 to 30 (open question about regression)
+
+Checks 1 to 25 (rules, text output, generator, bots) are covered by named tests in the round-1 run, all passing, including the strict check 14 (damage events: threat 105 and reach 114 in the 20-seed run) and check 26. The rules and view files are stated as untouched; I cannot verify that from the packet. The text player ran correctly in my play run. Check 27 (page contents), 28 (controls), 29 (visible versus remembered, distinguishable types, marks, brazier lit/unlit) and 30 (summary screens) need a browser. **Regression statement: no regression found in 1 to 26; not checkable in 27 to 30.**
+
+### Risks seen in the code (not confirmed visually)
+
+- **R1 (criterion 35).** The player body is `blue` (`#6f9fd0`), the same color as the `<` stairs. The player flame is `gold`, the same color as the lit-brazier flame. Standing on `<` or a lit brazier, parts of the player picture may blend into the picture below. The pale head and the flame size still help. Needs a screenshot.
+- **R2 (criterion 42, edge case).** The threat `!` badge is drawn at `cr.y - 0.55` tiles, i.e. centered on the creature tile's top edge with a 16 px font. Half of it lies on the tile above, and for a creature in row 0 half is clipped. It is not a corner badge. It may overlap the reach letters or the picture of a neighbour tile to the north. Needs a screenshot.
+- **R3 (minor).** The picture inset is 4 px on 22 px tiles (about 18%), not the 10% in the spec. The code takes `max(10%, border + 1)` so the 3 px border stays free. This looks intended and consistent with the spec's rule on small tiles, but it is a deviation from "about 10%".
+- The tile size is 22 px, above the 20 px threshold in open question 2 of the spec.
+
+### Verdict
+
+**fail**: criterion 44 fails on the missing letter backing. No other criterion is shown to fail. About 14 criteria (31 to 43, 46, 47, 49) are not checkable with my means, so the change cannot count as verified. Passing: 45 (view level only) and 48 (with limits).
+
+## Decisions already made
+
+- D-002: threat marks plus reach marks. D-003: flat dark-cave pictures, marks always over pictures (the letter backing comes from the spec's section 5, not from a decision). D-004: pictures drawn by code, pure scene mapping.
+
+## Constraints
+
+- I verified from the spec and the build only.
+- I changed no repository file.
+- I did not decide intended look or behaviour.
+
+## Open questions
+
+1. Studio: route the fix for 44 (draw a dark backing behind the reach letters) to `gameplay-engineer`. This is the first failure of this criterion, so no technical-director escalation yet.
+2. Studio: get the page seen. Options are a corrected `shot` run (one key name per press, whatever separator the tool wants) or the Owner. The screenshots should cover:
+   - a fresh frame at r = 6, and at r = 2;
+   - the player on `<` and on a lit brazier (R1);
+   - a threat border and `!` badge on a creature in row 0 and below another marked tile (R2);
+   - a reach mark on an item tile and on a lit brazier;
+   - a crouch line and a Gloom area over items;
+   - a stunned creature;
+   - the inventory with a salve and an oil flask;
+   - the browser console on first load.
+3. Engineer or Art Director: decide whether R1 and R2 need picture or badge changes once seen.
+4. Is the golden test enough for 48? Accepted as a pass with the limits listed above. Strengthening it is optional.
+
+## Expected output
+
+The Studio routes the 44 fix to `gameplay-engineer`, then a second QA pass with screenshots. Success: every criterion in 31 to 49 is marked pass, or a stated not-checkable with a named reason that the Owner accepts.
+
+## Load
+
+- Role: none (addressed to studio); QA role for the re-verification: studio/roles/qa.md
+- Skills: studio/skills/verify-change.md
+- Project: design/entity-pictures.md, repo/src/page.js, repo/src/pictures.js, repo/src/scene.js, repo/tests/golden.test.js, repo/tests/golden/hashes.json, build (`node --test`, `node play.js {script}`, screenshots of `index.html`)
+- Decisions: decisions/D-002-threat-and-reach-marks.md, decisions/D-003-picture-style-and-mark-layering.md, decisions/D-004-pictures-drawn-by-code-with-pure-scene-mapping.md
+- Previous handoff: goals/G-002-entity-pictures/06-studio-to-qa.md
+>>>END

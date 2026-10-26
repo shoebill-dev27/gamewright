@@ -1,0 +1,107 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-002",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "98369dc7-ee19-43ad-a694-c783efffe2b1",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 25616,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 4261,
+    "output_tokens_details": {
+     "thinking_tokens": 867
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 25616,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 4261,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 25616,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 25616
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.14507799999999998,
+   "attempt": 1,
+   "started": "2026-10-26T11:11:22",
+   "seconds": 32.7,
+   "errors": [
+    "goal.md: the Goal has used 14 of its 13 operations, so add no stages but one: a game-director step to cut the remaining work to what the Owner request needs (the rest is then skipped), or an owner step to escalate the cost. Planned steps may still be opened",
+    "goal.md: route row 8 has unknown role to be set by step 7; a Role cell holds exactly one role id (or studio, owner), and a parallel step gets its own row (5, 5b)"
+   ]
+  },
+  {
+   "runtime": "claude",
+   "session_id": "d84f1108-8f3f-418f-b12a-2261b028f2ff",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 25809,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 4426,
+    "output_tokens_details": {
+     "thinking_tokens": 650
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 25809,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 4426,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 25809,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 25809
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.1475,
+   "attempt": 2,
+   "started": "2026-10-26T11:11:55",
+   "seconds": 34.0,
+   "errors": [
+    "goal.md: the Goal has used 14 of its 13 operations, so add no stages but one: a game-director step to cut the remaining work to what the Owner request needs (the rest is then skipped), or an owner step to escalate the cost. Planned steps may still be opened"
+   ]
+  }
+ ],
+ "status": "rejected"
+}

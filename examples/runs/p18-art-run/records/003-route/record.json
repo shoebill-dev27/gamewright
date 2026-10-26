@@ -1,0 +1,73 @@
+{
+ "op": "Route",
+ "role": null,
+ "goal": "G-002",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "e646a771-13e4-43c8-8975-f1dd707b54fa",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 19481,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 3455,
+    "output_tokens_details": {
+     "thinking_tokens": 895
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 19481,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 3455,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 19481,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 19481
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.112478,
+   "attempt": 1,
+   "started": "2026-10-26T10:51:39",
+   "seconds": 25.9,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "goals/G-002-entity-pictures/03-studio-to-technical-director.md": "56ff09601754e2e17db192ac512b01e061a5243cc2a25276c1d3a3b5ec15bb96",
+  "goals/G-002-entity-pictures/goal.md": "2dfdb64e8e875aa6448a40f9dc171241ba6e08febec3e8729ed97d1b2849a253"
+ },
+ "decision": {
+  "new": [
+   "technical-director",
+   "Plan"
+  ],
+  "status": "active",
+  "open": [
+   [
+    "technical-director",
+    "Plan"
+   ]
+  ]
+ },
+ "seen_through_seq": 3
+}

@@ -1,0 +1,77 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-002-entity-pictures/01-studio-to-art-director.md",
+  "sha256": "092eb25f99b37e84d3f2eba6b2e8b36d4ae4d13b0a9da18fde13740ebba26956",
+  "bytes": 4578
+ },
+ {
+  "path": "studio/roles/art-director.md",
+  "sha256": "e3f2f2d53dd17c71caffe3cd19e994e8e3fbbe3d7f61dc06065e5c4c4e20bc65",
+  "bytes": 1150
+ },
+ {
+  "path": "studio/skills/write-design-spec.md",
+  "sha256": "f60b4ce8c6e89c2dc27ff87184c54b91452c45db8422fc378ca9253b45a0efd2",
+  "bytes": 1367
+ },
+ {
+  "path": "project.md#vision",
+  "sha256": "f7148f891902b9f1bd9c9364155d3325453ff66c0a9363272cc4f833c6dced17",
+  "bytes": 969
+ },
+ {
+  "path": "project.md#player-profile",
+  "sha256": "00466a3c22762110ab7dbe2bba33dfec33f4382e8c760a379fc9463ef3251be0",
+  "bytes": 231
+ },
+ {
+  "path": "project.md#current-state",
+  "sha256": "1fe38baeb437f33376e6672942ebdd276bc9b3afc39d9f7d30e6dfa4c20be43b",
+  "bytes": 1038
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "450fd395c0cb68189bb9f0c7ff683df5db990e6a88dacea42fd26cf28e181cf0",
+  "bytes": 849
+ },
+ {
+  "path": "design/game-spec.md",
+  "sha256": "5a49d3f2c7ea90a42935dd7fcb476240f09edd540abadae1e568af020ba2f4b3",
+  "bytes": 19121
+ },
+ {
+  "path": "design/acceptance-criteria.md",
+  "sha256": "7e86d8201ca491669b298a39b93925ba389dc407e7d0cc9dd3264955acad7666",
+  "bytes": 7923
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "4a77541cca79152650818a34d36d78dc6f1cbf8fb4b616b17d21934fe1421fba",
+  "bytes": 6937
+ },
+ {
+  "path": "decisions/D-001-classic-scripts-shared-rules.md",
+  "sha256": "d8028757b2b22bd72544eeeb055593d1a4118d0c695f753f8c7f8e75f99255ff",
+  "bytes": 1575
+ },
+ {
+  "path": "decisions/D-002-threat-and-reach-marks.md",
+  "sha256": "05ba76f00173c03e14b3d829b371b88cafc9dd6e874de2d5c32b009665dc3971",
+  "bytes": 1943
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

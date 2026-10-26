@@ -1,0 +1,50 @@
+{
+ "checks": "docs/phase18.md §3.5 (A1-A5)",
+ "A1_pictures": {
+  "met": true,
+  "seen": [
+   "player",
+   "moth",
+   "shade",
+   "hound",
+   "Gloom",
+   "unlit brazier",
+   "lit brazier",
+   "salve",
+   "oil",
+   "stairs up",
+   "stairs down",
+   "wall",
+   "floor"
+  ],
+  "how": "screenshots of the bot-3 winning run replayed in the page (screenshots/), and src/pictures.js read in full"
+ },
+ "A2_rules_unchanged": {
+  "met": true,
+  "bot_runs_identical_to_phase17": "20 of 20 (result, floor, turns, commands)",
+  "bot_wins_of_20": 12,
+  "recorded_win_replays_to_victory": true
+ },
+ "A3_page_works": {
+  "met": true,
+  "console_errors": 0,
+  "winning_run_in_the_page": "Victory",
+  "marks": "drawn after the pictures (src/page.js steps 2-5); not seen in my screenshots"
+ },
+ "A4_constraints": {
+  "met": true,
+  "node_test": "69 pass, 0 fail",
+  "dependencies": "none",
+  "network": "none"
+ },
+ "A5_studio_looked": {
+  "met": true,
+  "shot_runs": {
+   "QA 008": "1 failed (key format)",
+   "QA 013": "2 ok",
+   "Art Director 014": "1 failed (key format), 1 ok"
+  },
+  "screenshots_attached": 3
+ },
+ "security": "the Phase 17 XSS in src/page.js (seed through innerHTML) is still there; the published copy is fixed"
+}

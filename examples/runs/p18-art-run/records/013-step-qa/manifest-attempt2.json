@@ -1,0 +1,77 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-002-entity-pictures/12-studio-to-qa.md",
+  "sha256": "4728529bf93e36f9ef6417ab462f2cbc6b2bf61920faa9eb668f152c90dc5baf",
+  "bytes": 2424
+ },
+ {
+  "path": "studio/roles/qa.md",
+  "sha256": "195f2577b415690bb94f98028cd9f5cefc18ab84b0cf2d122d142a44fac4840a",
+  "bytes": 1771
+ },
+ {
+  "path": "studio/skills/verify-change.md",
+  "sha256": "da40d2c0030e078ac6d085ea06b17bb9b452495f4e2f412a9e1bd723ac72ddf5",
+  "bytes": 1281
+ },
+ {
+  "path": "design/entity-pictures.md",
+  "sha256": "36d79bc0eaa16d8f82ad5657c1f95bfb0e1dadcbdbb0209450f51751d071e1a8",
+  "bytes": 14545
+ },
+ {
+  "path": "design/acceptance-criteria.md",
+  "sha256": "7e86d8201ca491669b298a39b93925ba389dc407e7d0cc9dd3264955acad7666",
+  "bytes": 7923
+ },
+ {
+  "path": "repo/manual.md",
+  "sha256": "80f1606337bcc9815f835c863bfc8a7b070375cc62626f7caf2a6c589b7a3c49",
+  "bytes": 7947
+ },
+ {
+  "path": "repo/index.html",
+  "sha256": "56556bfa421f8c804c50a94cd2db5666bf2b38a48547e6bf08d004ad4b33abff",
+  "bytes": 2787
+ },
+ {
+  "path": "decisions/D-002-threat-and-reach-marks.md",
+  "sha256": "05ba76f00173c03e14b3d829b371b88cafc9dd6e874de2d5c32b009665dc3971",
+  "bytes": 1943
+ },
+ {
+  "path": "decisions/D-003-picture-style-and-mark-layering.md",
+  "sha256": "b2ba6fda05f1f2e4e1f4386b6e33af77fd25d3a74bedff7d7071fe018ae260c5",
+  "bytes": 2331
+ },
+ {
+  "path": "decisions/D-005-tile-size-and-mark-chips.md",
+  "sha256": "8fe8048980f655bffd4b2aabb1986fd4bae89be1ccbedecdb6700482d6567afb",
+  "bytes": 4352
+ },
+ {
+  "path": "goals/G-002-entity-pictures/08-qa-to-studio.md",
+  "sha256": "c03fbae2521cd48eaf3531067fe8055c231ca7d4f5781324aada28c7342dfc83",
+  "bytes": 11869
+ },
+ {
+  "path": "@files/repo",
+  "sha256": "ab3d69199b98a75bb49d478081df0126bce4873b0ed0c438ab13c683e980ca63",
+  "bytes": 832
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ },
+ {
+  "path": "@run-results",
+  "sha256": "02e60278a37f308dedd7227698e811894345146b49ff0480cedd11f07b39a21c",
+  "bytes": 14418
+ }
+]

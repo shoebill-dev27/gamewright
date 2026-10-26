@@ -1,0 +1,3 @@
+<<<FILE @run/shot/first-look
+dddd
+>>>END

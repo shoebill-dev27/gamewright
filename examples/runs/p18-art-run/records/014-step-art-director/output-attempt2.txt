@@ -1,0 +1,3 @@
+<<<FILE @run/shot/keys-spaced
+d d d d s s
+>>>END

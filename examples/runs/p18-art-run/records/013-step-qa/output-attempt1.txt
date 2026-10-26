@@ -1,0 +1,22 @@
+<<<FILE @run/tests
+>>>END
+
+<<<FILE @run/play/hollow-walk
+seed 42
+dddd ss ..
+>>>END
+
+<<<FILE @run/shot/start
+
+>>>END
+
+<<<FILE @run/shot/walk
+d
+d
+d
+d
+s
+s
+Space
+Space
+>>>END

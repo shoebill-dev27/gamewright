@@ -1,0 +1,10 @@
+[
+ {
+  "run": "@run/shot/first-look",
+  "command": "screenshots of index.html ({script}: keys to press)",
+  "script": "dddd\n",
+  "exit": 1,
+  "seconds": 0.9,
+  "output": "shot failed: keyboard.press: Unknown key: \"dddd\"\n"
+ }
+]

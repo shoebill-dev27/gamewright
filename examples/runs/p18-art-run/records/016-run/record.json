@@ -1,0 +1,24 @@
+{
+ "op": "Run",
+ "goal": "G-002",
+ "operations": [
+  "002-step-art-director",
+  "003-route",
+  "004-step-technical-director",
+  "005-route",
+  "006-step-gameplay-engineer",
+  "007-route",
+  "008-step-qa",
+  "009-step-art-director",
+  "010-route",
+  "011-step-gameplay-engineer",
+  "012-route",
+  "013-step-qa",
+  "014-step-art-director",
+  "015-route"
+ ],
+ "stop_reason": "rejected: 015-route: output rejected after 2 attempts",
+ "status": "active",
+ "owner_reads": null,
+ "next": "run examples/runs/p18-art-run"
+}

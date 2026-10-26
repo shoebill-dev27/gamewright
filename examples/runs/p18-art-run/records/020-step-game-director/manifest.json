@@ -1,0 +1,82 @@
+[
+ {
+  "path": "studio/execution.md#executor-instructions",
+  "sha256": "cf01d0ce3e943ccc7d1592ecf3a3626b53dc55f931d520857b86e1b1a5dbf6e4",
+  "bytes": 1596
+ },
+ {
+  "path": "goals/G-002-entity-pictures/16-studio-to-game-director.md",
+  "sha256": "bbcdf967210e46f42b54b491f1110aafac10a919f88b1d8838d035b38a739927",
+  "bytes": 3970
+ },
+ {
+  "path": "studio/roles/game-director.md",
+  "sha256": "69dbeaa90e3f822df62699c3b2ee3bc23fd8ddf84aa4e7846916f67837c6d21a",
+  "bytes": 1658
+ },
+ {
+  "path": "studio/skills/make-decision.md",
+  "sha256": "68436360ad82bd660f2153934ae7305118489c26ad3255d10e5018773d9eb4b6",
+  "bytes": 1129
+ },
+ {
+  "path": "studio/skills/prepare-owner-escalation.md",
+  "sha256": "aa513b1d59e5e7f1caef545cb3a64bc1c45cfd1b2548c8d8ec4ab3a336e2e67e",
+  "bytes": 1207
+ },
+ {
+  "path": "project.md#vision",
+  "sha256": "f7148f891902b9f1bd9c9364155d3325453ff66c0a9363272cc4f833c6dced17",
+  "bytes": 969
+ },
+ {
+  "path": "project.md#constraints",
+  "sha256": "450fd395c0cb68189bb9f0c7ff683df5db990e6a88dacea42fd26cf28e181cf0",
+  "bytes": 849
+ },
+ {
+  "path": "design/entity-pictures.md",
+  "sha256": "36d79bc0eaa16d8f82ad5657c1f95bfb0e1dadcbdbb0209450f51751d071e1a8",
+  "bytes": 14545
+ },
+ {
+  "path": "goals/G-002-entity-pictures/goal.md",
+  "sha256": "c9b94b0ce222e398a6d666ca998722be5cbc0363c46034b7a9894c931f647965",
+  "bytes": 4235
+ },
+ {
+  "path": "decisions/D-003-picture-style-and-mark-layering.md",
+  "sha256": "b2ba6fda05f1f2e4e1f4386b6e33af77fd25d3a74bedff7d7071fe018ae260c5",
+  "bytes": 2331
+ },
+ {
+  "path": "decisions/D-005-tile-size-and-mark-chips.md",
+  "sha256": "8fe8048980f655bffd4b2aabb1986fd4bae89be1ccbedecdb6700482d6567afb",
+  "bytes": 4352
+ },
+ {
+  "path": "goals/G-002-entity-pictures/14-qa-to-studio.md",
+  "sha256": "9cde400968cc3af72f07a2b5282449ecdbc84f402acc70c33ac7168db23522d5",
+  "bytes": 9654
+ },
+ {
+  "path": "goals/G-002-entity-pictures/15-art-director-to-studio.md",
+  "sha256": "9b867085e1e03751553443758d1bfa78ee14e9cf127fc79c3bc2cf9894df2b1b",
+  "bytes": 7512
+ },
+ {
+  "path": "studio/templates/handoff.md",
+  "sha256": "af0c271f16080818a0452170e6d5c2ddbf604ae997395d01769761eb1fb2b183",
+  "bytes": 2233
+ },
+ {
+  "path": "studio/templates/escalation.md",
+  "sha256": "6e505880bdef28223c7275a4bb19c8f245577964d14c28d48e04561e7a5c7b90",
+  "bytes": 975
+ },
+ {
+  "path": "studio/templates/decision.md",
+  "sha256": "3e91a728280e2237954c0f0c01910841bc3fcc94adb6051881015a08a7193f71",
+  "bytes": 458
+ }
+]

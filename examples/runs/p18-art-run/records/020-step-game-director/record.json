@@ -1,0 +1,60 @@
+{
+ "op": "Step",
+ "role": "game-director",
+ "goal": "G-002",
+ "attempts": [
+  {
+   "runtime": "claude",
+   "session_id": "afb0d923-c39f-4989-b4fa-e481d54d027c",
+   "model": "claude-sonnet-5-5",
+   "tools": [],
+   "mcp_servers": [],
+   "tool_uses": [],
+   "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 23142,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 4067,
+    "output_tokens_details": {
+     "thinking_tokens": 580
+    },
+    "server_tool_use": {
+     "web_search_requests": 0,
+     "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+     "ephemeral_1h_input_tokens": 23142,
+     "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+     {
+      "input_tokens": 2,
+      "output_tokens": 4067,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 23142,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 23142
+      },
+      "type": "message"
+     }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+   },
+   "cost_usd": 0.133242,
+   "attempt": 1,
+   "started": "2026-10-26T17:55:09",
+   "seconds": 34.3,
+   "errors": []
+  }
+ ],
+ "status": "ok",
+ "written": {
+  "decisions/D-006-close-g002-on-partial-evidence.md": "e6475be755698c36795d36b525823fefd4dcca3e76b905732a04303526d6fc86",
+  "goals/G-002-entity-pictures/17-game-director-to-studio.md": "fc9c93b781a67ca1a1ddb8c79975b2cff786c6c517ecbb29a0d46a9b934bf9b1"
+ },
+ "decision": {}
+}

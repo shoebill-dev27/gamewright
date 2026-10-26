@@ -146,6 +146,14 @@ Results and findings: `docs/phase16.md`.
 
 | Run | What it shows |
 |---|---|
-| `runs/p17-ember-run` | `fixtures/ember-hollow` (a short roguelike: five seeded floors, an ember that is light and time, a boss; JavaScript with shared rules, a browser page and input scripts) given "このコンセプトで、最初から最後まで通して遊べる版を作ってほしい。ブラウザで遊べるようにしてほしい" on Claude. The Studio built about 1,100 lines and 49 tests and closed exactly on its budget (19 operations, 25 executors), judging the Goal partly met: no executor could see the page and the playtest stopped on floor 1. `held-out.json` records the pre-registered checks: all but V3 met (2 item kinds, not 3); the team's bot wins 13 of 20 seeds, and the page opens from a file and plays. |
+| `runs/p17-ember-run` | `fixtures/ember-hollow` (a short roguelike: five seeded floors, an ember that is light and time, a boss; JavaScript with shared rules, a browser page and input scripts) given "このコンセプトで、最初から最後まで通して遊べる版を作ってほしい。ブラウザで遊べるようにしてほしい" on Claude. The Studio built about 1,100 lines and 49 tests and closed exactly on its budget (19 operations, 25 executors), judging the Goal partly met: no executor could see the page and the playtest stopped on floor 1. `held-out.json` records the pre-registered checks: all but V3 met (2 item kinds, not 3); the team's bot wins 12 of 20 seeds, and the page opens from a file and plays. |
 
 Results and findings: `docs/phase17.md`.
+
+## Phase 18: the Studio sees its own screens
+
+| Run | What it shows |
+|---|---|
+| `runs/p18-art-run` | The Phase 17 project with `page: index.html` declared, given "それぞれに絵をつけてほしい" on Claude. The Art Director specified the pictures, the engineer drew 13 pictures in code, and QA and the Art Director took screenshots with `@run/shot` and judged what they saw; the Goal closed as built but only partly seen (21 operations against a budget of 13, 25 executors). `held-out.json` records A1–A5, all met: every entity has its picture (`screenshots/`), the rule files are byte-identical to Phase 17 and the team's bot plays all 20 seeds exactly as before. |
+
+Results and findings: `docs/phase18.md`.

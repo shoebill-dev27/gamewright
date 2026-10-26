@@ -1,0 +1,13 @@
+I can't verify the visual criteria from the code alone, so I'm running the tests, a text-player script and a screenshot run first.
+
+<<<FILE @run/tests/suite
+>>>END
+
+<<<FILE @run/play/text-seed42
+seed 42
+dddd ss .. dddd ssss wwww aaaa .. 1
+>>>END
+
+<<<FILE @run/shot/walk
+dddd....ssss..dddd
+>>>END
