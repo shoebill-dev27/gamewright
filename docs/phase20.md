@@ -85,3 +85,8 @@ Close の後に、私が判定する。スクリプトでの判定は、`repo/ma
   - executor の指示に、「自分の手段で示せないことを書く。どの工程でも示せない、とは書かない」を足した。
   - テストは `tests/test_phase20.py`。
 - **Owner としての回答**: A に 2 件を足して、10 件の追加にした。条件として、画面の確認（QA の撮影、Art Director の画面レビュー）を戻し、Play は省いてよいとした。
+- 3 回目の `run`（4 回の実行）:
+  - Resume が D-005 を記録し、10 件の追加と画面の確認の復活を反映した。
+  - Engineer は、失敗していた UI 試験を直した（試験はすべて通った）。町から社までの経路を探す道具（`tools/climb.js`、`tools/search.js`）も足した。
+  - QA（23）と Art Director の画面レビュー（24）は並行に開いたが、まだ実行していない。
+  - executor の利用上限に達して止まった（「session limit · resets 12:40pm」）。続きは `python3 scripts/studio_run.py run examples/runs/p20-kitsunebi-run`。
