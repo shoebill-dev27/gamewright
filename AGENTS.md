@@ -42,6 +42,9 @@ copy writable) and never without it.
 `run` stops on its own when the Owner is needed, on a rejected output, a runtime error, its
 operation budget (`--max-ops`, default 25), or when no progress is being made.
 
+To watch the Roles at work, `python3 scripts/studio_office.py serve <ws>` serves a read-only
+virtual office on http://127.0.0.1:8765/; `export <ws> <dir>` writes a replay of a recorded run.
+
 `--runtime claude|codex` picks the executor runtime. Never paste your own conversation into a
 Step; the packet is the only input. The manual operations above remain valid.
 
@@ -63,5 +66,6 @@ Step; the packet is the only input. The manual operations above remain valid.
   Goal budgets and closing Resumes: `tests/test_phase13.py`; a budgeted Goal run to Close:
   `tests/test_phase14.py`; build file names for build-writing Steps: `tests/test_phase15.py`;
   a first playable from a concept: `tests/test_phase16.py`; a larger browser game: `tests/test_phase17.py`;
-  screenshots for the Studio: `tests/test_phase18.py`; Phases 5-18 need `bwrap`, Phases 17-18 also `node`,
-  and the live screenshot test a local Chromium with Playwright).
+  screenshots for the Studio: `tests/test_phase18.py`; the virtual office: `tests/test_phase19.py`;
+  Phases 5-18 need `bwrap`, Phases 17-18 also `node`, and the live screenshot test a local Chromium with
+  Playwright).

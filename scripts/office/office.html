@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src data:">
+<title>Virtual AI Game Studio</title>
+<style>
+  /* Layout: a header band; the office in the middle with status panels on each side; the live log and queue below. */
+  :root {
+    --bg: #0b1220; --panel: #111b2e; --panel-2: #16233a; --line: #243653; --ink: #e8eef8; --muted: #93a4bf;
+    --accent: #4cc3ff; --ok: #3ecf8e; --warn: #ffb547; --busy: #3ecf8e; --wait: #93a4bf; --bad: #ff6b6b;
+    --font: "Hiragino Sans", "Noto Sans JP", "Yu Gothic", "Meiryo", system-ui, sans-serif;
+    --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { background: radial-gradient(120% 90% at 50% 0%, #13213a 0%, var(--bg) 60%); color: var(--ink); font-family: var(--font); font-size: 14px; }
+  .wrap { display: grid; grid-template-rows: auto 1fr auto; gap: 12px; min-height: 100%; padding-block: 12px; padding-left: max(14px, env(safe-area-inset-left, 0px)); padding-right: max(14px, env(safe-area-inset-right, 0px)); }
+  header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 10px 16px; }
+  .brand { display: flex; flex-direction: column; min-width: 0; }
+  .brand b { font-size: 20px; letter-spacing: 0.02em; }
+  .brand small { color: var(--muted); font-size: 11px; letter-spacing: 0.14em; }
+  .goalbox { display: flex; align-items: center; gap: 10px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 6px 12px; min-width: 0; flex: 1 1 280px; }
+  .goalbox .t { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 3px 10px; font-size: 12px; font-weight: 700; white-space: nowrap; border: 1px solid transparent; }
+  .pill.busy { background: rgba(62,207,142,.16); color: #7af0b6; border-color: rgba(62,207,142,.4); }
+  .pill.waiting { background: rgba(147,164,191,.14); color: #c7d2e4; border-color: rgba(147,164,191,.35); }
+  .pill.idle { background: rgba(147,164,191,.08); color: var(--muted); border-color: rgba(147,164,191,.2); }
+  .pill.done { background: rgba(76,195,255,.14); color: #8fd8ff; border-color: rgba(76,195,255,.35); }
+  .pill.warn { background: rgba(255,181,71,.14); color: #ffd08a; border-color: rgba(255,181,71,.4); }
+  .counts { display: flex; gap: 8px; flex-wrap: wrap; }
+  .count { display: flex; align-items: center; gap: 6px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px; font-size: 12px; color: var(--muted); }
+  .count b { color: var(--ink); font-size: 18px; font-variant-numeric: tabular-nums; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .clock { text-align: right; font-variant-numeric: tabular-nums; }
+  .clock b { font-size: 20px; display: block; }
+  .clock small { color: var(--muted); font-size: 11px; }
+  .replay { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .replay[hidden] { display: none !important; }
+  .replay button, .replay select { background: var(--panel-2); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font: inherit; cursor: pointer; }
+  .replay input[type=range] { width: 200px; accent-color: var(--accent); }
+  main { display: grid; grid-template-columns: minmax(250px, 300px) minmax(0, 1fr) minmax(260px, 320px); gap: 12px; min-height: 0; }
+  @media (max-width: 1100px) { main { grid-template-columns: minmax(0, 1fr); } }
+  .col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; min-width: 0; }
+  .panel h2 { margin: 0 0 8px; font-size: 14px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .panel h2 small { color: var(--muted); font-size: 10px; letter-spacing: 0.14em; font-weight: 400; }
+  .panel h2 .num { color: var(--accent); font-size: 22px; font-variant-numeric: tabular-nums; }
+  .bar { height: 6px; background: var(--panel-2); border-radius: 999px; overflow: hidden; margin: 2px 0 10px; }
+  .bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--ok)); width: 0; transition: width .6s ease; }
+  ul.list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .row { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 8px; align-items: center; background: var(--panel-2); border-radius: 9px; padding: 6px 8px; }
+  .row .main { min-width: 0; }
+  .row .main b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+  .row .main span { display: block; color: var(--muted); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .office { position: relative; background: radial-gradient(70% 70% at 50% 50%, #1a2b47 0%, #0f1a2d 70%); border: 1px solid var(--line); border-radius: 18px; padding: 8px; min-width: 0; }
+  .office svg { display: block; width: 100%; height: auto; max-width: 100%; }
+  .detail .who { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .detail .who b { font-size: 18px; }
+  .detail .avatar { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; color: #0b1220; }
+  .kv { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 10px; font-size: 12px; }
+  .kv dt { color: var(--muted); }
+  .kv dd { margin: 0; overflow-wrap: anywhere; }
+  .duties { margin: 8px 0 0; padding-left: 18px; color: var(--muted); font-size: 12px; }
+  .bottom { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 12px; }
+  @media (max-width: 900px) { .bottom { grid-template-columns: minmax(0, 1fr); } }
+  .log { font-family: var(--mono); font-size: 12px; max-height: 190px; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; }
+  .log div { display: grid; grid-template-columns: 52px 112px minmax(0, 1fr); gap: 8px; }
+  .log time { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .log .text { overflow-wrap: anywhere; }
+  .empty { color: var(--muted); font-size: 12px; }
+  .note { color: var(--muted); font-size: 11px; }
+  .desk { cursor: pointer; }
+  .desk:focus { outline: none; }
+  .desk:focus-visible .plate { stroke: var(--accent); stroke-width: 2.5; }
+  @keyframes typing { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
+  .typing circle { animation: typing 1.2s infinite; }
+  .typing circle:nth-child(2) { animation-delay: .2s; }
+  .typing circle:nth-child(3) { animation-delay: .4s; }
+  @keyframes pulse { 0% { opacity: .35; } 50% { opacity: .85; } 100% { opacity: .35; } }
+  .glow { animation: pulse 1.8s ease-in-out infinite; }
+  @media (prefers-reduced-motion: reduce) { .typing circle, .glow { animation: none; } .bar i { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><b>Virtual AI Game Studio</b><small>AI AGENTS × GAME DEVELOPMENT</small></div>
+    <div class="goalbox"><span class="note">プロジェクト</span><span class="t" id="projectName">—</span><span class="pill idle" id="goalStatus">—</span></div>
+    <div class="counts">
+      <span class="count"><i class="dot" style="background:var(--busy)"></i>作業中 <b id="cBusy">0</b></span>
+      <span class="count"><i class="dot" style="background:var(--wait)"></i>待機中 <b id="cWait">0</b></span>
+      <span class="count"><i class="dot" style="background:#5b6b86"></i>手すき <b id="cIdle">0</b></span>
+      <span class="count">予算 <b id="budget">—</b></span>
+    </div>
+    <div class="replay" id="replay" hidden>
+      <button id="play" type="button">▶ 再生</button>
+      <select id="speed" aria-label="再生の速さ">
+        <option value="10">×10</option><option value="60" selected>×60</option><option value="300">×300</option><option value="600">×600</option>
+      </select>
+      <input id="scrub" type="range" min="0" max="0" value="0" aria-label="時間">
+    </div>
+    <div class="clock"><b id="clock">--:--:--</b><small id="mode">接続中…</small></div>
+  </header>
+
+  <main>
+    <div class="col">
+      <section class="panel">
+        <h2><span>プロジェクト進行状況</span><span class="num" id="pct">0%</span></h2>
+        <div class="bar"><i id="pctBar"></i></div>
+        <div style="font-weight:700;margin-bottom:2px" id="goalTitle">—</div>
+        <div class="note" id="goalRequest" style="margin-bottom:8px"></div>
+        <ul class="list" id="stages"></ul>
+      </section>
+      <section class="panel">
+        <h2><span>最近の受け渡し</span><small>HANDOFFS</small></h2>
+        <ul class="list" id="handoffs"></ul>
+      </section>
+    </div>
+
+    <div class="office">
+      <svg id="floor" viewBox="0 0 1000 660" role="img" aria-label="バーチャルオフィス。7 人のエージェントの席と、中央の Goal"></svg>
+    </div>
+
+    <div class="col">
+      <section class="panel detail">
+        <h2><span>エージェントの詳細</span><small>AGENT DETAIL</small></h2>
+        <div class="who"><div class="avatar" id="dAvatar">E</div><div><b id="dName">—</b><div class="note" id="dEn"></div></div><span class="pill idle" id="dState" style="margin-left:auto">—</span></div>
+        <dl class="kv">
+          <dt>いまの仕事</dt><dd id="dStage">—</dd>
+          <dt>内容</dt><dd id="dTask">—</dd>
+          <dt>経過</dt><dd id="dSince">—</dd>
+          <dt>完了した工程</dt><dd id="dDone">0</dd>
+          <dt>最近の行動</dt><dd id="dLast">—</dd>
+        </dl>
+        <ul class="duties" id="dDuties"></ul>
+        <div class="note" style="margin-top:8px">席をクリックすると切り替わります。</div>
+      </section>
+      <section class="panel">
+        <h2><span>意思決定の記録</span><small>DECISION LOG</small></h2>
+        <ul class="list" id="decisions"></ul>
+      </section>
+    </div>
+  </main>
+
+  <div class="bottom">
+    <section class="panel">
+      <h2><span>実行ログ</span><small id="logNote">LIVE LOG</small></h2>
+      <div class="log" id="log"></div>
+    </section>
+    <section class="panel">
+      <h2><span>これからの仕事</span><small>TASK QUEUE</small></h2>
+      <ul class="list" id="queue"></ul>
+    </section>
+  </div>
+</div>
+
+<script>
+"use strict";
+const ROLES = {
+  "game-director":      { ja: "ディレクター", en: "Director", color: "#f5b942", x: 500, y: 112, duties: ["方向と優先順位の判断", "体験の Goal の達成判定", "Owner への確認の準備"] },
+  "game-designer":      { ja: "デザイナー", en: "Designer", color: "#3ecf8e", x: 225, y: 190, duties: ["ルールと数値の設計", "受け入れ基準の作成", "仕様の質問への回答"] },
+  "technical-director": { ja: "テクニカルディレクター", en: "Tech Director", color: "#8b9cff", x: 775, y: 190, duties: ["技術方針の決定", "作業の分割と順序", "リスクの見極め"] },
+  "art-director":       { ja: "アートディレクター", en: "Art Director", color: "#ff8fb1", x: 165, y: 390, duties: ["見た目の方針", "絵の仕様", "画面の確認"] },
+  "gameplay-engineer":  { ja: "エンジニア", en: "Engineer", color: "#4cc3ff", x: 835, y: 390, duties: ["実装", "不具合の原因究明", "試験の追加"] },
+  "qa":                 { ja: "品質保証", en: "QA", color: "#ffa94d", x: 335, y: 565, duties: ["受け入れ基準の検証", "不具合の再現と重大度", "回帰の確認"] },
+  "playtester":         { ja: "プレイテスター", en: "Playtester", color: "#7ee081", x: 665, y: 565, duties: ["プレイヤーの目で遊ぶ", "体験の報告", "分かりにくさの指摘"] },
+};
+const HUB = { x: 500, y: 350 };
+const NAME = { studio: "Studio", owner: "Owner" };
+for (const [k, r] of Object.entries(ROLES)) NAME[k] = r.en;
+const STATE_JA = { done: "完了", open: "進行中", planned: "予定", tentative: "保留", skipped: "省略" };
+const SVGNS = "http://www.w3.org/2000/svg";
+const $ = (id) => document.getElementById(id);
+let selected = "gameplay-engineer", lastSeq = null, current = null;
+
+function el(tag, attrs, text) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) e.setAttribute(k, v);
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+function sv(tag, attrs, text) {
+  const e = document.createElementNS(SVGNS, tag);
+  for (const [k, v] of Object.entries(attrs || {})) e.setAttribute(k, v);
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+const hhmm = (iso) => (iso ? iso.slice(11, 16) : "--:--");
+function elapsed(since, now) {
+  if (!since || !now) return "—";
+  const s = Math.max(0, (Date.parse(now) - Date.parse(since)) / 1000);
+  const m = Math.floor(s / 60), h = Math.floor(m / 60);
+  return h ? `${h} 時間 ${m % 60} 分` : m ? `${m} 分 ${Math.floor(s % 60)} 秒` : `${Math.floor(s)} 秒`;
+}
+function stateKey(status) {
+  const s = (status || "").toLowerCase();
+  return s.startsWith("done") ? "done" : s.startsWith("open") ? "open" : s.startsWith("skip") ? "skipped" : s.startsWith("tent") ? "tentative" : "planned";
+}
+
+// --- The office floor (drawn once; updated per snapshot) ---------------------------------------
+const floor = $("floor"), deskParts = {};
+function drawFloor() {
+  const defs = sv("defs");
+  const g = sv("radialGradient", { id: "hubGlow" });
+  g.append(sv("stop", { offset: "0%", "stop-color": "#4cc3ff", "stop-opacity": "0.55" }), sv("stop", { offset: "100%", "stop-color": "#4cc3ff", "stop-opacity": "0" }));
+  defs.append(g);
+  floor.append(defs);
+  floor.append(sv("ellipse", { cx: 500, cy: 360, rx: 470, ry: 300, fill: "#13223b", stroke: "#243653" }));
+  for (const [k, r] of Object.entries(ROLES)) floor.append(sv("line", { x1: HUB.x, y1: HUB.y, x2: r.x, y2: r.y + 20, stroke: "#2b4468", "stroke-width": 2, "stroke-dasharray": "4 6" }));
+  floor.append(sv("circle", { cx: HUB.x, cy: HUB.y, r: 110, fill: "url(#hubGlow)", class: "glow" }));
+  floor.append(sv("circle", { cx: HUB.x, cy: HUB.y, r: 78, fill: "#10213a", stroke: "#4cc3ff", "stroke-width": 2 }));
+  const hubTitle = sv("text", { x: HUB.x, y: HUB.y - 26, "text-anchor": "middle", fill: "#e8eef8", "font-size": 13, "font-weight": 700 });
+  const hubTitle2 = sv("text", { x: HUB.x, y: HUB.y - 9, "text-anchor": "middle", fill: "#e8eef8", "font-size": 13, "font-weight": 700 });
+  const hubSub = sv("text", { x: HUB.x, y: HUB.y + 12, "text-anchor": "middle", fill: "#93a4bf", "font-size": 11 }, "Current Goal");
+  const hubStudio = sv("text", { x: HUB.x, y: HUB.y + 34, "text-anchor": "middle", fill: "#4cc3ff", "font-size": 13, "font-weight": 700 }, "Studio: 見守り中");
+  floor.append(hubTitle, hubTitle2, hubSub, hubStudio);
+  deskParts.hub = { title: hubTitle, title2: hubTitle2, studio: hubStudio };
+  for (const [k, r] of Object.entries(ROLES)) {
+    const d = sv("g", { class: "desk", tabindex: 0, role: "button", "aria-label": `${r.ja}の詳細を見る` });
+    d.append(sv("ellipse", { cx: r.x, cy: r.y + 36, rx: 96, ry: 30, fill: "#1a2c49", stroke: "#2b4468" }));
+    const halo = sv("ellipse", { cx: r.x, cy: r.y + 36, rx: 100, ry: 33, fill: "none", stroke: r.color, "stroke-width": 3, opacity: 0, class: "glow" });
+    d.append(halo);
+    d.append(sv("rect", { x: r.x - 54, y: r.y - 8, width: 108, height: 26, rx: 6, fill: "#2a3a55" }));
+    const screen = sv("rect", { x: r.x - 26, y: r.y - 40, width: 52, height: 32, rx: 4, fill: "#0d1626", stroke: "#3a5072" });
+    d.append(screen, sv("rect", { x: r.x - 3, y: r.y - 8, width: 6, height: 6, fill: "#3a5072" }));
+    d.append(sv("circle", { cx: r.x + 46, cy: r.y - 20, r: 13, fill: r.color }));
+    d.append(sv("path", { d: `M ${r.x + 26} ${r.y + 14} q 20 -30 40 0 z`, fill: r.color, opacity: 0.85 }));
+    const typing = sv("g", { class: "typing", opacity: 0 });
+    for (let i = 0; i < 3; i++) typing.append(sv("circle", { cx: r.x - 12 + i * 12, cy: r.y - 24, r: 3.5, fill: r.color }));
+    d.append(typing);
+    d.append(sv("rect", { x: r.x - 104, y: r.y + 52, width: 208, height: 46, rx: 12, fill: "#0f1a2d", stroke: "#2b4468", class: "plate" }));
+    d.append(sv("circle", { cx: r.x - 86, cy: r.y + 75, r: 8, fill: r.color }));
+    d.append(sv("text", { x: r.x - 72, y: r.y + 72, fill: "#e8eef8", "font-size": 13, "font-weight": 700 }, r.en));
+    d.append(sv("text", { x: r.x - 72, y: r.y + 89, fill: "#93a4bf", "font-size": 11 }, r.ja));
+    const pillBg = sv("rect", { x: r.x + 36, y: r.y + 64, width: 62, height: 22, rx: 11, fill: "#1c2a42" });
+    const pillTx = sv("text", { x: r.x + 67, y: r.y + 79, "text-anchor": "middle", fill: "#93a4bf", "font-size": 11, "font-weight": 700 }, "手すき");
+    d.append(pillBg, pillTx);
+    const bubbleBg = sv("rect", { x: r.x - 90, y: r.y - 82, width: 180, height: 26, rx: 8, fill: "#0f1a2d", stroke: r.color, opacity: 0 });
+    const bubbleTx = sv("text", { x: r.x, y: r.y - 64, "text-anchor": "middle", fill: "#e8eef8", "font-size": 11, opacity: 0 });
+    d.append(bubbleBg, bubbleTx);
+    d.addEventListener("click", () => { selected = k; if (current) renderDetail(current); });
+    d.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selected = k; if (current) renderDetail(current); } });
+    floor.append(d);
+    deskParts[k] = { halo, screen, typing, pillBg, pillTx, bubbleBg, bubbleTx };
+  }
+}
+
+function point(who) {
+  if (ROLES[who]) return { x: ROLES[who].x, y: ROLES[who].y + 20 };
+  return HUB;
+}
+function flow(from, to) {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const a = point(from), b = point(to), color = (ROLES[from] || ROLES[to] || { color: "#4cc3ff" }).color;
+  const dotEl = sv("circle", { r: 7, fill: color });
+  const trail = sv("circle", { r: 14, fill: color, opacity: 0.25 });
+  floor.append(trail, dotEl);
+  const t0 = performance.now(), dur = 1400;
+  function at(p) {
+    const mid = p < 0.5 ? p * 2 : (p - 0.5) * 2;
+    const s = p < 0.5 ? a : HUB, e = p < 0.5 ? HUB : b;
+    return { x: s.x + (e.x - s.x) * mid, y: s.y + (e.y - s.y) * mid };
+  }
+  function step(now) {
+    const p = Math.min(1, (now - t0) / dur), q = at(p);
+    dotEl.setAttribute("cx", q.x); dotEl.setAttribute("cy", q.y);
+    trail.setAttribute("cx", q.x); trail.setAttribute("cy", q.y);
+    if (p < 1) requestAnimationFrame(step); else { dotEl.remove(); trail.remove(); }
+  }
+  requestAnimationFrame(step);
+}
+
+// --- Render one snapshot ----------------------------------------------------------------------
+function render(s) {
+  current = s;
+  $("projectName").textContent = s.project.name || s.project.id || "—";
+  const gs = $("goalStatus");
+  gs.textContent = { active: "進行中", done: "完了", abandoned: "打ち切り", "blocked-on-owner": "Owner の判断待ち" }[s.goal.status] || s.goal.status || "—";
+  gs.className = "pill " + (s.goal.status === "done" ? "done" : s.goal.status === "active" ? "busy" : "warn");
+  $("cBusy").textContent = s.counts.busy; $("cWait").textContent = s.counts.waiting; $("cIdle").textContent = s.counts.idle;
+  $("budget").textContent = s.goal.budget ? `${s.goal.used}/${s.goal.budget}` : `${s.goal.used}`;
+  $("clock").textContent = s.now ? s.now.slice(11, 19) : "--:--:--";
+  $("goalTitle").textContent = `${s.goal.id}: ${s.goal.title || "—"}`;
+  $("goalRequest").textContent = s.goal.request ? `依頼: 「${s.goal.request}」` : "";
+
+  const counted = s.stages.filter((x) => stateKey(x.status) !== "skipped");
+  const done = counted.filter((x) => stateKey(x.status) === "done").length;
+  const pct = s.goal.status === "done" ? 100 : counted.length ? Math.round((100 * done) / counted.length) : 0;
+  $("pct").textContent = pct + "%"; $("pctBar").style.width = pct + "%";
+  const stages = $("stages"); stages.textContent = "";
+  if (!s.stages.length) stages.append(el("li", { class: "empty" }, "工程表はまだありません"));
+  for (const x of s.stages) {
+    const k = stateKey(x.status), li = el("li", { class: "row" });
+    li.append(el("span", {}, { done: "✓", open: "◉", planned: "○", tentative: "？", skipped: "–" }[k]));
+    const m = el("div", { class: "main" }); m.append(el("b", {}, x.stage), el("span", {}, NAME[x.role] || x.role)); li.append(m);
+    li.append(el("span", { class: "pill " + (k === "done" ? "done" : k === "open" ? "busy" : "idle") }, STATE_JA[k]));
+    stages.append(li);
+  }
+
+  const hl = $("handoffs"); hl.textContent = "";
+  if (!s.handoffs.length) hl.append(el("li", { class: "empty" }, "まだ受け渡しはありません"));
+  for (const h of s.handoffs.slice(0, 6)) {
+    const li = el("li", { class: "row" });
+    li.append(el("span", {}, String(h.seq)));
+    const m = el("div", { class: "main" });
+    m.append(el("b", {}, `${NAME[h.from] || h.from} → ${NAME[h.to] || h.to}`), el("span", {}, h.title || h.stage));
+    li.append(m, el("span", { class: "note" }, hhmm(h.time)));
+    hl.append(li);
+  }
+
+  const dl = $("decisions"); dl.textContent = "";
+  if (!s.decisions.length) dl.append(el("li", { class: "empty" }, "まだ決定はありません"));
+  for (const d of s.decisions) {
+    const li = el("li", { class: "row" });
+    li.append(el("span", {}, "◆"));
+    const m = el("div", { class: "main" }); m.append(el("b", {}, `${d.id} ${d.title}`), el("span", {}, `決めた人: ${NAME[d.by] || d.by}  ${d.date}`));
+    li.append(m, el("span", { class: "note" }, hhmm(d.time)));
+    dl.append(li);
+  }
+
+  const log = $("log"), atBottom = log.scrollTop + log.clientHeight >= log.scrollHeight - 8;
+  log.textContent = "";
+  if (!s.log.length) log.append(el("div", { class: "empty" }, "まだ記録はありません"));
+  for (const l of s.log) {
+    const row = el("div");
+    const who = el("span", {}, `[${NAME[l.who] || l.who}]`);
+    who.style.color = (ROLES[l.who] || { color: "#4cc3ff" }).color;
+    row.append(el("time", {}, hhmm(l.time)), who, el("span", { class: "text" }, l.text));
+    log.append(row);
+  }
+  if (atBottom) log.scrollTop = log.scrollHeight;
+
+  const q = $("queue"); q.textContent = "";
+  if (!s.queue.length) q.append(el("li", { class: "empty" }, "残っている仕事はありません"));
+  s.queue.forEach((x, i) => {
+    const k = stateKey(x.status), li = el("li", { class: "row" });
+    li.append(el("span", {}, String(i + 1)));
+    const m = el("div", { class: "main" }); m.append(el("b", {}, x.stage), el("span", {}, NAME[x.role] || x.role)); li.append(m);
+    li.append(el("span", { class: "pill " + (k === "open" ? "busy" : "idle") }, STATE_JA[k]));
+    q.append(li);
+  });
+
+  const words = (s.goal.title || s.goal.id || "").split(" "), lines = ["", ""];
+  for (const w of words) { const k = lines[0].length + w.length < 17 && !lines[1] ? 0 : 1; lines[k] = (lines[k] ? lines[k] + " " : "") + w; }
+  deskParts.hub.title.textContent = lines[0].slice(0, 20);
+  deskParts.hub.title2.textContent = lines[1].length > 18 ? lines[1].slice(0, 17) + "…" : lines[1];
+  deskParts.hub.studio.textContent = `Studio: ${s.studio.label}`;
+  for (const [k, a] of Object.entries(s.agents)) {
+    const p = deskParts[k]; if (!p) continue;
+    const busy = a.state === "busy", waiting = a.state === "waiting";
+    p.halo.setAttribute("opacity", busy ? 1 : 0);
+    p.typing.setAttribute("opacity", busy ? 1 : 0);
+    p.screen.setAttribute("fill", busy ? ROLES[k].color : waiting ? "#1d2c45" : "#0d1626");
+    p.screen.setAttribute("fill-opacity", busy ? 0.55 : 1);
+    p.pillTx.textContent = a.label;
+    p.pillBg.setAttribute("fill", busy ? "#14432f" : waiting ? "#2a3650" : "#1c2a42");
+    p.pillTx.setAttribute("fill", busy ? "#7af0b6" : waiting ? "#c7d2e4" : "#93a4bf");
+    const show = busy || waiting;
+    p.bubbleBg.setAttribute("opacity", show ? 0.95 : 0); p.bubbleTx.setAttribute("opacity", show ? 1 : 0);
+    p.bubbleTx.textContent = show ? (a.stage || "").slice(0, 24) : "";
+  }
+  if (lastSeq !== null && s.latest_seq > lastSeq) {
+    s.handoffs.filter((h) => h.seq > lastSeq).reverse().forEach((h, i) => setTimeout(() => flow(h.from, h.to), i * 500));
+  }
+  lastSeq = s.latest_seq;
+  renderDetail(s);
+}
+
+function renderDetail(s) {
+  const r = ROLES[selected], a = s.agents[selected];
+  $("dAvatar").style.background = r.color; $("dAvatar").textContent = r.en[0];
+  $("dName").textContent = r.ja; $("dEn").textContent = r.en;
+  const st = $("dState"); st.textContent = a.label; st.className = "pill " + a.state;
+  $("dStage").textContent = a.stage || "—";
+  $("dTask").textContent = a.task || "—";
+  $("dSince").textContent = a.state === "busy" ? elapsed(a.since, s.now) : "—";
+  $("dDone").textContent = String(a.steps_done);
+  $("dLast").textContent = a.last ? `${hhmm(a.last.time)} ${a.last.text}` : "—";
+  const du = $("dDuties"); du.textContent = "";
+  for (const d of r.duties) du.append(el("li", {}, d));
+}
+
+// --- Modes: replay a timeline.json if one sits beside the page, else poll the live API ---------
+async function start() {
+  drawFloor();
+  try {
+    const res = await fetch("timeline.json", { cache: "no-store" });
+    if (res.ok) {
+      const tl = await res.json();
+      if (Array.isArray(tl) && tl.length) return replay(tl);
+    }
+  } catch (e) { /* no timeline: live */ }
+  live();
+}
+
+function live() {
+  $("mode").textContent = "ライブ（1.5 秒ごとに更新）";
+  $("logNote").textContent = "LIVE LOG";
+  const tick = async () => {
+    try {
+      const res = await fetch("api/state", { cache: "no-store" });
+      if (res.ok) render(await res.json());
+      else $("mode").textContent = "サーバーから状態を取得できません";
+    } catch (e) { $("mode").textContent = "サーバーに接続できません"; }
+  };
+  tick(); setInterval(tick, 1500);
+}
+
+function replay(tl) {
+  $("replay").hidden = false;
+  $("logNote").textContent = "REPLAY";
+  const times = tl.map((s) => Date.parse(s.now)), t0 = times[0], t1 = times[times.length - 1];
+  const scrub = $("scrub"); scrub.max = String(Math.max(1, Math.round((t1 - t0) / 1000))); scrub.value = "0";
+  let clock = t0, playing = false, lastFrame = null, shown = -1;
+  const show = () => {
+    let i = 0;
+    while (i + 1 < times.length && times[i + 1] <= clock) i++;
+    if (i !== shown) { shown = i; render(tl[i]); }
+    $("clock").textContent = new Date(clock).toTimeString().slice(0, 8);
+    $("mode").textContent = `リプレイ ${tl[i].now.slice(0, 10)}（${i + 1}/${tl.length}）`;
+    scrub.value = String(Math.round((clock - t0) / 1000));
+  };
+  const frame = (now) => {
+    if (!playing) return;
+    if (lastFrame !== null) clock = Math.min(t1, clock + (now - lastFrame) * Number($("speed").value));
+    lastFrame = now; show();
+    if (clock >= t1) { playing = false; $("play").textContent = "▶ 再生"; return; }
+    requestAnimationFrame(frame);
+  };
+  $("play").addEventListener("click", () => {
+    playing = !playing; $("play").textContent = playing ? "❚❚ 一時停止" : "▶ 再生";
+    if (playing) { if (clock >= t1) { clock = t0; lastSeq = null; } lastFrame = null; requestAnimationFrame(frame); }
+  });
+  scrub.addEventListener("input", () => { clock = t0 + Number(scrub.value) * 1000; lastSeq = null; shown = -1; show(); });
+  show();
+}
+
+start();
+</script>
+</body>
+</html>
