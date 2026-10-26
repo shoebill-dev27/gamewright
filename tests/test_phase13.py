@@ -246,3 +246,13 @@ def test_recorded_measurement_reproduces(tmp_path):
     m = t6.measure(repo, tmp_path)
     assert m == recorded["measurement"] and code == recorded["tests_exit"]
     assert t10.boss_verdict(m) == recorded["boss_verdict"]
+
+
+def test_over_budget_a_route_may_renumber_planned_rows_around_a_scope_step(
+    ws, monkeypatch
+):
+    scope = (2, "Decide", "game-director", "make-decision", "planned", "—")
+    moved = (3, "Verify", "qa", "verify-change", "open", NEXT[0])  # was row 2
+    route(ws, monkeypatch, [DONE_ROW, scope, moved], used=31)
+    text = (ws / "project" / G / "goal.md").read_text()
+    assert "| 2 | Decide | game-director |" in text and "| 3 | Verify | qa |" in text

@@ -1149,11 +1149,11 @@ def build_route(project, gdir, records=None, since=None):
             errors.append(
                 "goal.md: keep budget as it was; only the Owner changes it (through Resume)"
             )
-        old_rows = {r["n"] for r in route_rows(before)}
-        added = [r for r in route_rows(new_goal) if r["n"] not in old_rows]
-        if used >= budget and any(
-            r["role"] not in ("game-director", "owner") for r in added
-        ):
+        # Count stages, not row numbers: a Route may renumber rows to put a scope step first.
+        others = lambda text: sum(
+            r["role"] not in ("game-director", "owner") for r in route_rows(text)
+        )
+        if used >= budget and others(new_goal) > others(before):
             errors.append(
                 f"goal.md: the Goal has used {used} of its {budget} operations, so add no stages "
                 "but one: a game-director step to cut the remaining work to what the Owner request "
