@@ -42,7 +42,8 @@ def test_shot_is_offered_only_with_a_page_and_a_browser(tmp_path, monkeypatch):
     workspace = ember_ws(tmp_path)
     project = workspace / "project"
     monkeypatch.setattr(sr, "browser_tools", lambda: (Path("/x/chrome"), Path("/x/nm")))
-    assert "shot" in sr.run_commands(project)
+    described = sr.run_commands(project)["shot"]
+    assert "page index.html#<fragment>" in described and "size <w>x<h>" in described
     monkeypatch.setattr(sr, "browser_tools", lambda: None)
     assert "shot" not in sr.run_commands(project)
     monkeypatch.setattr(sr, "browser_tools", lambda: (Path("/x/chrome"), Path("/x/nm")))
@@ -119,7 +120,7 @@ def test_a_shot_run_attaches_screenshots_to_the_next_executor(tmp_path, monkeypa
         out = (
             block(
                 "@run/shot/start",
-                "page index.html#seed-42\nArrowLeft shot dd.s shot\n",
+                "page index.html#seed-42\nsize 1200x800\nArrowLeft shot dd.s shot\n",
             )
             if len(received) == 1
             else block(
@@ -142,6 +143,10 @@ def test_a_shot_run_attaches_screenshots_to_the_next_executor(tmp_path, monkeypa
     sr.do_step(workspace, args(goal="G-001"))
     assert received[0] == [] and len(received[1]) == 2
     assert all(i["data"].startswith(b"\x89PNG") for i in received[1])
+    width, height = (
+        int.from_bytes(received[1][0]["data"][o : o + 4], "big") for o in (16, 20)
+    )
+    assert (width, height) == (1200, 800)  # the size line
     rec = next((workspace / "records").glob("*-step-art-director"))
     assert sorted(p.name for p in rec.glob("shot-*.png")) == [
         "shot-round1-1.png",

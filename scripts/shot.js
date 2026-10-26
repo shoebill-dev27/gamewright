@@ -4,7 +4,7 @@
 //
 //   node shot.js <default page> <script>
 //
-// Script: an optional first line `page <path>[#fragment]`, then key names separated by spaces or
+// Script: optional first lines `page <path>[#fragment]` and `size <w>x<h>`, then key names separated by spaces or
 // newlines (Playwright names: ArrowLeft, a, Space, Enter, ...); `shot` takes a screenshot there.
 // A lowercase run of keys ("dddd", "ss..") is pressed one character at a time.
 // The last screen is always taken. At most MAX_SHOTS screenshots, saved as /work/.shots/N.png.
@@ -16,23 +16,30 @@ const MAX_SHOTS = 4;
 
 function parse(defaultPage, text) {
   const lines = text.split('\n');
-  let page = defaultPage;
-  const first = (lines[0] || '').trim();
-  if (first.startsWith('page ')) { page = first.slice(5).trim(); lines.shift(); }
+  let page = defaultPage, width = 1000, height = 700;
+  while (lines.length && /^(page|size) /.test(lines[0].trim())) {
+    const line = lines.shift().trim();
+    if (line.startsWith('page ')) page = line.slice(5).trim();
+    else {
+      const m = line.match(/^size (\d+)x(\d+)$/);
+      if (!m) throw new Error('size must look like `size 1280x800`: ' + line);
+      width = Math.min(2560, Math.max(320, +m[1])); height = Math.min(2560, Math.max(240, +m[2]));
+    }
+  }
   const path = page.split('#')[0];
   if (!path || path.startsWith('/') || path.split('/').includes('..')) {
     throw new Error('page must be a path inside the build: ' + page);
   }
-  return { page, steps: lines.join(' ').split(/\s+/).filter(Boolean) };
+  return { page, width, height, steps: lines.join(' ').split(/\s+/).filter(Boolean) };
 }
 
 (async () => {
   const [defaultPage, scriptFile] = process.argv.slice(2);
-  const { page, steps } = parse(defaultPage, fs.readFileSync(scriptFile, 'utf8'));
+  const { page, width, height, steps } = parse(defaultPage, fs.readFileSync(scriptFile, 'utf8'));
   const browser = await chromium.launch({
     executablePath: '/opt/browser/chrome', args: ['--no-sandbox', '--disable-gpu'],
   });
-  const tab = await browser.newPage({ viewport: { width: 1000, height: 700 } });
+  const tab = await browser.newPage({ viewport: { width, height } });
   const errors = [];
   tab.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
   tab.on('pageerror', (e) => errors.push(String(e)));

@@ -247,7 +247,14 @@ def run_commands(project):
         return {}
     commands = {k[4:]: v for k, v in meta.items() if k.startswith("run_") and v}
     if meta.get("page") and browser_tools():
-        commands["shot"] = f"screenshots of {meta['page']} ({{script}}: keys to press)"
+        commands["shot"] = (
+            f"screenshots of {meta['page']} in a browser. {{script}} lines: optional `page "
+            f"{meta['page']}#<fragment>` (a fragment the page reads, e.g. a seed) and `size <w>x<h>` "
+            "(default 1000x700), then keys to press (Playwright names such as ArrowLeft, Space; a "
+            "lowercase run like `dddd` is one press per character) and `shot` where a screenshot is "
+            "wanted. The last screen is always taken; at most 4 screenshots, attached as images to "
+            "your next packet"
+        )
     return commands
 
 
