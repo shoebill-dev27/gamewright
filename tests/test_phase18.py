@@ -119,7 +119,7 @@ def test_a_shot_run_attaches_screenshots_to_the_next_executor(tmp_path, monkeypa
         out = (
             block(
                 "@run/shot/start",
-                "page index.html#seed-42\nArrowLeft shot ArrowDown ArrowDown shot\n",
+                "page index.html#seed-42\nArrowLeft shot dd.s shot\n",
             )
             if len(received) == 1
             else block(
@@ -149,3 +149,4 @@ def test_a_shot_run_attaches_screenshots_to_the_next_executor(tmp_path, monkeypa
     ]
     result = json.loads((rec / "runs-round1.json").read_text())[0]
     assert result["exit"] == 0 and '"console_errors":[]' in result["output"]
+    assert '"keys_pressed":5' in result["output"]  # "dd.s" is four presses

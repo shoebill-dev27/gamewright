@@ -6,6 +6,7 @@
 //
 // Script: an optional first line `page <path>[#fragment]`, then key names separated by spaces or
 // newlines (Playwright names: ArrowLeft, a, Space, Enter, ...); `shot` takes a screenshot there.
+// A lowercase run of keys ("dddd", "ss..") is pressed one character at a time.
 // The last screen is always taken. At most MAX_SHOTS screenshots, saved as /work/.shots/N.png.
 'use strict';
 const fs = require('fs');
@@ -43,8 +44,11 @@ function parse(defaultPage, text) {
     await tab.screenshot({ path: '/work/.shots/' + (++shots) + '.png' });
   };
   for (const step of steps) {
-    if (step === 'shot') await take();
-    else { await tab.keyboard.press(step); pressed++; }
+    if (step === 'shot') { await take(); continue; }
+    // Named keys start with a capital (ArrowLeft, Space); a lowercase run such as "dddd" or
+    // "ss.." is read as one press per character, as in the build's own scripts.
+    const keys = step.length > 1 && /^[a-z0-9.,;/]+$/.test(step) ? step.split('') : [step];
+    for (const k of keys) { await tab.keyboard.press(k); pressed++; }
   }
   if (steps[steps.length - 1] !== 'shot') await take();
   console.log(JSON.stringify({ page, keys_pressed: pressed, screenshots: shots, screenshots_not_taken: skipped, console_errors: errors }));
