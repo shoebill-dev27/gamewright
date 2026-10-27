@@ -101,11 +101,21 @@ def test_the_server_answers_only_its_own_paths_on_localhost():
         assert "Virtual AI Game Studio" in page
         state = json.loads(urllib.request.urlopen(base + "/api/state").read())
         assert state["mode"] == "live"
+        layout = json.loads(urllib.request.urlopen(base + "/assets/layout.json").read())
+        assert set(layout["roles"]) == set(so.ROLES)
+        assert (
+            urllib.request.urlopen(base + "/assets/office.webp").headers["Content-Type"]
+            == "image/webp"
+        )
         for path in (
             "/project/project.md",
             "/../../etc/passwd",
             "/scripts/studio_run.py",
             "/timeline.json",
+            "/assets/../studio_office.py",
+            "/assets/%2e%2e/studio_office.py",
+            "/assets/office.html",
+            "/assets/nothing.webp",
         ):
             with pytest.raises(urllib.error.HTTPError) as err:
                 urllib.request.urlopen(base + path)
@@ -128,4 +138,7 @@ def test_the_page_never_puts_data_into_html():
 def test_export_writes_the_page_and_the_timeline(tmp_path):
     out = so.export(RUN, tmp_path / "replay")
     assert (out / "office.html").read_bytes() == so.PAGE.read_bytes()
+    assert (out / "assets" / "layout.json").is_file() and (
+        out / "assets" / "office.webp"
+    ).is_file()
     assert len(json.loads((out / "timeline.json").read_text())) > 20

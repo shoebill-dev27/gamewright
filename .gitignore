@@ -21,3 +21,6 @@ __pycache__/
 
 # Dry-run driver logs
 examples/runs/*.log
+
+# Scratch output of scripts/office/make_assets.py (the finished pictures live in scripts/office/assets/)
+scripts/office/.build/

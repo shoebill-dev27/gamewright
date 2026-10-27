@@ -21,6 +21,20 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import studio_run as sr  # noqa: E402
 
 PAGE = Path(__file__).resolve().parent / "office" / "office.html"
+ASSETS = PAGE.parent / "assets"
+ASSET_TYPES = {".webp": "image/webp", ".png": "image/png", ".json": "application/json"}
+
+
+def asset(path):
+    """The asset file a request path names (/assets/<name>), or None: only plain file names in the
+    assets directory, never anything outside it."""
+    name = path[len("/assets/") :] if path.startswith("/assets/") else ""
+    if not re.fullmatch(r"[a-z0-9-]+\.(webp|png|json)", name):
+        return None
+    f = ASSETS / name
+    return f if f.is_file() else None
+
+
 STUDIO_OPS = ("Intake", "Route", "Resume")
 ROLES = [
     "game-director",
@@ -503,6 +517,9 @@ def make_handler(ws):
             path = self.path.split("?")[0]
             if path in ("/", "/office.html"):
                 self.send(200, PAGE.read_bytes(), "text/html; charset=utf-8")
+            elif asset(path):
+                f = asset(path)
+                self.send(200, f.read_bytes(), ASSET_TYPES[f.suffix])
             elif path == "/api/state":
                 body = json.dumps(office_state(ws), ensure_ascii=False).encode()
                 self.send(200, body, "application/json; charset=utf-8")
@@ -537,6 +554,8 @@ def serve(ws, port):
 def export(ws, out):
     out.mkdir(parents=True, exist_ok=True)
     shutil.copy(PAGE, out / "office.html")
+    if ASSETS.is_dir():
+        shutil.copytree(ASSETS, out / "assets", dirs_exist_ok=True)
     (out / "timeline.json").write_text(
         json.dumps(timeline(ws), ensure_ascii=False), encoding="utf-8"
     )

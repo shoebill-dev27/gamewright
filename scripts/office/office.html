@@ -3,258 +3,269 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src data:">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'self' data:">
 <title>Virtual AI Game Studio</title>
+<link rel="icon" href="data:,">
 <style>
-  /* Layout: header band; status column, the office floor, detail column; log and queue below. */
+  /* Layout: a light header; the rendered studio (assets/) with its live overlay and glass panels on
+     both sides; the log and queue below. */
   :root {
-    --bg: #0a1121; --panel: rgba(16, 26, 46, 0.94); --row: #142039;
-    --line: #22344f; --line-hi: #2e4670; --ink: #eaf1fb; --sub: #a9b8cf; --muted: #7d8da8;
-    --green: #2fd18b; --cyan: #38bdf8; --purple: #8b5cf6; --orange: #f59e0b;
+    --bg: #070d1c; --glass: rgba(10, 20, 40, 0.84); --glass-hi: rgba(18, 32, 60, 0.9); --row: rgba(255, 255, 255, 0.045);
+    --line: rgba(120, 160, 230, 0.22); --ink: #eef3fb; --sub: #b4c1d6; --muted: #8394ae;
+    --green: #22c55e; --cyan: #38bdf8; --purple: #8b5cf6; --orange: #f59e0b;
     --font: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Noto Sans CJK JP", "Yu Gothic UI", "Yu Gothic", "Meiryo", system-ui, sans-serif;
     color-scheme: dark;
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; min-height: 100%; }
-  body { background: radial-gradient(1200px 700px at 50% 30%, #13244a 0%, var(--bg) 70%) fixed, var(--bg); color: var(--ink); font-family: var(--font); font-size: 13px; }
-  .wrap { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; padding: 10px max(12px, env(safe-area-inset-right, 0px)) 14px max(12px, env(safe-area-inset-left, 0px)); }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 13px; }
 
   /* Header */
-  header { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; background: linear-gradient(180deg, #16243f, #111c33); border: 1px solid var(--line); border-radius: 14px; padding: 8px 14px; box-shadow: 0 6px 24px rgba(0,0,0,.35); }
-  .brand { display: flex; align-items: center; gap: 10px; padding-right: 14px; border-right: 1px solid var(--line); }
-  .brand svg { width: 46px; height: 32px; flex: none; }
-  .brand b { display: block; font-size: 20px; font-weight: 800; }
-  .brand small { display: block; color: var(--muted); font-size: 10px; letter-spacing: .16em; }
-  .proj { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1 1 300px; }
-  .proj .lbl { color: var(--muted); font-size: 11px; line-height: 1.2; }
-  .proj .lbl small { display: block; font-size: 9px; letter-spacing: .14em; }
-  .proj .box { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; background: #0c162b; border: 1px solid var(--line-hi); border-radius: 10px; padding: 7px 12px; }
-  .proj .box .t { font-weight: 700; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1; }
+  header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 7px 16px; background: linear-gradient(180deg, #f7f9fc, #e7ecf4); color: #142036; border-bottom: 1px solid #c9d3e2; position: relative; z-index: 2; }
+  .brand { display: flex; align-items: center; gap: 10px; padding-right: 14px; border-right: 1px solid #c9d3e2; }
+  .brand svg { width: 50px; height: 36px; flex: none; }
+  .brand b { display: block; font-size: 21px; font-weight: 800; letter-spacing: .01em; color: #18233a; }
+  .brand small { display: block; color: #5a6b86; font-size: 10px; letter-spacing: .18em; }
+  .proj { display: flex; align-items: center; gap: 10px; flex: 1 1 160px; min-width: 0; }
+  .proj .lbl { color: #5a6b86; font-size: 12px; line-height: 1.2; white-space: nowrap; }
+  .proj .lbl small { display: block; font-size: 9px; letter-spacing: .16em; }
+  @media (max-width: 1800px) { .proj .lbl { display: none; } }
+  .proj .box { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; background: #fff; border: 1px solid #c9d3e2; border-radius: 10px; padding: 7px 12px; box-shadow: 0 1px 2px rgba(20, 32, 54, .08); }
+  .proj .box .t { font-weight: 800; font-size: 16px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .chips { display: flex; gap: 8px; flex-wrap: wrap; }
-  .chip { display: flex; align-items: center; gap: 7px; background: #0f1a30; border: 1px solid var(--line); border-radius: 12px; padding: 6px 12px; font-size: 12px; color: var(--sub); white-space: nowrap; }
-  .chip b { color: var(--ink); font-size: 18px; font-variant-numeric: tabular-nums; }
-  .chip small { color: var(--muted); font-size: 12px; }
+  .chip { display: flex; align-items: center; gap: 6px; background: #fff; border: 1px solid #d3dbe7; border-radius: 12px; padding: 5px 10px; font-size: 12px; font-weight: 700; color: #3b4a63; white-space: nowrap; box-shadow: 0 1px 2px rgba(20, 32, 54, .06); }
+  .chip b { font-size: 18px; color: #142036; font-variant-numeric: tabular-nums; }
+  .chip small { color: #6b7a93; font-size: 12px; font-weight: 600; }
   .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: none; }
-  .when { text-align: right; font-variant-numeric: tabular-nums; line-height: 1.15; }
-  .when small { color: var(--sub); font-size: 12px; display: block; }
-  .when b { font-size: 22px; }
+  .when { text-align: right; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .when small { display: block; color: #4b5b75; font-size: 13px; font-weight: 700; }
+  .when b { font-size: 22px; color: #142036; }
   .replay { display: flex; align-items: center; gap: 6px; }
   .replay[hidden] { display: none !important; }
-  .replay button, .replay select, select.agent { width: 100%; margin-bottom: 10px; } .replay select, select.agent { background: #0f1a30; color: var(--ink); border: 1px solid var(--line-hi); border-radius: 9px; padding: 6px 10px; font: inherit; cursor: pointer; }
-  .replay input[type=range] { width: 170px; accent-color: var(--cyan); }
+  .replay button, .replay select { background: #fff; color: #142036; border: 1px solid #c9d3e2; border-radius: 9px; padding: 5px 8px; font: inherit; font-weight: 700; cursor: pointer; }
+  .replay input[type=range] { width: 110px; accent-color: #2563eb; }
 
-  /* Columns and panels */
-  main { display: grid; grid-template-columns: minmax(240px, 300px) minmax(0, 1fr) minmax(260px, 320px); gap: 10px; align-items: start; }
-  @media (max-width: 1150px) { main { grid-template-columns: minmax(0, 1fr); } }
-  .col { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
-  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; min-width: 0; box-shadow: 0 6px 22px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.03); }
-  .ph { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  /* Stage: the rendered studio and its overlay; the side panels float over its edges */
+  .stage { position: relative; height: min(calc(100vw * 1400 / 2560), calc(100vh - var(--hdr, 64px))); min-height: 520px; overflow: hidden; background: #0b1530; }
+  .scenewrap { position: absolute; left: 0; right: 0; bottom: 0; aspect-ratio: 2560 / 1400; }
+  .scenewrap > img, .scenewrap > svg { position: absolute; display: block; }
+  .scenewrap > img.scene, .scenewrap > svg { inset: 0; width: 100%; height: 100%; }
+  .scenewrap > img.busy { opacity: 0; transition: opacity .6s ease; pointer-events: none; }
+  .scenewrap > img.busy.on { opacity: 1; }
+  .sign { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 1; text-align: center; padding: 6px 26px 7px; border-radius: 12px; background: linear-gradient(180deg, rgba(14, 28, 58, .92), rgba(8, 16, 36, .92)); border: 1px solid rgba(56, 189, 248, .55); box-shadow: 0 0 18px rgba(56, 189, 248, .35), inset 0 1px 0 rgba(255, 255, 255, .08); pointer-events: none; }
+  .sign b { display: block; font-size: 19px; letter-spacing: .14em; font-weight: 800; color: #f1f6ff; white-space: nowrap; }
+  .sign small { display: block; font-size: 10px; letter-spacing: .32em; color: #7dd3fc; }
+  .side { position: absolute; top: 1.4%; bottom: 1.4%; width: 20.6%; display: flex; flex-direction: column; gap: 10px; z-index: 1; }
+  .side.left { left: .9%; }
+  .side.right { right: .9%; }
+  @media (max-width: 1180px) {
+    .stage { height: auto; min-height: 0; overflow: visible; }
+    .scenewrap { position: relative; }
+    .side { position: static; width: auto; padding: 10px 12px 0; }
+    .stage .side .panel.grow { flex: none; max-height: 380px; }
+    .sign { display: none; }
+  }
+  .panel { background: var(--glass); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; min-height: 0; backdrop-filter: blur(6px); box-shadow: 0 10px 30px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .06); }
+  .side .panel { overflow: hidden; display: flex; flex-direction: column; }
+  .side .panel.grow { flex: 1 1 0; }
+  .side.right .panel.grow { flex: 0 1 auto; }
+  .side .panel .scroll { overflow-y: auto; min-height: 0; flex: 1 1 auto; scrollbar-width: thin; -webkit-mask-image: linear-gradient(to bottom, #000 88%, transparent); mask-image: linear-gradient(to bottom, #000 88%, transparent); padding-bottom: 8px; }
+  .ph { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex: none; }
   .ph .ico { width: 22px; height: 22px; flex: none; }
   .ph .tt { flex: 1; min-width: 0; }
   .ph .tt b { display: block; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  #stages { max-height: 430px; overflow-y: auto; }
   .ph .tt small { display: block; color: var(--muted); font-size: 9px; letter-spacing: .16em; }
-  .ph .big { color: var(--cyan); font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; }
-  .ph .badge { min-width: 28px; height: 28px; padding: 0 6px; border-radius: 14px; background: #1d2b47; display: grid; place-items: center; font-weight: 700; }
-  .bar { height: 7px; background: #0c1629; border-radius: 999px; overflow: hidden; }
+  .ph .big { color: #5cc8ff; font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .ph .badge { min-width: 28px; height: 28px; padding: 0 7px; border-radius: 14px; background: rgba(255, 255, 255, .1); display: grid; place-items: center; font-weight: 800; }
+  .bar { height: 7px; background: rgba(255, 255, 255, .08); border-radius: 999px; overflow: hidden; flex: none; }
   .bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #22d3ee, #3b82f6); border-radius: 999px; transition: width .6s ease; }
-  .gt { margin: 12px 0 4px; font-weight: 800; font-size: 14px; line-height: 1.4; }
-  .gr { color: var(--sub); font-size: 12px; line-height: 1.5; margin-bottom: 10px; }
+  .gt { margin: 12px 0 4px; font-weight: 800; font-size: 15px; line-height: 1.4; }
+  .gr { color: var(--sub); font-size: 12px; line-height: 1.5; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   ul.rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-  .r { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; align-items: center; gap: 10px; background: var(--row); border: 1px solid #1a2a47; border-radius: 10px; padding: 7px 10px; }
+  .r { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; align-items: center; gap: 10px; background: var(--row); border: 1px solid rgba(255, 255, 255, .06); border-radius: 10px; padding: 7px 10px; }
   .r .m { min-width: 0; }
   .r .m b { display: block; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .r .m span { display: block; color: var(--muted); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .r .end { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
   .r .end time { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
-  .r.now { border-color: #2c5ea8; background: #15284a; }
+  .r.now { border-color: rgba(96, 165, 250, .55); background: rgba(59, 130, 246, .14); }
   .num { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 11px; color: #0a1121; }
   .st { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 800; }
   .st.done { background: #10b981; color: #052e1f; }
-  .st.open { background: #3b82f6; box-shadow: 0 0 0 3px #1e3a6e; }
+  .st.open { border: 2px solid #3b82f6; background: radial-gradient(circle, #3b82f6 0 45%, transparent 50%); }
   .st.planned { border: 2px solid #3a4a66; }
   .st.tentative { border: 2px dashed #3a4a66; color: var(--muted); }
   .st.skipped { border: 2px solid #2a3850; color: var(--muted); }
-  .pill { display: inline-flex; align-items: center; justify-content: center; border-radius: 7px; padding: 3px 9px; font-size: 11px; font-weight: 700; white-space: nowrap; }
-  .p-green { background: #0f3b2c; color: #5ff0b0; }
-  .p-blue { background: #14306a; color: #93c5fd; }
-  .p-purple { background: #2e1e5c; color: #c4b5fd; }
-  .p-orange { background: #4a2e0a; color: #fcd34d; }
-  .p-grey { background: #1e2a41; color: #a9b8cf; }
-  .p-dark { background: #141e33; color: #6f809d; }
-  .p-red { background: #4a1420; color: #fda4af; }
-  .p-pink { background: #4a1638; color: #f9a8d4; }
+  .pill { display: inline-flex; align-items: center; justify-content: center; border-radius: 7px; padding: 3px 9px; font-size: 11px; font-weight: 800; white-space: nowrap; }
+  .p-green { background: rgba(34, 197, 94, .2); color: #6ff0a6; }
+  .p-blue { background: rgba(59, 130, 246, .25); color: #9cc6ff; }
+  .p-purple { background: rgba(139, 92, 246, .28); color: #cbb8ff; }
+  .p-orange { background: rgba(245, 158, 11, .25); color: #fcd34d; }
+  .p-grey { background: rgba(148, 163, 184, .2); color: #c4cfdf; }
+  .p-dark { background: rgba(255, 255, 255, .07); color: #8394ae; }
+  .p-red { background: rgba(239, 68, 68, .25); color: #fda4af; }
+  .p-pink { background: rgba(236, 72, 153, .25); color: #f9a8d4; }
 
-  /* Office floor */
-  .office { position: relative; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: radial-gradient(900px 560px at 50% 52%, #1d3463 0%, #12213f 48%, #0b1428 100%); min-width: 0; }
-  .office svg { display: block; width: 100%; height: auto; }
-  .desk { cursor: pointer; }
-  .desk:focus { outline: none; }
-  .desk:focus-visible .plate, .desk.picked .plate { stroke: #7dd3fc; stroke-width: 2.5; }
-
-  /* Agent detail */
-  .card { background: #f4f7fc; color: #0f1a2e; border-radius: 12px; padding: 12px 14px; }
+  /* Agent card */
+  .card { background: #f5f8fc; color: #0f1a2e; border-radius: 12px; padding: 12px 14px; }
   .card .top { display: flex; align-items: center; gap: 10px; }
-  .card .top svg { width: 50px; height: 50px; flex: none; }
-  .card .top b { font-size: 18px; display: block; }
-  .card .top small { color: #4b5b75; font-size: 12px; }
-  .card .lbl { color: #4b5b75; font-size: 11px; margin: 12px 0 4px; }
+  .card .top img { width: 52px; height: 52px; border-radius: 50%; flex: none; background: #dfe7f2; object-fit: cover; }
+  .card .top b { font-size: 18px; }
+  .card .top small { color: #4b5b75; font-size: 12px; margin-left: 6px; white-space: nowrap; }
+  .card .lbl { color: #4b5b75; font-size: 11px; margin: 10px 0 3px; }
   .card .lbl span { color: #8592a8; }
-  .card .task { font-size: 13px; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; max-height: 7.5em; overflow: hidden; }
-  .card .bar { background: #dde5f1; margin-top: 10px; }
-  .card .meta { display: flex; justify-content: space-between; gap: 10px; color: #4b5b75; font-size: 12px; margin-top: 8px; flex-wrap: wrap; }
+  .card .task { font-size: 13px; font-weight: 700; line-height: 1.5; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .card .bar { background: #dde5f1; margin-top: 8px; }
+  .card .meta { display: flex; justify-content: space-between; gap: 10px; color: #4b5b75; font-size: 12px; margin-top: 7px; flex-wrap: wrap; }
   .card .meta span { min-width: 0; overflow-wrap: anywhere; }
-  .card .next { display: flex; justify-content: space-between; gap: 8px; border: 1px solid #d5ddea; border-radius: 9px; padding: 8px 10px; font-size: 13px; }
+  .card .next { display: flex; justify-content: space-between; gap: 8px; border: 1px solid #d5ddea; border-radius: 9px; padding: 7px 10px; font-size: 13px; }
   .card .next span:last-child { color: #4b5b75; white-space: nowrap; }
-  .card .duties { margin: 6px 0 0; padding-left: 18px; color: #3b4a63; font-size: 12px; line-height: 1.6; }
+  select.agent { background: rgba(255, 255, 255, .08); color: var(--ink); border: 1px solid var(--line); border-radius: 9px; padding: 5px 8px; font: inherit; max-width: 40%; }
+  select.agent option { color: #142036; }
 
   /* Bottom */
-  .bottom { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 430px); gap: 10px; }
-  @media (max-width: 950px) { .bottom { grid-template-columns: minmax(0, 1fr); } }
-  .log { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(8, auto); grid-auto-flow: column; gap: 4px 24px; font-size: 12px; }
-  @media (max-width: 700px) { .log { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-auto-flow: row; } }
-  .log div { display: grid; grid-template-columns: 8px 40px auto minmax(0, 1fr); gap: 7px; align-items: center; min-width: 0; }
+  .bottom { padding: 10px 12px 14px; }
+  .log { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(5, auto); grid-auto-flow: column; gap: 5px 26px; font-size: 12.5px; }
+  @media (max-width: 760px) { .log { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-auto-flow: row; } }
+  .log div { display: grid; grid-template-columns: 8px 40px auto minmax(0, 1fr); gap: 8px; align-items: center; min-width: 0; }
   .log time { color: var(--sub); font-variant-numeric: tabular-nums; }
-  .log .who { font-weight: 700; white-space: nowrap; }
+  .log .who { font-weight: 800; white-space: nowrap; }
   .log .tx { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .q { display: grid; grid-template-columns: 24px minmax(0, 1fr) 130px 36px; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid #1a2a47; font-size: 12px; }
+  .q { display: grid; grid-template-columns: 24px minmax(0, 1fr) 130px 34px; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid rgba(255, 255, 255, .07); font-size: 12.5px; }
   .q:last-child { border-bottom: none; }
-  .q .n { width: 22px; height: 22px; border-radius: 6px; background: #1d2b47; display: grid; place-items: center; font-weight: 700; font-size: 11px; }
+  .q .n { width: 22px; height: 22px; border-radius: 6px; background: rgba(255, 255, 255, .09); display: grid; place-items: center; font-weight: 800; font-size: 11px; }
   .q .s { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .q .who { display: flex; align-items: center; gap: 6px; color: var(--sub); font-size: 11px; overflow: hidden; white-space: nowrap; }
   .empty { color: var(--muted); font-size: 12px; padding: 4px 2px; }
   .live { display: inline-flex; align-items: center; gap: 6px; color: var(--sub); font-size: 11px; font-weight: 400; margin-left: 10px; }
-  @keyframes blink { 50% { opacity: .25; } }
-  @keyframes typing { 0%, 80%, 100% { opacity: .2; } 40% { opacity: 1; } }
-  @keyframes pulse { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  @keyframes scan { 0%, 100% { transform: scaleX(.4); } 50% { transform: scaleX(1); } }
-  @keyframes dash { to { stroke-dashoffset: -28; } }
-  .live .dot { animation: blink 1.6s infinite; }
+
+  /* Overlay */
+  .pod { cursor: pointer; }
+  .pod:focus { outline: none; }
+  .pod:focus-visible .plate-bg, .pod.picked .plate-bg { stroke: #e0f2fe; stroke-width: 4px; }
   .typing circle { animation: typing 1.2s infinite; }
   .typing circle:nth-of-type(2) { animation-delay: .2s; }
   .typing circle:nth-of-type(3) { animation-delay: .4s; }
-  .pulse { animation: pulse 2.2s ease-in-out infinite; }
-  .spin { transform-box: fill-box; transform-origin: center; animation: spin 24s linear infinite; }
-  .busy .scan { transform-box: fill-box; transform-origin: left center; animation: scan 1.4s ease-in-out infinite; }
-  .flowing { stroke-dasharray: 14 14; animation: dash .9s linear infinite; }
-  @media (prefers-reduced-motion: reduce) { .typing circle, .pulse, .spin, .busy .scan, .live .dot, .flowing { animation: none; } .bar i { transition: none; } }
+  .pulse { animation: pulse 2s ease-in-out infinite; }
+  .flowing { stroke-dasharray: 18 14; animation: dash 1s linear infinite; }
+  .live .dot { animation: blink 1.6s infinite; }
+  @keyframes typing { 0%, 80%, 100% { opacity: .2; } 40% { opacity: 1; } }
+  @keyframes pulse { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+  @keyframes dash { to { stroke-dashoffset: -32; } }
+  @keyframes blink { 50% { opacity: .25; } }
+  @media (prefers-reduced-motion: reduce) { .typing circle, .pulse, .flowing, .live .dot { animation: none; } .bar i, .stage > img.busy { transition: none; } }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div class="brand">
-      <svg viewBox="0 0 46 32" aria-hidden="true"><defs><linearGradient id="gp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e2e8f0"/><stop offset="1" stop-color="#94a3b8"/></linearGradient></defs><path d="M10 6h26a9 9 0 0 1 9 9v3a10 10 0 0 1-17 7h-10A10 10 0 0 1 1 18v-3a9 9 0 0 1 9-9z" fill="url(#gp)"/><rect x="9" y="13" width="10" height="3.6" rx="1.2" fill="#1e293b"/><rect x="12.2" y="9.8" width="3.6" height="10" rx="1.2" fill="#1e293b"/><circle cx="32" cy="12.5" r="2.4" fill="#ef4444"/><circle cx="37" cy="17" r="2.4" fill="#3b82f6"/><circle cx="27.5" cy="17" r="2.4" fill="#22c55e"/><circle cx="32" cy="21.5" r="2.4" fill="#f59e0b"/></svg>
-      <div><b>Virtual AI Game Studio</b><small>AI AGENTS × GAME DEVELOPMENT</small></div>
-    </div>
-    <div class="proj">
-      <div class="lbl">プロジェクト<small>PROJECT</small></div>
-      <div class="box"><span class="t" id="projectName">—</span><span class="pill p-green" id="goalStatus">—</span></div>
-    </div>
-    <div class="chips">
-      <span class="chip"><i class="dot" style="background:var(--green)"></i>稼働中 <b id="cBusy">0</b></span>
-      <span class="chip"><i class="dot" style="background:#94a3b8"></i>待機中 <b id="cWait">0</b></span>
-      <span class="chip"><i class="dot" style="background:var(--purple)"></i>レビュー <b id="cReview">0</b></span>
-      <span class="chip"><i class="dot" style="background:var(--orange)"></i>テスト <b id="cTest">0</b></span>
-      <span class="chip"><i class="dot" style="background:var(--cyan)"></i>実行 <b id="cUsed">0</b><small id="cBudget"></small></span>
-    </div>
-    <div class="replay" id="replay" hidden>
-      <button id="play" type="button">▶ 再生</button>
-      <select id="speed" aria-label="再生の速さ"><option value="10">×10</option><option value="60" selected>×60</option><option value="300">×300</option><option value="600">×600</option></select>
-      <input id="scrub" type="range" min="0" max="0" value="0" aria-label="時間">
-    </div>
-    <div class="when"><small id="date">--/--</small><b id="clock">--:--</b></div>
-  </header>
-
-  <main>
-    <div class="col">
-      <section class="panel">
-        <div class="ph"><svg class="ico" viewBox="0 0 22 22" aria-hidden="true"><rect x="1" y="1" width="9" height="9" rx="2" fill="#38bdf8"/><rect x="12" y="1" width="9" height="9" rx="2" fill="#818cf8"/><rect x="1" y="12" width="9" height="9" rx="2" fill="#818cf8"/><rect x="12" y="12" width="9" height="9" rx="2" fill="#38bdf8"/></svg><div class="tt"><b>プロジェクト進行状況</b><small>PROJECT STATUS</small></div><span class="big" id="pct">0%</span></div>
-        <div class="bar"><i id="pctBar"></i></div>
-        <div class="gt" id="goalTitle">—</div>
-        <div class="gr" id="goalRequest"></div>
-        <ul class="rows" id="stages"></ul>
-      </section>
-      <section class="panel">
-        <div class="ph"><svg class="ico" viewBox="0 0 22 22" aria-hidden="true"><rect x="1" y="3" width="9" height="16" rx="2" fill="#a78bfa"/><rect x="12" y="3" width="9" height="16" rx="2" fill="#60a5fa"/></svg><div class="tt"><b>現在のハンドオフ</b><small>ACTIVE HANDOFF</small></div><span class="badge" id="hCount">0</span></div>
-        <ul class="rows" id="handoffs"></ul>
-      </section>
-    </div>
-
-    <div class="office"><svg id="floor" viewBox="0 0 1400 915" role="img" aria-label="バーチャルオフィス。7 人の AI エージェントの席と、中央の Goal"></svg></div>
-
-    <div class="col">
-      <section class="panel">
-        <div class="ph"><svg class="ico" viewBox="0 0 22 22" aria-hidden="true"><rect x="1" y="1" width="9" height="9" rx="2" fill="#f472b6"/><rect x="12" y="1" width="9" height="9" rx="2" fill="#38bdf8"/><rect x="1" y="12" width="20" height="9" rx="2" fill="#818cf8"/></svg><div class="tt"><b>エージェントの詳細</b><small>AGENT DETAIL</small></div></div>
-        <select class="agent" id="agentSelect" aria-label="エージェントを選ぶ"></select>
-        <div class="card">
-          <div class="top"><svg id="dFace" viewBox="0 0 60 60" aria-hidden="true"></svg><div style="flex:1;min-width:0"><b id="dName">—</b><small id="dJa"></small></div><span class="pill p-grey" id="dState">—</span></div>
-          <div class="lbl">いまの仕事 <span>Current Task</span></div>
-          <div class="task" id="dTask">—</div>
-          <div class="bar"><i id="dBar"></i></div>
-          <div class="meta"><span id="dFile">—</span><span id="dSince"></span></div>
-          <div class="lbl">次の予定 <span>Next</span></div>
-          <div class="next"><span id="dNext">—</span><span id="dNextWho"></span></div>
-          <div class="lbl">受け持ち <span>Duties</span></div>
-          <ul class="duties" id="dDuties"></ul>
-        </div>
-      </section>
-      <section class="panel">
-        <div class="ph"><svg class="ico" viewBox="0 0 22 22" aria-hidden="true"><rect x="3" y="2" width="16" height="18" rx="3" fill="#fb923c"/><rect x="6" y="6" width="10" height="2" rx="1" fill="#7c2d12"/><rect x="6" y="10" width="10" height="2" rx="1" fill="#7c2d12"/><rect x="6" y="14" width="6" height="2" rx="1" fill="#7c2d12"/></svg><div class="tt"><b>意思決定の記録</b><small>DECISION LOG</small></div><span class="badge" id="dCount">0</span></div>
-        <ul class="rows" id="decisions"></ul>
-      </section>
-    </div>
-  </main>
-
-  <div class="bottom">
-    <section class="panel">
-      <div class="ph"><svg class="ico" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="#2563eb"/><path d="M6 11.5l3.2 3.2L16 8" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg><div class="tt"><b>実行ログ<span class="live"><i class="dot" style="background:var(--green)"></i><span id="liveNote">接続中…</span></span></b><small>LIVE LOG</small></div></div>
-      <div class="log" id="log"></div>
-    </section>
-    <section class="panel">
-      <div class="ph"><svg class="ico" viewBox="0 0 22 22" aria-hidden="true"><rect x="2" y="4" width="18" height="3" rx="1.5" fill="#60a5fa"/><rect x="2" y="9.5" width="18" height="3" rx="1.5" fill="#60a5fa"/><rect x="2" y="15" width="11" height="3" rx="1.5" fill="#60a5fa"/></svg><div class="tt"><b>キュー（今後のタスク）</b><small>TASK QUEUE</small></div><span class="badge" id="qCount">0</span></div>
-      <div id="queue"></div>
-    </section>
+<header>
+  <div class="brand">
+    <svg viewBox="0 0 50 36" aria-hidden="true"><defs><linearGradient id="gp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b4b6b"/><stop offset="1" stop-color="#18233a"/></linearGradient></defs><path d="M11 7h28a10 10 0 0 1 10 10v3a11 11 0 0 1-19 7.5h-10A11 11 0 0 1 1 20v-3A10 10 0 0 1 11 7z" fill="url(#gp)"/><rect x="9" y="15" width="11" height="4" rx="1.3" fill="#fff"/><rect x="12.5" y="11.5" width="4" height="11" rx="1.3" fill="#fff"/><circle cx="35" cy="13.5" r="2.6" fill="#ef4444"/><circle cx="40.5" cy="18.5" r="2.6" fill="#3b82f6"/><circle cx="29.5" cy="18.5" r="2.6" fill="#22c55e"/><circle cx="35" cy="23.5" r="2.6" fill="#f59e0b"/></svg>
+    <div><b>Virtual AI Game Studio</b><small>AI AGENTS × GAME DEVELOPMENT</small></div>
   </div>
+  <div class="proj">
+    <div class="lbl">プロジェクト<small>PROJECT</small></div>
+    <div class="box"><span class="t" id="projectName">—</span><span class="pill p-green" id="goalStatus" style="background:#dcfce7;color:#15803d">—</span></div>
+  </div>
+  <div class="chips">
+    <span class="chip"><i class="dot" style="background:#22c55e"></i>稼働中 <b id="cBusy">0</b></span>
+    <span class="chip"><i class="dot" style="background:#94a3b8"></i>待機中 <b id="cWait">0</b></span>
+    <span class="chip"><i class="dot" style="background:#8b5cf6"></i>レビュー <b id="cReview">0</b></span>
+    <span class="chip"><i class="dot" style="background:#f59e0b"></i>テスト中 <b id="cTest">0</b></span>
+    <span class="chip"><i class="dot" style="background:#38bdf8"></i>実行 <b id="cUsed">0</b><small id="cBudget"></small></span>
+  </div>
+  <div class="replay" id="replay" hidden>
+    <button id="play" type="button">▶ 再生</button>
+    <select id="speed" aria-label="再生の速さ"><option value="10">×10</option><option value="60" selected>×60</option><option value="300">×300</option><option value="600">×600</option></select>
+    <input id="scrub" type="range" min="0" max="0" value="0" aria-label="時間">
+  </div>
+  <div class="when"><small id="date">--/--</small><b id="clock">--:--</b></div>
+</header>
+
+<div class="stage" id="stage">
+  <div class="scenewrap" id="scenewrap">
+    <img class="scene" id="scene" alt="バーチャルオフィス。7 人の AI エージェントの席と、中央の Goal" src="assets/office.webp">
+    <svg id="overlay" viewBox="0 0 2560 1400" aria-hidden="false"></svg>
+  </div>
+  <div class="sign" aria-hidden="true"><b>VIRTUAL AI GAME STUDIO</b><small>CREATE · PLAY · TOGETHER</small></div>
+
+  <aside class="side left">
+    <section class="panel">
+      <div class="ph"><svg class="ico" viewBox="0 0 22 22" aria-hidden="true"><rect x="1" y="1" width="9" height="9" rx="2" fill="#38bdf8"/><rect x="12" y="1" width="9" height="9" rx="2" fill="#818cf8"/><rect x="1" y="12" width="9" height="9" rx="2" fill="#818cf8"/><rect x="12" y="12" width="9" height="9" rx="2" fill="#38bdf8"/></svg><div class="tt"><b>プロジェクト進行状況</b><small>PROJECT STATUS</small></div><span class="big" id="pct">0%</span></div>
+      <div class="bar"><i id="pctBar"></i></div>
+      <div class="gt" id="goalTitle">—</div>
+      <div class="gr" id="goalRequest"></div>
+    </section>
+    <section class="panel grow">
+      <div class="ph"><svg class="ico" viewBox="0 0 22 22" aria-hidden="true"><rect x="2" y="3" width="18" height="3" rx="1.5" fill="#34d399"/><rect x="2" y="9.5" width="18" height="3" rx="1.5" fill="#60a5fa"/><rect x="2" y="16" width="12" height="3" rx="1.5" fill="#818cf8"/></svg><div class="tt"><b>工程</b><small>ROUTE</small></div><span class="badge" id="sCount">0</span></div>
+      <div class="scroll"><ul class="rows" id="stages"></ul></div>
+    </section>
+    <section class="panel grow">
+      <div class="ph"><svg class="ico" viewBox="0 0 22 22" aria-hidden="true"><rect x="1" y="3" width="9" height="16" rx="2" fill="#a78bfa"/><rect x="12" y="3" width="9" height="16" rx="2" fill="#60a5fa"/></svg><div class="tt"><b>現在のハンドオフ</b><small>ACTIVE HANDOFF</small></div><span class="badge" id="hCount">0</span></div>
+      <div class="scroll"><ul class="rows" id="handoffs"></ul></div>
+    </section>
+  </aside>
+
+  <aside class="side right">
+    <section class="panel">
+      <div class="ph"><svg class="ico" viewBox="0 0 22 22" aria-hidden="true"><rect x="1" y="1" width="9" height="9" rx="2" fill="#f472b6"/><rect x="12" y="1" width="9" height="9" rx="2" fill="#38bdf8"/><rect x="1" y="12" width="20" height="9" rx="2" fill="#818cf8"/></svg><div class="tt"><b>エージェントの詳細</b><small>AGENT DETAIL</small></div><select class="agent" id="agentSelect" aria-label="エージェントを選ぶ"></select></div>
+      <div class="card">
+        <div class="top"><img id="dFace" alt=""><div style="flex:1;min-width:0"><b id="dName">—</b><small id="dJa"></small></div><span class="pill" id="dState">—</span></div>
+        <div class="lbl">いまの仕事 <span>Current Task</span></div>
+        <div class="task" id="dTask">—</div>
+        <div class="bar"><i id="dBar"></i></div>
+        <div class="meta"><span id="dFile">—</span><span id="dSince"></span></div>
+        <div class="lbl">次の予定 <span>Next</span></div>
+        <div class="next"><span id="dNext">—</span><span id="dNextWho"></span></div>
+      </div>
+    </section>
+    <section class="panel grow">
+      <div class="ph"><svg class="ico" viewBox="0 0 22 22" aria-hidden="true"><rect x="3" y="2" width="16" height="18" rx="3" fill="#fb923c"/><rect x="6" y="6" width="10" height="2" rx="1" fill="#7c2d12"/><rect x="6" y="10" width="10" height="2" rx="1" fill="#7c2d12"/><rect x="6" y="14" width="6" height="2" rx="1" fill="#7c2d12"/></svg><div class="tt"><b>意思決定の記録</b><small>DECISION LOG</small></div><span class="badge" id="dCount">0</span></div>
+      <div class="scroll"><ul class="rows" id="decisions"></ul></div>
+    </section>
+  <section class="panel grow">
+    <div class="ph"><svg class="ico" viewBox="0 0 22 22" aria-hidden="true"><rect x="2" y="4" width="18" height="3" rx="1.5" fill="#60a5fa"/><rect x="2" y="9.5" width="18" height="3" rx="1.5" fill="#60a5fa"/><rect x="2" y="15" width="11" height="3" rx="1.5" fill="#60a5fa"/></svg><div class="tt"><b>キュー（今後のタスク）</b><small>TASK QUEUE</small></div><span class="badge" id="qCount">0</span></div>
+    <div class="scroll" id="queue"></div>
+  </section>
+  </aside>
+</div>
+
+<div class="bottom">
+  <section class="panel">
+    <div class="ph"><svg class="ico" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="#2563eb"/><path d="M6 11.5l3.2 3.2L16 8" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg><div class="tt"><b>実行ログ<span class="live"><i class="dot" style="background:var(--green)"></i><span id="liveNote">接続中…</span></span></b><small>LIVE LOG</small></div></div>
+    <div class="log" id="log"></div>
+  </section>
 </div>
 
 <script>
 "use strict";
-// Roles: names, colour, desk position on the floor, which side the duties bubble sits on, and looks.
+// Roles: names, colour, duties and a small glyph for the name plate. Where each desk is comes from
+// assets/layout.json, written by the renderer with the picture.
 const ROLES = {
-  "game-director":      { ja: "ディレクター", en: "Director", color: "#f5b942", x: 700, y: 170, side: "right",
-                          hair: "#2b2f3a", style: "short", shirt: "#3b4b7a", acc: "crown", skin: "#f3cfb3",
-                          duties: ["全体方針の確認", "工程の優先度の判断", "品質の最終承認"] },
-  "game-designer":      { ja: "デザイナー", en: "Designer", color: "#34d399", x: 390, y: 290, side: "left",
-                          hair: "#7a4b2a", style: "bob", shirt: "#e7e2d6", acc: "none", skin: "#f6d3b9",
-                          duties: ["遊びとルールの設計", "数値とレベルの設計", "仕様書の作成"] },
-  "technical-director": { ja: "テクニカルディレクター", en: "Tech Director", color: "#818cf8", x: 1010, y: 290, side: "right",
-                          hair: "#1f2430", style: "spiky", shirt: "#2f3b55", acc: "glasses", skin: "#efc9ad",
-                          duties: ["技術方針の検討", "作りの分け方の設計", "実装方法のレビュー"] },
-  "art-director":       { ja: "アートディレクター", en: "Art Director", color: "#f472b6", x: 320, y: 520, side: "left",
-                          hair: "#f1a7c3", style: "long", shirt: "#f8f4f0", acc: "beret", skin: "#f8d8c4",
-                          duties: ["アートスタイルの監修", "絵と画面の方針", "見た目の確認"] },
-  "gameplay-engineer":  { ja: "エンジニア", en: "Engineer", color: "#38bdf8", x: 1080, y: 520, side: "right",
-                          hair: "#22324f", style: "messy", shirt: "#1f3a5f", acc: "headphones", skin: "#f0cbb0",
-                          duties: ["ゲームロジックの実装", "画面と操作の実装", "試験とビルド"] },
-  "qa":                 { ja: "品質保証", en: "QA", color: "#f59e0b", x: 540, y: 770, side: "left",
-                          hair: "#2a2320", style: "short", shirt: "#3a4f7a", acc: "glasses", skin: "#f2cdb1",
-                          duties: ["動作テスト", "不具合の検証", "受け入れ基準の確認"] },
-  "playtester":         { ja: "プレイテスター", en: "Playtester", color: "#a3e635", x: 860, y: 770, side: "right",
-                          hair: "#3a2a20", style: "cap", shirt: "#e2e8f0", acc: "cap", skin: "#f3d0b5",
-                          duties: ["実際に遊んで確かめる", "遊びやすさの確認", "プレイの所見"] },
+  "game-director":      { ja: "ディレクター", en: "Director", color: "#f5b942", duties: ["全体方針の確認", "工程の優先度の判断", "品質の最終承認"],
+                          glyph: "M-7 4 L-8 -5 L-3.5 -1 L0 -7 L3.5 -1 L8 -5 L7 4 Z" },
+  "game-designer":      { ja: "デザイナー", en: "Designer", color: "#34d399", duties: ["遊びとルールの設計", "数値とレベルの設計", "仕様書の作成"],
+                          glyph: "M-6 6 L-7 2 L3 -8 L7 -4 L-3 6 Z M2 -7 L6 -3" },
+  "technical-director": { ja: "テクニカルディレクター", en: "Technical Director", color: "#818cf8", duties: ["技術方針の検討", "作りの分け方の設計", "実装方法のレビュー"],
+                          glyph: "M-5 -5 H5 V5 H-5 Z M-2 -8 V-5 M2 -8 V-5 M-2 5 V8 M2 5 V8 M-8 -2 H-5 M-8 2 H-5 M5 -2 H8 M5 2 H8" },
+  "art-director":       { ja: "アートディレクター", en: "Art Director", color: "#f472b6", duties: ["アートスタイルの監修", "絵と画面の方針", "見た目の確認"],
+                          glyph: "M0 -7 A7 7 0 1 0 2 7 C0 5 1 2 4 3 C7 4 8 0 7 -3 C6 -6 3 -7 0 -7 Z" },
+  "gameplay-engineer":  { ja: "エンジニア", en: "Engineer", color: "#38bdf8", duties: ["ゲームロジックの実装", "画面と操作の実装", "試験とビルド"],
+                          glyph: "M-3 -6 L-8 0 L-3 6 M3 -6 L8 0 L3 6" },
+  "qa":                 { ja: "品質保証", en: "QA", color: "#f59e0b", duties: ["動作テスト", "不具合の検証", "受け入れ基準の確認"],
+                          glyph: "M-2 -6 A5 5 0 1 0 -1.9 4 A5 5 0 0 0 -2 -6 Z M2 3 L7 8" },
+  "playtester":         { ja: "プレイテスター", en: "Playtester", color: "#a3e635", duties: ["実際に遊んで確かめる", "遊びやすさの確認", "プレイの所見"],
+                          glyph: "M-8 -1 Q-8 -5 -4 -5 H4 Q8 -5 8 -1 L7 4 Q6 7 3 4 H-3 Q-6 7 -7 4 Z M-5 -1 H-2 M-3.5 -2.5 V0.5" },
 };
 const ORDER = Object.keys(ROLES);
-const HUB = { x: 700, y: 480, color: "#38bdf8" };
 const NAME = { studio: "Studio", owner: "Owner" };
 for (const [k, r] of Object.entries(ROLES)) NAME[k] = r.en;
 const STAGE_JA = { Intake: "受付", Design: "企画・仕様", Decide: "方針の判断", Plan: "技術計画", Art: "アート", Build: "実装・ビルド",
-  Fix: "修正", Verify: "テスト", Test: "テスト", Play: "プレイ検証", Playtest: "プレイ検証", Review: "レビュー", Route: "段取り", Close: "まとめ" };
+  Fix: "修正", Verify: "テスト", Test: "テスト", Play: "プレイ検証", Playtest: "プレイ検証", Review: "レビュー", Route: "段取り", Close: "まとめ", Next: "次の段取り" };
+const BUSY_PILL = { "game-director": ["#7c3aed", "#ede9fe"], qa: ["#f59e0b", "#1c1203"], playtester: ["#22c55e", "#04230f"] };
 const SVGNS = "http://www.w3.org/2000/svg";
 const $ = (id) => document.getElementById(id);
-let selected = "game-designer", picked = false, lastSeq = null, drawnSeq = null, current = null;
-const desk = {}, layer = {};
+let L = null, K = 1, S = 1, selected = "game-designer", picked = false, lastSeq = null, drawnSeq = null, current = null;
+const pods = {}, layer = {};
 
 function el(tag, attrs, text) { const e = document.createElement(tag); for (const [k, v] of Object.entries(attrs || {})) e.setAttribute(k, v); if (text !== undefined) e.textContent = text; return e; }
 function sv(tag, attrs, text) { const e = document.createElementNS(SVGNS, tag); for (const [k, v] of Object.entries(attrs || {})) e.setAttribute(k, v); if (text !== undefined) e.textContent = text; return e; }
@@ -263,18 +274,18 @@ const hhmm = (iso) => (iso ? iso.slice(11, 16) : "--:--");
 function elapsed(since, now) { if (!since || !now) return ""; const s = Math.max(0, (Date.parse(now) - Date.parse(since)) / 1000), m = Math.floor(s / 60), h = Math.floor(m / 60); return h ? `${h}時間${m % 60}分` : m ? `${m}分${Math.floor(s % 60)}秒` : `${Math.floor(s)}秒`; }
 function stateKey(s) { s = (s || "").toLowerCase(); return s.startsWith("done") ? "done" : s.startsWith("open") ? "open" : s.startsWith("skip") ? "skipped" : s.startsWith("tent") ? "tentative" : "planned"; }
 function stageJa(stage) { return STAGE_JA[(stage || "").split(/[\s:(-]/)[0]] || stage || "—"; }
-const colorOf = (who) => (ROLES[who] || HUB).color;
-const anchorOf = (who) => (ROLES[who] ? { x: ROLES[who].x, y: ROLES[who].y + 40, rx: 168, ry: 112 } : { x: HUB.x, y: HUB.y, rx: 128, ry: 122 });
+const colorOf = (who) => (ROLES[who] ? ROLES[who].color : "#38bdf8");
+const overlap = (a, b) => Math.max(0, Math.min(a[0] + a[2], b[0] + b[2]) - Math.max(a[0], b[0])) * Math.max(0, Math.min(a[1] + a[3], b[1] + b[3]) - Math.max(a[1], b[1]));
 
 // Shrink an SVG text until it fits, then cut it short with an ellipsis.
-function fit(t, text, maxW, size, min = 11) {
+function fit(t, text, maxW, size, min = size * 0.7) {
   t.textContent = text; t.setAttribute("font-size", size);
-  while (size > min && t.getComputedTextLength() > maxW) t.setAttribute("font-size", --size);
+  while (size > min && t.getComputedTextLength() > maxW) t.setAttribute("font-size", (size -= 0.5));
   let s = text; while (s.length > 1 && t.getComputedTextLength() > maxW) { s = s.slice(0, -1); t.textContent = s + "…"; }
 }
-// Wrap text over the given SVG lines by measured width; the last line ends with an ellipsis if needed.
+// Wrap text over SVG lines by measured width; the last line ends with an ellipsis if needed.
 function wrapInto(lines, text, maxW, size, y0) {
-  const tokens = /[\u3000-\u9fff]/.test(text) ? [...text] : text.split(/(\s+)/);
+  const tokens = /[　-鿿]/.test(text) ? [...text] : text.split(/(\s+)/);
   let i = 0, used = 0;
   for (const [n, t] of lines.entries()) {
     t.setAttribute("font-size", size); t.textContent = "";
@@ -285,236 +296,163 @@ function wrapInto(lines, text, maxW, size, y0) {
     while (i < tokens.length) { t.textContent = cur + tokens[i]; if (cur.trim() && t.getComputedTextLength() > maxW) break; cur += tokens[i++]; }
     t.textContent = cur.trim();
   }
-  lines.forEach((t, n) => t.setAttribute("y", y0 + (n - (used - 1) / 2) * (size + 4)));
+  lines.forEach((t, n) => t.setAttribute("y", y0 + (n - (used - 1) / 2) * (size * 1.25)));
 }
-function gradient(defs, id, stops, radial = false) {
-  const g = radial ? sv("radialGradient", { id }) : sv("linearGradient", { id, x1: 0, y1: 0, x2: 0, y2: 1 });
-  for (const [o, c, a] of stops) g.append(sv("stop", { offset: o, "stop-color": c, "stop-opacity": a === undefined ? 1 : a }));
-  defs.append(g);
-}
-
-// A seated chibi-style person facing the viewer.
-function person(g, cx, cy, r, scale = 1) {
-  const p = sv("g", { transform: `translate(${cx} ${cy}) scale(${scale})` });
-  const skin = r.skin, hair = r.hair;
-  p.append(sv("path", { d: "M-30 34 Q-30 6 -14 2 L14 2 Q30 6 30 34 Z", fill: r.shirt }));
-  p.append(sv("path", { d: "M-8 2 L0 12 L8 2 Z", fill: shade(r.shirt, 0.4) }));
-  p.append(sv("rect", { x: -5, y: -6, width: 10, height: 10, rx: 3, fill: shade(skin, -0.1) }));
-  if (r.style === "long") p.append(sv("path", { d: "M-24 -30 Q-28 10 -16 20 L16 20 Q28 10 24 -30 Z", fill: hair }));
-  if (r.style === "bob") p.append(sv("path", { d: "M-24 -28 Q-27 0 -18 6 L18 6 Q27 0 24 -28 Z", fill: hair }));
-  p.append(sv("ellipse", { cx: 0, cy: -26, rx: 21, ry: 22, fill: skin }));
-  for (const ex of [-21, 21]) p.append(sv("ellipse", { cx: ex, cy: -24, rx: 3.5, ry: 5, fill: shade(skin, -0.08) }));
-  const top = {
-    short: "M-22 -28 Q-22 -50 0 -50 Q22 -50 22 -28 Q14 -38 0 -36 Q-12 -38 -22 -28 Z",
-    bob: "M-23 -26 Q-24 -52 0 -51 Q24 -52 23 -26 Q16 -34 6 -36 Q-2 -30 -10 -36 Q-18 -34 -23 -26 Z",
-    spiky: "M-22 -28 L-24 -42 L-15 -40 L-12 -52 L-4 -44 L2 -55 L8 -44 L16 -51 L17 -40 L24 -42 L22 -28 Q12 -36 0 -35 Q-12 -36 -22 -28 Z",
-    long: "M-23 -24 Q-24 -52 0 -51 Q24 -52 23 -24 Q18 -38 2 -38 Q-6 -32 -14 -36 Q-20 -32 -23 -24 Z",
-    messy: "M-23 -26 Q-26 -48 -8 -51 Q4 -56 14 -49 Q26 -46 23 -26 Q18 -37 8 -34 Q2 -40 -6 -35 Q-14 -40 -23 -26 Z",
-    cap: "M-22 -30 Q-22 -50 0 -50 Q22 -50 22 -30 Z",
-  }[r.style];
-  p.append(sv("path", { d: top, fill: hair }));
-  p.append(sv("path", { d: "M-14 -46 Q-2 -52 10 -47", stroke: shade(hair, 0.35), "stroke-width": 2.2, fill: "none", "stroke-linecap": "round", opacity: 0.7 }));
-  for (const ex of [-8, 8]) {
-    p.append(sv("ellipse", { cx: ex, cy: -24, rx: 3.4, ry: 4.4, fill: "#22252f" }));
-    p.append(sv("circle", { cx: ex + 1.2, cy: -25.6, r: 1.3, fill: "#ffffff" }));
-  }
-  p.append(sv("path", { d: "M-12 -32 Q-8 -34 -4 -32 M4 -32 Q8 -34 12 -32", stroke: shade(hair, -0.2), "stroke-width": 1.6, fill: "none", "stroke-linecap": "round" }));
-  p.append(sv("path", { d: "M-4 -14 Q0 -11 4 -14", stroke: "#a3533f", "stroke-width": 1.8, fill: "none", "stroke-linecap": "round" }));
-  for (const ex of [-13, 13]) p.append(sv("ellipse", { cx: ex, cy: -17, rx: 4, ry: 2.4, fill: "#f49c9c", opacity: 0.45 }));
-  if (r.acc === "glasses") {
-    for (const ex of [-8, 8]) p.append(sv("circle", { cx: ex, cy: -24, r: 6, fill: "none", stroke: "#1f2937", "stroke-width": 1.8 }));
-    p.append(sv("path", { d: "M-2 -24 L2 -24", stroke: "#1f2937", "stroke-width": 1.8 }));
-  }
-  if (r.acc === "headphones") {
-    p.append(sv("path", { d: "M-24 -24 Q-24 -56 0 -56 Q24 -56 24 -24", stroke: "#111827", "stroke-width": 4, fill: "none" }));
-    for (const ex of [-28, 19]) p.append(sv("rect", { x: ex, y: -32, width: 9, height: 15, rx: 4, fill: "#38bdf8" }));
-  }
-  if (r.acc === "cap") {
-    p.append(sv("path", { d: "M-23 -36 Q-20 -56 0 -56 Q20 -56 23 -36 Z", fill: "#1e3a8a" }));
-    p.append(sv("path", { d: "M-6 -38 Q16 -42 34 -36 Q20 -32 -4 -34 Z", fill: "#1e40af" }));
-  }
-  if (r.acc === "beret") p.append(sv("ellipse", { cx: -4, cy: -48, rx: 20, ry: 7, fill: "#7c3aed" }));
-  if (r.acc === "crown") p.append(sv("path", { d: "M-9 -58 L-6 -51 L0 -57 L6 -51 L9 -58 L8 -49 L-8 -49 Z", fill: "#f5b942" }));
-  p.append(sv("path", { d: "M-28 14 Q-34 30 -22 40 L-14 38 Q-20 28 -18 16 Z", fill: shade(r.shirt, -0.15) }));
-  p.append(sv("path", { d: "M28 14 Q34 30 22 40 L14 38 Q20 28 18 16 Z", fill: shade(r.shirt, -0.15) }));
-  g.append(p);
+// The spot among candidates that covers the least of what should stay clear.
+function choose(cands, w, h, clear) {
+  let best = null;
+  cands.forEach(([x, y], i) => {
+    const box = [x, y, w, h];
+    const hit = clear.reduce((n, c) => n + overlap(box, c.box) * (c.weight || 1), 0);
+    const cost = hit + i * 40 * K * K;
+    if (!best || cost < best.cost) best = { box, cost, hit };
+  });
+  best.box.hit = best.hit;
+  return best.box;
 }
 
-function monitor(g, x, y, w, h, color, tilt) {
-  const m = sv("g", { transform: `translate(${x} ${y}) skewY(${tilt})` });
-  m.append(sv("rect", { x: -w / 2 - 3, y: -h - 3, width: w + 6, height: h + 6, rx: 3, fill: "#0b1120" }));
-  m.append(sv("rect", { x: -w / 2, y: -h, width: w, height: h, rx: 2, fill: "#0f1d36" }));
-  for (let i = 0; i < Math.floor((h - 6) / 7); i++) {
-    const bw = (0.35 + ((i * 37) % 60) / 100) * (w - 10);
-    m.append(sv("rect", { x: -w / 2 + 5, y: -h + 5 + i * 7, width: bw, height: 3, rx: 1.5, fill: i % 3 === 0 ? color : i % 3 === 1 ? "#7dd3fc" : "#94a3b8", opacity: 0.85, class: i % 2 ? "scan" : "" }));
-  }
-  m.append(sv("rect", { x: -3, y: 2, width: 6, height: 6, fill: "#334155" }));
-  m.append(sv("rect", { x: -10, y: 7, width: 20, height: 3, rx: 1.5, fill: "#334155" }));
-  g.append(m);
-}
-
-function plant(g, x, y, s = 1) {
-  const p = sv("g", { transform: `translate(${x} ${y}) scale(${s})` });
-  p.append(sv("ellipse", { cx: 0, cy: 16, rx: 12, ry: 4, fill: "#000", opacity: 0.25 }));
-  p.append(sv("path", { d: "M-10 0 L10 0 L7 16 L-7 16 Z", fill: "#e5e7eb" }));
-  p.append(sv("rect", { x: -11, y: -2, width: 22, height: 4, rx: 2, fill: "#cbd5e1" }));
-  for (const [dx, dy, rot, c] of [[-8, -12, -35, "#16a34a"], [8, -12, 35, "#15803d"], [0, -18, 0, "#22c55e"], [-4, -22, -12, "#16a34a"], [5, -22, 14, "#4ade80"]])
-    p.append(sv("ellipse", { cx: dx, cy: dy, rx: 5, ry: 13, fill: c, transform: `rotate(${rot} ${dx} ${dy})` }));
-  g.append(p);
-}
-
-// The office floor ---------------------------------------------------------------------------------
-const floor = $("floor");
-function drawFloor() {
-  desk.later = [];
-  layer.keepClear = [[HUB.x - 100, HUB.y - 70, 200, 140]];
+// --- The stage: picture layers and the overlay drawn from layout.json --------------------------
+function buildStage() {
+  const [W, H] = L.size, stage = $("scenewrap"), svg = $("overlay");
+  S = W / 1280;  // scene pixels per preview pixel
+  K = S * 0.7;   // overlay size unit
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   const defs = sv("defs");
-  gradient(defs, "floorG", [["0%", "#2a4d88"], ["60%", "#1c3666"], ["100%", "#14284b"]], true);
-  gradient(defs, "rimG", [["0", "#0f1e3a"], ["1", "#091428"]]);
-  gradient(defs, "podTop", [["0", "#34527f"], ["1", "#25416d"]]);
-  gradient(defs, "podSide", [["0", "#1a2e52"], ["1", "#0f1d38"]]);
-  gradient(defs, "deskTop", [["0", "#52678c"], ["1", "#3c4f72"]]);
-  gradient(defs, "deskFront", [["0", "#2a3a58"], ["1", "#1a2742"]]);
-  gradient(defs, "hubGlow", [["0%", "#7dd3fc", 0.7], ["55%", "#38bdf8", 0.22], ["100%", "#38bdf8", 0]], true);
-  gradient(defs, "hubBall", [["0%", "#2273d6"], ["65%", "#0f3d86"], ["100%", "#0a2a5e"]], true);
-  gradient(defs, "plateG", [["0", "#15264a"], ["1", "#0d1830"]]);
-  gradient(defs, "wallG", [["0", "#0c1830"], ["1", "#122243"]]);
-  for (const [k, c] of [...Object.entries(ROLES).map(([k, r]) => [k, r.color]), ["hub", HUB.color]]) {
-    const mk = sv("marker", { id: "arw-" + k, viewBox: "0 0 10 10", refX: 7, refY: 5, markerWidth: 4.5, markerHeight: 4.5, orient: "auto" });
-    mk.append(sv("path", { d: "M0 0 L10 5 L0 10 z", fill: c }));
+  const glow = sv("filter", { id: "glow", x: "-50%", y: "-50%", width: "200%", height: "200%" });
+  glow.append(sv("feGaussianBlur", { stdDeviation: 4 * K, result: "b" }));
+  const merge = sv("feMerge"); merge.append(sv("feMergeNode", { in: "b" }), sv("feMergeNode", { in: "SourceGraphic" })); glow.append(merge);
+  const shadow = sv("filter", { id: "shadow", x: "-20%", y: "-20%", width: "140%", height: "160%" });
+  shadow.append(sv("feDropShadow", { dx: 0, dy: 2 * K, stdDeviation: 3 * K, "flood-color": "#000", "flood-opacity": 0.55 }));
+  defs.append(glow, shadow);
+  for (const k of [...ORDER, "hub"]) {
+    const mk = sv("marker", { id: "arw-" + k, viewBox: "0 0 10 10", refX: 6, refY: 5, markerWidth: 3.6, markerHeight: 3.6, orient: "auto" });
+    mk.append(sv("path", { d: "M0 0 L10 5 L0 10 z", fill: k === "hub" ? "#38bdf8" : ROLES[k].color }));
     defs.append(mk);
   }
-  const clip = sv("clipPath", { id: "floorClip" }); clip.append(sv("ellipse", { cx: 700, cy: 505, rx: 676, ry: 376 })); defs.append(clip);
-  floor.append(defs);
-
-  // back wall with windows
-  floor.append(sv("rect", { x: 0, y: 0, width: 1400, height: 150, fill: "url(#wallG)" }));
-  for (let i = 0; i < 7; i++) {
-    const wx = 40 + i * 196;
-    floor.append(sv("rect", { x: wx, y: 20, width: 140, height: 80, rx: 6, fill: "#14305e", stroke: "#24467d" }));
-    floor.append(sv("path", { d: `M${wx + 12} 96 L${wx + 58} 24 L${wx + 76} 24 L${wx + 30} 96 Z`, fill: "#7cb8ff", opacity: 0.1 }));
-    floor.append(sv("rect", { x: wx + 68, y: 20, width: 4, height: 80, fill: "#24467d" }));
-  }
-
-  // the round floor
-  floor.append(sv("ellipse", { cx: 700, cy: 518, rx: 680, ry: 380, fill: "url(#rimG)" }));
-  floor.append(sv("ellipse", { cx: 700, cy: 505, rx: 680, ry: 380, fill: "url(#floorG)" }));
-  const grid = sv("g", { opacity: 0.16, stroke: "#9cc3ff", "stroke-width": 1, "clip-path": "url(#floorClip)" });
-  for (let i = -16; i <= 16; i++) {
-    grid.append(sv("line", { x1: 700 + i * 56 - 380, y1: 120, x2: 700 + i * 56 + 380, y2: 900 }));
-    grid.append(sv("line", { x1: 700 + i * 56 + 380, y1: 120, x2: 700 + i * 56 - 380, y2: 900 }));
-  }
-  floor.append(grid);
-  floor.append(sv("ellipse", { cx: 700, cy: 505, rx: 676, ry: 376, fill: "none", stroke: "#3d67a8", "stroke-width": 2, opacity: 0.6 }));
-  for (const [x, y, s] of [[56, 340, 1.7], [1344, 340, 1.7], [90, 850, 1.9], [1310, 850, 1.9], [220, 168, 1.2], [1180, 168, 1.2]]) plant(floor, x, y, s);
-
-  // faint links from the hub to every desk; handoff arrows draw over them
+  svg.append(defs);
+  // busy layers, one per Role, placed where the renderer cut them out
   for (const k of ORDER) {
-    const a = anchorOf(k);
-    floor.append(sv("path", { d: `M${HUB.x} ${HUB.y} L${a.x} ${a.y}`, stroke: ROLES[k].color, "stroke-width": 2, "stroke-dasharray": "3 9", opacity: 0.28, "stroke-linecap": "round" }));
+    const b = L.roles[k].busy;
+    if (!b) continue;
+    const img = el("img", { class: "busy", alt: "", src: `assets/busy-${k}.webp` });
+    Object.assign(img.style, { left: `${(100 * b[0]) / W}%`, top: `${(100 * b[1]) / H}%`, width: `${(100 * b[2]) / W}%`, height: `${(100 * b[3]) / H}%` });
+    stage.insertBefore(img, svg);
+    pods[k] = { img };
   }
-  layer.arrows = sv("g"); floor.append(layer.arrows);
-
-  // the hub: Goal and progress ring
-  floor.append(sv("ellipse", { cx: HUB.x, cy: HUB.y + 90, rx: 160, ry: 36, fill: "#0a1730", opacity: 0.85 }));
-  floor.append(sv("circle", { cx: HUB.x, cy: HUB.y, r: 185, fill: "url(#hubGlow)", class: "pulse" }));
-  floor.append(sv("ellipse", { cx: HUB.x, cy: HUB.y + 82, rx: 142, ry: 32, fill: "#12305f", stroke: "#38bdf8", "stroke-width": 2 }));
-  floor.append(sv("circle", { cx: HUB.x, cy: HUB.y, r: 108, fill: "url(#hubBall)", stroke: "#7dd3fc", "stroke-width": 2.5 }));
-  floor.append(sv("path", { d: `M${HUB.x - 70} ${HUB.y - 68} Q${HUB.x} ${HUB.y - 110} ${HUB.x + 70} ${HUB.y - 68}`, stroke: "#bae6fd", "stroke-width": 3, fill: "none", opacity: 0.35 }));
-  floor.append(sv("ellipse", { cx: HUB.x, cy: HUB.y, rx: 146, ry: 40, fill: "none", stroke: "#7dd3fc", "stroke-width": 1.5, "stroke-dasharray": "6 10", opacity: 0.55, class: "spin" }));
-  layer.ring = sv("g"); floor.append(layer.ring);
-  const txt = (y, size, fill, weight, text) => { const t = sv("text", { x: HUB.x, y, "text-anchor": "middle", fill, "font-size": size, "font-weight": weight }, text); floor.append(t); return t; };
-  desk.hub = { id: txt(HUB.y - 56, 14, "#7dd3fc", 800, ""), lines: [0, 1, 2].map(() => txt(HUB.y, 18, "#ffffff", 800, "")),
-               cg: txt(HUB.y + 40, 14, "#bae6fd", 400, "Current Goal"), st: txt(HUB.y + 62, 14, "#7dd3fc", 700, "") };
-
-  for (const k of [...ORDER].sort((a, b) => ROLES[a].y - ROLES[b].y)) drawDesk(k);
-  layer.badges = sv("g"); layer.flow = sv("g");
-  floor.append(layer.badges, layer.flow);
+  layer.halos = sv("g"); layer.arrows = sv("g"); layer.labels = sv("g"); layer.badges = sv("g"); layer.flow = sv("g");
+  svg.append(layer.halos, layer.arrows, layer.labels, layer.badges, layer.flow);
+  // what labels and badges keep clear of: the hub, the side panels, every character's head
+  const hub = L.hub;
+  layer.clear = [{ box: [hub.center[0] - 70 * S, hub.center[1] - 60 * S, 140 * S, 125 * S], weight: 3 },
+                 { box: [0, 0, W * 0.22, H], weight: 6 }, { box: [W * 0.78, 0, W * 0.22, H], weight: 6 }];
+  for (const k of ORDER) { const h = L.roles[k].head; layer.clear.push({ box: [h[0] - 28 * S, h[1] - 6 * S, 56 * S, 80 * S], weight: 4 }); }
+  // hub label
+  const hc = hub.center, txt = (dy, size, fill, weight) => { const t = sv("text", { x: hc[0], y: hc[1] + dy * K, "text-anchor": "middle", fill, "font-size": size * K, "font-weight": weight, filter: "url(#shadow)" }); layer.labels.append(t); return t; };
+  const disc = sv("radialGradient", { id: "disc" });
+  disc.append(sv("stop", { offset: "0%", "stop-color": "#04122c", "stop-opacity": 0.82 }), sv("stop", { offset: "62%", "stop-color": "#04122c", "stop-opacity": 0.74 }), sv("stop", { offset: "100%", "stop-color": "#04122c", "stop-opacity": 0 }));
+  defs.append(disc);
+  layer.labels.append(sv("ellipse", { cx: hc[0], cy: hc[1] + 16 * K, rx: 118 * K, ry: 78 * K, fill: "url(#disc)" }));
+  layer.hub = { lines: [0, 1, 2].map(() => txt(0, 14, "#ffffff", 800)), cg: txt(46, 10.5, "#d6f1ff", 600), st: txt(61, 10, "#7dd3fc", 700) };
+  layer.hub.cg.textContent = "Current Goal";
+  for (const k of ORDER) drawPod(k);
 }
 
-function drawDesk(k) {
-  const r = ROLES[k], x = r.x, y = r.y;
-  const g = sv("g", { class: "desk", tabindex: 0, role: "button", "aria-label": `${r.ja}（${r.en}）の詳細を見る` });
-  g.append(sv("ellipse", { cx: x, cy: y + 46, rx: 150, ry: 54, fill: "url(#podSide)" }));
-  g.append(sv("ellipse", { cx: x, cy: y + 34, rx: 150, ry: 54, fill: "url(#podTop)", stroke: "#3f6096", "stroke-width": 1.5 }));
-  const glow = sv("ellipse", { cx: x, cy: y + 34, rx: 146, ry: 50, fill: r.color, opacity: 0 });
-  const halo = sv("ellipse", { cx: x, cy: y + 36, rx: 158, ry: 60, fill: "none", stroke: r.color, "stroke-width": 4, opacity: 0, class: "pulse" });
-  g.append(glow, halo);
-  // screen wall behind the seat
-  g.append(sv("path", { d: `M${x - 110} ${y - 30} L${x + 110} ${y - 30} L${x + 100} ${y - 16} L${x - 100} ${y - 16} Z`, fill: "url(#deskTop)" }));
-  g.append(sv("rect", { x: x - 100, y: y - 16, width: 200, height: 14, fill: "url(#deskFront)" }));
-  const shine = sv("rect", { x: x - 94, y: y - 84, width: 188, height: 56, rx: 8, fill: r.color, opacity: 0 });
-  const screens = sv("g");
-  monitor(screens, x - 62, y - 34, 50, 34, r.color, 8);
-  monitor(screens, x, y - 38, 62, 40, r.color, 0);
-  monitor(screens, x + 62, y - 34, 50, 34, r.color, -8);
-  g.append(shine, screens);
-  // chair, the person, the front desk
-  g.append(sv("rect", { x: x - 34, y: y - 4, width: 68, height: 46, rx: 15, fill: "#111a2e", stroke: "#26324a" }));
-  person(g, x, y + 22, r, 0.92);
-  g.append(sv("path", { d: `M${x - 78} ${y + 50} L${x + 78} ${y + 50} L${x + 92} ${y + 66} L${x - 92} ${y + 66} Z`, fill: "url(#deskTop)" }));
-  g.append(sv("rect", { x: x - 92, y: y + 66, width: 184, height: 16, fill: "url(#deskFront)" }));
-  g.append(sv("path", { d: `M${x - 34} ${y + 54} L${x + 34} ${y + 54} L${x + 38} ${y + 62} L${x - 38} ${y + 62} Z`, fill: "#a7b4c8" }));
-  g.append(sv("rect", { x: x + 50, y: y + 48, width: 12, height: 13, rx: 3, fill: "#f8fafc" }));
-  g.append(sv("path", { d: `M${x + 62} ${y + 51} q6 3 0 7`, stroke: "#f8fafc", "stroke-width": 2, fill: "none" }));
-  g.append(sv("rect", { x: x - 70, y: y + 52, width: 22, height: 8, rx: 2, fill: shade(r.color, -0.2), transform: `rotate(-8 ${x - 59} ${y + 56})` }));
-  plant(g, x + (r.side === "right" ? -130 : 130), y + 30, 0.9);
+function drawPod(k) {
+  const r = ROLES[k], p = L.roles[k], [cx, cy, rx, ry] = p.ring;
+  const halo = sv("ellipse", { cx, cy, rx: rx + 3 * K, ry: ry + 3 * K, fill: "none", stroke: r.color, "stroke-width": 3.5 * K, opacity: 0, filter: "url(#glow)", class: "pulse" });
+  layer.halos.append(halo);
+  // name plate on the front edge of the pod: glyph, English and Japanese names, state pill
+  const probe = sv("text", { "font-size": 15 * K, "font-weight": 800 }, r.en), probe2 = sv("text", { "font-size": 11 * K }, r.ja);
+  layer.labels.append(probe, probe2);
+  const textW = Math.max(probe.getComputedTextLength(), probe2.getComputedTextLength());
+  probe.remove(); probe2.remove();
+  const pw = 41 * K + textW + 82 * K, ph = 42 * K;
+  const toHub = Math.sign(L.hub.center[0] - cx) || 1;
+  const [px, py] = choose([[cx - pw / 2, cy + ry * 0.62], [cx - pw / 2 + toHub * rx * 0.3, cy + ry * 0.62], [cx - pw / 2 - toHub * rx * 0.3, cy + ry * 0.62],
+    [cx - pw / 2, cy + ry * 0.85], [cx - pw / 2 - toHub * rx * 0.35, cy + ry * 0.85]], pw, ph, layer.clear);
+  const g = sv("g", { class: "pod", tabindex: 0, role: "button", "aria-label": `${r.ja}（${r.en}）の詳細を見る` });
+  const hit = sv("ellipse", { class: "hit", cx, cy: cy - ry * 0.6, rx: rx * 0.95, ry: ry * 1.9, fill: "transparent", stroke: "transparent", "stroke-width": 2 * K });
+  const plate = sv("g", { filter: "url(#shadow)" });
+  const plateBg = sv("rect", { class: "plate-bg", x: px, y: py, width: pw, height: ph, rx: 12 * K, fill: "rgba(9,18,38,0.9)", stroke: shade(r.color, -0.1), "stroke-width": 1.5 * K });
+  plate.append(plateBg);
+  plate.append(sv("circle", { cx: px + 21 * K, cy: py + ph / 2, r: 13 * K, fill: r.color }));
+  plate.append(sv("path", { d: r.glyph, transform: `translate(${px + 21 * K} ${py + ph / 2}) scale(${K * 0.95})`, fill: k === "gameplay-engineer" || k === "game-designer" || k === "technical-director" || k === "qa" ? "none" : "#0b1428", stroke: "#0b1428", "stroke-width": 1.8, "stroke-linecap": "round", "stroke-linejoin": "round" }));
+  const en = sv("text", { x: px + 41 * K, y: py + 19 * K, fill: "#ffffff", "font-weight": 800, "font-size": 15 * K }, r.en);
+  const ja = sv("text", { x: px + 41 * K, y: py + 34 * K, fill: "#b4c1d6", "font-size": 11 * K }, r.ja);
+  const pill = sv("rect", { x: px + pw - 70 * K, y: py + 9 * K, width: 62 * K, height: 24 * K, rx: 12 * K, fill: "#334155" });
+  const pillTx = sv("text", { x: px + pw - 39 * K, y: py + 25.5 * K, "text-anchor": "middle", fill: "#cbd5e1", "font-size": 11.5 * K, "font-weight": 800 }, "手すき");
+  plate.append(en, ja, pill, pillTx);
+  // typing dots beside the head while working
+  const [hx, hy] = p.head;
   const typing = sv("g", { class: "typing", opacity: 0 });
-  typing.append(sv("rect", { x: x + 26, y: y - 30, width: 56, height: 22, rx: 11, fill: "#0f1d36", stroke: r.color, "stroke-width": 1.5 }));
-  for (let i = 0; i < 3; i++) typing.append(sv("circle", { cx: x + 41 + i * 13, cy: y - 19, r: 3.6, fill: r.color }));
-  g.append(typing);
-  // name plate
-  layer.keepClear.push([x - 122, y + 92, 244, 48]);
-  g.append(sv("rect", { x: x - 122, y: y + 92, width: 244, height: 48, rx: 12, fill: "url(#plateG)", stroke: "#2e4670", "stroke-width": 1.5, class: "plate" }));
-  g.append(sv("circle", { cx: x - 98, cy: y + 116, r: 14, fill: shade(r.color, -0.6), stroke: r.color, "stroke-width": 2 }));
-  g.append(sv("circle", { cx: x - 98, cy: y + 116, r: 5, fill: r.color }));
-  const en = sv("text", { x: x - 76, y: y + 114, fill: "#ffffff", "font-weight": 800 });
-  const ja = sv("text", { x: x - 76, y: y + 133, fill: "#a9b8cf" });
-  const pill = sv("rect", { x: x + 34, y: y + 102, width: 80, height: 28, rx: 14, fill: "#1e2a41" });
-  const pillTx = sv("text", { x: x + 74, y: y + 121, "text-anchor": "middle", fill: "#a9b8cf", "font-size": 14, "font-weight": 800 }, "手すき");
-  g.append(en, ja, pill, pillTx);
-  // duties bubble
-  const bx = r.side === "right" ? x + 112 : x - 302, by = y - 98;
-  layer.keepClear.push([bx, by, 190, 76]);
-  const bubble = sv("g", { opacity: 0.97 });
-  bubble.append(sv("rect", { x: bx, y: by, width: 190, height: 76, rx: 12, fill: "#f8fafc", stroke: shade(r.color, 0.3), "stroke-width": 1.5 }));
-  bubble.append(sv("path", { d: r.side === "right" ? `M${bx + 1} ${by + 46} l-12 8 l12 6 Z` : `M${bx + 189} ${by + 46} l12 8 l-12 6 Z`, fill: "#f8fafc" }));
-  r.duties.forEach((d, i) => {
-    bubble.append(sv("circle", { cx: bx + 15, cy: by + 18 + i * 20, r: 4, fill: r.color }));
-    const t = sv("text", { x: bx + 26, y: by + 23 + i * 20, fill: "#1f2937", "font-weight": 700 });
-    bubble.append(t);
-    desk.later.push([t, d, 156, 15, 11]);
-  });
-  g.append(bubble);
+  typing.append(sv("path", { d: `M${hx - 5 * K} ${hy - 19 * K} L${hx} ${hy - 11 * K} L${hx + 5 * K} ${hy - 19 * K} Z`, fill: "rgba(9,18,38,0.92)" }));
+  typing.append(sv("rect", { x: hx - 22 * K, y: hy - 40 * K, width: 44 * K, height: 21 * K, rx: 10.5 * K, fill: "rgba(9,18,38,0.92)", stroke: r.color, "stroke-width": 1.5 * K }));
+  for (let i = 0; i < 3; i++) typing.append(sv("circle", { cx: hx - 11 * K + i * 11 * K, cy: hy - 29.5 * K, r: 3 * K, fill: r.color }));
+  layer.clear.push({ box: [hx - 24 * K, hy - 42 * K, 48 * K, 32 * K], weight: 3 });
+  g.append(hit, plate, typing);
+  layer.labels.append(g);
+  layer.clear.push({ box: [px, py, pw, ph], weight: 3 });
   const pick = () => { selected = k; picked = true; $("agentSelect").value = k; if (current) renderDetail(current); };
   g.addEventListener("click", pick);
   g.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); } });
-  floor.append(g);
-  desk.later.push([en, r.en, 106, 19, 12], [ja, r.ja, 106, 13, 9]);
-  desk[k] = { g, glow, halo, typing, pill, pillTx, shine, screens };
+  Object.assign(pods[k], { g, halo, pill, pillTx, typing, plateBg });
 }
 
-// Handoff arrows: the latest handoff between each pair of places, newest brightest, with a numbered badge.
+function drawBubbles() {
+  // each Role's duties sit next to its own head (outer side first), with a tail pointing at it
+  const bw = 150 * K, bh = 58 * K;
+  for (const k of ORDER) {
+    const r = ROLES[k], [hx, hy] = L.roles[k].head, out = L.roles[k].ring[0] < L.hub.center[0] - 5 ? -1 : 1;
+    const side = (dir) => (dir < 0 ? hx - bw - 34 * S : hx + 34 * S);
+    const cands = [[side(out), hy - bh * 0.35], [side(out), hy - bh - 4 * S], [side(-out), hy - bh * 0.35], [hx - bw / 2, hy - bh - 46 * S], [side(-out), hy - bh - 4 * S], [side(out), hy + 20 * S]];
+    const [x, y] = choose(cands, bw, bh, layer.clear);
+    layer.clear.push({ box: [x, y, bw, bh], weight: 3 });
+    const g = sv("g", { filter: "url(#shadow)", opacity: 0.97 });
+    // tail: from the bubble's edge nearest the head toward the head
+    const ex = Math.max(x + 14 * K, Math.min(x + bw - 14 * K, hx)), ey = Math.max(y + 12 * K, Math.min(y + bh - 12 * K, hy));
+    const dx = hx - ex, dy = hy - ey, d = Math.hypot(dx, dy) || 1, tip = Math.min(d - 14 * S, 26 * K), nx = -dy / d, ny = dx / d;
+    if (tip > 4 * K) g.append(sv("path", { d: `M${ex + nx * 7 * K} ${ey + ny * 7 * K} L${ex + (dx / d) * tip} ${ey + (dy / d) * tip} L${ex - nx * 7 * K} ${ey - ny * 7 * K} Z`, fill: "#f8fafc" }));
+    g.append(sv("rect", { x, y, width: bw, height: bh, rx: 10 * K, fill: "#f8fafc", stroke: shade(r.color, 0.35), "stroke-width": 1.2 * K }));
+    r.duties.forEach((d, i) => {
+      g.append(sv("circle", { cx: x + 12 * K, cy: y + 13 * K + i * 16 * K, r: 3.4 * K, fill: r.color }));
+      g.append(sv("text", { x: x + 21 * K, y: y + 17 * K + i * 16 * K, fill: "#1f2937", "font-weight": 700 }, d));
+    });
+    layer.labels.insertBefore(g, layer.labels.firstChild);
+    for (const t of g.querySelectorAll("text")) fit(t, t.textContent, bw - 28 * K, 11.5 * K);
+  }
+}
+
+// Handoff arrows on the floor: the latest handoff between each pair of places, newest brightest.
+function anchorOf(who) {
+  if (ROLES[who]) { const [cx, cy, rx, ry] = L.roles[who].ring; return { x: cx, y: cy, rx: rx * 1.02, ry: ry * 1.05 }; }
+  return { x: L.hub.floor[0], y: L.hub.floor[1] - 8 * K, rx: L.hub.rx * 0.95, ry: L.hub.ry * 0.95 };
+}
 function curve(from, to) {
   const a = anchorOf(from), b = anchorOf(to), dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len;
   const trim = (p) => 1 / Math.hypot(ux / p.rx, uy / p.ry);
   const s = { x: a.x + ux * trim(a), y: a.y + uy * trim(a) }, e = { x: b.x - ux * trim(b), y: b.y - uy * trim(b) };
-  const span = Math.hypot(e.x - s.x, e.y - s.y), bend = Math.min(60, span * 0.28);
-  const c = { x: (s.x + e.x) / 2 - uy * bend, y: (s.y + e.y) / 2 + ux * bend };
+  const span = Math.hypot(e.x - s.x, e.y - s.y), mx = (s.x + e.x) / 2, my = (s.y + e.y) / 2;
+  const heads = ORDER.filter((k) => k !== from && k !== to).map((k) => L.roles[k].head);
+  const clearance = (c) => Math.min(...[0.2, 0.35, 0.5, 0.65, 0.8].flatMap((t) => {
+    const u = 1 - t, x = u * u * s.x + 2 * u * t * c.x + t * t * e.x, y = u * u * s.y + 2 * u * t * c.y + t * t * e.y;
+    return heads.map(([hx, hy]) => Math.hypot(x - hx, (y - (hy + 30 * S)) * 1.3));
+  }));
+  let c = null;
+  for (const b of [0.25, -0.25, 0.45, -0.45, 0.1]) {
+    const cand = { x: mx - uy * span * b, y: my + ux * span * b };
+    if (!c || clearance(cand) > clearance(c) + 4 * S) c = cand;
+  }
   return { s, c, e, d: `M${s.x.toFixed(1)} ${s.y.toFixed(1)} Q${c.x.toFixed(1)} ${c.y.toFixed(1)} ${e.x.toFixed(1)} ${e.y.toFixed(1)}` };
 }
-const overlap = (a, b) => Math.max(0, Math.min(a[0] + a[2], b[0] + b[2]) - Math.max(a[0], b[0])) * Math.max(0, Math.min(a[1] + a[3], b[1] + b[3]) - Math.max(a[1], b[1]));
-function place(c, w, h, placed) {
-  const len = Math.hypot(c.e.x - c.s.x, c.e.y - c.s.y) || 1, px = -(c.e.y - c.s.y) / len, py = (c.e.x - c.s.x) / len;
-  let best = null;
-  for (const t of [0.5, 0.4, 0.6, 0.3, 0.7]) for (const off of [0, 30, -30, 60, -60]) {
-    const u = 1 - t, x = u * u * c.s.x + 2 * u * t * c.c.x + t * t * c.e.x + px * off, y = u * u * c.s.y + 2 * u * t * c.c.y + t * t * c.e.y + py * off;
-    const box = [x - w / 2, y - h / 2, w, h];
-    const cost = [...layer.keepClear, ...placed].reduce((n, r) => n + overlap(box, r), 0) + Math.abs(off) * 2 + Math.abs(t - 0.5) * 200;
-    if (!best || cost < best.cost) best = { x, y, box, cost };
+function badgeSpot(c, w, h, placed) {
+  const len = Math.hypot(c.e.x - c.s.x, c.e.y - c.s.y) || 1, px = -(c.e.y - c.s.y) / len, py = (c.e.x - c.s.x) / len, cands = [];
+  for (const t of [0.5, 0.4, 0.6, 0.3, 0.7]) for (const off of [0, 22, -22, 44, -44]) {
+    const u = 1 - t, x = u * u * c.s.x + 2 * u * t * c.c.x + t * t * c.e.x + px * off * K, y = u * u * c.s.y + 2 * u * t * c.c.y + t * t * c.e.y + py * off * K;
+    cands.push([x - w / 2, y - h / 2]);
   }
-  placed.push(best.box);
-  return best;
+  const box = choose(cands, w, h, [...layer.clear, ...placed]);
+  placed.push({ box, weight: 4 });
+  return { x: box[0] + w / 2, y: box[1] + h / 2, hit: box.hit / (w * h) };
 }
 function drawArrows(handoffs) {
   layer.arrows.textContent = ""; layer.badges.textContent = "";
@@ -526,30 +464,31 @@ function drawArrows(handoffs) {
     if (shown.length === 4) break;
   }
   shown.forEach((h, i) => {
-    const c = curve(h.from, h.to), who = ROLES[h.to] ? h.to : ROLES[h.from] ? h.from : "hub", color = colorOf(who), op = [1, 0.75, 0.55, 0.4][i];
-    layer.arrows.append(sv("path", { d: c.d, stroke: color, "stroke-width": 14, fill: "none", opacity: op * 0.18, "stroke-linecap": "round" }));
-    const p = sv("path", { d: c.d, stroke: color, "stroke-width": 5, fill: "none", opacity: op, "stroke-linecap": "round", "marker-end": `url(#arw-${who})`, class: i === 0 ? "flowing" : "" });
+    const c = curve(h.from, h.to), who = ROLES[h.to] ? h.to : ROLES[h.from] ? h.from : "hub", color = who === "hub" ? "#38bdf8" : ROLES[who].color, op = [1, 0.8, 0.6, 0.45][i];
+    layer.arrows.append(sv("path", { d: c.d, stroke: color, "stroke-width": 14 * K, fill: "none", opacity: op * 0.28, "stroke-linecap": "round", filter: "url(#glow)" }));
+    const p = sv("path", { d: c.d, stroke: color, "stroke-width": 6 * K, fill: "none", opacity: op, "stroke-linecap": "round", "marker-end": `url(#arw-${who})`, class: i === 0 ? "flowing" : "" });
     layer.arrows.append(p); paths[h.seq] = { p, color };
-    const full = i < 2, w = full ? 168 : 32, hh = full ? 56 : 32, at = place(c, w, hh, placed);
-    const b = sv("g", { transform: `translate(${at.x.toFixed(1)} ${at.y.toFixed(1)})`, opacity: Math.max(op, 0.75) });
+    if (i >= 2) return;  // older arrows stay as faint lines without a badge
+    const full = true, w = 112 * K, hh = 42 * K, at = badgeSpot(c, w, hh, placed);
+    const b = sv("g", { transform: `translate(${at.x.toFixed(1)} ${at.y.toFixed(1)})`, opacity: Math.max(op, 0.8), filter: "url(#shadow)" });
     layer.badges.append(b);
     if (full) {
-      const t = sv("text", { x: 0, y: -5, "text-anchor": "middle", fill: "#ffffff", "font-weight": 800 });
-      b.append(sv("rect", { x: -84, y: -28, width: 168, height: 56, rx: 12, fill: "#101f3e", stroke: color, "stroke-width": 2.5 }), t,
-        sv("text", { x: -12, y: 18, "text-anchor": "middle", fill: shade(color, 0.35), "font-size": 14, "font-weight": 700 }, "Hand-off"),
-        sv("circle", { cx: 44, cy: 13, r: 12, fill: color }),
-        sv("text", { x: 44, y: 18, "text-anchor": "middle", fill: "#0b1428", "font-size": 13, "font-weight": 800 }, String(h.seq)));
-      fit(t, stageJa(h.stage), 150, 17);
+      const t = sv("text", { x: 0, y: -4 * K, "text-anchor": "middle", fill: "#ffffff", "font-weight": 800 });
+      b.append(sv("rect", { x: -w / 2, y: -hh / 2, width: w, height: hh, rx: 9 * K, fill: "rgba(9,18,38,0.92)", stroke: color, "stroke-width": 2 * K }), t,
+        sv("text", { x: -9 * K, y: 13 * K, "text-anchor": "middle", fill: shade(color, 0.35), "font-size": 10.5 * K, "font-weight": 800 }, "Hand-off"),
+        sv("circle", { cx: 30 * K, cy: 9.5 * K, r: 8 * K, fill: color }),
+        sv("text", { x: 30 * K, y: 13 * K, "text-anchor": "middle", fill: "#0b1428", "font-size": 9.5 * K, "font-weight": 800 }, String(h.seq)));
+      fit(t, stageJa(h.stage), w - 14 * K, 12.5 * K);
     } else {
-      b.append(sv("circle", { r: 15, fill: "#101f3e", stroke: color, "stroke-width": 2.5 }),
-        sv("text", { y: 5, "text-anchor": "middle", fill: "#ffffff", "font-size": 13, "font-weight": 800 }, String(h.seq)));
+      b.append(sv("circle", { r: 12 * K, fill: "rgba(9,18,38,0.92)", stroke: color, "stroke-width": 2 * K }),
+        sv("text", { y: 4 * K, "text-anchor": "middle", fill: "#ffffff", "font-size": 10.5 * K, "font-weight": 800 }, String(h.seq)));
     }
   });
   return paths;
 }
 function flowAlong(path, color) {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const halo = sv("circle", { r: 20, fill: color, opacity: 0.35 }), dot = sv("circle", { r: 8, fill: "#ffffff", stroke: color, "stroke-width": 4 });
+  const halo = sv("circle", { r: 16 * K, fill: color, opacity: 0.35 }), dot = sv("circle", { r: 6.5 * K, fill: "#ffffff", stroke: color, "stroke-width": 3 * K });
   layer.flow.append(halo, dot);
   const total = path.getTotalLength(), t0 = performance.now(), dur = 1400;
   const step = (now) => {
@@ -559,46 +498,25 @@ function flowAlong(path, color) {
   };
   requestAnimationFrame(step);
 }
-function drawRing(stages) {
-  layer.ring.textContent = "";
-  const rows = stages.filter((x) => stateKey(x.status) !== "skipped"), n = rows.length, R = 124;
-  if (!n) return;
-  const gap = n > 1 ? 0.06 : 0, arc = (2 * Math.PI) / n;
-  rows.forEach((x, i) => {
-    const a0 = -Math.PI / 2 + i * arc + gap / 2, a1 = a0 + arc - gap, k = stateKey(x.status);
-    const pt = (a) => `${(HUB.x + R * Math.cos(a)).toFixed(1)} ${(HUB.y + R * Math.sin(a)).toFixed(1)}`;
-    const d = n === 1 ? `M${HUB.x} ${HUB.y - R} a${R} ${R} 0 1 1 -0.1 0` : `M${pt(a0)} A${R} ${R} 0 ${arc - gap > Math.PI ? 1 : 0} 1 ${pt(a1)}`;
-    layer.ring.append(sv("path", { d, fill: "none", "stroke-width": 7, "stroke-linecap": "round", stroke: k === "done" || k === "open" ? colorOf(x.role) : "#2a3d63", opacity: k === "done" ? 1 : k === "open" ? 0.9 : 0.8, class: k === "open" ? "pulse" : "" }));
-  });
-}
 
-// Panels -----------------------------------------------------------------------------------------
+// --- Panels ---------------------------------------------------------------------------------------
 const OUTCOME = { done: ["完了", "p-green"], partial: ["途中", "p-orange"], question: ["質問", "p-purple"], pass: ["合格", "p-green"], fail: ["不合格", "p-red"],
   routed: ["依頼", "p-blue"], "goal-met": ["達成", "p-green"], "goal-not-met": ["未達", "p-orange"], open: ["回答待ち", "p-pink"], resolved: ["回答済み", "p-grey"] };
 const DECIDER = { owner: ["Owner", "p-pink"], "game-director": ["方針", "p-purple"], "game-designer": ["仕様", "p-green"], "technical-director": ["技術", "p-blue"],
   "art-director": ["アート", "p-pink"], "gameplay-engineer": ["実装", "p-blue"], qa: ["品質", "p-orange"], playtester: ["所見", "p-green"] };
 
-function face(svgEl, k) {
-  svgEl.textContent = "";
-  svgEl.append(sv("circle", { cx: 30, cy: 30, r: 29, fill: shade(ROLES[k].color, -0.55), stroke: ROLES[k].color, "stroke-width": 2 }));
-  const clip = sv("clipPath", { id: "faceClip" }); clip.append(sv("circle", { cx: 30, cy: 30, r: 28 }));
-  svgEl.append(clip);
-  const g = sv("g", { "clip-path": "url(#faceClip)" }); svgEl.append(g);
-  person(g, 30, 50, ROLES[k], 0.62);
-}
-
 function render(s) {
   current = s;
   $("projectName").textContent = s.project.name || s.project.id || "—";
-  const gs = { active: ["進行中", "p-green"], done: ["完了", "p-blue"], abandoned: ["打ち切り", "p-grey"], "blocked-on-owner": ["Owner 判断待ち", "p-pink"] }[s.goal.status] || [s.goal.status || "Goal 待ち", "p-grey"];
-  $("goalStatus").textContent = gs[0]; $("goalStatus").className = "pill " + gs[1];
+  const gs = { active: ["進行中", "#dcfce7", "#15803d"], done: ["完了", "#dbeafe", "#1d4ed8"], abandoned: ["打ち切り", "#e2e8f0", "#475569"], "blocked-on-owner": ["Owner 判断待ち", "#fce7f3", "#be185d"] }[s.goal.status] || [s.goal.status || "Goal 待ち", "#e2e8f0", "#475569"];
+  Object.assign($("goalStatus").style, { background: gs[1], color: gs[2] }); $("goalStatus").textContent = "● " + gs[0];
   $("cBusy").textContent = s.counts.busy; $("cWait").textContent = s.counts.waiting;
   $("cReview").textContent = s.agents["game-director"].state === "busy" ? 1 : 0;
   $("cTest").textContent = ["qa", "playtester"].filter((k) => s.agents[k].state === "busy").length;
   $("cUsed").textContent = s.goal.used || 0; $("cBudget").textContent = s.goal.budget ? `/ ${s.goal.budget}` : "";
   if (s.now) {
     const d = new Date(s.now);
-    $("date").textContent = `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()} (${"日月火水木金土"[d.getDay()]})`;
+    $("date").textContent = `${d.getMonth() + 1}/${d.getDate()} (${"日月火水木金土"[d.getDay()]})`;
     $("clock").textContent = s.now.slice(11, 16);
   }
   const counted = s.stages.filter((x) => stateKey(x.status) !== "skipped");
@@ -608,7 +526,7 @@ function render(s) {
   $("goalTitle").textContent = s.goal.title ? `${s.goal.id}: ${s.goal.title}` : "Goal を待っています";
   $("goalRequest").textContent = s.goal.request ? `依頼「${s.goal.request}」` : "";
 
-  const stages = $("stages"); stages.textContent = "";
+  const stages = $("stages"); stages.textContent = ""; $("sCount").textContent = `${done}/${counted.length}`;
   if (!s.stages.length) stages.append(el("li", { class: "empty" }, "工程表はまだありません"));
   for (const x of s.stages) {
     const k = stateKey(x.status), li = el("li", { class: "r" + (k === "open" ? " now" : "") });
@@ -621,7 +539,7 @@ function render(s) {
 
   const hl = $("handoffs"); hl.textContent = ""; $("hCount").textContent = String(s.latest_seq || 0);
   if (!s.handoffs.length) hl.append(el("li", { class: "empty" }, "まだ受け渡しはありません"));
-  s.handoffs.slice(0, 5).forEach((h, i) => {
+  s.handoffs.slice(0, 6).forEach((h, i) => {
     const li = el("li", { class: "r" + (i === 0 ? " now" : "") });
     const n = el("span", { class: "num" }, String(h.seq)); n.style.background = colorOf(ROLES[h.from] ? h.from : h.to); li.append(n);
     const m = el("div", { class: "m" }); m.append(el("b", {}, `${NAME[h.from] || h.from} → ${NAME[h.to] || h.to}`), el("span", {}, `${stageJa(h.stage)}${h.title ? " · " + h.title : ""}`)); li.append(m);
@@ -632,17 +550,17 @@ function render(s) {
 
   const dl = $("decisions"); dl.textContent = ""; $("dCount").textContent = String(s.decisions.length);
   if (!s.decisions.length) dl.append(el("li", { class: "empty" }, "まだ決定はありません"));
-  for (const d of s.decisions.slice(0, 5)) {
+  for (const d of s.decisions.slice(0, 6)) {
     const li = el("li", { class: "r" });
     const n = el("span", { class: "num" }, d.id.replace(/^D-0*/, "")); n.style.background = colorOf(d.by); li.append(n);
-    const m = el("div", { class: "m" }); m.append(el("b", { title: d.title }, d.title), el("span", {}, `${d.id} · ${NAME[d.by] || d.by} · ${d.date} ${hhmm(d.time)}`)); li.append(m);
+    const m = el("div", { class: "m" }); m.append(el("span", {}, `${d.date.slice(5).replace("-", "/")} ${hhmm(d.time)} · ${NAME[d.by] || d.by}`), el("b", { title: d.title }, d.title)); li.append(m);
     const t = DECIDER[d.by] || ["決定", "p-grey"]; li.append(el("span", { class: "pill " + t[1] }, t[0]));
     dl.append(li);
   }
 
   const log = $("log"); log.textContent = "";
   if (!s.log.length) log.append(el("div", { class: "empty" }, "まだ記録はありません"));
-  for (const l of s.log.slice(-16).reverse()) {
+  for (const l of s.log.slice(-12).reverse()) {
     const row = el("div"), c = colorOf(l.who);
     const dot = el("span", { class: "dot" }); dot.style.background = c; dot.style.width = "8px"; dot.style.height = "8px";
     const who = el("span", { class: "who" }, `[${NAME[l.who] || l.who}]`); who.style.color = c;
@@ -661,24 +579,23 @@ function render(s) {
     q.append(row);
   });
 
-  // the floor
-  desk.hub.id.textContent = s.goal.id || "";
-  wrapInto(desk.hub.lines, s.goal.title || "Goal を待っています", 184, 17, HUB.y - 10);
-  desk.hub.st.textContent = `Studio: ${s.studio.label}`;
-  drawRing(s.stages);
+  if (L) renderStage(s);
+  renderDetail(s);
+}
+
+function renderStage(s) {
+  wrapInto(layer.hub.lines, s.goal.title ? `${s.goal.id}: ${s.goal.title}` : "Goal を待っています", 140 * K, 13 * K, L.hub.center[1] + 6 * K);
+  layer.hub.st.textContent = `Studio: ${s.studio.label}`;
   for (const [k, a] of Object.entries(s.agents)) {
-    const p = desk[k]; if (!p) continue;
+    const p = pods[k]; if (!p) continue;
     const busy = a.state === "busy", waiting = a.state === "waiting";
-    p.g.classList.toggle("busy", busy);
-    p.halo.setAttribute("opacity", busy ? 1 : waiting ? 0.35 : 0);
-    p.glow.setAttribute("opacity", busy ? 0.22 : waiting ? 0.07 : 0);
+    p.img.classList.toggle("on", busy);
+    p.halo.setAttribute("opacity", busy ? 1 : waiting ? 0.45 : 0);
+    p.halo.setAttribute("stroke-dasharray", waiting ? `${10 * K} ${8 * K}` : "none");
     p.typing.setAttribute("opacity", busy ? 1 : 0);
-    p.shine.setAttribute("opacity", busy ? 0.16 : 0);
-    p.screens.setAttribute("opacity", busy ? 1 : waiting ? 0.8 : 0.5);
-    const lab = busy ? [a.label, "#0f3b2c", "#5ff0b0"] : waiting ? ["待機中", "#3a3a12", "#fde68a"] : ["手すき", "#141e33", "#7d8da8"];
-    if (busy && k === "game-director") lab.splice(1, 2, "#2e1e5c", "#c4b5fd");
-    if (busy && k === "qa") lab.splice(1, 2, "#4a2e0a", "#fcd34d");
-    p.pillTx.textContent = lab[0]; p.pill.setAttribute("fill", lab[1]); p.pillTx.setAttribute("fill", lab[2]);
+    const [bg, fg] = busy ? BUSY_PILL[k] || ["#16a34a", "#f0fdf4"] : waiting ? ["#b45309", "#fff7e6"] : ["#334155", "#cbd5e1"];
+    p.plateBg.setAttribute("stroke-dasharray", waiting ? `${7 * K} ${5 * K}` : "none");
+    p.pill.setAttribute("fill", bg); p.pillTx.setAttribute("fill", fg); p.pillTx.textContent = busy ? a.label : waiting ? "待機中" : "手すき";
   }
   if (drawnSeq !== s.latest_seq) {
     const paths = drawArrows(s.handoffs);
@@ -687,7 +604,6 @@ function render(s) {
     drawnSeq = s.latest_seq;
   }
   lastSeq = s.latest_seq;
-  renderDetail(s);
 }
 
 function renderDetail(s) {
@@ -695,12 +611,13 @@ function renderDetail(s) {
   const busy = ORDER.find((r) => s.agents[r].state === "busy");
   if (!picked && busy) { selected = busy; $("agentSelect").value = busy; }
   const k = selected, r = ROLES[k], a = s.agents[k];
-  for (const [kk, p] of Object.entries(desk)) if (ROLES[kk]) p.g.classList.toggle("picked", kk === k);
-  face($("dFace"), k);
+  for (const [kk, p] of Object.entries(pods)) if (p.g) p.g.classList.toggle("picked", kk === k);
+  $("dFace").src = `assets/face-${k}.webp`;
   $("dName").textContent = r.en; $("dJa").textContent = r.ja;
   $("dState").textContent = a.label;
   $("dState").className = "pill " + (a.state === "busy" ? "p-green" : a.state === "waiting" ? "p-orange" : "p-dark");
-  $("dTask").textContent = a.stage ? `${stageJa(a.stage)}${a.task ? " — " + a.task : ""}` : a.last ? `直近: ${a.last.text}` : "割り当てはありません";
+  Object.assign($("dState").style, a.state === "busy" ? { background: "#16a34a", color: "#fff" } : { background: "", color: "" });
+  $("dTask").textContent = a.stage ? `${stageJa(a.stage)} — ${a.task || a.stage}` : a.last ? `直近: ${a.last.text}` : "割り当てはありません";
   const mine = s.stages.filter((x) => x.role === k && stateKey(x.status) !== "skipped");
   const doneMine = mine.filter((x) => stateKey(x.status) === "done").length;
   $("dBar").style.width = mine.length ? Math.round((100 * doneMine) / mine.length) + "%" : "0%";
@@ -709,17 +626,20 @@ function renderDetail(s) {
   const next = s.queue.find((x) => x.role === k && stateKey(x.status) !== "open") || s.queue.find((x) => x.role === k);
   $("dNext").textContent = next ? stageJa(next.stage) : "予定なし";
   $("dNextWho").textContent = next ? ({ open: "進行中", planned: "予定", tentative: "保留" }[stateKey(next.status)] || "") : "";
-  const du = $("dDuties"); du.textContent = ""; for (const d of r.duties) du.append(el("li", {}, d));
 }
 
-// Modes -------------------------------------------------------------------------------------------
+// --- Modes ----------------------------------------------------------------------------------------
+function fitStage() { document.documentElement.style.setProperty("--hdr", document.querySelector("header").offsetHeight + "px"); }
 async function start() {
-  drawFloor();
-  for (const [t, text, w, size, min] of desk.later) fit(t, text, w, size, min);
+  fitStage(); addEventListener("resize", fitStage);
   const sel = $("agentSelect");
-  for (const k of ORDER) sel.append(el("option", { value: k }, `${ROLES[k].en}（${ROLES[k].ja}）`));
+  for (const k of ORDER) sel.append(el("option", { value: k }, ROLES[k].en));
   sel.value = selected;
   sel.addEventListener("change", () => { selected = sel.value; picked = true; if (current) renderDetail(current); });
+  try {
+    const res = await fetch("assets/layout.json", { cache: "no-store" });
+    if (res.ok) { L = await res.json(); buildStage(); drawBubbles(); }
+  } catch (e) { /* no layout: panels only */ }
   try {
     const res = await fetch("timeline.json", { cache: "no-store" });
     if (res.ok) { const tl = await res.json(); if (Array.isArray(tl) && tl.length) return replay(tl); }
@@ -757,7 +677,7 @@ function replay(tl) {
     playing = !playing; $("play").textContent = playing ? "❚❚ 一時停止" : "▶ 再生";
     if (playing) { if (clock >= t1) { clock = t0; lastSeq = null; shown = -1; } lastFrame = null; requestAnimationFrame(frame); }
   });
-  scrub.addEventListener("input", () => { clock = t0 + Number(scrub.value) * 1000; lastSeq = null; shown = -1; show(); });
+  scrub.addEventListener("input", () => { clock = t0 + Number(scrub.value) * 1000; lastSeq = null; drawnSeq = null; shown = -1; show(); });
   show();
 }
 start();
