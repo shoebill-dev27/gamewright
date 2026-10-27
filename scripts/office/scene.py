@@ -34,7 +34,7 @@ PODS = {
     "playtester": (2.15, -3.95),
 }
 HUB = (0.0, 0.35)
-CHAR_SCALE = 1.28
+CHAR_SCALE = 1.12
 POD_R = 1.62
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -123,16 +123,74 @@ def outline_mat():
     return m
 
 
+LIGHT = Vector((-0.3, -0.8, 0.55)).normalized()  # the characters' toon key light
+TOON_GLOW = 0.52
+
+
+def toon(nt, color, shadow):
+    """Cel shading for the characters: a lit and a shadow tone split along a fixed key light, a soft
+    rim, and a share of real diffuse so lamps and screens still tint them. `color` is a socket.
+    """
+    n = nt.nodes
+    nt.nodes.remove(n["Principled BSDF"])
+    geo = n.new("ShaderNodeNewGeometry")
+    dot = n.new("ShaderNodeVectorMath")
+    dot.operation = "DOT_PRODUCT"
+    dot.inputs[1].default_value = LIGHT
+    nt.links.new(geo.outputs["Normal"], dot.inputs[0])
+    dark = n.new("ShaderNodeMapRange")  # 1 in shadow, 0 lit, with a narrow soft edge
+    dark.interpolation_type = "SMOOTHSTEP"
+    dark.inputs["From Min"].default_value = -0.1
+    dark.inputs["From Max"].default_value = 0.08
+    dark.inputs["To Min"].default_value = 1.0
+    dark.inputs["To Max"].default_value = 0.0
+    nt.links.new(dot.outputs["Value"], dark.inputs["Value"])
+    tone = n.new("ShaderNodeMix")
+    tone.data_type, tone.blend_type = "RGBA", "MULTIPLY"
+    nt.links.new(dark.outputs["Result"], tone.inputs["Factor"])
+    nt.links.new(color, tone.inputs["A"])
+    tone.inputs["B"].default_value = (*lin(shadow), 1)
+    lw = n.new("ShaderNodeLayerWeight")
+    lw.inputs["Blend"].default_value = 0.3
+    rim = n.new("ShaderNodeMapRange")
+    rim.inputs["From Min"].default_value = 0.55
+    rim.inputs["From Max"].default_value = 0.85
+    rim.inputs["To Max"].default_value = 0.3
+    nt.links.new(lw.outputs["Facing"], rim.inputs["Value"])
+    lit = n.new("ShaderNodeMix")
+    lit.data_type, lit.blend_type = "RGBA", "SCREEN"
+    nt.links.new(rim.outputs["Result"], lit.inputs["Factor"])
+    nt.links.new(tone.outputs["Result"], lit.inputs["A"])
+    lit.inputs["B"].default_value = (*lin("#dfe8ff"), 1)
+    em = n.new("ShaderNodeEmission")
+    em.inputs["Strength"].default_value = TOON_GLOW
+    nt.links.new(lit.outputs["Result"], em.inputs["Color"])
+    diff = n.new("ShaderNodeBsdfDiffuse")
+    nt.links.new(color, diff.inputs["Color"])
+    mix = n.new("ShaderNodeMixShader")
+    mix.inputs["Fac"].default_value = 0.2
+    nt.links.new(em.outputs["Emission"], mix.inputs[1])
+    nt.links.new(diff.outputs["BSDF"], mix.inputs[2])
+    nt.links.new(mix.outputs["Shader"], n["Material Output"].inputs["Surface"])
+
+
+def toon_mat(name, color, shadow="#8a90c0"):
+    if name in _mats:
+        return _mats[name]
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    rgb = m.node_tree.nodes.new("ShaderNodeRGB")
+    rgb.outputs[0].default_value = (*lin(color), 1)
+    toon(m.node_tree, rgb.outputs[0], shadow)
+    _mats[name] = m
+    return m
+
+
 def skin_face_mat(role, spec):
-    """Skin with the face texture projected across the front of the head (object space)."""
+    """Toon skin with the face texture projected across the front of the head (object space)."""
     m = bpy.data.materials.new(f"head-{role}")
     m.use_nodes = True
     nt = m.node_tree
-    b = nt.nodes["Principled BSDF"]
-    b.inputs["Roughness"].default_value = 0.55
-    b.inputs["Subsurface Weight"].default_value = 0.15
-    b.inputs["Subsurface Radius"].default_value = (0.3, 0.12, 0.08)
-    b.inputs["Subsurface Scale"].default_value = 0.02
     tc = nt.nodes.new("ShaderNodeTexCoord")
     sep = nt.nodes.new("ShaderNodeSeparateXYZ")
     comb = nt.nodes.new("ShaderNodeCombineXYZ")
@@ -162,8 +220,11 @@ def skin_face_mat(role, spec):
     mixc.inputs["A"].default_value = (*lin(spec["skin"]), 1)
     nt.links.new(fac.outputs[0], mixc.inputs["Factor"])
     nt.links.new(tex.outputs["Color"], mixc.inputs["B"])
-    nt.links.new(mixc.outputs["Result"], b.inputs["Base Color"])
+    toon(nt, mixc.outputs["Result"], SKIN_SHADOW)
     return m
+
+
+SKIN_SHADOW = "#e3a08f"
 
 
 # --- geometry helpers -----------------------------------------------------------------------------
@@ -367,6 +428,7 @@ def place(objs, origin, yaw):
 
 HEAD_R = 0.30
 HEAD_Z = 1.26
+HEAD_SCALE = 0.84
 
 
 def hair_elems(style):
@@ -490,9 +552,10 @@ def character(role, spec, pose):
     """A seated chibi character at the origin facing -y; returns its objects."""
     R = HEAD_R
     objs = []
-    shirt = mat(f"shirt-{role}", spec["shirt"], rough=0.75)
-    pants = mat("pants", "#2b3142", rough=0.8)
-    skin = mat(f"skin-{role}", spec["skin"], rough=0.55)
+    shirt = toon_mat(f"shirt-{role}", spec["shirt"])
+    inner = toon_mat(f"inner-{role}", spec["inner"])
+    pants = toon_mat("pants", "#2b3142")
+    skin = toon_mat(f"skin-{role}", spec["skin"], SKIN_SHADOW)
     busy = pose == "busy"
     # body: hips, torso and sleeves blend into one shape
     torso = [
@@ -520,36 +583,102 @@ def character(role, spec, pose):
             )
     body = metaball(f"mbBody{role}", torso + sleeves, shirt, res=0.018)
     objs.append(outline(body, 0.01))
-    if spec["acc"] == "tie":  # a blazer over a white shirt: shirt front and a tie
+    outfit = spec["outfit"]
+    if outfit in ("blazer", "cardigan"):  # open front over the shirt, with lapels
         objs.append(
             box(
                 f"shirtfront-{role}",
                 (0.13, 0.02, 0.2),
                 (0, -0.2, 0.86),
-                mat("white", "#f4f6fa", 0.6),
+                inner,
                 rot=(0.1, 0, 0),
                 bev=0.01,
             )
         )
+        for sx in (-1, 1):
+            objs.append(
+                box(
+                    f"lapel{sx}-{role}",
+                    (0.05, 0.025, 0.24),
+                    (sx * 0.08, -0.205, 0.86),
+                    shirt,
+                    rot=(0.1, sx * 0.3, 0),
+                    bev=0.008,
+                )
+            )
+        if outfit == "cardigan":
+            for k in range(3):
+                objs.append(
+                    sphere(
+                        f"button{k}-{role}",
+                        0.014,
+                        (0.045, -0.235, 0.7 + k * 0.07),
+                        toon_mat("button", "#6b4a2e"),
+                        seg=12,
+                    )
+                )
+    if outfit == "hoodie":  # a hood bunched behind the neck and two drawstrings
+        objs.append(
+            outline(
+                torus(
+                    f"hood-{role}",
+                    0.15,
+                    0.07,
+                    (0, 0.07, 1.0),
+                    shirt,
+                    rot=(0.45, 0, 0),
+                    minor=12,
+                ),
+                0.008,
+            )
+        )
+        for sx in (-1, 1):
+            objs.append(
+                cyl(
+                    f"string{sx}-{role}",
+                    0.009,
+                    0.16,
+                    (sx * 0.05, -0.215, 0.86),
+                    inner,
+                    verts=8,
+                    rot=(0.1, 0, 0),
+                )
+            )
+    if outfit in ("sweater", "tee", "blouse"):  # a collar in the inner colour
+        objs.append(
+            torus(
+                f"collar-{role}",
+                0.105,
+                0.032 if outfit == "blouse" else 0.022,
+                (0, -0.01, 1.0),
+                inner,
+                rot=(0.2, 0, 0),
+                minor=10,
+            )
+        )
+    if spec["acc"] == "tie":
         objs.append(
             box(
                 f"tie-{role}",
                 (0.045, 0.02, 0.17),
                 (0, -0.215, 0.84),
-                mat("tie", "#c0392b", 0.5),
+                toon_mat("tie", "#c0392b"),
                 rot=(0.1, 0, 0),
                 bev=0.008,
             )
         )
     if spec["acc"] == "scarf":
         objs.append(
-            torus(
-                f"scarf-{role}",
-                0.15,
-                0.05,
-                (0, -0.01, 1.0),
-                mat("scarf", spec["accent"], 0.8),
-                minor=10,
+            outline(
+                torus(
+                    f"scarf-{role}",
+                    0.15,
+                    0.05,
+                    (0, -0.01, 1.0),
+                    toon_mat("scarf", spec["accent"]),
+                    minor=10,
+                ),
+                0.008,
             )
         )
     legs = []
@@ -565,19 +694,22 @@ def character(role, spec, pose):
                 f"shoe{sx}-{role}",
                 0.075,
                 (sx * 0.12, -0.42, 0.08),
-                mat("shoe", "#3a3f4f", 0.6),
+                toon_mat("shoe", "#3a3f4f"),
                 scale=(1, 1.5, 0.7),
             )
         )
     for h in hands:
         objs.append(
-            outline(sphere(f"hand-{role}", 0.062, h, skin, scale=(1, 1.1, 0.85)), 0.008)
+            outline(
+                sphere(f"hand-{role}", 0.058, h, skin, scale=(0.9, 1.3, 0.7)), 0.008
+            )
         )
     objs.append(cyl(f"neck-{role}", 0.07, 0.14, (0, 0, 1.0), skin))
     # head with face, ears and hair, as children of a pivot so the head can tilt
     pivot = bpy.data.objects.new(f"headpivot-{role}", None)
     link(pivot)
-    pivot.location = (0, -0.05 if busy else 0.05, HEAD_Z - (0.02 if busy else 0))
+    pivot.location = (0, -0.05 if busy else 0.05, HEAD_Z - (0.02 if busy else 0) - 0.03)
+    pivot.scale = (HEAD_SCALE,) * 3
     turn = 14 if (sum(map(ord, role)) % 2) else -14
     pivot.rotation_euler = (
         math.radians(-4 if busy else -18),
@@ -596,7 +728,7 @@ def character(role, spec, pose):
     hair = metaball(
         f"mbHair{role}",
         hair_elems(spec["style"]),
-        mat(f"hair-{role}", spec["hair"], rough=0.62),
+        toon_mat(f"hair-{role}", spec["hair"], "#6c6a96"),
         res=0.014,
     )
     outline(hair, 0.012)
@@ -639,7 +771,7 @@ def character(role, spec, pose):
             )
         )
     if acc == "headphones":
-        dark = mat("hp", "#1b1f2a", 0.35, 0.3)
+        dark = toon_mat("hp", "#2a2f3d")
         parts.append(
             torus(
                 f"band-{role}",
@@ -681,7 +813,7 @@ def character(role, spec, pose):
                     f"beret-{role}",
                     0.21,
                     (-0.07, 0.02, 0.36),
-                    mat("beret", "#7c3aed", 0.8),
+                    toon_mat("beret", "#7c3aed"),
                     scale=(1.0, 1.0, 0.32),
                     rot=(0.25, -0.3, 0),
                 ),
@@ -694,14 +826,12 @@ def character(role, spec, pose):
                 0.018,
                 0.05,
                 (-0.09, 0.03, 0.44),
-                mat("beret", "#7c3aed", 0.8),
+                toon_mat("beret", "#7c3aed"),
             )
         )
-    if acc == "cap":
-        capm = mat("cap", "#3f7d20", 0.6)
-        c = sphere(
-            f"cap-{role}", R * 1.18, (0, 0.05, 0.12), capm, scale=(1, 1.04, 0.88)
-        )
+    if acc == "cap":  # a snug cap worn backwards: the strap shows at the front
+        capm = toon_mat("cap", "#2b303c")
+        c = sphere(f"cap-{role}", R * 1.06, (0, 0.03, 0.1), capm, scale=(1, 1.03, 0.8))
         bm = bmesh.new()
         bm.from_mesh(c.data)
         bmesh.ops.delete(
@@ -713,19 +843,34 @@ def character(role, spec, pose):
         parts.append(
             outline(
                 cyl(
-                    f"visor-{role}", 0.19, 0.025, (0, 0.4, 0.13), capm, rot=(0.25, 0, 0)
+                    f"visor-{role}",
+                    0.17,
+                    0.022,
+                    (0, -0.31, 0.16),
+                    capm,
+                    rot=(-0.35, 0, 0),
                 ),
                 0.008,
             )
         )
-        parts[-1].scale = (1, 0.8, 1)
+        parts[-1].scale = (1, 0.7, 1)
         parts.append(
             sphere(
-                f"capbadge-{role}",
-                0.035,
-                (0, -0.26, 0.3),
-                mat("badge", "#a3e635", 0.4, emit="#a3e635", strength=1.5),
-                scale=(1, 0.3, 1),
+                f"capbutton-{role}",
+                0.03,
+                (0, 0.03, 0.35),
+                toon_mat("capbutton", "#a3e635"),
+                seg=12,
+            )
+        )
+        parts.append(
+            box(
+                f"cappatch-{role}",
+                (0.11, 0.02, 0.07),
+                (0, -0.275, 0.25),
+                toon_mat("capbutton", "#a3e635"),
+                rot=(-0.6, 0, 0),
+                bev=0.01,
             )
         )
     for p in parts:
@@ -831,31 +976,237 @@ def plant(name, loc, s=1.0, pot="#e8ebf0"):
     return objs
 
 
-def chair(role, color):
+def polar(a, r, z=0.0):
+    """A point in a pod: angle a in degrees (0 = right, 90 = back), radius r, height z."""
+    return (math.cos(math.radians(a)) * r, math.sin(math.radians(a)) * r, z)
+
+
+DESK_TOP = 0.83  # the console top
+WOOD = ("wood", "#a77b55", 0.42)
+DESK_BODY = ("deskbody", "#394154", 0.5)
+
+
+def paper_stack(name, loc, yaw, n=4, col="#f3f0e8"):
+    paper = mat("paper", col, 0.85)
+    return [
+        box(
+            f"{name}{i}",
+            (0.2, 0.27, 0.008),
+            (loc[0], loc[1], loc[2] + 0.004 + i * 0.009),
+            paper,
+            rot=(0, 0, math.radians(yaw + (i * 37 % 11) - 5)),
+            bev=0,
+        )
+        for i in range(n)
+    ]
+
+
+def mug_at(name, loc, color):
+    m = mat(f"mug-{color}", color, 0.35, coat=0.5)
+    return [
+        cyl(name, 0.045, 0.1, (loc[0], loc[1], loc[2] + 0.05), m, bev=0.004),
+        torus(
+            f"{name}-h",
+            0.03,
+            0.009,
+            (loc[0] - 0.05, loc[1], loc[2] + 0.05),
+            m,
+            rot=(math.pi / 2, 0, 0),
+            minor=6,
+        ),
+    ]
+
+
+def pencil_cup(name, loc):
+    objs = [
+        cyl(name, 0.04, 0.1, (loc[0], loc[1], loc[2] + 0.05), mat("cup", "#30384a"))
+    ]
+    for i, col in enumerate(("#ef4444", "#3b82f6", "#facc15", "#22c55e")):
+        objs.append(
+            cyl(
+                f"{name}-p{i}",
+                0.007,
+                0.16,
+                (loc[0] + (i - 1.5) * 0.015, loc[1], loc[2] + 0.13),
+                mat(f"pencil{i}", col, 0.5),
+                verts=6,
+                rot=((i - 1.5) * 0.12, (i % 2 - 0.5) * 0.2, 0),
+            )
+        )
+    return objs
+
+
+def book_stack(name, loc, yaw, colors):
+    return [
+        box(
+            f"{name}{i}",
+            (0.22, 0.3, 0.04),
+            (loc[0], loc[1], loc[2] + 0.02 + i * 0.042),
+            mat(f"book-{col}", col, 0.7),
+            rot=(0, 0, math.radians(yaw + i * 9 - 8)),
+            bev=0.004,
+        )
+        for i, col in enumerate(colors)
+    ]
+
+
+def books_row(name, a0, a1, r, z, colors):
+    """Upright books along an arc (a shelf), each turned to face the pod centre."""
+    objs = []
+    for i, col in enumerate(colors):
+        a = a0 + (a1 - a0) * (i + 0.5) / len(colors)
+        h = 0.2 + (i * 7 % 5) * 0.025
+        objs.append(
+            box(
+                f"{name}{i}",
+                (0.05, 0.16, h),
+                polar(a, r, z + h / 2),
+                mat(f"book-{col}", col, 0.7),
+                rot=(0, 0, math.radians(a)),
+                bev=0.004,
+            )
+        )
+    return objs
+
+
+def figure(name, loc, color, hair="#2a2733"):
+    """A tiny figurine: a body and a big head."""
+    return [
+        cyl(
+            f"{name}-b",
+            0.035,
+            0.08,
+            (loc[0], loc[1], loc[2] + 0.04),
+            mat(f"fig-{color}", color, 0.35, coat=0.6),
+            r2=0.025,
+        ),
+        sphere(
+            f"{name}-h",
+            0.04,
+            (loc[0], loc[1], loc[2] + 0.11),
+            mat("figskin", "#f6d2b8", 0.5),
+        ),
+        sphere(
+            f"{name}-hair",
+            0.043,
+            (loc[0], loc[1] + 0.01, loc[2] + 0.125),
+            mat(f"fighair-{hair}", hair, 0.5),
+            scale=(1, 1, 0.75),
+        ),
+    ]
+
+
+def posts(name, x, y, top, w):
+    """Two posts from the floor up to `top`, holding a board or screen of width w at (x, y)."""
+    return [
+        box(
+            f"{name}-post{sx}",
+            (0.05, 0.05, top - 0.16),
+            (x + sx * w * 0.35, y + 0.04, (top + 0.16) / 2),
+            mat("post", "#3a4358", 0.4),
+            bev=0.008,
+        )
+        for sx in (-1, 1)
+    ]
+
+
+def poster(name, path, loc, yaw, w, h, glow=0.0, frame="#2a3142"):
+    face = box(
+        name,
+        (w, 0.012, h),
+        loc,
+        image_mat(f"{name}-img", path, glow, 0.6),
+        rot=(0, 0, math.radians(yaw)),
+        bev=0,
+    )
+    cork_uv(face)
+    fr = box(
+        f"{name}-frame",
+        (w + 0.04, 0.01, h + 0.04),
+        (loc[0], loc[1], loc[2]),
+        mat("frame-" + frame, frame, 0.4),
+        rot=(0, 0, math.radians(yaw)),
+        bev=0.004,
+    )
+    return [face, fr]
+
+
+def cabinet(name, a, r):
+    """A low drawer cabinet at the end of the console; returns its objects and its top centre."""
+    x, y, _ = polar(a, r)
+    body = mat(*DESK_BODY)
+    objs = [
+        box(
+            name,
+            (0.42, 0.4, 0.6),
+            (x, y, 0.46),
+            body,
+            bev=0.012,
+        ),
+        box(
+            f"{name}-top",
+            (0.44, 0.42, 0.03),
+            (x, y, 0.775),
+            mat(*WOOD, coat=0.2),
+            bev=0.006,
+        ),
+    ]
+    for k in range(3):
+        objs.append(
+            box(
+                f"{name}-drawer{k}",
+                (0.36, 0.01, 0.16),
+                (x, y - 0.2, 0.27 + k * 0.18),
+                mat("drawer", "#4a5368", 0.45),
+                bev=0.004,
+            )
+        )
+    return objs, (x, y, 0.79)
+
+
+def chair(role, color, kind):
     seat = mat("chairfab", "#2a3040", 0.8)
     acc = mat(f"chairacc-{role}", color, 0.5)
     metalm = mat("chairmetal", "#9aa3b5", 0.3, 0.8)
+    back_h, back_w = (1.05, 0.66) if kind in ("exec", "gaming") else (0.78, 0.58)
+    if kind == "exec":
+        seat = acc = mat("leather", "#5a3324", 0.35, coat=0.3)
+    if kind == "gaming":
+        seat = mat("gamingblack", "#1c1f29", 0.5)
     objs = [box(f"seat-{role}", (0.56, 0.52, 0.1), (0, 0.05, 0.44), seat, bev=0.04)]
     objs.append(
         box(
             f"back-{role}",
-            (0.58, 0.12, 0.78),
-            (0, 0.33, 0.9),
+            (back_w, 0.12, back_h),
+            (0, 0.33, 0.5 + back_h / 2),
             seat,
             rot=(math.radians(-10), 0, 0),
             bev=0.05,
         )
     )
-    objs.append(
-        box(
-            f"backstripe-{role}",
-            (0.1, 0.13, 0.7),
-            (0, 0.33, 0.9),
-            acc,
-            rot=(math.radians(-10), 0, 0),
-            bev=0.02,
+    if kind == "gaming":  # side bolsters in the Role colour
+        for sx in (-1, 1):
+            objs.append(
+                box(
+                    f"wing{sx}-{role}",
+                    (0.1, 0.14, back_h * 0.9),
+                    (sx * 0.3, 0.3, 0.5 + back_h / 2),
+                    acc,
+                    rot=(math.radians(-10), 0, sx * 0.25),
+                    bev=0.04,
+                )
+            )
+    else:
+        objs.append(
+            box(
+                f"backstripe-{role}",
+                (0.1, 0.13, back_h * 0.9),
+                (0, 0.33, 0.5 + back_h / 2),
+                acc,
+                rot=(math.radians(-10), 0, 0),
+                bev=0.02,
+            )
         )
-    )
     objs.append(cyl(f"gas-{role}", 0.03, 0.34, (0, 0.05, 0.22), metalm))
     for i in range(5):
         a = i * 2 * math.pi / 5
@@ -873,38 +1224,47 @@ def chair(role, color):
 
 
 def desk_pod(role, spec, screens_glow):
-    """The pod around a character at the origin: platform, ring light, rear console with monitors,
-    front desk with keyboard and props, and role-specific items."""
+    """The booth around a character at the origin: a stepped platform with the state ring, a
+    partition at the back, the console with monitors, cabinets, shelves and the Role's own things.
+    """
     color = spec["color"]
-    objs = []
-    objs.append(
+    busy = screens_glow > 2
+    objs = [
+        cyl(
+            f"platbase-{role}",
+            POD_R + 0.1,
+            0.08,
+            (0, 0, 0.04),
+            mat("platbase", "#2c3446", 0.5),
+            verts=96,
+            bev=0.01,
+        ),
         cyl(
             f"plat-{role}",
             POD_R,
-            0.16,
-            (0, 0, 0.08),
-            mat("plattop", "#aeb8c8", 0.4, coat=0.3),
+            0.1,
+            (0, 0, 0.11),
+            mat("plattop", "#8e96a3", 0.45, coat=0.25),
             verts=96,
-            bev=0.02,
-        )
-    )
-    objs.append(
-        cyl(
-            f"platbase-{role}",
-            POD_R + 0.06,
-            0.06,
-            (0, 0, 0.03),
-            mat("platbase", "#56627a", 0.5),
-            verts=96,
-        )
-    )
-    ring_strength = 14 if screens_glow > 2 else 3
+            bev=0.015,
+        ),
+        torus(
+            f"platedge-{role}",
+            POD_R - 0.02,
+            0.014,
+            (0, 0, 0.158),
+            mat("platedge", "#9aa5ba", 0.35, 0.3),
+            major=128,
+            minor=6,
+        ),
+    ]
+    ring_strength = 18 if busy else 0.5
     objs.append(
         torus(
             f"ring-{role}",
-            POD_R + 0.03,
-            0.022,
-            (0, 0, 0.12),
+            POD_R + 0.1,
+            0.035,
+            (0, 0, 0.05),
             mat(
                 f"ring-{role}-{ring_strength}",
                 color,
@@ -916,16 +1276,37 @@ def desk_pod(role, spec, screens_glow):
             minor=8,
         )
     )
-    wood = mat("wood", "#c9a27a", 0.45, coat=0.2)
-    white = mat("deskwhite", "#e9edf3", 0.4)
-    led = mat(
-        f"led-{role}", color, 0.3, emit=color, strength=6 if screens_glow > 2 else 2
-    )
-    # rear console: a curved desk behind the chair carrying the monitors
-    objs.append(arc_slab(f"console-top-{role}", 0.98, 1.5, 25, 155, 0.78, 0.83, wood))
+    wood = mat(*WOOD, coat=0.2)
+    body = mat(*DESK_BODY)
+    led = mat(f"led-{role}", color, 0.3, emit=color, strength=6 if busy else 2)
+    # the partition: a curved fabric wall with a wooden cap and end posts
     objs.append(
-        arc_slab(f"console-body-{role}", 1.38, 1.48, 27, 153, 0.16, 0.78, white)
+        arc_slab(
+            f"partition-{role}",
+            1.5,
+            1.57,
+            18,
+            162,
+            0.16,
+            1.6,
+            mat("partition", "#c6ccd6", 0.9),
+        )
     )
+    objs.append(arc_slab(f"partcap-{role}", 1.48, 1.59, 17, 163, 1.6, 1.65, wood))
+    for a in (17.5, 162.5):
+        objs.append(
+            box(
+                f"partpost{a}-{role}",
+                (0.07, 0.09, 1.5),
+                polar(a, 1.535, 0.9),
+                body,
+                rot=(0, 0, math.radians(a - 90)),
+                bev=0.01,
+            )
+        )
+    # the console behind the chair carrying the monitors
+    objs.append(arc_slab(f"console-top-{role}", 0.98, 1.5, 25, 155, 0.78, 0.83, wood))
+    objs.append(arc_slab(f"console-body-{role}", 1.3, 1.48, 27, 153, 0.16, 0.78, body))
     objs.append(
         arc_slab(f"console-led-{role}", 1.0, 1.03, 30, 150, 0.765, 0.78, led, bev=0)
     )
@@ -934,48 +1315,33 @@ def desk_pod(role, spec, screens_glow):
             box(
                 f"console-leg{a}-{role}",
                 (0.06, 0.4, 0.62),
-                (
-                    math.cos(math.radians(a)) * 1.22,
-                    math.sin(math.radians(a)) * 1.22,
-                    0.47,
-                ),
-                white,
+                polar(a, 1.12, 0.47),
+                body,
                 rot=(0, 0, math.radians(a - 90)),
                 bev=0.01,
             )
         )
-    for k, a in enumerate((58, 90, 122)):
-        r = 1.26
-        x, y = math.cos(math.radians(a)) * r, math.sin(math.radians(a)) * r
+    for k, a in enumerate((50, 90, 130)):
         big = k == 1
+        w, h = (0.95, 0.55) if big else (0.78, 0.46)
         objs += monitor(
             f"mon{k}-{role}",
-            0.72 if big else 0.6,
-            0.44 if big else 0.37,
-            (x, y, 1.13 if big else 1.08),
+            w,
+            h,
+            polar(a, 1.24, DESK_TOP + 0.01 + h / 2 + 0.09),
             a - 90,
             TEX / f"screen-{role}-{k}.png",
             screens_glow,
             tilt=-4,
         )
-    objs += plant(
-        f"plant-a-{role}",
-        (math.cos(math.radians(160)) * 1.33, math.sin(math.radians(160)) * 1.33, 0.83),
-        0.85,
-    )
-    objs += plant(
-        f"plant-b-{role}",
-        (math.cos(math.radians(22)) * 1.33, math.sin(math.radians(22)) * 1.33, 0.83),
-        0.7,
-    )
-    # a rug under the chair and a warm desk lamp at the console end
+    # a rug in the Role's tone under the chair
     objs.append(
         cyl(
             f"rug-{role}",
             1.05,
             0.012,
             (0, -0.05, 0.166),
-            mat(f"rug-{role}", "#26314d", 0.9),
+            mat("rug", "#5b6474", 0.95),
             verts=64,
         )
     )
@@ -985,20 +1351,21 @@ def desk_pod(role, spec, screens_glow):
             1.05,
             0.012,
             (0, -0.05, 0.17),
-            mat(f"rugedge-{role}", color, 0.6),
+            mat(f"rugedge-{role}", mix_hex(color, "#1a2133", 0.35), 0.7),
             major=96,
             minor=6,
         )
     )
-    lx, ly = math.cos(math.radians(140)) * 1.2, math.sin(math.radians(140)) * 1.2
+    # a warm desk lamp under the left shelf
+    lx, ly, _ = polar(142, 1.22)
     lampm = mat("lamp", "#2b3142", 0.35, 0.5)
     objs.append(cyl(f"lampbase-{role}", 0.07, 0.025, (lx, ly, 0.845), lampm))
     objs.append(
         cyl(
             f"lamparm-{role}",
             0.012,
-            0.42,
-            (lx + 0.06, ly - 0.03, 1.04),
+            0.38,
+            (lx + 0.06, ly - 0.03, 1.02),
             lampm,
             rot=(0.25, 0.35, 0),
         )
@@ -1008,109 +1375,88 @@ def desk_pod(role, spec, screens_glow):
             f"lamphead-{role}",
             0.07,
             0.09,
-            (lx + 0.15, ly - 0.09, 1.24),
-            mat("lamphead", "#fff3d6", 0.3, emit="#ffd9a0", strength=6),
+            (lx + 0.14, ly - 0.09, 1.2),
+            mat("lamphead", "#fff3d6", 0.3, emit="#ffd9a0", strength=8),
             r2=0.03,
             rot=(-0.6, 0.4, 0),
         )
     )
     lt = bpy.data.lights.new(f"lamp-{role}", "POINT")
-    lt.color, lt.energy, lt.shadow_soft_size = lin("#ffc98a"), 22, 0.15
+    lt.color, lt.energy, lt.shadow_soft_size = lin("#ffc98a"), 30, 0.12
     lo = bpy.data.objects.new(f"lamp-{role}", lt)
-    lo.location = (lx + 0.15, ly - 0.12, 1.18)
+    lo.location = (lx + 0.14, ly - 0.12, 1.14)
     link(lo)
     objs.append(lo)
-    # a low shelf behind the console end with binders and a little figure
-    sx, sy = math.cos(math.radians(118)) * 1.72, math.sin(math.radians(118)) * 1.72
-    shelf = mat("shelf", "#e3e7ee", 0.45)
-    objs.append(
-        box(
-            f"shelf-{role}",
-            (0.62, 0.3, 0.62),
-            (sx, sy, 0.47),
-            shelf,
-            rot=(0, 0, math.radians(28)),
-            bev=0.012,
-        )
+    # the left shelf on the partition with books and figures; plants on the partition cap
+    objs.append(arc_slab(f"shelf-{role}", 1.3, 1.5, 134, 161, 1.42, 1.46, wood))
+    objs += books_row(
+        f"shelfbook-{role}",
+        136,
+        150,
+        1.42,
+        1.46,
+        ("#ef4444", "#3b82f6", "#f59e0b", "#22c55e", color, "#e5e7eb"),
     )
-    for i, col in enumerate(("#ef4444", "#3b82f6", "#22c55e", "#f59e0b", color)):
-        ox = (i - 2) * 0.1
-        objs.append(
-            box(
-                f"binder{i}-{role}",
-                (0.07, 0.22, 0.26),
-                (
-                    sx + math.cos(math.radians(28)) * ox,
-                    sy + math.sin(math.radians(28)) * ox,
-                    0.93,
-                ),
-                mat(f"binder{i}", col, 0.55),
-                rot=(0, 0, math.radians(28 + (i - 2) * 3)),
-                bev=0.006,
-            )
-        )
-    objs.append(
-        sphere(
-            f"figure-{role}",
-            0.06,
-            (sx + 0.22, sy + 0.12, 0.85),
-            mat(f"fig-{role}", color, 0.35, coat=0.6),
-        )
+    objs += figure(f"shelffig-{role}", polar(155, 1.4, 1.46), color, spec["hair"])
+    objs += plant(f"plant-a-{role}", polar(162, 1.5, 1.65), 0.8)
+    objs += plant(f"plant-b-{role}", polar(19, 1.5, 1.65), 0.65)
+    # things on the console between the monitors
+    rnd = sum(map(ord, role))
+    objs += paper_stack(f"papers-{role}", polar(108, 1.08, DESK_TOP), 18, 3 + rnd % 3)
+    objs += book_stack(
+        f"books-{role}",
+        polar(36, 1.2, DESK_TOP),
+        30,
+        ("#ef4444", "#3b82f6", "#f59e0b")[: 2 + rnd % 2],
     )
-    objs.append(
-        sphere(
-            f"figurehead-{role}",
-            0.05,
-            (sx + 0.22, sy + 0.12, 0.95),
-            mat("figskin", "#f6d2b8", 0.5),
-        )
-    )
+    objs += pencil_cup(f"pens-{role}", polar(72, 1.06, DESK_TOP))
     for i, col in enumerate(("#fde047", "#f9a8d4", "#86efac")):
-        a_ = math.radians(90)
         objs.append(
             box(
                 f"sticky{i}-{role}",
                 (0.07, 0.006, 0.07),
-                (
-                    math.cos(a_) * 1.26 - 0.36 + i * 0.08,
-                    math.sin(a_) * 1.26 - 0.035,
-                    0.95 + (i % 2) * 0.05,
-                ),
+                (-0.42 + i * 0.08, 1.205, 0.97 + (i % 2) * 0.05),
                 mat(f"sticky{i}", col, 0.8),
                 rot=(0, (i - 1) * 0.15, 0),
                 bev=0,
             )
         )
-    for i, col in enumerate(("#ef4444", "#3b82f6", "#f59e0b")):
-        objs.append(
-            box(
-                f"book{i}-{role}",
-                (0.2, 0.28, 0.035),
-                (
-                    math.cos(math.radians(40)) * 1.18,
-                    math.sin(math.radians(40)) * 1.18,
-                    0.85 + i * 0.037,
-                ),
-                mat(f"book{i}", col, 0.7),
-                rot=(0, 0, 0.5 + i * 0.12),
-                bev=0.004,
-            )
+    # cabinets at both console ends, a bin on the floor
+    cab_r, top_r = cabinet(f"cabR-{role}", 8, 1.22)
+    cab_l, top_l = cabinet(f"cabL-{role}", 172, 1.22)
+    objs += cab_r + cab_l
+    bx, by, _ = polar(222, 1.4)
+    objs.append(
+        cyl(
+            f"bin-{role}",
+            0.11,
+            0.26,
+            (bx, by, 0.29),
+            mat("bin", "#4a5368", 0.5),
+            r2=0.13,
         )
-    objs += role_props(role, spec)
+    )
+    objs += role_props(role, spec, screens_glow, top_l, top_r)
     return objs
+
+
+def mix_hex(a, b, t):
+    ca = [int(a.lstrip("#")[i : i + 2], 16) for i in (0, 2, 4)]
+    cb = [int(b.lstrip("#")[i : i + 2], 16) for i in (0, 2, 4)]
+    return "#" + "".join(f"{round(x + (y - x) * t):02x}" for x, y in zip(ca, cb))
 
 
 def front_desk(role, spec, screens_glow):
     """A small curved desk in front of the character with the keyboard, mouse and mug."""
     color = spec["color"]
-    wood = mat("wood", "#c9a27a", 0.45, coat=0.2)
-    white = mat("deskwhite", "#e9edf3", 0.4)
+    wood = mat(*WOOD, coat=0.2)
+    body = mat(*DESK_BODY)
     led = mat(
         f"led-{role}", color, 0.3, emit=color, strength=6 if screens_glow > 2 else 2
     )
     objs = []
     objs.append(arc_slab(f"front-top-{role}", 0.5, 0.92, 232, 308, 0.7, 0.74, wood))
-    objs.append(arc_slab(f"front-body-{role}", 0.84, 0.92, 234, 306, 0.16, 0.7, white))
+    objs.append(arc_slab(f"front-body-{role}", 0.84, 0.92, 234, 306, 0.16, 0.7, body))
     objs.append(
         arc_slab(f"front-led-{role}", 0.92, 0.93, 236, 304, 0.6, 0.62, led, bev=0)
     )
@@ -1132,75 +1478,82 @@ def front_desk(role, spec, screens_glow):
             scale=(1, 1.5, 0.6),
         )
     )
-    mug = mat(f"mug-{role}", color, 0.35, coat=0.5)
-    objs.append(cyl(f"mug-{role}", 0.045, 0.1, (-0.36, -0.56, 0.79), mug, bev=0.004))
-    objs.append(
-        torus(
-            f"mughandle-{role}",
-            0.03,
-            0.009,
-            (-0.41, -0.56, 0.79),
-            mug,
-            rot=(math.pi / 2, 0, 0),
-            minor=6,
-        )
-    )
+    objs += mug_at(f"mug-{role}", (-0.36, -0.56, 0.74), color)
     return objs
 
 
-def role_props(role, spec):
+def role_props(role, spec, glow, top_l, top_r):
+    """What makes each booth the Role's own, on the cabinets (top_l, top_r), the partition, the
+    desks and the floor."""
     c = spec["color"]
     objs = []
+    scr = lambda k: TEX / f"screen-{role}-{k}.png"  # noqa: E731
+    lit = 1.2 if glow > 2 else 0.5
     if role == "game-director":
         objs += monitor(
-            "wall-dir",
-            1.5,
-            0.82,
-            (0, 1.75, 1.95),
-            0,
-            TEX / "screen-game-director-1.png",
-            1.6,
-            stand=False,
+            "wall-dir", 1.5, 0.82, (0, 1.75, 2.2), 0, scr(1), 1.6, stand=False
         )
         objs.append(
             box(
                 "wall-dir-post",
-                (0.08, 0.08, 1.6),
+                (0.08, 0.08, 1.8),
                 (0, 1.8, 0.95),
                 mat("post", "#3a4358", 0.4),
                 bev=0.01,
             )
         )
-        objs.append(
-            cyl(
-                "trophy",
-                0.06,
-                0.16,
-                (0.42, -0.58, 0.82),
-                mat("gold", "#f5b942", 0.25, 1.0),
-                r2=0.03,
+        gold = mat("gold", "#f5b942", 0.25, 1.0)
+        for k, (x, h) in enumerate(((-0.08, 0.16), (0.08, 0.12))):
+            objs.append(
+                cyl(
+                    f"trophy{k}",
+                    0.05,
+                    h,
+                    (top_r[0] + x, top_r[1], top_r[2] + h / 2),
+                    gold,
+                    r2=0.025,
+                )
             )
-        )
+            objs.append(
+                sphere(
+                    f"trophycup{k}",
+                    0.06,
+                    (top_r[0] + x, top_r[1], top_r[2] + h + 0.04),
+                    gold,
+                    scale=(1, 1, 0.8),
+                )
+            )
         objs.append(
             sphere(
-                "trophy-cup",
-                0.07,
-                (0.42, -0.58, 0.95),
-                mat("gold", "#f5b942", 0.25, 1.0),
-                scale=(1, 1, 0.8),
+                "globe",
+                0.12,
+                (top_l[0], top_l[1], top_l[2] + 0.2),
+                mat("globe-desk", "#3b82f6", 0.4, coat=0.5),
             )
         )
+        objs.append(
+            cyl(
+                "globe-stand",
+                0.06,
+                0.08,
+                (top_l[0], top_l[1], top_l[2] + 0.04),
+                gold,
+            )
+        )
+        objs += poster("award", scr(2), polar(26, 1.46, 1.36), -64, 0.4, 0.3)
     if role == "game-designer":
         objs.append(
             box(
                 "corkboard",
                 (1.3, 0.04, 0.85),
-                (-0.1, 1.72, 1.8),
+                (-0.1, 1.72, 2.05),
                 image_mat("cork", TEX / "board.png", 0.0, 0.8),
                 bev=0.0,
             )
         )
         cork_uv(objs[-1])
+        objs += posts("corkboard", -0.1, 1.72, 1.7, 1.3)
+        objs += poster("levelmap", scr(0), polar(26, 1.46, 1.36), -64, 0.4, 0.3, lit)
         for i, col in enumerate(("#fde047", "#f9a8d4", "#86efac")):
             objs.append(
                 box(
@@ -1212,34 +1565,53 @@ def role_props(role, spec):
                     bev=0.0,
                 )
             )
+        for k, col in enumerate(("#ef4444", "#f8fafc", "#3b82f6")):
+            objs.append(
+                box(
+                    f"dice{k}",
+                    (0.05, 0.05, 0.05),
+                    (top_r[0] - 0.1 + k * 0.08, top_r[1] - 0.05, top_r[2] + 0.025),
+                    mat(f"dice-{col}", col, 0.3, coat=0.5),
+                    rot=(0, 0, k * 0.6),
+                    bev=0.012,
+                )
+            )
+        objs += book_stack(
+            "gameboxes",
+            (top_l[0], top_l[1], top_l[2]),
+            10,
+            ("#7c3aed", "#f97316", "#0ea5e9"),
+        )
     if role == "technical-director":
         rack = mat("rack", "#1c2232", 0.35, 0.4)
-        objs.append(box("rack", (0.42, 0.4, 1.1), (1.25, 0.95, 0.72), rack, bev=0.02))
-        for i in range(6):
+        rx, ry = top_r[0] + 0.05, top_r[1] + 0.05
+        objs.append(
+            box("rack", (0.44, 0.42, 0.75), (rx, ry, top_r[2] + 0.375), rack, bev=0.02)
+        )
+        for i in range(5):
+            on = "#818cf8" if i % 2 else "#34d399"
             objs.append(
                 box(
                     f"rackled{i}",
-                    (0.3, 0.01, 0.04),
-                    (1.25, 0.745, 0.35 + i * 0.15),
-                    mat(
-                        f"rackled{i % 2}",
-                        "#818cf8" if i % 2 else "#34d399",
-                        0.3,
-                        emit="#818cf8" if i % 2 else "#34d399",
-                        strength=5,
-                    ),
+                    (0.3, 0.01, 0.035),
+                    (rx, ry - 0.215, top_r[2] + 0.12 + i * 0.13),
+                    mat(f"rackled{i % 2}", on, 0.3, emit=on, strength=5),
                     bev=0.0,
                 )
             )
         objs += monitor(
-            "wall-tech",
-            1.1,
-            0.62,
-            (-0.15, 1.75, 1.85),
-            0,
-            TEX / "screen-technical-director-0.png",
-            1.4,
-            stand=False,
+            "wall-tech", 1.1, 0.62, (-0.15, 1.75, 2.1), 0, scr(0), 1.4, stand=False
+        )
+        objs += posts("wall-tech", -0.15, 1.75, 1.8, 1.1)
+        objs += poster("archdiagram", scr(0), polar(26, 1.46, 1.36), -64, 0.4, 0.3)
+        objs.append(
+            box(
+                "coffee",
+                (0.2, 0.18, 0.3),
+                (top_l[0], top_l[1], top_l[2] + 0.15),
+                mat("coffee", "#2b2f3a", 0.35, 0.5),
+                bev=0.02,
+            )
         )
     if role == "art-director":
         objs.append(
@@ -1262,40 +1634,103 @@ def role_props(role, spec):
                 rot=(0, math.pi / 2, 0.6),
             )
         )
+        ex, ey, _ = polar(196, 1.25)
+        along = Vector((math.cos(math.radians(20)), math.sin(math.radians(20)), 0))
         objs.append(
             box(
                 "easel-board",
-                (0.8, 0.03, 0.62),
-                (-1.15, 0.85, 1.5),
-                image_mat("easel", TEX / "screen-art-director-0.png", 0.6, 0.6),
-                rot=(math.radians(-8), 0, math.radians(40)),
+                (0.62, 0.03, 0.5),
+                (ex, ey, 1.42),
+                image_mat("easel", scr(0), 0.6, 0.6),
+                rot=(math.radians(-10), 0, math.radians(20)),
                 bev=0.0,
             )
         )
         cork_uv(objs[-1])
-        objs.append(
-            box(
-                "easel-leg",
-                (0.05, 0.05, 1.3),
-                (-1.15, 0.88, 0.8),
-                mat("easelwood", "#a0784f", 0.6),
-                rot=(0, 0, math.radians(40)),
-                bev=0.01,
+        for k, sx in enumerate((-1, 1)):
+            objs.append(
+                box(
+                    f"easel-leg{k}",
+                    (0.04, 0.04, 1.35),
+                    Vector((ex, ey, 0.82)) + along * sx * 0.2,
+                    mat("easelwood", "#a0784f", 0.6),
+                    rot=(math.radians(-6), sx * 0.12, math.radians(20)),
+                    bev=0.01,
+                )
             )
-        )
+        objs += poster("swatches", scr(1), polar(26, 1.46, 1.36), -64, 0.4, 0.3, lit)
+        for k, col in enumerate(("#f472b6", "#a78bfa", "#38bdf8", "#fbbf24")):
+            objs.append(
+                cyl(
+                    f"paint{k}",
+                    0.04,
+                    0.08,
+                    (top_r[0] - 0.12 + k * 0.08, top_r[1], top_r[2] + 0.04),
+                    mat(f"paint-{col}", col, 0.3, coat=0.4),
+                )
+            )
+        objs += figure("adfig1", (top_r[0], top_r[1] + 0.1, top_r[2]), "#f472b6")
     if role == "gameplay-engineer":
         can = mat("can", "#22c55e", 0.25, 0.8)
-        objs.append(cyl("can", 0.035, 0.12, (0.42, -0.6, 0.8), can))
+        for k in range(3):
+            objs.append(
+                cyl(
+                    f"can{k}",
+                    0.035,
+                    0.12,
+                    (0.42 - k * 0.07 * (k % 2), -0.6 + k * 0.05, 0.8),
+                    can,
+                )
+            )
         objs += monitor(
             "mon-extra-eng",
             0.5,
             0.32,
             (1.25, 0.6, 1.02),
             30,
-            TEX / "screen-gameplay-engineer-2.png",
-            1.2,
+            scr(2),
+            glow * 0.4 + 0.6,
             tilt=-4,
         )
+        tx, ty, _ = polar(332, 1.33)
+        objs.append(
+            box(
+                "tower",
+                (0.22, 0.45, 0.48),
+                (tx, ty, 0.4),
+                mat("tower", "#151925", 0.3, 0.4, coat=0.5),
+                rot=(0, 0, math.radians(-40)),
+                bev=0.015,
+            )
+        )
+        objs.append(
+            box(
+                "tower-rgb",
+                (0.012, 0.36, 0.38),
+                (tx - 0.085, ty - 0.1, 0.4),
+                mat("rgb", "#38bdf8", 0.3, emit="#a855f7", strength=4),
+                rot=(0, 0, math.radians(-40)),
+                bev=0,
+            )
+        )
+        objs.append(
+            sphere(
+                "duck",
+                0.05,
+                (top_l[0], top_l[1], top_l[2] + 0.05),
+                mat("duck", "#facc15", 0.4, coat=0.4),
+                scale=(1.2, 1, 0.9),
+            )
+        )
+        objs.append(
+            sphere(
+                "duckhead",
+                0.035,
+                (top_l[0] - 0.02, top_l[1] - 0.03, top_l[2] + 0.12),
+                mat("duck", "#facc15", 0.4, coat=0.4),
+            )
+        )
+        objs += poster("codeprint", scr(0), polar(26, 1.46, 1.36), -64, 0.4, 0.3, lit)
     if role == "qa":
         objs.append(
             box(
@@ -1321,13 +1756,47 @@ def role_props(role, spec):
             box(
                 "bugboard",
                 (0.9, 0.04, 0.6),
-                (1.0, 1.25, 1.55),
-                image_mat("bugs", TEX / "screen-qa-0.png", 1.0, 0.4),
+                (1.0, 1.25, 1.95),
+                image_mat("bugs", scr(0), 1.0, 0.4),
                 rot=(0, 0, math.radians(-35)),
                 bev=0.0,
             )
         )
         cork_uv(objs[-1])
+        for o in posts("bugboard", 0, 0, 1.68, 0.9):
+            o.location = Matrix.Rotation(math.radians(-35), 4, "Z") @ o.location
+            o.location += Vector((1.0, 1.25, 0))
+            o.rotation_euler.z = math.radians(-35)
+            objs.append(o)
+        for k in range(3):  # test devices on a stand
+            dx = top_r[0] - 0.12 + k * 0.12
+            objs.append(
+                box(
+                    f"device{k}",
+                    (0.08 + 0.03 * (k == 1), 0.012, 0.15 + 0.04 * (k == 1)),
+                    (dx, top_r[1], top_r[2] + 0.1),
+                    mat("device", "#111827", 0.3),
+                    rot=(math.radians(-15), 0, 0),
+                    bev=0.006,
+                )
+            )
+            objs.append(
+                box(
+                    f"devscreen{k}",
+                    (0.065 + 0.03 * (k == 1), 0.004, 0.13 + 0.04 * (k == 1)),
+                    (dx, top_r[1] - 0.008, top_r[2] + 0.1),
+                    mat(
+                        f"devscreen{k}",
+                        "#38bdf8",
+                        0.2,
+                        emit=("#22c55e", "#38bdf8", "#f87171")[k],
+                        strength=2.5 * lit,
+                    ),
+                    rot=(math.radians(-15), 0, 0),
+                    bev=0,
+                )
+            )
+        objs += poster("checklist", scr(1), polar(26, 1.46, 1.36), -64, 0.4, 0.3, lit)
     if role == "playtester":
         pad = mat("pad", "#2d3346", 0.4)
         objs.append(
@@ -1352,15 +1821,56 @@ def role_props(role, spec):
             )
         )
         objs += monitor(
-            "tv-play",
-            1.3,
-            0.74,
-            (0, 1.75, 1.9),
-            0,
-            TEX / "screen-playtester-1.png",
-            1.8,
-            stand=False,
+            "tv-play", 1.3, 0.74, (0, 1.75, 2.1), 0, scr(1), 1.8, stand=False
         )
+        objs += posts("tv-play", 0, 1.75, 1.75, 1.3)
+        objs.append(
+            box(
+                "console-box",
+                (0.36, 0.28, 0.08),
+                (top_r[0], top_r[1], top_r[2] + 0.04),
+                mat("consolebox", "#f1f5f9", 0.3, coat=0.4),
+                bev=0.015,
+            )
+        )
+        objs.append(
+            box(
+                "console-led",
+                (0.2, 0.01, 0.012),
+                (top_r[0], top_r[1] - 0.145, top_r[2] + 0.04),
+                mat("consoleled", c, 0.3, emit=c, strength=5),
+                bev=0,
+            )
+        )
+        objs += book_stack(
+            "gamecases",
+            polar(36, 1.2, DESK_TOP + 0.13),
+            20,
+            ("#16a34a", "#dc2626", "#2563eb"),
+        )
+        bx, by, _ = polar(196, 1.22)
+        objs.append(
+            metaball(
+                "beanbag",
+                [
+                    dict(co=(bx, by, 0.32), r=0.32, size=(1.0, 1.0, 0.6)),
+                    dict(co=(bx + 0.05, by + 0.08, 0.45), r=0.24, size=(1.0, 0.7, 0.8)),
+                ],
+                toon_mat("beanbag", "#65a30d", "#6f8a4a"),
+            )
+        )
+        for k in range(2):
+            objs.append(
+                box(
+                    f"pad2-{k}",
+                    (0.16, 0.1, 0.035),
+                    (top_l[0] - 0.06 + k * 0.1, top_l[1] + k * 0.05, top_l[2] + 0.02),
+                    pad,
+                    rot=(0, 0, 0.4 * k),
+                    bev=0.015,
+                )
+            )
+        objs += poster("gameart", scr(0), polar(26, 1.46, 1.36), -64, 0.4, 0.3, lit)
     return objs
 
 
@@ -1391,9 +1901,9 @@ def floor_mat():
     b = nt.nodes["Principled BSDF"]
     brick = nt.nodes.new("ShaderNodeTexBrick")
     brick.offset = 0.0
-    brick.inputs["Color1"].default_value = (*lin("#1e2c4b"), 1)
-    brick.inputs["Color2"].default_value = (*lin("#22325a"), 1)
-    brick.inputs["Mortar"].default_value = (*lin("#33497a"), 1)
+    brick.inputs["Color1"].default_value = (*lin("#172139"), 1)
+    brick.inputs["Color2"].default_value = (*lin("#1a2541"), 1)
+    brick.inputs["Mortar"].default_value = (*lin("#2a3b63"), 1)
     brick.inputs["Scale"].default_value = 1.0
     brick.inputs["Mortar Size"].default_value = 0.012
     brick.inputs["Brick Width"].default_value = 1.2
@@ -1401,8 +1911,8 @@ def floor_mat():
     tc = nt.nodes.new("ShaderNodeTexCoord")
     nt.links.new(tc.outputs["Object"], brick.inputs["Vector"])
     nt.links.new(brick.outputs["Color"], b.inputs["Base Color"])
-    b.inputs["Roughness"].default_value = 0.22
-    b.inputs["Coat Weight"].default_value = 0.4
+    b.inputs["Roughness"].default_value = 0.3
+    b.inputs["Coat Weight"].default_value = 0.35
     return m
 
 
@@ -1410,9 +1920,13 @@ def build_room():
     CURRENT[0] = "room"
     floor = cyl("floor", 16, 0.1, (0, 0, -0.05), floor_mat(), verts=128)
     floor.data.polygons.foreach_set("use_smooth", [False] * len(floor.data.polygons))
-    # walkway rings and spokes of light on the floor
+    # a walkway ring around the hub and a path to every pod, edged with light
+    walk = mat("walk", "#28365a", 0.55, coat=0.2)
     cyan = mat("floorline", "#38bdf8", 0.3, emit="#38bdf8", strength=2.5)
-    torus("walk-inner", 1.95, 0.02, (*HUB, 0.01), cyan, major=128, minor=6)
+    ring = arc_slab("walkway", 1.75, 2.45, 0, 360, 0.0, 0.015, walk, seg=128, bev=0)
+    ring.location = (*HUB, 0)
+    for r_ in (1.75, 2.45):
+        torus(f"walk-edge{r_}", r_, 0.016, (*HUB, 0.016), cyan, major=160, minor=6)
     torus(
         "walk-outer",
         7.6,
@@ -1425,26 +1939,33 @@ def build_room():
     for role, (x, y) in PODS.items():
         dx, dy = x - HUB[0], y - HUB[1]
         d = math.hypot(dx, dy)
-        length = d - 1.95 - POD_R - 0.1
-        mid = (
-            HUB[0] + dx / d * (1.95 + length / 2),
-            HUB[1] + dy / d * (1.95 + length / 2),
-            0.008,
+        length = d - 2.45 - POD_R - 0.05
+        rot = (0, 0, math.atan2(dy, dx) - math.pi / 2)
+        mid = Vector(
+            (
+                HUB[0] + dx / d * (2.45 + length / 2),
+                HUB[1] + dy / d * (2.45 + length / 2),
+                0.007,
+            )
         )
-        box(
+        box(f"path-{role}", (0.6, length, 0.014), mid, walk, rot=rot, bev=0)
+        side = Vector((-dy / d, dx / d, 0)) * 0.3
+        edge = mat(
             f"spoke-{role}",
-            (0.05, length, 0.01),
-            mid,
-            mat(
-                f"spoke-{role}",
-                ROLES[role]["color"],
-                0.3,
-                emit=ROLES[role]["color"],
-                strength=1.2,
-            ),
-            rot=(0, 0, math.atan2(dy, dx) - math.pi / 2),
-            bev=0,
+            ROLES[role]["color"],
+            0.3,
+            emit=ROLES[role]["color"],
+            strength=1.6,
         )
+        for sgn in (-1, 1):
+            box(
+                f"pathedge{sgn}-{role}",
+                (0.025, length, 0.016),
+                mid + side * sgn + Vector((0, 0, 0.002)),
+                edge,
+                rot=rot,
+                bev=0,
+            )
     # the back wall: panels, windows, shelves and planters
     wall = mat("wall", "#17223d", 0.6)
     trim = mat("trim", "#2b3d66", 0.4)
@@ -1499,6 +2020,53 @@ def build_room():
             rot=(0, 0, ar - math.pi / 2),
             bev=0.01,
         )
+    for k, a in enumerate((19, 33, 47, 61, 119, 133, 147, 161)):
+        ar = math.radians(a)
+        col = ("#38bdf8", "#a855f7", "#f472b6")[k % 3]
+        box(
+            f"neon{k}",
+            (0.06, 0.03, 1.8),
+            (math.cos(ar) * 9.33, math.sin(ar) * 9.33, 1.75),
+            mat(f"neon-{col}", col, 0.3, emit=col, strength=6),
+            rot=(0, 0, ar - math.pi / 2),
+            bev=0,
+        )
+    board = mat("sideboard", "#1f2a45", 0.5)
+    for a0, a1 in ((6, 72), (108, 174)):
+        arc_slab(f"sideboard{a0}", 8.75, 9.3, a0, a1, 0.0, 0.75, board, seg=48)
+        arc_slab(
+            f"sideboardtop{a0}",
+            8.72,
+            9.32,
+            a0,
+            a1,
+            0.75,
+            0.79,
+            mat(*WOOD, coat=0.2),
+            seg=48,
+        )
+    for k, a in enumerate(range(10, 172, 9)):
+        if 70 < a < 110:
+            continue
+        x, y, _ = polar(a, 9.0)
+        if k % 3 == 0:
+            plant(f"boardplant{k}", (x, y, 0.79), 1.1)
+        elif k % 3 == 1:
+            book_stack(
+                f"boardbooks{k}",
+                (x, y, 0.79),
+                a,
+                ("#ef4444", "#3b82f6", "#f59e0b", "#22c55e")[: 2 + k % 3],
+            )
+        else:
+            box(
+                f"boardbox{k}",
+                (0.4, 0.3, 0.3),
+                (x, y, 0.94),
+                mat("cardboard", "#b98a5a", 0.8),
+                rot=(0, 0, math.radians(a - 90)),
+                bev=0.01,
+            )
     for k, a in enumerate(range(6, 178, 12)):
         ar = math.radians(a)
         plant(f"wallplant{k}", (math.cos(ar) * 9.6, math.sin(ar) * 9.6, 3.6), 1.6)
@@ -1546,7 +2114,9 @@ def build_room():
             ((sx * 8.0, 4.4), (sx * 8.6, 1.0), (sx * 8.3, -3.4))
         ):
             plant(f"bigplant{sx}{k}", (px_, py_, 0), 2.6, pot="#d9dee8")
-    # the hub: stepped base, ring light, glass dome, wire globe and an orbit ring
+    lounge(-4.85, -4.65, 35)
+    arcade(4.85, -4.65, -35)
+    # the hub: stepped base, ring light and glass dome
     hx, hy = HUB
     cyl(
         "hub-base",
@@ -1562,15 +2132,28 @@ def build_room():
         1.22,
         0.22,
         (hx, hy, 0.17),
-        mat("hubstep", "#7d8cab", 0.35, coat=0.3),
+        mat("hubstep", "#2c3c63", 0.35, coat=0.3),
         verts=96,
         bev=0.02,
     )
+    for k in range(16):
+        arc_slab(
+            f"hub-block{k}",
+            1.16,
+            1.42,
+            k * 22.5 + 0.8,
+            k * 22.5 + 21.7,
+            0.12,
+            0.34,
+            mat("hubblock", "#46536f", 0.4, coat=0.3),
+            seg=6,
+            bev=0.01,
+        ).location = (hx, hy, 0)
     torus(
         "hub-ring",
-        1.24,
-        0.03,
-        (hx, hy, 0.28),
+        1.29,
+        0.025,
+        (hx, hy, 0.345),
         mat("hubring", "#38bdf8", 0.3, emit="#38bdf8", strength=6),
         major=128,
         minor=8,
@@ -1584,70 +2167,211 @@ def build_room():
         major=128,
         minor=8,
     )
-    dome = sphere("hub-dome", 1.0, (hx, hy, 0.28), dome_mat(), seg=64)
+    dome = sphere("hub-dome", 1.12, (hx, hy, 0.3), dome_mat(), seg=64)
     bm = bmesh.new()
     bm.from_mesh(dome.data)
     bmesh.ops.delete(bm, geom=[v for v in bm.verts if v.co.z < -0.02], context="VERTS")
     bm.to_mesh(dome.data)
     bm.free()
-    globe = bpy.data.objects.new("hub-globe", bpy.data.meshes.new("hub-globe"))
-    bm = bmesh.new()
-    bmesh.ops.create_icosphere(bm, subdivisions=2, radius=0.58)
-    bm.to_mesh(globe.data)
-    bm.free()
-    globe.location = (hx, hy, 1.05)
-    link(globe, mat("globe", "#7dd3fc", 0.3, emit="#7dd3fc", strength=4))
-    wf = globe.modifiers.new("wire", "WIREFRAME")
-    wf.thickness = 0.012
+    # a soft core low in the dome; the page writes the Goal over the clear upper part
     sphere(
         "hub-core",
-        0.3,
-        (hx, hy, 1.05),
-        mat("core", "#1d4ed8", 0.3, emit="#2563eb", strength=1.2),
+        0.34,
+        (hx, hy, 0.55),
+        mat("core", "#1d4ed8", 0.3, emit="#2563eb", strength=1.5),
         seg=32,
     )
-    torus(
-        "hub-orbit",
-        0.8,
-        0.012,
-        (hx, hy, 1.05),
-        mat("orbit", "#a5f3fc", 0.3, emit="#a5f3fc", strength=8),
-        rot=(math.radians(72), math.radians(12), 0),
-        major=128,
-        minor=6,
-    )
     light = bpy.data.lights.new("hub-light", "POINT")
-    light.color, light.energy, light.shadow_soft_size = lin("#7dd3fc"), 220, 0.8
+    light.color, light.energy, light.shadow_soft_size = lin("#4fb4ff"), 160, 0.8
     lo = bpy.data.objects.new("hub-light", light)
     lo.location = (hx, hy, 1.2)
     link(lo)
 
 
+def lounge(x, y, yaw):
+    """A sofa, a coffee table, a rug, a floor lamp and a plant, turned by yaw toward the hub."""
+    CURRENT[0] = "room"
+    objs = [
+        cyl(
+            "lounge-rug", 1.1, 0.012, (0, 0.1, 0.006), mat("loungerug", "#2a3555", 0.95)
+        )
+    ]
+    fab = mat("sofa", "#2f7a86", 0.85)
+    objs.append(box("sofa-seat", (1.7, 0.75, 0.38), (0, 0.55, 0.22), fab, bev=0.06))
+    objs.append(box("sofa-back", (1.7, 0.22, 0.5), (0, 0.85, 0.55), fab, bev=0.06))
+    for sx in (-1, 1):
+        objs.append(
+            box(
+                f"sofa-arm{sx}",
+                (0.2, 0.75, 0.5),
+                (sx * 0.85, 0.55, 0.32),
+                fab,
+                bev=0.06,
+            )
+        )
+        objs.append(
+            box(
+                f"cushion{sx}",
+                (0.38, 0.14, 0.34),
+                (sx * 0.5, 0.68, 0.55),
+                mat(f"cushion{sx}", "#f2c14e" if sx < 0 else "#f472b6", 0.8),
+                rot=(math.radians(-15), 0, sx * 0.15),
+                bev=0.05,
+            )
+        )
+    objs.append(
+        cyl("table-top", 0.42, 0.04, (0, -0.35, 0.42), mat(*WOOD, coat=0.2), bev=0.01)
+    )
+    objs.append(
+        cyl("table-leg", 0.06, 0.4, (0, -0.35, 0.2), mat("post", "#3a4358", 0.4))
+    )
+    objs += mug_at("table-mug", (0.12, -0.3, 0.44), "#f59e0b")
+    objs += book_stack("table-books", (-0.15, -0.42, 0.44), 15, ("#3b82f6", "#ef4444"))
+    objs.append(
+        cyl(
+            "flamp-pole",
+            0.02,
+            1.6,
+            (1.15, 0.85, 0.8),
+            mat("lamp", "#2b3142", 0.35, 0.5),
+        )
+    )
+    objs.append(
+        cyl(
+            "flamp-shade",
+            0.2,
+            0.25,
+            (1.15, 0.85, 1.65),
+            mat("lampshade", "#fff3d6", 0.6, emit="#ffd9a0", strength=4),
+            r2=0.13,
+        )
+    )
+    lt = bpy.data.lights.new("flamp", "POINT")
+    lt.color, lt.energy, lt.shadow_soft_size = lin("#ffc98a"), 120, 0.2
+    lo = bpy.data.objects.new("flamp", lt)
+    lo.location = (1.15, 0.85, 1.5)
+    link(lo)
+    objs.append(lo)
+    objs += plant("lounge-plant", (-1.25, 0.9, 0), 2.0)
+    place([o for o in objs if o.parent is None], (x, y), yaw)
+
+
+def arcade(x, y, yaw):
+    """Two arcade cabinets, a low shelf of game boxes and a plant, turned by yaw toward the hub."""
+    CURRENT[0] = "room"
+    objs = [
+        cyl(
+            "arcade-rug", 1.1, 0.012, (0, 0.1, 0.006), mat("loungerug", "#2a3555", 0.95)
+        )
+    ]
+    for k, (ox, side, scr) in enumerate(
+        ((-0.45, "#a855f7", "game"), (0.45, "#22d3ee", "game"))
+    ):
+        body = mat("cabinet", "#161a26", 0.4, coat=0.4)
+        objs.append(box(f"arcade{k}", (0.7, 0.7, 1.5), (ox, 0.5, 0.75), body, bev=0.03))
+        for sx in (-1, 1):
+            objs.append(
+                box(
+                    f"arcade{k}-side{sx}",
+                    (0.012, 0.66, 1.4),
+                    (ox + sx * 0.356, 0.5, 0.75),
+                    mat(f"arcadeside-{side}", side, 0.4, emit=side, strength=1.5),
+                    bev=0,
+                )
+            )
+        objs += monitor(
+            f"arcade{k}-scr",
+            0.5,
+            0.38,
+            (ox, 0.13, 1.2),
+            0,
+            TEX / "screen-playtester-0.png",
+            2.5,
+            tilt=-18,
+            stand=False,
+        )
+        objs.append(
+            box(
+                f"arcade{k}-marquee",
+                (0.62, 0.05, 0.16),
+                (ox, 0.16, 1.55),
+                mat(f"marquee-{side}", side, 0.3, emit=side, strength=5),
+                bev=0.01,
+            )
+        )
+        objs.append(
+            box(
+                f"arcade{k}-panel",
+                (0.66, 0.3, 0.06),
+                (ox, 0.05, 0.92),
+                body,
+                rot=(math.radians(-12), 0, 0),
+                bev=0.01,
+            )
+        )
+        for b, col in enumerate(("#ef4444", "#facc15", "#22c55e")):
+            objs.append(
+                sphere(
+                    f"arcade{k}-btn{b}",
+                    0.025,
+                    (ox - 0.05 + b * 0.08, -0.02, 0.96),
+                    mat(f"btn-{col}", col, 0.3, emit=col, strength=2),
+                    seg=12,
+                )
+            )
+    objs.append(
+        box("gameshelf", (1.2, 0.35, 0.6), (-1.5, 0.3, 0.3), mat(*DESK_BODY), bev=0.012)
+    )
+    for b, col in enumerate(("#16a34a", "#dc2626", "#2563eb", "#f59e0b", "#7c3aed")):
+        h = 0.22 + (b % 3) * 0.03
+        objs.append(
+            box(
+                f"gamebox{b}",
+                (0.05, 0.22, h),
+                (-1.85 + b * 0.16, 0.3, 0.6 + h / 2),
+                mat(f"book-{col}", col, 0.7),
+                bev=0.004,
+            )
+        )
+    objs += plant("arcade-plant", (1.35, 0.6, 0), 2.0)
+    place([o for o in objs if o.parent is None], (x, y), yaw)
+
+
 def dome_mat():
+    """Glowing glass: a deep blue body brightening to a cyan rim, a faint reflection, see-through."""
     m = bpy.data.materials.new("dome")
     m.use_nodes = True
     nt = m.node_tree
     nt.nodes.clear()
-    out = nt.nodes.new("ShaderNodeOutputMaterial")
-    lw = nt.nodes.new("ShaderNodeLayerWeight")
-    lw.inputs["Blend"].default_value = 0.35
-    em = nt.nodes.new("ShaderNodeEmission")
-    em.inputs["Color"].default_value = (*lin("#3aa0ff"), 1)
-    em.inputs["Strength"].default_value = 1.1
-    tr = nt.nodes.new("ShaderNodeBsdfTransparent")
-    tr.inputs["Color"].default_value = (*lin("#bfe9ff"), 1)
-    mix = nt.nodes.new("ShaderNodeMixShader")
-    gl = nt.nodes.new("ShaderNodeBsdfGlossy")
-    gl.inputs["Roughness"].default_value = 0.05
-    add = nt.nodes.new("ShaderNodeAddShader")
-    nt.links.new(lw.outputs["Facing"], mix.inputs["Fac"])
-    nt.links.new(tr.outputs["BSDF"], mix.inputs[1])
-    nt.links.new(em.outputs["Emission"], mix.inputs[2])
-    nt.links.new(mix.outputs["Shader"], add.inputs[0])
-    gm = nt.nodes.new("ShaderNodeMixShader")
-    gm.inputs["Fac"].default_value = 0.92
-    nt.links.new(gl.outputs["BSDF"], gm.inputs[1])
-    nt.links.new(tr.outputs["BSDF"], gm.inputs[2])
+    n = nt.nodes
+    lw = n.new("ShaderNodeLayerWeight")
+    lw.inputs["Blend"].default_value = 0.3
+    col = n.new("ShaderNodeMix")
+    col.data_type = "RGBA"
+    col.inputs["A"].default_value = (*lin("#0b3a9e"), 1)
+    col.inputs["B"].default_value = (*lin("#3fb0ff"), 1)
+    nt.links.new(lw.outputs["Facing"], col.inputs["Factor"])
+    power = n.new("ShaderNodeMapRange")  # 0.3 in the middle up to 1.8 at the rim
+    power.inputs["To Min"].default_value, power.inputs["To Max"].default_value = (
+        0.3,
+        1.8,
+    )
+    nt.links.new(lw.outputs["Facing"], power.inputs["Value"])
+    em = n.new("ShaderNodeEmission")
+    nt.links.new(col.outputs["Result"], em.inputs["Color"])
+    nt.links.new(power.outputs["Result"], em.inputs["Strength"])
+    tr = n.new("ShaderNodeBsdfTransparent")
+    tr.inputs["Color"].default_value = (*lin("#3d7fd6"), 1)
+    gl = n.new("ShaderNodeBsdfGlossy")
+    gl.inputs["Roughness"].default_value = 0.06
+    glass = n.new("ShaderNodeMixShader")
+    glass.inputs["Fac"].default_value = 0.06
+    nt.links.new(tr.outputs["BSDF"], glass.inputs[1])
+    nt.links.new(gl.outputs["BSDF"], glass.inputs[2])
+    add = n.new("ShaderNodeAddShader")
+    nt.links.new(glass.outputs["Shader"], add.inputs[0])
+    nt.links.new(em.outputs["Emission"], add.inputs[1])
+    out = n.new("ShaderNodeOutputMaterial")
     nt.links.new(add.outputs["Shader"], out.inputs["Surface"])
     return m
 
@@ -1662,35 +2386,44 @@ def yaw_of(role):
 
 
 POD_OBJS = {}
+IDLE_GLOW, BUSY_GLOW = 1.1, 4.0
+CHAIRS = {"game-director": "exec", "playtester": "gaming"}
+TURN = {  # degrees the character, chair and front desk turn toward a side monitor
+    "game-designer": -24,
+    "technical-director": 24,
+    "art-director": -20,
+    "gameplay-engineer": 20,
+    "qa": 14,
+    "playtester": -10,
+}
 
 
 def build_pod(role, pose, glow):
     CURRENT[0] = f"pod-{role}"
     spec = ROLES[role]
     near = (
-        chair(role, spec["color"])
+        chair(role, spec["color"], CHAIRS.get(role, "task"))
         + front_desk(role, spec, glow)
         + character(role, spec, pose)
     )
     pod = desk_pod(role, spec, glow)
     bpy.context.view_layer.update()  # matrix_world is stale until the scene updates
+    turn = Matrix.Rotation(math.radians(TURN.get(role, 0)), 4, "Z")
     for o in near:
         if o.parent is None:
-            o.matrix_world = Matrix.Scale(CHAR_SCALE, 4) @ o.matrix_world
+            o.matrix_world = turn @ Matrix.Scale(CHAR_SCALE, 4) @ o.matrix_world
     for o in pod:  # role props lying on the front desk move up with it
         if (
             o.parent is None
             and Vector(o.location[:2]).length < 0.95
             and o.location.z > 0.5
         ):
-            o.matrix_world = Matrix.Scale(CHAR_SCALE, 4) @ o.matrix_world
+            o.matrix_world = turn @ Matrix.Scale(CHAR_SCALE, 4) @ o.matrix_world
     objs = pod + near
     roots = [o for o in objs if o.parent is None]
     place(roots, PODS[role], yaw_of(role))
     POD_OBJS[role] = objs
-    if (
-        glow > 2
-    ):  # a spotlight on the working desk, and light from the screens on the face
+    if glow > 2:  # a spotlight on the working desk
         sp = bpy.data.lights.new(f"spot-{role}", "SPOT")
         sp.color, sp.energy, sp.spot_size, sp.spot_blend, sp.shadow_soft_size = (
             lin("#fff4e0"),
@@ -1702,17 +2435,20 @@ def build_pod(role, pose, glow):
         so = bpy.data.objects.new(f"spot-{role}", sp)
         so.location = (*PODS[role], 4.2)
         link(so)
-        lt = bpy.data.lights.new(f"screenlight-{role}", "AREA")
-        lt.color, lt.energy, lt.size = lin(spec["color"]), 120, 1.2
-        lo = bpy.data.objects.new(f"screenlight-{role}", lt)
-        m = Matrix.Translation((*PODS[role], 0)) @ Matrix.Rotation(
-            math.radians(yaw_of(role)), 4, "Z"
-        )
-        lo.matrix_world = m @ (
-            Matrix.Translation((0, 0.9, 1.5))
-            @ Euler((math.radians(-70), 0, 0)).to_matrix().to_4x4()
-        )
-        link(lo)
+    # light from the monitor wall onto the desk and face: cool when idle, the Role colour at work
+    lt = bpy.data.lights.new(f"screenlight-{role}", "AREA")
+    lt.color, lt.energy, lt.size = (
+        (lin(spec["color"]), 120, 1.2) if glow > 2 else (lin("#bcd7ff"), 45, 1.2)
+    )
+    lo = bpy.data.objects.new(f"screenlight-{role}", lt)
+    m = Matrix.Translation((*PODS[role], 0)) @ Matrix.Rotation(
+        math.radians(yaw_of(role)), 4, "Z"
+    )
+    lo.matrix_world = m @ (
+        Matrix.Translation((0, 0.9, 1.5))
+        @ Euler((math.radians(-70), 0, 0)).to_matrix().to_4x4()
+    )
+    link(lo)
 
 
 def remove_pod(role):
@@ -1748,18 +2484,26 @@ def build_lights():
         *lin("#26324f"),
         1,
     )
-    world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.4
+    world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.5
     scene.world = world
     sun = bpy.data.lights.new("sun", "SUN")
-    sun.energy, sun.angle, sun.color = 2.8, math.radians(8), lin("#ffe2bd")
+    sun.energy, sun.angle, sun.color = 2.4, math.radians(10), lin("#ffe2bd")
     so = bpy.data.objects.new("sun", sun)
     so.rotation_euler = (math.radians(40), math.radians(-24), math.radians(-35))
     scene.collection.objects.link(so)
     fill = bpy.data.lights.new("fill", "AREA")
-    fill.energy, fill.size, fill.color = 2200, 16, lin("#cfe0ff")
+    fill.energy, fill.size, fill.color = 2000, 16, lin("#cfe0ff")
     fo = bpy.data.objects.new("fill", fill)
     fo.location = (0, -2, 11)
     scene.collection.objects.link(fo)
+    rim = bpy.data.lights.new("rim", "AREA")
+    rim.energy, rim.size, rim.color = 2500, 12, lin("#8fb4ff")
+    ro = bpy.data.objects.new("rim", rim)
+    ro.location = (0, 13, 6)
+    ro.rotation_euler = (
+        (Vector((0, 0, 0)) - ro.location).to_track_quat("-Z", "Y").to_euler()
+    )
+    scene.collection.objects.link(ro)
 
 
 def setup_render(samples):
@@ -1789,7 +2533,7 @@ def setup_render(samples):
             break
         except TypeError:
             pass
-    vs.exposure = 0.7
+    vs.exposure = 0.8
 
 
 def px(cam, co):
@@ -1851,9 +2595,69 @@ def layout(cam):
     return out
 
 
+def lines_mat():
+    """Camera-space normal (red, green) and depth (blue) as flat colour, for edge detection."""
+    m = bpy.data.materials.new("lines-pass")
+    m.use_nodes = True
+    nt = m.node_tree
+    nt.nodes.clear()
+    geo = nt.nodes.new("ShaderNodeNewGeometry")
+    vt = nt.nodes.new("ShaderNodeVectorTransform")
+    vt.vector_type, vt.convert_from, vt.convert_to = "NORMAL", "WORLD", "CAMERA"
+    nt.links.new(geo.outputs["Normal"], vt.inputs["Vector"])
+    sep = nt.nodes.new("ShaderNodeSeparateXYZ")
+    nt.links.new(vt.outputs["Vector"], sep.inputs["Vector"])
+    comb = nt.nodes.new("ShaderNodeCombineXYZ")
+    for axis in ("X", "Y"):
+        half = nt.nodes.new("ShaderNodeMath")
+        half.operation = "MULTIPLY_ADD"
+        half.inputs[1].default_value = half.inputs[2].default_value = 0.5
+        nt.links.new(sep.outputs[axis], half.inputs[0])
+        nt.links.new(half.outputs[0], comb.inputs[axis])
+    cam = nt.nodes.new("ShaderNodeCameraData")
+    depth = nt.nodes.new("ShaderNodeMath")
+    depth.operation, depth.use_clamp = "MULTIPLY_ADD", True
+    depth.inputs[1].default_value, depth.inputs[2].default_value = 1 / 24, -14 / 24
+    nt.links.new(cam.outputs["View Z Depth"], depth.inputs[0])
+    nt.links.new(depth.outputs[0], comb.inputs["Z"])
+    em = nt.nodes.new("ShaderNodeEmission")
+    nt.links.new(comb.outputs["Vector"], em.inputs["Color"])
+    out = nt.nodes.new("ShaderNodeOutputMaterial")
+    nt.links.new(em.outputs["Emission"], out.inputs["Surface"])
+    return m
+
+
+def render_lines(path):
+    """Render the line pass with the current border and holdouts, then restore the settings."""
+    c, vs, r = scene.cycles, scene.view_settings, scene.render
+    keep = (c.samples, c.use_denoising, c.max_bounces, vs.view_transform, vs.look)
+    keep += (vs.exposure, r.film_transparent)
+    vl = bpy.context.view_layer
+    if LINES[0] is None:
+        LINES[0] = lines_mat()
+    vl.material_override = LINES[0]
+    c.samples, c.use_denoising, c.max_bounces = 8, False, 0
+    vs.view_transform, vs.look, vs.exposure = "Standard", "None", 0.0
+    r.film_transparent = True
+    render_to(path)
+    vl.material_override = None
+    c.samples, c.use_denoising, c.max_bounces, vs.view_transform, vs.look = keep[:5]
+    vs.exposure, r.film_transparent = keep[5:]
+
+
+LINES = [None]
+
+
 def render_to(path):
     scene.render.filepath = str(path)
     bpy.ops.render.render(write_still=True)
+
+
+def only_pod(keep):
+    """Leave every collection except `keep` out of the render (None: render everything), so
+    nothing in front of a portrait camera can hide the face."""
+    for lc in bpy.context.view_layer.layer_collection.children:
+        lc.exclude = keep is not None and lc.name != f"pod-{keep}"
 
 
 def set_holdout(keep):
@@ -1872,7 +2676,7 @@ def debug_char(role):
     build_pod(
         role,
         "busy" if "busy" in argv[3:] else "idle",
-        3.2 if "busy" in argv[3:] else 0.7,
+        BUSY_GLOW if "busy" in argv[3:] else IDLE_GLOW,
     )
     cam = bpy.data.cameras.new("cam")
     cam.lens = 50
@@ -1898,17 +2702,18 @@ def main():
     build_lights()
     build_room()
     for role in PODS:
-        build_pod(role, "idle", 0.7)
+        build_pod(role, "idle", IDLE_GLOW)
     cam = build_camera()
     lay = layout(cam)
     (OUT / "layout.json").write_text(json.dumps(lay, indent=1))
     if ONLY in ("all", "base"):
         render_to(OUT / "office.png")
+        render_lines(OUT / "lines-office.png")
     if ONLY in ("all", "busy"):
         scene.render.film_transparent = True
         for role in PODS:
             remove_pod(role)
-            build_pod(role, "busy", 3.2)
+            build_pod(role, "busy", BUSY_GLOW)
             box_ = bbox_px(cam, POD_OBJS[role], pad=24)
             lay["roles"][role]["busy"] = box_
             r = scene.render
@@ -1920,9 +2725,10 @@ def main():
             )
             set_holdout(role)
             render_to(OUT / f"busy-{role}.png")
+            render_lines(OUT / f"lines-busy-{role}.png")
             set_holdout(None)
             remove_pod(role)
-            build_pod(role, "idle", 0.7)
+            build_pod(role, "idle", IDLE_GLOW)
         scene.render.use_border = False
         scene.render.film_transparent = False
         (OUT / "layout.json").write_text(json.dumps(lay, indent=1))
@@ -1940,18 +2746,14 @@ def portraits(main_cam):
     scene.collection.objects.link(obj)
     scene.camera = obj
     for role, (x, y) in PODS.items():
-        yaw = math.radians(yaw_of(role))
-        head = Vector((x, y, HEAD_Z - 0.02))
+        yaw = math.radians(yaw_of(role) + TURN.get(role, 0))
+        head = Vector((x, y, (HEAD_Z - 0.03) * CHAR_SCALE - 0.08))
         fwd = Vector((math.sin(yaw), -math.cos(yaw), 0))
-        obj.location = head + fwd * 4.2 + Vector((0, 0, 0.5))
-        obj.rotation_euler = (
-            (head + Vector((0, 0, -0.05)) - obj.location)
-            .to_track_quat("-Z", "Y")
-            .to_euler()
-        )
-        set_holdout(role)
+        obj.location = head + fwd * 2.6 + Vector((0, 0, 0.35))
+        obj.rotation_euler = (head - obj.location).to_track_quat("-Z", "Y").to_euler()
+        only_pod(role)
         render_to(OUT / f"face-{role}.png")
-    set_holdout(None)
+    only_pod(None)
     scene.camera = main_cam
     scene.render.resolution_x, scene.render.resolution_y = W, H
 

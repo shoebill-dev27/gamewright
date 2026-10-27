@@ -1,5 +1,5 @@
-"""Build the virtual office's picture assets: textures (PIL), the 3D scene (Blender), then glow and
-WebP conversion.
+"""Build the virtual office's picture assets: textures (PIL), the 3D scene (Blender), then the 2D
+finish (illustration lines, glow, colour grade) and WebP conversion.
 
     python3 scripts/office/make_assets.py [--preview] [--blender PATH]
 
@@ -17,7 +17,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-from PIL import Image, ImageChops, ImageDraw, ImageFilter
+import numpy as np
+from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter
 
 HERE = Path(__file__).resolve().parent
 ASSETS = HERE / "assets"
@@ -30,8 +31,10 @@ ROLES = {
         eyes="#5a3a26",
         style="neat",
         shirt="#2b3a63",
+        outfit="blazer",
+        inner="#f4f6fa",
         accent="#f5b942",
-        skin="#f6d2b8",
+        skin="#f5c8a8",
         acc="tie",
         mouth="smile",
     ),
@@ -40,9 +43,11 @@ ROLES = {
         hair="#8a5532",
         eyes="#b8742c",
         style="fluffy",
-        shirt="#efe6d2",
+        shirt="#d39a55",
+        outfit="cardigan",
+        inner="#f3ead6",
         accent="#34d399",
-        skin="#f7d5bd",
+        skin="#f6cbad",
         acc="scarf",
         mouth="open",
     ),
@@ -52,8 +57,10 @@ ROLES = {
         eyes="#56607a",
         style="spiky",
         shirt="#5b4a9a",
+        outfit="sweater",
+        inner="#e5e7eb",
         accent="#818cf8",
-        skin="#efcaae",
+        skin="#eec0a0",
         acc="glasses",
         mouth="flat",
     ),
@@ -62,9 +69,11 @@ ROLES = {
         hair="#f39ac2",
         eyes="#8b4fc9",
         style="long",
-        shirt="#fbf6f1",
+        shirt="#a993dd",
+        outfit="blouse",
+        inner="#fff7f0",
         accent="#f472b6",
-        skin="#f9dccb",
+        skin="#f7cfb8",
         acc="beret",
         mouth="smile",
     ),
@@ -73,9 +82,11 @@ ROLES = {
         hair="#26324d",
         eyes="#2f7fd1",
         style="messy",
-        shirt="#22426e",
+        shirt="#2d64a8",
+        outfit="hoodie",
+        inner="#38bdf8",
         accent="#38bdf8",
-        skin="#f1ccb2",
+        skin="#efc2a4",
         acc="headphones",
         mouth="smile",
     ),
@@ -85,8 +96,10 @@ ROLES = {
         eyes="#6b4630",
         style="short",
         shirt="#f08a1c",
+        outfit="tee",
+        inner="#2f3a4f",
         accent="#f59e0b",
-        skin="#f3cfb3",
+        skin="#f1c4a5",
         acc="glasses",
         mouth="flat",
     ),
@@ -95,9 +108,11 @@ ROLES = {
         hair="#6a4430",
         eyes="#3f9b54",
         style="cap",
-        shirt="#eef2f6",
+        shirt="#9aa6b8",
+        outfit="hoodie",
+        inner="#a3e635",
         accent="#84cc16",
-        skin="#f4d1b6",
+        skin="#f2c6a7",
         acc="cap",
         mouth="open",
     ),
@@ -128,6 +143,13 @@ def face(role, spec, size=1024):
     def at(x, z):  # head units (x right, z up) -> pixels
         return u + x * u, u - z * u
 
+    shade = Image.new("RGBA", (s, s), (0, 0, 0, 0))
+    cx, cy = at(0, 1.0)
+    ImageDraw.Draw(shade).ellipse(
+        [cx - 1.15 * u, cy - 0.62 * u, cx + 1.15 * u, cy + 0.62 * u],
+        fill=rgb("#d9978a", 150),
+    )
+    im.alpha_composite(shade.filter(ImageFilter.GaussianBlur(u * 0.07)))
     blush = Image.new("RGBA", (s, s), (0, 0, 0, 0))
     bd = ImageDraw.Draw(blush)
     for sx in (-1, 1):
@@ -606,16 +628,65 @@ def bloom(im, strength=0.3, radius=14, threshold=225):
     return out
 
 
+def ink(im, lines, color=(26, 31, 46), strength=0.7):
+    """Illustration lines where the line pass shows a crease (normal) or a step (depth)."""
+    a = np.asarray(lines.convert("RGBA"), dtype=np.float32) / 255
+
+    def diff(x):  # central difference, the larger of the two directions
+        g = np.zeros_like(x)
+        g[1:-1] = np.abs(x[2:] - x[:-2])
+        h = np.zeros_like(x)
+        h[:, 1:-1] = np.abs(x[:, 2:] - x[:, :-2])
+        return np.maximum(g, h)
+
+    crease = np.clip((diff(a[..., 0]) + diff(a[..., 1]) - 0.08) / 0.12, 0, 1)
+    step = np.clip((diff(a[..., 2]) - 0.007) / 0.012, 0, 1)
+    edge = np.maximum(np.maximum(crease, step), np.clip(diff(a[..., 3]) * 2, 0, 1))
+    e = Image.fromarray((edge * 255 * strength).astype(np.uint8))
+    # thick enough to survive the page showing the picture at about half size
+    e = e.filter(ImageFilter.MaxFilter(3)).filter(ImageFilter.GaussianBlur(0.8))
+    e = np.asarray(e, dtype=np.float32) / 255
+    rgba = np.asarray(im.convert("RGBA"), dtype=np.float32)
+    rgba[..., :3] = rgba[..., :3] * (1 - e[..., None]) + np.array(color) * e[..., None]
+    rgba[..., 3] = np.maximum(rgba[..., 3], e * 255)
+    return Image.fromarray(rgba.astype(np.uint8), "RGBA")
+
+
+def grade(im):
+    """The 2D finish: a gentle S-curve, cool shadows, warm highlights, a little sharpening."""
+    luts = []
+    for ch, (lo, hi) in enumerate(((-0.02, 0.02), (0.0, 0.005), (0.035, -0.02))):
+        lut = []
+        for v in range(256):
+            x = v / 255
+            y = 0.7 * x + 0.3 * x * x * (3 - 2 * x)
+            y += lo * (1 - x) ** 2 + hi * x * x
+            lut.append(max(0, min(255, round(y * 255))))
+        luts += lut
+    rgb_, alpha = im.convert("RGB"), im.convert("RGBA").getchannel("A")
+    rgb_ = ImageEnhance.Color(rgb_.point(luts)).enhance(1.06)
+    rgb_ = rgb_.filter(ImageFilter.UnsharpMask(radius=1.4, percent=30, threshold=2))
+    rgb_.putalpha(alpha)
+    return rgb_
+
+
+def finish(raw, name):
+    im = Image.open(raw / f"{name}.png")
+    if (raw / f"lines-{name}.png").exists():
+        im = ink(im, Image.open(raw / f"lines-{name}.png"))
+    return grade(bloom(im))
+
+
 def post(raw, preview):
     ASSETS.mkdir(exist_ok=True)
     layout = json.loads((raw / "layout.json").read_text())
     q = 70 if preview else 86
-    bloom(Image.open(raw / "office.png")).convert("RGB").save(
+    finish(raw, "office").convert("RGB").save(
         ASSETS / "office.webp", quality=q, method=6
     )
     for role in ROLES:
         if (raw / f"busy-{role}.png").exists():
-            bloom(Image.open(raw / f"busy-{role}.png")).save(
+            finish(raw, f"busy-{role}").save(
                 ASSETS / f"busy-{role}.webp", quality=q, method=6
             )
         if (raw / f"face-{role}.png").exists():

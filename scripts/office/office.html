@@ -349,7 +349,7 @@ function buildStage() {
   // hub label
   const hc = hub.center, txt = (dy, size, fill, weight) => { const t = sv("text", { x: hc[0], y: hc[1] + dy * K, "text-anchor": "middle", fill, "font-size": size * K, "font-weight": weight, filter: "url(#shadow)" }); layer.labels.append(t); return t; };
   const disc = sv("radialGradient", { id: "disc" });
-  disc.append(sv("stop", { offset: "0%", "stop-color": "#04122c", "stop-opacity": 0.82 }), sv("stop", { offset: "62%", "stop-color": "#04122c", "stop-opacity": 0.74 }), sv("stop", { offset: "100%", "stop-color": "#04122c", "stop-opacity": 0 }));
+  disc.append(sv("stop", { offset: "0%", "stop-color": "#062a6b", "stop-opacity": 0.6 }), sv("stop", { offset: "60%", "stop-color": "#062a6b", "stop-opacity": 0.42 }), sv("stop", { offset: "100%", "stop-color": "#062a6b", "stop-opacity": 0 }));
   defs.append(disc);
   layer.labels.append(sv("ellipse", { cx: hc[0], cy: hc[1] + 16 * K, rx: 118 * K, ry: 78 * K, fill: "url(#disc)" }));
   layer.hub = { lines: [0, 1, 2].map(() => txt(0, 14, "#ffffff", 800)), cg: txt(46, 10.5, "#d6f1ff", 600), st: txt(61, 10, "#7dd3fc", 700) };
@@ -359,8 +359,17 @@ function buildStage() {
 
 function drawPod(k) {
   const r = ROLES[k], p = L.roles[k], [cx, cy, rx, ry] = p.ring;
-  const halo = sv("ellipse", { cx, cy, rx: rx + 3 * K, ry: ry + 3 * K, fill: "none", stroke: r.color, "stroke-width": 3.5 * K, opacity: 0, filter: "url(#glow)", class: "pulse" });
-  layer.halos.append(halo);
+  // working: a wide band of light around the pod's edge under a bright pulsing ring
+  const band = sv("radialGradient", { id: `band-${k}` });
+  band.append(sv("stop", { offset: "78%", "stop-color": r.color, "stop-opacity": 0 }), sv("stop", { offset: "92%", "stop-color": r.color, "stop-opacity": 0.55 }), sv("stop", { offset: "100%", "stop-color": r.color, "stop-opacity": 0 }));
+  $("overlay").querySelector("defs").append(band);
+  // only the front half: the back of the ring lies behind the booth, and must not cross the character
+  const clip = sv("clipPath", { id: `front-${k}` });
+  clip.append(sv("rect", { x: cx - rx * 1.4, y: cy, width: rx * 2.8, height: ry * 1.5 }));
+  $("overlay").querySelector("defs").append(clip);
+  const pool = sv("ellipse", { cx, cy, rx: rx * 1.16, ry: ry * 1.2, fill: `url(#band-${k})`, opacity: 0, style: "mix-blend-mode: screen", "clip-path": `url(#front-${k})` });
+  const halo = sv("ellipse", { cx, cy, rx: rx + 3 * K, ry: ry + 3 * K, fill: "none", stroke: r.color, "stroke-width": 5.5 * K, opacity: 0, filter: "url(#glow)", class: "pulse", "clip-path": `url(#front-${k})` });
+  layer.halos.append(pool, halo);
   // name plate on the front edge of the pod: glyph, English and Japanese names, state pill
   const probe = sv("text", { "font-size": 15 * K, "font-weight": 800 }, r.en), probe2 = sv("text", { "font-size": 11 * K }, r.ja);
   layer.labels.append(probe, probe2);
@@ -395,7 +404,7 @@ function drawPod(k) {
   const pick = () => { selected = k; picked = true; $("agentSelect").value = k; if (current) renderDetail(current); };
   g.addEventListener("click", pick);
   g.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); } });
-  Object.assign(pods[k], { g, halo, pill, pillTx, typing, plateBg });
+  Object.assign(pods[k], { g, halo, pool, pill, pillTx, typing, plateBg });
 }
 
 function drawBubbles() {
@@ -591,6 +600,7 @@ function renderStage(s) {
     const busy = a.state === "busy", waiting = a.state === "waiting";
     p.img.classList.toggle("on", busy);
     p.halo.setAttribute("opacity", busy ? 1 : waiting ? 0.45 : 0);
+    p.pool.setAttribute("opacity", busy ? 1 : 0);
     p.halo.setAttribute("stroke-dasharray", waiting ? `${10 * K} ${8 * K}` : "none");
     p.typing.setAttribute("opacity", busy ? 1 : 0);
     const [bg, fg] = busy ? BUSY_PILL[k] || ["#16a34a", "#f0fdf4"] : waiting ? ["#b45309", "#fff7e6"] : ["#334155", "#cbd5e1"];

@@ -142,3 +142,14 @@ def test_export_writes_the_page_and_the_timeline(tmp_path):
         out / "assets" / "office.webp"
     ).is_file()
     assert len(json.loads((out / "timeline.json").read_text())) > 20
+
+
+def test_every_role_has_a_visible_portrait():
+    Image = pytest.importorskip("PIL.Image")
+    layout = json.loads((so.ASSETS / "layout.json").read_text())
+    for role in layout["roles"]:
+        alpha = (
+            Image.open(so.ASSETS / f"face-{role}.webp").convert("RGBA").getchannel("A")
+        )
+        opaque = sum(alpha.point(lambda v: 255 if v > 128 else 0).histogram()[255:])
+        assert opaque > alpha.width * alpha.height * 0.5, role
