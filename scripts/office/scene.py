@@ -1969,7 +1969,9 @@ def stand_in(role):
     white = mat("standin", "#ffffff", emit="#ffffff", strength=2)
     me = bpy.data.meshes.new(f"standin-{role}")
     w, seat, shoulder = 0.62, 0.38, 1.28  # half width, lowest visible point, shoulders
-    desk = DESK_Z + 0.1  # above the desk top and the laptop's keyboard
+    desk = (
+        DESK_Z + 0.14
+    )  # above the desk top and what lies on it (a mug's rim is at + 0.12)
     # up the right side, round over the head (to 1.78, higher for tall headwear), and down
     outline = [(w, seat), (w, shoulder), (0.5, 1.4), (0.4, 1.52)]
     outline += [

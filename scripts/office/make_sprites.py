@@ -69,6 +69,7 @@ CHARACTERS = {
             "black cap with cat ears, silver hair with blue tint, blue eyes, "
             "blue headphones, white jacket, light blue hood"
         ),
+        avoid=", headphones around neck, scarf",  # one headset, on the head
         busy="looking down at a laptop, typing, focused, closed mouth",
         idle="peace sign, happy, open mouth smile",
     ),
@@ -189,7 +190,7 @@ def paint_one(role, state, seed, scale, strength):
     pipe.enable_model_cpu_offload()  # fits next to other GPU users
     c = CHARACTERS[role]
     prompt = PAINT.format(who=c["who"], act=ACT[state], pose=c[state], look=c["look"])
-    negative = NEGATIVE + (AT_WORK if state == "busy" else "")
+    negative = NEGATIVE + c.get("avoid", "") + (AT_WORK if state == "busy" else "")
     for text in (prompt, negative):  # the encoder silently drops what is past 77 tokens
         n = len(pipe.tokenizer(text).input_ids)
         assert n <= 77, f"{text[:40]}... is {n} tokens; the encoder reads 77"

@@ -391,25 +391,31 @@ function buildStage() {
   // a front-row arrow meets the head where the figure begins (a tall cap leaves room above it in the
   // sprite's box): measured on the idle picture once it has loaded, then the arrows are redrawn
   for (const k of ORDER) {
-    const img = pods[k].chars && pods[k].chars.idle, b = L.roles[k].sprite;
-    if (!img || L.roles[k].row !== "front") continue;
-    const meet = () => {
-      pods[k].anchor = { x: pods[k].anchor.x, y: b[1] + figureTop(img) * b[3] - 4 * S };
+    const imgs = pods[k].chars && Object.values(pods[k].chars), b = L.roles[k].sprite;
+    if (!imgs || L.roles[k].row !== "front") continue;
+    // the lower of the two pictures' tops, so the arrow touches the head in either state
+    Promise.all(imgs.map((img) => img.decode().catch(() => null))).then(() => {
+      const top = Math.max(...imgs.map((img) => (img.naturalWidth ? figureTop(img) : 0)));
+      pods[k].anchor = { x: pods[k].anchor.x, y: b[1] + top * b[3] - 4 * S };
       drawnSeq = null;
       if (current) renderStage(current);
-    };
-    if (img.complete && img.naturalWidth) meet(); else img.addEventListener("load", meet, { once: true });
+    });
   }
 }
 
-// The share of a picture's height above its first solid row.
+// The share of a picture's height above its first solid row (one with a few solid pixels, so that a
+// stray strand or a thin spike does not count as the top of the head).
 function figureTop(img) {
   const w = 64, h = Math.max(1, Math.round((w * img.naturalHeight) / img.naturalWidth)), c = document.createElement("canvas");
   c.width = w; c.height = h;
   const g = c.getContext("2d");
   g.drawImage(img, 0, 0, w, h);
   const a = g.getImageData(0, 0, w, h).data;
-  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (a[(y * w + x) * 4 + 3] > 128) return y / h;
+  for (let y = 0; y < h; y++) {
+    let solid = 0;
+    for (let x = 0; x < w; x++) if (a[(y * w + x) * 4 + 3] > 128) solid++;
+    if (solid >= 4) return y / h;
+  }
   return 0;
 }
 
