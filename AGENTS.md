@@ -45,7 +45,9 @@ operation budget (`--max-ops`, default 25), or when no progress is being made.
 To watch the Roles at work, `python3 scripts/studio_office.py serve <ws>` serves a read-only
 virtual office on http://127.0.0.1:8765/; `export <ws> <dir>` writes a replay of a recorded run.
 Its pictures are rendered in Blender by `python3 scripts/office/make_assets.py` (the results are
-committed under `scripts/office/assets/`; rerun it only to change the scene).
+committed under `scripts/office/assets/`; rerun it only to change the scene). The seven characters are
+2D sprites painted from the character sheet `scripts/office/design/characters.png` by
+`scripts/office/make_sprites.py` (needs a CUDA GPU and an anime SDXL checkpoint; see its docstring).
 
 `--runtime claude|codex` picks the executor runtime. Never paste your own conversation into a
 Step; the packet is the only input. The manual operations above remain valid.

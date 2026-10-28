@@ -6,6 +6,7 @@ Deterministic: recorded runs and temporary workspaces only. Run with `python3 -m
 import datetime
 import json
 import shutil
+import subprocess
 import sys
 import threading
 import urllib.error
@@ -98,7 +99,7 @@ def test_the_server_answers_only_its_own_paths_on_localhost():
     try:
         assert server.server_address[0] == "127.0.0.1"
         page = urllib.request.urlopen(base + "/").read().decode()
-        assert "Virtual AI Game Studio" in page
+        assert "<b>Gamewright</b>" in page
         state = json.loads(urllib.request.urlopen(base + "/api/state").read())
         assert state["mode"] == "live"
         layout = json.loads(urllib.request.urlopen(base + "/assets/layout.json").read())
@@ -153,3 +154,78 @@ def test_every_role_has_a_visible_portrait():
         )
         opaque = sum(alpha.point(lambda v: 255 if v > 128 else 0).histogram()[255:])
         assert opaque > alpha.width * alpha.height * 0.5, role
+
+
+def test_every_role_is_a_whole_character_sprite():
+    """Each Role has a working and an idle sprite and a seat mask, and no head is cut off: nothing
+    solid on the top edge, or on the sides beside the head (shoulders may reach the sides, and the
+    desk hides the bottom)."""
+    Image = pytest.importorskip("PIL.Image")
+    layout = json.loads((so.ASSETS / "layout.json").read_text())
+    for role, entry in layout["roles"].items():
+        assert "sprite" in entry and (so.ASSETS / f"mask-{role}.webp").is_file(), role
+        for state in ("busy", "idle"):
+            alpha = Image.open(so.ASSETS / f"char-{role}-{state}.webp").getchannel("A")
+            solid = alpha.point(lambda v: 255 if v > 128 else 0)
+            w, h = solid.size
+            top = solid.crop((0, 0, w, 1)).histogram()[255]  # a hair strand may touch
+            assert top < w * 0.03, (role, state, "top", top)
+            for edge in ((0, 0, 1, h // 4), (w - 1, 0, w, h // 4)):
+                assert solid.crop(edge).getbbox() is None, (role, state, edge)
+
+
+CARD_CHECK = """
+const { chromium } = require(process.env.PLAYWRIGHT);
+(async () => {
+  const browser = await chromium.launch({ executablePath: process.env.CHROME, args: ['--no-sandbox'] });
+  const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+  await page.goto(process.env.URL);
+  await page.waitForFunction(() => document.getElementById('dName').textContent !== '\u2014');
+  console.log(JSON.stringify(await page.evaluate(() => {
+    // each part must show by scrolling the card alone: the panels around it clip and do not scroll
+    const card = document.querySelector('.card'), hidden = [];
+    for (const id of ['agentSelect', 'dFace', 'dName', 'dState', 'dTask', 'dFile', 'dSince', 'dNext']) {
+      const el = document.getElementById(id);
+      card.scrollTop = card.contains(el) ? el.offsetTop - card.offsetTop - 4 : 0;
+      const r = el.getBoundingClientRect();
+      for (let p = el.parentElement; p !== document.body; p = p.parentElement) {
+        const c = p.getBoundingClientRect(), s = getComputedStyle(p);
+        if (s.overflowY !== 'visible' && (r.top < c.top - 1 || r.bottom > c.bottom + 1)) { hidden.push(id); break; }
+      }
+    }
+    return { hidden, brand: document.querySelector('header .brand b').textContent };
+  })));
+  await browser.close();
+})();
+"""
+
+
+@recorded
+@pytest.mark.skipif(
+    not (shutil.which("node") and sr.browser_tools()), reason="no node or browser"
+)
+def test_the_agent_card_shows_everything_at_1280_by_800(tmp_path):
+    chrome, modules = sr.browser_tools()
+    (tmp_path / "card.js").write_text(CARD_CHECK)
+    server = so.http.server.ThreadingHTTPServer(("127.0.0.1", 0), so.make_handler(RUN))
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    try:
+        env = {
+            "PATH": "/usr/bin:/bin",
+            "HOME": str(Path.home()),
+            "CHROME": str(chrome),
+            "PLAYWRIGHT": str(modules / "playwright"),
+            "URL": f"http://127.0.0.1:{server.server_address[1]}/",
+        }
+        out = subprocess.run(
+            [shutil.which("node"), str(tmp_path / "card.js")],
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=90,
+        )
+        assert out.returncode == 0, out.stderr
+        result = json.loads(out.stdout)
+        assert result == {"hidden": [], "brand": "Gamewright"}
+    finally:
+        server.shutdown()

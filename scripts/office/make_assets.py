@@ -1,11 +1,12 @@
-"""Build the virtual office's picture assets: textures (PIL), the 3D scene (Blender), then the 2D
-finish (illustration lines, glow, colour grade) and WebP conversion.
+"""Build the virtual office's picture assets: textures (PIL), then the 3D scene drawn as a flat
+illustration (Blender: EEVEE cel shading and Freestyle outlines), then lossless WebP.
 
     python3 scripts/office/make_assets.py [--preview] [--blender PATH]
 
 Blender renders the office from one fixed camera (scripts/office/scene.py), so every layer lines up:
-the base picture with every Role idle, one "busy" picture per Role for its own desk, a portrait per
-Role, and layout.json with the screen positions the page overlays its live UI on.
+the base picture with every Role idle, one "busy" picture per Role for its own desk, a seat mask per
+Role, and layout.json with the screen positions the page overlays its live UI on. The characters
+come from make_sprites.py; `--guide` renders the placeholder figures it paints over.
 """
 
 import argparse
@@ -17,8 +18,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-import numpy as np
-from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter
 
 HERE = Path(__file__).resolve().parent
 ASSETS = HERE / "assets"
@@ -609,90 +609,18 @@ def make_textures(out):
 # --- post ---------------------------------------------------------------------------------------
 
 
-def bloom(im, strength=0.3, radius=14, threshold=225):
-    """Soft glow around bright pixels (screens, rings, the hub)."""
-    rgba = im.convert("RGBA")
-    base = rgba.convert("RGB")
-    bright = base.point(lambda v: max(0, v - threshold) * 255 // (255 - threshold))
-    glow = bright.filter(ImageFilter.GaussianBlur(radius))
-    glow2 = bright.filter(ImageFilter.GaussianBlur(radius * 3))
-    glow = ImageChops.add(glow, glow2)
-    glow = glow.point(lambda v: min(255, int(v * strength)))
-    out = ImageChops.add(base, glow)
-    alpha = rgba.getchannel("A")
-    if alpha.getextrema() != (255, 255):
-        alpha = ImageChops.lighter(
-            alpha, glow.convert("L").point(lambda v: min(255, v * 2))
-        )
-    out.putalpha(alpha)
-    return out
-
-
-def ink(im, lines, color=(26, 31, 46), strength=0.7):
-    """Illustration lines where the line pass shows a crease (normal) or a step (depth)."""
-    a = np.asarray(lines.convert("RGBA"), dtype=np.float32) / 255
-
-    def diff(x):  # central difference, the larger of the two directions
-        g = np.zeros_like(x)
-        g[1:-1] = np.abs(x[2:] - x[:-2])
-        h = np.zeros_like(x)
-        h[:, 1:-1] = np.abs(x[:, 2:] - x[:, :-2])
-        return np.maximum(g, h)
-
-    crease = np.clip((diff(a[..., 0]) + diff(a[..., 1]) - 0.08) / 0.12, 0, 1)
-    step = np.clip((diff(a[..., 2]) - 0.007) / 0.012, 0, 1)
-    edge = np.maximum(np.maximum(crease, step), np.clip(diff(a[..., 3]) * 2, 0, 1))
-    e = Image.fromarray((edge * 255 * strength).astype(np.uint8))
-    # thick enough to survive the page showing the picture at about half size
-    e = e.filter(ImageFilter.MaxFilter(3)).filter(ImageFilter.GaussianBlur(0.8))
-    e = np.asarray(e, dtype=np.float32) / 255
-    rgba = np.asarray(im.convert("RGBA"), dtype=np.float32)
-    rgba[..., :3] = rgba[..., :3] * (1 - e[..., None]) + np.array(color) * e[..., None]
-    rgba[..., 3] = np.maximum(rgba[..., 3], e * 255)
-    return Image.fromarray(rgba.astype(np.uint8), "RGBA")
-
-
-def grade(im):
-    """The 2D finish: a gentle S-curve, cool shadows, warm highlights, a little sharpening."""
-    luts = []
-    for ch, (lo, hi) in enumerate(((-0.02, 0.02), (0.0, 0.005), (0.035, -0.02))):
-        lut = []
-        for v in range(256):
-            x = v / 255
-            y = 0.7 * x + 0.3 * x * x * (3 - 2 * x)
-            y += lo * (1 - x) ** 2 + hi * x * x
-            lut.append(max(0, min(255, round(y * 255))))
-        luts += lut
-    rgb_, alpha = im.convert("RGB"), im.convert("RGBA").getchannel("A")
-    rgb_ = ImageEnhance.Color(rgb_.point(luts)).enhance(1.06)
-    rgb_ = rgb_.filter(ImageFilter.UnsharpMask(radius=1.4, percent=30, threshold=2))
-    rgb_.putalpha(alpha)
-    return rgb_
-
-
-def finish(raw, name):
-    im = Image.open(raw / f"{name}.png")
-    if (raw / f"lines-{name}.png").exists():
-        im = ink(im, Image.open(raw / f"lines-{name}.png"))
-    return grade(bloom(im))
-
-
-def post(raw, preview):
+def post(raw):
+    """Lossless WebP: flat colours and thin outlines stay crisp."""
     ASSETS.mkdir(exist_ok=True)
+    # faces come from the sprites (make_sprites.py use); a face-*.png left in the scratch
+    # directory by an older 3D render would otherwise replace them
+    names = ["office"] + [f"{k}-{role}" for role in ROLES for k in ("busy", "mask")]
+    for name in names:
+        if (raw / f"{name}.png").exists():
+            Image.open(raw / f"{name}.png").save(
+                ASSETS / f"{name}.webp", lossless=True, quality=100, method=6
+            )
     layout = json.loads((raw / "layout.json").read_text())
-    q = 70 if preview else 86
-    finish(raw, "office").convert("RGB").save(
-        ASSETS / "office.webp", quality=q, method=6
-    )
-    for role in ROLES:
-        if (raw / f"busy-{role}.png").exists():
-            finish(raw, f"busy-{role}").save(
-                ASSETS / f"busy-{role}.webp", quality=q, method=6
-            )
-        if (raw / f"face-{role}.png").exists():
-            Image.open(raw / f"face-{role}.png").save(
-                ASSETS / f"face-{role}.webp", quality=90, method=6
-            )
     (ASSETS / "layout.json").write_text(json.dumps(layout, indent=1) + "\n")
 
 
@@ -701,17 +629,24 @@ def main():
     ap.add_argument("--preview", action="store_true", help="small, fast render")
     ap.add_argument("--blender", default=shutil.which("blender") or "blender")
     ap.add_argument("--work", default=str(HERE / ".build"), help="scratch directory")
-    ap.add_argument("--only", default="all", help="all | base | busy | faces")
+    ap.add_argument("--only", default="all", help="all | base | masks | busy")
     ap.add_argument("--no-post", action="store_true")
+    ap.add_argument(
+        "--guide",
+        action="store_true",
+        help="render the sprite Roles in 3D into <work>/guide, for make_sprites.py",
+    )
     a = ap.parse_args()
     work = Path(a.work)
-    tex, raw = work / "tex", work / "raw"
+    tex, raw = work / "tex", work / ("guide" if a.guide else "raw")
     make_textures(tex)
     raw.mkdir(parents=True, exist_ok=True)
     cmd = [
         a.blender,
         "-b",
         "--factory-startup",
+        "--python-exit-code",
+        "1",
         "-P",
         str(HERE / "scene.py"),
         "--",
@@ -721,9 +656,11 @@ def main():
     ]
     if a.preview:
         cmd.append("preview")
+    if a.guide:
+        cmd.append("guide")
     subprocess.run(cmd, check=True)
-    if not a.no_post:
-        post(raw, a.preview)
+    if not (a.no_post or a.guide):
+        post(raw)
 
 
 if __name__ == "__main__":
