@@ -64,7 +64,7 @@
   .scenewrap > img.char { opacity: 0; transition: opacity .35s ease; pointer-events: none; mask-size: 100% 100%; -webkit-mask-size: 100% 100%; }
   .scenewrap > img.char.on { opacity: 1; }
   .aura { transition: opacity .6s ease; }
-  .scenewrap > img.char.sel { filter: drop-shadow(0 0 3px var(--sel)) drop-shadow(0 0 9px var(--sel)); }
+  .scenewrap > img.char.sel { filter: drop-shadow(0 0 1px rgba(255, 255, 255, .95)) drop-shadow(0 0 2px rgba(255, 255, 255, .6)); }
   .side { position: absolute; top: 1.4%; bottom: 1.4%; width: var(--pw); display: flex; flex-direction: column; gap: 10px; z-index: 1; }
   .side.left { left: .9%; }
   .side.right { right: .9%; }
@@ -388,6 +388,29 @@ function buildStage() {
   layer.hub.cg.setAttribute("letter-spacing", 3 * K);
   for (const k of ORDER) drawPod(k);
   for (const k of ORDER) placeTyping(k);
+  // a front-row arrow meets the head where the figure begins (a tall cap leaves room above it in the
+  // sprite's box): measured on the idle picture once it has loaded, then the arrows are redrawn
+  for (const k of ORDER) {
+    const img = pods[k].chars && pods[k].chars.idle, b = L.roles[k].sprite;
+    if (!img || L.roles[k].row !== "front") continue;
+    const meet = () => {
+      pods[k].anchor = { x: pods[k].anchor.x, y: b[1] + figureTop(img) * b[3] - 4 * S };
+      drawnSeq = null;
+      if (current) renderStage(current);
+    };
+    if (img.complete && img.naturalWidth) meet(); else img.addEventListener("load", meet, { once: true });
+  }
+}
+
+// The share of a picture's height above its first solid row.
+function figureTop(img) {
+  const w = 64, h = Math.max(1, Math.round((w * img.naturalHeight) / img.naturalWidth)), c = document.createElement("canvas");
+  c.width = w; c.height = h;
+  const g = c.getContext("2d");
+  g.drawImage(img, 0, 0, w, h);
+  const a = g.getImageData(0, 0, w, h).data;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (a[(y * w + x) * 4 + 3] > 128) return y / h;
+  return 0;
 }
 
 function drawPod(k) {
@@ -467,35 +490,57 @@ function anchorOf(who) {
 // each desk with its screens, from the monitors' tops to the desk front (measured on the render)
 let desks = null;
 const deskBoxes = () => desks || (desks = ORDER.map((k) => { const p = L.roles[k]; return [p.ring[0] - p.ring[2] * 0.8, p.desk[1] - 98 * S, p.ring[2] * 1.6, 130 * S]; }));
+// A point on a Bézier curve given by its control points (quadratic or cubic), by de Casteljau.
+function bez(pts, t) {
+  let q = pts;
+  while (q.length > 1) q = q.slice(1).map((p, i) => ({ x: q[i].x + (p.x - q[i].x) * t, y: q[i].y + (p.y - q[i].y) * t }));
+  return q[0];
+}
 function curve(from, to) {
   const a = anchorOf(from), b = anchorOf(to), span = Math.hypot(b.x - a.x, b.y - a.y) || 1, mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
-  // what an arrow should not cross: faces most, then the Goal screen, then bodies (it passes behind them)
-  const others = ORDER.filter((k) => k !== from && k !== to).map((k) => L.roles[k].body);
-  const faces = others.map(([bx, by, bw, bh]) => [bx + bw * 0.15, by, bw * 0.7, bh * 0.55]);
+  // what an arrow should not cross: faces most, then desks and the Goal screen, then bodies (it passes
+  // behind them), each as drawn: the character's sprite, not the smaller stand-in
+  const others = ORDER.filter((k) => k !== from && k !== to).map((k) => L.roles[k].sprite || L.roles[k].body);
+  const faces = others.map(([bx, by, bw, bh]) => [bx + bw * 0.15, by, bw * 0.7, bh * 0.5]);
   const g = L.hub, screen = [g.center[0] - g.rx, g.top[1], 2 * g.rx, g.floor[1] - g.top[1]];
   const inside = (x, y, [bx, by, bw, bh]) => x > bx && x < bx + bw && y > by && y < by + bh;
   const ts = Array.from({ length: 19 }, (_, i) => (i + 1) / 20);
-  const cost = (c) => ts.reduce((n, t) => {
-    const u = 1 - t, x = u * u * a.x + 2 * u * t * c.x + t * t * b.x, y = u * u * a.y + 2 * u * t * c.y + t * t * b.y;
+  const cost = (pts) => ts.reduce((n, t) => {
+    const { x, y } = bez(pts, t);
     return n + 3 * faces.filter((f) => inside(x, y, f)).length + 2 * inside(x, y, screen) + others.filter((o) => inside(x, y, o)).length
       + 2 * deskBoxes().filter((d) => inside(x, y, d)).length;
   }, 0);
   // between two people an arch (over or under); from the Goal screen a drop, bent aside if need be
-  const cands = ROLES[from] && ROLES[to] ? [0.1, 0.16, 0.3, 0.45, -0.12, -0.22, 0.04].map((lift) => ({ x: mx, y: Math.min(a.y, b.y) - span * lift }))
+  const mid = ROLES[from] && ROLES[to] ? [0.1, 0.16, 0.3, 0.45, -0.12, -0.22, -0.35, -0.5, 0.04].map((lift) => ({ x: mx, y: Math.min(a.y, b.y) - span * lift }))
     : [0, 0.2, -0.2, 0.35, -0.35].map((off) => ({ x: mx + span * off, y: my }));
-  // a front-row person sits in a gap of the back row: an arrow can drop to (or rise from) the head
-  // straight down that gap instead of cutting across a desk
+  const cands = mid.map((c) => [a, c, b]);
+  // a front-row person sits in a gap of the back row: an arrow can run level above the back row and
+  // drop to (or rise from) the head straight down that gap, clear of faces and desks
   const high = Math.min(a.y, b.y) - span * 0.12;
-  if (L.roles[to] && L.roles[to].row === "front") cands.push({ x: b.x, y: high });
-  if (L.roles[from] && L.roles[from].row === "front") cands.push({ x: a.x, y: high });
-  let c = null, best = Infinity;
-  for (const cand of cands) { const k = cost(cand); if (k < best) { c = cand; best = k; } }
-  return { s: a, c, e: b, d: `M${a.x.toFixed(1)} ${a.y.toFixed(1)} Q${c.x.toFixed(1)} ${c.y.toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}` };
+  for (const [end, other, last] of [[b, a, true], [a, b, false]]) {
+    const who = last ? to : from;
+    if (!(L.roles[who] && L.roles[who].row === "front")) continue;
+    cands.push(last ? [a, { x: b.x, y: high }, b] : [a, { x: a.x, y: high }, b]);
+    const level = Math.min(other.y, end.y - span * 0.3), corner = { x: end.x, y: level };
+    cands.push(last ? [a, { x: a.x + (end.x - a.x) * 0.5, y: level }, corner, b] : [a, corner, { x: b.x + (end.x - b.x) * 0.5, y: level }, b]);
+  }
+  let pts = null, best = Infinity;
+  for (const cand of cands) { const k = cost(cand); if (k < best) { pts = cand; best = k; } }
+  // two people in the front row: their heads are level with the back-row desk between them, so
+  // every path between the heads crosses that desk or the person behind it; join their name plates
+  // instead, dipping onto the floor below them
+  if (L.roles[from] && L.roles[to] && L.roles[from].row === "front" && L.roles[to].row === "front") {
+    const under = (k) => { const [px, py, pw, ph] = pods[k].plateBox; return { x: px + pw / 2, y: py + ph + 3 * S }; };
+    const u = under(from), v = under(to);
+    pts = [u, { x: (u.x + v.x) / 2, y: Math.max(u.y, v.y) + 60 * S }, v];
+  }
+  const f = (p) => `${p.x.toFixed(1)} ${p.y.toFixed(1)}`;
+  return { s: a, e: b, pts, d: `M${f(pts[0])} ${pts.length === 4 ? "C" : "Q"}${pts.slice(1).map(f).join(" ")}` };
 }
 function badgeSpot(c, w, h, placed, to) {
   const len = Math.hypot(c.e.x - c.s.x, c.e.y - c.s.y) || 1, px = -(c.e.y - c.s.y) / len, py = (c.e.x - c.s.x) / len, cands = [];
   for (const t of [0.5, 0.4, 0.6, 0.3, 0.7, 0.2, 0.8]) for (const off of [0, 22, -22, 44, -44, 70, -70]) {
-    const u = 1 - t, x = u * u * c.s.x + 2 * u * t * c.c.x + t * t * c.e.x + px * off * K, y = u * u * c.s.y + 2 * u * t * c.c.y + t * t * c.e.y + py * off * K;
+    const q = bez(c.pts, t), x = q.x + px * off * K, y = q.y + py * off * K;
     cands.push([x - w / 2, y - h / 2]);
   }
   // when the arrow runs where nothing fits: beside the receiver's plate, or under the Goal screen
@@ -673,7 +718,7 @@ function renderDetail(s) {
   const k = selected, r = ROLES[k], a = s.agents[k];
   for (const [kk, p] of Object.entries(pods)) {
     if (p.g) p.g.classList.toggle("picked", kk === k);
-    for (const img of Object.values(p.chars || {})) { img.classList.toggle("sel", kk === k); img.style.setProperty("--sel", ROLES[kk].color); }
+    for (const img of Object.values(p.chars || {})) img.classList.toggle("sel", kk === k);
   }
   if (k !== renderDetail.shown) document.querySelector(".card").scrollTop = 0;  // a new agent starts at its face
   renderDetail.shown = k;
