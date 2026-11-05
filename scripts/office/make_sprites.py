@@ -43,7 +43,7 @@ CHARACTERS = {
         box=(255, 150, 490, 480),
         ref=(345, 190, 475, 345),  # head and shoulders: the pen hand would carry over
         who="1girl",
-        look="brown hair, hair bun, brown eyes, teal jacket, white shirt",
+        look="brown hair, hair bun, brown eyes, deep teal jacket, white shirt",
         busy="focused, gentle smile",
         idle="cheerful smile, open mouth",
     ),
@@ -66,10 +66,10 @@ CHARACTERS = {
         ref=(765, 180, 905, 350),  # head and shoulders: the peace sign would carry over
         who="1girl",
         look=(
-            "black cap with cat ears, silver hair with blue tint, blue eyes, "
+            "black cap with black cat ears, silver-blue hair, blue eyes, "
             "blue headphones, white jacket, light blue hood"
         ),
-        avoid=", headphones around neck, scarf",  # one headset, on the head
+        avoid=", headphones around neck, scarf, ponytail, pole",  # one headset, hair down, nothing behind
         busy="looking down at a laptop, typing, focused, closed mouth",
         idle="peace sign, happy, open mouth smile",
     ),
