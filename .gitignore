@@ -24,3 +24,6 @@ examples/runs/*.log
 
 # Scratch output of scripts/office/make_assets.py (the finished pictures live in scripts/office/assets/)
 scripts/office/.build/
+
+# Screenshots taken while measuring the office (large; the logs are committed)
+examples/runs/p21-measure/shots/

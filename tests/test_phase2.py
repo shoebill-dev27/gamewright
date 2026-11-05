@@ -766,7 +766,8 @@ def test_recorded_isolation_canaries():
             listed = {a.strip() for a in header.split(",")}
             shown = set(re.findall(r"^<<<FILE (goals/\S+/\d{2,}-\S+)$", packet, re.M))
             assert shown == listed, rec
-            assert "records/" not in packet, rec
+            # the runner's own records/NNN-* (a project file such as repo/test/records/ is fine)
+            assert not re.search(r"(?<![\w/])records/\d{3}-", packet), rec
 
 
 @pytest.mark.skipif(not RUNS.is_dir(), reason="no recorded runs")
