@@ -52,6 +52,9 @@ def test_a_moment_shows_who_was_at_work():
         ), name
         assert sum(a["state"] == "busy" for a in s["agents"].values()) == 1
         assert s["agents"][role]["task"]  # the Task of the Handoff it works from
+        labels = {"waiting": "着手待ち", "idle": "スタンバイ"}
+        for agent in s["agents"].values():
+            assert agent["state"] == "busy" or agent["label"] == labels[agent["state"]]
 
 
 @recorded

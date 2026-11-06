@@ -419,9 +419,9 @@ def office_state(ws, at=None):
         elif open_row:
             h = by_file.get(open_row["handoff"])
             task, stage = (h or {}).get("task", ""), open_row["stage"]
-            state, label = "waiting", "待機中"
+            state, label = "waiting", "着手待ち"
         else:
-            state, label = "idle", "手すき"
+            state, label = "idle", "スタンバイ"
         mine_done = [r for r in finished if r["actor"] == role]
         agents[role] = {
             "state": state,

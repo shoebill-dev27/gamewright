@@ -185,8 +185,8 @@
   </div>
   <div class="chips">
     <span class="chip"><i class="dot" style="background:#22c55e"></i>稼働中 <b id="cBusy">0</b></span>
-    <span class="chip"><i class="dot" style="background:#94a3b8"></i>待機中 <b id="cWait">0</b></span>
-    <span class="chip"><i class="dot" style="background:#8b5cf6"></i>レビュー <b id="cReview">0</b></span>
+    <span class="chip"><i class="dot" style="background:#94a3b8"></i>着手待ち <b id="cWait">0</b></span>
+    <span class="chip"><i class="dot" style="background:#8b5cf6"></i>レビュー中 <b id="cReview">0</b></span>
     <span class="chip"><i class="dot" style="background:#f59e0b"></i>テスト中 <b id="cTest">0</b></span>
     <span class="chip"><i class="dot" style="background:#38bdf8"></i>実行 <b id="cUsed">0</b><small id="cBudget"></small></span>
   </div>
@@ -427,7 +427,7 @@ function drawPod(k) {
   layer.labels.append(probe, probe2);
   const textW = Math.max(probe.getComputedTextLength(), probe2.getComputedTextLength());
   probe.remove(); probe2.remove();
-  const pw = 41 * K + textW + 82 * K, ph = 42 * K;
+  const pw = 41 * K + textW + 88 * K, ph = 42 * K;
   const [hx, hy] = p.head, back = p.row === "back";
   const px = hx - pw / 2, py = back ? hy - ph - 4 * S : p.desk[1] - ph / 2;  // front row: on the desk front
   // working: a wide band of light around the pod's edge under a bright pulsing ring
@@ -461,8 +461,8 @@ function drawPod(k) {
   plate.append(sv("path", { d: r.glyph, transform: `translate(${px + 21 * K} ${py + ph / 2}) scale(${K * 0.95})`, fill: k === "gameplay-engineer" || k === "game-designer" || k === "technical-director" || k === "qa" ? "none" : "#0b1428", stroke: "#0b1428", "stroke-width": 1.8, "stroke-linecap": "round", "stroke-linejoin": "round" }));
   const en = sv("text", { x: px + 41 * K, y: py + 19 * K, fill: "#ffffff", "font-weight": 800, "font-size": 15 * K }, r.en);
   const ja = sv("text", { x: px + 41 * K, y: py + 34 * K, fill: "#b4c1d6", "font-size": 11 * K }, r.ja);
-  const pill = sv("rect", { x: px + pw - 70 * K, y: py + 9 * K, width: 62 * K, height: 24 * K, rx: 12 * K, fill: "#334155" });
-  const pillTx = sv("text", { x: px + pw - 39 * K, y: py + 25.5 * K, "text-anchor": "middle", fill: "#cbd5e1", "font-size": 11.5 * K, "font-weight": 800 }, "手すき");
+  const pill = sv("rect", { x: px + pw - 76 * K, y: py + 9 * K, width: 68 * K, height: 24 * K, rx: 12 * K, fill: "#334155" });
+  const pillTx = sv("text", { x: px + pw - 42 * K, y: py + 25.5 * K, "text-anchor": "middle", fill: "#cbd5e1", "font-size": 11.5 * K, "font-weight": 800 }, "スタンバイ");
   plate.append(en, ja, pill, pillTx);
   const typing = sv("g", { class: "typing", opacity: 0 });  // filled in by placeTyping
   g.append(hit, plate, typing);
@@ -706,7 +706,7 @@ function renderStage(s) {
     p.typing.setAttribute("opacity", busy ? 1 : 0);
     const [bg, fg] = busy ? BUSY_PILL[k] || ["#16a34a", "#f0fdf4"] : waiting ? ["#b45309", "#fff7e6"] : ["#334155", "#cbd5e1"];
     p.plateBg.setAttribute("stroke-dasharray", waiting ? `${7 * K} ${5 * K}` : "none");
-    p.pill.setAttribute("fill", bg); p.pillTx.setAttribute("fill", fg); p.pillTx.textContent = busy ? a.label : waiting ? "待機中" : "手すき";
+    p.pill.setAttribute("fill", bg); p.pillTx.setAttribute("fill", fg); p.pillTx.textContent = a.label;
   }
   if (drawnSeq !== s.latest_seq) {
     const paths = drawArrows(s.handoffs);
