@@ -1262,7 +1262,6 @@ def station_props(role, spec, glow):
                 scale=(1, 1, 0.8),
             )
         )
-        objs += plant("dir-plant", (*floor, 0), 1.25)
     if role == "game-designer":
         for i, col in enumerate(("#fde047", "#f9a8d4", "#86efac")):
             objs.append(
